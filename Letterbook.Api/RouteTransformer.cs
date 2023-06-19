@@ -7,13 +7,13 @@ namespace Letterbook.Api;
 /// </summary>
 public partial class RouteTransformer : IOutboundParameterTransformer
 {
-    [GeneratedRegex("([a-z])([A-Z])")]
+    [GeneratedRegex("(?<!^)(?=[A-Z])")]
     private static partial Regex RouteRegex();
     
     public string? TransformOutbound(object? value)
     {
         return value != null
-            ? RouteRegex().Replace(value.ToString(), "$1_$2").ToLower()
+            ? string.Join("_", RouteRegex().Split(value.ToString())).ToLower()
             : null;
     }
 }
