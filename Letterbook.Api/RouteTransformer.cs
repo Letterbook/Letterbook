@@ -2,6 +2,9 @@
 
 namespace Letterbook.Api;
 
+/// <summary>
+/// Adjusts routes to adhere to mastodon's snake_cased url conventions
+/// </summary>
 public partial class RouteTransformer : IOutboundParameterTransformer
 {
     [GeneratedRegex("([a-z])([A-Z])")]
