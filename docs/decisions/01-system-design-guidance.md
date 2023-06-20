@@ -4,10 +4,10 @@ Priorities for the project, and some guidance on how to balance those priorities
 
 ## Status
 
-- [ ] Decided (proposal was agreed and adopted)
-- [ ] Decided Against (agreed not to adopt)
-- [ ] Deferred (no decision, but should be revisited later)
-- [ ] Superseded (later events or decisions make this no longer relevant)
+- [x] Decided (2023-06-20)
+- [ ] Decided Against
+- [ ] Deferred
+- [ ] Superseded
 
 # Decision
 
@@ -46,3 +46,5 @@ Letterbook should be maximally affordable, because people use these services for
 So, I think those technology choices are pretty reasonable. Except maybe Postgres. I don't *love* using Postgres for this. I considered a document db. I think the ones that could be viable are Mongo or CouchDB. The problem with mongo is that I can't find a managed provider that I think has a reasonable price point. And the problem with CouchDB is that the only managed provider I can find is IBM. I also considered a graph database. It's a social network, after all. The network graph is the key thing here. The problem again is that the only reasonable option is Neo4j, and it's super expensive to get as a managed service.
 
 So, that leaves good old SQL databases. And of the common options, postgres is the one I'm most familiar with. It also has the Apache AGE extension, which probably solves the basic cases that would call for a graph database.
+
+[See the original PR for some additional discussion about telemetry, feature flags, and a plug-in system.](https://github.com/Letterbook/Letterbook/pull/1)
