@@ -1,0 +1,7 @@
+﻿GET {{host}}/actor
+
+###
+GET {{host}}/api/v1/actor
+
+###
+GET {{host}}/api/v1/accounts/11/scheduled_statuses
