@@ -3,7 +3,7 @@
 namespace Letterbook.Api.Controllers;
 
 [Route("api/v1/[controller]")]
-public class AccountsController : BaseApiController
+public class AccountsController
 {
     [HttpPost]
     public IActionResult RegisterAccount()

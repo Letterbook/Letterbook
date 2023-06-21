@@ -15,6 +15,7 @@ public class ActorController
     }
     
     [HttpGet]
+    [ActionName("Followers")]
     [Route("{id}/collections/[action]")]
     public IActionResult GetFollowers(int id)
     {
@@ -22,6 +23,7 @@ public class ActorController
     }
     
     [HttpGet]
+    [ActionName("Following")]
     [Route("{id}/collections/[action]")]
     public IActionResult GetFollowing(int id)
     {
@@ -29,6 +31,7 @@ public class ActorController
     }
     
     [HttpGet]
+    [ActionName("Liked")]
     [Route("{id}/collections/[action]")]
     public IActionResult GetLiked(int id)
     {
@@ -36,14 +39,16 @@ public class ActorController
     }
     
     [HttpGet]
-    [Route("{id}/inbox")]
+    [ActionName("Inbox")]
+    [Route("{id}/[action]")]
     public IActionResult GetInbox(int id)
     {
         throw new NotImplementedException();
     }
     
     [HttpPost]
-    [Route("{id}/inbox")]
+    [ActionName("Inbox")]
+    [Route("{id}/[action]")]
     public IActionResult PostInbox(int id)
     {
         throw new NotImplementedException();
@@ -57,14 +62,16 @@ public class ActorController
     }
     
     [HttpGet]
-    [Route("{id}/outbox")]
+    [ActionName("Outbox")]
+    [Route("{id}/[action]")]
     public IActionResult GetOutbox(int id)
     {
         throw new NotImplementedException();
     }
     
     [HttpPost]
-    [Route("{id}/outbox")]
+    [ActionName("Outbox")]
+    [Route("{id}/[action]")]
     public IActionResult PostOutbox(int id)
     {
         throw new NotImplementedException();

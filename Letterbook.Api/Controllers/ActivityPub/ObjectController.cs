@@ -8,14 +8,14 @@ public class ObjectController
 {
     [HttpGet]
     [Route("{id}/collections/[action]")]
-    public IActionResult GetLikes(int id, string type)
+    public IActionResult Likes(int id, string type)
     {
         throw new NotImplementedException();
     }
     
     [HttpGet]
     [Route("{id}/collections/[action]")]
-    public IActionResult GetShares(int id, string type)
+    public IActionResult Shares(int id, string type)
     {
         throw new NotImplementedException();
     }
