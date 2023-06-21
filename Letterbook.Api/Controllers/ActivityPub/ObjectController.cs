@@ -2,6 +2,10 @@
 
 namespace Letterbook.Api.Controllers.ActivityPub;
 
+/// <summary>
+/// Provides the Collection endpoints specified for all objects in the ActivityPub spec
+/// https://www.w3.org/TR/activitypub/#collections
+/// </summary>
 [ApiController]
 [Route("[controller]/{type}")]
 public class ObjectController

@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.DataProtection.Internal;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
 
+/// <summary>
+/// Provides the endpoints specified for Actors in the ActivityPub spec
+/// https://www.w3.org/TR/activitypub/#actors
+/// </summary>
 [ApiController]
 [Route("[controller]")]
 public class ActorController
