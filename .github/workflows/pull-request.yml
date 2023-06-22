@@ -1,4 +1,4 @@
-name: validate pull request
+name: ci-unit-tests
 
 on:
   pull_request:
