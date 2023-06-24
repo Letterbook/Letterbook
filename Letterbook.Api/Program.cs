@@ -15,6 +15,9 @@ public class Program
         {
             options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
         });
+        
+        builder.Services.Configure<ConfigOptions>(builder.Configuration.GetSection(ConfigOptions.Key));
+
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();

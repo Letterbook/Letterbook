@@ -1,9 +1,8 @@
 ﻿using System.Reflection;
-using Letterbook.Api.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using Fedodo.NuGet.ActivityPub;
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes;
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes.SubTypes;
+using Microsoft.Extensions.Options;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
 
@@ -18,9 +17,9 @@ public class ActorController
     private readonly SnakeCaseRouteTransformer _transformer = new();
     private readonly Uri _baseUri;
 
-    public ActorController(Uri baseUri)
+    public ActorController(IOptions<ConfigOptions> config)
     {
-        _baseUri = baseUri;
+        _baseUri = new Uri(config.Value.Scheme + config.Value.HostName);
     }
     
     
