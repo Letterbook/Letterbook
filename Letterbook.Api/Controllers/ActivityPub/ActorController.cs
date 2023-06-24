@@ -1,9 +1,8 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.Reflection;
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes;
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes.SubTypes;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
@@ -18,10 +17,12 @@ public class ActorController
 {
     private readonly SnakeCaseRouteTransformer _transformer = new();
     private readonly Uri _baseUri;
+    private readonly ILogger _logger;
 
-    public ActorController(IOptions<ConfigOptions> config)
+    public ActorController(IOptions<ConfigOptions> config, ILogger<ActorController> logger)
     {
         _baseUri = new Uri($"{config.Value.Scheme}://{config.Value.HostName}");
+        _logger = logger;
     }
 
 
@@ -85,9 +86,11 @@ public class ActorController
 
     [HttpPost]
     [Route("[action]")]
-    public IActionResult SharedInbox()
+    public ActionResult SharedInbox(Activity activity)
     {
-        throw new NotImplementedException();
+        _logger.LogInformation("Activity received: {type} {object}", activity.Type,
+            activity.Object?.Objects?.First().Type);
+        return new AcceptedResult();
     }
 
     [HttpGet]
