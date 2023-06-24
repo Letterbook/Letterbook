@@ -86,11 +86,15 @@ public class ActorController
 
     [HttpPost]
     [Route("[action]")]
-    public ActionResult SharedInbox(Activity activity)
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
+    public async Task<ActionResult> SharedInbox(Activity activity)
     {
-        _logger.LogInformation("Activity received: {type} {object}", activity.Type,
-            activity.Object?.Objects?.First().Type);
-        return new AcceptedResult();
+        return await Task.Run(() =>
+        {
+            _logger.LogInformation("Activity received: {type} {object}", activity.Type,
+                activity.Object?.Objects?.First().Type);
+            return new AcceptedResult();
+        });
     }
 
     [HttpGet]
