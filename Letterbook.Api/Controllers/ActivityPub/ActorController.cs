@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes;
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes.SubTypes;
@@ -22,26 +23,26 @@ public class ActorController
     {
         _baseUri = new Uri($"{config.Value.Scheme}://{config.Value.HostName}");
     }
-    
-    
+
+
     [HttpGet]
     [Route("{id}")]
     public ActionResult<Actor> GetActor(int id)
     {
         var actor = new Actor
         {
-            Inbox =  CollectionUri(nameof(GetInbox), id.ToString()),
-            Outbox =  CollectionUri(nameof(GetOutbox), id.ToString()),
-            Followers =  CollectionUri(nameof(GetFollowers), id.ToString()),
-            Following =  CollectionUri(nameof(GetFollowing), id.ToString()),
+            Inbox = CollectionUri(nameof(GetInbox), id.ToString()),
+            Outbox = CollectionUri(nameof(GetOutbox), id.ToString()),
+            Followers = CollectionUri(nameof(GetFollowers), id.ToString()),
+            Following = CollectionUri(nameof(GetFollowing), id.ToString()),
             Endpoints = new Endpoints()
             {
-                SharedInbox =  CollectionUri(nameof(SharedInbox), id.ToString())
+                SharedInbox = CollectionUri(nameof(SharedInbox), id.ToString())
             }
         };
         return new OkObjectResult(actor);
     }
-    
+
     [HttpGet]
     [ActionName("Followers")]
     [Route("{id}/collections/[action]")]
@@ -49,7 +50,7 @@ public class ActorController
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpGet]
     [ActionName("Following")]
     [Route("{id}/collections/[action]")]
@@ -57,7 +58,7 @@ public class ActorController
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpGet]
     [ActionName("Liked")]
     [Route("{id}/collections/[action]")]
@@ -65,7 +66,7 @@ public class ActorController
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpGet]
     [ActionName("Inbox")]
     [Route("{id}/[action]")]
@@ -73,7 +74,7 @@ public class ActorController
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpPost]
     [ActionName("Inbox")]
     [Route("{id}/[action]")]
@@ -88,7 +89,7 @@ public class ActorController
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpGet]
     [ActionName("Outbox")]
     [Route("{id}/[action]")]
@@ -96,7 +97,7 @@ public class ActorController
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpPost]
     [ActionName("Outbox")]
     [Route("{id}/[action]")]
@@ -111,16 +112,22 @@ public class ActorController
         var route = "/actor/" + routeTemplate
             .Replace("[action]", action)
             .Replace("{id}", id);
-        var result = new Uri(_baseUri, _transformer.TransformOutbound(route));
-        
+        var transformed = string.Join("/", route
+            .Split("/")
+            .Select(part => _transformer.TransformOutbound(part)));
+        var result = new Uri(_baseUri, transformed);
+
         return result;
     }
 
     private static (string action, string route) ActionAttributes(string action)
     {
         var method = typeof(ActorController).GetMethod(action);
-        var actionName = method.GetCustomAttribute<ActionNameAttribute>();
+
+        var actionName = (method ?? throw new InvalidOperationException($"no method with name {action}"))
+            .GetCustomAttribute<ActionNameAttribute>();
         var route = method.GetCustomAttribute<RouteAttribute>();
-        return (actionName?.Name, route?.Template);
+        if (route == null) throw new InvalidOperationException($"no route for action {action}");
+        return (actionName?.Name ?? method.Name, route.Template);
     }
 }

@@ -22,7 +22,7 @@ public partial class SnakeCaseRouteTransformer : IOutboundParameterTransformer
     public string? TransformOutbound(object? value)
     {
         return value != null
-            ? string.Join("_", RouteRegex().Split(value.ToString())).ToLower()
+            ? string.Join("_", RouteRegex().Split(value.ToString()!)).ToLower()
             : null;
     }
 }
