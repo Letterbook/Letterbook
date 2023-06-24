@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes;
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes.SubTypes;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
@@ -19,27 +20,26 @@ public class ActorController
 
     public ActorController(IOptions<ConfigOptions> config)
     {
-        _baseUri = new Uri(config.Value.Scheme + config.Value.HostName);
+        _baseUri = new Uri($"{config.Value.Scheme}://{config.Value.HostName}");
     }
     
     
     [HttpGet]
     [Route("{id}")]
-    public IActionResult GetActor(int id)
+    public ActionResult<Actor> GetActor(int id)
     {
         var actor = new Actor
         {
-            Inbox = collectionUri(ActionName(nameof(GetInbox)), id.ToString()),
-            Outbox = collectionUri(ActionName(nameof(GetOutbox)), id.ToString()),
-            Endpoints = new Endpoints
+            Inbox =  CollectionUri(nameof(GetInbox), id.ToString()),
+            Outbox =  CollectionUri(nameof(GetOutbox), id.ToString()),
+            Followers =  CollectionUri(nameof(GetFollowers), id.ToString()),
+            Following =  CollectionUri(nameof(GetFollowing), id.ToString()),
+            Endpoints = new Endpoints()
             {
-                SharedInbox = collectionUri(ActionName(nameof(SharedInbox)), id.ToString())
-            },
-            Followers = collectionUri(ActionName(nameof(GetFollowers)), id.ToString()),
-            Following = collectionUri(ActionName(nameof(GetFollowing)), id.ToString()),
-            // Fedodo doesn't seem to have Liked on Actor? Shrug.
+                SharedInbox =  CollectionUri(nameof(SharedInbox), id.ToString())
+            }
         };
-        throw new NotImplementedException();
+        return new OkObjectResult(actor);
     }
     
     [HttpGet]
@@ -105,29 +105,22 @@ public class ActorController
         throw new NotImplementedException();
     }
 
-    private Uri collectionUri(string action, string id)
+    private Uri CollectionUri(string actionName, string id)
     {
-        var route = "/actor/" + RouteTemplate(action)
-            .Replace("[action]", ActionName(action))
+        var (action, routeTemplate) = ActionAttributes(actionName);
+        var route = "/actor/" + routeTemplate
+            .Replace("[action]", action)
             .Replace("{id}", id);
         var result = new Uri(_baseUri, _transformer.TransformOutbound(route));
         
         return result;
     }
 
-    private static string ActionName(string action)
+    private static (string action, string route) ActionAttributes(string action)
     {
-        var method = typeof(ActorController)
-            .GetRuntimeMethod(action, Array.Empty<Type>());
+        var method = typeof(ActorController).GetMethod(action);
         var actionName = method.GetCustomAttribute<ActionNameAttribute>();
-        return actionName?.Name;
-    }
-
-    private static string RouteTemplate(string action)
-    {
-        var method = typeof(ActorController)
-            .GetRuntimeMethod(action, Array.Empty<Type>());
         var route = method.GetCustomAttribute<RouteAttribute>();
-        return route?.Template;
+        return (actionName?.Name, route?.Template);
     }
 }
