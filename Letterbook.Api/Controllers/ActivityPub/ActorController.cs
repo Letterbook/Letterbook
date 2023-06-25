@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Reflection;
+using Fedodo.NuGet.ActivityPub.Model.ActorTypes;
+using Fedodo.NuGet.ActivityPub.Model.ActorTypes.SubTypes;
+using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
 
@@ -10,13 +15,35 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [Route("[controller]")]
 public class ActorController
 {
+    private readonly SnakeCaseRouteTransformer _transformer = new();
+    private readonly Uri _baseUri;
+    private readonly ILogger _logger;
+
+    public ActorController(IOptions<ConfigOptions> config, ILogger<ActorController> logger)
+    {
+        _baseUri = new Uri($"{config.Value.Scheme}://{config.Value.HostName}");
+        _logger = logger;
+    }
+
+
     [HttpGet]
     [Route("{id}")]
-    public IActionResult GetActor(int id)
+    public ActionResult<Actor> GetActor(int id)
     {
-        throw new NotImplementedException();
+        var actor = new Actor
+        {
+            Inbox = CollectionUri(nameof(GetInbox), id.ToString()),
+            Outbox = CollectionUri(nameof(GetOutbox), id.ToString()),
+            Followers = CollectionUri(nameof(GetFollowers), id.ToString()),
+            Following = CollectionUri(nameof(GetFollowing), id.ToString()),
+            Endpoints = new Endpoints()
+            {
+                SharedInbox = CollectionUri(nameof(SharedInbox), id.ToString())
+            }
+        };
+        return new OkObjectResult(actor);
     }
-    
+
     [HttpGet]
     [ActionName("Followers")]
     [Route("{id}/collections/[action]")]
@@ -24,7 +51,7 @@ public class ActorController
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpGet]
     [ActionName("Following")]
     [Route("{id}/collections/[action]")]
@@ -32,7 +59,7 @@ public class ActorController
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpGet]
     [ActionName("Liked")]
     [Route("{id}/collections/[action]")]
@@ -40,7 +67,7 @@ public class ActorController
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpGet]
     [ActionName("Inbox")]
     [Route("{id}/[action]")]
@@ -48,7 +75,7 @@ public class ActorController
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpPost]
     [ActionName("Inbox")]
     [Route("{id}/[action]")]
@@ -59,11 +86,17 @@ public class ActorController
 
     [HttpPost]
     [Route("[action]")]
-    public IActionResult SharedInbox()
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
+    public async Task<ActionResult> SharedInbox(Activity activity)
     {
-        throw new NotImplementedException();
+        return await Task.Run(() =>
+        {
+            _logger.LogInformation("Activity received: {type} {object}", activity.Type,
+                activity.Object?.Objects?.First().Type);
+            return new AcceptedResult();
+        });
     }
-    
+
     [HttpGet]
     [ActionName("Outbox")]
     [Route("{id}/[action]")]
@@ -71,12 +104,37 @@ public class ActorController
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpPost]
     [ActionName("Outbox")]
     [Route("{id}/[action]")]
     public IActionResult PostOutbox(int id)
     {
         throw new NotImplementedException();
+    }
+
+    private Uri CollectionUri(string actionName, string id)
+    {
+        var (action, routeTemplate) = ActionAttributes(actionName);
+        var route = "/actor/" + routeTemplate
+            .Replace("[action]", action)
+            .Replace("{id}", id);
+        var transformed = string.Join("/", route
+            .Split("/")
+            .Select(part => _transformer.TransformOutbound(part)));
+        var result = new Uri(_baseUri, transformed);
+
+        return result;
+    }
+
+    private static (string action, string route) ActionAttributes(string action)
+    {
+        var method = typeof(ActorController).GetMethod(action);
+
+        var actionName = (method ?? throw new InvalidOperationException($"no method with name {action}"))
+            .GetCustomAttribute<ActionNameAttribute>();
+        var route = method.GetCustomAttribute<RouteAttribute>();
+        if (route == null) throw new InvalidOperationException($"no route for action {action}");
+        return (actionName?.Name ?? method.Name, route.Template);
     }
 }

@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Api", "Letterbook.Api\Letterbook.Api.csproj", "{2153952C-93B2-459A-9881-7AA82B394A80}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Api.Tests", "Letterbook.Api.Tests\Letterbook.Api.Tests.csproj", "{26191462-CED5-4AF4-A5BD-94E31768F376}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{2153952C-93B2-459A-9881-7AA82B394A80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2153952C-93B2-459A-9881-7AA82B394A80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2153952C-93B2-459A-9881-7AA82B394A80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26191462-CED5-4AF4-A5BD-94E31768F376}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26191462-CED5-4AF4-A5BD-94E31768F376}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26191462-CED5-4AF4-A5BD-94E31768F376}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26191462-CED5-4AF4-A5BD-94E31768F376}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
