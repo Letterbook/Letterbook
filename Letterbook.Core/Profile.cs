@@ -1,6 +1,6 @@
 ﻿namespace Letterbook.Core;
 
-public interface IActivityRecords
+public class Profile
 {
     
 }

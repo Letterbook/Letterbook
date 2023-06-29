@@ -12,4 +12,8 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ReferencePathWithRefAssemblies Update="C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\7.0.5\ref\net7.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
+  </ItemGroup>
+
 </Project>

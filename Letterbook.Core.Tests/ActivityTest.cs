@@ -1,28 +1,29 @@
 namespace Letterbook.Core.Tests;
 
-public class ActivityTest
+public class ActivityTest : WithMocks
 {
-    private Activity _activity;
+    private readonly ActivityService _activityService;
 
     public ActivityTest()
     {
-        _activity = new Activity();
+        _activityService = new ActivityService(FediAdapter.Object, ActivityAdapter.Object, ShareAdapter.Object);
     }
+    
     [Fact(DisplayName = "Create method should exist")]
     public void TestCreateExists()
     {
-        Assert.Throws<NotImplementedException>(() => { _activity.Create(); });
+        Assert.Throws<NotImplementedException>(() => _activityService.Create());
     }
     
     [Fact(DisplayName = "Receive method should exist")]
-    public void TestReceiveExists()
+    public async Task TestReceiveExists()
     {
-        Assert.Throws<NotImplementedException>(() => { _activity.Receive(null!); });
+        await Assert.ThrowsAsync<NotImplementedException>(() => _activityService.Receive(null!));
     }
     
     [Fact(DisplayName = "Deliver method should exist")]
     public void TestDeliverExists()
     {
-        Assert.Throws<NotImplementedException>(() => { _activity.Deliver(null!); });
+        Assert.Throws<NotImplementedException>(() => _activityService.Deliver(null!));
     }
 }
