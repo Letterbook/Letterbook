@@ -17,7 +17,7 @@ public class ActorController
 {
     private readonly SnakeCaseRouteTransformer _transformer = new();
     private readonly Uri _baseUri;
-    private readonly ILogger _logger;
+    private readonly ILogger<ActorController> _logger;
 
     public ActorController(IOptions<ConfigOptions> config, ILogger<ActorController> logger)
     {
@@ -91,6 +91,7 @@ public class ActorController
     {
         return await Task.Run(() =>
         {
+            // TODO: add dependency on ActivityService and call it here
             _logger.LogInformation("Activity received: {type} {object}", activity.Type,
                 activity.Object?.Objects?.First().Type);
             return new AcceptedResult();

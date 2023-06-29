@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices.JavaScript;
 using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
 using Letterbook.Core.Ports;
+using Microsoft.Extensions.Logging;
 using PubObject = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
 namespace Letterbook.Core;
@@ -10,12 +11,14 @@ public class ActivityService
     private readonly IFediPort _fediPort;
     private readonly IActivityPort _activityPort;
     private readonly ISharePort _sharePort;
+    private readonly ILogger<ActivityService> _logger;
 
-    public ActivityService(IFediPort fediPort, IActivityPort activityPort, ISharePort sharePort)
+    public ActivityService(IFediPort fediPort, IActivityPort activityPort, ISharePort sharePort, ILogger<ActivityService> logger)
     {
         _fediPort = fediPort;
         _activityPort = activityPort;
         _sharePort = sharePort;
+        _logger = logger;
     }
 
     public Activity Create()
@@ -26,30 +29,31 @@ public class ActivityService
     public async Task Receive(Activity activity)
     {
         // get destinations
-        var linkTasks = (activity.To?.Links?.Select(ResolveLink) ?? Array.Empty<Task<PubObject>>())
-            .Concat(activity.Bto?.Links?.Select(ResolveLink) ?? Array.Empty<Task<PubObject>>())
-            .Concat(activity.Cc?.Links?.Select(ResolveLink) ?? Array.Empty<Task<PubObject>>())
-            .Concat(activity.Bcc?.Links?.Select(ResolveLink) ?? Array.Empty<Task<PubObject>>());
         var recipients = activity.To?.Objects ?? Array.Empty<PubObject>()
             .Concat(activity.Bto?.Objects ?? Array.Empty<PubObject>())
             .Concat(activity.Cc?.Objects ?? Array.Empty<PubObject>())
             .Concat(activity.Bcc?.Objects ?? Array.Empty<PubObject>());
-        var linkedRecipients = await Task.WhenAll(linkTasks);
         
         // get audience (often followers + public)
         // also includes recipients
-        var audience = activity.Audience.Objects;
-        var linkedAudience = Task.WhenAll(activity.Audience.Links.Select(ResolveLink));
+        var audience = activity.Audience.Objects
+            .Concat(recipients);
 
         // record activity
-        await _activityPort.RecordObject(activity.Object.Objects.First());
+        // TODO: what about more than one object in an activity?
+        // TODO: handle different kinds of activities
+        var subject = activity.Object.Objects.First();
+        await _activityPort.RecordObject(subject);
         
         // add to audience inboxes
-        var shareTasks = audience.Select(a => _sharePort.ShareWithAudience(activity, a.Url.ToString()));
+        var shareTasks = audience.Select(a => _sharePort.ShareWithAudience(subject, a.Url.ToString()));
         await Task.WhenAll(shareTasks);
         
         // notify recipients
-
+        // TODO: NotificationService
+        // for now, just log it to prove we got it
+        _logger.LogInformation("Activity received: {type} {object}", activity.Type,
+            activity.Object?.Objects?.First().Type);
 
         throw new NotImplementedException();
     }
