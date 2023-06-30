@@ -2,6 +2,7 @@
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes;
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes.SubTypes;
 using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
+using Letterbook.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -18,11 +19,14 @@ public class ActorController
     private readonly SnakeCaseRouteTransformer _transformer = new();
     private readonly Uri _baseUri;
     private readonly ILogger<ActorController> _logger;
+    private readonly IActivityService _activityService;
 
-    public ActorController(IOptions<ConfigOptions> config, ILogger<ActorController> logger)
+    public ActorController(IOptions<ConfigOptions> config, ILogger<ActorController> logger,
+        IActivityService activityService)
     {
         _baseUri = new Uri($"{config.Value.Scheme}://{config.Value.HostName}");
         _logger = logger;
+        _activityService = activityService;
     }
 
 
@@ -89,13 +93,9 @@ public class ActorController
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     public async Task<ActionResult> SharedInbox(Activity activity)
     {
-        return await Task.Run(() =>
-        {
-            // TODO: add dependency on ActivityService and call it here
-            _logger.LogInformation("Activity received: {type} {object}", activity.Type,
-                activity.Object?.Objects?.First().Type);
-            return new AcceptedResult();
-        });
+        // TODO: add dependency on ActivityService and call it here
+        await _activityService.Receive(activity);
+        return new AcceptedResult();
     }
 
     [HttpGet]

@@ -6,18 +6,19 @@ using PubObject = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
 namespace Letterbook.Core;
 
-public class ActivityService
+public class ActivityService : IActivityService
 {
-    private readonly IFediPort _fediPort;
-    private readonly IActivityPort _activityPort;
-    private readonly ISharePort _sharePort;
+    private readonly IFediPort _fediAdapter;
+    private readonly IActivityPort _activityAdapter;
+    private readonly ISharePort _shareAdapter;
     private readonly ILogger<ActivityService> _logger;
 
-    public ActivityService(IFediPort fediPort, IActivityPort activityPort, ISharePort sharePort, ILogger<ActivityService> logger)
+    public ActivityService(IFediPort fediAdapter, IActivityPort activityAdapter, ISharePort shareAdapter,
+        ILogger<ActivityService> logger)
     {
-        _fediPort = fediPort;
-        _activityPort = activityPort;
-        _sharePort = sharePort;
+        _fediAdapter = fediAdapter;
+        _activityAdapter = activityAdapter;
+        _shareAdapter = shareAdapter;
         _logger = logger;
     }
 
@@ -43,10 +44,10 @@ public class ActivityService
         // TODO: what about more than one object in an activity?
         // TODO: handle different kinds of activities
         var subject = activity.Object.Objects.First();
-        await _activityPort.RecordObject(subject);
+        await _activityAdapter.RecordObject(subject);
         
         // add to audience inboxes
-        var shareTasks = audience.Select(a => _sharePort.ShareWithAudience(subject, a.Url.ToString()));
+        var shareTasks = audience.Select(a => _shareAdapter.ShareWithAudience(subject, a.Url.ToString()));
         await Task.WhenAll(shareTasks);
         
         // notify recipients
@@ -54,8 +55,6 @@ public class ActivityService
         // for now, just log it to prove we got it
         _logger.LogInformation("Activity received: {type} {object}", activity.Type,
             activity.Object?.Objects?.First().Type);
-
-        throw new NotImplementedException();
     }
 
     public void Deliver(Activity activity)
@@ -66,7 +65,7 @@ public class ActivityService
     private async Task<PubObject?> ResolveLink(Link link)
     {
         return link.Href != null
-            ? await _fediPort.FollowLink(link.Href)
+            ? await _fediAdapter.FollowLink(link.Href)
             : default;
     }
 

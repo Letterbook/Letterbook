@@ -16,4 +16,9 @@
     <ReferencePathWithRefAssemblies Update="C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\7.0.5\ref\net7.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj" />
+    <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
+  </ItemGroup>
+
 </Project>
