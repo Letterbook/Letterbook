@@ -38,7 +38,7 @@ public class ActivityTest : WithMocks
         Assert.Throws<NotImplementedException>(() => _activityService.Create());
     }
     
-    [Theory(DisplayName = "Receive can handle reasonable activities")]
+    [Theory(DisplayName = "Receive can handle common and well formed activities")]
     [MemberData(nameof(ActivityList), 10)]
     public async Task TestReceiveCanHandleActivities(Activity activity)
     {
