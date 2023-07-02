@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices.JavaScript;
 using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
 using Letterbook.Core.Ports;
+using Letterbook.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using PubObject = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
@@ -30,19 +31,20 @@ public class ActivityService : IActivityService
     public async Task Receive(Activity activity)
     {
         // get destinations
-        var recipients = activity.To?.Objects ?? Array.Empty<PubObject>()
-            .Concat(activity.Bto?.Objects ?? Array.Empty<PubObject>())
-            .Concat(activity.Cc?.Objects ?? Array.Empty<PubObject>())
-            .Concat(activity.Bcc?.Objects ?? Array.Empty<PubObject>());
+        var recipients = activity.To?.Objects ?? Enumerable.Empty<PubObject>()
+            .Concat(activity.Bto?.Objects ?? Enumerable.Empty<PubObject>())
+            .Concat(activity.Cc?.Objects ?? Enumerable.Empty<PubObject>())
+            .Concat(activity.Bcc?.Objects ?? Enumerable.Empty<PubObject>());
         
         // get audience (often followers + public)
         // also includes recipients
-        var audience = activity.Audience.Objects
+        var audience = (activity.Audience?.Objects ?? Enumerable.Empty<PubObject>())
             .Concat(recipients);
 
         // record activity
         // TODO: what about more than one object in an activity?
         // TODO: handle different kinds of activities
+        // TODO: do all activities have an object? Either way, handle invalid inputs
         var subject = activity.Object.Objects.First();
         await _activityAdapter.RecordObject(subject);
         
