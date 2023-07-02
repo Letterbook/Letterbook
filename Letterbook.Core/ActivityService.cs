@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
+﻿using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
 using Letterbook.Core.Ports;
 using Letterbook.Core.Extensions;
 using Microsoft.Extensions.Logging;
@@ -31,14 +30,14 @@ public class ActivityService : IActivityService
     public async Task Receive(Activity activity)
     {
         // get destinations
-        var recipients = activity.To?.Objects ?? Enumerable.Empty<PubObject>()
-            .Concat(activity.Bto?.Objects ?? Enumerable.Empty<PubObject>())
-            .Concat(activity.Cc?.Objects ?? Enumerable.Empty<PubObject>())
-            .Concat(activity.Bcc?.Objects ?? Enumerable.Empty<PubObject>());
+        var recipients = FedodoEx.HasDefault(activity.To?.Objects)
+            .Concat(FedodoEx.HasDefault(activity.Bto?.Objects))
+            .Concat(FedodoEx.HasDefault(activity.Cc?.Objects))
+            .Concat(FedodoEx.HasDefault(activity.Bcc?.Objects));
         
         // get audience (often followers + public)
         // also includes recipients
-        var audience = (activity.Audience?.Objects ?? Enumerable.Empty<PubObject>())
+        var audience = FedodoEx.HasDefault(activity.Audience?.Objects)
             .Concat(recipients);
 
         // record activity
