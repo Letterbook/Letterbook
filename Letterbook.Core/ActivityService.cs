@@ -8,12 +8,12 @@ namespace Letterbook.Core;
 
 public class ActivityService : IActivityService
 {
-    private readonly IFediPort _fediAdapter;
-    private readonly IActivityPort _activityAdapter;
-    private readonly ISharePort _shareAdapter;
+    private readonly IFediAdapter _fediAdapter;
+    private readonly IActivityAdapter _activityAdapter;
+    private readonly IShareAdapter _shareAdapter;
     private readonly ILogger<ActivityService> _logger;
 
-    public ActivityService(IFediPort fediAdapter, IActivityPort activityAdapter, ISharePort shareAdapter,
+    public ActivityService(IFediAdapter fediAdapter, IActivityAdapter activityAdapter, IShareAdapter shareAdapter,
         ILogger<ActivityService> logger)
     {
         _fediAdapter = fediAdapter;

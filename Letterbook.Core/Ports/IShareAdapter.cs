@@ -2,7 +2,7 @@
 
 namespace Letterbook.Core.Ports;
 
-public interface ISharePort
+public interface IShareAdapter
 {
     Task ShareWithAudience(Object obj, string audienceUri);
 }

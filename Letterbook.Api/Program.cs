@@ -1,4 +1,5 @@
 using Letterbook.Adapter.Db;
+using Letterbook.Adapter.FediClient;
 using Letterbook.Core;
 using Letterbook.Core.Ports;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -22,9 +23,9 @@ public class Program
         
         // Register DI containers
         builder.Services.AddScoped<IActivityService, ActivityService>();
-        // builder.Services.AddScoped<IFediPort, IFediPort>();
-        // builder.Services.AddScoped<ISharePort, ISharePort>();
-        builder.Services.AddScoped<IActivityPort, ActivityAdapter>();
+        builder.Services.AddScoped<IFediAdapter, FediClient>();
+        builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
+        builder.Services.AddScoped<IShareAdapter, ActivityAdapter>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();

@@ -2,7 +2,7 @@
 
 namespace Letterbook.Core.Ports;
 
-public interface IFediPort
+public interface IFediAdapter
 {
     Task<PubObject> FollowLink(Uri href);
 }

@@ -5,14 +5,14 @@ namespace Letterbook.Core.Tests;
 
 public abstract class WithMocks
 {
-    protected Mock<IFediPort> FediAdapter;
-    protected Mock<IActivityPort> ActivityAdapter;
-    protected Mock<ISharePort> ShareAdapter;
+    protected Mock<IFediAdapter> FediAdapter;
+    protected Mock<IActivityAdapter> ActivityAdapter;
+    protected Mock<IShareAdapter> ShareAdapter;
 
     protected WithMocks()
     {
-        FediAdapter = new Mock<IFediPort>();
-        ActivityAdapter = new Mock<IActivityPort>();
-        ShareAdapter = new Mock<ISharePort>();
+        FediAdapter = new Mock<IFediAdapter>();
+        ActivityAdapter = new Mock<IActivityAdapter>();
+        ShareAdapter = new Mock<IShareAdapter>();
     }
 }
