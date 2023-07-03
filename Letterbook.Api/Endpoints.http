@@ -5,6 +5,3 @@ GET {{host}}/api/v1/actor
 
 ###
 GET {{host}}/api/v1/accounts/11/scheduled_statuses
-
-###
-GET  https://tech.lgbt/.well-known/webfinger?resource=acct:jenniferplusplus@tech.lgbt
