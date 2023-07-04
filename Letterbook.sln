@@ -24,9 +24,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D5E41A46-D753-4214-AF70-1839E56B4A14}"
 	ProjectSection(SolutionItems) = preProject
-		docs\decisions\00-template.md = docs\decisions\00-template.md
-		docs\decisions\01-system-design-guidance.md = docs\decisions\01-system-design-guidance.md
-		docs\decisions\02-architecture-design-patterns.md = docs\decisions\02-architecture-design-patterns.md
 		docs\decisions\hexagonal-architecture.png = docs\decisions\hexagonal-architecture.png
 		docs\timeline.md = docs\timeline.md
 	EndProjectSection
@@ -35,6 +32,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{25C320
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\pull-request.yml = .github\workflows\pull-request.yml
 		.github\workflows\push-to-main.yml = .github\workflows\push-to-main.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Decisions", "Decisions", "{4FB3BADC-1EDD-482C-8D60-AD46D676A12F}"
+	ProjectSection(SolutionItems) = preProject
+		docs\decisions\00-template.md = docs\decisions\00-template.md
+		docs\decisions\01-system-design-guidance.md = docs\decisions\01-system-design-guidance.md
+		docs\decisions\02-architecture-design-patterns.md = docs\decisions\02-architecture-design-patterns.md
+		docs\decisions\hexagonal-architecture.png = docs\decisions\hexagonal-architecture.png
 	EndProjectSection
 EndProject
 Global
@@ -73,5 +78,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
+		{4FB3BADC-1EDD-482C-8D60-AD46D676A12F} = {D5E41A46-D753-4214-AF70-1839E56B4A14}
 	EndGlobalSection
 EndGlobal

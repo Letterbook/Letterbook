@@ -4,10 +4,10 @@ Using a hexagonal architecture for the overall application. And using query obje
 
 ## Status
 
-- [ ] Decided (proposal was agreed and adopted)
-- [ ] Decided Against (agreed not to adopt)
-- [ ] Deferred (no decision, but should be revisited later)
-- [ ] Superseded (later events or decisions make this no longer relevant)
+- [x] Decided (2023-07-04)
+- [ ] Decided Against
+- [ ] Deferred
+- [ ] Superseded
 
 # Decision
 
