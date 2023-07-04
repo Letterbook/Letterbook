@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Db", "Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj", "{30FE036C-1B72-4891-BD76-A3BEDC6D5722}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Helper.DbMigrations", "Letterbook.Helper.DbMigrations\Letterbook.Helper.DbMigrations.csproj", "{4E325ED7-F185-40B5-A98C-B9C2941CB7A6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{30FE036C-1B72-4891-BD76-A3BEDC6D5722}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30FE036C-1B72-4891-BD76-A3BEDC6D5722}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30FE036C-1B72-4891-BD76-A3BEDC6D5722}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30FE036C-1B72-4891-BD76-A3BEDC6D5722}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E325ED7-F185-40B5-A98C-B9C2941CB7A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E325ED7-F185-40B5-A98C-B9C2941CB7A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E325ED7-F185-40B5-A98C-B9C2941CB7A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E325ED7-F185-40B5-A98C-B9C2941CB7A6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
