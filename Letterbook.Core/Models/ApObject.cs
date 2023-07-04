@@ -1,17 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace Letterbook.Core.Models;
 
-namespace Letterbook.Adapter.Db.Entities;
-
-public class ActivityObject
+public class ApObject
 {
-    [Required]
-    public Uri? Id { get; set; }
+    public Uri Id { get; set; }
     public ActivityObjectType Type { get; set; }
     public string? LocalId { get; set; }
-    [Required]
-    public Uri? Host { get; set; }
-    [Required]
-    public Actor? Actor { get; set; }
+    public Uri Host { get; set; }
+    public Actor Actor { get; set; }
     public List<Actor> AddressedTo { get; set; } = new List<Actor>();
     public List<Actor> AddressedBto { get; set; } = new List<Actor>();
     public List<Actor> AddressedCc { get; set; } = new List<Actor>();

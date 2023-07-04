@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Letterbook.Adapter.Db.Entities;
+﻿namespace Letterbook.Core.Models;
 
 /// <summary>
 /// Ok, so. The AP Spec says that Actors are Objects. But, here's the thing. Most of the object properties make no
@@ -11,10 +9,9 @@ namespace Letterbook.Adapter.Db.Entities;
 /// </summary>
 public class Actor
 {
-    [Required]
-    public Uri? Id { get; set; }
+    public Uri Id { get; set; }
     public ActivityObjectType Type = ActivityObjectType.Actor;
-    [Required]
-    public Uri? Host { get; set; }
+    public Uri Host { get; set; }
     public string? LocalId { get; set; }
+    public List<Audience> Audiences { get; set; }
 }

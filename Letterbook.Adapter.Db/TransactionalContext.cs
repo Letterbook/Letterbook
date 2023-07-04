@@ -1,4 +1,5 @@
-﻿using Letterbook.Adapter.Db.Entities;
+﻿using System.Reflection;
+using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -17,7 +18,7 @@ public class TransactionalContext : DbContext
 {
     private readonly ILogger<TransactionalContext> _logger;
     private readonly DbOptions _config;
-    public DbSet<ActivityObject> Objects { get; set; }
+    public DbSet<ApObject> Objects { get; set; }
     public DbSet<Actor> Actors { get; set; }
     public DbSet<Audience> Audiences { get; set; }
 
@@ -37,5 +38,11 @@ public class TransactionalContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         options.UseNpgsql(_config.GetConnectionString());
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }

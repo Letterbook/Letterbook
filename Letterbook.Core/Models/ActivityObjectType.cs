@@ -1,4 +1,4 @@
-﻿namespace Letterbook.Adapter.Db.Entities;
+﻿namespace Letterbook.Core.Models;
 
 public enum ActivityObjectType
 {
