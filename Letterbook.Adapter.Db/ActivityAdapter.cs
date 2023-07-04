@@ -1,4 +1,5 @@
-﻿// using Letterbook.Core.Ports;
+﻿using Letterbook.Core.Ports;
+using Microsoft.Extensions.Logging;
 
 using Letterbook.Core;
 using Microsoft.Extensions.Logging;
@@ -7,7 +8,7 @@ using Object = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
 namespace Letterbook.Adapter.Db;
 
-public class ActivityAdapter// : IActivityAdapter, IShareAdapter
+public class ActivityAdapter : IActivityAdapter, IShareAdapter
 {
     private readonly ILogger<ActivityAdapter> _logger;
     private readonly DbOptions _config;
