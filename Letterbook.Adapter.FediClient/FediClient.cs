@@ -1,4 +1,4 @@
-﻿using Letterbook.Core.Ports;
+﻿using Letterbook.Core.Adapters;
 using Object = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
 namespace Letterbook.Adapter.FediClient;

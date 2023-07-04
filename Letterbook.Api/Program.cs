@@ -1,7 +1,7 @@
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.FediClient;
 using Letterbook.Core;
-using Letterbook.Core.Ports;
+using Letterbook.Core.Adapters;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace Letterbook.Api;

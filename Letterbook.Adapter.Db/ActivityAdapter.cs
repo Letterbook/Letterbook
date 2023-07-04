@@ -1,7 +1,4 @@
-﻿using Letterbook.Core.Ports;
-using Microsoft.Extensions.Logging;
-
-using Letterbook.Core;
+﻿using Letterbook.Core.Adapters;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Object = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;

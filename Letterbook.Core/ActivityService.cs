@@ -1,5 +1,5 @@
 ﻿using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
-using Letterbook.Core.Ports;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using PubObject = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;

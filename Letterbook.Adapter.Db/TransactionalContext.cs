@@ -23,6 +23,7 @@ public class TransactionalContext : DbContext
 
     public TransactionalContext(DbContextOptions<TransactionalContext> context) : base(context)
     {
+        _logger = new Logger<TransactionalContext>(new LoggerFactory());
         _config = new DesignDbOptions();
     }
 

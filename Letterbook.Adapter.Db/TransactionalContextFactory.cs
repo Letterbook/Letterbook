@@ -11,7 +11,6 @@ public class TransactionalContextFactory : IDesignTimeDbContextFactory<Transacti
     public TransactionalContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<TransactionalContext>();
-        optionsBuilder.UseNpgsql();
 
         return new TransactionalContext(optionsBuilder.Options);
     }
