@@ -1,4 +1,5 @@
 
+using Letterbook.Adapter.Db;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace Letterbook.Api;
@@ -17,6 +18,7 @@ public class Program
         });
         
         builder.Services.Configure<ConfigOptions>(builder.Configuration.GetSection(ConfigOptions.Key));
+        builder.Services.Configure<DbOptions>(builder.Configuration.GetSection(DbOptions.ConfigKey));
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();

@@ -1,0 +1,13 @@
+﻿
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=letterbook
+      - POSTGRES_PASSWORD=letterbookpw
+      - POSTGRES_DB=letterbook #optional (specify default database instead of $POSTGRES_DB)
+    ports:
+      - "5432:5432"
+    restart: always

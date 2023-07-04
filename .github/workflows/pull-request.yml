@@ -20,4 +20,4 @@ jobs:
       - name: Build
         run: dotnet build Letterbook.Api
       - name: Test
-        run: dotnet test Letterbook.Api.Tests
+        run: dotnet test Letterbook.sln
