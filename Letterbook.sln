@@ -31,7 +31,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{25C320AC-E149-44F9-81F3-5275C7D8D334}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\pull-request.yml = .github\workflows\pull-request.yml
-		.github\workflows\push-to-main.yml = .github\workflows\push-to-main.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Decisions", "Decisions", "{4FB3BADC-1EDD-482C-8D60-AD46D676A12F}"
