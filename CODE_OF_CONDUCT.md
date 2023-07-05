@@ -43,7 +43,8 @@ And by contrast, some examples of unacceptable behavior.
 
 It is the responsibility of all the project members to uphold the values and standards of the project. In general, people should try to resolve conflicts directly with each other. The project's leaders and maintainers should step in whenever that isn't enough, and they should take whatever action they deem necessary to uphold the code of conduct. In all cases, the project leaders must respect the privacy and safety of anyone who reports an incident to them.
 
-To report an incident, email any member of the [Maintainers](https://github.com/orgs/Letterbook/teams/maintainers) team.
+### Reporting
+To report an incident, email Jennifer Moore (contact@jenniferplusplus.com) or any other member of the [Maintainers](https://github.com/orgs/Letterbook/teams/maintainers) team.
 
 ### Corrective Action
 
