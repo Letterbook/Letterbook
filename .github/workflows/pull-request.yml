@@ -1,6 +1,10 @@
-name: validate pull request
+name: Build
 
 on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
   pull_request:
     branches:
       - 'main'
@@ -18,6 +22,6 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Build
-        run: dotnet build Letterbook.Api
+        run: dotnet build Letterbook.sln
       - name: Test
         run: dotnet test Letterbook.sln
