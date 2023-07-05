@@ -1,6 +1,6 @@
 ﻿using PubObject = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
-namespace Letterbook.Core.Ports;
+namespace Letterbook.Core.Adapters;
 
 public interface IFediAdapter
 {

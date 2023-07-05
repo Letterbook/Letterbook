@@ -1,4 +1,4 @@
-﻿using Letterbook.Core.Ports;
+﻿using Letterbook.Core.Adapters;
 using Moq;
 
 namespace Letterbook.Core.Tests;

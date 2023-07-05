@@ -1,7 +1,7 @@
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.FediClient;
 using Letterbook.Core;
-using Letterbook.Core.Ports;
+using Letterbook.Core.Adapters;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace Letterbook.Api;
@@ -19,7 +19,9 @@ public class Program
             options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
         });
         
+        // Register DI config
         builder.Services.Configure<ConfigOptions>(builder.Configuration.GetSection(ConfigOptions.Key));
+        builder.Services.Configure<DbOptions>(builder.Configuration.GetSection(DbOptions.ConfigKey));
         
         // Register DI containers
         builder.Services.AddScoped<IActivityService, ActivityService>();
