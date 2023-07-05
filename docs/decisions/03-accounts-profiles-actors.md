@@ -11,7 +11,41 @@ Clarifying the difference between these concepts, and the value of having them b
 
 # Decision
 
-A summary of what was proposed and decided
+```mermaid
+flowchart TD
+    A1[Alice's Account]
+    A2[Bob's Account]
+    P1[Profile]
+    P2[Shared Profile]
+    P3[Profile]
+    C1["Actor\n@cats4life"]
+    C2["Actor\n@Starbucks_United"]
+    C3["Actor\n@SpaceTheFinalFrontier"]
+    CR1[Remote Actor]
+    CR2[Remote Actor]
+    U1([Alice])
+    U2([Bob])
+    F("Fediverse\n☁️")
+
+    U1 -->|login| A1
+    U2 -->|login| A2
+
+    subgraph "letterbook.social"
+        C4["Actor\nCached Remote Actor"]
+        C5["Actor\nCached Remote Actor"]
+        A1 -->|owns| P1 & P2
+        A2 -.->|access| P2
+        A2 -->|owns| P3
+        P1 --> C1
+        P2 --> C2
+        P3 --> C3    
+    end
+
+    C4 -.-> CR1
+    C5 -.-> CR2
+    C1 & C2 & C3 <-->|Activities| F
+    F <-->|Activities| CR1 & CR2
+```
 
 ## Impact
 
