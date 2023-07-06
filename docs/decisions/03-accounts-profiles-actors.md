@@ -11,6 +11,15 @@ Clarifying the difference between these concepts, and the value of having them b
 
 # Decision
 
+An account, profile, and actor are all closely related to a<sup>1</sup> user. In this context, a user is a person. As in, a human being<sup>2</sup> who is using the application to send, receive, and interact with notes and other users. Generally all the things that are implied when a person says that they're "on ~~mastodon~~ the fediverse." The thing about computers is that they suck at infering things, so all the implied stuff has to be explicit. All of these things make up a computational model of people trying to do things in the real world. Getting the boundaries right on the pieces of that model will make it possible to support those people and the things they do over time, even as more people want to do increasingly complicated things. In other words, this is an exercise in domain modelling.
+
+## Models
+
+* **Account**. An account is the thing that a person logs into. It has the closest relationship with that person, as they exist in the outside world. That's where we manage things like passwords, emails, and preferences.
+* **Profile**. A profile is the thing that is presented to the rest of the social network. This is where we manage things like handles, display names, profile pictures, follows, and followers.
+* **Actor**. An actor is how profiles are represented and transferred in the ActivityPub fediverse. This is how Letterbook will present a profile to other services, and this is how we will understand and interact with users of those other services. It presents essentially all the same information as the profile does, but in a serialized format specified by the federation protocol.
+
+I've tried to capture these relationships here:
 ```mermaid
 flowchart TD
     A1[Alice's Account]
@@ -18,7 +27,7 @@ flowchart TD
     P1[Profile]
     P2[Shared Profile]
     P3[Profile]
-    C1["Actor\n@cats4life"]
+    C1["Actor\n@CmdrSpot"]
     C2["Actor\n@Starbucks_United"]
     C3["Actor\n@SpaceTheFinalFrontier"]
     CR1[Remote Actor]
@@ -31,8 +40,8 @@ flowchart TD
     U2 -->|login| A2
 
     subgraph "letterbook.social"
-        C4["Actor\nCached Remote Actor"]
-        C5["Actor\nCached Remote Actor"]
+        C4["Cached Remote Actor\n@make_it_sew"]
+        C5["Cached Remote Actor\n@coffee_nebula"]
         A1 -->|owns| P1 & P2
         A2 -.->|access| P2
         A2 -->|owns| P3
@@ -46,6 +55,9 @@ flowchart TD
     C1 & C2 & C3 <-->|Activities| F
     F <-->|Activities| CR1 & CR2
 ```
+
+* <sup>1</sup> potentially more than one user, in the case of profiles that represent an organization. But that's the end, and we're at the beginning.
+* <sup>2</sup> or bot. This stuff gets complicated rapidly.
 
 ## Impact
 
