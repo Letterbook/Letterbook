@@ -27,21 +27,21 @@ flowchart TD
     P1[Profile]
     P2[Shared Profile]
     P3[Profile]
-    C1["Actor\n@CmdrSpot"]
-    C2["Actor\n@Starbucks_United"]
-    C3["Actor\n@SpaceTheFinalFrontier"]
+    C1["Actor \n @CmdrSpot"]
+    C2["Actor \n @Redshirts_United"]
+    C3["Actor \n @SpaceTheFinalFrontier"]
     CR1[Remote Actor]
     CR2[Remote Actor]
     U1([Alice])
     U2([Bob])
-    F("Fediverse\n☁️")
+    F(("Fediverse \n ☁️"))
 
     U1 -->|login| A1
     U2 -->|login| A2
 
-    subgraph "letterbook.social"
-        C4["Cached Remote Actor\n@make_it_sew"]
-        C5["Cached Remote Actor\n@coffee_nebula"]
+    subgraph "letterbook \n tenforward.example"
+        C4[/"Cached Remote Actor \n @make_it_sew@uss-enterprise.example"/]
+        C5[/"Cached Remote Actor \n @coffee_nebula@uss-voyager.example"/]
         A1 -->|owns| P1 & P2
         A2 -.->|access| P2
         A2 -->|owns| P3
@@ -61,7 +61,9 @@ flowchart TD
 
 ## Impact
 
-Details about what changes because of the decision
+The immediate result is that these models and db entities need to be created and used. On the one hand, it's probably a bit more work than simply using a singular monolithic "user" model, or similar. On the other hand, this should continue to provide good flexibility for a long time. And, it can ease development and testing, by isolating work on message handling and federation from concerns about authentication.
+
+In the longer term, this also creates the possibility that accounts can be connected to more than one profile, and that profiles can be connected to more than one account. This can enable things like easier and more robust management of bot profiles, shared access to profiles representing organizations, or delegating moderation powers between trusted contacts.
 
 ## Context
 
