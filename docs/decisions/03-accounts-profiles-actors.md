@@ -73,4 +73,6 @@ As one example, imagine a union drive. The organizing committee may need to exer
 
 ## Discussion
 
-A summary of the comments/issues/concerns that led up to the decision
+This ADR largely ignores permissions and access controls surrounding shared profiles. That's an important and complex topic, and one that warrants careful consideration. In addition to this account/profile domain modelling, that will also depend on how we implement an authorization model.
+
+[See the PR](https://github.com/Letterbook/Letterbook/pull/37/files)
