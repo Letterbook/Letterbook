@@ -4,7 +4,7 @@ Clarifying the difference between these concepts, and the value of having them b
 
 ## Status
 
-- [ ] Decided
+- [x] Decided (2023-07-10)
 - [ ] Decided Against
 - [ ] Deferred
 - [ ] Superseded
