@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Fedodo.ActivityPub.Model" Version="2.0.27" />
+    <PackageReference Include="Letterbook.ActivityPub" Version="1.0.0-ci0008-36" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.8" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.5.0">

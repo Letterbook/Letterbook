@@ -3,7 +3,9 @@ using Fedodo.NuGet.ActivityPub.Model.ActorTypes;
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes.SubTypes;
 using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
 using Letterbook.Core;
+using Models = Letterbook.ActivityPub.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
@@ -91,7 +93,7 @@ public class ActorController
     [HttpPost]
     [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
-    public async Task<ActionResult> SharedInbox(Activity activity)
+    public async Task<ActionResult> SharedInbox(Models.Activity activity)
     {
         // TODO: add dependency on ActivityService and call it here
         await _activityService.Receive(activity);

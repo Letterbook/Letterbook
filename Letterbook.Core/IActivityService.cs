@@ -1,4 +1,4 @@
-﻿using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
+﻿using Letterbook.ActivityPub.Models;
 
 namespace Letterbook.Core;
 
