@@ -12,6 +12,8 @@ Letterbook is intended to be a mastodon-compatible federated microblogging serve
 
 This project is still in the very early stages, but we would love to have more contributors. This is a project built *for* the community, and it should also be built *by* the community. Unfortunately, things probably aren't established enough yet that someone could jump in without guidance. But, we would be happy to provide that guidance! Please reach out here on github, or on the fediverse.
 
+You can probably get a sense of how things stand from the [Minimum Functionality](https://github.com/orgs/Letterbook/projects/1/views/1) project board.
+
 ## Maintainers
 
 * [@jenniferplusplus@tech.lgbt](https://tech.lgbt/@jenniferplusplus)
