@@ -38,13 +38,14 @@ public class ActivityTest : WithMocks
         Assert.Throws<NotImplementedException>(() => _activityService.Create());
     }
     
-    // [Theory(DisplayName = "Receive can handle common and well formed activities")]
-    // [MemberData(nameof(ActivityList), 10)]
-    // public async Task TestReceiveCanHandleActivities(Activity activity)
-    // {
+    [Theory(DisplayName = "Receive can handle common and well formed activities",
+        Skip = "Requires type mappers")]
+    [MemberData(nameof(ActivityList), 10)]
+    public async Task TestReceiveCanHandleActivities(Activity activity)
+    {
         // var exceptions = await Record.ExceptionAsync(() => _activityService.Receive(activity));
         // Assert.Null(exceptions);
-    // }
+    }
     
     [Fact(DisplayName = "Deliver method should exist")]
     public void TestDeliverExists()
