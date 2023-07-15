@@ -2,6 +2,7 @@
 
 public enum AddressedRelationship
 {
+    None,
     To,
     Bto,
     Cc,

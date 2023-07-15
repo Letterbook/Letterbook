@@ -1,6 +1,7 @@
-﻿using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
+﻿using Letterbook.ActivityPub;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
+using Letterbook.ActivityPub.Models;
 using Microsoft.Extensions.Logging;
 using PubObject = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
@@ -30,32 +31,32 @@ public class ActivityService : IActivityService
     public async Task Receive(Activity activity)
     {
         // get destinations
-        var recipients = FedodoEx.HasDefault(activity.To?.Objects)
-            .Concat(FedodoEx.HasDefault(activity.Bto?.Objects))
-            .Concat(FedodoEx.HasDefault(activity.Cc?.Objects))
-            .Concat(FedodoEx.HasDefault(activity.Bcc?.Objects));
-        
-        // get audience (often followers + public)
+        var recipients = activity.To
+            .Concat(activity.Cc)
+            .Concat(activity.Bto)
+            .Concat(activity.Bcc);
+
+        // get audience (in case there is one)
         // also includes recipients
-        var audience = FedodoEx.HasDefault(activity.Audience?.Objects)
-            .Concat(recipients);
+        var audience = recipients.Concat(activity.Audience);
 
         // record activity
         // TODO: what about more than one object in an activity?
         // TODO: handle different kinds of activities
         // TODO: do all activities have an object? Either way, handle invalid inputs
-        var subject = activity.Object.Objects.First();
-        await _activityAdapter.RecordObject(subject);
-        
+        var subject = activity.Object.FirstOrDefault().Resolve();
+        // await _activityAdapter.RecordObject(subject);
+
         // add to audience inboxes
-        var shareTasks = audience.Select(a => _shareAdapter.ShareWithAudience(subject, a.Url.ToString()));
-        await Task.WhenAll(shareTasks);
-        
+        // var shareTasks = audience.Select(a => _shareAdapter.ShareWithAudience(subject, a.Url.ToString()));
+        // await Task.WhenAll(shareTasks);
+
         // notify recipients
         // TODO: NotificationService
         // for now, just log it to prove we got it
+        var resolved = activity.Object.FirstOrDefault().TryResolve<DTO.Object>(out var value);
         _logger.LogInformation("Activity received: {type} {object}", activity.Type,
-            activity.Object?.Objects?.First().Type);
+            resolved ? value!.Type.First() : "Unknown");
     }
 
     public void Deliver(Activity activity)

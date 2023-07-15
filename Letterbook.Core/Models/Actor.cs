@@ -9,9 +9,16 @@
 /// </summary>
 public class Actor
 {
+    private Actor()
+    {
+        Id = default!;
+        Type = default;
+        Host = default!;
+    }
+    
     public Uri Id { get; set; }
-    public ActivityObjectType Type = ActivityObjectType.Actor;
+    public ActivityObjectType Type { get; set; }
     public Uri Host { get; set; }
     public string? LocalId { get; set; }
-    public List<Audience> Audiences { get; set; }
+    public List<Audience> Audiences { get; set; } = new();
 }
