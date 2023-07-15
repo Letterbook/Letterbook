@@ -1,10 +1,8 @@
-﻿using Letterbook.ActivityPub.Models;
-
-namespace Letterbook.Core;
+﻿namespace Letterbook.Core;
 
 public interface IActivityService
 {
-    Activity Create();
-    Task Receive(Activity activity);
-    void Deliver(Activity activity);
+    DTO.Activity Create();
+    Task Receive(DTO.Activity activity);
+    void Deliver(DTO.Activity activity);
 }

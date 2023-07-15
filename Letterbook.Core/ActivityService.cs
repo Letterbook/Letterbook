@@ -3,7 +3,6 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.ActivityPub.Models;
 using Microsoft.Extensions.Logging;
-using Object = Letterbook.ActivityPub.Models.Object;
 using PubObject = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
 namespace Letterbook.Core;
@@ -55,7 +54,7 @@ public class ActivityService : IActivityService
         // notify recipients
         // TODO: NotificationService
         // for now, just log it to prove we got it
-        var resolved = activity.Object.FirstOrDefault().TryResolve<Object>(out var value);
+        var resolved = activity.Object.FirstOrDefault().TryResolve<DTO.Object>(out var value);
         _logger.LogInformation("Activity received: {type} {object}", activity.Type,
             resolved ? value!.Type.First() : "Unknown");
     }
