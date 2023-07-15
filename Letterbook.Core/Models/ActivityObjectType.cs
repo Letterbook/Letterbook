@@ -5,5 +5,5 @@ public enum ActivityObjectType
     None,
     Actor,
     Note,
-    Like,
+    Image,
 }

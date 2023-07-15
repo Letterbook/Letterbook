@@ -1,8 +1,8 @@
-﻿using Object = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
+﻿using Letterbook.Core.Models;
 
 namespace Letterbook.Core.Adapters;
 
 public interface IActivityAdapter
 {
-    Task RecordObject(Object obj);
+    ValueTask<bool> RecordNote(Note note);
 }

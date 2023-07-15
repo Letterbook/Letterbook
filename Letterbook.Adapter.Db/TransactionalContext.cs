@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Adapter.Db;
@@ -16,21 +15,20 @@ namespace Letterbook.Adapter.Db;
 /// </summary>
 public class TransactionalContext : DbContext
 {
-    private readonly ILogger<TransactionalContext> _logger;
     private readonly DbOptions _config;
-    public DbSet<ApObject> Objects { get; set; }
+    public DbSet<Note> Notes { get; set; }
     public DbSet<Actor> Actors { get; set; }
     public DbSet<Audience> Audiences { get; set; }
 
+    // Called by the designer to create and run migrations
     public TransactionalContext(DbContextOptions<TransactionalContext> context) : base(context)
     {
-        _logger = new Logger<TransactionalContext>(new LoggerFactory());
         _config = new DesignDbOptions();
     }
 
-    public TransactionalContext(ILogger<TransactionalContext> logger, IOptions<DbOptions> config)
+    // Called by DI for normal use
+    public TransactionalContext(IOptions<DbOptions> config)
     {
-        _logger = logger;
         _config = config.Value;
     }
 
