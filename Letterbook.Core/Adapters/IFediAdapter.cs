@@ -2,7 +2,7 @@
 
 namespace Letterbook.Core.Adapters;
 
-public interface IFediAdapter
+public interface IFediAdapter : IAdapter
 {
     Task<PubObject> FollowLink(Uri href);
 }
