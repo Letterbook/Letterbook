@@ -1,7 +1,10 @@
-﻿using Letterbook.ActivityPub;
+﻿using CommonExtensions;
+using Letterbook.ActivityPub;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.ActivityPub.Models;
+using Letterbook.Core.Models;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
 using PubObject = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
@@ -28,8 +31,26 @@ public class ActivityService : IActivityService
         throw new NotImplementedException();
     }
 
-    public async Task Receive(Activity activity)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="activity"></param>
+    /// <returns>Success</returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task<bool> Receive(Activity activity)
     {
+        Enum.TryParse(activity.Type, out ActivityType type);
+        switch (type)
+        {
+            case ActivityType.Create:
+                return await HandleCreate(activity);
+            case ActivityType.Like:
+                throw new NotImplementedException("Not implemented yet: Like");
+            default:
+                _logger.LogInformation("Ignored unknown Activity Type {Type}", activity.Type);
+                return false;
+        }
+        
         // get destinations
         var recipients = activity.To
             .Concat(activity.Cc)
@@ -64,15 +85,11 @@ public class ActivityService : IActivityService
         throw new NotImplementedException();
     }
 
-    private async Task<PubObject?> ResolveLink(Link link)
+    private async Task<bool> HandleCreate(Activity activity)
     {
-        return link.Href != null
-            ? await _fediAdapter.FollowLink(link.Href)
-            : default;
-    }
-
-    private async Task<IEnumerable<Profile>> GetAudienceMembers(Collection collection)
-    {
-        throw new NotImplementedException();
+        var notes = activity.Object.Where(each => each.Type == "Note")
+            .Where(each => each.Type == "Note")
+            .Select(async each => await _activityAdapter.RecordNote(/*each as Note*/ new Note()))
+            
     }
 }

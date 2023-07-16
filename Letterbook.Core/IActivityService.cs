@@ -3,6 +3,6 @@
 public interface IActivityService
 {
     DTO.Activity Create();
-    Task Receive(DTO.Activity activity);
+    Task<bool> Receive(DTO.Activity activity);
     void Deliver(DTO.Activity activity);
 }
