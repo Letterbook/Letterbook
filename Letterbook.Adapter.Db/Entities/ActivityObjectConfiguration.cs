@@ -9,19 +9,19 @@ public class ActivityObjectConfiguration : IEntityTypeConfiguration<ApObject>
     public void Configure(EntityTypeBuilder<ApObject> builder)
     {
         builder.HasKey(entity => entity.Id);
-        builder.HasOne<Actor>(entity => entity.Actor);
-        builder.HasMany<Actor>(entity => entity.AddressedTo)
+        builder.HasOne<Profile>(entity => entity.Profile);
+        builder.HasMany<Profile>(entity => entity.AddressedTo)
             .WithMany()
             .UsingEntity<JoinObjectActor>(b => b.HasDiscriminator(j => j.Relationship).HasValue(AddressedRelationship.To));
-        builder.HasMany<Actor>(entity => entity.AddressedBto)
+        builder.HasMany<Profile>(entity => entity.AddressedBto)
             .WithMany()
             .UsingEntity<JoinObjectActor>(b => b.HasDiscriminator(j => j.Relationship).HasValue(AddressedRelationship.Bto));
 
-        builder.HasMany<Actor>(entity => entity.AddressedCc)
+        builder.HasMany<Profile>(entity => entity.AddressedCc)
             .WithMany()
             .UsingEntity<JoinObjectActor>(b => b.HasDiscriminator(j => j.Relationship).HasValue(AddressedRelationship.Cc));
 
-        builder.HasMany<Actor>(entity => entity.AddressedBcc)
+        builder.HasMany<Profile>(entity => entity.AddressedBcc)
             .WithMany()
             .UsingEntity<JoinObjectActor>(b => b.HasDiscriminator(j => j.Relationship).HasValue(AddressedRelationship.Bcc));
 
