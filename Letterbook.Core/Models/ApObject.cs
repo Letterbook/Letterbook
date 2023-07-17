@@ -5,7 +5,7 @@ public class ApObject
     private ApObject()
     {
         Id = default!;
-        Type = ActivityObjectType.None;
+        Type = ActivityObjectType.Unknown;
         Host = default!;
         Profile = default!;
     }

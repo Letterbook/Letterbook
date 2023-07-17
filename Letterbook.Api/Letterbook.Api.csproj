@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Collection" Version="9.0.0" />
     <PackageReference Include="Fedodo.ActivityPub.Model" Version="2.0.27" />
     <PackageReference Include="Letterbook.ActivityPub" Version="1.0.0-ci0010-39" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.8" />

@@ -16,8 +16,8 @@ public class Image : IExpiring, IContentRef
     
     public Uri Id { get; set; }
     public string? LocalId { get; set; }
-    public Uri Authority { get; set; }
-    public HashSet<Profile> Creators { get; set; } = new();
+    public string Authority { get; set; }
+    public HashSet<IObjectRef> Creators { get; set; } = new();
     public DateTime CreatedDate { get; set; }
     public ContentType MimeType { get; set; }
     public Uri FileLocation { get; set; } // good enough?

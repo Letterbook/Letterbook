@@ -13,13 +13,12 @@ public class Profile : IObjectRef
     {
         Id = default!;
         Type = default;
-        Host = default!;
+        Authority = default!;
     }
     
     public Uri Id { get; set; }
     public ActivityActorType Type { get; set; }
-    public Uri Host { get; set; }
     public string? LocalId { get; set; }
-    public Uri Authority { get; set; }
+    public string Authority { get; set; }
     public HashSet<Audience> Audiences { get; set; } = new();
 }
