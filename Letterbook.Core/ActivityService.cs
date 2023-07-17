@@ -14,7 +14,7 @@ public class ActivityService : IActivityService
     private readonly IActivityAdapter _activityAdapter;
     private readonly IShareAdapter _shareAdapter;
     private readonly ILogger<ActivityService> _logger;
-    private static IMapper DtoMapper => new Mapper(Mappers.DtoMapper.Config);
+    // private static IMapper DtoMapper => new Mapper(Mappers.DtoMapper.Config);
 
     public ActivityService(IFediAdapter fediAdapter, IActivityAdapter activityAdapter, IShareAdapter shareAdapter,
         ILogger<ActivityService> logger)
@@ -43,16 +43,16 @@ public class ActivityService : IActivityService
         {
             case ActivityType.Create:
                 // 1. map the new objects
-                var objects = DtoMapper.Map<IEnumerable<IObjectRef>>(activity);
+                // var objects = DtoMapper.Map<IEnumerable<IObjectRef>>(activity);
                 // 2. record those objects ✅
                 var recordResults = new List<bool>();
-                foreach (var objectRef in objects)
-                {
-                    if (objectRef is Note note)
-                    {
-                        recordResults.Add(await _activityAdapter.RecordNote(note));
-                    }
-                }
+                // foreach (var objectRef in objects)
+                // {
+                    // if (objectRef is Note note)
+                    // {
+                        // recordResults.Add(await _activityAdapter.RecordNote(note));
+                    // }
+                // }
                 
                 if (!recordResults.Any(r => r)) return false;
                 // 3. publish Notes (mostly not other types) to the queue
