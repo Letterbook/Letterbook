@@ -9,13 +9,12 @@ public class Audience : IEquatable<Audience>
     
     public Uri Id { get; set; }
     public List<Profile> Members { get; set; } = new();
-    public List<ApObject> Objects { get; set; } = new();
 
     public bool Equals(Audience? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Id.Equals(other.Id) && Members.Equals(other.Members) && Objects.Equals(other.Objects);
+        return Id.Equals(other.Id) && Members.Equals(other.Members);
     }
 
     public override bool Equals(object? obj)

@@ -9,7 +9,7 @@
 /// </summary>
 public class Profile : IObjectRef
 {
-    private Profile()
+    protected Profile()
     {
         Id = default!;
         Type = default;
@@ -20,5 +20,5 @@ public class Profile : IObjectRef
     public ActivityActorType Type { get; set; }
     public string? LocalId { get; set; }
     public string Authority { get; set; }
-    public HashSet<Audience> Audiences { get; set; } = new();
+    public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
 }

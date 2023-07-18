@@ -17,10 +17,12 @@ public class Image : IExpiring, IContentRef
     public Uri Id { get; set; }
     public string? LocalId { get; set; }
     public string Authority { get; set; }
-    public HashSet<IObjectRef> Creators { get; set; } = new();
+    public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
     public DateTime CreatedDate { get; set; }
     public ContentType MimeType { get; set; }
     public Uri FileLocation { get; set; } // good enough?
     public DateTime Expiration { get; set; }
     public string? Description { get; set; }
+    public ICollection<Audience> Visibility { get; set; } = new HashSet<Audience>();
+    public ICollection<Mention> Mentions { get; set; } = new HashSet<Mention>();
 }

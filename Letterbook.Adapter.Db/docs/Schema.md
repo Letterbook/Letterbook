@@ -1,42 +1,63 @@
 ```mermaid
 classDiagram
 direction BT
-class ActorAudience {
+class Audience {
+   text ImageId
+   text NoteId
+   text Id
+}
+class AudienceProfile {
    text AudiencesId
    text MembersId
 }
-class Actors {
-   text Host
+class Images {
    text LocalId
+   text Authority
+   timestamp with time zone CreatedDate
+   text MimeType
+   text FileLocation
+   timestamp with time zone Expiration
+   text Description
    text Id
 }
-class Audiences {
+class Mention {
+   text SubjectId
+   integer Visibility
+   text ImageId
+   text NoteId
+   uuid Id
+}
+class Notes {
+   text LocalId
+   text Authority
+   timestamp with time zone CreatedDate
+   text Content
+   text Summary
+   text Client
+   text InReplyToId
    text Id
 }
-class JoinObjectActor {
-   text ObjectId
-   integer Relationship
-   text ActorId
-   text ApObject3Id
-}
-class JoinObjectAudience {
-   text AudienceId
-   text ObjectsId
-}
-class Objects {
+class Profiles {
    integer Type
    text LocalId
-   text Host
-   text ActorId
+   text Authority
+   text ImageId
+   text NoteId
    text Id
 }
+class __EFMigrationsHistory {
+   varchar(32) ProductVersion
+   varchar(150) MigrationId
+}
 
-ActorAudience  -->  Actors
-ActorAudience  -->  Audiences
-JoinObjectActor  -->  Actors
-JoinObjectActor  -->  Objects
-JoinObjectAudience  -->  Audiences
-JoinObjectAudience  -->  Objects
-Objects  -->  Actors
-
+Audience  -->  Images : ImageId 
+Audience  -->  Notes : NoteId
+AudienceProfile  -->  Audience : AudiencesId 
+AudienceProfile  -->  Profiles : MembersId 
+Mention  -->  Images : ImageId 
+Mention  -->  Notes : NoteId
+Mention  -->  Profiles : SubjectId 
+Notes  -->  Notes : InReplyToId 
+Profiles  -->  Images : ImageId 
+Profiles  -->  Notes : NoteId
 ```

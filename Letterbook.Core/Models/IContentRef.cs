@@ -6,6 +6,6 @@
 /// </summary>
 public interface IContentRef : IObjectRef
 {
-    public HashSet<IObjectRef> Creators { get; set; }
+    public ICollection<Profile> Creators { get; set; }
     public DateTime CreatedDate { get; set; }
 }

@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using Letterbook.ActivityPub;
-using Letterbook.Core.Adapters;
+﻿using Letterbook.Core.Adapters;
 using Letterbook.ActivityPub.Models;
 using Letterbook.Core.Models;
 using Microsoft.Extensions.Logging;

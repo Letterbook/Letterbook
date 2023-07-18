@@ -10,6 +10,7 @@
       <PackageReference Include="AutoMapper" Version="12.0.1" />
       <PackageReference Include="AutoMapper.Collection" Version="9.0.0" />
       <PackageReference Include="Fedodo.ActivityPub.Model" Version="2.0.27" />
+      <PackageReference Include="Hashids.net" Version="1.7.0" />
       <PackageReference Include="Letterbook.ActivityPub" Version="1.0.0-ci0010-39" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.5.0">
@@ -17,6 +18,7 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
+      <PackageReference Include="Nanoid" Version="2.1.0" />
     </ItemGroup>
 
     <ItemGroup>
