@@ -20,6 +20,13 @@ public class Note : IContentRef
     public ICollection<Mention> Mentions { get; set; } = new HashSet<Mention>();
     public string? Client { get; set; }
     public Note? InReplyTo { get; set; }
-    public List<Note> Replies { get; set; } = new();
-    // tags?
+    public IList<Note> Replies { get; set; } = new List<Note>();
+    public ICollection<Profile> LikedBy { get; set; } = new HashSet<Profile>();
+    public ICollection<Profile> BoostedBy { get; set; } = new HashSet<Profile>();
+
+    // You may be wondering, what's the difference between Attachments and tags?
+    // The answer is that the spec authors had good intentions, but at this point it's not clear.
+    // Tags are intended to be references, and attachments are intended to be included, like an email attachment.
+    // public IList<IContentRef> Attachments { get; set; }
+    // public ICollection<IContentRef> Tags { get; set; }
 }

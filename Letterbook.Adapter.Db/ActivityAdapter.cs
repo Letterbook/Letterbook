@@ -17,12 +17,19 @@ public class ActivityAdapter : IActivityAdapter, IShareAdapter
         _context = context;
     }
 
-    public async ValueTask<bool> RecordNote(Note obj)
+    public bool RecordNote(Note obj)
     {
         _logger.LogInformation("Called {Name}", $"{nameof(RecordNote)}");
-        var entity = await _context.Notes.AddAsync(obj);
+        var entity = _context.Notes.Add(obj);
         return entity.State is EntityState.Added or EntityState.Modified or EntityState.Unchanged;
     }
+
+    public bool RecordNotes(IEnumerable<Note> notes)
+    {
+        _context.Notes.AddRange(notes);
+        return true;
+    }
+
 
     public Task ShareWithAudience(Object obj, string audienceUri)
     {

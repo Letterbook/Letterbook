@@ -93,7 +93,7 @@ public class ActorController
     public async Task<ActionResult> SharedInbox(DTO.Activity activity)
     {
         // TODO: add dependency on ActivityService and call it here
-        await _activityService.Receive(activity);
+        await _activityService.ReceiveNotes(activity);
         return new AcceptedResult();
     }
 
