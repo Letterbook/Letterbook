@@ -30,6 +30,32 @@ public class ActivityAdapter : IActivityAdapter, IShareAdapter
         return true;
     }
 
+    public bool DeleteNote(Note note)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool DeleteNotes(IEnumerable<Note> notes)
+    {
+        throw new NotImplementedException();
+    }
+
+    // TODO: Backing entities for revisions
+    public bool AddRevision(Note note)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Note? LookupNoteUrl(string url)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Note? LookupNoteId(string? localId)
+    {
+        throw new NotImplementedException();
+    }
+
 
     public Task ShareWithAudience(Object obj, string audienceUri)
     {
