@@ -2,8 +2,7 @@
 
 public enum ActivityObjectType
 {
-    None,
-    Actor,
+    Unknown,
     Note,
-    Like,
+    Image,
 }
