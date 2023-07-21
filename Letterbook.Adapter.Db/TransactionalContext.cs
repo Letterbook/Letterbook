@@ -2,7 +2,6 @@
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Mention = Fedodo.NuGet.ActivityPub.Model.LinkTypes.Mention;
 
 namespace Letterbook.Adapter.Db;
 

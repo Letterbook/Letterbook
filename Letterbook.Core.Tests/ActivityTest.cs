@@ -1,5 +1,4 @@
 using Bogus;
-using Fedodo.NuGet.ActivityPub.Model.CoreTypes;
 using Letterbook.Api.Tests.Fakes;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -41,7 +40,7 @@ public class ActivityTest : WithMocks
     [Theory(DisplayName = "Receive can handle common and well formed activities",
         Skip = "Requires type mappers")]
     [MemberData(nameof(ActivityList), 10)]
-    public async Task TestReceiveCanHandleActivities(Activity activity)
+    public async Task TestReceiveCanHandleActivities(DTO.Activity activity)
     {
         // var exceptions = await Record.ExceptionAsync(() => _activityService.Receive(activity));
         // Assert.Null(exceptions);

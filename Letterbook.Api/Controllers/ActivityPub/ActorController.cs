@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using Fedodo.NuGet.ActivityPub.Model.ActorTypes;
-using Fedodo.NuGet.ActivityPub.Model.ActorTypes.SubTypes;
 using Letterbook.Core;
 using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -32,20 +30,9 @@ public class ActorController
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult<Actor> GetActor(int id)
+    public ActionResult<DTO.Actor> GetActor(int id)
     {
-        var actor = new Actor
-        {
-            Inbox = CollectionUri(nameof(GetInbox), id.ToString()),
-            Outbox = CollectionUri(nameof(GetOutbox), id.ToString()),
-            Followers = CollectionUri(nameof(GetFollowers), id.ToString()),
-            Following = CollectionUri(nameof(GetFollowing), id.ToString()),
-            Endpoints = new Endpoints()
-            {
-                SharedInbox = CollectionUri(nameof(SharedInbox), id.ToString())
-            }
-        };
-        return new OkObjectResult(actor);
+        throw new NotImplementedException();
     }
 
     [HttpGet]

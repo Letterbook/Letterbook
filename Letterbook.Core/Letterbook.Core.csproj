@@ -9,9 +9,8 @@
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="12.0.1" />
       <PackageReference Include="AutoMapper.Collection" Version="9.0.0" />
-      <PackageReference Include="Fedodo.ActivityPub.Model" Version="2.0.27" />
       <PackageReference Include="Hashids.net" Version="1.7.0" />
-      <PackageReference Include="Letterbook.ActivityPub" Version="1.0.0-ci0010-39" />
+      <PackageReference Include="Letterbook.ActivityPub" Version="1.0.0-ci0023-50" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.5.0">
         <PrivateAssets>all</PrivateAssets>

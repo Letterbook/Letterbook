@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using AutoMapper;
-using Letterbook.ActivityPub;
+﻿using AutoMapper;
 using Letterbook.Core.Models;
 
 namespace Letterbook.Core.Mappers;
@@ -10,23 +8,12 @@ public static class DtoMapper
     public static MapperConfiguration Config = new(cfg =>
     {
         ConfigureDtoResolvables(cfg);
-        ConfigureObjectRefs(cfg);
         ConfigureProfile(cfg);
         ConfigureNote(cfg);
     });
 
-    private static void ConfigureObjectRefs(IMapperConfigurationExpression cfg)
-    {
-        cfg.CreateMap<DTO.Activity, IEnumerable<IObjectRef>>();
-    }
-
     private static void ConfigureProfile(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<DTO.IResolvable, Models.Profile>()
-            .IncludeBase<DTO.IResolvable, IObjectRef>()
-            .ForMember(dest => dest.Audiences, opt => opt.Ignore())
-            ;
-        
         cfg.CreateMap<DTO.Actor, Models.Profile>()
             .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
             .ForMember(dest => dest.Audiences, opt => opt.Ignore())
@@ -35,6 +22,7 @@ public static class DtoMapper
                 // TODO: Mapper in DI so it has access to config
                 return profile.Authority.ToString() == "letterbook.example" ? "999" : default;
             }));
+        cfg.CreateMap<DTO.Link, Models.Profile>();
     }
 
     private static void ConfigureNote(IMapperConfigurationExpression cfg)
@@ -78,14 +66,6 @@ public static class DtoMapper
                 return dest.Authority.ToString() == "letterbook.example" ? "999" : default;
             }));
         cfg.CreateMap<DTO.Link, ObjectRef>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Href))
-            .ForMember(dest => dest.Authority, opt => opt.MapFrom((src, dest) => dest.Id.Authority))
-            .ForMember(dest => dest.LocalId, opt => opt.Ignore());
-        
-        cfg.CreateMap<DTO.IResolvable, IObjectRef>()
-            .ConstructUsing((src, context) => context.Mapper.Map<ObjectRef>(src))
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.SourceUrl))
-            .ForMember(dest => dest.Authority, opt => opt.MapFrom((src, dest) => dest.Id.Authority))
             .ForMember(dest => dest.LocalId, opt => opt.Ignore());
     }
 }
