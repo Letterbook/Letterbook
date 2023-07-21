@@ -2,6 +2,7 @@
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes;
 using Fedodo.NuGet.ActivityPub.Model.ActorTypes.SubTypes;
 using Letterbook.Core;
+using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -93,7 +94,7 @@ public class ActorController
     public async Task<ActionResult> SharedInbox(DTO.Activity activity)
     {
         // TODO: add dependency on ActivityService and call it here
-        await _activityService.ReceiveNotes(activity);
+        await _activityService.ReceiveNotes(new Note[]{}, Enum.Parse<ActivityType>(activity.Type), null);
         return new AcceptedResult();
     }
 

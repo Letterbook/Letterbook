@@ -2,11 +2,10 @@
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Object = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
 namespace Letterbook.Adapter.Db;
 
-public class ActivityAdapter : IActivityAdapter, IShareAdapter
+public class ActivityAdapter : IActivityAdapter
 {
     private readonly ILogger<ActivityAdapter> _logger;
     private readonly TransactionalContext _context;
@@ -54,12 +53,5 @@ public class ActivityAdapter : IActivityAdapter, IShareAdapter
     public Note? LookupNoteId(string? localId)
     {
         throw new NotImplementedException();
-    }
-
-
-    public Task ShareWithAudience(Object obj, string audienceUri)
-    {
-        _logger.LogInformation("Called {Name}", $"{nameof(ShareWithAudience)}");
-        return Task.CompletedTask;
     }
 }

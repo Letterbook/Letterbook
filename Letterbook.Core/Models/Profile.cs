@@ -9,7 +9,7 @@
 /// </summary>
 public class Profile : IObjectRef
 {
-    protected Profile()
+    private Profile()
     {
         Id = default!;
         Type = default;

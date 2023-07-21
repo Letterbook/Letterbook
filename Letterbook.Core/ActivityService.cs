@@ -33,7 +33,7 @@ public class ActivityService : IActivityService
     /// <returns>True if any action was taken, false otherwise</returns>
     public async Task<bool> ReceiveNotes(IEnumerable<Note> notes, ActivityType activity, Profile actor)
     {
-        bool actionTaken;
+        var actionTaken = false;
         switch (activity)
         {
             case ActivityType.Create:
@@ -44,9 +44,11 @@ public class ActivityService : IActivityService
                 // 2. publish Notes (mostly not other types) to the queue
                 return actionTaken;
             case ActivityType.Like:
-                actionTaken = notes
-                    .Select(note => _activityAdapter.LookupNoteUrl(note.Id.ToString())?.LikedBy.Add(actor))
-                    .Any(r => r != null);
+                foreach (var note in notes)
+                {
+                    _activityAdapter.LookupNoteUrl(note.Id.ToString())?.LikedBy.Add(actor);
+                    actionTaken = true;
+                }
                 // publish like
                 return actionTaken;
             case ActivityType.Delete:
