@@ -80,7 +80,6 @@ public class ActorController
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     public async Task<ActionResult> SharedInbox(DTO.Activity activity)
     {
-        // TODO: add dependency on ActivityService and call it here
         await _activityService.ReceiveNotes(new Note[]{}, Enum.Parse<ActivityType>(activity.Type), null);
         return new AcceptedResult();
     }
