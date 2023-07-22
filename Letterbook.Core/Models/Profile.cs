@@ -22,7 +22,7 @@ public class Profile : IObjectRef
     
     public Uri Id { get; set; }
     public string? LocalId { get; set; }
-    public string Authority => Id.ToString();
+    public string Authority => Id.Authority;
 
     public ActivityActorType Type { get; set; }
     public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();

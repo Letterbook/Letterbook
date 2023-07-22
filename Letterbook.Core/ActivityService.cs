@@ -46,7 +46,9 @@ public class ActivityService : IActivityService
             case ActivityType.Like:
                 foreach (var note in notes)
                 {
-                    _activityAdapter.LookupNoteUrl(note.Id.ToString())?.LikedBy.Add(actor);
+                    var found = _activityAdapter.LookupNoteUrl(note.Id.ToString());
+                    if (found is null) continue;
+                    found.LikedBy.Add(actor);
                     actionTaken = true;
                 }
                 // publish like
