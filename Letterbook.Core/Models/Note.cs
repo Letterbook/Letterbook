@@ -5,7 +5,6 @@ public class Note : IContentRef
     private Note()
     {
         Id = default!;
-        Authority = default!;
         Content = default!;
         CreatedDate = default!;
     }
@@ -13,13 +12,12 @@ public class Note : IContentRef
     public Note(Uri id)
     {
         Id = id;
-        Authority = Id.Authority;
         CreatedDate = default;
     }
 
     public Uri Id { get; set; }
     public string? LocalId { get; set; }
-    public string Authority { get; set; }
+    public string Authority => Id.Authority;
     public ObjectCollection<Profile> Creators { get; set; } = new ();
     public DateTime CreatedDate { get; set; }
     public string Content { get; set; } = string.Empty; // TODO: HTML encode & sanitize
@@ -28,7 +26,7 @@ public class Note : IContentRef
     public ICollection<Mention> Mentions { get; set; } = new HashSet<Mention>();
     public string? Client { get; set; }
     public Note? InReplyTo { get; set; }
-    public IList<Note> Replies { get; set; } = new List<Note>();
+    public ObjectList<Note> Replies { get; set; } = new ();
     public ObjectList<Profile> LikedBy { get; set; } = new ();
     public ObjectList<Profile> BoostedBy { get; set; } = new();
 
