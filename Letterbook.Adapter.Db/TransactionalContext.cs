@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -13,6 +14,7 @@ namespace Letterbook.Adapter.Db;
 /// Maybe notifications, too.
 /// There may be a need for search and/or graph databases in the future, and those would also be separate from this.
 /// </summary>
+[AutoContext(scope: InjectableScope.Scoped)]
 public class TransactionalContext : DbContext
 {
     private readonly DbOptions _config;

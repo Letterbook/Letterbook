@@ -6,6 +6,8 @@ using Object = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
 namespace Letterbook.Adapter.Db;
 
+[AutoAdapter(typeof(IActivityAdapter), scope: InjectableScope.Scoped)]
+[AutoAdapter(typeof(IShareAdapter), scope: InjectableScope.Scoped)]
 public class ActivityAdapter : IActivityAdapter, IShareAdapter
 {
     private readonly ILogger<ActivityAdapter> _logger;
