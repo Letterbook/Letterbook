@@ -1,5 +1,5 @@
 using Bogus;
-using Letterbook.Api.Tests.Fakes;
+using Letterbook.Core.Tests.Fakes;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -25,27 +25,19 @@ public class ActivityTest : WithMocks
 
     }
 
-    public static IEnumerable<object[]> ActivityList(int count)
-    {
-        var activityGenerator = new FakeActivity();
-        return activityGenerator.GenerateForever().Take(count).Select(a => new[] { a });
-    }
-
     [Fact(DisplayName = "Create method should exist")]
     public void TestCreateExists()
     {
         Assert.Throws<NotImplementedException>(() => _activityService.Create());
     }
-    
-    [Theory(DisplayName = "Receive can handle common and well formed activities",
-        Skip = "Requires type mappers")]
-    [MemberData(nameof(ActivityList), 10)]
-    public async Task TestReceiveCanHandleActivities(DTO.Activity activity)
+
+    [Fact]
+    public void TestReceiveNotes()
     {
-        // var exceptions = await Record.ExceptionAsync(() => _activityService.Receive(activity));
-        // Assert.Null(exceptions);
+        var note = new FakeNote().Generate();
+        Assert.NotNull(note);
     }
-    
+
     [Fact(DisplayName = "Deliver method should exist")]
     public void TestDeliverExists()
     {

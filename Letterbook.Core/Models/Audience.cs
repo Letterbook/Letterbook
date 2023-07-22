@@ -1,6 +1,6 @@
 ﻿namespace Letterbook.Core.Models;
 
-public class Audience : IEquatable<Audience>
+public class Audience : IEquatable<Audience>, IObjectRef
 {
     private Audience()
     {
@@ -8,6 +8,8 @@ public class Audience : IEquatable<Audience>
     }
     
     public Uri Id { get; set; }
+    public string? LocalId { get; set; }
+    public string Authority { get; }
     public List<Profile> Members { get; set; } = new();
 
     public bool Equals(Audience? other)
