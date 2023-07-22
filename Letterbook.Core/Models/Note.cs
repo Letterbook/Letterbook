@@ -22,12 +22,12 @@ public class Note : IContentRef
     public string Authority { get; set; }
     public ObjectCollection<Profile> Creators { get; set; } = new ();
     public DateTime CreatedDate { get; set; }
-    public string? Content { get; set; }  // TODO: HTML encode & sanitize
+    public string Content { get; set; } = string.Empty; // TODO: HTML encode & sanitize
     public string? Summary { get; set; } // TODO: strip all HTML
     public ObjectCollection<Audience> Visibility { get; set; } = new();
     public ICollection<Mention> Mentions { get; set; } = new HashSet<Mention>();
     public string? Client { get; set; }
-    public IObjectRef? InReplyTo { get; set; }
+    public Note? InReplyTo { get; set; }
     public IList<Note> Replies { get; set; } = new List<Note>();
     public ObjectList<Profile> LikedBy { get; set; } = new ();
     public ObjectList<Profile> BoostedBy { get; set; } = new();

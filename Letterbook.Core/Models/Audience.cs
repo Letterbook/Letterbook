@@ -8,8 +8,12 @@ public class Audience : IEquatable<Audience>, IObjectRef
     }
     
     public Uri Id { get; set; }
-    public string? LocalId { get; set; }
-    public string Authority { get; }
+    // LocalId isn't a meaningful concept for Audience, but it's required by IObjectRef
+    public string? LocalId { 
+        get => Id.ToString(); 
+        set => Id = Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out var newId) ? newId : Id; 
+    }
+    public string Authority => Id.Authority;
     public List<Profile> Members { get; set; } = new();
 
     public bool Equals(Audience? other)
