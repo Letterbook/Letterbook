@@ -1,8 +1,8 @@
-﻿using Object = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
+﻿using Letterbook.Core.Models;
 
 namespace Letterbook.Core.Adapters;
 
 public interface IShareAdapter : IAdapter
 {
-    Task ShareWithAudience(Object obj, string audienceUri);
+    Task ShareWithAudience(IObjectRef obj, string audienceUri);
 }

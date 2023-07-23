@@ -1,12 +1,12 @@
 ﻿using Letterbook.Core.Adapters;
-using Object = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
+using Letterbook.Core.Models;
 
 namespace Letterbook.Adapter.FediClient;
 
 [AutoAdapter(typeof(IFediAdapter))]
 public class FediClient : IFediAdapter
 {
-    public Task<Object> FollowLink(Uri href)
+    public Task<IObjectRef> FollowLink(Uri href)
     {
         throw new NotImplementedException();
     }

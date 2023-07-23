@@ -10,7 +10,7 @@
 /// </summary>
 public class Mention : IEquatable<Mention>
 {
-    public IObjectRef Source { get; set; }
+    public Guid Id { get; set; }
     public Profile Subject { get; set; }
     public MentionVisibility Visibility { get; set; }
 
@@ -18,7 +18,7 @@ public class Mention : IEquatable<Mention>
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Source.Equals(other.Source) && Subject.Equals(other.Subject) && Visibility == other.Visibility;
+        return Subject.Equals(other.Subject);
     }
 
     public override bool Equals(object? obj)
@@ -31,7 +31,7 @@ public class Mention : IEquatable<Mention>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Source.Id, Subject);
+        return HashCode.Combine(Subject);
     }
 
     public static bool operator ==(Mention? left, Mention? right)

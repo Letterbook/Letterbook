@@ -1,6 +1,6 @@
 ﻿namespace Letterbook.Core.Models;
 
-public class Audience : IEquatable<Audience>
+public class Audience : IEquatable<Audience>, IObjectRef
 {
     private Audience()
     {
@@ -8,14 +8,19 @@ public class Audience : IEquatable<Audience>
     }
     
     public Uri Id { get; set; }
+    // LocalId isn't a meaningful concept for Audience, but it's required by IObjectRef
+    public string? LocalId { 
+        get => Id.ToString(); 
+        set => Id = Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out var newId) ? newId : Id; 
+    }
+    public string Authority => Id.Authority;
     public List<Profile> Members { get; set; } = new();
-    public List<ApObject> Objects { get; set; } = new();
 
     public bool Equals(Audience? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Id.Equals(other.Id) && Members.Equals(other.Members) && Objects.Equals(other.Objects);
+        return Id.Equals(other.Id) && Members.Equals(other.Members);
     }
 
     public override bool Equals(object? obj)

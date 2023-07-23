@@ -1,8 +1,10 @@
-﻿namespace Letterbook.Core;
+﻿using Letterbook.Core.Models;
+
+namespace Letterbook.Core;
 
 public interface IActivityService
 {
     DTO.Activity Create();
-    Task<bool> Receive(DTO.Activity activity);
+    Task<bool> ReceiveNotes(IEnumerable<Note> notes, ActivityType activity, Profile actor);
     void Deliver(DTO.Activity activity);
 }

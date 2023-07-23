@@ -1,0 +1,12 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Letterbook.Adapter.Db.Entities;
+
+public class ConfigureAudience : IEntityTypeConfiguration<Models.Audience>
+{
+    public void Configure(EntityTypeBuilder<Models.Audience> builder)
+    {
+        builder.Ignore(e => e.LocalId);
+    }
+}

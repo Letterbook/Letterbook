@@ -19,8 +19,8 @@ public class TransactionalContext : DbContext
 {
     private readonly DbOptions _config;
     public DbSet<Note> Notes { get; set; }
-    public DbSet<Profile> Actors { get; set; }
-    public DbSet<Audience> Audiences { get; set; }
+    public DbSet<Image> Images { get; set; }
+    public DbSet<Profile> Profiles { get; set; }
 
     // Called by the designer to create and run migrations
     public TransactionalContext(DbContextOptions<TransactionalContext> context) : base(context)
