@@ -27,7 +27,6 @@ public class Program
         builder.Services.AddScoped<IActivityService, ActivityService>();
         builder.Services.AddScoped<IFediAdapter, FediClient>();
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
-        builder.Services.AddScoped<IShareAdapter, ActivityAdapter>();
         // TODO: https://github.com/Letterbook/Letterbook/issues/43
         builder.Services.AddDbContext<TransactionalContext>();
 

@@ -2,11 +2,10 @@
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Object = Fedodo.NuGet.ActivityPub.Model.CoreTypes.Object;
 
 namespace Letterbook.Adapter.Db;
 
-public class ActivityAdapter : IActivityAdapter, IShareAdapter
+public class ActivityAdapter : IActivityAdapter
 {
     private readonly ILogger<ActivityAdapter> _logger;
     private readonly TransactionalContext _context;
@@ -17,16 +16,42 @@ public class ActivityAdapter : IActivityAdapter, IShareAdapter
         _context = context;
     }
 
-    public async ValueTask<bool> RecordNote(Note obj)
+    public bool RecordNote(Note obj)
     {
         _logger.LogInformation("Called {Name}", $"{nameof(RecordNote)}");
-        var entity = await _context.Notes.AddAsync(obj);
+        var entity = _context.Notes.Add(obj);
         return entity.State is EntityState.Added or EntityState.Modified or EntityState.Unchanged;
     }
 
-    public Task ShareWithAudience(Object obj, string audienceUri)
+    public bool RecordNotes(IEnumerable<Note> notes)
     {
-        _logger.LogInformation("Called {Name}", $"{nameof(ShareWithAudience)}");
-        return Task.CompletedTask;
+        _context.Notes.AddRange(notes);
+        return true;
+    }
+
+    public bool DeleteNote(Note note)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool DeleteNotes(IEnumerable<Note> notes)
+    {
+        throw new NotImplementedException();
+    }
+
+    // TODO: Backing entities for revisions
+    public bool AddRevision(Note note)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Note? LookupNoteUrl(string url)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Note? LookupNoteId(string? localId)
+    {
+        throw new NotImplementedException();
     }
 }

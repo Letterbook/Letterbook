@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using AutoMapper;
-using Letterbook.ActivityPub;
+﻿using AutoMapper;
 using Letterbook.Core.Models;
 
 namespace Letterbook.Core.Mappers;
@@ -10,44 +8,38 @@ public static class DtoMapper
     public static MapperConfiguration Config = new(cfg =>
     {
         ConfigureDtoResolvables(cfg);
-        ConfigureObjectRefs(cfg);
         ConfigureProfile(cfg);
         ConfigureNote(cfg);
     });
 
-    private static void ConfigureObjectRefs(IMapperConfigurationExpression cfg)
-    {
-        cfg.CreateMap<DTO.Activity, IEnumerable<IObjectRef>>();
-    }
-
     private static void ConfigureProfile(IMapperConfigurationExpression cfg)
     {
+        cfg.CreateMap<DTO.Actor, Models.Profile>()
+            .IncludeBase<DTO.IResolvable, IObjectRef>()
+            .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
+            .ForMember(dest => dest.Audiences, opt => opt.Ignore());
+        cfg.CreateMap<DTO.Object, Models.Profile>()
+            .IncludeBase<DTO.IResolvable, Models.Profile>();
+        cfg.CreateMap<DTO.Link, Models.Profile>()
+            .IncludeBase<DTO.IResolvable, Models.Profile>();
         cfg.CreateMap<DTO.IResolvable, Models.Profile>()
             .IncludeBase<DTO.IResolvable, IObjectRef>()
-            .ForMember(dest => dest.Audiences, opt => opt.Ignore())
-            ;
-        
-        cfg.CreateMap<DTO.Actor, Models.Profile>()
-            .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
-            .ForMember(dest => dest.Audiences, opt => opt.Ignore())
-            .ForMember(dest => dest.LocalId, opt => opt.MapFrom((actor, profile) =>
-            {
-                // TODO: Mapper in DI so it has access to config
-                return profile.Authority.ToString() == "letterbook.example" ? "999" : default;
-            }));
+            .ForMember(dest => dest.LocalId, opt => opt.Ignore())
+            .ForMember(dest => dest.Type, opt => opt.Ignore())
+            .ForMember(dest => dest.Authority, opt => opt.Ignore())
+            .ForMember(dest => dest.Audiences, opt => opt.Ignore());
     }
 
     private static void ConfigureNote(IMapperConfigurationExpression cfg)
     {
         cfg.CreateMap<DTO.Object, Note>()
+            .IncludeBase<DTO.IResolvable, IObjectRef>()
             .IncludeBase<DTO.Object, IObjectRef>()
-            .ForMember(dest => dest.Creators, opt =>
-            {
-                opt.UseDestinationValue();
-                opt.MapFrom(src => src.AttributedTo);
-            })
+            .ForMember(dest => dest.Creators, opt => opt.MapFrom(src => src.AttributedTo))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.Published))
             .ForMember(dest => dest.InReplyTo, opt => opt.Ignore())
+            .ForMember(dest => dest.LikedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.BoostedBy, opt => opt.Ignore())
             // .ForMember(dest => dest.InReplyTo, opt => opt.MapFrom(src => src.InReplyTo.FirstOrDefault()))
             .ForMember(dest => dest.Client, opt => opt.Ignore()) // TODO: take from Activity, somehow
             .ForMember(dest => dest.Visibility, opt => opt.Ignore()) // TODO: ugh, this will be complicated
@@ -57,6 +49,8 @@ public static class DtoMapper
 
     private static void ConfigureDtoResolvables(IMapperConfigurationExpression cfg)
     {
+        cfg.CreateMap<DTO.IResolvable, IObjectRef>()
+            .ForMember(dest => dest.LocalId, opt => opt.Ignore());
         cfg.CreateMap<DTO.Object, IObjectRef>().ConstructUsing((src, context) =>
             {
                 Enum.TryParse<ActivityObjectType>(src.Type, out var type);
@@ -71,21 +65,10 @@ public static class DtoMapper
                         throw new ArgumentOutOfRangeException(nameof(src.Type), $"Unsupported Object type {src.Type}");
                 }
             })
-            .ForMember(dest => dest.Authority, opt => opt.MapFrom( src => src.Id!.Authority))
-            .ForMember(dest => dest.LocalId, opt => opt.MapFrom((src, dest) =>
-            {
-                // TODO: Mapper in DI so it has access to config
-                return dest.Authority.ToString() == "letterbook.example" ? "999" : default;
-            }));
+            .IncludeBase<DTO.IResolvable, IObjectRef>()
+            .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority));
         cfg.CreateMap<DTO.Link, ObjectRef>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Href))
-            .ForMember(dest => dest.Authority, opt => opt.MapFrom((src, dest) => dest.Id.Authority))
-            .ForMember(dest => dest.LocalId, opt => opt.Ignore());
-        
-        cfg.CreateMap<DTO.IResolvable, IObjectRef>()
-            .ConstructUsing((src, context) => context.Mapper.Map<ObjectRef>(src))
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.SourceUrl))
-            .ForMember(dest => dest.Authority, opt => opt.MapFrom((src, dest) => dest.Id.Authority))
+            .IncludeBase<DTO.IResolvable, IObjectRef>()
             .ForMember(dest => dest.LocalId, opt => opt.Ignore());
     }
 }

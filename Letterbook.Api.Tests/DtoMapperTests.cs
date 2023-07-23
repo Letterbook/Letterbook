@@ -2,7 +2,7 @@
 using Letterbook.Core.Mappers;
 using Letterbook.Core.Models;
 
-namespace Letterbook.Core.Tests;
+namespace Letterbook.Api.Tests;
 
 public class DtoMapperTests
 {

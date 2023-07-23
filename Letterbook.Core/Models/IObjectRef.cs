@@ -10,5 +10,5 @@ public interface IObjectRef
 {
     public Uri Id { get; set; }
     public string? LocalId { get; set; }
-    public string Authority { get; set; }
+    public string Authority { get; }
 }

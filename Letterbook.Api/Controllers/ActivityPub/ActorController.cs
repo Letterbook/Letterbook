@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
-using Fedodo.NuGet.ActivityPub.Model.ActorTypes;
-using Fedodo.NuGet.ActivityPub.Model.ActorTypes.SubTypes;
 using Letterbook.Core;
+using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -31,20 +30,9 @@ public class ActorController
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult<Actor> GetActor(int id)
+    public ActionResult<DTO.Actor> GetActor(int id)
     {
-        var actor = new Actor
-        {
-            Inbox = CollectionUri(nameof(GetInbox), id.ToString()),
-            Outbox = CollectionUri(nameof(GetOutbox), id.ToString()),
-            Followers = CollectionUri(nameof(GetFollowers), id.ToString()),
-            Following = CollectionUri(nameof(GetFollowing), id.ToString()),
-            Endpoints = new Endpoints()
-            {
-                SharedInbox = CollectionUri(nameof(SharedInbox), id.ToString())
-            }
-        };
-        return new OkObjectResult(actor);
+        throw new NotImplementedException();
     }
 
     [HttpGet]
@@ -92,8 +80,7 @@ public class ActorController
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     public async Task<ActionResult> SharedInbox(DTO.Activity activity)
     {
-        // TODO: add dependency on ActivityService and call it here
-        await _activityService.Receive(activity);
+        await _activityService.ReceiveNotes(new Note[]{}, Enum.Parse<ActivityType>(activity.Type), null);
         return new AcceptedResult();
     }
 
