@@ -1,7 +1,6 @@
 using Letterbook.Adapter.Db;
-using Letterbook.Adapter.FediClient;
 using Letterbook.Core;
-using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace Letterbook.Api;
@@ -25,10 +24,8 @@ public class Program
         
         // Register DI containers
         builder.Services.AddScoped<IActivityService, ActivityService>();
-        builder.Services.AddScoped<IFediAdapter, FediClient>();
-        builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
-        // TODO: https://github.com/Letterbook/Letterbook/issues/43
-        builder.Services.AddDbContext<TransactionalContext>();
+        builder.Services.AddContexts();
+        builder.Services.AddAdapters();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();

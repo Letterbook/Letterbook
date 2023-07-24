@@ -2,7 +2,7 @@
 
 namespace Letterbook.Core.Adapters;
 
-public interface IShareAdapter
+public interface IShareAdapter : IAdapter
 {
     Task ShareWithAudience(IObjectRef obj, string audienceUri);
 }
