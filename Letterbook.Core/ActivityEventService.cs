@@ -1,11 +1,21 @@
-﻿using Letterbook.Core.Models;
+﻿using Letterbook.Core.Adapters;
+using Letterbook.Core.Models;
 
 namespace Letterbook.Core;
 
-// TODO: Figure out how to make this work
-public class ObjectEventService : IObjectEventService
+/// <summary>
+/// ActivityEventService provides a loosely coupled publish/subscribe interface between other core services. Typically,
+/// core services will be narrowly scoped, and will publish a message through the event service. Other services may
+/// consume that message and perform their own processing in response. For instance, to send notifications.
+/// </summary>
+public class ActivityEventService : IActivityEventService
 {
-    public IObservable<IObjectRef> ObjectEvents { get; }
+    private IMessageBusAdapter _messageBusAdapter;
+
+    public ActivityEventService(IMessageBusAdapter messageBusAdapter)
+    {
+        _messageBusAdapter = messageBusAdapter;
+    }
 
     public void Created<T>(T value) where T : class, IObjectRef
     {

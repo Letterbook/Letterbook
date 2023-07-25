@@ -2,9 +2,8 @@
 
 namespace Letterbook.Core;
 
-public interface IObjectEventService
+public interface IActivityEventService
 {
-    IObservable<IObjectRef> ObjectEvents { get; }
     void Created<T>(T value) where T : class, IObjectRef;
     void Updated<T>(T value) where T : class, IObjectRef;
     void Deleted<T>(T value) where T : class, IObjectRef;
