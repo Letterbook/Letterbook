@@ -13,5 +13,6 @@ public interface IActivityEventService
     void Approved<T>(T value) where T : class, IObjectRef;
     void Rejected<T>(T value) where T : class, IObjectRef;
     void Requested<T>(T value) where T : class, IObjectRef;
+    void Offered<T>(T value) where T : class, IObjectRef;
     void Mentioned<T>(T value) where T : class, IObjectRef;
 }

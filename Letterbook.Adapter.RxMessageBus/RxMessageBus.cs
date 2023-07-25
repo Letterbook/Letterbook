@@ -2,6 +2,7 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
 using Microsoft.Extensions.Logging;
 
@@ -11,8 +12,8 @@ namespace Letterbook.Adapter.RxMessageBus;
 [AutoAdapter(typeof(IMessageBusClient), InjectableScope.Singleton)]
 public class RxMessageBus : IMessageBusAdapter, IMessageBusClient
 {
-    private static readonly Lazy<Dictionary<Type, Subject<object>>> LazyChannels = new();
-    private static Dictionary<Type, Subject<object>> Channels => LazyChannels.Value;
+    private static readonly Lazy<Dictionary<string, Subject<CloudEvent>>> LazyChannels = new();
+    private static Dictionary<string, Subject<CloudEvent>> Channels => LazyChannels.Value;
 
     private readonly ILogger<RxMessageBus> _logger;
 
@@ -21,32 +22,32 @@ public class RxMessageBus : IMessageBusAdapter, IMessageBusClient
         _logger = logger;
     }
 
-    public IObserver<T> OpenChannel<T>()
+    public IObserver<CloudEvent> OpenChannel(string type)
     {
-        var channel = GetSubject<T>();
+        var channel = GetSubject(type);
         return channel.AsObserver();
     }
 
-    public IObservable<T> ListenChannel<T>()
+    public IObservable<CloudEvent> ListenChannel(string type)
     {
-        var channel = GetSubject<T>();
+        var channel = GetSubject(type);
         return channel.AsObservable()
             .SubscribeOn(TaskPoolScheduler.Default);
     }
 
-    private Subject<T> GetSubject<T>()
+    private Subject<CloudEvent> GetSubject(string type)
     {
-        Subject<T> subject;
+        Subject<CloudEvent> subject;
 
-        if (!Channels.ContainsKey(typeof(T)))
+        if (!Channels.ContainsKey(type))
         {
-            subject = new Subject<T>();
-            Channels.Add(typeof(T), (subject as Subject<object>)!);
-            _logger.LogInformation("Created Channel for {Type}", typeof(T));
+            subject = new Subject<CloudEvent>();
+            Channels.Add(type, subject);
+            _logger.LogInformation("Created Channel for {Type}", type);
         }
         else
         {
-            subject = (Channels[typeof(T)] as Subject<T>)!;
+            subject = Channels[type];
         }
 
         return subject;

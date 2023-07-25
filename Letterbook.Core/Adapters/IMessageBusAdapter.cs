@@ -1,6 +1,8 @@
-﻿namespace Letterbook.Core.Adapters;
+﻿using CloudNative.CloudEvents;
+
+namespace Letterbook.Core.Adapters;
 
 public interface IMessageBusAdapter
 {
-    public IObserver<T> OpenChannel<T>();
+    public IObserver<CloudEvent> OpenChannel(string type);
 }
