@@ -117,6 +117,8 @@ public class ActivityEventService : IActivityEventService
         return new CloudEvent
         {
             Id = Guid.NewGuid().ToString(),
+            // TODO: instance domain name from config
+            Source = new Uri("https://letterbook.example"),
             Data = value,
             Type = $"{nameof(ActivityEventService)}.{value.GetType()}.{action}",
             Subject = value.Id.ToString(),
