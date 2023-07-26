@@ -11,15 +11,16 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
-
+        // Register controllers
         builder.Services.AddControllers(options =>
         {
             options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
         });
         
         // Register DI config
-        builder.Services.Configure<ConfigOptions>(builder.Configuration.GetSection(ConfigOptions.Key));
+        var coreOptions = builder.Configuration.GetSection(CoreOptions.ConfigKey);
+        builder.Services.Configure<CoreOptions>(coreOptions);
+        builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptions.ConfigKey));
         builder.Services.Configure<DbOptions>(builder.Configuration.GetSection(DbOptions.ConfigKey));
         
         // Register DI containers
@@ -31,6 +32,9 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
+        var opts = coreOptions.Get<CoreOptions>() 
+                   ?? throw new ArgumentException("Invalid configuration", nameof(CoreOptions));
+        builder.WebHost.UseUrls($"{opts.Scheme}://{opts.DomainName}:{opts.Port}");
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.

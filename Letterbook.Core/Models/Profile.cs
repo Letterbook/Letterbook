@@ -23,7 +23,10 @@ public class Profile : IObjectRef
     public Uri Id { get; set; }
     public string? LocalId { get; set; }
     public string Authority => Id.Authority;
-
+    
+    // Local profiles should all have an owner, but remote ones do not.
+    // Could remote profiles be claimed through an account transfer?
+    public Account? OwnedBy { get; set; }
     public ActivityActorType Type { get; set; }
     public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
 }
