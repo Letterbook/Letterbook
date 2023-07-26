@@ -25,6 +25,7 @@ public class Program
         
         // Register DI containers
         builder.Services.AddScoped<IActivityService, ActivityService>();
+        builder.Services.AddScoped<IActivityEventService, ActivityEventService>();
         builder.Services.AddContexts();
         builder.Services.AddAdapters();
 
