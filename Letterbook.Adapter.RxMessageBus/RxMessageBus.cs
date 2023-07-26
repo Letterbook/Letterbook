@@ -8,18 +8,15 @@ using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Adapter.RxMessageBus;
 
-[AutoAdapter(typeof(IMessageBusAdapter), InjectableScope.Singleton)]
-[AutoAdapter(typeof(IMessageBusClient), InjectableScope.Singleton)]
 public class RxMessageBus : IMessageBusAdapter, IMessageBusClient
 {
-    private static readonly Lazy<Dictionary<string, Subject<CloudEvent>>> LazyChannels = new();
-    private static Dictionary<string, Subject<CloudEvent>> Channels => LazyChannels.Value;
-
+    private readonly Dictionary<string, Subject<CloudEvent>> Channels;// => new();
     private readonly ILogger<RxMessageBus> _logger;
 
     public RxMessageBus(ILogger<RxMessageBus> logger)
     {
         _logger = logger;
+        Channels = new Dictionary<string, Subject<CloudEvent>>();
     }
 
     public IObserver<CloudEvent> OpenChannel(string type)
@@ -30,6 +27,7 @@ public class RxMessageBus : IMessageBusAdapter, IMessageBusClient
 
     public IObservable<CloudEvent> ListenChannel(string type)
     {
+        // TODO: Figure out how to define a new DI scope on subscribe
         var channel = GetSubject(type);
         return channel.AsObservable()
             .SubscribeOn(TaskPoolScheduler.Default);

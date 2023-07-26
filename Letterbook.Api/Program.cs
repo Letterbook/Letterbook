@@ -1,6 +1,7 @@
 using Letterbook.Adapter.Db;
+using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Core;
-using Letterbook.Core.Extensions;
+using Letterbook.Core.Adapters;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace Letterbook.Api;
@@ -17,17 +18,20 @@ public class Program
             options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
         });
         
-        // Register DI config
+        // Register config
         var coreOptions = builder.Configuration.GetSection(CoreOptions.ConfigKey);
         builder.Services.Configure<CoreOptions>(coreOptions);
         builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptions.ConfigKey));
         builder.Services.Configure<DbOptions>(builder.Configuration.GetSection(DbOptions.ConfigKey));
         
-        // Register DI containers
+        // Register Services
         builder.Services.AddScoped<IActivityService, ActivityService>();
         builder.Services.AddScoped<IActivityEventService, ActivityEventService>();
-        builder.Services.AddContexts();
-        builder.Services.AddAdapters();
+        
+        // Register Adapters
+        builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
+        builder.Services.AddSingleton<IMessageBusAdapter, RxMessageBus>();
+        builder.Services.AddDbContext<TransactionalContext>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
