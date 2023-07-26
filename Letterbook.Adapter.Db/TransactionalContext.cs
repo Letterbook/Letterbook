@@ -23,7 +23,7 @@ public class TransactionalContext : DbContext
     public DbSet<Profile> Profiles { get; set; }
 
     // Called by the designer to create and run migrations
-    public TransactionalContext(DbContextOptions<TransactionalContext> context) : base(context)
+    internal TransactionalContext(DbContextOptions<TransactionalContext> context) : base(context)
     {
         _config = new DesignDbOptions();
     }

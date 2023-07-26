@@ -7,14 +7,12 @@ namespace Letterbook.Core;
 
 public class ActivityService : IActivityService
 {
-    private readonly IFediAdapter _fediAdapter;
     private readonly IActivityAdapter _activityAdapter;
     private readonly ILogger<ActivityService> _logger;
 
     // TODO: pubsub adapter
-    public ActivityService(IFediAdapter fediAdapter, IActivityAdapter activityAdapter, ILogger<ActivityService> logger)
+    public ActivityService(IActivityAdapter activityAdapter, ILogger<ActivityService> logger)
     {
-        _fediAdapter = fediAdapter;
         _activityAdapter = activityAdapter;
         _logger = logger;
     }

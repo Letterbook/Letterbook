@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj" />
-    <ProjectReference Include="..\Letterbook.Adapter.FediClient\Letterbook.Adapter.FediClient.csproj" />
     <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
   </ItemGroup>
 
