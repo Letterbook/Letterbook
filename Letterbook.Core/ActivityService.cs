@@ -10,13 +10,16 @@ public class ActivityService : IActivityService
     private readonly IFediAdapter _fediAdapter;
     private readonly IActivityAdapter _activityAdapter;
     private readonly ILogger<ActivityService> _logger;
+    private readonly IActivityEventService _events;
 
     // TODO: pubsub adapter
-    public ActivityService(IFediAdapter fediAdapter, IActivityAdapter activityAdapter, ILogger<ActivityService> logger)
+    public ActivityService(IFediAdapter fediAdapter, IActivityAdapter activityAdapter, ILogger<ActivityService> logger,
+        IActivityEventService eventService)
     {
         _fediAdapter = fediAdapter;
         _activityAdapter = activityAdapter;
         _logger = logger;
+        _events = eventService;
     }
 
     public Activity Create()
@@ -37,11 +40,31 @@ public class ActivityService : IActivityService
         switch (activity)
         {
             case ActivityType.Create:
-            case ActivityType.Announce:
-            case ActivityType.Update:
-                // 1. record those objects ✅
                 actionTaken = _activityAdapter.RecordNotes(notes);
-                // 2. publish Notes (mostly not other types) to the queue
+                if (!actionTaken) return actionTaken;
+                foreach (var note in notes)
+                {
+                    _events.Created(note);
+                }
+
+                return actionTaken;
+            case ActivityType.Announce:
+                actionTaken = _activityAdapter.RecordNotes(notes);
+                if (!actionTaken) return actionTaken;
+                foreach (var note in notes)
+                {
+                    _events.Boosted(note);
+                }
+
+                return actionTaken;
+            case ActivityType.Update:
+                actionTaken = _activityAdapter.RecordNotes(notes);
+                if (!actionTaken) return actionTaken;
+                foreach (var note in notes)
+                {
+                    _events.Updated(note);
+                }
+
                 return actionTaken;
             case ActivityType.Like:
                 foreach (var note in notes)
@@ -49,12 +72,20 @@ public class ActivityService : IActivityService
                     var found = _activityAdapter.LookupNoteUrl(note.Id.ToString());
                     if (found is null) continue;
                     found.LikedBy.Add(actor);
+                    _events.Liked(note);
                     actionTaken = true;
                 }
+
                 // publish like
                 return actionTaken;
             case ActivityType.Delete:
                 actionTaken = _activityAdapter.DeleteNotes(notes);
+                if (!actionTaken) return actionTaken;
+                foreach (var note in notes)
+                {
+                    _events.Deleted(note);
+                }
+
                 return actionTaken;
             case ActivityType.Dislike:
                 actionTaken = notes
@@ -62,6 +93,7 @@ public class ActivityService : IActivityService
                     .Any(r => r == true);
                 return actionTaken;
             case ActivityType.Flag:
+                // TODO: Flag
             case ActivityType.Ignore: //?
             case ActivityType.Question: //?
             case ActivityType.Remove: //?
