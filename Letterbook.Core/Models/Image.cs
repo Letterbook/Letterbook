@@ -31,6 +31,6 @@ public class Image : IExpiring, IContentRef
     public Uri FileLocation { get; set; } // good enough?
     public DateTime Expiration { get; set; }
     public string? Description { get; set; }
-    public ObjectList<Audience> Visibility { get; set; } = new ();
+    public ObjectCollection<Audience> Visibility { get; set; } = new ();
     public ICollection<Mention> Mentions { get; set; } = new HashSet<Mention>();
 }

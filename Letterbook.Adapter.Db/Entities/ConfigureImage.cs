@@ -9,7 +9,11 @@ public class ConfigureImage : IEntityTypeConfiguration<Image>
 {
     public void Configure(EntityTypeBuilder<Image> builder)
     {
-        builder.HasMany<Models.Mention>(entity => entity.Mentions);
+        builder.OwnsMany<Models.Mention>(entity => entity.Mentions)
+            .WithOwner();
+        builder.HasMany<Profile>(image => image.Creators)
+            .WithMany("CreatedImages")
+            .UsingEntity("ImagesCreatedByProfile");
         builder.Property(entity => entity.MimeType).HasConversion<string>(v => v.ToString(), v => new ContentType(v));
     }
 }
