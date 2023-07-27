@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(TransactionalContext))]
-    [Migration("20230727031247_Initial_Accounts")]
+    [Migration("20230727054513_Initial_Accounts")]
     partial class Initial_Accounts
     {
         /// <inheritdoc />
@@ -38,6 +38,36 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.HasIndex("MembersId");
 
                     b.ToTable("AudienceProfile");
+                });
+
+            modelBuilder.Entity("AudienceProfileMembers", b =>
+                {
+                    b.Property<string>("AudienceId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProfileId")
+                        .HasColumnType("text");
+
+                    b.HasKey("AudienceId", "ProfileId");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("AudienceProfileMembers");
+                });
+
+            modelBuilder.Entity("ImagesCreatedByProfile", b =>
+                {
+                    b.Property<string>("CreatedImagesId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CreatorsId")
+                        .HasColumnType("text");
+
+                    b.HasKey("CreatedImagesId", "CreatorsId");
+
+                    b.HasIndex("CreatorsId");
+
+                    b.ToTable("ImagesCreatedByProfile");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.Account", b =>
@@ -122,36 +152,6 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.ToTable("LinkedProfile");
                 });
 
-            modelBuilder.Entity("Letterbook.Core.Models.Mention", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ImageId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("NoteId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("SubjectId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Visibility")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ImageId");
-
-                    b.HasIndex("NoteId");
-
-                    b.HasIndex("SubjectId");
-
-                    b.ToTable("Mention");
-                });
-
             modelBuilder.Entity("Letterbook.Core.Models.Note", b =>
                 {
                     b.Property<string>("Id")
@@ -188,9 +188,6 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<string>("ImageId")
-                        .HasColumnType("text");
-
                     b.Property<string>("LocalId")
                         .HasColumnType("text");
 
@@ -202,44 +199,12 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ImageId");
-
                     b.HasIndex("OwnedById");
 
                     b.ToTable("Profiles");
                 });
 
-            modelBuilder.Entity("NoteProfile", b =>
-                {
-                    b.Property<string>("CreatedNotesId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("CreatorsId")
-                        .HasColumnType("text");
-
-                    b.HasKey("CreatedNotesId", "CreatorsId");
-
-                    b.HasIndex("CreatorsId");
-
-                    b.ToTable("NoteProfile");
-                });
-
-            modelBuilder.Entity("NoteProfile1", b =>
-                {
-                    b.Property<string>("LikedById")
-                        .HasColumnType("text");
-
-                    b.Property<string>("LikedNotesId")
-                        .HasColumnType("text");
-
-                    b.HasKey("LikedById", "LikedNotesId");
-
-                    b.HasIndex("LikedNotesId");
-
-                    b.ToTable("NoteProfile1");
-                });
-
-            modelBuilder.Entity("NoteProfile2", b =>
+            modelBuilder.Entity("NotesBoostedByProfile", b =>
                 {
                     b.Property<string>("BoostedById")
                         .HasColumnType("text");
@@ -251,7 +216,37 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasIndex("BoostedNotesId");
 
-                    b.ToTable("NoteProfile2");
+                    b.ToTable("NotesBoostedByProfile");
+                });
+
+            modelBuilder.Entity("NotesCreatedByProfile", b =>
+                {
+                    b.Property<string>("CreatedNotesId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CreatorsId")
+                        .HasColumnType("text");
+
+                    b.HasKey("CreatedNotesId", "CreatorsId");
+
+                    b.HasIndex("CreatorsId");
+
+                    b.ToTable("NotesCreatedByProfile");
+                });
+
+            modelBuilder.Entity("NotesLikedByProfile", b =>
+                {
+                    b.Property<string>("LikedById")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LikedNotesId")
+                        .HasColumnType("text");
+
+                    b.HasKey("LikedById", "LikedNotesId");
+
+                    b.HasIndex("LikedNotesId");
+
+                    b.ToTable("NotesLikedByProfile");
                 });
 
             modelBuilder.Entity("AudienceProfile", b =>
@@ -269,6 +264,36 @@ namespace Letterbook.Adapter.Db.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AudienceProfileMembers", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Audience", null)
+                        .WithMany()
+                        .HasForeignKey("AudienceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ImagesCreatedByProfile", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Image", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedImagesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("CreatorsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Audience", b =>
                 {
                     b.HasOne("Letterbook.Core.Models.Image", null)
@@ -278,6 +303,45 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.HasOne("Letterbook.Core.Models.Note", null)
                         .WithMany("Visibility")
                         .HasForeignKey("NoteId");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.Image", b =>
+                {
+                    b.OwnsMany("Letterbook.Core.Models.Mention", "Mentions", b1 =>
+                        {
+                            b1.Property<string>("ImageId")
+                                .HasColumnType("text");
+
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("SubjectId")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<int>("Visibility")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("ImageId", "Id");
+
+                            b1.HasIndex("SubjectId");
+
+                            b1.ToTable("Images_Mentions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ImageId");
+
+                            b1.HasOne("Letterbook.Core.Models.Profile", "Subject")
+                                .WithMany()
+                                .HasForeignKey("SubjectId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+
+                            b1.Navigation("Subject");
+                        });
+
+                    b.Navigation("Mentions");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.LinkedProfile", b =>
@@ -299,40 +363,53 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("Profile");
                 });
 
-            modelBuilder.Entity("Letterbook.Core.Models.Mention", b =>
-                {
-                    b.HasOne("Letterbook.Core.Models.Image", null)
-                        .WithMany("Mentions")
-                        .HasForeignKey("ImageId");
-
-                    b.HasOne("Letterbook.Core.Models.Note", null)
-                        .WithMany("Mentions")
-                        .HasForeignKey("NoteId");
-
-                    b.HasOne("Letterbook.Core.Models.Profile", "Subject")
-                        .WithMany()
-                        .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Subject");
-                });
-
             modelBuilder.Entity("Letterbook.Core.Models.Note", b =>
                 {
                     b.HasOne("Letterbook.Core.Models.Note", "InReplyTo")
                         .WithMany("Replies")
                         .HasForeignKey("InReplyToId");
 
+                    b.OwnsMany("Letterbook.Core.Models.Mention", "Mentions", b1 =>
+                        {
+                            b1.Property<string>("NoteId")
+                                .HasColumnType("text");
+
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("SubjectId")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<int>("Visibility")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("NoteId", "Id");
+
+                            b1.HasIndex("SubjectId");
+
+                            b1.ToTable("Notes_Mentions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("NoteId");
+
+                            b1.HasOne("Letterbook.Core.Models.Profile", "Subject")
+                                .WithMany()
+                                .HasForeignKey("SubjectId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+
+                            b1.Navigation("Subject");
+                        });
+
                     b.Navigation("InReplyTo");
+
+                    b.Navigation("Mentions");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.Profile", b =>
                 {
-                    b.HasOne("Letterbook.Core.Models.Image", null)
-                        .WithMany("Creators")
-                        .HasForeignKey("ImageId");
-
                     b.HasOne("Letterbook.Core.Models.Account", "OwnedBy")
                         .WithMany()
                         .HasForeignKey("OwnedById");
@@ -340,37 +417,7 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("OwnedBy");
                 });
 
-            modelBuilder.Entity("NoteProfile", b =>
-                {
-                    b.HasOne("Letterbook.Core.Models.Note", null)
-                        .WithMany()
-                        .HasForeignKey("CreatedNotesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Letterbook.Core.Models.Profile", null)
-                        .WithMany()
-                        .HasForeignKey("CreatorsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("NoteProfile1", b =>
-                {
-                    b.HasOne("Letterbook.Core.Models.Profile", null)
-                        .WithMany()
-                        .HasForeignKey("LikedById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Letterbook.Core.Models.Note", null)
-                        .WithMany()
-                        .HasForeignKey("LikedNotesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("NoteProfile2", b =>
+            modelBuilder.Entity("NotesBoostedByProfile", b =>
                 {
                     b.HasOne("Letterbook.Core.Models.Profile", null)
                         .WithMany()
@@ -385,6 +432,36 @@ namespace Letterbook.Adapter.Db.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("NotesCreatedByProfile", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Note", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedNotesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("CreatorsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NotesLikedByProfile", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("LikedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Note", null)
+                        .WithMany()
+                        .HasForeignKey("LikedNotesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Account", b =>
                 {
                     b.Navigation("LinkedProfiles");
@@ -392,17 +469,11 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("Letterbook.Core.Models.Image", b =>
                 {
-                    b.Navigation("Creators");
-
-                    b.Navigation("Mentions");
-
                     b.Navigation("Visibility");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.Note", b =>
                 {
-                    b.Navigation("Mentions");
-
                     b.Navigation("Replies");
 
                     b.Navigation("Visibility");
