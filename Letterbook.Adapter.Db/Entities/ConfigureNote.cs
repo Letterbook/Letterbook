@@ -8,12 +8,16 @@ public class ConfigureNote : IEntityTypeConfiguration<Note>
 {
     public void Configure(EntityTypeBuilder<Note> builder)
     {
-        builder.HasMany<Models.Mention>(entity => entity.Mentions);
+        builder.OwnsMany<Models.Mention>(entity => entity.Mentions)
+            .WithOwner();
         builder.HasMany<Profile>(entity => entity.Creators)
-            .WithMany("CreatedNotes");
+            .WithMany("CreatedNotes")
+            .UsingEntity("NotesCreatedByProfile");
         builder.HasMany<Profile>(entity => entity.LikedBy)
-            .WithMany("LikedNotes");
+            .WithMany("LikedNotes")
+            .UsingEntity("NotesLikedByProfile");
         builder.HasMany<Profile>(entity => entity.BoostedBy)
-            .WithMany("BoostedNotes");
+            .WithMany("BoostedNotes")
+            .UsingEntity("NotesBoostedByProfile");
     }
 }
