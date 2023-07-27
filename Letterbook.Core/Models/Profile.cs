@@ -29,4 +29,5 @@ public class Profile : IObjectRef
     public Account? OwnedBy { get; set; }
     public ActivityActorType Type { get; set; }
     public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
+    public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
 }

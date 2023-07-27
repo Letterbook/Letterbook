@@ -9,8 +9,7 @@ public class Account
     // TODO(Authentication): https://github.com/Letterbook/Letterbook/issues/35
     // PasswordHash?
     // 2FA stuff?
-    public Profile DefaultProfile { get; set; }
-    public ICollection<AccountProfile> LinkedProfiles { get; set; } = new HashSet<AccountProfile>();
+    public ICollection<LinkedProfile> LinkedProfiles { get; set; } = new HashSet<LinkedProfile>();
     
     // In the future, Account might tie in to things like organizations or billing accounts
     
@@ -18,7 +17,6 @@ public class Account
     {
         Id = default!;
         Email = default!;
-        DefaultProfile = default!;
     }
 
     private Account(string email) : this()
@@ -34,12 +32,9 @@ public class Account
         {
             LocalId = ShortId.NewShortId()
         };
-        var account = new Account(email)
-        {
-            DefaultProfile = profile
-        };
+        var account = new Account(email);
         profile.OwnedBy = account;
-        account.LinkedProfiles.Add(new AccountProfile(account, profile, ProfilePermission.All));
+        account.LinkedProfiles.Add(new LinkedProfile(account, profile, ProfilePermission.All));
 
         return account;
     }

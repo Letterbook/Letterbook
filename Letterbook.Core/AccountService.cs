@@ -35,4 +35,24 @@ public class AccountService : IAccountService
         _logger.LogWarning("Could not create new account for {Email}", account.Email);
         return default;
     }
+
+    public Account? LookupAccount(string id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEnumerable<Account> FindAccounts(string email)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEnumerable<Account> FindRelatedAccounts(Profile profile)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool UpdateAccount(Account account)
+    {
+        throw new NotImplementedException();
+    }
 }

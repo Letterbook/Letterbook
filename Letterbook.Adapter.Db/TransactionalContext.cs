@@ -1,8 +1,9 @@
 ﻿using System.Reflection;
-using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+#pragma warning disable CS8618
+// EntityFramework does the right thing
 
 namespace Letterbook.Adapter.Db;
 
@@ -20,6 +21,7 @@ public class TransactionalContext : DbContext
     public DbSet<Note> Notes { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<Profile> Profiles { get; set; }
+    public DbSet<Account> Accounts { get; set; }
 
     // Called by the designer to create and run migrations
     internal TransactionalContext(DbContextOptions<TransactionalContext> context) : base(context)
