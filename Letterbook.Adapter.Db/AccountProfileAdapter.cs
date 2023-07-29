@@ -2,7 +2,7 @@
 
 namespace Letterbook.Adapter.Db;
 
-public class AccountAdapter : IAccountAdapter
+public class AccountProfileAdapter : IAccountProfileAdapter
 {
     public bool RecordAccount(Models.Account account)
     {
@@ -10,6 +10,16 @@ public class AccountAdapter : IAccountAdapter
     }
 
     public bool RecordAccounts(IEnumerable<Models.Account> accounts)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Models.Account? LookupAccount(string id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Models.Profile? LookupProfile(string localId)
     {
         throw new NotImplementedException();
     }

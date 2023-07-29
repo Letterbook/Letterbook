@@ -26,12 +26,9 @@ public class Account
     }
 
     // TODO(Account creation): https://github.com/Letterbook/Letterbook/issues/32
-    public static Account CreateAccount(string email, Uri profileId)
+    public static Account CreateAccount(Uri baseUri, string email, string handle)
     {
-        var profile = new Profile(profileId)
-        {
-            LocalId = ShortId.NewShortId()
-        };
+        var profile = Profile.CreatePerson(baseUri, handle);
         var account = new Account(email);
         profile.OwnedBy = account;
         account.LinkedProfiles.Add(new LinkedProfile(account, profile, ProfilePermission.All));

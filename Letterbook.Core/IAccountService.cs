@@ -4,9 +4,11 @@ namespace Letterbook.Core;
 
 public interface IAccountService
 {
-    public Account? RegisterAccount(string email, string username);
+    public Account? RegisterAccount(string email, string handle);
     public Account? LookupAccount(string id);
     public IEnumerable<Account> FindAccounts(string email);
-    public IEnumerable<Account> FindRelatedAccounts(Profile profile);
-    public bool UpdateAccount(Account account);
+    public bool UpdateEmail(string accountId, string email);
+    public bool AddLinkedProfile(string accountId, Profile profile, ProfilePermission permission);
+    public bool UpdateLinkedProfile(string accountId, Profile profile, ProfilePermission permission);
+    public bool RemoveLinkedProfile(string accountId, Profile profile);
 }

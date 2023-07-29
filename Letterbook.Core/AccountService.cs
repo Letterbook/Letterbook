@@ -8,24 +8,23 @@ namespace Letterbook.Core;
 public class AccountService : IAccountService
 {
     private readonly ILogger<AccountService> _logger;
-    private readonly IAccountAdapter _adapter;
+    private readonly IAccountProfileAdapter _accountAdapter;
     private readonly CoreOptions _opts;
 
-    public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options, IAccountAdapter adapter)
+    public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options, IAccountProfileAdapter accountAdapter)
     {
         _logger = logger;
-        _adapter = adapter;
+        _accountAdapter = accountAdapter;
         _opts = options.Value;
     }
 
-    public Account? RegisterAccount(string email, string username)
+    public Account? RegisterAccount(string email, string handle)
     {
-        // TODO: profile uri format
         // Fun fact, Uri will collapse the port number out of the string if it's the default for the scheme
-        var profileId = new Uri($"{_opts.Scheme}://{_opts.DomainName}:{_opts.Port}/actor/@{username}");
-        var account = Account.CreateAccount(email, profileId);
+        var baseUri = new Uri($"{_opts.Scheme}://{_opts.DomainName}:{_opts.Port}");
+        var account = Account.CreateAccount(baseUri, email, handle);
 
-        var success = _adapter.RecordAccount(account);
+        var success = _accountAdapter.RecordAccount(account);
         if (success)
         {
             _logger.LogInformation("Created new account {AccountId}", account.Id);
@@ -38,7 +37,7 @@ public class AccountService : IAccountService
 
     public Account? LookupAccount(string id)
     {
-        throw new NotImplementedException();
+        return _accountAdapter.LookupAccount(id);
     }
 
     public IEnumerable<Account> FindAccounts(string email)
@@ -46,13 +45,41 @@ public class AccountService : IAccountService
         throw new NotImplementedException();
     }
 
-    public IEnumerable<Account> FindRelatedAccounts(Profile profile)
+    public bool UpdateEmail(string accountId, string email)
     {
-        throw new NotImplementedException();
+        var account = _accountAdapter.LookupAccount(accountId);
+        if (account == null) return false;
+        account.Email = email;
+        return true;
     }
 
-    public bool UpdateAccount(Account account)
+    public bool AddLinkedProfile(string accountId, Profile profile, ProfilePermission permission)
     {
-        throw new NotImplementedException();
+        var account = _accountAdapter.LookupAccount(accountId);
+        if (account is null) return false;
+        var count = profile.RelatedAccounts.Count;
+        profile.RelatedAccounts.Add(new LinkedProfile(account, profile, permission));
+        return count == profile.RelatedAccounts.Count;
+    }
+
+    public bool UpdateLinkedProfile(string accountId, Profile profile, ProfilePermission permission)
+    {
+        var account = _accountAdapter.LookupAccount(accountId);
+        if (account is null) return false;
+        var model = new LinkedProfile(account, profile, ProfilePermission.None);
+        var linkedProfile = profile.RelatedAccounts.SingleOrDefault(p => p.Equals(model));
+        if (linkedProfile is null) return false;
+        if (linkedProfile.Permission == permission) return false;
+        
+        linkedProfile.Permission = permission;
+        return true;
+    }
+
+    public bool RemoveLinkedProfile(string accountId, Profile profile)
+    {
+        var account = _accountAdapter.LookupAccount(accountId);
+        if (account is null) return false;
+
+        return profile.RelatedAccounts.Remove(new LinkedProfile(account, profile, ProfilePermission.None));
     }
 }
