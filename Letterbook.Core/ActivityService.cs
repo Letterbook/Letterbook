@@ -9,11 +9,11 @@ public class ActivityService : IActivityService
 {
     private readonly IActivityAdapter _activityAdapter;
     private readonly ILogger<ActivityService> _logger;
-    private readonly IEventService _events;
+    private readonly IActivityEventService _events;
 
     // TODO: pubsub adapter
     public ActivityService(IActivityAdapter activityAdapter, ILogger<ActivityService> logger,
-        IEventService eventService)
+        IActivityEventService eventService)
     {
         _activityAdapter = activityAdapter;
         _logger = logger;

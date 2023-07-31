@@ -26,7 +26,7 @@ public class Program
         
         // Register Services
         builder.Services.AddScoped<IActivityService, ActivityService>();
-        builder.Services.AddScoped<IEventService, EventService>();
+        builder.Services.AddScoped<IActivityEventService, ActivityEventService>();
         
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();

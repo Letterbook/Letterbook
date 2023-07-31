@@ -2,7 +2,7 @@
 
 namespace Letterbook.Core;
 
-public interface IEventService
+public interface IActivityEventService
 {
     void Created<T>(T value) where T : class, IObjectRef;
     void Updated<T>(T value) where T : class, IObjectRef;
