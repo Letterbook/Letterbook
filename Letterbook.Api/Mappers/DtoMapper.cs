@@ -15,9 +15,10 @@ public static class DtoMapper
     private static void ConfigureProfile(IMapperConfigurationExpression cfg)
     {
         cfg.CreateMap<DTO.Actor, Models.Profile>()
-            .IncludeBase<DTO.IResolvable, IObjectRef>()
+            .IncludeBase<DTO.IResolvable, Models.Profile>()
             .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
-            .ForMember(dest => dest.Audiences, opt => opt.Ignore());
+            .ForMember(dest => dest.Handle, opt => opt.Ignore())
+            .ForMember(dest => dest.DisplayName, opt => opt.Ignore());
         cfg.CreateMap<DTO.Object, Models.Profile>()
             .IncludeBase<DTO.IResolvable, Models.Profile>();
         cfg.CreateMap<DTO.Link, Models.Profile>()
@@ -27,6 +28,10 @@ public static class DtoMapper
             .ForMember(dest => dest.LocalId, opt => opt.Ignore())
             .ForMember(dest => dest.Type, opt => opt.Ignore())
             .ForMember(dest => dest.Authority, opt => opt.Ignore())
+            .ForMember(dest => dest.OwnedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.RelatedAccounts, opt => opt.Ignore())
+            .ForMember(dest => dest.Handle, opt => opt.Ignore())
+            .ForMember(dest => dest.DisplayName, opt => opt.Ignore())
             .ForMember(dest => dest.Audiences, opt => opt.Ignore());
     }
 
