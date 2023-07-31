@@ -9,14 +9,14 @@ namespace Letterbook.Core;
 /// core services will be narrowly scoped, and will publish a message through the event service. Other services may
 /// consume that message and perform their own processing in response. For instance, to send notifications.
 /// </summary>
-public class ActivityEventService : IActivityEventService
+public class EventService : IEventService
 {
     private readonly IMessageBusAdapter _messageBusAdapter;
     private readonly IObserver<CloudEvent> _notesChannel;
     private readonly IObserver<CloudEvent> _imagesChannel;
     private readonly IObserver<CloudEvent> _profileChannel;
 
-    public ActivityEventService(IMessageBusAdapter messageBusAdapter)
+    public EventService(IMessageBusAdapter messageBusAdapter)
     {
         _messageBusAdapter = messageBusAdapter;
         _notesChannel = _messageBusAdapter.OpenChannel(typeof(Note).ToString());
@@ -120,7 +120,7 @@ public class ActivityEventService : IActivityEventService
             // TODO: instance domain name from config
             Source = new Uri("https://letterbook.example"),
             Data = value,
-            Type = $"{nameof(ActivityEventService)}.{value.GetType()}.{action}",
+            Type = $"{nameof(EventService)}.{value.GetType()}.{action}",
             Subject = value.Id.ToString(),
             Time = DateTimeOffset.UtcNow
         };

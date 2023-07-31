@@ -9,7 +9,7 @@ namespace Letterbook.Core.Tests;
 
 public class ActivityEventServiceTest : WithMocks
 {
-    private ActivityEventService _service;
+    private EventService _service;
     private Subject<CloudEvent> _subject;
     private FakeNote _fakeNote;
     private FakeProfile _fakeProfile;
@@ -22,7 +22,7 @@ public class ActivityEventServiceTest : WithMocks
         _fakeNote = new FakeNote();
         _fakeProfile = new FakeProfile();
         
-        _service = new ActivityEventService(MessageBusAdapterMock.Object);
+        _service = new EventService(MessageBusAdapterMock.Object);
     }
     
     [Fact]

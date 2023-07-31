@@ -22,7 +22,7 @@ public class ActivityTest : WithMocks
         _randomSeed = new Random().Next();
         _loggerMock = new Mock<ILogger<ActivityService>>();
         _activityService = new ActivityService(ActivityAdapterMock.Object, _loggerMock.Object,
-            Mock.Of<IActivityEventService>());
+            Mock.Of<IEventService>());
 
         Randomizer.Seed = new Random(_randomSeed);
         _outputHelper.WriteLine($"Bogus random seed: {_randomSeed}");
