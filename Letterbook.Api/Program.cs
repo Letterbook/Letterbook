@@ -27,6 +27,8 @@ public class Program
         // Register Services
         builder.Services.AddScoped<IActivityService, ActivityService>();
         builder.Services.AddScoped<IActivityEventService, ActivityEventService>();
+        builder.Services.AddScoped<IAccountService, AccountService>();
+        builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
@@ -39,7 +41,7 @@ public class Program
 
         var opts = coreOptions.Get<CoreOptions>() 
                    ?? throw new ArgumentException("Invalid configuration", nameof(CoreOptions));
-        builder.WebHost.UseUrls($"{opts.Scheme}://{opts.DomainName}:{opts.Port}");
+        builder.WebHost.UseUrls(CoreOptions.BaseUri(opts).ToString());
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.

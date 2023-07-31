@@ -8,26 +8,29 @@ namespace Letterbook.Core;
 public class AccountService : IAccountService
 {
     private readonly ILogger<AccountService> _logger;
-    private readonly IAccountProfileAdapter _accountAdapter;
     private readonly CoreOptions _opts;
+    private readonly IAccountProfileAdapter _accountAdapter;
+    private readonly IAccountEventService _eventService;
 
-    public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options, IAccountProfileAdapter accountAdapter)
+    public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options, IAccountProfileAdapter accountAdapter, IAccountEventService eventService)
     {
         _logger = logger;
-        _accountAdapter = accountAdapter;
         _opts = options.Value;
+        _accountAdapter = accountAdapter;
+        _eventService = eventService;
     }
 
     public Account? RegisterAccount(string email, string handle)
     {
         // Fun fact, Uri will collapse the port number out of the string if it's the default for the scheme
-        var baseUri = new Uri($"{_opts.Scheme}://{_opts.DomainName}:{_opts.Port}");
+        var baseUri = CoreOptions.BaseUri(_opts);
         var account = Account.CreateAccount(baseUri, email, handle);
 
         var success = _accountAdapter.RecordAccount(account);
         if (success)
         {
             _logger.LogInformation("Created new account {AccountId}", account.Id);
+            _eventService.Created(account);
             return account;
         }
 

@@ -19,16 +19,16 @@ public class RxMessageBus : IMessageBusAdapter, IMessageBusClient
         Channels = new Dictionary<string, Subject<CloudEvent>>();
     }
 
-    public IObserver<CloudEvent> OpenChannel(string type)
+    public IObserver<CloudEvent> OpenChannel<T>()
     {
-        var channel = GetSubject(type);
+        var channel = GetSubject(typeof(T).ToString());
         return channel.AsObserver();
     }
 
-    public IObservable<CloudEvent> ListenChannel(string type)
+    public IObservable<CloudEvent> ListenChannel<T>()
     {
         // TODO: Figure out how to define a new DI scope on subscribe
-        var channel = GetSubject(type);
+        var channel = GetSubject(typeof(T).ToString());
         return channel.AsObservable()
             .SubscribeOn(TaskPoolScheduler.Default);
     }
