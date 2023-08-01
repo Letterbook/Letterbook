@@ -12,7 +12,8 @@ public class AccountService : IAccountService
     private readonly IAccountProfileAdapter _accountAdapter;
     private readonly IAccountEventService _eventService;
 
-    public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options, IAccountProfileAdapter accountAdapter, IAccountEventService eventService)
+    public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options,
+        IAccountProfileAdapter accountAdapter, IAccountEventService eventService)
     {
         _logger = logger;
         _opts = options.Value;
@@ -60,9 +61,11 @@ public class AccountService : IAccountService
     {
         var account = _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
-        var count = profile.RelatedAccounts.Count;
-        profile.RelatedAccounts.Add(new LinkedProfile(account, profile, permission));
-        return count == profile.RelatedAccounts.Count;
+        var count = account.LinkedProfiles.Count;
+        var link = new LinkedProfile(account, profile, permission);
+        profile.RelatedAccounts.Add(link);
+        account.LinkedProfiles.Add(link);
+        return count == account.LinkedProfiles.Count;
     }
 
     public bool UpdateLinkedProfile(string accountId, Profile profile, ProfilePermission permission)
@@ -70,11 +73,19 @@ public class AccountService : IAccountService
         var account = _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
         var model = new LinkedProfile(account, profile, ProfilePermission.None);
-        var linkedProfile = profile.RelatedAccounts.SingleOrDefault(p => p.Equals(model));
-        if (linkedProfile is null) return false;
-        if (linkedProfile.Permission == permission) return false;
-        
-        linkedProfile.Permission = permission;
+        var profileLink = profile.RelatedAccounts.SingleOrDefault(p => p.Equals(model));
+        var accountLink = account.LinkedProfiles.SingleOrDefault(p => p.Equals(model));
+        if (profileLink is null || accountLink is null)
+        {
+            _logger.LogWarning("Account {Account} and Profile {Profile} have mismatched permission links", account.Id,
+                profile.Id);
+            return false;
+        }
+
+        if (profileLink.Permission == permission || accountLink.Permission == permission) return false;
+
+        profileLink.Permission = permission;
+        accountLink.Permission = permission;
         return true;
     }
 
@@ -83,6 +94,8 @@ public class AccountService : IAccountService
         var account = _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
 
-        return profile.RelatedAccounts.Remove(new LinkedProfile(account, profile, ProfilePermission.None));
+        var link = new LinkedProfile(account, profile, ProfilePermission.None);
+
+        return profile.RelatedAccounts.Remove(link) && account.LinkedProfiles.Remove(link);
     }
 }
