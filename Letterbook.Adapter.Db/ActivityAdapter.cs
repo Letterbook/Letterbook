@@ -5,8 +5,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Adapter.Db;
 
-[AutoAdapter(typeof(IActivityAdapter), scope: InjectableScope.Scoped)]
-[AutoAdapter(typeof(IShareAdapter), scope: InjectableScope.Scoped)]
 public class ActivityAdapter : IActivityAdapter
 {
     private readonly ILogger<ActivityAdapter> _logger;

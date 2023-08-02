@@ -19,10 +19,10 @@ public class ActorController
     private readonly ILogger<ActorController> _logger;
     private readonly IActivityService _activityService;
 
-    public ActorController(IOptions<ConfigOptions> config, ILogger<ActorController> logger,
+    public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
         IActivityService activityService)
     {
-        _baseUri = new Uri($"{config.Value.Scheme}://{config.Value.HostName}");
+        _baseUri = new Uri($"{config.Value.Scheme}://{config.Value.DomainName}");
         _logger = logger;
         _activityService = activityService;
     }

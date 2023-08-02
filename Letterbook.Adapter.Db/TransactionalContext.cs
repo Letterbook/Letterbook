@@ -1,8 +1,9 @@
 ﻿using System.Reflection;
-using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+#pragma warning disable CS8618
+// EntityFramework does the right thing
 
 namespace Letterbook.Adapter.Db;
 
@@ -14,16 +15,16 @@ namespace Letterbook.Adapter.Db;
 /// Maybe notifications, too.
 /// There may be a need for search and/or graph databases in the future, and those would also be separate from this.
 /// </summary>
-[AutoContext(scope: InjectableScope.Scoped)]
 public class TransactionalContext : DbContext
 {
     private readonly DbOptions _config;
     public DbSet<Note> Notes { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<Profile> Profiles { get; set; }
+    public DbSet<Account> Accounts { get; set; }
 
     // Called by the designer to create and run migrations
-    public TransactionalContext(DbContextOptions<TransactionalContext> context) : base(context)
+    internal TransactionalContext(DbContextOptions<TransactionalContext> context) : base(context)
     {
         _config = new DesignDbOptions();
     }

@@ -4,5 +4,5 @@ namespace Letterbook.Core.Adapters;
 
 public interface IMessageBusAdapter
 {
-    public IObserver<CloudEvent> OpenChannel(string type);
+    public IObserver<CloudEvent> OpenChannel<T>();
 }

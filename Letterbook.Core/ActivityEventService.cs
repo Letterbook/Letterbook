@@ -1,6 +1,7 @@
 ﻿using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
+using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
@@ -11,17 +12,19 @@ namespace Letterbook.Core;
 /// </summary>
 public class ActivityEventService : IActivityEventService
 {
+    private readonly CoreOptions _options;
     private readonly IMessageBusAdapter _messageBusAdapter;
     private readonly IObserver<CloudEvent> _notesChannel;
     private readonly IObserver<CloudEvent> _imagesChannel;
     private readonly IObserver<CloudEvent> _profileChannel;
 
-    public ActivityEventService(IMessageBusAdapter messageBusAdapter)
+    public ActivityEventService(IOptions<CoreOptions> options, IMessageBusAdapter messageBusAdapter)
     {
+        _options = options.Value;
         _messageBusAdapter = messageBusAdapter;
-        _notesChannel = _messageBusAdapter.OpenChannel(typeof(Note).ToString());
-        _imagesChannel = _messageBusAdapter.OpenChannel(typeof(Image).ToString());
-        _profileChannel = _messageBusAdapter.OpenChannel(typeof(Profile).ToString());
+        _notesChannel = _messageBusAdapter.OpenChannel<Note>();
+        _imagesChannel = _messageBusAdapter.OpenChannel<Image>();
+        _profileChannel = _messageBusAdapter.OpenChannel<Profile>();
     }
 
     public void Created<T>(T value) where T : class, IObjectRef
@@ -112,13 +115,12 @@ public class ActivityEventService : IActivityEventService
         };
     }
 
-    private static CloudEvent FormatMessage(IObjectRef value, string action)
+    private CloudEvent FormatMessage(IObjectRef value, string action)
     {
         return new CloudEvent
         {
             Id = Guid.NewGuid().ToString(),
-            // TODO: instance domain name from config
-            Source = new Uri("https://letterbook.example"),
+            Source = CoreOptions.BaseUri(_options),
             Data = value,
             Type = $"{nameof(ActivityEventService)}.{value.GetType()}.{action}",
             Subject = value.Id.ToString(),

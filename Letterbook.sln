@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Core.Tests", "Le
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Db", "Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj", "{0F2F7B63-F6D1-4E87-A210-5DC86183E66E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.FediClient", "Letterbook.Adapter.FediClient\Letterbook.Adapter.FediClient.csproj", "{22DF8E39-0CB2-4A17-823D-FA4F9E34EE9F}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development", "{DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml

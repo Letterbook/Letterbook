@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using CloudNative.CloudEvents;
 using Letterbook.Core.Tests.Fakes;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Letterbook.Core.Tests;
@@ -17,12 +18,12 @@ public class ActivityEventServiceTest : WithMocks
     public ActivityEventServiceTest()
     {
         _subject = new Subject<CloudEvent>();
-        MessageBusAdapterMock.Setup(m => m.OpenChannel(It.IsAny<string>()))
+        MessageBusAdapterMock.Setup(m => m.OpenChannel<It.IsAnyType>())
             .Returns(_subject.AsObserver());
         _fakeNote = new FakeNote();
         _fakeProfile = new FakeProfile();
         
-        _service = new ActivityEventService(MessageBusAdapterMock.Object);
+        _service = new ActivityEventService(CoreOptionsMock, MessageBusAdapterMock.Object);
     }
     
     [Fact]
