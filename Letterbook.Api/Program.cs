@@ -29,6 +29,7 @@ public class Program
         builder.Services.AddScoped<IActivityEventService, ActivityEventService>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
+        builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
         
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
