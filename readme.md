@@ -17,3 +17,8 @@ You can probably get a sense of how things stand from the [Minimum Functionality
 ## Maintainers
 
 * [@jenniferplusplus@tech.lgbt](https://tech.lgbt/@jenniferplusplus)
+
+## Useful links
+
+* [Mastodon Docs](https://docs.joinmastodon.org/)
+* [Mastodon API routes](https://docs.joinmastodon.org/dev/routes/)
