@@ -6,7 +6,7 @@ This document exists primarily as a statement of values, and our intent to uphol
 
 ### Self Determination
 
-People should be able to make decisions for themselves. Communities should be able to make decisions for themselves. In order for that to happen, they need the information to understand that decision, as well as the ability to carry it out. Freedom and openness are necessary components of this, but we should also try to empower people to realize the potential that freedom creates.
+Individuals and communities should be able to make their own choices and have enough information to fully understand those choices. A decision is not a choice if it is coerced or unfair, and there is no decision at all if only one real choice is offered. Freedom and openness are necessary components of this, but people must be empowered to realize the potential that freedom creates. We must provide all information necessary to make an informed decision, and we must provide fair choices with real alternatives.
 
 ### Human Communication
 
