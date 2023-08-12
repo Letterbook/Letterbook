@@ -40,7 +40,7 @@ This is the first, best way to begin a discussion. We're trying to track our act
 1. [Minimum Functionality][minimum-board]
 2. [Single User Preview][preview-board]
 
-Please look through those boards before opening a new issue. But if you don't see an issue for the topic you want to discuss, then feel free to open a new one.
+Please look through those boards before opening a new issue. But if you don't see an issue for the topic you want to discuss, then feel free to open a new one. If you do find an appropriate issue, please leave a comment to start or join the conversation. Either **creating or commenting on issues opens up communication**. It also allows issues to be assigned to you. We do that as a way to keep track of what people are working on, and who we should follow up with if we need to follow up.
 
 ## Documentation
 
