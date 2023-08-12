@@ -28,6 +28,14 @@ And this list will only grow over time.
 
 Please read the [Code of Conduct][coc]. It's adapted from the commonly used contributor covenant, but it's not just boilerplate. Be sure you can uphold the project's shared values and abide by the standards laid out in that document. You're more than welcome to ask for clarification.
 
+These values will have a direct impact on the features we do and don't implement, how we prioritize them, and how they are designed. For example:
+
+* We believe tracking and mass data harvesting are dangerous and unethical; we won't build or support those activities and will attempt to limit the personal data we collect
+* We believe that cryptocoins, NFTs, and related technologies are purposefully wasteful and deceptive; we will not incorporate them
+* We believe so-called AI—especially generative AI—is extractive, wasteful, hazardous, and usually deceptive; we will view it with skepticism
+* We will prefer opt-in rather than opt-out dynamics wherever possible
+* We will build moderation and administration tools that preserve autonomy and privacy, as well as foster safety
+
 
 ## Collaboration
 
