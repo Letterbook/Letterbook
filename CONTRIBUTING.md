@@ -4,6 +4,7 @@
 - [Collaboration](#collaboration)
   - [Github Issues](#github-issues)
 - [Documentation](#documentation)
+  - [Useful links](#useful-links)
 - [Development](#development)
   - [Build and Run](#build-and-run)
     - [Using the `dotnet` CLI](#using-the-dotnet-cli)
@@ -44,6 +45,13 @@ Please look through those boards before opening a new issue. But if you don't se
 ## Documentation
 
 Writing docs is both hard and valuable. Because a lot of things about the project are still being established, it's even harder than normal. This means there's not a lot of documentation yet. This will be a focus in the near future. What we do have is several [Architecture Decision Record][adr-what] docs. You should look throught them. This is likely the best way to get up to speed on the [design, goals, and constraints][adr] for the project.
+
+### Useful links
+
+We plan to support enough of the Mastodon API to provide good compatibility with Mastodon clients. So you may find these docs to be valuable. They also provide some useful information about how to interoperate with other federated services.
+
+* [Mastodon Docs](https://docs.joinmastodon.org/)
+* [Mastodon API routes](https://docs.joinmastodon.org/dev/routes/)
 
 ## Development
 
@@ -109,8 +117,8 @@ Letterbook is licensed under the [AGPL, version 3.0][license]. The maintainers m
 [dotnet]: https://dotnet.microsoft.com/en-us/download
 [swagger]: http://localhost:5127/swagger/index.html
 [coc]: https://github.com/Letterbook/Letterbook/blob/main/CODE_OF_CONDUCT.md
-[preview-board]: https://github.com/orgs/Letterbook/projects/5/views/1
-[minimum-board]: https://github.com/orgs/Letterbook/projects/1/views/1
+[preview-board]: https://github.com/orgs/Letterbook/projects/5/views/2
+[minimum-board]: https://github.com/orgs/Letterbook/projects/1/views/2
 [license]: https://github.com/Letterbook/Letterbook/blob/main/LICENSE
 [adr-what]: https://www.redhat.com/architect/architecture-decision-records
 [adr]: https://github.com/Letterbook/Letterbook/tree/main/docs/decisions
