@@ -1,5 +1,5 @@
 name: Triage Issue
-run-name: Triage Issue # ${{github.event.issue.number}}
+run-name: Triage Issue #${{github.event.issue.number}}
 
 on:
   issues:
@@ -17,4 +17,4 @@ jobs:
           # to the issue
           project-url: https://github.com/orgs/Letterbook/projects/6
           github-token: ${{ secrets.TRIAGE_TOKEN }}
-          labeled: 'needs triage'
+          labeled: 'new issue'
