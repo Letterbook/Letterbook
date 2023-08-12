@@ -34,6 +34,7 @@ These values will have a direct impact on the features we do and don't implement
 * We believe that cryptocoins, NFTs, and related technologies are purposefully wasteful and deceptive; we will not incorporate them
 * We believe so-called AI—especially generative AI—is extractive, wasteful, hazardous, and usually deceptive; we will view it with skepticism
 * We will prefer opt-in rather than opt-out dynamics wherever possible
+* We will seek and respect consent, by helping people to make well informed choices without manipulation
 * We will build moderation and administration tools that preserve autonomy and privacy, as well as foster safety
 
 
