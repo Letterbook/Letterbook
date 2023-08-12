@@ -35,7 +35,7 @@ Before you jump in and start working, the first thing to do is to talk to us. We
 
 ### Github Issues
 
-This is the first, best way to begin a discussion. We're trying to track our active and planned efforts here, because this is where it's the most visible and accessible. There are two project boards that you should check to get a sense of what's already planned and in-progress.
+This is the first, best way to begin a discussion. We're trying to track our active and planned efforts here on the project repository, because this is where it's the most visible and approachable. There are two project boards that you should check to get a sense of what's already planned and in-progress.
 
 1. [Minimum Functionality][minimum-board]
 2. [Single User Preview][preview-board]
