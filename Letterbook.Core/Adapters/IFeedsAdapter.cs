@@ -13,6 +13,7 @@ public interface IFeedsAdapter
         where T : IContentRef;
 
     public void RemoveFromTimelines<T>(T subject) where T : IContentRef;
+    public void RemoveFromTimelines<T>(T subject, ICollection<Audience> audiences) where T : IContentRef;
     public IEnumerable<Notification> GetAggregateNotifications(Profile recipient, DateTime begin, int limit);
 
     public IEnumerable<Notification> GetFilteredNotifications(Profile recipient, DateTime begin,

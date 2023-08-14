@@ -64,10 +64,16 @@ public class TimelineService : ITimelineService
             // also boosted by
             _feeds.AddNotification(mention.Subject, note, note.Creators, ActivityType.Update);
         }
+
+        foreach (var profile in note.BoostedBy.Where(profile => profile.HasLocalAuthority(_options)))
+        {
+            _feeds.AddNotification(profile, note, note.Creators, ActivityType.Update);
+        }
     }
 
     public void HandleDelete(Note note)
     {
+        // Need to figure out how to handle deleted boosts
         _feeds.RemoveFromTimelines(note);
     }
 
