@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development"
 		docker-compose.yml = docker-compose.yml
 		.gitignore = .gitignore
 		readme.md = readme.md
+		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
+		CONTRIBUTING.md = CONTRIBUTING.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D5E41A46-D753-4214-AF70-1839E56B4A14}"
