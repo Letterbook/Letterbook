@@ -4,17 +4,23 @@ namespace Letterbook.Core.Adapters;
 
 public interface IFeedsAdapter
 {
-    public void AddToTimeline(Note note, Audience audience, bool boosted = false);
-    public void AddToTimeline(Image image, Audience audience, bool boosted = false);
-    public void AddNotification(Profile recipient, Note subject, Profile actor, ActivityType activity);
-    public IEnumerable<Notification> GetAggregateNotifications(Profile recipient, DateTime begin, int limit = 20);
+    public void AddToTimeline<T>(T subject, Audience audience, Profile? boostedBy = default) where T : IContentRef;
+
+    public void AddToTimeline<T>(T subject, ICollection<Audience> audience, Profile? boostedBy = default)
+        where T : IContentRef;
+
+    public void AddNotification<T>(Profile recipient, T subject, IEnumerable<Profile> actors, ActivityType activity)
+        where T : IContentRef;
+
+    public void RemoveFromTimelines<T>(T subject) where T : IContentRef;
+    public IEnumerable<Notification> GetAggregateNotifications(Profile recipient, DateTime begin, int limit);
 
     public IEnumerable<Notification> GetFilteredNotifications(Profile recipient, DateTime begin,
-        ActivityType typeFilter, int limit = 20);
+        ActivityType typeFilter, int limit);
 
-    public IEnumerable<Note> GetTimelineEntries(ICollection<Audience> audiences, DateTime begin,
-        bool includeBoosts = true, int limit = 20);
+    public IEnumerable<Note> GetTimelineEntries(ICollection<Audience> audiences, DateTime begin, int limit,
+        bool includeBoosts = true);
 
-    public IEnumerable<IObjectRef> GetTimelineEntries(ICollection<Audience> audiences, DateTime begin,
-        ICollection<string> types, bool includeBoosts = true, int limit = 20);
+    public IEnumerable<IObjectRef> GetTimelineEntries(ICollection<Audience> audiences, DateTime begin, int limit,
+        ICollection<string> types, bool includeBoosts = true);
 }

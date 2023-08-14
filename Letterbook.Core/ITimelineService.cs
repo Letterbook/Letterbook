@@ -8,4 +8,5 @@ public interface ITimelineService
     public void HandleBoost(Note note);
     public void HandleUpdate(Note note);
     public void HandleDelete(Note note);
+    public IEnumerable<IObjectRef> GetFeed(string recipientId, DateTime begin, int limit = 40);
 }

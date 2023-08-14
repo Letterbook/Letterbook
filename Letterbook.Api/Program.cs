@@ -2,6 +2,7 @@ using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace Letterbook.Api;
@@ -42,7 +43,7 @@ public class Program
 
         var opts = coreOptions.Get<CoreOptions>() 
                    ?? throw new ArgumentException("Invalid configuration", nameof(CoreOptions));
-        builder.WebHost.UseUrls(CoreOptions.BaseUri(opts).ToString());
+        builder.WebHost.UseUrls(opts.BaseUri().ToString());
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.

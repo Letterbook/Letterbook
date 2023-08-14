@@ -1,4 +1,5 @@
 ﻿using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -24,7 +25,7 @@ public class AccountService : IAccountService
     public Account? RegisterAccount(string email, string handle)
     {
         // Fun fact, Uri will collapse the port number out of the string if it's the default for the scheme
-        var baseUri = CoreOptions.BaseUri(_opts);
+        var baseUri = _opts.BaseUri();
         var account = Account.CreateAccount(baseUri, email, handle);
 
         var success = _accountAdapter.RecordAccount(account);

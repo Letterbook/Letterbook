@@ -1,38 +1,98 @@
 ﻿using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
 public class TimelineService : ITimelineService
 {
     private ILogger<TimelineService> _logger;
+    private CoreOptions _options;
     private IFeedsAdapter _feeds;
-    
-    public TimelineService(ILogger<TimelineService> logger, IFeedsAdapter feeds)
+    private IAccountProfileAdapter _profileAdapter;
+
+    public TimelineService(ILogger<TimelineService> logger, IOptions<CoreOptions> options, IFeedsAdapter feeds, IAccountProfileAdapter profileAdapter)
     {
         _logger = logger;
+        _options = options.Value;
         _feeds = feeds;
+        _profileAdapter = profileAdapter;
     }
-    
+
     public void HandleCreate(Note note)
     {
-        throw new NotImplementedException();
+        var audience = DefaultAudience(note);
+        var mentions = note.Mentions.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
+
+        audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
+        _feeds.AddToTimeline(note, audience);
+
+        foreach (var mention in mentions)
+        {
+            _feeds.AddNotification(mention.Subject, note, note.Creators, ActivityType.Create);
+        }
     }
 
     public void HandleBoost(Note note)
     {
         var boostedBy = note.BoostedBy.Last();
-        throw new NotImplementedException();
+        if (note.Visibility.Contains(Audience.Public) || note.Mentions.Contains(Mention.Public) ||
+            note.Mentions.Contains(Mention.Unlisted))
+        {
+            _feeds.AddToTimeline(note, Audience.FromBoost(boostedBy), boostedBy);
+        }
+
+        foreach (var creator in note.Creators.Where(creator => creator.HasLocalAuthority(_options)))
+        {
+            _feeds.AddNotification(creator, note, new []{boostedBy}, ActivityType.Announce);
+        }
+        
     }
 
     public void HandleUpdate(Note note)
     {
-        throw new NotImplementedException();
+        var audience = DefaultAudience(note);
+        var mentions = note.Mentions.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
+
+        audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
+        _feeds.AddToTimeline(note, audience);
+
+        foreach (var mention in mentions)
+        {
+            // also boosted by
+            _feeds.AddNotification(mention.Subject, note, note.Creators, ActivityType.Update);
+        }
     }
 
     public void HandleDelete(Note note)
     {
-        throw new NotImplementedException();
+        _feeds.RemoveFromTimelines(note);
+    }
+
+    public IEnumerable<IObjectRef> GetFeed(string recipientId, DateTime begin, int limit = 40)
+    {
+        var recipient = _profileAdapter.LookupProfile(recipientId);
+        return _feeds.GetTimelineEntries(recipient.Audiences, begin, limit);
+    }
+
+    /// <summary>
+    /// Get the audience entries for the addressed recipients, plus followers/public/local, if applicable
+    /// </summary>
+    /// <param name="note"></param>
+    /// <returns></returns>
+    private HashSet<Audience> DefaultAudience(Note note)
+    {
+        var result = new HashSet<Audience>();
+        result.UnionWith(note.Visibility);
+
+        // No one is actually in the public audience
+        // This guarantees we include public posts in the timeline for the followers audience
+        if (!result.Contains(Audience.Public)) return result;
+        var followers = note.Creators.Select(p => p.FollowersCollection.Id);
+        result.UnionWith(followers.Select(Audience.FromUri));
+
+        return result;
     }
 }
