@@ -12,7 +12,7 @@ Letterbook is intended to be a mastodon-compatible federated microblogging serve
 
 Like a lot of other people, I joined the fediverse at the end of 2022. I had primarily used Twitter until then. There were always a lot of tradeoffs involved in that choice, but they ceased to be worthwhile. There are likewise tradeoffs in making my home on the fediverse. It's far from perfect. But of all the options, I believe the fediverse has the most upside, and by far the most future potential. That potential exists mainly in the more democratized nature of the network. Anyone can, *in theory*, run their own instance and set their own terms for engaging with the rest of the fediverse. Letterbook is an attempt to bring that theory closer to practice.
 
-Like many people, I have concerns about the sustainability of the fediverse as it stands now.
+Like many people, I have concerns about the sustainability of the fediverse as it stands now. The model we have is that, with a few exceptions, servers are run by unpaid volunteers and funded by donations, if even that. Adding to that, it seems the cost and difficulty of running mastodon servers scales faster than is bearable for most administrators. 
 
 * cost
 * admin burnout
