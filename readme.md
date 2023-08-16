@@ -10,14 +10,9 @@ Letterbook is intended to be a mastodon-compatible federated microblogging serve
 
 ## Background
 
-Like a lot of other people, I joined the fediverse at the end of 2022. I had primarily used Twitter until then. There were always a lot of tradeoffs involved in that choice, but they ceased to be worthwhile. There are likewise tradeoffs in making my home on the fediverse. It's far from perfect. But of all the options, I believe the fediverse has the most upside, and by far the most future potential. That potential exists mainly in the more democratized nature of the network. Anyone can, *in theory*, run their own instance and set their own terms for engaging with the rest of the fediverse. Letterbook is an attempt to bring that theory closer to practice.
+I hate the term microblogging, but I love the dynamic of it. Or at least the dynamic it can facilitate. I prefer to call it open correspondence. In fact, that open correspondence is the origin of the name. In the times when written letters were the standard technology for communicating across distances, a letter book was an actual book used to store and file those letters. Letterbook is where you keep your correspondence. Out of all the options which support that kind of open correspondence, I believe the fediverse has the most upside, and by far the most future potential. But I have concerns about the sustainability of the fediverse as it stands now, and I'm hardly the only one. Topics like cost, admin burnout, and haphazard moderation come up frequently. Letterbook is an attempt to address those concerns.
 
-Like many people, I have concerns about the sustainability of the fediverse as it stands now. The model we have is that, with a few exceptions, servers are run by unpaid volunteers and funded by donations, if even that. Adding to that, it seems the cost and difficulty of running mastodon servers scales faster than is bearable for most administrators. 
-
-* cost
-* admin burnout
-* coarse moderation
-* "just move/just run your own"
+I also sometimes macroblog. If you'd like to read more about the thought process that went into starting the projcet, [you can do that here](https://jenniferplusplus.com/letterbook/).
 
 ## Contributing
 
