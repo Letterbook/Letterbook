@@ -93,8 +93,9 @@ public class TimelineService : ITimelineService
         var result = new HashSet<Audience>();
         result.UnionWith(note.Visibility);
 
-        // No one is actually in the public audience
-        // This guarantees we include public posts in the timeline for the followers audience
+        // The "public audience" would be equivalent to Mastodon's federated global feed
+        // That's not the same thing as putting posts into follower's feeds.
+        // This ensures we include public posts in the followers audience in case the sender doesn't specify it
         if (!result.Contains(Audience.Public)) return result;
         var followers = note.Creators.Select(p => p.FollowersCollection.Id);
         result.UnionWith(followers.Select(Audience.FromUri));

@@ -54,7 +54,7 @@ public class Audience : IEquatable<Audience>, IObjectRef
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Id.Equals(other.Id) && Members.Equals(other.Members);
+        return Id.Equals(other.Id);
     }
 
     public override bool Equals(object? obj)
