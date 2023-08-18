@@ -61,6 +61,8 @@ We plan to support enough of the Mastodon API to provide good compatibility with
 
 * [Mastodon Docs](https://docs.joinmastodon.org/)
 * [Mastodon API routes](https://docs.joinmastodon.org/dev/routes/)
+* [ActivityPub Spec](https://www.w3.org/TR/activitypub/)
+* [ActivityStreams Vocabulary](https://www.w3.org/TR/activitystreams-vocabulary/)
 
 ## Development
 
