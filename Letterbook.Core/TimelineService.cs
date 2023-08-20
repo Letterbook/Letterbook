@@ -85,6 +85,7 @@ public class TimelineService : ITimelineService
 
     public IEnumerable<IObjectRef> GetFeed(string recipientId, DateTime begin, int limit = 40)
     {
+        // TODO: Account for moderation conditions (block, mute, etc)
         var recipient = _profileAdapter.LookupProfile(recipientId);
         return _feeds.GetTimelineEntries(recipient.Audiences, begin, limit);
     }

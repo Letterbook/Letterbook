@@ -369,4 +369,16 @@ public class TimelineServiceTest : WithMocks
         
         _feeds.Verify(m => m.AddNotification(note.Creators.First(), note, note.Creators, ActivityType.Update), Times.Never);
     }
+
+    [Trait("TimelineService", "HandleDelete")]
+    [Fact(DisplayName = "HandleDelete should remove the deleted post from all feeds")]
+    public void RemoveFromFeedsOnDelete()
+    {
+        var note = _note.Generate();
+        
+        _timeline.HandleDelete(note);
+        
+        _feeds.Verify(m => m.RemoveFromTimelines(note), Times.Once);
+
+    }
 }
