@@ -38,7 +38,6 @@ public class TimelineServiceTest : WithMocks
     }
 
     [Fact]
-    [Trait("Category", "OnCreate")]
     public void AddToPublicOnCreate()
     {
         var note = _note.Generate();
@@ -53,7 +52,6 @@ public class TimelineServiceTest : WithMocks
     }
 
     [Fact]
-    [Trait("Category", "OnCreate")]
     public void AddToFollowersOnCreate()
     {
         var note = _note.Generate();
@@ -69,7 +67,6 @@ public class TimelineServiceTest : WithMocks
     }
 
     [Fact]
-    [Trait("Category", "OnCreate")]
     public void AddToFollowersImplicitlyOnCreate()
     {
         var note = _note.Generate();
@@ -85,7 +82,6 @@ public class TimelineServiceTest : WithMocks
     }
 
     [Fact]
-    [Trait("Category", "OnCreate")]
     public void AddToMentionsOnCreate()
     {
         var note = _note.Generate();
@@ -107,7 +103,6 @@ public class TimelineServiceTest : WithMocks
     }
 
     [Fact]
-    [Trait("Category", "OnCreate")]
     public void AddMentionToNotificationsOnCreate()
     {
         var note = _note.Generate();
@@ -126,7 +121,6 @@ public class TimelineServiceTest : WithMocks
     }
 
     [Fact]
-    [Trait("Category", "OnCreate")]
     public void AddAllMentionsToNotificationsOnCreate()
     {
         var faker = new Faker();
@@ -146,8 +140,62 @@ public class TimelineServiceTest : WithMocks
 
         foreach (var mention in mentions)
         {
-            _feeds.Verify(m => m.AddNotification(mention.Subject, note, note.Creators, ActivityType.Create), Times.Exactly(1));
+            _feeds.Verify(m => m.AddNotification(mention.Subject, note, note.Creators, ActivityType.Create),
+                Times.Exactly(1));
         }
     }
 
+    [Fact(DisplayName = "HandleBoost should add public posts to the boost feed")]
+    public void AddPublicToTimelineOnBoost()
+    {
+        var note = _note.Generate();
+        note.Visibility.Add(Audience.Public);
+        var booster = _profile.Generate();
+        note.BoostedBy.Add(booster);
+
+        _timeline.HandleBoost(note);
+
+        _feeds.Verify(m => m.AddToTimeline(note, Audience.FromBoost(booster), booster), Times.Exactly(1));
+    }
+    
+    [Fact(DisplayName = "HandleBoost should not add follower posts to any feed")]
+    public void NoAddFollowersToTimelineOnBoost()
+    {
+        var note = _note.Generate();
+        note.Visibility.Add(Audience.FromFollowers(note.Creators.First()));
+        var booster = _profile.Generate();
+        note.BoostedBy.Add(booster);
+
+        _timeline.HandleBoost(note);
+
+        _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.IsAny<Audience>(), It.IsAny<Profile>()), Times.Never);
+        _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.IsAny<ICollection<Audience>>(), It.IsAny<Profile>()), Times.Never);
+    }
+    
+    [Fact(DisplayName = "HandleBoost should not add private posts to any feed")]
+    public void NoAddPrivateToTimelineOnBoost()
+    {
+        var note = _note.Generate();
+        note.Mentions.Add(Mention.To(_profile.Generate()));
+        var booster = _profile.Generate();
+        note.BoostedBy.Add(booster);
+
+        _timeline.HandleBoost(note);
+
+        _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.IsAny<Audience>(), It.IsAny<Profile>()), Times.Never);
+        _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.IsAny<ICollection<Audience>>(), It.IsAny<Profile>()), Times.Never);
+    }
+    
+    [Fact(DisplayName = "HandleBoost should add notification for creator")]
+    public void AddNotificationForCreatorOnBoost()
+    {
+        var creator = _profile.Generate();
+        var note = new FakeNote(creator).Generate();
+        var booster = _profile.Generate();
+        note.BoostedBy.Add(booster);
+
+        _timeline.HandleBoost(note);
+
+        _feeds.Verify(m => m.AddNotification(creator, note, It.IsAny<IEnumerable<Profile>>(), ActivityType.Announce), Times.Exactly(1));
+    }
 }

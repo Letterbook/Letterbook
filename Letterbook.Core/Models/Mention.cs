@@ -28,6 +28,10 @@ public class Mention : IEquatable<Mention>
 
     public static Mention Public => _publicSpecialMention;
     public static Mention Unlisted => _unlistedSpecialMention;
+    public static Mention To(Profile subject) => Create(subject, MentionVisibility.To);
+    public static Mention Bto(Profile subject) => Create(subject, MentionVisibility.Bto);
+    public static Mention Cc(Profile subject) => Create(subject, MentionVisibility.Cc);
+    public static Mention Bcc(Profile subject) => Create(subject, MentionVisibility.Bcc);
 
     /// <summary>
     /// This should be used for comparisons only, in visibility calculations. It will not make any sense to persist it
@@ -69,5 +73,15 @@ public class Mention : IEquatable<Mention>
     public static bool operator !=(Mention? left, Mention? right)
     {
         return !Equals(left, right);
+    }
+
+    private static Mention Create(Profile subject, MentionVisibility visibility)
+    {
+        return new Mention()
+        {
+            Id = Guid.NewGuid(),
+            Subject = subject,
+            Visibility = visibility
+        };
     }
 }
