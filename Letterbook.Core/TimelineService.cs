@@ -23,6 +23,7 @@ public class TimelineService : ITimelineService
 
     public void HandleCreate(Note note)
     {
+        // TODO: account for moderation conditions (blocks, etc)
         var audience = DefaultAudience(note);
         var mentions = note.Mentions.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
 

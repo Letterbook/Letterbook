@@ -1,4 +1,5 @@
-﻿using Letterbook.Core.Adapters;
+﻿using Bogus;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Microsoft.Extensions.Logging;
@@ -24,6 +25,7 @@ public class TimelineServiceTest : WithMocks
         _feeds = new Mock<IFeedsAdapter>();
         _timeline = new TimelineService(_logger.Object, CoreOptionsMock, _feeds.Object, AccountProfileMock.Object);
 
+        outputHelper.WriteLine($"Bogus Seed: {Init.WithSeed()}");
         _opts = CoreOptionsMock.Value;
         _note = new FakeNote();
         _profile = new FakeProfile(_opts.DomainName);
@@ -36,17 +38,22 @@ public class TimelineServiceTest : WithMocks
     }
 
     [Fact]
+    [Trait("Category", "OnCreate")]
     public void AddToPublicOnCreate()
     {
         var note = _note.Generate();
         note.Visibility.Add(Audience.Public);
 
         _timeline.HandleCreate(note);
-        
-        _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.Is<ICollection<Audience>>(audience => audience.Contains(Audience.Public)), It.IsAny<Profile>()), Times.Exactly(1));
+
+        _feeds.Verify(
+            m => m.AddToTimeline(It.IsAny<Note>(),
+                It.Is<ICollection<Audience>>(audience => audience.Contains(Audience.Public)), It.IsAny<Profile>()),
+            Times.Exactly(1));
     }
-    
+
     [Fact]
+    [Trait("Category", "OnCreate")]
     public void AddToFollowersOnCreate()
     {
         var note = _note.Generate();
@@ -54,11 +61,15 @@ public class TimelineServiceTest : WithMocks
         note.Visibility.Add(expected);
 
         _timeline.HandleCreate(note);
-        
-        _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()), Times.Exactly(1));
+
+        _feeds.Verify(
+            m => m.AddToTimeline(It.IsAny<Note>(),
+                It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()),
+            Times.Exactly(1));
     }
 
     [Fact]
+    [Trait("Category", "OnCreate")]
     public void AddToFollowersImplicitlyOnCreate()
     {
         var note = _note.Generate();
@@ -66,11 +77,15 @@ public class TimelineServiceTest : WithMocks
         note.Visibility.Add(Audience.Public);
 
         _timeline.HandleCreate(note);
-        
-        _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()), Times.Exactly(1));
+
+        _feeds.Verify(
+            m => m.AddToTimeline(It.IsAny<Note>(),
+                It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()),
+            Times.Exactly(1));
     }
 
     [Fact]
+    [Trait("Category", "OnCreate")]
     public void AddToMentionsOnCreate()
     {
         var note = _note.Generate();
@@ -84,7 +99,55 @@ public class TimelineServiceTest : WithMocks
         var expected = Audience.FromMention(mention.Subject);
 
         _timeline.HandleCreate(note);
-        
-        _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()), Times.Exactly(1));
+
+        _feeds.Verify(
+            m => m.AddToTimeline(It.IsAny<Note>(),
+                It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()),
+            Times.Exactly(1));
     }
+
+    [Fact]
+    [Trait("Category", "OnCreate")]
+    public void AddMentionToNotificationsOnCreate()
+    {
+        var note = _note.Generate();
+        var profile = _profile.Generate();
+        note.Mentions.Add(new Mention()
+        {
+            Id = Guid.NewGuid(),
+            Subject = profile,
+            Visibility = MentionVisibility.To
+        });
+
+        _timeline.HandleCreate(note);
+
+        _feeds.Verify(m => m.AddNotification<Note>(profile, note, note.Creators, ActivityType.Create),
+            Times.Exactly(1));
+    }
+
+    [Fact]
+    [Trait("Category", "OnCreate")]
+    public void AddAllMentionsToNotificationsOnCreate()
+    {
+        var faker = new Faker();
+        var note = _note.Generate();
+        var mentions = _profile.Generate(3).Select(p => new Mention()
+        {
+            Id = Guid.NewGuid(),
+            Subject = p,
+            Visibility = faker.PickRandom<MentionVisibility>()
+        }).ToArray();
+        foreach (var mention in mentions)
+        {
+            note.Mentions.Add(mention);
+        }
+
+        _timeline.HandleCreate(note);
+
+        foreach (var mention in mentions)
+        {
+            _feeds.Verify(m => m.AddNotification(mention.Subject, note, note.Creators, ActivityType.Create), Times.Exactly(1));
+        }
+    }
+
 }
