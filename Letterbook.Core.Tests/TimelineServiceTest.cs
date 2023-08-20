@@ -25,7 +25,7 @@ public class TimelineServiceTest : WithMocks
         _feeds = new Mock<IFeedsAdapter>();
         _timeline = new TimelineService(_logger.Object, CoreOptionsMock, _feeds.Object, AccountProfileMock.Object);
 
-        outputHelper.WriteLine($"Bogus Seed: {Init.WithSeed()}");
+        _outputHelper.WriteLine($"Bogus Seed: {Init.WithSeed()}");
         _opts = CoreOptionsMock.Value;
         _note = new FakeNote();
         _profile = new FakeProfile(_opts.DomainName);
@@ -49,7 +49,7 @@ public class TimelineServiceTest : WithMocks
         _feeds.Verify(
             m => m.AddToTimeline(It.IsAny<Note>(),
                 It.Is<ICollection<Audience>>(audience => audience.Contains(Audience.Public)), It.IsAny<Profile>()),
-            Times.Exactly(1));
+            Times.Once);
     }
 
     [Trait("TimelineService", "HandleCreate")]
@@ -65,7 +65,7 @@ public class TimelineServiceTest : WithMocks
         _feeds.Verify(
             m => m.AddToTimeline(It.IsAny<Note>(),
                 It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()),
-            Times.Exactly(1));
+            Times.Once);
     }
 
     [Trait("TimelineService", "HandleCreate")]
@@ -81,7 +81,7 @@ public class TimelineServiceTest : WithMocks
         _feeds.Verify(
             m => m.AddToTimeline(It.IsAny<Note>(),
                 It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()),
-            Times.Exactly(1));
+            Times.Once);
     }
 
     [Trait("TimelineService", "HandleCreate")]
@@ -103,7 +103,7 @@ public class TimelineServiceTest : WithMocks
         _feeds.Verify(
             m => m.AddToTimeline(It.IsAny<Note>(),
                 It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()),
-            Times.Exactly(1));
+            Times.Once);
     }
 
     [Trait("TimelineService", "HandleCreate")]
@@ -122,7 +122,7 @@ public class TimelineServiceTest : WithMocks
         _timeline.HandleCreate(note);
 
         _feeds.Verify(m => m.AddNotification<Note>(profile, note, note.Creators, ActivityType.Create),
-            Times.Exactly(1));
+            Times.Once);
     }
 
     [Trait("TimelineService", "HandleCreate")]
@@ -147,7 +147,7 @@ public class TimelineServiceTest : WithMocks
         foreach (var mention in mentions)
         {
             _feeds.Verify(m => m.AddNotification(mention.Subject, note, note.Creators, ActivityType.Create),
-                Times.Exactly(1));
+                Times.Once);
         }
     }
 
@@ -189,7 +189,7 @@ public class TimelineServiceTest : WithMocks
 
         _timeline.HandleBoost(note);
 
-        _feeds.Verify(m => m.AddToTimeline(note, Audience.FromBoost(booster), booster), Times.Exactly(1));
+        _feeds.Verify(m => m.AddToTimeline(note, Audience.FromBoost(booster), booster), Times.Once);
     }
     
     [Trait("TimelineService", "HandleBoost")]
@@ -233,7 +233,7 @@ public class TimelineServiceTest : WithMocks
 
         _timeline.HandleBoost(note);
 
-        _feeds.Verify(m => m.AddNotification(creator, note, It.IsAny<IEnumerable<Profile>>(), ActivityType.Announce), Times.Exactly(1));
+        _feeds.Verify(m => m.AddNotification(creator, note, It.IsAny<IEnumerable<Profile>>(), ActivityType.Announce), Times.Once);
     }
 
     [Trait("TimelineService", "HandleUpdate")]
@@ -249,7 +249,7 @@ public class TimelineServiceTest : WithMocks
         _feeds.Verify(
             m => m.AddToTimeline(It.IsAny<Note>(),
                 It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()),
-            Times.Exactly(1));
+            Times.Once);
     }
     
     [Trait("TimelineService", "HandleUpdate")]
@@ -269,7 +269,7 @@ public class TimelineServiceTest : WithMocks
             m => m.AddToTimeline(It.IsAny<Note>(),
                 It.Is<ICollection<Audience>>(actual =>
                     audience.Aggregate(true, (contains, expected) => contains && actual.Contains(expected))),
-                It.IsAny<Profile>()), Times.Exactly(1));
+                It.IsAny<Profile>()), Times.Once);
     }
 
     [Trait("TimelineService", "HandleUpdate")]
@@ -336,7 +336,7 @@ public class TimelineServiceTest : WithMocks
 
         _feeds.Verify(
             m => m.AddToTimeline(note, It.Is<ICollection<Audience>>(actual => actual.Contains(expected)),
-                It.IsAny<Profile>()), Times.Exactly(1));
+                It.IsAny<Profile>()), Times.Once);
 
     }
     
@@ -355,7 +355,7 @@ public class TimelineServiceTest : WithMocks
             m => m.AddToTimeline(It.IsAny<Note>(),
                 It.Is<ICollection<Audience>>(actual =>
                     audience.Aggregate(false, (contains, expected) => contains || actual.Contains(expected))),
-                It.IsAny<Profile>()), Times.Exactly(0));
+                It.IsAny<Profile>()), Times.Never);
         
     }
     
