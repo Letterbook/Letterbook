@@ -37,7 +37,8 @@ public class TimelineServiceTest : WithMocks
         Assert.NotNull(_timeline);
     }
 
-    [Fact]
+    [Trait("TimelineService", "HandleCreate")]
+    [Fact(DisplayName = "HandleCreate should add public posts to the public audience")]
     public void AddToPublicOnCreate()
     {
         var note = _note.Generate();
@@ -51,7 +52,8 @@ public class TimelineServiceTest : WithMocks
             Times.Exactly(1));
     }
 
-    [Fact]
+    [Trait("TimelineService", "HandleCreate")]
+    [Fact(DisplayName = "HandleCreate should add follower posts to the creator's follower audience")]
     public void AddToFollowersOnCreate()
     {
         var note = _note.Generate();
@@ -66,7 +68,8 @@ public class TimelineServiceTest : WithMocks
             Times.Exactly(1));
     }
 
-    [Fact]
+    [Trait("TimelineService", "HandleCreate")]
+    [Fact(DisplayName = "HandleCreate should add public posts to the creator's follower audience")]
     public void AddToFollowersImplicitlyOnCreate()
     {
         var note = _note.Generate();
@@ -81,7 +84,8 @@ public class TimelineServiceTest : WithMocks
             Times.Exactly(1));
     }
 
-    [Fact]
+    [Trait("TimelineService", "HandleCreate")]
+    [Fact(DisplayName = "HandleCreate should add any posts to the mentioned profiles' feeds")]
     public void AddToMentionsOnCreate()
     {
         var note = _note.Generate();
@@ -102,7 +106,8 @@ public class TimelineServiceTest : WithMocks
             Times.Exactly(1));
     }
 
-    [Fact]
+    [Trait("TimelineService", "HandleCreate")]
+    [Fact(DisplayName = "HandleCreate should add any posts to the mentioned profile's notifications")]
     public void AddMentionToNotificationsOnCreate()
     {
         var note = _note.Generate();
@@ -120,7 +125,8 @@ public class TimelineServiceTest : WithMocks
             Times.Exactly(1));
     }
 
-    [Fact]
+    [Trait("TimelineService", "HandleCreate")]
+    [Fact(DisplayName = "HandleCreate should add any posts to all of the mentioned profiles' notifications")]
     public void AddAllMentionsToNotificationsOnCreate()
     {
         var faker = new Faker();
@@ -145,6 +151,34 @@ public class TimelineServiceTest : WithMocks
         }
     }
 
+    [Trait("TimelineService", "HandleCreate")]
+    [Fact(DisplayName = "HandleCreate should not add private posts to the public or follower feeds")]
+    public void NoAddPrivateOnCreate()
+    {
+        var note = _note.Generate();
+        note.Visibility.Remove(Audience.Public);
+        note.Visibility.Remove(Audience.FromFollowers(note.Creators.First()));
+        var mentioned = Mention.To(_profile.Generate());
+        note.Mentions.Add(mentioned);
+        
+        _timeline.HandleCreate(note);
+
+        _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), Audience.Public, It.IsAny<Profile>()), Times.Never);
+        _feeds.Verify(
+            m => m.AddToTimeline(It.IsAny<Note>(), Audience.FromFollowers(note.Creators.First()), It.IsAny<Profile>()),
+            Times.Never);
+        _feeds.Verify(
+            m => m.AddToTimeline(It.IsAny<Note>(),
+                It.Is<ICollection<Audience>>(audience => audience.Contains(Audience.Public)), It.IsAny<Profile>()),
+            Times.Never);
+        _feeds.Verify(
+            m => m.AddToTimeline(It.IsAny<Note>(),
+                It.Is<ICollection<Audience>>(audience =>
+                    audience.Contains(Audience.FromFollowers(note.Creators.First()))), It.IsAny<Profile>()),
+            Times.Never);
+    }
+
+    [Trait("TimelineService", "HandleBoost")]
     [Fact(DisplayName = "HandleBoost should add public posts to the boost feed")]
     public void AddPublicToTimelineOnBoost()
     {
@@ -158,6 +192,7 @@ public class TimelineServiceTest : WithMocks
         _feeds.Verify(m => m.AddToTimeline(note, Audience.FromBoost(booster), booster), Times.Exactly(1));
     }
     
+    [Trait("TimelineService", "HandleBoost")]
     [Fact(DisplayName = "HandleBoost should not add follower posts to any feed")]
     public void NoAddFollowersToTimelineOnBoost()
     {
@@ -172,6 +207,7 @@ public class TimelineServiceTest : WithMocks
         _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.IsAny<ICollection<Audience>>(), It.IsAny<Profile>()), Times.Never);
     }
     
+    [Trait("TimelineService", "HandleBoost")]
     [Fact(DisplayName = "HandleBoost should not add private posts to any feed")]
     public void NoAddPrivateToTimelineOnBoost()
     {
@@ -186,6 +222,7 @@ public class TimelineServiceTest : WithMocks
         _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.IsAny<ICollection<Audience>>(), It.IsAny<Profile>()), Times.Never);
     }
     
+    [Trait("TimelineService", "HandleBoost")]
     [Fact(DisplayName = "HandleBoost should add notification for creator")]
     public void AddNotificationForCreatorOnBoost()
     {
@@ -197,5 +234,61 @@ public class TimelineServiceTest : WithMocks
         _timeline.HandleBoost(note);
 
         _feeds.Verify(m => m.AddNotification(creator, note, It.IsAny<IEnumerable<Profile>>(), ActivityType.Announce), Times.Exactly(1));
+    }
+
+    [Trait("TimelineService", "HandleUpdate")]
+    [Fact(DisplayName = "HandleUpdate should add to followers timeline")]
+    public void AddToFollowersOnUpdate()
+    {
+        var note = _note.Generate();
+        var expected = Audience.FromFollowers(note.Creators.First());
+        note.Visibility.Add(expected);
+
+        _timeline.HandleUpdate(note);
+
+        _feeds.Verify(
+            m => m.AddToTimeline(It.IsAny<Note>(),
+                It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()),
+            Times.Exactly(1));
+    }
+    
+    [Trait("TimelineService", "HandleUpdate")]
+    [Fact(DisplayName = "HandleUpdate should add to all creator's followers timeline")]
+    public void AddToAllFollowersOnUpdate()
+    {
+        var note = _note.Generate();
+        note.Creators.Add(_profile.Generate());
+        var audience = note.Creators.Select(Audience.FromFollowers).ToArray();
+        note.Visibility.Add(Audience.Public);
+
+        _timeline.HandleUpdate(note);
+
+        // This assertion looks more complicated than it is.
+        // It just checks that the followers audience is included for every creator on the note
+        _feeds.Verify(
+            m => m.AddToTimeline(It.IsAny<Note>(),
+                It.Is<ICollection<Audience>>(actual =>
+                    audience.Aggregate(true, (contains, expected) => contains && actual.Contains(expected))),
+                It.IsAny<Profile>()), Times.Exactly(1));
+        
+    }
+    
+    [Trait("TimelineService", "HandleUpdate")]
+    [Fact(DisplayName = "HandleUpdate should not add private post to any creator's followers timeline")]
+    public void NoAddPrivateToFollowersOnUpdate()
+    {
+        var note = _note.Generate();
+        note.Creators.Add(_profile.Generate());
+        var audience = note.Creators.Select(Audience.FromFollowers).ToArray();
+        note.Visibility.Remove(Audience.Public);
+
+        _timeline.HandleUpdate(note);
+
+        _feeds.Verify(
+            m => m.AddToTimeline(It.IsAny<Note>(),
+                It.Is<ICollection<Audience>>(actual =>
+                    audience.Aggregate(false, (contains, expected) => contains || actual.Contains(expected))),
+                It.IsAny<Profile>()), Times.Exactly(0));
+        
     }
 }
