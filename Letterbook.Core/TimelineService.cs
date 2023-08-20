@@ -62,11 +62,16 @@ public class TimelineService : ITimelineService
 
         foreach (var mention in mentions)
         {
-            // also boosted by
             _feeds.AddNotification(mention.Subject, note, note.Creators, ActivityType.Update);
         }
 
         foreach (var profile in note.BoostedBy.Where(profile => profile.HasLocalAuthority(_options)))
+        {
+            _feeds.AddNotification(profile, note, note.Creators, ActivityType.Update);
+        }
+
+        if (note.Creators.Count <= 1) return;
+        foreach (var profile in note.Creators.Where(profile => profile.HasLocalAuthority(_options)))
         {
             _feeds.AddNotification(profile, note, note.Creators, ActivityType.Update);
         }

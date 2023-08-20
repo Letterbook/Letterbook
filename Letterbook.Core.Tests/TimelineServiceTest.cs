@@ -270,7 +270,74 @@ public class TimelineServiceTest : WithMocks
                 It.Is<ICollection<Audience>>(actual =>
                     audience.Aggregate(true, (contains, expected) => contains && actual.Contains(expected))),
                 It.IsAny<Profile>()), Times.Exactly(1));
+    }
+
+    [Trait("TimelineService", "HandleUpdate")]
+    [Fact(DisplayName = "HandleUpdate should add to all mentioned profiles' notifications")]
+    public void AddToAllMentionedNotifications()
+    {
+        var note = _note.Generate();
+        var mentions = _profile.Generate(3).Select(Mention.To).ToArray();
+        foreach (var mention in mentions)
+        {
+            note.Mentions.Add(mention);
+        }
         
+        _timeline.HandleUpdate(note);
+
+        foreach (var expected in mentions)
+        {
+            _feeds.Verify(m => m.AddNotification(expected.Subject, note, note.Creators, ActivityType.Update), Times.Once);
+        }
+    }
+    
+    [Trait("TimelineService", "HandleUpdate")]
+    [Fact(DisplayName = "HandleUpdate should add to all boosters' notifications")]
+    public void AddToAllBoostersNotifications()
+    {
+        var note = _note.Generate();
+        var boosters = _profile.Generate(3).ToArray();
+        foreach (var mention in boosters)
+        {
+            note.BoostedBy.Add(mention);
+        }
+        
+        _timeline.HandleUpdate(note);
+
+        foreach (var expected in boosters)
+        {
+            _feeds.Verify(m => m.AddNotification(expected, note, note.Creators, ActivityType.Update), Times.Once);
+        }
+    }
+    
+    [Trait("TimelineService", "HandleUpdate")]
+    [Fact(DisplayName = "HandleUpdate should add to multiple creators' notifications")]
+    public void AddToOtherCreatorsNotifications()
+    {
+        var note = _note.Generate();
+        var localCreator = _profile.Generate();
+        note.Creators.Add(localCreator);
+        
+        _timeline.HandleUpdate(note);
+        
+        _feeds.Verify(m => m.AddNotification(localCreator, note, note.Creators, ActivityType.Update), Times.Once);
+    }
+
+    [Trait("TimelineService", "HandleUpdate")]
+    [Fact(DisplayName = "HandleUpdate should add post to mentioned profiles' feeds")]
+    public void AddToMentionsOnUpdate()
+    {
+        var note = _note.Generate();
+        var mentioned = Mention.To(_profile.Generate());
+        var expected = Audience.FromMention(mentioned.Subject);
+        note.Mentions.Add(mentioned);
+        
+        _timeline.HandleUpdate(note);
+
+        _feeds.Verify(
+            m => m.AddToTimeline(note, It.Is<ICollection<Audience>>(actual => actual.Contains(expected)),
+                It.IsAny<Profile>()), Times.Exactly(1));
+
     }
     
     [Trait("TimelineService", "HandleUpdate")]
@@ -290,5 +357,16 @@ public class TimelineServiceTest : WithMocks
                     audience.Aggregate(false, (contains, expected) => contains || actual.Contains(expected))),
                 It.IsAny<Profile>()), Times.Exactly(0));
         
+    }
+    
+    [Trait("TimelineService", "HandleUpdate")]
+    [Fact(DisplayName = "HandleUpdate should not add to single creator's notifications")]
+    public void NoAddToSingleCreatorsNotifications()
+    {
+        var note = _note.Generate();
+        
+        _timeline.HandleUpdate(note);
+        
+        _feeds.Verify(m => m.AddNotification(note.Creators.First(), note, note.Creators, ActivityType.Update), Times.Never);
     }
 }
