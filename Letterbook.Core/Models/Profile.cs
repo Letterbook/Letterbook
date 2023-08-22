@@ -36,6 +36,7 @@ public class Profile : IObjectRef
     public ActivityActorType Type { get; set; }
     public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
     public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
+    public ObjectCollection<Profile> FollowersCollection { get; set; } = new();
 
     public static Profile CreatePerson(Uri baseUri, string handle)
     {
@@ -45,9 +46,11 @@ public class Profile : IObjectRef
             Id = new Uri(baseUri, $"/actor/{localId}"),
             LocalId = localId,
             Type = ActivityActorType.Person,
-            Handle = $@"{handle}@{baseUri.Authority}",
+            Handle = $"@{handle}@{baseUri.Authority}",
             DisplayName = handle,
         };
+        profile.Audiences.Add(Audience.FromMention(profile));
+        profile.FollowersCollection.Id = new Uri(profile.Id, "/followers");
         return profile;
     }
 }

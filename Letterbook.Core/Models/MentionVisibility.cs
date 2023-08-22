@@ -6,4 +6,5 @@ public enum MentionVisibility
     Bcc,
     To,
     Cc,
+    // does this also need to include Audience and Tags?
 }

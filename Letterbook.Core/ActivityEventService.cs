@@ -1,5 +1,6 @@
 ﻿using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.Extensions.Options;
 
@@ -120,7 +121,7 @@ public class ActivityEventService : IActivityEventService
         return new CloudEvent
         {
             Id = Guid.NewGuid().ToString(),
-            Source = CoreOptions.BaseUri(_options),
+            Source = _options.BaseUri(),
             Data = value,
             Type = $"{nameof(ActivityEventService)}.{value.GetType()}.{action}",
             Subject = value.Id.ToString(),

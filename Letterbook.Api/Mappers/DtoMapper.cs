@@ -18,6 +18,7 @@ public static class DtoMapper
             .IncludeBase<DTO.IResolvable, Models.Profile>()
             .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
+            .ForMember(dest => dest.FollowersCollection, opt => opt.MapFrom(src => src.Followers))
             .ForMember(dest => dest.DisplayName, opt => opt.Ignore());
         cfg.CreateMap<DTO.Object, Models.Profile>()
             .IncludeBase<DTO.IResolvable, Models.Profile>();
@@ -32,6 +33,7 @@ public static class DtoMapper
             .ForMember(dest => dest.RelatedAccounts, opt => opt.Ignore())
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
             .ForMember(dest => dest.DisplayName, opt => opt.Ignore())
+            .ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
             .ForMember(dest => dest.Audiences, opt => opt.Ignore());
     }
 
