@@ -43,6 +43,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Decisions", "Decisions", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.RxMessageBus", "Letterbook.Adapter.RxMessageBus\Letterbook.Adapter.RxMessageBus.csproj", "{FD68DA55-DCCF-4F8B-AFBB-C1383E9C58A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.TimescaleFeeds", "Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj", "{DF6AFF86-FFF2-4179-917A-2FAFE10B1A88}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +82,10 @@ Global
 		{FD68DA55-DCCF-4F8B-AFBB-C1383E9C58A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD68DA55-DCCF-4F8B-AFBB-C1383E9C58A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD68DA55-DCCF-4F8B-AFBB-C1383E9C58A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF6AFF86-FFF2-4179-917A-2FAFE10B1A88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF6AFF86-FFF2-4179-917A-2FAFE10B1A88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF6AFF86-FFF2-4179-917A-2FAFE10B1A88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF6AFF86-FFF2-4179-917A-2FAFE10B1A88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
