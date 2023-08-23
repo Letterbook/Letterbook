@@ -6,7 +6,7 @@ namespace Letterbook.Adapter.TimescaleFeeds;
 
 public class FeedsDbOptions
 {
-    public new const string ConfigKey = "Letterbook.Db.Feeds";
+    public new const string ConfigKey = "Letterbook.Timescale.Feeds";
     
     public string? Host { get; set; }
     public string? Port { get; set; }

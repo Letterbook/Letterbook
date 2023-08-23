@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Letterbook.Adapter.TimescaleFeeds.Entities;
 
-public class ConfigTimelineRecord : IEntityTypeConfiguration<TimelineRecord>
+public class ConfigTimelineRecord : IEntityTypeConfiguration<Entry>
 {
-    public void Configure(EntityTypeBuilder<TimelineRecord> builder)
+    public void Configure(EntityTypeBuilder<Entry> builder)
     {
         builder.HasNoKey();
         builder.HasIndex(model => model.Time);

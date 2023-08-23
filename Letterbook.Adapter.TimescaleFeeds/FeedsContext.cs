@@ -8,12 +8,20 @@ namespace Letterbook.Adapter.TimescaleFeeds;
 public class FeedsContext : DbContext
 {
     private FeedsDbOptions _feedsDbOptions;
-    public DbSet<TimelineRecord> Timelines { get; set; }
+    public DbSet<Entry> Feeds { get; set; }
 
     // Called by the designer to create and run migrations
     internal FeedsContext(DbContextOptions<FeedsContext> options) : base(options)
     {
-        _feedsDbOptions = new DesignFeedsDbOptions();
+        _feedsDbOptions = new FeedsDbOptions
+        {
+            Host = "localhost",
+            Port = "5432",
+            Username = "letterbook",
+            Password = "letterbookpw",
+            UseSsl = false,
+            Database = "letterbook_feeds",
+        };
     }
 
     // Called by DI during normal use
