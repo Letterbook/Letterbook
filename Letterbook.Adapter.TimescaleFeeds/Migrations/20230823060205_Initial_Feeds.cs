@@ -1,4 +1,5 @@
 ﻿using System;
+using Letterbook.Adapter.TimescaleFeeds.Extensions;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -49,6 +50,8 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
                 name: "IX_Feeds_Time",
                 table: "Feeds",
                 column: "Time");
+
+            migrationBuilder.CreateHyperTable("Feeds", "Time");
         }
 
         /// <inheritdoc />

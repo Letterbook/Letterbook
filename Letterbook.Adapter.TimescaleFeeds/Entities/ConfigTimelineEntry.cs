@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Letterbook.Adapter.TimescaleFeeds.Entities;
 
-public class ConfigTimelineRecord : IEntityTypeConfiguration<Entry>
+public class ConfigTimelineEntry : IEntityTypeConfiguration<Entry>
 {
     public void Configure(EntityTypeBuilder<Entry> builder)
     {
