@@ -1,5 +1,6 @@
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
+using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
@@ -36,6 +37,7 @@ public class Program
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
         builder.Services.AddSingleton<IMessageBusAdapter, RxMessageBus>();
         builder.Services.AddDbContext<TransactionalContext>();
+        builder.Services.AddDbContext<FeedsContext>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();

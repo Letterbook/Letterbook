@@ -51,6 +51,8 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
                 table: "Feeds",
                 column: "Time");
 
+            migrationBuilder.InstallTimescale();
+            
             migrationBuilder.CreateHyperTable("Feeds", "Time");
         }
 

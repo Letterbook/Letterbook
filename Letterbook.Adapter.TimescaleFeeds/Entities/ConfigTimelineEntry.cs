@@ -9,8 +9,13 @@ public class ConfigTimelineEntry : IEntityTypeConfiguration<Entry>
     {
         builder.HasNoKey();
         builder.HasIndex(model => model.Time);
-        builder.HasIndex(model => model.AudienceKey);
-        builder.HasIndex(model => model.EntityId);
+        // Hash indexes do what it says on the tin
+        // They're faster than BTrees for equality but support no other comparisons
+        builder.HasIndex(model => model.AudienceKey).HasMethod("Hash");
+        builder.HasIndex(model => model.EntityId).HasMethod("Hash");
+        builder.HasIndex(model => model.Authority).HasMethod("Hash");
+        // GIN is an index optimized for multi-value columns, like arrays
+        // It supports comparisons for equality (=, is, in) and inequality (=>, >, <, <=) 
         builder.HasIndex(model => model.CreatedBy).HasMethod("GIN");
     }
 }

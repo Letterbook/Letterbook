@@ -14,5 +14,5 @@ public class Entry
     public string[] CreatedBy { get; set; } //json
     public string Authority { get; set; }
     public string? BoostedBy { get; set; }
-    public DateTime CreatedTime { get; set; }
+    public DateTime CreatedDate { get; set; }
 }
