@@ -5,17 +5,13 @@ namespace Letterbook.Adapter.TimescaleFeeds.Extensions;
 
 public static class ContentExtensions
 {
-    public static void ToEntryTemplate(this IContentRef content, StringBuilder sb, int row)
+    public static void AppendEntryRow(this StringBuilder sb, int row)
     {
         const int count = 9;
         var start = count * row;
         var end = start + count;
         sb.Append('(');
-        foreach (var i in Enumerable.Range(start, end))
-        {
-            sb.Append('{').Append(i).Append('}');
-            if (i < end) sb.Append(',');
-        }
+        sb.AppendJoin(',', Enumerable.Range(start, end).Select(i => $"{{{i}}}"));
         sb.Append(')');
     }
 

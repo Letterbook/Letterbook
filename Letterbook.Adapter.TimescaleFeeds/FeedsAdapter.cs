@@ -56,7 +56,7 @@ public class FeedsAdapter : IFeedsAdapter
 
         for (var i = 0; i < audience.Count; i++)
         {
-            subject.ToEntryTemplate(builder, i);
+            builder.AppendEntryRow(i);
             if (i + 1 < audience.Count) builder.Append(",\n");
         }
 
