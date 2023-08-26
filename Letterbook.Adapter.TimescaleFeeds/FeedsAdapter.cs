@@ -48,6 +48,7 @@ public class FeedsAdapter : IFeedsAdapter
             AddToTimeline(subject, each, boostedBy);
         }
         
+        // language=NONE suppress jetbrains embedded sql highlighting because it's more annoying than helpful here
         var builder = new StringBuilder(
             """
             INSERT INTO Feeds (Time, Type, EntityId, AudienceKey, AudienceName, CreatedBy, Authority, BoostedBy, CreatedDate)

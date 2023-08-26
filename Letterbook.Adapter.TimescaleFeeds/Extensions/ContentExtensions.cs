@@ -9,9 +9,8 @@ public static class ContentExtensions
     {
         const int count = 9;
         var start = count * row;
-        var end = start + count;
         sb.Append('(');
-        sb.AppendJoin(',', Enumerable.Range(start, end).Select(i => $"{{{i}}}"));
+        sb.AppendJoin(',', Enumerable.Range(start, count).Select(i => $"{{{i}}}"));
         sb.Append(')');
     }
 
