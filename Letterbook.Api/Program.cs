@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Core;
@@ -17,6 +19,10 @@ public class Program
         builder.Services.AddControllers(options =>
         {
             options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
+        }).AddJsonOptions(opts =>
+        {
+            opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         });
         
         // Register config
@@ -58,7 +64,6 @@ public class Program
         app.UseAuthorization();
         
         app.UsePathBase(new PathString("/api/v1"));
-
 
         app.MapControllers();
 

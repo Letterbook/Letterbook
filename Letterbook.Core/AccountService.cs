@@ -1,6 +1,7 @@
 ﻿using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Letterbook.Core.Models.WebFinger;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -43,6 +44,11 @@ public class AccountService : IAccountService
     public Account? LookupAccount(string id)
     {
         return _accountAdapter.LookupAccount(id);
+    }
+
+    public WebFingerJsonResourceDescriptor LookupAccount(WebFingerQueryTarget queryTarget)
+    {
+        throw new NotImplementedException();
     }
 
     public IEnumerable<Account> FindAccounts(string email)
