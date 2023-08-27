@@ -33,7 +33,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Letterbook.Api.Tests\Letterbook.Api.Tests.csproj" />
         <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
     </ItemGroup>
 
