@@ -11,10 +11,12 @@ namespace Letterbook.Adapter.TimescaleFeeds;
 public class FeedsAdapter : IFeedsAdapter
 {
     private readonly FeedsContext _feedsContext;
+    private bool _canceled;
 
     public FeedsAdapter(FeedsContext feedsContext)
     {
         _feedsContext = feedsContext;
+        _canceled = false;
     }
 
     public void AddToTimeline<T>(T subject, Models.Audience audience, Models.Profile? boostedBy = default)
@@ -34,8 +36,8 @@ public class FeedsAdapter : IFeedsAdapter
 
         _feedsContext.Feeds.FromSql(
             $"""
-             INSERT INTO Feeds (Time, Type, EntityId, AudienceKey, AudienceName, CreatedBy, Authority, BoostedBy, CreatedDate)
-             VALUES ({line.Time}, {line.Type}, {line.AudienceKey}, {line.EntityId}, {line.Authority}, {line.CreatedBy}, {line.Type}, {line.BoostedBy}, {line.CreatedDate});
+             INSERT INTO "Feeds" ("Time", "Type", "EntityId", "AudienceKey", "AudienceName", "CreatedBy", "Authority", "BoostedBy", "CreatedTime")
+             VALUES ({line.Time}, {line.Type}, {line.EntityId}, {line.AudienceKey}, {null}, ARRAY [{string.Join(',', line.CreatedBy)}], {line.Authority}, {line.BoostedBy}, {line.CreatedDate})
              """);
     }
 
@@ -110,5 +112,14 @@ public class FeedsAdapter : IFeedsAdapter
         bool includeBoosts = true)
     {
         throw new NotImplementedException();
+    }
+
+    public void Cancel() => _canceled = true;
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        if(!_canceled) _feedsContext.SaveChanges();
+        _feedsContext.Dispose();
     }
 }

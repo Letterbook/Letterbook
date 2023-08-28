@@ -2,7 +2,7 @@
 
 namespace Letterbook.Core.Adapters;
 
-public interface IFeedsAdapter
+public interface IFeedsAdapter : IDisposable
 {
     public void AddToTimeline<T>(T subject, Audience audience, Profile? boostedBy = default) where T : IContentRef;
 
@@ -24,4 +24,6 @@ public interface IFeedsAdapter
 
     public IEnumerable<IObjectRef> GetTimelineEntries(ICollection<Audience> audiences, DateTime begin, int limit,
         ICollection<string> types, bool includeBoosts = true);
+
+    public void Cancel();
 }
