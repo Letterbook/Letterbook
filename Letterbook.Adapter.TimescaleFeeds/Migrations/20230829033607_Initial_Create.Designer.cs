@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.TimescaleFeeds.Migrations
 {
     [DbContext(typeof(FeedsContext))]
-    [Migration("20230823060205_Initial_Feeds")]
-    partial class Initial_Feeds
+    [Migration("20230829033607_Initial_Create")]
+    partial class Initial_Create
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,7 +45,7 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<DateTime>("CreatedTime")
+                    b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("EntityId")
@@ -60,11 +60,19 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
 
                     b.HasIndex("AudienceKey");
 
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("AudienceKey"), "Hash");
+
+                    b.HasIndex("Authority");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Authority"), "Hash");
+
                     b.HasIndex("CreatedBy");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("CreatedBy"), "GIN");
 
                     b.HasIndex("EntityId");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("EntityId"), "Hash");
 
                     b.HasIndex("Time");
 

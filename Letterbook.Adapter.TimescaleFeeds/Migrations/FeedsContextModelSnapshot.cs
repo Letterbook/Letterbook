@@ -42,7 +42,7 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
-                    b.Property<DateTime>("CreatedTime")
+                    b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("EntityId")
@@ -57,11 +57,19 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
 
                     b.HasIndex("AudienceKey");
 
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("AudienceKey"), "Hash");
+
+                    b.HasIndex("Authority");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Authority"), "Hash");
+
                     b.HasIndex("CreatedBy");
 
                     NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("CreatedBy"), "GIN");
 
                     b.HasIndex("EntityId");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("EntityId"), "Hash");
 
                     b.HasIndex("Time");
 

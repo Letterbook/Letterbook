@@ -1,5 +1,4 @@
 ﻿using System;
-using Letterbook.Adapter.TimescaleFeeds.Extensions;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -7,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Letterbook.Adapter.TimescaleFeeds.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial_Feeds : Migration
+    public partial class Initial_Create : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,7 +23,7 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
                     CreatedBy = table.Column<string[]>(type: "text[]", nullable: false),
                     Authority = table.Column<string>(type: "text", nullable: false),
                     BoostedBy = table.Column<string>(type: "text", nullable: true),
-                    CreatedTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -33,7 +32,14 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Feeds_AudienceKey",
                 table: "Feeds",
-                column: "AudienceKey");
+                column: "AudienceKey")
+                .Annotation("Npgsql:IndexMethod", "Hash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Feeds_Authority",
+                table: "Feeds",
+                column: "Authority")
+                .Annotation("Npgsql:IndexMethod", "Hash");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Feeds_CreatedBy",
@@ -44,16 +50,13 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Feeds_EntityId",
                 table: "Feeds",
-                column: "EntityId");
+                column: "EntityId")
+                .Annotation("Npgsql:IndexMethod", "Hash");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Feeds_Time",
                 table: "Feeds",
                 column: "Time");
-
-            migrationBuilder.InstallTimescale();
-            
-            migrationBuilder.CreateHyperTable("Feeds", "Time");
         }
 
         /// <inheritdoc />

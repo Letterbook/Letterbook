@@ -17,6 +17,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development", "{6F3E708C-9C13-4404-BC2A-348FDA953167}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
+		Http\JSON-LD.http = Http\JSON-LD.http
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Core", "Letterbook.Core\Letterbook.Core.csproj", "{808895B8-D5F6-4DE3-AFF6-91C19E75B78C}"

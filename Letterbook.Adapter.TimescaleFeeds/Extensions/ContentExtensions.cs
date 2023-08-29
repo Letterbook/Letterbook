@@ -22,7 +22,7 @@ public static class ContentExtensions
             subject.Id.ToString(),  // EntityId
             audience.Id.ToString(),  // AudienceKey
             null,  // AudienceName
-            subject.Creators.Select(c => c.Id.ToString()).ToArray(),  // CreatedBy
+            $"ARRAY [{string.Join(',', subject.Creators.Select(c => c.Id.ToString()).ToArray())}]",  // CreatedBy
             subject.Authority,  // Authority
             boostedBy?.Id.ToString(),  // BoostedBy
             subject.CreatedDate,  // CreatedDate

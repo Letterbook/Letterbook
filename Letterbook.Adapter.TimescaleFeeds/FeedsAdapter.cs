@@ -36,7 +36,7 @@ public class FeedsAdapter : IFeedsAdapter
 
         _feedsContext.Feeds.FromSql(
             $"""
-             INSERT INTO "Feeds" ("Time", "Type", "EntityId", "AudienceKey", "AudienceName", "CreatedBy", "Authority", "BoostedBy", "CreatedTime")
+             INSERT INTO "Feeds" ("Time", "Type", "EntityId", "AudienceKey", "AudienceName", "CreatedBy", "Authority", "BoostedBy", "CreatedDate")
              VALUES ({line.Time}, {line.Type}, {line.EntityId}, {line.AudienceKey}, {null}, ARRAY [{string.Join(',', line.CreatedBy)}], {line.Authority}, {line.BoostedBy}, {line.CreatedDate})
              """);
     }
@@ -53,7 +53,7 @@ public class FeedsAdapter : IFeedsAdapter
         // language=NONE suppress jetbrains embedded sql highlighting because it's more annoying than helpful here
         var builder = new StringBuilder(
             """
-            INSERT INTO Feeds (Time, Type, EntityId, AudienceKey, AudienceName, CreatedBy, Authority, BoostedBy, CreatedDate)
+            INSERT INTO "Feeds" ("Time", "Type", "EntityId", "AudienceKey", "AudienceName", "CreatedBy", "Authority", "BoostedBy", "CreatedDate")
             VALUES 
             """);
 
