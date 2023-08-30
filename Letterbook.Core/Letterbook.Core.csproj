@@ -24,6 +24,7 @@
 
     <ItemGroup>
       <Folder Include="Mappers\" />
+      <Folder Include="Models\WebFinger\" />
     </ItemGroup>
 
 </Project>

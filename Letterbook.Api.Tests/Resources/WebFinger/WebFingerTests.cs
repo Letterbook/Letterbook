@@ -2,7 +2,6 @@
 using Letterbook.Api.Tests.Support;
 using Letterbook.Api.Tests.Support.Extensions;
 using Letterbook.Core.Models;
-using Letterbook.Core.Models.WebFinger;
 using Xunit.Abstractions;
 
 namespace Letterbook.Api.Tests.Resources.WebFinger;
@@ -49,11 +48,7 @@ public class WebFingerTests : IDisposable
     {
         await _client.GetAsync("/.well-known/webfinger?resource=acct:coffee_nebula@uss-voyager.example");
 
-        _web.FakeAccountService.MustHaveBeenAskedToFind(new WebFingerQueryTarget
-        {
-            Username = "coffee_nebula",
-            Domain = "uss-voyager.example"
-        });
+        _web.FakeAccountService.MustHaveBeenAskedToFind("acct:coffee_nebula@uss-voyager.example");
     }
 
     /*

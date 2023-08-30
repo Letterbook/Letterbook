@@ -1,5 +1,4 @@
 ﻿using Letterbook.Core;
-using Letterbook.Core.Models.WebFinger;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Letterbook.Api.Controllers;
@@ -17,7 +16,7 @@ public class WebFingerController
     [Route("/.well-known/webfinger")]
     public ActionResult Get([FromQuery]string resource)
     {
-        var profile = _accountService.LookupProfile(WebFingerQueryTarget.Parse(resource));
+        var profile = _accountService.LookupProfile(resource);
 
         return new OkObjectResult(new WebFingerJsonResourceDescriptor
         {

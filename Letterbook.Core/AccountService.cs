@@ -1,7 +1,6 @@
 ﻿using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
-using Letterbook.Core.Models.WebFinger;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -46,7 +45,7 @@ public class AccountService : IAccountService
         return _accountAdapter.LookupAccount(id);
     }
 
-    public Profile LookupProfile(WebFingerQueryTarget queryTarget)
+    public Profile LookupProfile(string queryTarget)
     {
         throw new NotImplementedException();
     }

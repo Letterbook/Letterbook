@@ -1,12 +1,11 @@
 ﻿using Letterbook.Core;
 using Letterbook.Core.Models;
-using Letterbook.Core.Models.WebFinger;
 
 namespace Letterbook.Api.Tests.Fakes;
 
 public class FakeAccountService : IAccountService
 {
-    private readonly List<WebFingerQueryTarget> _webFingerQueries = new();
+    private readonly List<string> _webFingerQueries = new();
     private Profile _returnValue = new(null);
 
     public Account? RegisterAccount(string email, string handle)
@@ -19,7 +18,7 @@ public class FakeAccountService : IAccountService
         throw new NotImplementedException();
     }
 
-    public Profile LookupProfile(WebFingerQueryTarget queryTarget)
+    public Profile LookupProfile(string queryTarget)
     {
         _webFingerQueries.Add(queryTarget);
         return _returnValue;
@@ -50,7 +49,7 @@ public class FakeAccountService : IAccountService
         throw new NotImplementedException();
     }
 
-    public void MustHaveBeenAskedToFind(WebFingerQueryTarget queryTarget)
+    public void MustHaveBeenAskedToFind(string queryTarget)
     {
         Assert.Contains(queryTarget, _webFingerQueries);
     }

@@ -1,4 +1,4 @@
-﻿namespace Letterbook.Core.Models.WebFinger;
+﻿namespace Letterbook.Api;
 
 // https://datatracker.ietf.org/doc/html/rfc7033#section-4
 public class WebFingerJsonResourceDescriptor
