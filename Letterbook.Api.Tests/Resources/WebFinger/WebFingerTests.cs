@@ -33,14 +33,13 @@ public class WebFingerTests : IDisposable
         _web = new WebAdapter();
         _client = _web.Client;
 
-        _web.FakeAccountService.AlwaysReturn(Profile.CreatePerson(new Uri("https://mastodon.social"), ""));
+        _web.FakeAccountService.AlwaysReturn(Profile.CreatePerson(new Uri("https://uss-voyager.example"), ""));
     }
 
     [Fact]
     public async Task ItReturnsStatusCode200Okay()
     {
-        // https://docs.joinmastodon.org/spec/webfinger/
-        var reply = await _client.GetAsync("/.well-known/webfinger?resource=acct:gargron@mastodon.social");
+        var reply = await _client.GetAsync("/.well-known/webfinger?resource=acct:coffee_nebula@uss-voyager.example");
 
         Assert.Equal(HttpStatusCode.OK, reply.StatusCode);
     }
@@ -48,54 +47,32 @@ public class WebFingerTests : IDisposable
     [Fact]
     public async Task ItQueriesForTheSuppliedQueryTarget()
     {
-        await _client.GetAsync("/.well-known/webfinger?resource=acct:gargron@mastodon.social");
+        await _client.GetAsync("/.well-known/webfinger?resource=acct:coffee_nebula@uss-voyager.example");
 
         _web.FakeAccountService.MustHaveBeenAskedToFind(new WebFingerQueryTarget
         {
-            Username = "gargron",
-            Domain = "mastodon.social"
+            Username = "coffee_nebula",
+            Domain = "uss-voyager.example"
         });
     }
 
     /*
-    {
-      "subject": "acct:Gargron@mastodon.social",
-      "aliases": [
-        "https://mastodon.social/@Gargron",
-        "https://mastodon.social/users/Gargron"
-      ],
-      "links": [
-        {
-          "rel": "http://webfinger.net/rel/profile-page",
-          "type": "text/html",
-          "href": "https://mastodon.social/@Gargron"
-        },
-        {
-          "rel": "self",
-          "type": "application/activity+json",
-          "href": "https://mastodon.social/users/Gargron"
-        },
-        {
-          "rel": "http://ostatus.org/schema/1.0/subscribe",
-          "template": "https://mastodon.social/authorize_interaction?uri={uri}"
-        }
-      ]
-    }
+        See sample at: // https://docs.joinmastodon.org/spec/webfinger/
      */
     [Fact]
     public async Task ItReturnsAJsonResourceDescriptor()
     {
-        var profile = Profile.CreatePerson(new Uri("https://mastodon.social"), "Gargron");
+        var profile = Profile.CreatePerson(new Uri("https://uss-voyager.example"), "coffee_nebula");
 
         _web.FakeAccountService.AlwaysReturn(profile);
 
-        var reply = await _client.GetAsync("/.well-known/webfinger?resource=acct:gargron@mastodon.social");
+        var reply = await _client.GetAsync("/.well-known/webfinger?resource=acct:coffee_nebula@uss-voyager.example");
 
         var body = await reply.Content.ReadAsStringAsync();
 
         body.MustMatchJson(@"
             {
-              ""subject"": ""acct:Gargron@mastodon.social"",
+              ""subject"": ""acct:coffee_nebula@uss-voyager.example"",
             }");
     }
 

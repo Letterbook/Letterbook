@@ -10,7 +10,7 @@ public class WebFingerQueryTarget
 
     public static WebFingerQueryTarget Parse(string resource)
     {
-        // acct:gargron@mastodon.social
+        // acct:coffee_nebula@uss-voyager.example
         var usernameAndDomain = resource.Split(":")[1].Split("@");
         var username = usernameAndDomain[0];
         var domain = usernameAndDomain[1];

@@ -1,6 +1,5 @@
 ﻿using Letterbook.Core;
 using Letterbook.Core.Models.WebFinger;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Letterbook.Api.Controllers;

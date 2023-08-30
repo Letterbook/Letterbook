@@ -1,30 +1,6 @@
 ﻿namespace Letterbook.Core.Models.WebFinger;
 
-/*
-    {
-      "subject": "acct:Gargron@mastodon.social",
-      "aliases": [
-        "https://mastodon.social/@Gargron",
-        "https://mastodon.social/users/Gargron"
-      ],
-      "links": [
-        {
-          "rel": "http://webfinger.net/rel/profile-page",
-          "type": "text/html",
-          "href": "https://mastodon.social/@Gargron"
-        },
-        {
-          "rel": "self",
-          "type": "application/activity+json",
-          "href": "https://mastodon.social/users/Gargron"
-        },
-        {
-          "rel": "http://ostatus.org/schema/1.0/subscribe",
-          "template": "https://mastodon.social/authorize_interaction?uri={uri}"
-        }
-      ]
-    } 
- */
+// https://datatracker.ietf.org/doc/html/rfc7033#section-4
 public class WebFingerJsonResourceDescriptor
 {
     public string Subject { get; set; }
