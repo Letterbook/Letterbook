@@ -7,7 +7,7 @@ namespace Letterbook.Api.Tests.Fakes;
 public class FakeAccountService : IAccountService
 {
     private readonly List<WebFingerQueryTarget> _webFingerQueries = new();
-    private WebFingerJsonResourceDescriptor _returnValue = new WebFingerJsonResourceDescriptor();
+    private Profile _returnValue = new(null);
 
     public Account? RegisterAccount(string email, string handle)
     {
@@ -19,7 +19,7 @@ public class FakeAccountService : IAccountService
         throw new NotImplementedException();
     }
 
-    public WebFingerJsonResourceDescriptor LookupAccount(WebFingerQueryTarget queryTarget)
+    public Profile LookupProfile(WebFingerQueryTarget queryTarget)
     {
         _webFingerQueries.Add(queryTarget);
         return _returnValue;
@@ -55,7 +55,7 @@ public class FakeAccountService : IAccountService
         Assert.Contains(queryTarget, _webFingerQueries);
     }
 
-    public void AlwaysReturn(WebFingerJsonResourceDescriptor returnValue)
+    public void AlwaysReturn(Profile returnValue)
     {
         _returnValue = returnValue;
     }

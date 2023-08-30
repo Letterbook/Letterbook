@@ -18,6 +18,11 @@ public class WebFingerController
     [Route("/.well-known/webfinger")]
     public ActionResult Get([FromQuery]string resource)
     {
-        return new OkObjectResult(_accountService.LookupAccount(WebFingerQueryTarget.Parse(resource)));
+        var profile = _accountService.LookupProfile(WebFingerQueryTarget.Parse(resource));
+
+        return new OkObjectResult(new WebFingerJsonResourceDescriptor
+        {
+            Subject = $"acct:{profile.DisplayName}@{profile.Authority}"
+        });
     }
 }

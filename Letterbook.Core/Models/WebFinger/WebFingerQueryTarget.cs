@@ -1,8 +1,7 @@
 ﻿namespace Letterbook.Core.Models.WebFinger;
 
 // https://datatracker.ietf.org/doc/html/rfc7033#section-4.4
-
-//https://datatracker.ietf.org/doc/html/rfc7033#section-4
+// https://datatracker.ietf.org/doc/html/rfc7033#section-4
 public class WebFingerQueryTarget
 {
     public string Host { get; set; }

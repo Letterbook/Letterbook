@@ -46,7 +46,7 @@ public class AccountService : IAccountService
         return _accountAdapter.LookupAccount(id);
     }
 
-    public WebFingerJsonResourceDescriptor LookupAccount(WebFingerQueryTarget queryTarget)
+    public Profile LookupProfile(WebFingerQueryTarget queryTarget)
     {
         throw new NotImplementedException();
     }

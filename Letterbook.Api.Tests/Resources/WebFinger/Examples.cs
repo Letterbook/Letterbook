@@ -2,6 +2,7 @@
 using Letterbook.Api.Tests.Support;
 using Letterbook.Api.Tests.Support.Extensions;
 using Letterbook.Core;
+using Letterbook.Core.Models;
 using Letterbook.Core.Models.WebFinger;
 using Xunit.Abstractions;
 
@@ -32,6 +33,8 @@ public class Examples : IDisposable
         _log = log;
         _web = new WebAdapter();
         _client = _web.Client;
+
+        _web.FakeAccountService.AlwaysReturn(Profile.CreatePerson(new Uri("https://mastodon.social"), ""));
     }
 
     [Fact]
@@ -83,19 +86,9 @@ public class Examples : IDisposable
     [Fact]
     public async Task ItReturnsAJsonResourceDescriptor()
     {
-        var expected = new WebFingerJsonResourceDescriptor
-        {
-            Subject = "acct:Gargron@mastodon.social",
-            Aliases = new List<string> { "https://mastodon.social/@Gargron", "https://mastodon.social/users/Gargron" },
-            Links = new List<Link>
-            {
-                new() { Rel = "http://webfinger.net/rel/profile-page", Type="text/html", Href="https://mastodon.social/@Gargron" },
-                new() { Rel = "self", Type="application/activity+json", Href="https://mastodon.social/users/Gargron" },
-                new() { Rel = "http://ostatus.org/schema/1.0/subscribe", Template = "https://mastodon.social/authorize_interaction?uri={uri}" },
-            }
-        };
+        var profile = Profile.CreatePerson(new Uri("https://mastodon.social"), "Gargron");
 
-        _web.FakeAccountService.AlwaysReturn(expected);
+        _web.FakeAccountService.AlwaysReturn(profile);
 
         var reply = await _client.GetAsync("/.well-known/webfinger?resource=acct:gargron@mastodon.social");
 
@@ -104,26 +97,6 @@ public class Examples : IDisposable
         body.MustMatchJson(@"
             {
               ""subject"": ""acct:Gargron@mastodon.social"",
-              ""aliases"": [
-                ""https://mastodon.social/@Gargron"",
-                ""https://mastodon.social/users/Gargron""
-              ],
-              ""links"": [
-                {
-                  ""rel"": ""http://webfinger.net/rel/profile-page"",
-                  ""type"": ""text/html"",
-                  ""href"": ""https://mastodon.social/@Gargron""
-                },
-                {
-                  ""rel"": ""self"",
-                  ""type"": ""application/activity+json"",
-                  ""href"": ""https://mastodon.social/users/Gargron""
-                },
-                {
-                  ""rel"": ""http://ostatus.org/schema/1.0/subscribe"",
-                  ""template"": ""https://mastodon.social/authorize_interaction?uri={uri}""
-                }
-              ]
             }");
     }
 
