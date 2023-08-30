@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Letterbook.Api.Tests.Support;
 using Letterbook.Api.Tests.Support.Extensions;
-using Letterbook.Core;
 using Letterbook.Core.Models;
 using Letterbook.Core.Models.WebFinger;
 using Xunit.Abstractions;
@@ -22,13 +21,13 @@ namespace Letterbook.Api.Tests.Resources.WebFinger;
 
  */
 
-public class Examples : IDisposable
+public class WebFingerTests : IDisposable
 {
     private readonly ITestOutputHelper _log;
     private readonly WebAdapter _web;
     private readonly HttpClient _client;
 
-    public Examples(ITestOutputHelper log)
+    public WebFingerTests(ITestOutputHelper log)
     {
         _log = log;
         _web = new WebAdapter();
