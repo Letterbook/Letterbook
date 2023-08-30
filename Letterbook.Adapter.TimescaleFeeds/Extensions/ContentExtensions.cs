@@ -18,11 +18,12 @@ public static class ContentExtensions
     {
         return new List<object?>
         {
+            DateTime.UtcNow, // Time
             subject.Type,  // Type
             subject.Id.ToString(),  // EntityId
             audience.Id.ToString(),  // AudienceKey
             null,  // AudienceName
-            $"ARRAY [{string.Join(',', subject.Creators.Select(c => c.Id.ToString()).ToArray())}]",  // CreatedBy
+            subject.Creators.Select(c => c.Id.ToString()).ToArray(),  // CreatedBy
             subject.Authority,  // Authority
             boostedBy?.Id.ToString(),  // BoostedBy
             subject.CreatedDate,  // CreatedDate

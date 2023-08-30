@@ -19,7 +19,7 @@ public class FeedsAdapter : IFeedsAdapter
         _canceled = false;
     }
 
-    public void AddToTimeline<T>(T subject, Models.Audience audience, Models.Profile? boostedBy = default)
+    public async Task<int> AddToTimeline<T>(T subject, Models.Audience audience, Models.Profile? boostedBy = default)
         where T : Models.IContentRef
     {
         var line = new Entry()
@@ -34,21 +34,18 @@ public class FeedsAdapter : IFeedsAdapter
             CreatedDate = subject.CreatedDate
         };
 
-        _feedsContext.Feeds.FromSql(
+        return await _feedsContext.Database.ExecuteSqlAsync(
             $"""
              INSERT INTO "Feeds" ("Time", "Type", "EntityId", "AudienceKey", "AudienceName", "CreatedBy", "Authority", "BoostedBy", "CreatedDate")
              VALUES ({line.Time}, {line.Type}, {line.EntityId}, {line.AudienceKey}, {null}, ARRAY [{string.Join(',', line.CreatedBy)}], {line.Authority}, {line.BoostedBy}, {line.CreatedDate})
              """);
     }
 
-    public void AddToTimeline<T>(T subject, ICollection<Models.Audience> audience, Models.Profile? boostedBy = default)
+    public async Task<int> AddToTimeline<T>(T subject, ICollection<Models.Audience> audience,
+        Models.Profile? boostedBy = default)
         where T : Models.IContentRef
     {
-        if(!audience.Any()) return;
-        foreach (var each in audience)
-        {
-            AddToTimeline(subject, each, boostedBy);
-        }
+        if(!audience.Any()) return 0;
         
         // language=NONE suppress jetbrains embedded sql highlighting because it's more annoying than helpful here
         var builder = new StringBuilder(
@@ -70,7 +67,8 @@ public class FeedsAdapter : IFeedsAdapter
         }
 
         builder.Append(';');
-        _feedsContext.Feeds.FromSql(FormattableStringFactory.Create(builder.ToString(), values));
+        var sql = FormattableStringFactory.Create(builder.ToString(), values.ToArray());
+        return await _feedsContext.Database.ExecuteSqlAsync(sql);
     }
 
     public void AddNotification<T>(Models.Profile recipient, T subject, IEnumerable<Models.Profile> actors,

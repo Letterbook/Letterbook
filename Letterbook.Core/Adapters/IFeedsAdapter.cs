@@ -4,9 +4,9 @@ namespace Letterbook.Core.Adapters;
 
 public interface IFeedsAdapter : IDisposable
 {
-    public void AddToTimeline<T>(T subject, Audience audience, Profile? boostedBy = default) where T : IContentRef;
+    public Task<int> AddToTimeline<T>(T subject, Audience audience, Profile? boostedBy = default) where T : IContentRef;
 
-    public void AddToTimeline<T>(T subject, ICollection<Audience> audience, Profile? boostedBy = default)
+    public Task<int> AddToTimeline<T>(T subject, ICollection<Audience> audience, Profile? boostedBy = default)
         where T : IContentRef;
 
     public void AddNotification<T>(Profile recipient, T subject, IEnumerable<Profile> actors, ActivityType activity)
