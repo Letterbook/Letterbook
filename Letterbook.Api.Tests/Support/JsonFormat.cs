@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Letterbook.Core;
+namespace Letterbook.Api.Tests.Support;
 
 public class JsonFormat
 {
