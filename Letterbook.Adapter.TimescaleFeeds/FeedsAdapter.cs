@@ -1,9 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text;
-using Letterbook.Adapter.TimescaleFeeds.Entities;
 using Letterbook.Adapter.TimescaleFeeds.Extensions;
 using Letterbook.Core.Adapters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Models = Letterbook.Core.Models;
 
 namespace Letterbook.Adapter.TimescaleFeeds;
@@ -11,18 +11,19 @@ namespace Letterbook.Adapter.TimescaleFeeds;
 public class FeedsAdapter : IFeedsAdapter
 {
     private readonly FeedsContext _feedsContext;
-    private bool _canceled;
+    private IDbContextTransaction _transaction;
 
     public FeedsAdapter(FeedsContext feedsContext)
     {
         _feedsContext = feedsContext;
-        _canceled = false;
+        // _canceled = false;
     }
 
     public async Task<int> AddToTimeline<T>(T subject, Models.Audience audience, Models.Profile? boostedBy = default)
         where T : Models.IContentRef
     {
-        var line = new Entry()
+        Start();
+        var line = new Models.TimelineEntry()
         {
             Type = subject.Type,
             EntityId = subject.Id.ToString(),
@@ -37,7 +38,7 @@ public class FeedsAdapter : IFeedsAdapter
         return await _feedsContext.Database.ExecuteSqlAsync(
             $"""
              INSERT INTO "Feeds" ("Time", "Type", "EntityId", "AudienceKey", "AudienceName", "CreatedBy", "Authority", "BoostedBy", "CreatedDate")
-             VALUES ({line.Time}, {line.Type}, {line.EntityId}, {line.AudienceKey}, {null}, ARRAY [{string.Join(',', line.CreatedBy)}], {line.Authority}, {line.BoostedBy}, {line.CreatedDate})
+             VALUES ({line.Time}, {line.Type}, {line.EntityId}, {line.AudienceKey}, {null}, ARRAY [{string.Join(',', line.CreatedBy)}], {line.Authority}, {line.BoostedBy}, {line.CreatedDate});
              """);
     }
 
@@ -47,6 +48,7 @@ public class FeedsAdapter : IFeedsAdapter
     {
         if(!audience.Any()) return 0;
         
+        Start();
         // language=NONE suppress jetbrains embedded sql highlighting because it's more annoying than helpful here
         var builder = new StringBuilder(
             """
@@ -77,14 +79,31 @@ public class FeedsAdapter : IFeedsAdapter
         throw new NotImplementedException();
     }
 
-    public void RemoveFromTimelines<T>(T subject) where T : Models.IContentRef
+    public async Task<int> RemoveFromTimelines<T>(T subject) where T : Models.IContentRef
     {
-        throw new NotImplementedException();
+        Start();
+        return await _feedsContext.Database.ExecuteSqlAsync(
+            $"""
+            DELETE FROM "Feeds"
+            WHERE "EntityId" = {subject.Id.ToString()};
+            """);
     }
 
-    public void RemoveFromTimelines<T>(T subject, ICollection<Models.Audience> audiences) where T : Models.IContentRef
+    public async Task<int> RemoveFromTimelines<T>(T subject, ICollection<Models.Audience> audiences) where T : Models.IContentRef
     {
-        throw new NotImplementedException();
+        Start();
+        var keys = audiences.Select(a => $"{a.Id}" as object);
+        var builder = new StringBuilder(
+            """
+            DELETE FROM "Feeds"
+            WHERE "EntityId" = {0}
+            AND "AudienceKey" in (
+            """);
+        builder.AppendJoin(',', Enumerable.Range(1, audiences.Count).Select(i => $"{{{i}}}"));
+        builder.Append(");");
+        var sql = FormattableStringFactory.Create(builder.ToString(), keys.Prepend(subject.Id.ToString()).ToArray());
+        
+        return await _feedsContext.Database.ExecuteSqlAsync(sql);
     }
 
     public IEnumerable<Models.Notification> GetAggregateNotifications(Models.Profile recipient, DateTime begin,
@@ -99,25 +118,58 @@ public class FeedsAdapter : IFeedsAdapter
         throw new NotImplementedException();
     }
 
-    public IEnumerable<Models.Note> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime begin,
+    public IQueryable<Models.TimelineEntry> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime before,
         int limit, bool includeBoosts = true)
     {
-        throw new NotImplementedException();
+        var keys = audiences.Select(a => a.Id.ToString());
+        return _feedsContext.Feeds
+            .AsNoTracking()
+            .Where(t => t.Time <= before)
+            .Where(t => keys.Contains(t.AudienceKey))
+            .Where(t => includeBoosts || t.BoostedBy != null)
+            .GroupBy(t => t.EntityId).Select(g => g.First())
+            // Equivalent to DistinctBy, but EFCore won't translate that for some reason
+            // .DistinctBy(t => t.EntityId)
+            .Take(limit);
     }
 
-    public IEnumerable<Models.IObjectRef> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime begin,
-        int limit, ICollection<string> types,
+    public IQueryable<Models.TimelineEntry> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime before,
+        int limit, ICollection<Models.ActivityObjectType> types,
         bool includeBoosts = true)
     {
         throw new NotImplementedException();
     }
 
-    public void Cancel() => _canceled = true;
+    public Task Cancel()
+    {
+        if (_feedsContext.Database.CurrentTransaction is not null)
+        {
+            return _feedsContext.Database.RollbackTransactionAsync();
+        }
+        
+        return Task.CompletedTask;
+    }
+    public Task Commit()
+    {
+        if (_feedsContext.Database.CurrentTransaction is not null)
+        {
+            return _feedsContext.Database.CommitTransactionAsync();
+        }
+
+        return Task.CompletedTask;
+    }
 
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        if(!_canceled) _feedsContext.SaveChanges();
         _feedsContext.Dispose();
+    }
+
+    private void Start()
+    {
+        if (_feedsContext.Database.CurrentTransaction is null)
+        {
+            _feedsContext.Database.BeginTransaction();
+        }
     }
 }

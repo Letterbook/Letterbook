@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Letterbook.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Letterbook.Adapter.TimescaleFeeds.Entities;
 
-public class ConfigTimelineEntry : IEntityTypeConfiguration<Entry>
+public class ConfigTimelineEntry : IEntityTypeConfiguration<TimelineEntry>
 {
-    public void Configure(EntityTypeBuilder<Entry> builder)
+    public void Configure(EntityTypeBuilder<TimelineEntry> builder)
     {
         builder.HasNoKey();
         builder.HasIndex(model => model.Time);

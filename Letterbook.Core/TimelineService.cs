@@ -87,7 +87,8 @@ public class TimelineService : ITimelineService
     {
         // TODO: Account for moderation conditions (block, mute, etc)
         var recipient = _profileAdapter.LookupProfile(recipientId);
-        return _feeds.GetTimelineEntries(recipient.Audiences, begin, limit);
+        throw new NotImplementedException();
+        // return _feeds.GetTimelineEntries(recipient.Audiences, begin, limit);
     }
 
     /// <summary>
