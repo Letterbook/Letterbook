@@ -26,6 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D5E41A46-D
 	ProjectSection(SolutionItems) = preProject
 		docs\decisions\hexagonal-architecture.png = docs\decisions\hexagonal-architecture.png
 		docs\timeline.md = docs\timeline.md
+		docs\IntegrationTests.Readme.md = docs\IntegrationTests.Readme.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "github", "github", "{25C320AC-E149-44F9-81F3-5275C7D8D334}"
