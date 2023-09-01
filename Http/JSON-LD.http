@@ -1,0 +1,12 @@
+﻿# Jetbrains IDEs will execute these as Http requests
+# This is just for convenience
+
+####
+# Mastodon doesn't actually publish a schema, they just use this namespace to sort of pretend they do
+# Meaning this will 404. It's not just you.
+GET http://joinmastodon.org/ns#
+Accept: application/ld+json; profile="https://www.w3.org/ns/activitystreams"
+
+####
+GET https://www.w3.org/ns/activitystreams#public
+Accept: application/ld+json; profile="https://www.w3.org/ns/activitystreams"

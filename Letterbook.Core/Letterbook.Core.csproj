@@ -10,6 +10,10 @@
       <PackageReference Include="AutoMapper" Version="12.0.1" />
       <PackageReference Include="AutoMapper.Collection" Version="9.0.0" />
       <PackageReference Include="CloudNative.CloudEvents" Version="2.6.0" />
+      <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="Hashids.net" Version="1.7.0" />
       <PackageReference Include="Letterbook.ActivityPub" Version="1.0.0-ci0023-50" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />

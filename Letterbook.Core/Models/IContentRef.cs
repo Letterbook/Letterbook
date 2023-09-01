@@ -8,4 +8,5 @@ public interface IContentRef : IObjectRef
 {
     public ObjectCollection<Profile> Creators { get; set; }
     public DateTime CreatedDate { get; set; }
+    public ActivityObjectType Type { get; }
 }
