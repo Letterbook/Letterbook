@@ -45,6 +45,11 @@ public class AccountService : IAccountService
         return _accountAdapter.LookupAccount(id);
     }
 
+    public Profile LookupProfile(string queryTarget)
+    {
+        throw new NotImplementedException();
+    }
+
     public IEnumerable<Account> FindAccounts(string email)
     {
         throw new NotImplementedException();
