@@ -27,6 +27,6 @@ jobs:
       - name: Install dependencies
         run: dotnet restore Letterbook.sln
       - name: Build
-        run: dotnet build Letterbook.sln
+        run: dotnet build Letterbook.sln --configuration Release
       - name: Test
-        run: dotnet test Letterbook.sln
+        run: dotnet test Letterbook.sln --configuration Release --logger GitHubActions
