@@ -1,13 +1,24 @@
 ﻿
 
 services:
+  timescale:
+    container_name: timescale
+    image: timescale/timescaledb:2.11.2-pg15-oss
+    environment:
+      - POSTGRES_USER=letterbook
+      - POSTGRES_PASSWORD=letterbookpw
+      - POSTGRES_DB=letterbook_feeds
+    ports:
+      - "5433:5432"
+    restart: always
+
   postgres:
     container_name: postgres
     image: postgres:15-alpine
     environment:
       - POSTGRES_USER=letterbook
       - POSTGRES_PASSWORD=letterbookpw
-      - POSTGRES_DB=letterbook #optional (specify default database instead of $POSTGRES_DB)
+      - POSTGRES_DB=letterbook
     ports:
       - "5432:5432"
     restart: always

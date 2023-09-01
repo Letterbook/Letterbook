@@ -20,6 +20,7 @@ public class Note : IContentRef
     public string Authority => Id.Authority;
     public ObjectCollection<Profile> Creators { get; set; } = new ();
     public DateTime CreatedDate { get; set; }
+    public ActivityObjectType Type => ActivityObjectType.Note;
     public string Content { get; set; } = string.Empty; // TODO: HTML encode & sanitize
     public string? Summary { get; set; } // TODO: strip all HTML
     public ObjectCollection<Audience> Visibility { get; set; } = new();

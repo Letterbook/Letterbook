@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.TimescaleFeeds", "Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj", "{81099574-0BD3-4031-817A-2513B36D3792}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.TimescaleFeeds.IntegrationTests", "Letterbook.Adapter.TimescaleFeeds.IntegrationTests\Letterbook.Adapter.TimescaleFeeds.IntegrationTests.csproj", "{67A90C4D-0E08-4CD3-908D-6C8CC3BA0BDC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D2ADB5E5-5A1E-414D-9DA1-7888E17AAB8F}"
+	ProjectSection(SolutionItems) = preProject
+		docs\IntegrationTests.Readme.md = docs\IntegrationTests.Readme.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Core.Tests", "Letterbook.Core.Tests\Letterbook.Core.Tests.csproj", "{7A6CB4BB-1E66-4BDE-B193-0F05FE6031C3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development", "{6F3E708C-9C13-4404-BC2A-348FDA953167}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+		Http\JSON-LD.http = Http\JSON-LD.http
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Core", "Letterbook.Core\Letterbook.Core.csproj", "{808895B8-D5F6-4DE3-AFF6-91C19E75B78C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{81099574-0BD3-4031-817A-2513B36D3792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81099574-0BD3-4031-817A-2513B36D3792}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81099574-0BD3-4031-817A-2513B36D3792}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81099574-0BD3-4031-817A-2513B36D3792}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67A90C4D-0E08-4CD3-908D-6C8CC3BA0BDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67A90C4D-0E08-4CD3-908D-6C8CC3BA0BDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67A90C4D-0E08-4CD3-908D-6C8CC3BA0BDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67A90C4D-0E08-4CD3-908D-6C8CC3BA0BDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A6CB4BB-1E66-4BDE-B193-0F05FE6031C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A6CB4BB-1E66-4BDE-B193-0F05FE6031C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A6CB4BB-1E66-4BDE-B193-0F05FE6031C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A6CB4BB-1E66-4BDE-B193-0F05FE6031C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{808895B8-D5F6-4DE3-AFF6-91C19E75B78C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{808895B8-D5F6-4DE3-AFF6-91C19E75B78C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{808895B8-D5F6-4DE3-AFF6-91C19E75B78C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{808895B8-D5F6-4DE3-AFF6-91C19E75B78C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
