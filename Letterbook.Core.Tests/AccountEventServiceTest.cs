@@ -29,7 +29,7 @@ public class AccountEventServiceTest : WithMocks
         _subject.Subscribe(c =>
         {
             var action = c.Type!.Split(".").Last();
-            Assert.NotEqual("Created", action);
+            Assert.Equal("Created", action);
         });
         _service.Created(account);
     }
