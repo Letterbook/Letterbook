@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Letterbook.Adapter.Db.Migrations
 {
-    [DbContext(typeof(TransactionalContext))]
+    [DbContext(typeof(RelationalContext))]
     [Migration("20230727051434_Fix_Navigations")]
     partial class Fix_Navigations
     {

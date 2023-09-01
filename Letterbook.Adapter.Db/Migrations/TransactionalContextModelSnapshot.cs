@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Letterbook.Adapter.Db.Migrations
 {
-    [DbContext(typeof(TransactionalContext))]
+    [DbContext(typeof(RelationalContext))]
     partial class TransactionalContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

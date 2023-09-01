@@ -8,9 +8,9 @@ namespace Letterbook.Adapter.Db;
 public class ActivityAdapter : IActivityAdapter
 {
     private readonly ILogger<ActivityAdapter> _logger;
-    private readonly TransactionalContext _context;
+    private readonly RelationalContext _context;
 
-    public ActivityAdapter(ILogger<ActivityAdapter> logger, TransactionalContext context)
+    public ActivityAdapter(ILogger<ActivityAdapter> logger, RelationalContext context)
     {
         _logger = logger;
         _context = context;

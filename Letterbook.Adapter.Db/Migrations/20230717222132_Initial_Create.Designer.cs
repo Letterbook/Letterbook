@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Letterbook.Adapter.Db.Migrations
 {
-    [DbContext(typeof(TransactionalContext))]
+    [DbContext(typeof(RelationalContext))]
     [Migration("20230717222132_Initial_Create")]
     partial class Initial_Create
     {
