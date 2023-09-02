@@ -43,7 +43,9 @@ jobs:
       - name: Test Migrations
         run: |
           dotnet ef migrations add CI
-          if [ -n "$(git status --porcelain -uno)" ]; then
+          CHANGED=$(git status --porcelain -uno)
+          if [ -n "$CHANGED" ]; then
+            echo "$CHANGED"
             echo 'Failed: Stale migrations'
             exit 1
           fi
