@@ -20,13 +20,34 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 7.0.x
-      - name: Install dependencies
+      
+      - name: Restore
         run: dotnet restore Letterbook.sln
+      
       - name: Build
         run: dotnet build Letterbook.sln --configuration Release
+      
       - name: Test
         run: dotnet test Letterbook.sln --configuration Release --logger GitHubActions
+      
+      - name: Install EF Tools
+        run: |
+          dotnet tool install --global dotnet-ef
+          dotnet tool restore
+      
+      - name: Test Migrations
+        run: |
+          dotnet ef migrations add CI
+          CHANGED=$(git status --porcelain -uno)
+          if [ -n "$CHANGED" ]; then
+            echo "$CHANGED"
+            echo 'Failed: Stale migrations'
+            exit 1
+          fi
+        working-directory: Letterbook.Adapter.Db/
+        shell: bash

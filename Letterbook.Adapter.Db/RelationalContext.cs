@@ -15,7 +15,7 @@ namespace Letterbook.Adapter.Db;
 /// Maybe notifications, too.
 /// There may be a need for search and/or graph databases in the future, and those would also be separate from this.
 /// </summary>
-public class TransactionalContext : DbContext
+public class RelationalContext : DbContext
 {
     private readonly DbOptions _config;
     public DbSet<Note> Notes { get; set; }
@@ -24,13 +24,13 @@ public class TransactionalContext : DbContext
     public DbSet<Account> Accounts { get; set; }
 
     // Called by the designer to create and run migrations
-    internal TransactionalContext(DbContextOptions<TransactionalContext> context) : base(context)
+    internal RelationalContext(DbContextOptions<RelationalContext> context) : base(context)
     {
         _config = new DesignDbOptions();
     }
 
     // Called by DI for normal use
-    public TransactionalContext(IOptions<DbOptions> config)
+    public RelationalContext(IOptions<DbOptions> config)
     {
         _config = config.Value;
     }

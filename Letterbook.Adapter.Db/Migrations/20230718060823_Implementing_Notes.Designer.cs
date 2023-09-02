@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Letterbook.Adapter.Db.Migrations
 {
-    [DbContext(typeof(TransactionalContext))]
+    [DbContext(typeof(RelationalContext))]
     [Migration("20230718060823_Implementing_Notes")]
     partial class Implementing_Notes
     {

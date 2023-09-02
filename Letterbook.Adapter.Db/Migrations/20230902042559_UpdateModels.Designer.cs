@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    [Migration("20230727051434_Fix_Navigations")]
-    partial class Fix_Navigations
+    [Migration("20230902042559_UpdateModels")]
+    partial class UpdateModels
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -70,6 +70,60 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.ToTable("ImagesCreatedByProfile");
                 });
 
+            modelBuilder.Entity("Letterbook.Adapter.Db.NavigationModels.FollowerRelation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FollowersCollectionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FollowingId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FollowsId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubjectId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Date");
+
+                    b.HasIndex("FollowersCollectionId");
+
+                    b.HasIndex("FollowingId");
+
+                    b.HasIndex("FollowsId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("FollowerRelation");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.Account", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Accounts");
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Audience", b =>
                 {
                     b.Property<string>("Id")
@@ -120,6 +174,24 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.ToTable("Images");
                 });
 
+            modelBuilder.Entity("Letterbook.Core.Models.LinkedProfile", b =>
+                {
+                    b.Property<string>("AccountId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProfileId")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Permission")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.HasKey("AccountId", "ProfileId");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("LinkedProfile");
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Note", b =>
                 {
                     b.Property<string>("Id")
@@ -156,13 +228,28 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Handle")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("LocalId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnedById")
                         .HasColumnType("text");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LocalId");
+
+                    b.HasIndex("OwnedById");
 
                     b.ToTable("Profiles");
                 });
@@ -257,6 +344,37 @@ namespace Letterbook.Adapter.Db.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Letterbook.Adapter.Db.NavigationModels.FollowerRelation", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("FollowersCollectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("FollowingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Profile", "Follows")
+                        .WithMany()
+                        .HasForeignKey("FollowsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Profile", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Follows");
+
+                    b.Navigation("Subject");
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Audience", b =>
                 {
                     b.HasOne("Letterbook.Core.Models.Image", null)
@@ -307,6 +425,25 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("Mentions");
                 });
 
+            modelBuilder.Entity("Letterbook.Core.Models.LinkedProfile", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Account", "Account")
+                        .WithMany("LinkedProfiles")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Profile", "Profile")
+                        .WithMany("RelatedAccounts")
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Profile");
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Note", b =>
                 {
                     b.HasOne("Letterbook.Core.Models.Note", "InReplyTo")
@@ -350,6 +487,15 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("InReplyTo");
 
                     b.Navigation("Mentions");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.Profile", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Account", "OwnedBy")
+                        .WithMany()
+                        .HasForeignKey("OwnedById");
+
+                    b.Navigation("OwnedBy");
                 });
 
             modelBuilder.Entity("NotesBoostedByProfile", b =>
@@ -397,6 +543,11 @@ namespace Letterbook.Adapter.Db.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Letterbook.Core.Models.Account", b =>
+                {
+                    b.Navigation("LinkedProfiles");
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Image", b =>
                 {
                     b.Navigation("Visibility");
@@ -407,6 +558,11 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("Replies");
 
                     b.Navigation("Visibility");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.Profile", b =>
+                {
+                    b.Navigation("RelatedAccounts");
                 });
 #pragma warning restore 612, 618
         }

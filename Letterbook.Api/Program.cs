@@ -42,7 +42,7 @@ public class Program
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
         builder.Services.AddSingleton<IMessageBusAdapter, RxMessageBus>();
-        builder.Services.AddDbContext<TransactionalContext>();
+        builder.Services.AddDbContext<RelationalContext>();
         builder.Services.AddDbContext<FeedsContext>();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
