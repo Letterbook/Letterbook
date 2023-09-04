@@ -39,6 +39,7 @@ public class RelationalContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         options.UseNpgsql(_config.GetConnectionString());
+        options.UseOpenIddict();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

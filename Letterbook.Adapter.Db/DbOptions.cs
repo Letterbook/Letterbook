@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using Letterbook.Core.Exceptions;
 
 namespace Letterbook.Adapter.Db;
 
@@ -19,14 +20,16 @@ public class DbOptions
 
     public string GetConnectionString()
     {
-        if (ConnectionString != null) return ConnectionString;
-        if (Host == null) throw new NoNullAllowedException("Host cannot be null, specify a Host or ConnectionString");
-        if (Port == null) throw new NoNullAllowedException("Port cannot be null, specify a Port or ConnectionString");
-        if (Username == null)
-            throw new NoNullAllowedException("Username cannot be null, specify a Username or ConnectionString");
-        if (Password == null)
-            throw new NoNullAllowedException("Password cannot be null, specify a Password or ConnectionString");
+        if (!string.IsNullOrEmpty(ConnectionString)) return ConnectionString;
+        if (string.IsNullOrEmpty(Host)) throw new ConfigException("Host cannot be null, specify a Host or ConnectionString");
+        if (string.IsNullOrEmpty(Port)) throw new ConfigException("Port cannot be null, specify a Port or ConnectionString");
+        if (string.IsNullOrEmpty(Username))
+            throw new ConfigException("Username cannot be null, specify a Username or ConnectionString");
+        if (string.IsNullOrEmpty(Password))
+            throw new ConfigException("Password cannot be null, specify a Password or ConnectionString");
+        if (string.IsNullOrEmpty(Database))
+            throw new ConfigException("Database cannot be null, specify a Database or ConnectionString");
         return
-            $"Server={Host};Port={Port};Database={Database};User Id={Username};Password={Password};SSL Mode={(UseSsl ?? true ? "Require" : "Prefer")};";
+            $"Server={Host};Port={Port};Database={Database};User Id={Username};Password={Password};SSL Mode={(UseSsl is true ? "Require" : "Prefer")};";
     }
 }

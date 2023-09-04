@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Letterbook.Api.Controllers;
+namespace Letterbook.Api.Controllers.Mastodon;
 
 [Route("api/v1/[controller]")]
 public class AccountsController

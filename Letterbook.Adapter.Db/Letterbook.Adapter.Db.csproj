@@ -36,6 +36,7 @@
     <ItemGroup>
       <Compile Remove="Migrations\20230901221809_Current.cs" />
       <Compile Remove="Migrations\20230901221809_Current.Designer.cs" />
+      <Compile Remove="Migrations\TransactionalContextModelSnapshot.cs" />
     </ItemGroup>
 
 </Project>

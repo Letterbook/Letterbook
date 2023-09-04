@@ -15,11 +15,14 @@
       </PackageReference>
       <PackageReference Include="Hashids.net" Version="1.7.0" />
       <PackageReference Include="Letterbook.ActivityPub" Version="1.0.0-ci0023-50" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.10" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.5.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="7.0.10" />
+      <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="7.0.10" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
       <PackageReference Include="Nanoid" Version="2.1.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />

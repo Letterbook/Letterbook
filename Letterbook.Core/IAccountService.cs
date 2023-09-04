@@ -1,9 +1,11 @@
-﻿using Letterbook.Core.Models;
+﻿using System.Security.Claims;
+using Letterbook.Core.Models;
 
 namespace Letterbook.Core;
 
 public interface IAccountService
 {
+    public Task<ClaimsIdentity?> AuthenticatePassword(string email, string password);
     public Account? RegisterAccount(string email, string handle);
     public Account? LookupAccount(string id);
     public Profile LookupProfile(string queryTarget);
