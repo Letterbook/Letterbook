@@ -8,6 +8,7 @@ using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Letterbook.Core.Workers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -57,6 +58,10 @@ public class Program
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
+        
+        // Register Workers
+        builder.Services.AddScoped<IScopedWorker, SeedAdminWorker>();
+        builder.Services.AddHostedService<WorkerScope<SeedAdminWorker>>();
         
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();

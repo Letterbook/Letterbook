@@ -55,7 +55,7 @@ public class UserAccountController : ControllerBase
 
         try
         {
-            var account = _accountService.RegisterAccount(registrationRequest.Email, registrationRequest.Handle);
+            var account = _accountService.RegisterAccount(registrationRequest.Email, registrationRequest.Handle, "password");
             
             // account created, now what?
         }

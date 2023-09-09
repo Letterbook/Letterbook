@@ -40,7 +40,7 @@ public class AccountServiceTest : WithMocks
     {
         AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
 
-        var actual = _accountService.RegisterAccount("test@example.com", "tester");
+        var actual = _accountService.RegisterAccount("test@example.com", "tester", "password");
 
         Assert.IsType<Account>(actual);
     }
@@ -50,7 +50,7 @@ public class AccountServiceTest : WithMocks
     {
         AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
 
-        _accountService.RegisterAccount("test@example.com", "tester");
+        _accountService.RegisterAccount("test@example.com", "tester", "password");
 
         AccountEventServiceMock.Verify(mock => mock.Created(It.IsAny<Account>()));
     }
@@ -60,7 +60,7 @@ public class AccountServiceTest : WithMocks
     {
         AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(false);
 
-        var actual = _accountService.RegisterAccount("test@example.com", "tester");
+        var actual = _accountService.RegisterAccount("test@example.com", "tester", "password");
 
         Assert.Null(actual);
         AccountEventServiceMock.VerifyNoOtherCalls();

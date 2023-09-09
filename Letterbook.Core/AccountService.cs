@@ -56,10 +56,11 @@ public class AccountService : IAccountService, IDisposable
         }
     }
 
-    public Account? RegisterAccount(string email, string handle)
+    public async Task<Account?> RegisterAccount(string email, string handle, string password)
     {
         var baseUri = _opts.BaseUri();
         var account = Account.CreateAccount(baseUri, email, handle);
+        await _identityManager.AddPasswordAsync(account.Identity, password);
 
         var success = _accountAdapter.RecordAccount(account);
         if (success)
@@ -73,22 +74,22 @@ public class AccountService : IAccountService, IDisposable
         return default;
     }
 
-    public Account? LookupAccount(string id)
+    public Task<Account?> LookupAccount(string id)
     {
         return _accountAdapter.LookupAccount(id);
     }
 
-    public Profile LookupProfile(string queryTarget)
+    public Task<Profile> LookupProfile(string queryTarget)
     {
         throw new NotImplementedException();
     }
 
-    public IEnumerable<Account> FindAccounts(string email)
+    public Task<IEnumerable<Account>> FindAccounts(string email)
     {
         throw new NotImplementedException();
     }
 
-    public bool UpdateEmail(string accountId, string email)
+    public Task<bool> UpdateEmail(string accountId, string email)
     {
         var account = _accountAdapter.LookupAccount(accountId);
         if (account == null) return false;
@@ -96,7 +97,7 @@ public class AccountService : IAccountService, IDisposable
         return true;
     }
 
-    public bool AddLinkedProfile(string accountId, Profile profile, ProfilePermission permission)
+    public Task<bool> AddLinkedProfile(string accountId, Profile profile, ProfilePermission permission)
     {
         var account = _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
@@ -107,7 +108,7 @@ public class AccountService : IAccountService, IDisposable
         return count == account.LinkedProfiles.Count;
     }
 
-    public bool UpdateLinkedProfile(string accountId, Profile profile, ProfilePermission permission)
+    public Task<bool> UpdateLinkedProfile(string accountId, Profile profile, ProfilePermission permission)
     {
         var account = _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
@@ -128,7 +129,7 @@ public class AccountService : IAccountService, IDisposable
         return true;
     }
 
-    public bool RemoveLinkedProfile(string accountId, Profile profile)
+    public Task<bool> RemoveLinkedProfile(string accountId, Profile profile)
     {
         var account = _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
