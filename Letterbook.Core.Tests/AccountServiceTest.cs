@@ -1,5 +1,6 @@
 ﻿using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.Core.Tests.Mocks;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -13,16 +14,19 @@ public class AccountServiceTest : WithMocks
     private int _randomSeed;
     private FakeAccount _fakeAccount;
     private FakeProfile _fakeProfile;
+    private MockIdentityManager _mockIdentityManager;
 
     public AccountServiceTest(ITestOutputHelper outputHelper)
     {
         _outputHelper = outputHelper;
+        _outputHelper.WriteLine($"Bogus random seed: {Init.WithSeed()}");
         var loggerMock = Mock.Of<ILogger<AccountService>>();
         _fakeAccount = new FakeAccount();
         _fakeProfile = new FakeProfile();
+        _mockIdentityManager = new MockIdentityManager();
 
         _accountService = new AccountService(loggerMock, CoreOptionsMock, AccountProfileMock.Object,
-            AccountEventServiceMock.Object);
+            AccountEventServiceMock.Object, _mockIdentityManager.Create());
     }
 
     [Fact]
