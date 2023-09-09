@@ -1,11 +1,10 @@
-﻿using Letterbook.Api.Tests.Fakes;
-using Letterbook.Core;
+﻿using Letterbook.Core;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 
-namespace Letterbook.Api.Tests.Support;
+namespace Letterbook.Api.IntegrationTests.Host;
 
 public class WebAdapter : IDisposable
 {

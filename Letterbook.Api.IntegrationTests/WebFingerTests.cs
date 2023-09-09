@@ -1,11 +1,11 @@
 ﻿using System.Net;
-using Letterbook.Api.Tests.Support;
-using Letterbook.Api.Tests.Support.Extensions;
+using Letterbook.Api.IntegrationTests.Extensions;
+using Letterbook.Api.IntegrationTests.Host;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Xunit.Abstractions;
 
-namespace Letterbook.Api.Tests.Resources.WebFinger;
+namespace Letterbook.Api.IntegrationTests;
 
 /**
  * https://docs.joinmastodon.org/spec/webfinger/
