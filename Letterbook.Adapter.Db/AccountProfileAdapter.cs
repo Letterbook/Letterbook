@@ -14,22 +14,22 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         _context = context;
     }
 
-    public bool RecordAccount(Models.Account account)
+    public Task<bool> RecordAccount(Models.Account account)
     {
         throw new NotImplementedException();
     }
 
-    public bool RecordAccounts(IEnumerable<Models.Account> accounts)
+    public Task<bool> RecordAccounts(IEnumerable<Models.Account> accounts)
     {
         throw new NotImplementedException();
     }
 
-    public Models.Account? LookupAccount(string id)
+    public Task<Models.Account?> LookupAccount(string id)
     {
         throw new NotImplementedException();
     }
 
-    public Models.Profile? LookupProfile(string localId)
+    public Task<Models.Profile?> LookupProfile(string localId)
     {
         throw new NotImplementedException();
     }

@@ -1,4 +1,5 @@
 ﻿using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -33,7 +34,8 @@ public class SeedAdminWorker : IScopedWorker
         {
             if (_accountAdapter.SearchAccounts().Any()) return;
 
-            var admin = await _accountService.RegisterAccount($"admin@{_coreOptions.DomainName}", "admin", "password");
+            var admin = await _accountService.RegisterAccount($"admin@{_coreOptions.BaseUri().Authority}", "admin",
+                "password");
             if (admin is not null)
             {
                 _logger.LogInformation("Created admin account");

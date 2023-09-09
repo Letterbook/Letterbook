@@ -62,6 +62,7 @@ public class Program
         // Register Workers
         builder.Services.AddScoped<IScopedWorker, SeedAdminWorker>();
         builder.Services.AddHostedService<WorkerScope<SeedAdminWorker>>();
+        // TODO: clean up and make things buildable again, then see if you can log in
         
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
