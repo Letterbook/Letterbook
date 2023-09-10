@@ -7,11 +7,11 @@ public interface IAccountService
 {
     public Task<ClaimsIdentity?> AuthenticatePassword(string email, string password);
     public Task<Account?> RegisterAccount(string email, string handle, string password);
-    public Task<Account?> LookupAccount(string id);
+    public Task<Account?> LookupAccount(Guid id);
     public Task<Profile> LookupProfile(string queryTarget);
     public Task<IEnumerable<Account>> FindAccounts(string email);
-    public Task<bool> UpdateEmail(string accountId, string email);
-    public Task<bool> AddLinkedProfile(string accountId, Profile profile, ProfilePermission permission);
-    public Task<bool> UpdateLinkedProfile(string accountId, Profile profile, ProfilePermission permission);
-    public Task<bool> RemoveLinkedProfile(string accountId, Profile profile);
+    public Task<bool> UpdateEmail(Guid accountId, string email);
+    public Task<bool> AddLinkedProfile(Guid accountId, Profile profile, ProfilePermission permission);
+    public Task<bool> UpdateLinkedProfile(Guid accountId, Profile profile, ProfilePermission permission);
+    public Task<bool> RemoveLinkedProfile(Guid accountId, Profile profile);
 }

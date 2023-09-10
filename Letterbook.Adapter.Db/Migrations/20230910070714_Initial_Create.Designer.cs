@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    [Migration("20230908224910_Initial_Create")]
+    [Migration("20230910070714_Initial_Create")]
     partial class Initial_Create
     {
         /// <inheritdoc />
@@ -112,34 +112,12 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("Letterbook.Core.Models.Account", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("IdentityId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdentityId");
-
-                    b.ToTable("Accounts");
-                });
-
-            modelBuilder.Entity("Letterbook.Core.Models.AccountIdentity", b =>
-                {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
-
-                    b.Property<string>("AccountId")
-                        .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
                         .HasColumnType("text");
@@ -182,10 +160,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId")
-                        .IsUnique();
-
-                    b.ToTable("AccountIdentity");
+                    b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.Audience", b =>
@@ -240,8 +215,8 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("Letterbook.Core.Models.LinkedProfile", b =>
                 {
-                    b.Property<string>("AccountId")
-                        .HasColumnType("text");
+                    b.Property<Guid>("AccountId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ProfileId")
                         .HasColumnType("text");
@@ -303,8 +278,8 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<string>("LocalId")
                         .HasColumnType("text");
 
-                    b.Property<string>("OwnedById")
-                        .HasColumnType("text");
+                    b.Property<Guid?>("OwnedById")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -635,26 +610,6 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("Follows");
 
                     b.Navigation("Subject");
-                });
-
-            modelBuilder.Entity("Letterbook.Core.Models.Account", b =>
-                {
-                    b.HasOne("Letterbook.Core.Models.AccountIdentity", "Identity")
-                        .WithMany()
-                        .HasForeignKey("IdentityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Identity");
-                });
-
-            modelBuilder.Entity("Letterbook.Core.Models.AccountIdentity", b =>
-                {
-                    b.HasOne("Letterbook.Core.Models.Account", "Account")
-                        .WithOne()
-                        .HasForeignKey("Letterbook.Core.Models.AccountIdentity", "AccountId");
-
-                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.Audience", b =>

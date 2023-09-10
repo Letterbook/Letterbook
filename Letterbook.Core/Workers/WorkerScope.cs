@@ -18,12 +18,12 @@ public class WorkerScope<T> : IHostedService where T : class, IScopedWorker
         _serviceProvider = serviceProvider;
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         using var scope = _serviceProvider.CreateScope();
         var worker = scope.ServiceProvider.GetRequiredService<T>();
 
-        return worker.DoWork(cancellationToken);
+        await worker.DoWork(cancellationToken);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

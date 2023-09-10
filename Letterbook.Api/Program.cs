@@ -60,7 +60,7 @@ public class Program
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
         
         // Register Workers
-        builder.Services.AddScoped<IScopedWorker, SeedAdminWorker>();
+        builder.Services.AddScoped<SeedAdminWorker>();
         builder.Services.AddHostedService<WorkerScope<SeedAdminWorker>>();
         // TODO: clean up and make things buildable again, then see if you can log in
         
@@ -69,7 +69,7 @@ public class Program
         builder.Services.AddSingleton<IMessageBusAdapter, RxMessageBus>();
         builder.Services.AddDbContext<RelationalContext>();
         builder.Services.AddDbContext<FeedsContext>();
-        builder.Services.AddIdentity<AccountIdentity, IdentityRole<Guid>>()
+        builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
             .AddEntityFrameworkStores<RelationalContext>();
         
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

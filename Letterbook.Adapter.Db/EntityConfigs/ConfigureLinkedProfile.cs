@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
-namespace Letterbook.Adapter.Db.Entities;
+namespace Letterbook.Adapter.Db.EntityConfigs;
 
 public class ConfigureLinkedProfile : IEntityTypeConfiguration<Models.LinkedProfile>
 {

@@ -15,11 +15,11 @@ public class AccountService : IAccountService, IDisposable
     private readonly CoreOptions _opts;
     private readonly IAccountProfileAdapter _accountAdapter;
     private readonly IAccountEventService _eventService;
-    private readonly UserManager<AccountIdentity> _identityManager;
+    private readonly UserManager<Account> _identityManager;
 
     public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options,
         IAccountProfileAdapter accountAdapter, IAccountEventService eventService,
-        UserManager<AccountIdentity> identityManager)
+        UserManager<Account> identityManager)
     {
         _logger = logger;
         _opts = options.Value;
@@ -51,7 +51,7 @@ public class AccountService : IAccountService, IDisposable
             case PasswordVerificationResult.Failed:
             default:
                 await _identityManager.AccessFailedAsync(accountAuth);
-                _logger.LogInformation("Password Authentication failed for {AccountId}", accountAuth.Account.Id);
+                _logger.LogInformation("Password Authentication failed for {AccountId}", accountAuth.Id);
                 return default;
         }
     }
@@ -60,21 +60,29 @@ public class AccountService : IAccountService, IDisposable
     {
         var baseUri = _opts.BaseUri();
         var account = Account.CreateAccount(baseUri, email, handle);
-        await _identityManager.AddPasswordAsync(account.Identity, password);
-
-        var success = await _accountAdapter.RecordAccount(account);
+        var success = _accountAdapter.RecordAccount(account);
         if (success)
         {
+            await _accountAdapter.Commit();
             _logger.LogInformation("Created new account {AccountId}", account.Id);
             _eventService.Created(account);
-            return account;
+        }
+        else
+        {
+            _logger.LogWarning("Could not create new account for {Email}", account.Email);
+            return default;
         }
 
-        _logger.LogWarning("Could not create new account for {Email}", account.Email);
+        // var result = await _identityManager.CreateAsync(new AccountIdentity(account, email, handle), password);
+        var result = await _identityManager.AddPasswordAsync(account, password);
+
+        if (result.Succeeded) return account;
+        _logger.LogError("Invalid password for {Email} due to {@Reasons}", email, result.Errors.Select(e => e.Description));
         return default;
+
     }
 
-    public async Task<Account?> LookupAccount(string id)
+    public async Task<Account?> LookupAccount(Guid id)
     {
         return await _accountAdapter.LookupAccount(id);
     }
@@ -89,7 +97,7 @@ public class AccountService : IAccountService, IDisposable
         throw new NotImplementedException();
     }
 
-    public async Task<bool> UpdateEmail(string accountId, string email)
+    public async Task<bool> UpdateEmail(Guid accountId, string email)
     {
         var account = await _accountAdapter.LookupAccount(accountId);
         if (account == null) return false;
@@ -97,7 +105,7 @@ public class AccountService : IAccountService, IDisposable
         return true;
     }
 
-    public async Task<bool> AddLinkedProfile(string accountId, Profile profile, ProfilePermission permission)
+    public async Task<bool> AddLinkedProfile(Guid accountId, Profile profile, ProfilePermission permission)
     {
         var account = await _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
@@ -108,7 +116,7 @@ public class AccountService : IAccountService, IDisposable
         return count == account.LinkedProfiles.Count;
     }
 
-    public async Task<bool> UpdateLinkedProfile(string accountId, Profile profile, ProfilePermission permission)
+    public async Task<bool> UpdateLinkedProfile(Guid accountId, Profile profile, ProfilePermission permission)
     {
         var account = await _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
@@ -129,7 +137,7 @@ public class AccountService : IAccountService, IDisposable
         return true;
     }
 
-    public async Task<bool> RemoveLinkedProfile(string accountId, Profile profile)
+    public async Task<bool> RemoveLinkedProfile(Guid accountId, Profile profile)
     {
         var account = await _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;

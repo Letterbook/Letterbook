@@ -35,7 +35,7 @@ public class SeedAdminWorker : IScopedWorker
             if (_accountAdapter.SearchAccounts().Any()) return;
 
             var admin = await _accountService.RegisterAccount($"admin@{_coreOptions.BaseUri().Authority}", "admin",
-                "password");
+                "Password1!");
             if (admin is not null)
             {
                 _logger.LogInformation("Created admin account");

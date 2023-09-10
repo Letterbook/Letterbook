@@ -38,7 +38,7 @@ public class AccountServiceTest : WithMocks
     [Fact(DisplayName = "Should Register new accounts")]
     public async Task RegisterAccount()
     {
-        AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).ReturnsAsync(true);
+        AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
 
         var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password");
 
@@ -48,7 +48,7 @@ public class AccountServiceTest : WithMocks
     [Fact(DisplayName = "Should publish new accounts")]
     public async Task RegisterAccountPublish()
     {
-        AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).ReturnsAsync(true);
+        AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
 
         await _accountService.RegisterAccount("test@example.com", "tester", "password");
 
@@ -58,7 +58,7 @@ public class AccountServiceTest : WithMocks
     [Fact(DisplayName = "Should do nothing when registration fails")]
     public async Task RegisterAccountFail()
     {
-        AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).ReturnsAsync(false);
+        AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(false);
 
         var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password");
 
@@ -70,7 +70,7 @@ public class AccountServiceTest : WithMocks
     public async Task LookupTest()
     {
         var expected = _fakeAccount.Generate();
-        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<string>())).ReturnsAsync(expected);
+        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).ReturnsAsync(expected);
 
         var actual = await _accountService.LookupAccount(expected.Id);
 
@@ -81,7 +81,7 @@ public class AccountServiceTest : WithMocks
     public async Task LookupTestNoResult()
     {
         var expected = _fakeAccount.Generate();
-        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<string>())).ReturnsAsync(default(Account));
+        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).ReturnsAsync(default(Account));
 
         var actual = await _accountService.LookupAccount(expected.Id);
 
