@@ -32,9 +32,13 @@ public class SeedAdminWorker : IScopedWorker
 
         try
         {
-            if (_accountAdapter.SearchAccounts().Any()) return;
+            if (_accountAdapter.SearchAccounts().Any())
+            {
+                _logger.LogDebug("Found accounts, skipping seed");
+                return;
+            }
 
-            var admin = await _accountService.RegisterAccount($"admin@{_coreOptions.BaseUri().Authority}", "admin",
+            var admin = await _accountService.RegisterAccount($"admin@letterbook.example", "admin",
                 "Password1!");
             if (admin is not null)
             {

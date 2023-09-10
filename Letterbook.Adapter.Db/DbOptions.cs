@@ -18,7 +18,7 @@ public class DbOptions
     public string? Password { get; set; }
     public string? ConnectionString { get; set; }
 
-    public string GetConnectionString()
+    public virtual string GetConnectionString()
     {
         if (!string.IsNullOrEmpty(ConnectionString)) return ConnectionString;
         if (string.IsNullOrEmpty(Host)) throw new ConfigException("Host cannot be null, specify a Host or ConnectionString");

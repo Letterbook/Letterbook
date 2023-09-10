@@ -11,4 +11,9 @@ public class DesignDbOptions : DbOptions
         UseSsl = false;
         Database = "letterbook";
     }
+
+    public override string GetConnectionString()
+    {
+        return base.GetConnectionString() + "Include Error Detail=true";
+    }
 }

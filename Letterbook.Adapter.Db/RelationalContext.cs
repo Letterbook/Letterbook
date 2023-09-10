@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Letterbook.Core.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 #pragma warning disable CS8618
@@ -39,7 +40,6 @@ public class RelationalContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         options.UseNpgsql(_config.GetConnectionString());
-        options.UseOpenIddict();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

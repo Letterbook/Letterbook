@@ -28,7 +28,7 @@ public class AccountService : IAccountService, IDisposable
         _identityManager = identityManager;
     }
 
-    public async Task<ClaimsIdentity?> AuthenticatePassword(string email, string password)
+    public async Task<IList<Claim>> AuthenticatePassword(string email, string password)
     {
         var accountAuth = await _identityManager.FindByEmailAsync(email);
         if (accountAuth == null) return null;
@@ -37,6 +37,7 @@ public class AccountService : IAccountService, IDisposable
             throw new RateLimitException("Too many failed attempts", accountAuth.LockoutEnd.GetValueOrDefault());
         }
 
+        var checkResult = await _identityManager.CheckPasswordAsync(accountAuth, password);
         var match = _identityManager.PasswordHasher.VerifyHashedPassword(accountAuth,
             accountAuth.PasswordHash ?? string.Empty, password);
         switch (match)
@@ -44,15 +45,15 @@ public class AccountService : IAccountService, IDisposable
             case PasswordVerificationResult.SuccessRehashNeeded:
                 await _identityManager.ResetAccessFailedCountAsync(accountAuth);
                 accountAuth.PasswordHash = _identityManager.PasswordHasher.HashPassword(accountAuth, password);
-                return new ClaimsIdentity(await _identityManager.GetClaimsAsync(accountAuth));
+                return await _identityManager.GetClaimsAsync(accountAuth);
             case PasswordVerificationResult.Success:
                 await _identityManager.ResetAccessFailedCountAsync(accountAuth);
-                return new ClaimsIdentity(await _identityManager.GetClaimsAsync(accountAuth));
+                return await _identityManager.GetClaimsAsync(accountAuth);
             case PasswordVerificationResult.Failed:
             default:
                 await _identityManager.AccessFailedAsync(accountAuth);
                 _logger.LogInformation("Password Authentication failed for {AccountId}", accountAuth.Id);
-                return default;
+                return Array.Empty<Claim>();
         }
     }
 
@@ -60,26 +61,22 @@ public class AccountService : IAccountService, IDisposable
     {
         var baseUri = _opts.BaseUri();
         var account = Account.CreateAccount(baseUri, email, handle);
-        var success = _accountAdapter.RecordAccount(account);
-        if (success)
+        var created = await _identityManager.CreateAsync(account, password);
+        
+        if (created.Succeeded && _accountAdapter.RecordAccount(account))
         {
+            await _identityManager.AddClaimAsync(account, new Claim("registered", "true", "bool"));
             await _accountAdapter.Commit();
             _logger.LogInformation("Created new account {AccountId}", account.Id);
             _eventService.Created(account);
+            return account;
         }
         else
         {
             _logger.LogWarning("Could not create new account for {Email}", account.Email);
             return default;
         }
-
-        // var result = await _identityManager.CreateAsync(new AccountIdentity(account, email, handle), password);
-        var result = await _identityManager.AddPasswordAsync(account, password);
-
-        if (result.Succeeded) return account;
-        _logger.LogError("Invalid password for {Email} due to {@Reasons}", email, result.Errors.Select(e => e.Description));
-        return default;
-
+        
     }
 
     public async Task<Account?> LookupAccount(Guid id)

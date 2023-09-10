@@ -19,7 +19,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "quick": {
+    "http-no-browser": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,

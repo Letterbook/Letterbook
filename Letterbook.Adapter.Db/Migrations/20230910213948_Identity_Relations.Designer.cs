@@ -3,6 +3,7 @@ using System;
 using Letterbook.Adapter.Db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    partial class RelationalContextModelSnapshot : ModelSnapshot
+    [Migration("20230910213948_Identity_Relations")]
+    partial class Identity_Relations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

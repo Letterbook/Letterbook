@@ -5,7 +5,7 @@ namespace Letterbook.Core;
 
 public interface IAccountService
 {
-    public Task<ClaimsIdentity?> AuthenticatePassword(string email, string password);
+    public Task<IList<Claim>> AuthenticatePassword(string email, string password);
     public Task<Account?> RegisterAccount(string email, string handle, string password);
     public Task<Account?> LookupAccount(Guid id);
     public Task<Profile> LookupProfile(string queryTarget);

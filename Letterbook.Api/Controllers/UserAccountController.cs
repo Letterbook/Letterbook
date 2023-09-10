@@ -25,10 +25,10 @@ public class UserAccountController : ControllerBase
     {
         try
         {
-            var identity = await _accountService.AuthenticatePassword(loginRequest.Email, loginRequest.Password);
-            if (identity == null) return Unauthorized();
+            var claims = await _accountService.AuthenticatePassword(loginRequest.Email, loginRequest.Password);
+            if (!claims.Any()) return Unauthorized();
 
-            var principal = new ClaimsPrincipal(identity);
+            var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme));
             return SignIn(principal, JwtBearerDefaults.AuthenticationScheme);
         }
         catch (RateLimitException e)

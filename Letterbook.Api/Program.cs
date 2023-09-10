@@ -45,6 +45,7 @@ public class Program
                 {
                     ValidateAudience = false
                 };
+                options.RequireHttpsMetadata = false;
             });
         
         // Register options
@@ -113,6 +114,7 @@ public class Program
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+            // app.Services.GetService<JwtBearerHandler>()
         }
 
         app.UseHttpsRedirection();
