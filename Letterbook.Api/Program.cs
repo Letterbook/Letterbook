@@ -45,6 +45,7 @@ public class Program
                 {
                     ValidateAudience = false
                 };
+                // TODO(Security): Figure out how to do this only in Development
                 options.RequireHttpsMetadata = false;
             });
 
