@@ -37,6 +37,19 @@ public class MockIdentityManager
         IdentityErrorDescriber = identityErrorDescriber ?? new();
         ServiceProvider = serviceProvider ?? new();
         Logger = logger ?? new();
+        
+        UserStore.As<IUserPasswordStore<Account>>();
+        UserStore.As<IUserClaimStore<Account>>();
+        UserStore.As<IUserEmailStore<Account>>();
+        UserStore.As<IUserLoginStore<Account>>();
+        UserStore.Setup(m => m.CreateAsync(It.IsAny<Account>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(IdentityResult.Success);
+        PasswordValidator
+            .Setup(m => m.ValidateAsync(It.IsAny<UserManager<Account>>(), It.IsAny<Account>(), It.IsAny<string?>()))
+            .ReturnsAsync(IdentityResult.Success);
+        UserValidator
+            .Setup(m => m.ValidateAsync(It.IsAny<UserManager<Account>>(), It.IsAny<Account>()))
+            .ReturnsAsync(IdentityResult.Success);
     }
 
     public UserManager<Account> Create(IUserStore<Account>? userStore = null,
