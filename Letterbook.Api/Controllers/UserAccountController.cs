@@ -1,10 +1,15 @@
-﻿using System.Security.Claims;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using Letterbook.Api.Dto;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
+using Letterbook.Core.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Letterbook.Api.Controllers;
 
@@ -12,12 +17,23 @@ namespace Letterbook.Api.Controllers;
 public class UserAccountController : ControllerBase
 {
     private readonly ILogger<UserAccountController> _logger;
+    private readonly CoreOptions _coreOptions;
+    private readonly string _hostSecret;
     private readonly IAccountService _accountService;
 
-    public UserAccountController(ILogger<UserAccountController> logger, IAccountService accountService)
+    public UserAccountController(ILogger<UserAccountController> logger, IConfiguration config, IOptions<CoreOptions> coreOptions, IAccountService accountService)
     {
         _logger = logger;
+        _coreOptions = coreOptions.Value;
+        _hostSecret = config.GetValue<string>("HostSecret")!;
         _accountService = accountService;
+    }
+
+    private static string MintToken(SecurityTokenDescriptor descriptor)
+    {
+        var handler = new JwtSecurityTokenHandler();
+
+        return handler.WriteToken(handler.CreateToken(descriptor));
     }
 
     [HttpPost]
@@ -27,9 +43,26 @@ public class UserAccountController : ControllerBase
         {
             var claims = await _accountService.AuthenticatePassword(loginRequest.Email, loginRequest.Password);
             if (!claims.Any()) return Unauthorized();
-
-            var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme));
-            return SignIn(principal, JwtBearerDefaults.AuthenticationScheme);
+            
+            // TODO: asymmetric signing key
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_hostSecret));
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Issuer = _coreOptions.BaseUri().ToString(),
+                Audience = _coreOptions.BaseUri().ToString(),
+                NotBefore = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddDays(28),
+                SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
+            };
+            var token = MintToken(tokenDescriptor);
+            
+            return Ok(new TokenResponse
+            {
+                AccessToken = token,
+                ExpiresIn = (int)(tokenDescriptor.Expires - DateTime.UtcNow).Value.TotalSeconds,
+                TokenType = "Bearer"
+            });
         }
         catch (RateLimitException e)
         {

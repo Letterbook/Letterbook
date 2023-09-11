@@ -6,6 +6,7 @@ using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Letterbook.Core;
 
@@ -31,13 +32,12 @@ public class AccountService : IAccountService, IDisposable
     public async Task<IList<Claim>> AuthenticatePassword(string email, string password)
     {
         var accountAuth = await _identityManager.FindByEmailAsync(email);
-        if (accountAuth == null) return null;
+        if (accountAuth == null) return Array.Empty<Claim>();
         if (accountAuth.LockoutEnd >= DateTime.UtcNow)
         {
             throw new RateLimitException("Too many failed attempts", accountAuth.LockoutEnd.GetValueOrDefault());
         }
 
-        var checkResult = await _identityManager.CheckPasswordAsync(accountAuth, password);
         var match = _identityManager.PasswordHasher.VerifyHashedPassword(accountAuth,
             accountAuth.PasswordHash ?? string.Empty, password);
         switch (match)
@@ -65,18 +65,19 @@ public class AccountService : IAccountService, IDisposable
         
         if (created.Succeeded && _accountAdapter.RecordAccount(account))
         {
-            await _identityManager.AddClaimAsync(account, new Claim("registered", "true", "bool"));
+            await _identityManager.AddClaimsAsync(account, new []
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, handle),
+                new Claim(JwtRegisteredClaimNames.Email, email)
+            });
             await _accountAdapter.Commit();
             _logger.LogInformation("Created new account {AccountId}", account.Id);
             _eventService.Created(account);
             return account;
         }
-        else
-        {
-            _logger.LogWarning("Could not create new account for {Email}", account.Email);
-            return default;
-        }
         
+        _logger.LogWarning("Could not create new account for {Email}", account.Email);
+        return default;
     }
 
     public async Task<Account?> LookupAccount(Guid id)

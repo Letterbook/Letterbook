@@ -47,7 +47,7 @@ public class Program
                 };
                 options.RequireHttpsMetadata = false;
             });
-        
+
         // Register options
         builder.Services.Configure<CoreOptions>(coreSection);
         builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptions.ConfigKey));
@@ -128,4 +128,8 @@ public class Program
 
         app.Run();
     }
+}
+
+public class SomeOptions
+{
 }

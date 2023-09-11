@@ -8,3 +8,16 @@ GET {{host}}/api/v1/accounts/11/scheduled_statuses
 
 ###
 GET {{host}}/api/v1/connect/token
+
+###
+POST {{host}}/api/v1/user_account/login
+accept: */*
+Content-Type: application/json
+
+{
+  "email": "admin@letterbook.example",
+  "password": "Password1!"
+}
+
+###
+
