@@ -20,10 +20,7 @@ public class Audience : IEquatable<Audience>, IObjectRef
     
     public Uri Id { get; set; }
     // LocalId isn't a meaningful concept for Audience, but it's required by IObjectRef
-    public string? LocalId { 
-        get => Id.ToString(); 
-        set => Id = Uri.TryCreate(value, UriKind.RelativeOrAbsolute, out var newId) ? newId : Id; 
-    }
+    public Guid? LocalId { get; set; }
     public string Authority => Id.Authority;
     public List<Profile> Members { get; set; } = new();
 

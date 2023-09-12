@@ -23,7 +23,7 @@ public class Image : IExpiring, IContentRef
     }
     
     public Uri Id { get; set; }
-    public string? LocalId { get; set; }
+    public Guid? LocalId { get; set; }
     public string Authority => Id.Authority;
     public ObjectCollection<Profile> Creators { get; set; } = new ();
     public DateTime CreatedDate { get; set; }

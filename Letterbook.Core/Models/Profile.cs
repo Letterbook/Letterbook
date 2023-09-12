@@ -25,7 +25,7 @@ public class Profile : IObjectRef
     }
 
     public Uri Id { get; set; }
-    public string? LocalId { get; set; }
+    public Guid? LocalId { get; set; }
     public string Authority => Id.Authority;
     public string Handle { get; set; }
     public string DisplayName { get; set; }
@@ -40,7 +40,7 @@ public class Profile : IObjectRef
 
     public static Profile CreatePerson(Uri baseUri, string handle)
     {
-        var localId = ShortId.NewShortId();
+        var localId = Guid.NewGuid();
         var profile = new Profile
         {
             Id = new Uri(baseUri, $"/actor/{localId}"),
