@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Letterbook.Adapter.Db.Entities;
+namespace Letterbook.Adapter.Db.EntityConfigs;
 
 public class ConfigureAccount : IEntityTypeConfiguration<Models.Account>
 {

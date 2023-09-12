@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Letterbook.Core.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 #pragma warning disable CS8618

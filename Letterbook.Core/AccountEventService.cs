@@ -57,7 +57,7 @@ public class AccountEventService : IAccountEventService
             Source = _options.BaseUri(),
             Data = value,
             Type = $"{nameof(ActivityEventService)}.{value.GetType()}.{action}",
-            Subject = value.Id,
+            Subject = value.Id.ToString(),
             Time = DateTimeOffset.UtcNow
         };
     }

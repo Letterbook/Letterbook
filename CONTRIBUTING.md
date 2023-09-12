@@ -10,6 +10,7 @@
     - [Using the `dotnet` CLI](#using-the-dotnet-cli)
     - [Using VS Code](#using-vs-code)
     - [Using Jetbrains Rider and VisualStudio](#using-jetbrains-rider-and-visualstudio)
+  - [Secrets](#secrets)
   - [Dependencies](#dependencies)
 - [License](#license)
 
@@ -104,6 +105,16 @@ Tests can be run from the suggested test explorer extension.
 There are `launchSettings.json` targets configured in the repo. Open Letterbook.sln and then run the `Letterbook.Api: http` configuration.
 
 Tests can be run from the built-in test runner.
+
+### Secrets
+
+The app needs to access some secrets. As a matter of good security practice, those are not, and will never be, committed to source control. Not even fake or sample values. That means you have to provide your own. There are multiple options, but the easiest way will be to use Dotnet User Secrets. You can add your own with this command.
+
+```shell
+dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook.Api
+```
+
+The actual value isn't important as long as you're just running and debugging locally. So if you don't have openssl you can use any string of 32 characters. But using cryptographically secure secrets is a good habit to build.
 
 ### Dependencies
 

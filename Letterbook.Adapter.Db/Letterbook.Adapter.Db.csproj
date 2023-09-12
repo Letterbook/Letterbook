@@ -15,12 +15,13 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.5" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.5.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         <PrivateAssets>all</PrivateAssets>
@@ -36,6 +37,9 @@
     <ItemGroup>
       <Compile Remove="Migrations\20230901221809_Current.cs" />
       <Compile Remove="Migrations\20230901221809_Current.Designer.cs" />
+      <Compile Remove="Migrations\TransactionalContextModelSnapshot.cs" />
+      <Compile Remove="Migrations\Identity\20230910185508_Identity_Navigations.Designer.cs" />
+      <Compile Remove="Migrations\Identity\IdentityContextModelSnapshot.cs" />
     </ItemGroup>
 
 </Project>

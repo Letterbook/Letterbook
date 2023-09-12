@@ -3,7 +3,7 @@ using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Letterbook.Adapter.Db.Entities;
+namespace Letterbook.Adapter.Db.EntityConfigs;
 
 public class ConfigureImage : IEntityTypeConfiguration<Image>
 {

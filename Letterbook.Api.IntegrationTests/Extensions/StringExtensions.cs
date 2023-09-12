@@ -1,4 +1,4 @@
-﻿namespace Letterbook.Api.Tests.Support.Extensions;
+﻿namespace Letterbook.Api.IntegrationTests.Extensions;
 
 public static class StringExtensions
 {

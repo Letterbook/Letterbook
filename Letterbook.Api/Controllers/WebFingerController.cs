@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Letterbook.Api.Controllers;
 
-public class WebFingerController
+public class WebFingerController : ControllerBase
 {
     private readonly IAccountService _accountService;
 
@@ -14,11 +14,11 @@ public class WebFingerController
 
     [HttpGet]
     [Route("/.well-known/webfinger")]
-    public ActionResult Get([FromQuery]string resource)
+    public async Task<IResult> Get([FromQuery]string resource)
     {
-        var profile = _accountService.LookupProfile(resource);
+        var profile = await _accountService.LookupProfile(resource);
 
-        return new OkObjectResult(new WebFingerJsonResourceDescriptor
+        return Results.Ok(new WebFingerJsonResourceDescriptor
         {
             Subject = $"acct:{profile.DisplayName}@{profile.Authority}"
         });

@@ -1,24 +1,25 @@
-﻿using Letterbook.Api.Tests.Fakes;
-using Letterbook.Core;
+﻿using Letterbook.Core;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Moq;
 
-namespace Letterbook.Api.Tests.Support;
+namespace Letterbook.Api.IntegrationTests.Host;
 
 public class WebAdapter : IDisposable
 {
     public HttpClient Client { get; }
 
-    public FakeAccountService FakeAccountService { get; set; } = new();
+    public Mock<AccountService> _mockAccountService;
 
     public WebAdapter()
     {
+        _mockAccountService = new Mock<AccountService>();
         var web = new WebApplicationFactory<Program>()
             .WithWebHostBuilder(builder => builder.ConfigureServices(s =>
             {
                 s.RemoveAll<IAccountService>();
-                s.AddScoped<IAccountService>(_ => FakeAccountService);
+                s.AddScoped<IAccountService>(_ => _mockAccountService.Object);
             }));
 
         Client = web.CreateClient();
