@@ -27,12 +27,22 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         throw new NotImplementedException();
     }
 
-    public Task<Models.Account?> LookupAccount(Guid id)
+    public Models.Account? LookupAccount(Guid id)
     {
         throw new NotImplementedException();
     }
 
     public Task<Models.Profile?> LookupProfile(string localId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IQueryable<Models.Profile> SearchProfiles()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool RecordProfile(Models.Profile profile)
     {
         throw new NotImplementedException();
     }

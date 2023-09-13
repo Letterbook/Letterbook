@@ -1,13 +1,48 @@
-﻿using Letterbook.Core.Models;
+﻿using Letterbook.Core.Adapters;
+using Letterbook.Core.Exceptions;
+using Letterbook.Core.Extensions;
+using Letterbook.Core.Models;
 using Letterbook.Core.Values;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-class ProfileService : IProfileService
+public class ProfileService : IProfileService
 {
+    private ILogger<ProfileService> _logger;
+    private CoreOptions _options;
+    private IAccountProfileAdapter _profiles;
+
+    public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options, IAccountProfileAdapter profiles)
+    {
+        _logger = logger;
+        _options = options.Value;
+        _profiles = profiles;
+    }
+
     public Task<Profile> CreateProfile(Profile profile)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<Profile?> CreateProfile(Guid ownerId, string handle)
+    {
+        var account = _profiles.LookupAccount(ownerId);
+        if (account == null)
+        {
+            _logger.LogError("Failed to create a new profile because no account exists with ID {AccountId}", ownerId);
+            throw new InvalidException("Can't find account to attach to profile");
+        }
+        if (_profiles.SearchProfiles().Any(p => p.Handle == handle)) return default;
+
+        var profile = Profile.CreateIndividual(_options.BaseUri(), handle);
+        profile.OwnedBy = account;
+        account.LinkedProfiles.Add(new LinkedProfile(account, profile, ProfilePermission.All));
+        _profiles.RecordAccount(account);
+        await _profiles.Commit();
+
+        return profile;
     }
 
     public Task<Profile> UpdateProfile(Profile profile)
@@ -21,6 +56,11 @@ class ProfileService : IProfileService
     }
 
     public Task<Profile> LookupProfile(Uri id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IEnumerable<Profile>> FindProfiles(string handle)
     {
         throw new NotImplementedException();
     }

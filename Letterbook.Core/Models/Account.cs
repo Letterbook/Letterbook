@@ -12,7 +12,7 @@ public class Account : IdentityUser<Guid>
     // TODO(Account creation): https://github.com/Letterbook/Letterbook/issues/32
     public static Account CreateAccount(Uri baseUri, string email, string handle)
     {
-        var profile = Profile.CreatePerson(baseUri, handle);
+        var profile = Profile.CreateIndividual(baseUri, handle);
         var account = new Account
         {
             Email = email,

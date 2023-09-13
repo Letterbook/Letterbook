@@ -38,7 +38,9 @@ public class Profile : IObjectRef
     public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
     public ObjectCollection<Profile> FollowersCollection { get; set; } = new();
 
-    public static Profile CreatePerson(Uri baseUri, string handle)
+    // Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?
+    // The only use case I'm imagining for a service is to represent the server itself
+    public static Profile CreateIndividual(Uri baseUri, string handle)
     {
         var localId = Guid.NewGuid();
         var profile = new Profile
