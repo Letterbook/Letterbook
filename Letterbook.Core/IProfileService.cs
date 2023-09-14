@@ -7,6 +7,11 @@ public interface IProfileService
 {
     Task<Profile> CreateProfile(Profile profile);
     Task<Profile?> CreateProfile(Guid ownerId, string handle);
+    Task<Profile> UpdateDisplayName(Guid localId, string displayName);
+    Task<Profile> UpdateDescription(Guid localId, string description);
+    Task<Profile> InsertCustomField(Guid localId, int index, string key, string value);
+    Task<Profile> RemoveCustomField(Guid localId, int index);
+    Task<Profile> UpdateCustomField(Guid localId, int index, string key, string value);
     Task<Profile> UpdateProfile(Profile profile);
     Task<Profile> LookupProfile(Guid localId);
     Task<Profile> LookupProfile(Uri id);

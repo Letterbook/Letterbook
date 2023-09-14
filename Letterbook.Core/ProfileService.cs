@@ -45,6 +45,31 @@ public class ProfileService : IProfileService
         return profile;
     }
 
+    public Task<Profile> UpdateDisplayName(Guid localId, string displayName)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Profile> UpdateDescription(Guid localId, string description)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Profile> InsertCustomField(Guid localId, int index, string key, string value)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Profile> RemoveCustomField(Guid localId, int index)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Profile> UpdateCustomField(Guid localId, int index, string key, string value)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<Profile> UpdateProfile(Profile profile)
     {
         throw new NotImplementedException();

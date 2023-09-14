@@ -29,6 +29,8 @@ public class Profile : IObjectRef
     public string Authority => Id.Authority;
     public string Handle { get; set; }
     public string DisplayName { get; set; }
+    public string Description { get; set; }
+    public CustomField[] CustomFields { get; set; }
 
     // Local profiles should all have an owner, but remote ones do not.
     // Could remote profiles be claimed through an account transfer?
