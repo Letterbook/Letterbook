@@ -34,7 +34,11 @@ public class ProfileService : IProfileService
             _logger.LogError("Failed to create a new profile because no account exists with ID {AccountId}", ownerId);
             throw new InvalidException("Can't find account to attach to profile");
         }
-        if (_profiles.SearchProfiles().Any(p => p.Handle == handle)) return default;
+        if (_profiles.SearchProfiles().Any(p => p.Handle == handle))
+        {
+            _logger.LogError("Cannot create a new profile because a profile already exists with handle {Handle}", handle);
+            throw new DuplicateException("Profile already exists");
+        }
 
         var profile = Profile.CreateIndividual(_options.BaseUri(), handle);
         profile.OwnedBy = account;
