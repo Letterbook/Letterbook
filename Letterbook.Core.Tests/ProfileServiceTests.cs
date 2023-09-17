@@ -54,7 +54,7 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.SearchProfiles())
             .Returns(() => new List<Profile>().AsQueryable());
         
-        await Assert.ThrowsAsync<InvalidException>(async () => await _service.CreateProfile(accountId, expected));
+        await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
     }
     
     [Fact(DisplayName = "Should not create a duplicate profile")]
@@ -68,6 +68,6 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.SearchProfiles())
             .Returns(() => new List<Profile>{existing}.AsQueryable());
 
-        await Assert.ThrowsAsync<DuplicateException>(async () => await _service.CreateProfile(accountId, expected));
+        await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
     }
 }
