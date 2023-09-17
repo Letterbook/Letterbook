@@ -70,7 +70,7 @@ public class AccountServiceTest : WithMocks
     public async Task LookupTest()
     {
         var expected = _fakeAccount.Generate();
-        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).Returns(expected);
+        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).ReturnsAsync(expected);
 
         var actual = await _accountService.LookupAccount(expected.Id);
 
@@ -81,7 +81,7 @@ public class AccountServiceTest : WithMocks
     public async Task LookupTestNoResult()
     {
         var expected = _fakeAccount.Generate();
-        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).Returns(default(Account));
+        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).ReturnsAsync(default(Account));
 
         var actual = await _accountService.LookupAccount(expected.Id);
 
@@ -93,7 +93,7 @@ public class AccountServiceTest : WithMocks
     public async Task UpdateTest()
     {
         var account = _fakeAccount.Generate();
-        AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).Returns(account);
+        AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
         await _accountService.UpdateEmail(account.Id, "test@example.com");
 
@@ -106,7 +106,7 @@ public class AccountServiceTest : WithMocks
         var account = _fakeAccount.Generate();
         var profile = _fakeProfile.Generate();
         var expected = new LinkedProfile(account, profile, ProfilePermission.All);
-        AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).Returns(account);
+        AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
         await _accountService.AddLinkedProfile(account.Id, profile, ProfilePermission.All);
         
@@ -122,7 +122,7 @@ public class AccountServiceTest : WithMocks
         var expected = new LinkedProfile(account, profile, ProfilePermission.All);
         account.LinkedProfiles.Add(expected);
         profile.RelatedAccounts.Add(expected);
-        AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).Returns(account);
+        AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
         await _accountService.RemoveLinkedProfile(account.Id, profile);
         
@@ -138,7 +138,7 @@ public class AccountServiceTest : WithMocks
         var expected = new LinkedProfile(account, profile, ProfilePermission.All);
         account.LinkedProfiles.Add(expected);
         profile.RelatedAccounts.Add(expected);
-        AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).Returns(account);
+        AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
         await _accountService.UpdateLinkedProfile(account.Id, profile, ProfilePermission.None);
         

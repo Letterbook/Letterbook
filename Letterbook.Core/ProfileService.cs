@@ -28,7 +28,7 @@ public class ProfileService : IProfileService
 
     public async Task<Profile?> CreateProfile(Guid ownerId, string handle)
     {
-        var account = _profiles.LookupAccount(ownerId);
+        var account = await _profiles.LookupAccount(ownerId);
         if (account == null)
         {
             _logger.LogError("Failed to create a new profile because no account exists with ID {AccountId}", ownerId);

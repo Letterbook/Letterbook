@@ -82,7 +82,7 @@ public class AccountService : IAccountService, IDisposable
 
     public async Task<Account?> LookupAccount(Guid id)
     {
-        return _accountAdapter.LookupAccount(id);
+        return await _accountAdapter.LookupAccount(id);
     }
 
     public async Task<Profile> LookupProfile(string queryTarget)
@@ -98,7 +98,7 @@ public class AccountService : IAccountService, IDisposable
     // TODO: do this through Identity
     public async Task<bool> UpdateEmail(Guid accountId, string email)
     {
-        var account = _accountAdapter.LookupAccount(accountId);
+        var account = await _accountAdapter.LookupAccount(accountId);
         if (account == null) return false;
         account.Email = email;
         return true;
@@ -106,7 +106,7 @@ public class AccountService : IAccountService, IDisposable
 
     public async Task<bool> AddLinkedProfile(Guid accountId, Profile profile, ProfilePermission permission)
     {
-        var account = _accountAdapter.LookupAccount(accountId);
+        var account = await _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
         var count = account.LinkedProfiles.Count;
         var link = new LinkedProfile(account, profile, permission);
@@ -119,7 +119,7 @@ public class AccountService : IAccountService, IDisposable
 
     public async Task<bool> UpdateLinkedProfile(Guid accountId, Profile profile, ProfilePermission permission)
     {
-        var account = _accountAdapter.LookupAccount(accountId);
+        var account = await _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
         var model = new LinkedProfile(account, profile, ProfilePermission.None);
         var profileLink = profile.RelatedAccounts.SingleOrDefault(p => p.Equals(model));
@@ -142,7 +142,7 @@ public class AccountService : IAccountService, IDisposable
 
     public async Task<bool> RemoveLinkedProfile(Guid accountId, Profile profile)
     {
-        var account = _accountAdapter.LookupAccount(accountId);
+        var account = await _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
 
         var link = new LinkedProfile(account, profile, ProfilePermission.None);

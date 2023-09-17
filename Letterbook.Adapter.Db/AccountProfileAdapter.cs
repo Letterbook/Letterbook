@@ -27,7 +27,7 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         throw new NotImplementedException();
     }
 
-    public Models.Account? LookupAccount(Guid id)
+    public Task<Models.Account?> LookupAccount(Guid id)
     {
         throw new NotImplementedException();
     }

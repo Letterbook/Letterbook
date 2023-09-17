@@ -6,7 +6,7 @@ public interface IAccountProfileAdapter : IDisposable
 {
     public bool RecordAccount(Account account);
     public Task<bool> RecordAccounts(IEnumerable<Account> accounts);
-    public Account? LookupAccount(Guid id);
+    public Task<Account?> LookupAccount(Guid id);
     public IQueryable<Account> SearchAccounts();
     
     public Task<Profile?> LookupProfile(string localId);

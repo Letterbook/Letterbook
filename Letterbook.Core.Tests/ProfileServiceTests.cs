@@ -35,7 +35,7 @@ public class ProfileServiceTests : WithMocks
     {
         var accountId = Guid.NewGuid();
         var expected = "testAccount";
-        AccountProfileMock.Setup(m => m.LookupAccount(accountId)).Returns(_fakeAccount.Generate());
+        AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
         AccountProfileMock.Setup(m => m.SearchProfiles())
             .Returns(() => new List<Profile>().AsQueryable());
         
@@ -50,7 +50,7 @@ public class ProfileServiceTests : WithMocks
     {
         var accountId = Guid.NewGuid();
         var expected = "testAccount";
-        AccountProfileMock.Setup(m => m.LookupAccount(accountId)).Returns(default (Account));
+        AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(default (Account));
         AccountProfileMock.Setup(m => m.SearchProfiles())
             .Returns(() => new List<Profile>().AsQueryable());
         
@@ -64,7 +64,7 @@ public class ProfileServiceTests : WithMocks
         var expected = "testAccount";
         var existing = _fakeProfile.Generate();
         existing.Handle = expected;
-        AccountProfileMock.Setup(m => m.LookupAccount(accountId)).Returns(_fakeAccount.Generate());
+        AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
         AccountProfileMock.Setup(m => m.SearchProfiles())
             .Returns(() => new List<Profile>{existing}.AsQueryable());
 
