@@ -5,10 +5,12 @@ namespace Letterbook.Core.Exceptions;
 
 public class CoreException : Exception
 {
-    public CoreException()
-    {
-    }
-
+    /// <summary>
+    /// While you *can* construct your own CoreException, it's better to use a factory method, from below.
+    /// Exceptions form part of the mechanism to report error messages, to both users and operators. We can have better
+    /// and more helpful error messages if they're consistent. The factories help with that.
+    /// </summary>
+    /// <param name="message"></param>
     public CoreException(string? message) : base(message)
     {
     }
@@ -25,7 +27,7 @@ public class CoreException : Exception
         var ex = new CoreException(message)
         {
             HResult = (int)ErrorCodes.DuplicateEntry,
-            Source = $"{path}/{name}:{line}"
+            Source = $"{path} [{name}:{line}]"
         };
         ex.Data.Add("Id", id);
 
@@ -40,7 +42,7 @@ public class CoreException : Exception
         var ex = new CoreException(message)
         {
             HResult = (int)ErrorCodes.InvalidRequest,
-            Source = $"{path}/{name}:{line}"
+            Source = $"{path} [{name}:{line}]"
         };
         if (details == null) return ex;
         
