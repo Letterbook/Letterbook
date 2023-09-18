@@ -83,7 +83,7 @@ public class TimelineService : ITimelineService
         _feeds.RemoveFromTimelines(note);
     }
 
-    public async Task<IEnumerable<TimelineEntry>> GetFeed(string recipientId, DateTime begin, int limit = 40)
+    public async Task<IEnumerable<TimelineEntry>> GetFeed(Guid recipientId, DateTime begin, int limit = 40)
     {
         // TODO: Account for moderation conditions (block, mute, etc)
         var recipient = await _profileAdapter.LookupProfile(recipientId);

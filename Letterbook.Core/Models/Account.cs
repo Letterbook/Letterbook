@@ -23,4 +23,6 @@ public class Account : IdentityUser<Guid>
         
         return account;
     }
+
+    public Account ShallowClone() => (Account)MemberwiseClone();
 }

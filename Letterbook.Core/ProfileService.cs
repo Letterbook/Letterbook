@@ -1,4 +1,6 @@
-﻿using Letterbook.Core.Adapters;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
@@ -13,12 +15,15 @@ public class ProfileService : IProfileService
     private ILogger<ProfileService> _logger;
     private CoreOptions _options;
     private IAccountProfileAdapter _profiles;
+    private IProfileEventService _profileEvents;
 
-    public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options, IAccountProfileAdapter profiles)
+    public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options,
+        IAccountProfileAdapter profiles, IProfileEventService profileEvents)
     {
         _logger = logger;
         _options = options.Value;
         _profiles = profiles;
+        _profileEvents = profileEvents;
     }
 
     public Task<Profile> CreateProfile(Profile profile)
@@ -26,17 +31,20 @@ public class ProfileService : IProfileService
         throw new NotImplementedException();
     }
 
-    public async Task<Profile?> CreateProfile(Guid ownerId, string handle)
+    public async Task<Profile> CreateProfile(Guid ownerId, string handle)
     {
         var account = await _profiles.LookupAccount(ownerId);
         if (account == null)
         {
             _logger.LogError("Failed to create a new profile because no account exists with ID {AccountId}", ownerId);
-            throw CoreException.Invalid("Can't find account to attach to profile", "AccountId", ownerId);
+            throw CoreException.Invalid("Cannot attach new Profile to Account because Account could not be found",
+                "AccountId", ownerId);
         }
-        if (_profiles.SearchProfiles().Any(p => p.Handle == handle))
+
+        if (await _profiles.AnyProfile(p => p.Handle == handle))
         {
-            _logger.LogError("Cannot create a new profile because a profile already exists with handle {Handle}", handle);
+            _logger.LogError("Cannot create a new profile because a profile already exists with handle {Handle}",
+                handle);
             throw CoreException.Duplicate("Profile already exists", handle);
         }
 
@@ -45,54 +53,121 @@ public class ProfileService : IProfileService
         account.LinkedProfiles.Add(new LinkedProfile(account, profile, ProfilePermission.All));
         _profiles.RecordAccount(account);
         await _profiles.Commit();
+        _profileEvents.Created(profile);
 
         return profile;
     }
 
-    public Task<Profile> UpdateDisplayName(Guid localId, string displayName)
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="localId"></param>
+    /// <param name="displayName"></param>
+    /// <returns>The original and updated Profiles, or null if no change was made</returns>
+    /// <exception cref="CoreException"></exception>
+    public async Task<(Profile original, Profile? updated)> UpdateDisplayName(Guid localId, string displayName)
+    {
+        // TODO: vulgarity filters
+        var profile = await RequireProfile(localId);
+        if (profile.DisplayName == displayName) return (profile, default);
+
+        var original = profile.ShallowClone();
+        profile.DisplayName = displayName;
+        await _profiles.Commit();
+        _profileEvents.Updated(original: original, updated: profile);
+
+        return (original, profile);
+    }
+
+
+    public async Task<(Profile original, Profile? updated)> UpdateDescription(Guid localId, string description)
+    {
+        var profile = await RequireProfile(localId);
+        if (profile.Description == description) return (profile, default);
+
+        var original = profile.ShallowClone();
+        profile.Description = description;
+        await _profiles.Commit();
+        _profileEvents.Updated(original: original, updated: profile);
+
+        return (original, profile);
+    }
+
+    public async Task<(Profile original, Profile? updated)> InsertCustomField(Guid localId, int index, string key,
+        string value)
+    {
+        var profile = await RequireProfile(localId);
+        if (profile.CustomFields.Length >= _options.MaxCustomFields)
+            throw CoreException.Invalid("Cannot add any more custom fields");
+        var original = profile.ShallowClone();
+
+        var customFields = profile.CustomFields.ToList();
+        customFields.Insert(index, new CustomField { Label = key, Value = value });
+        profile.CustomFields = customFields.ToArray();
+
+        await _profiles.Commit();
+        _profileEvents.Updated(original: original, updated: profile);
+
+        return (original, profile);
+    }
+
+    public async Task<(Profile original, Profile? updated)> RemoveCustomField(Guid localId, int index)
+    {
+        var profile = await RequireProfile(localId);
+        if (profile.CustomFields.Length - 1 <= index)
+            throw CoreException.Invalid("Cannot remove custom field because it doesn't exist");
+        var original = profile.ShallowClone();
+
+        var customFields = profile.CustomFields.ToList();
+        customFields.RemoveAt(index);
+        profile.CustomFields = customFields.ToArray();
+
+        await _profiles.Commit();
+        _profileEvents.Updated(original: original, updated: profile);
+
+        return (original, profile);
+    }
+
+    public async Task<(Profile original, Profile? updated)> UpdateCustomField(Guid localId, int index, string key,
+        string value)
+    {
+        var profile = await RequireProfile(localId);
+        if (profile.CustomFields.Length - 1 <= index)
+            throw CoreException.Invalid("Cannot update custom field because it doesn't exist");
+        var field = profile.CustomFields[index];
+        if (field.Label == key && field.Value == value) return (profile, default);
+        var original = profile.ShallowClone();
+
+        profile.CustomFields[index] = new CustomField { Label = key, Value = value };
+
+        await _profiles.Commit();
+        _profileEvents.Updated(original: original, updated: profile);
+
+        return (original, profile);
+    }
+
+    public Task<(Profile original, Profile? updated)> UpdateProfile(Profile profile)
     {
         throw new NotImplementedException();
     }
 
-    public Task<Profile> UpdateDescription(Guid localId, string description)
+    public async Task<Profile?> LookupProfile(Guid localId)
     {
-        throw new NotImplementedException();
+        return await _profiles.LookupProfile(localId);
     }
 
-    public Task<Profile> InsertCustomField(Guid localId, int index, string key, string value)
+    public async Task<Profile?> LookupProfile(Uri id)
     {
-        throw new NotImplementedException();
+        return await _profiles.LookupProfile(id);
     }
 
-    public Task<Profile> RemoveCustomField(Guid localId, int index)
+    public async Task<IEnumerable<Profile>> FindProfiles(string handle)
     {
-        throw new NotImplementedException();
+        var results = _profiles.SearchProfiles(TODO)
+            .Where(p => p.Handle == handle);
     }
 
-    public Task<Profile> UpdateCustomField(Guid localId, int index, string key, string value)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Profile> UpdateProfile(Profile profile)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Profile> LookupProfile(Guid localId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Profile> LookupProfile(Uri id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IEnumerable<Profile>> FindProfiles(string handle)
-    {
-        throw new NotImplementedException();
-    }
+    // Stop here
 
     public Task<FollowResult> Follow(Guid selfId, Uri profileId, Uri? audienceId)
     {
@@ -137,5 +212,18 @@ public class ProfileService : IProfileService
     public Task ReportProfile(Guid selfId, Guid localId)
     {
         throw new NotImplementedException();
+    }
+
+    [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
+    private async Task<Profile> RequireProfile(Guid localId,
+        [CallerMemberName] string name = "",
+        [CallerFilePath] string path = "",
+        [CallerLineNumber] int line = -1)
+    {
+        var profile = await _profiles.LookupProfile(localId);
+        if (profile != null) return profile;
+        _logger.LogError("Cannot update Profile {ProfileId} because it could not be found", localId);
+        throw CoreException.Invalid("Failed to update Profile because it could not be found", "ProfileId", localId,
+            name, path, line);
     }
 }

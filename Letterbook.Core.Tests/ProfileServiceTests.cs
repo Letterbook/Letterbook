@@ -1,4 +1,5 @@
-﻿using Letterbook.Core.Exceptions;
+﻿using Letterbook.Core.Adapters;
+using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Microsoft.Extensions.Logging;
@@ -21,7 +22,7 @@ public class ProfileServiceTests : WithMocks
         _fakeAccount = new FakeAccount();
         _fakeProfile = new FakeProfile();
         
-        _service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object);
+        _service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object, Mock.Of<IProfileEventService>());
     }
 
     [Fact]
@@ -36,7 +37,7 @@ public class ProfileServiceTests : WithMocks
         var accountId = Guid.NewGuid();
         var expected = "testAccount";
         AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
-        AccountProfileMock.Setup(m => m.SearchProfiles())
+        AccountProfileMock.Setup(m => m.SearchProfiles(TODO))
             .Returns(() => new List<Profile>().AsQueryable());
         
         var actual = await _service.CreateProfile(accountId, expected);
@@ -51,7 +52,7 @@ public class ProfileServiceTests : WithMocks
         var accountId = Guid.NewGuid();
         var expected = "testAccount";
         AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(default (Account));
-        AccountProfileMock.Setup(m => m.SearchProfiles())
+        AccountProfileMock.Setup(m => m.SearchProfiles(TODO))
             .Returns(() => new List<Profile>().AsQueryable());
         
         await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
@@ -65,7 +66,7 @@ public class ProfileServiceTests : WithMocks
         var existing = _fakeProfile.Generate();
         existing.Handle = expected;
         AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
-        AccountProfileMock.Setup(m => m.SearchProfiles())
+        AccountProfileMock.Setup(m => m.SearchProfiles(TODO))
             .Returns(() => new List<Profile>{existing}.AsQueryable());
 
         await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
