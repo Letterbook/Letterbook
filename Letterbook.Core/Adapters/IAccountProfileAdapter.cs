@@ -18,7 +18,7 @@ public interface IAccountProfileAdapter : IDisposable
     public Task<bool> AnyProfile(ProfileComparer comparer);
     public Task<Profile?> LookupProfile(Guid localId);
     public Task<Profile?> LookupProfile(Uri id);
-    public IAsyncEnumerable<Profile> QueryProfiles(ProfileQuery query, int? limit);
+    public IAsyncEnumerable<Profile> QueryProfiles(ProfileQuery query, int? limit = null);
 
     public bool RecordProfile(Profile profile);
 

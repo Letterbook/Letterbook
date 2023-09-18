@@ -1,6 +1,7 @@
 ﻿using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
+using Letterbook.Core.Tests.Extensions;
 using Letterbook.Core.Tests.Fakes;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -37,8 +38,8 @@ public class ProfileServiceTests : WithMocks
         var accountId = Guid.NewGuid();
         var expected = "testAccount";
         AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
-        AccountProfileMock.Setup(m => m.SearchProfiles(TODO))
-            .Returns(() => new List<Profile>().AsQueryable());
+        AccountProfileMock.Setup(m => m.QueryProfiles(It.IsAny<IAccountProfileAdapter.ProfileQuery>(), It.IsAny<int?>()))
+            .Returns(() => new List<Profile>().AsAsyncEnumerable());
         
         var actual = await _service.CreateProfile(accountId, expected);
         
@@ -52,8 +53,8 @@ public class ProfileServiceTests : WithMocks
         var accountId = Guid.NewGuid();
         var expected = "testAccount";
         AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(default (Account));
-        AccountProfileMock.Setup(m => m.SearchProfiles(TODO))
-            .Returns(() => new List<Profile>().AsQueryable());
+        AccountProfileMock.Setup(m => m.QueryProfiles(It.IsAny<IAccountProfileAdapter.ProfileQuery>(), It.IsAny<int?>()))
+            .Returns(() => new List<Profile>().AsAsyncEnumerable());
         
         await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
     }
@@ -66,8 +67,8 @@ public class ProfileServiceTests : WithMocks
         var existing = _fakeProfile.Generate();
         existing.Handle = expected;
         AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
-        AccountProfileMock.Setup(m => m.SearchProfiles(TODO))
-            .Returns(() => new List<Profile>{existing}.AsQueryable());
+        AccountProfileMock.Setup(m => m.AnyProfile(It.IsAny<IAccountProfileAdapter.ProfileComparer>()))
+            .ReturnsAsync(true);
 
         await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
     }

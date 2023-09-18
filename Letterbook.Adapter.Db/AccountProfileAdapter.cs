@@ -38,6 +38,11 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         throw new NotImplementedException();
     }
 
+    public Task<bool> AnyProfile(IAccountProfileAdapter.ProfileComparer comparer)
+    {
+        return _context.Profiles.AnyAsync(profile => comparer(profile));
+    }
+
     public Task<Models.Profile?> LookupProfile(Guid localId)
     {
         throw new NotImplementedException();

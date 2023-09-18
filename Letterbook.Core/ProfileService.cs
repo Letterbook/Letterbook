@@ -163,8 +163,17 @@ public class ProfileService : IProfileService
 
     public async Task<IEnumerable<Profile>> FindProfiles(string handle)
     {
-        var results = _profiles.SearchProfiles(TODO)
-            .Where(p => p.Handle == handle);
+        var results = _profiles.QueryProfiles(source => source
+            .Where(p => p.Handle == handle)
+            .OrderBy(p => p.Handle));
+
+        var profiles = new List<Profile>();
+        await foreach (var profile in results)
+        {
+            profiles.Add(profile);
+        }
+
+        return profiles;
     }
 
     // Stop here
