@@ -19,11 +19,16 @@ public static class DtoMapper
             .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
             .ForMember(dest => dest.FollowersCollection, opt => opt.MapFrom(src => src.Followers))
+            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Content))
+            .ForMember(dest => dest.CustomFields, opt => opt.MapFrom(src => src.Attachment))
             .ForMember(dest => dest.DisplayName, opt => opt.Ignore());
+        
         cfg.CreateMap<DTO.Object, Models.Profile>()
             .IncludeBase<DTO.IResolvable, Models.Profile>();
+        
         cfg.CreateMap<DTO.Link, Models.Profile>()
             .IncludeBase<DTO.IResolvable, Models.Profile>();
+        
         cfg.CreateMap<DTO.IResolvable, Models.Profile>()
             .IncludeBase<DTO.IResolvable, IObjectRef>()
             .ForMember(dest => dest.LocalId, opt => opt.Ignore())
@@ -34,7 +39,12 @@ public static class DtoMapper
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
             .ForMember(dest => dest.DisplayName, opt => opt.Ignore())
             .ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
+            .ForMember(dest => dest.Description, opt => opt.Ignore())
+            .ForMember(dest => dest.CustomFields, opt => opt.Ignore())
             .ForMember(dest => dest.Audiences, opt => opt.Ignore());
+
+        cfg.CreateMap<DTO.IResolvable, CustomField>()
+            .ForAllMembers(opts => opts.Ignore());
     }
 
     private static void ConfigureNote(IMapperConfigurationExpression cfg)
