@@ -6,7 +6,7 @@
 public abstract class ObjectRef : IObjectRef
 {
     public Uri Id { get; set; }
-    public string? LocalId { get; set; }
+    public Guid? LocalId { get; set; }
     public string Authority
     {
         get => Id.Authority;
@@ -17,7 +17,7 @@ public abstract class ObjectRef : IObjectRef
         Id = id;
     }
 
-    protected ObjectRef(Uri id, string localId) : this(id)
+    protected ObjectRef(Uri id, Guid localId) : this(id)
     {
         LocalId = localId;
     }

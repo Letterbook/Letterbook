@@ -37,6 +37,16 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         throw new NotImplementedException();
     }
 
+    public IQueryable<Models.Profile> SearchProfiles()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool RecordProfile(Models.Profile profile)
+    {
+        throw new NotImplementedException();
+    }
+
     public IQueryable<Models.Account> SearchAccounts()
     {
         return _context.Accounts.AsQueryable();

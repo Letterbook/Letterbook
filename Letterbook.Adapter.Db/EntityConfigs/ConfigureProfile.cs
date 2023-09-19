@@ -14,5 +14,6 @@ public class ConfigureProfile : IEntityTypeConfiguration<Models.Profile>
         builder.HasMany<Models.Profile>(profile => profile.FollowersCollection)
             .WithMany("Following")
             .UsingEntity<FollowerRelation>();
+        builder.Property(profile => profile.CustomFields).HasColumnType("jsonb");
     }
 }

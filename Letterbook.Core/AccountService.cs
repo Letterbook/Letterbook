@@ -95,6 +95,7 @@ public class AccountService : IAccountService, IDisposable
         throw new NotImplementedException();
     }
 
+    // TODO: do this through Identity
     public async Task<bool> UpdateEmail(Guid accountId, string email)
     {
         var account = await _accountAdapter.LookupAccount(accountId);
@@ -111,6 +112,8 @@ public class AccountService : IAccountService, IDisposable
         var link = new LinkedProfile(account, profile, permission);
         profile.RelatedAccounts.Add(link);
         account.LinkedProfiles.Add(link);
+        await _accountAdapter.Commit();
+        
         return count == account.LinkedProfiles.Count;
     }
 
@@ -132,6 +135,8 @@ public class AccountService : IAccountService, IDisposable
 
         profileLink.Permission = permission;
         accountLink.Permission = permission;
+
+        await _accountAdapter.Commit();
         return true;
     }
 
@@ -142,12 +147,15 @@ public class AccountService : IAccountService, IDisposable
 
         var link = new LinkedProfile(account, profile, ProfilePermission.None);
 
-        return profile.RelatedAccounts.Remove(link) && account.LinkedProfiles.Remove(link);
+        var result = profile.RelatedAccounts.Remove(link) && account.LinkedProfiles.Remove(link);
+        if (result) await _accountAdapter.Commit();
+        return result;
     }
 
     public void Dispose()
     {
         GC.SuppressFinalize(this);
         _identityManager.Dispose();
+        _accountAdapter.Dispose();
     }
 }

@@ -3,6 +3,6 @@
 public class ObjectList<T> : List<T>, IObjectRef where T : IObjectRef
 {
     public Uri Id { get; set; }
-    public string? LocalId { get; set; }
+    public Guid? LocalId { get; set; }
     public string Authority { get; }
 }

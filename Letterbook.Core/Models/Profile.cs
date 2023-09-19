@@ -25,10 +25,12 @@ public class Profile : IObjectRef
     }
 
     public Uri Id { get; set; }
-    public string? LocalId { get; set; }
+    public Guid? LocalId { get; set; }
     public string Authority => Id.Authority;
     public string Handle { get; set; }
     public string DisplayName { get; set; }
+    public string Description { get; set; }
+    public CustomField[] CustomFields { get; set; }
 
     // Local profiles should all have an owner, but remote ones do not.
     // Could remote profiles be claimed through an account transfer?
@@ -38,9 +40,11 @@ public class Profile : IObjectRef
     public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
     public ObjectCollection<Profile> FollowersCollection { get; set; } = new();
 
-    public static Profile CreatePerson(Uri baseUri, string handle)
+    // Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?
+    // The only use case I'm imagining for a service is to represent the server itself
+    public static Profile CreateIndividual(Uri baseUri, string handle)
     {
-        var localId = ShortId.NewShortId();
+        var localId = Guid.NewGuid();
         var profile = new Profile
         {
             Id = new Uri(baseUri, $"/actor/{localId}"),
