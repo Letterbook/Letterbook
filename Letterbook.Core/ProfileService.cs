@@ -114,7 +114,7 @@ public class ProfileService : IProfileService
     public async Task<(Profile original, Profile? updated)> RemoveCustomField(Guid localId, int index)
     {
         var profile = await RequireProfile(localId);
-        if (profile.CustomFields.Length - 1 <= index)
+        if (index >= profile.CustomFields.Length)
             throw CoreException.Invalid("Cannot remove custom field because it doesn't exist");
         var original = profile.ShallowClone();
 
@@ -132,7 +132,7 @@ public class ProfileService : IProfileService
         string value)
     {
         var profile = await RequireProfile(localId);
-        if (profile.CustomFields.Length - 1 <= index)
+        if (index >= profile.CustomFields.Length)
             throw CoreException.Invalid("Cannot update custom field because it doesn't exist");
         var field = profile.CustomFields[index];
         if (field.Label == key && field.Value == value) return (profile, default);

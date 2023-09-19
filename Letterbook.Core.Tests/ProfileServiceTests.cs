@@ -1,4 +1,5 @@
-﻿using Letterbook.Core.Adapters;
+﻿using Bogus;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Extensions;
@@ -15,15 +16,19 @@ public class ProfileServiceTests : WithMocks
     private ProfileService _service;
     private FakeAccount _fakeAccount;
     private FakeProfile _fakeProfile;
+    private Profile _profile;
 
     public ProfileServiceTests(ITestOutputHelper output)
     {
         _output = output;
         _output.WriteLine($"Bogus seed: {Init.WithSeed()}");
         _fakeAccount = new FakeAccount();
-        _fakeProfile = new FakeProfile();
+        _fakeProfile = new FakeProfile("letterbook.example");
+        var genericFaker = new Faker();
+        CoreOptionsMock.Value.MaxCustomFields = 2;
         
         _service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object, Mock.Of<IProfileEventService>());
+        _profile = _fakeProfile.Generate();
     }
 
     [Fact]
@@ -47,7 +52,7 @@ public class ProfileServiceTests : WithMocks
         Assert.Equal($"@{expected}@letterbook.example", actual.Handle);
     }
     
-    [Fact(DisplayName = "Should error when trying to create an orphan profile")]
+    [Fact(DisplayName = "Should not create an orphan profile")]
     public async Task NoCreateOrphanProfile()
     {
         var accountId = Guid.NewGuid();
@@ -71,5 +76,165 @@ public class ProfileServiceTests : WithMocks
             .ReturnsAsync(true);
 
         await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
+    }
+
+    [Fact(DisplayName = "Should update the display name")]
+    public async Task UpdateDisplayName()
+    {
+        var expectedId = Guid.NewGuid();
+        _profile.LocalId = expectedId;
+        _profile.DisplayName = new Faker().Internet.UserName();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == expectedId)))
+            .ReturnsAsync(_profile);
+
+        var (_, actual) = await _service.UpdateDisplayName(expectedId, "Test Name");
+        
+        // Assert.NotEqual(_profile.LocalId, expectedId);
+        Assert.NotNull(actual);
+        Assert.Equal("Test Name", actual.DisplayName);
+    }
+    
+    [Fact(DisplayName = "Should not update the display name when the profile doesn't exist")]
+    public async Task NoUpdateDisplayNameNotExists()
+    {
+        var expectedId = Guid.NewGuid();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == expectedId)))
+            .ReturnsAsync(default (Profile));
+
+        await Assert.ThrowsAsync<CoreException>(() => _service.UpdateDisplayName(expectedId, "Test Name"));
+    }
+    
+    [Fact(DisplayName = "Should not update the display name when the name is unchanged")]
+    public async Task NoUpdateDisplayNameUnchanged()
+    {
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
+            .ReturnsAsync(_profile);
+
+        var (actual, modified) = await _service.UpdateDisplayName((Guid)_profile.LocalId!, _profile.DisplayName);
+        
+        Assert.Null(modified);
+        Assert.Equal(_profile, actual);
+        Assert.Equal(_profile.DisplayName, actual.DisplayName);
+        Assert.NotNull(actual.DisplayName);
+    }
+    
+    [Fact(DisplayName = "Should update the bio")]
+    public async Task UpdateBio()
+    {
+        var expectedId = Guid.NewGuid();
+        _profile.LocalId = expectedId;
+        _profile.DisplayName = new Faker().Internet.UserName();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == expectedId)))
+            .ReturnsAsync(_profile);
+
+        var (_, actual) = await _service.UpdateDescription(expectedId, "This is a test user bio");
+        
+        // Assert.NotEqual(_profile.LocalId, expectedId);
+        Assert.NotNull(actual);
+        Assert.Equal("This is a test user bio", actual.Description);
+    }
+    
+    [Fact(DisplayName = "Should not update the bio when the profile doesn't exist")]
+    public async Task NoUpdateBioNotExists()
+    {
+        var expectedId = Guid.NewGuid();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == expectedId)))
+            .ReturnsAsync(default (Profile));
+
+        await Assert.ThrowsAsync<CoreException>(() => _service.UpdateDescription(expectedId, "This is a test user bio"));
+    }
+    
+    [Fact(DisplayName = "Should not update the bio when it is unchanged")]
+    public async Task NoUpdateBioUnchanged()
+    {
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
+            .ReturnsAsync(_profile);
+
+        var (actual, modified) = await _service.UpdateDescription((Guid)_profile.LocalId!, _profile.Description);
+        
+        Assert.Null(modified);
+        Assert.Equal(_profile, actual);
+        Assert.Equal(_profile.Description, actual.Description);
+        Assert.NotNull(actual.Description);
+    }
+    
+    [Fact(DisplayName = "Should insert new custom fields")]
+    public async Task InsertCustomField()
+    {
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
+            .ReturnsAsync(_profile);
+
+        var (original, actual) = await _service.InsertCustomField((Guid)_profile.LocalId!, 0, "test item", "test value");
+        
+        // Assert.NotEqual(_profile.LocalId, expectedId);
+        Assert.NotNull(actual);
+        Assert.Equal("test item", actual.CustomFields[0].Label);
+        Assert.Equal("test value", actual.CustomFields[0].Value);
+        Assert.NotEqual("test value", original.CustomFields[0].Value);
+        Assert.NotEqual("test item", original.CustomFields[0].Label);
+        Assert.Equal(2, actual.CustomFields.Length);
+    }
+    
+    [Fact(DisplayName = "Should insert new custom fields at given index")]
+    public async Task InsertCustomFieldAtIndex()
+    {
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
+            .ReturnsAsync(_profile);
+
+        var (original, actual) = await _service.InsertCustomField((Guid)_profile.LocalId!, 1, "test item", "test value");
+        
+        // Assert.NotEqual(_profile.LocalId, expectedId);
+        Assert.NotNull(actual);
+        Assert.Equal("test item", actual.CustomFields[1].Label);
+        Assert.Equal("test value", actual.CustomFields[1].Value);
+        Assert.NotEqual(actual.CustomFields[1].Label, original.CustomFields[0].Value);
+        Assert.NotEqual(actual.CustomFields[1].Value, original.CustomFields[0].Label);
+        Assert.Equal(2, actual.CustomFields.Length);
+    }
+    
+    [Fact(DisplayName = "Should not insert custom fields when the profile doesn't exist")]
+    public async Task NoInsertCustomField()
+    {
+        var expectedId = Guid.NewGuid();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == expectedId)))
+            .ReturnsAsync(default (Profile));
+
+        await Assert.ThrowsAsync<CoreException>(() => _service.InsertCustomField((Guid)_profile.LocalId!, 0, "test item", "test value"));
+    }
+    
+    [Fact(DisplayName = "Should not insert custom fields when the list is already full")]
+    public async Task NoInsertCustomFieldTooMany()
+    {
+        _profile.CustomFields = _profile.CustomFields.Append(new() { Label = "item2", Value = "value2" }).ToArray();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
+            .ReturnsAsync(_profile);
+
+        await Assert.ThrowsAsync<CoreException>(() => _service.InsertCustomField((Guid)_profile.LocalId!, 0, "test item", "test value"));
+    }
+    
+    [Fact(DisplayName = "Should update custom fields")]
+    public async Task UpdateCustomField()
+    {
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
+            .ReturnsAsync(_profile);
+
+        var (_, actual) = await _service.UpdateCustomField((Guid)_profile.LocalId!, 0, "test item", "test value");
+        
+        Assert.NotNull(actual);
+        Assert.Equal("test item", actual.CustomFields[0].Label);
+        Assert.Equal("test value", actual.CustomFields[0].Value);
+        Assert.Single(actual.CustomFields);
+    }
+    
+    [Fact(DisplayName = "Should delete custom fields")]
+    public async Task DeleteCustomField()
+    {
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
+            .ReturnsAsync(_profile);
+
+        var (_, actual) = await _service.RemoveCustomField((Guid)_profile.LocalId!, 0);
+        
+        Assert.NotNull(actual);
+        Assert.Empty(actual.CustomFields);
     }
 }
