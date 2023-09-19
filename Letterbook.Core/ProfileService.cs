@@ -65,35 +65,49 @@ public class ProfileService : IProfileService
     /// <param name="displayName"></param>
     /// <returns>The original and updated Profiles, or null if no change was made</returns>
     /// <exception cref="CoreException"></exception>
-    public async Task<(Profile original, Profile? updated)> UpdateDisplayName(Guid localId, string displayName)
+    public async Task<UpdateResponse<Profile>> UpdateDisplayName(Guid localId, string displayName)
     {
         // TODO: vulgarity filters
         var profile = await RequireProfile(localId);
-        if (profile.DisplayName == displayName) return (profile, default);
+        if (profile.DisplayName == displayName) return new UpdateResponse<Profile>
+        {
+            Original = profile
+        };
 
         var original = profile.ShallowClone();
         profile.DisplayName = displayName;
         await _profiles.Commit();
         _profileEvents.Updated(original: original, updated: profile);
 
-        return (original, profile);
+        return new UpdateResponse<Profile>
+        {
+            Original = original,
+            Updated = profile
+        };
     }
 
 
-    public async Task<(Profile original, Profile? updated)> UpdateDescription(Guid localId, string description)
+    public async Task<UpdateResponse<Profile>> UpdateDescription(Guid localId, string description)
     {
         var profile = await RequireProfile(localId);
-        if (profile.Description == description) return (profile, default);
+        if (profile.Description == description) return new UpdateResponse<Profile>
+        {
+            Original = profile
+        };
 
         var original = profile.ShallowClone();
         profile.Description = description;
         await _profiles.Commit();
         _profileEvents.Updated(original: original, updated: profile);
 
-        return (original, profile);
+        return new UpdateResponse<Profile>
+        {
+            Original = original,
+            Updated = profile
+        };
     }
 
-    public async Task<(Profile original, Profile? updated)> InsertCustomField(Guid localId, int index, string key,
+    public async Task<UpdateResponse<Profile>> InsertCustomField(Guid localId, int index, string key,
         string value)
     {
         var profile = await RequireProfile(localId);
@@ -108,10 +122,14 @@ public class ProfileService : IProfileService
         await _profiles.Commit();
         _profileEvents.Updated(original: original, updated: profile);
 
-        return (original, profile);
+        return new UpdateResponse<Profile>
+        {
+            Original = original,
+            Updated = profile
+        };
     }
 
-    public async Task<(Profile original, Profile? updated)> RemoveCustomField(Guid localId, int index)
+    public async Task<UpdateResponse<Profile>> RemoveCustomField(Guid localId, int index)
     {
         var profile = await RequireProfile(localId);
         if (index >= profile.CustomFields.Length)
@@ -125,17 +143,24 @@ public class ProfileService : IProfileService
         await _profiles.Commit();
         _profileEvents.Updated(original: original, updated: profile);
 
-        return (original, profile);
+        return new UpdateResponse<Profile>
+        {
+            Original = original,
+            Updated = profile
+        };
     }
 
-    public async Task<(Profile original, Profile? updated)> UpdateCustomField(Guid localId, int index, string key,
+    public async Task<UpdateResponse<Profile>> UpdateCustomField(Guid localId, int index, string key,
         string value)
     {
         var profile = await RequireProfile(localId);
         if (index >= profile.CustomFields.Length)
             throw CoreException.Invalid("Cannot update custom field because it doesn't exist");
         var field = profile.CustomFields[index];
-        if (field.Label == key && field.Value == value) return (profile, default);
+        if (field.Label == key && field.Value == value) return new UpdateResponse<Profile>
+        {
+            Original = profile
+        };
         var original = profile.ShallowClone();
 
         profile.CustomFields[index] = new CustomField { Label = key, Value = value };
@@ -143,10 +168,14 @@ public class ProfileService : IProfileService
         await _profiles.Commit();
         _profileEvents.Updated(original: original, updated: profile);
 
-        return (original, profile);
+        return new UpdateResponse<Profile>
+        {
+            Original = original,
+            Updated = profile
+        };
     }
 
-    public Task<(Profile original, Profile? updated)> UpdateProfile(Profile profile)
+    public Task<UpdateResponse<Profile>> UpdateProfile(Profile profile)
     {
         throw new NotImplementedException();
     }

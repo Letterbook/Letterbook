@@ -87,11 +87,11 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == expectedId)))
             .ReturnsAsync(_profile);
 
-        var (_, actual) = await _service.UpdateDisplayName(expectedId, "Test Name");
+        var actual = await _service.UpdateDisplayName(expectedId, "Test Name");
         
         // Assert.NotEqual(_profile.LocalId, expectedId);
-        Assert.NotNull(actual);
-        Assert.Equal("Test Name", actual.DisplayName);
+        Assert.NotNull(actual.Updated);
+        Assert.Equal("Test Name", actual.Updated.DisplayName);
     }
     
     [Fact(DisplayName = "Should not update the display name when the profile doesn't exist")]
@@ -110,12 +110,12 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
             .ReturnsAsync(_profile);
 
-        var (actual, modified) = await _service.UpdateDisplayName((Guid)_profile.LocalId!, _profile.DisplayName);
+        var actual = await _service.UpdateDisplayName((Guid)_profile.LocalId!, _profile.DisplayName);
         
-        Assert.Null(modified);
-        Assert.Equal(_profile, actual);
-        Assert.Equal(_profile.DisplayName, actual.DisplayName);
-        Assert.NotNull(actual.DisplayName);
+        Assert.Null(actual.Updated);
+        Assert.Equal(_profile, actual.Original);
+        Assert.Equal(_profile.DisplayName, actual.Original.DisplayName);
+        Assert.NotNull(actual.Original.DisplayName);
     }
     
     [Fact(DisplayName = "Should update the bio")]
@@ -127,11 +127,10 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == expectedId)))
             .ReturnsAsync(_profile);
 
-        var (_, actual) = await _service.UpdateDescription(expectedId, "This is a test user bio");
+        var actual = await _service.UpdateDescription(expectedId, "This is a test user bio");
         
-        // Assert.NotEqual(_profile.LocalId, expectedId);
-        Assert.NotNull(actual);
-        Assert.Equal("This is a test user bio", actual.Description);
+        Assert.NotNull(actual.Updated);
+        Assert.Equal("This is a test user bio", actual.Updated.Description);
     }
     
     [Fact(DisplayName = "Should not update the bio when the profile doesn't exist")]
@@ -150,12 +149,12 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
             .ReturnsAsync(_profile);
 
-        var (actual, modified) = await _service.UpdateDescription((Guid)_profile.LocalId!, _profile.Description);
+        var actual = await _service.UpdateDescription((Guid)_profile.LocalId!, _profile.Description);
         
-        Assert.Null(modified);
-        Assert.Equal(_profile, actual);
-        Assert.Equal(_profile.Description, actual.Description);
-        Assert.NotNull(actual.Description);
+        Assert.Null(actual.Updated);
+        Assert.Equal(_profile, actual.Original);
+        Assert.Equal(_profile.Description, actual.Original.Description);
+        Assert.NotNull(actual.Original.Description);
     }
     
     [Fact(DisplayName = "Should insert new custom fields")]
@@ -164,15 +163,16 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
             .ReturnsAsync(_profile);
 
-        var (original, actual) = await _service.InsertCustomField((Guid)_profile.LocalId!, 0, "test item", "test value");
+        var actual = await _service.InsertCustomField((Guid)_profile.LocalId!, 0, "test item", "test value");
+        // var (original, actual) = await _service.InsertCustomField((Guid)_profile.LocalId!, 0, "test item", "test value");
         
         // Assert.NotEqual(_profile.LocalId, expectedId);
-        Assert.NotNull(actual);
-        Assert.Equal("test item", actual.CustomFields[0].Label);
-        Assert.Equal("test value", actual.CustomFields[0].Value);
-        Assert.NotEqual("test value", original.CustomFields[0].Value);
-        Assert.NotEqual("test item", original.CustomFields[0].Label);
-        Assert.Equal(2, actual.CustomFields.Length);
+        Assert.NotNull(actual.Updated);
+        Assert.Equal("test item", actual.Updated.CustomFields[0].Label);
+        Assert.Equal("test value", actual.Updated.CustomFields[0].Value);
+        Assert.NotEqual("test value", actual.Original.CustomFields[0].Value);
+        Assert.NotEqual("test item", actual.Original.CustomFields[0].Label);
+        Assert.Equal(2, actual.Updated.CustomFields.Length);
     }
     
     [Fact(DisplayName = "Should insert new custom fields at given index")]
@@ -181,15 +181,16 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
             .ReturnsAsync(_profile);
 
-        var (original, actual) = await _service.InsertCustomField((Guid)_profile.LocalId!, 1, "test item", "test value");
+        var actual = await _service.InsertCustomField((Guid)_profile.LocalId!, 1, "test item", "test value");
+        // var (original, actual) = await _service.InsertCustomField((Guid)_profile.LocalId!, 1, "test item", "test value");
         
         // Assert.NotEqual(_profile.LocalId, expectedId);
-        Assert.NotNull(actual);
-        Assert.Equal("test item", actual.CustomFields[1].Label);
-        Assert.Equal("test value", actual.CustomFields[1].Value);
-        Assert.NotEqual(actual.CustomFields[1].Label, original.CustomFields[0].Value);
-        Assert.NotEqual(actual.CustomFields[1].Value, original.CustomFields[0].Label);
-        Assert.Equal(2, actual.CustomFields.Length);
+        Assert.NotNull(actual.Updated);
+        Assert.Equal("test item", actual.Updated.CustomFields[1].Label);
+        Assert.Equal("test value", actual.Updated.CustomFields[1].Value);
+        Assert.NotEqual(actual.Updated.CustomFields[1].Label, actual.Original.CustomFields[0].Value);
+        Assert.NotEqual(actual.Updated.CustomFields[1].Value, actual.Original.CustomFields[0].Label);
+        Assert.Equal(2, actual.Updated.CustomFields.Length);
     }
     
     [Fact(DisplayName = "Should not insert custom fields when the profile doesn't exist")]
@@ -218,12 +219,13 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
             .ReturnsAsync(_profile);
 
-        var (_, actual) = await _service.UpdateCustomField((Guid)_profile.LocalId!, 0, "test item", "test value");
+        var actual = await _service.UpdateCustomField((Guid)_profile.LocalId!, 0, "test item", "test value");
+        // var (_, actual) = await _service.UpdateCustomField((Guid)_profile.LocalId!, 0, "test item", "test value");
         
-        Assert.NotNull(actual);
-        Assert.Equal("test item", actual.CustomFields[0].Label);
-        Assert.Equal("test value", actual.CustomFields[0].Value);
-        Assert.Single(actual.CustomFields);
+        Assert.NotNull(actual.Updated);
+        Assert.Equal("test item", actual.Updated.CustomFields[0].Label);
+        Assert.Equal("test value", actual.Updated.CustomFields[0].Value);
+        Assert.Single(actual.Updated.CustomFields);
     }
     
     [Fact(DisplayName = "Should delete custom fields")]
@@ -232,9 +234,9 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(given => given == _profile.LocalId)))
             .ReturnsAsync(_profile);
 
-        var (_, actual) = await _service.RemoveCustomField((Guid)_profile.LocalId!, 0);
+        var actual = await _service.RemoveCustomField((Guid)_profile.LocalId!, 0);
         
-        Assert.NotNull(actual);
-        Assert.Empty(actual.CustomFields);
+        Assert.NotNull(actual.Updated);
+        Assert.Empty(actual.Updated.CustomFields);
     }
 }
