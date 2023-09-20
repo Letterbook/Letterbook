@@ -32,6 +32,7 @@
 
     <ItemGroup>
       <Folder Include="Migrations\" />
+      <Folder Include="NavigationModels\" />
     </ItemGroup>
 
     <ItemGroup>

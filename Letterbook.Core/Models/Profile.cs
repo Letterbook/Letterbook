@@ -1,4 +1,5 @@
-﻿using Letterbook.Core.Extensions;
+﻿using System.Collections;
+using Letterbook.Core.Extensions;
 
 namespace Letterbook.Core.Models;
 
@@ -38,23 +39,10 @@ public class Profile : IObjectRef
     public ActivityActorType Type { get; set; }
     public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
     public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
-    public ObjectCollection<Profile> FollowersCollection { get; set; } = new();
+    public ICollection<FollowerRelation> Following { get; set; } = new HashSet<FollowerRelation>();
+    public ObjectCollection<FollowerRelation> FollowersCollection { get; set; } = new();
 
     public Profile ShallowClone() => (Profile)MemberwiseClone();
-
-    public Profile DeepClone()
-    {
-        var profile = ShallowClone();
-        profile.CustomFields = (CustomField[])CustomFields.Clone();
-        profile.Audiences = new List<Audience>(Audiences);
-        profile.RelatedAccounts = new List<LinkedProfile>(RelatedAccounts);
-        profile.FollowersCollection = new ObjectCollection<Profile>
-        {
-            Id = FollowersCollection.Id
-        };
-
-        return profile;
-    }
 
     // Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?
     // The only use case I'm imagining for a service is to represent the server itself

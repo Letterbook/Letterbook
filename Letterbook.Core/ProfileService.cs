@@ -205,10 +205,14 @@ public class ProfileService : IProfileService
         return profiles;
     }
 
-    // Stop here
-
-    public Task<FollowResult> Follow(Guid selfId, Uri profileId, Uri? audienceId)
+    public async Task<FollowResult> Follow(Guid selfId, Uri profileId, Uri? audienceId)
     {
+        var self = await _profiles.LookupProfile(selfId);
+        var profile = await _profiles.LookupProfile(profileId);
+        
+        // state machine?????
+        
+        // follow is remote
         throw new NotImplementedException();
     }
 
@@ -217,8 +221,10 @@ public class ProfileService : IProfileService
         throw new NotImplementedException();
     }
 
-    public Task<FollowResult> ReceiveFollower(Uri selfId, Uri followerId)
+    public Task<FollowResult> ReceiveFollowRequest(Uri selfId, Uri followerId)
     {
+        // doesn't confirm, just do the follow
+        // does confirm, mark pending
         throw new NotImplementedException();
     }
 

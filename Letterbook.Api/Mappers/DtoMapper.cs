@@ -39,6 +39,7 @@ public static class DtoMapper
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
             .ForMember(dest => dest.DisplayName, opt => opt.Ignore())
             .ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
+            .ForMember(dest => dest.Following, opt => opt.Ignore())
             .ForMember(dest => dest.Description, opt => opt.Ignore())
             .ForMember(dest => dest.CustomFields, opt => opt.Ignore())
             .ForMember(dest => dest.Audiences, opt => opt.Ignore());
