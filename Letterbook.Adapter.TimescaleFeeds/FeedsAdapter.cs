@@ -11,7 +11,6 @@ namespace Letterbook.Adapter.TimescaleFeeds;
 public class FeedsAdapter : IFeedsAdapter
 {
     private readonly FeedsContext _feedsContext;
-    private IDbContextTransaction _transaction;
 
     public FeedsAdapter(FeedsContext feedsContext)
     {

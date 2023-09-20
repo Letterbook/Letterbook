@@ -88,12 +88,7 @@ public class TimelineServiceTest : WithMocks
     [Fact(DisplayName = "HandleCreate should add any posts to the mentioned profiles' feeds")]
     public void AddToMentionsOnCreate()
     {
-        var mention = new Mention()
-        {
-            Id = Guid.NewGuid(),
-            Subject = _profile.Generate(),
-            Visibility = MentionVisibility.To
-        };
+        var mention = new Mention(_profile.Generate(), MentionVisibility.To);
         TestNote.Mentions.Add(mention);
         var expected = Audience.FromMention(mention.Subject);
 
@@ -110,12 +105,7 @@ public class TimelineServiceTest : WithMocks
     public void AddMentionToNotificationsOnCreate()
     {
         var profile = _profile.Generate();
-        TestNote.Mentions.Add(new Mention()
-        {
-            Id = Guid.NewGuid(),
-            Subject = profile,
-            Visibility = MentionVisibility.To
-        });
+        TestNote.Mentions.Add(new Mention(profile, MentionVisibility.To));
 
         _timeline.HandleCreate(TestNote);
 
@@ -129,12 +119,8 @@ public class TimelineServiceTest : WithMocks
     {
         var faker = new Faker();
 
-        var mentions = _profile.Generate(3).Select(p => new Mention()
-        {
-            Id = Guid.NewGuid(),
-            Subject = p,
-            Visibility = faker.PickRandom<MentionVisibility>()
-        }).ToArray();
+        var mentions = _profile.Generate(3)
+            .Select(p => new Mention(p, faker.PickRandom<MentionVisibility>())).ToArray();
         foreach (var mention in mentions)
         {
             TestNote.Mentions.Add(mention);

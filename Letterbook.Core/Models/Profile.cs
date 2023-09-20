@@ -17,11 +17,19 @@ public class Profile : IObjectRef
         Type = default;
         Handle = default!;
         DisplayName = default!;
+        FollowersCollection = default!;
+        CustomFields = default!;
+        Description = default!;
     }
 
     public Profile(Uri id)
     {
         Id = id;
+        Handle = string.Empty;
+        DisplayName = string.Empty;
+        Description = string.Empty;
+        CustomFields = Array.Empty<CustomField>();
+        FollowersCollection = ObjectCollection<Profile>.Followers(id);
     }
 
     public Uri Id { get; set; }
@@ -38,7 +46,7 @@ public class Profile : IObjectRef
     public ActivityActorType Type { get; set; }
     public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
     public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
-    public ObjectCollection<Profile> FollowersCollection { get; set; } = new();
+    public ObjectCollection<Profile> FollowersCollection { get; set; }
 
     // Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?
     // The only use case I'm imagining for a service is to represent the server itself

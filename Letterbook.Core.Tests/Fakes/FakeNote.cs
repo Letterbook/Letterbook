@@ -9,7 +9,7 @@ public sealed class FakeNote : Faker<Note>
     {
         CustomInstantiator(faker => new Note(new Uri(faker.Internet.UrlWithPath())));
         
-        RuleFor(note => note.Creators, ((faker, note) => new ObjectCollection<Profile>(){profile}));
+        RuleFor(note => note.Creators, (_, note) => new ObjectCollection<Profile>(new Uri(note.Id, "/followers")){profile});
     }
 
     public FakeNote() : this(new FakeProfile().Generate())
