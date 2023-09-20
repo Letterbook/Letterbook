@@ -7,13 +7,14 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Stateless;
 
 namespace Letterbook.Core;
 
 public class ProfileService : IProfileService
 {
     private ILogger<ProfileService> _logger;
-    private CoreOptions _options;
+    private CoreOptions _coreConfig;
     private IAccountProfileAdapter _profiles;
     private IProfileEventService _profileEvents;
 
@@ -21,7 +22,7 @@ public class ProfileService : IProfileService
         IAccountProfileAdapter profiles, IProfileEventService profileEvents)
     {
         _logger = logger;
-        _options = options.Value;
+        _coreConfig = options.Value;
         _profiles = profiles;
         _profileEvents = profileEvents;
     }
@@ -48,7 +49,7 @@ public class ProfileService : IProfileService
             throw CoreException.Duplicate("Profile already exists", handle);
         }
 
-        var profile = Profile.CreateIndividual(_options.BaseUri(), handle);
+        var profile = Profile.CreateIndividual(_coreConfig.BaseUri(), handle);
         profile.OwnedBy = account;
         account.LinkedProfiles.Add(new LinkedProfile(account, profile, ProfilePermission.All));
         _profiles.RecordAccount(account);
@@ -111,7 +112,7 @@ public class ProfileService : IProfileService
         string value)
     {
         var profile = await RequireProfile(localId);
-        if (profile.CustomFields.Length >= _options.MaxCustomFields)
+        if (profile.CustomFields.Length >= _coreConfig.MaxCustomFields)
             throw CoreException.Invalid("Cannot add any more custom fields");
         var original = profile.ShallowClone();
 
@@ -205,15 +206,28 @@ public class ProfileService : IProfileService
         return profiles;
     }
 
-    public async Task<FollowResult> Follow(Guid selfId, Uri profileId, Uri? audienceId)
+    public async Task<FollowResult> Follow(Guid selfId, Uri targetId, Uri? audienceId)
     {
-        var self = await _profiles.LookupProfile(selfId);
-        var profile = await _profiles.LookupProfile(profileId);
+        var self = await RequireProfile(selfId);
+        var target = await ResolveProfile(targetId);
         
-        // state machine?????
-        
-        // follow is remote
-        throw new NotImplementedException();
+        // follow is local`
+        if (target.Authority == _coreConfig.BaseUri().Authority)
+        {
+            // TODO: Check for blocks
+            // TODO: Check for requiresApproval
+            var follow = new FollowerRelation(self, target, FollowResult.Accepted);
+            self.Following.Add(follow);
+            target.FollowersCollection.Add(follow);
+            self.Audiences.Add(Audience.FromFollowers(target));
+            self.Audiences.Add(Audience.FromBoost(target));
+            await _profiles.Commit();
+            return FollowResult.Accepted;
+        }
+        else
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public Task<FollowResult> Follow(Guid selfId, Guid localId, Uri? audienceId)
@@ -225,6 +239,11 @@ public class ProfileService : IProfileService
     {
         // doesn't confirm, just do the follow
         // does confirm, mark pending
+        throw new NotImplementedException();
+    }
+
+    public Task<FollowResult> ReceiveFollowResponse(Uri selfId, Uri followerId, FollowResult response)
+    {
         throw new NotImplementedException();
     }
 
@@ -266,8 +285,33 @@ public class ProfileService : IProfileService
     {
         var profile = await _profiles.LookupProfile(localId);
         if (profile != null) return profile;
+        
         _logger.LogError("Cannot update Profile {ProfileId} because it could not be found", localId);
+        await _profiles.Cancel();
         throw CoreException.Invalid("Failed to update Profile because it could not be found", "ProfileId", localId,
+            name, path, line);
+    }
+    
+    [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
+    private async Task<Profile> ResolveProfile(Uri profileId,
+        [CallerMemberName] string name = "",
+        [CallerFilePath] string path = "",
+        [CallerLineNumber] int line = -1)
+    {
+        var profile = await _profiles.LookupProfile(profileId);
+        if (profile != null) return profile;
+        
+        //profile = await _client.Resolve<Profile>(profileId);
+        if (profile != null)
+        {
+            _profiles.RecordProfile(profile);
+            _logger.LogInformation("Fetched Profile {ProfileId} from origin", profileId);
+            return profile;
+        }
+        
+        _logger.LogError("Cannot resolve Profile {ProfileId}", profileId);
+        await _profiles.Cancel();
+        throw CoreException.Missing("Failed to update Profile because it could not be found", profileId.ToString(),
             name, path, line);
     }
 }

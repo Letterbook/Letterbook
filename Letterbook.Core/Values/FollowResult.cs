@@ -2,6 +2,7 @@
 
 public enum FollowResult : int
 {
+    None,
     Accepted,
     Pending,
     Rejected

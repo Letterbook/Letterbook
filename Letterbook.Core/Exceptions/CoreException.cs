@@ -64,4 +64,19 @@ public class CoreException : Exception
         details.Add(key, value);
         return Invalid(message, details, name, path, line);
     }
+    
+    public static CoreException Missing(string message, string key,
+        [CallerMemberName] string name = "",
+        [CallerFilePath] string path = "",
+        [CallerLineNumber] int line = -1)
+    {
+        var ex = new CoreException(message)
+        {
+            HResult = (int)ErrorCodes.MissingData,
+            Source = $"{path} [{name}:{line}]",
+        };
+        ex.Data.Add("Key", key);
+
+        return ex;
+    }
 }

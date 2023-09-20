@@ -1,11 +1,13 @@
-﻿namespace Letterbook.Core.Models;
+﻿using Letterbook.Core.Values;
+
+namespace Letterbook.Core.Models;
 
 public class FollowerRelation : IObjectRef
 {
     public Guid Id { get; set; }
     public Profile Subject { get; set; }
     public Profile Follows { get; set; }
-    public FollowerRelationState State { get; set; }
+    public FollowResult State { get; set; }
     public DateTime Date { get; set; }
 
     private FollowerRelation()
@@ -14,6 +16,15 @@ public class FollowerRelation : IObjectRef
         Subject = default!;
         Follows = default!;
         State = default;
+        Date = DateTime.UtcNow;
+    }
+
+    public FollowerRelation(Profile subject, Profile follows, FollowResult state)
+    {
+        Id = Guid.NewGuid();
+        Subject = subject;
+        Follows = follows;
+        State = state;
         Date = DateTime.UtcNow;
     }
 
