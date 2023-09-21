@@ -34,19 +34,12 @@ public class Audience : IEquatable<Audience>, IObjectRef
     public static Audience FromFollowers(Profile creator) => FromUri(creator.FollowersCollection.Id);
     public static Audience FromBoost(Profile creator)
     {
-        var builder = new UriBuilder(creator.FollowersCollection.Id)
-        {
-            Fragment = "boosts"
-        };
+        var builder = new UriBuilder(creator.FollowersCollection.Id);
+        builder.Fragment += "boosts";
         return FromUri(builder.Uri);
     }
-    public static Audience FromMention(Profile subject)
-    {
-        var builder = new UriBuilder(subject.Id);
-        builder.Fragment = string.IsNullOrEmpty(builder.Fragment) ? "mentioned" : builder.Fragment + ";mentioned";
-        return FromUri(builder.Uri);
-    }
-    
+    public static Audience FromMention(Profile subject) => FromUri(subject.Id);
+
     public bool Equals(Audience? other)
     {
         if (ReferenceEquals(null, other)) return false;

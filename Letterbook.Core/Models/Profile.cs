@@ -18,11 +18,25 @@ public class Profile : IObjectRef
         Type = default;
         Handle = default!;
         DisplayName = default!;
+        FollowersCollection = default!;
+        CustomFields = default!;
+        Description = default!;
     }
-
+    
     public Profile(Uri id)
     {
         Id = id;
+        Handle = string.Empty;
+        DisplayName = string.Empty;
+        Description = string.Empty;
+        CustomFields = Array.Empty<CustomField>();
+        FollowersCollection = ObjectCollection<FollowerRelation>.Followers(id);
+    }
+    
+    // Constructor for local profiles
+    private Profile(Uri baseUri, Guid id) : this(new Uri(baseUri, $"/actor/{id.ToShortId()}"))
+    {
+        LocalId = id;
     }
 
     public Uri Id { get; set; }
@@ -39,8 +53,8 @@ public class Profile : IObjectRef
     public ActivityActorType Type { get; set; }
     public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
     public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
+    public ObjectCollection<FollowerRelation> FollowersCollection { get; set; }
     public ICollection<FollowerRelation> Following { get; set; } = new HashSet<FollowerRelation>();
-    public ObjectCollection<FollowerRelation> FollowersCollection { get; set; } = new();
 
     public Profile ShallowClone() => (Profile)MemberwiseClone();
 
@@ -49,16 +63,13 @@ public class Profile : IObjectRef
     public static Profile CreateIndividual(Uri baseUri, string handle)
     {
         var localId = Guid.NewGuid();
-        var profile = new Profile
+        var profile = new Profile(baseUri, localId)
         {
-            Id = new Uri(baseUri, $"/actor/{localId}"),
-            LocalId = localId,
             Type = ActivityActorType.Person,
             Handle = $"@{handle}@{baseUri.Authority}",
             DisplayName = handle,
         };
         profile.Audiences.Add(Audience.FromMention(profile));
-        profile.FollowersCollection.Id = new Uri(profile.Id, "/followers");
         return profile;
     }
 }

@@ -11,7 +11,6 @@ public class AccountServiceTest : WithMocks
 {
     private readonly ITestOutputHelper _outputHelper;
     private readonly AccountService _accountService;
-    private int _randomSeed;
     private FakeAccount _fakeAccount;
     private FakeProfile _fakeProfile;
     private MockIdentityManager _mockIdentityManager;

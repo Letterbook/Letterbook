@@ -33,6 +33,19 @@ public class Mention : IEquatable<Mention>
     public static Mention Cc(Profile subject) => Create(subject, MentionVisibility.Cc);
     public static Mention Bcc(Profile subject) => Create(subject, MentionVisibility.Bcc);
 
+    private Mention()
+    {
+        Id = Guid.Empty;
+        Subject = default!;
+    }
+    
+    public Mention(Profile subject, MentionVisibility visibility)
+    {
+        Id = Guid.NewGuid();
+        Subject = subject;
+        Visibility = visibility;
+    }
+
     /// <summary>
     /// This should be used for comparisons only, in visibility calculations. It will not make any sense to persist it
     /// </summary>

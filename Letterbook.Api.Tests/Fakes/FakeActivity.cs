@@ -1,4 +1,5 @@
 ﻿using Bogus;
+#pragma warning disable CS8603 // Possible null reference return.
 
 namespace Letterbook.Api.Tests.Fakes;
 
