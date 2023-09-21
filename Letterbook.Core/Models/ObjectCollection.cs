@@ -16,7 +16,23 @@ public class ObjectCollection<T> : HashSet<T>, IObjectRef where T : IObjectRef
         Id = id;
     }
 
-    public static ObjectCollection<T> Creators(Uri id) => new(new Uri(id, "/creators"));
-    public static ObjectCollection<T> Audience(Uri id) => new(new Uri(id, "/audience"));
-    public static ObjectCollection<T> Followers(Uri id) => new(new Uri(id, "/followers"));
+    public static ObjectCollection<T> Creators(Uri id)
+    {
+        var b = new UriBuilder(id);
+        b.Path += "/creators";
+        return new ObjectCollection<T>(b.Uri);
+    }
+
+    public static ObjectCollection<T> Audience(Uri id)
+    {
+        var b = new UriBuilder(id);
+        b.Path += "/audience";
+        return new ObjectCollection<T>(b.Uri);
+    }
+    public static ObjectCollection<T> Followers(Uri id)
+    {
+        var b = new UriBuilder(id);
+        b.Path += "/followers";
+        return new ObjectCollection<T>(b.Uri);
+    }
 }

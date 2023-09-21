@@ -21,7 +21,7 @@ public class Profile : IObjectRef
         CustomFields = default!;
         Description = default!;
     }
-
+    
     public Profile(Uri id)
     {
         Id = id;
@@ -30,6 +30,12 @@ public class Profile : IObjectRef
         Description = string.Empty;
         CustomFields = Array.Empty<CustomField>();
         FollowersCollection = ObjectCollection<Profile>.Followers(id);
+    }
+    
+    // Constructor for local profiles
+    private Profile(Uri baseUri, Guid id) : this(new Uri(baseUri, $"/actor/{id.ToShortId()}"))
+    {
+        LocalId = id;
     }
 
     public Uri Id { get; set; }
@@ -53,16 +59,13 @@ public class Profile : IObjectRef
     public static Profile CreateIndividual(Uri baseUri, string handle)
     {
         var localId = Guid.NewGuid();
-        var profile = new Profile
+        var profile = new Profile(baseUri, localId)
         {
-            Id = new Uri(baseUri, $"/actor/{localId}"),
-            LocalId = localId,
             Type = ActivityActorType.Person,
             Handle = $"@{handle}@{baseUri.Authority}",
             DisplayName = handle,
         };
         profile.Audiences.Add(Audience.FromMention(profile));
-        profile.FollowersCollection.Id = new Uri(profile.Id, "/followers");
         return profile;
     }
 }

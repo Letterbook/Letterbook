@@ -16,8 +16,23 @@ public class ObjectList<T> : List<T>, IObjectRef where T : IObjectRef
         Id = id;
     }
     
-    public static ObjectList<T> Replies(Uri id) => new(new Uri(id, "/replies"));
-    public static ObjectList<T> Likes(Uri id) => new(new Uri(id, "/likes"));
-    public static ObjectList<T> Boosts(Uri id) => new(new Uri(id, "/boosts"));
+    public static ObjectList<T> Replies(Uri id)
+    {
+        var b = new UriBuilder(id);
+        b.Path += "/replies";
+        return new ObjectList<T>(b.Uri);
+    }
+    public static ObjectList<T> Likes(Uri id)
+    {
+        var b = new UriBuilder(id);
+        b.Path += "/likes";
+        return new ObjectList<T>(b.Uri);
+    }
+    public static ObjectList<T> Boosts(Uri id)
+    {
+        var b = new UriBuilder(id);
+        b.Path += "/boosts";
+        return new ObjectList<T>(b.Uri);
+    }
 
 }
