@@ -17,7 +17,7 @@ public sealed class FakeProfile : Faker<Profile>
 
     public FakeProfile(Uri uri)
     {
-        CustomInstantiator(f => new Profile(uri));
+        CustomInstantiator(f => Profile.CreateEmpty(new Uri(uri, $"/{f.Internet.UserName()}")));
 
         RuleFor(p => p.FollowersCollection, (f, p) => ObjectCollection<FollowerRelation>.Followers(p.Id));
         RuleFor(p => p.DisplayName, (f) => f.Internet.UserName());

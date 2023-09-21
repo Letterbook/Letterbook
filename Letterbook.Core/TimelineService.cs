@@ -42,7 +42,7 @@ public class TimelineService : ITimelineService
         if (note.Visibility.Contains(Audience.Public) || note.Mentions.Contains(Mention.Public) ||
             note.Mentions.Contains(Mention.Unlisted))
         {
-            _feeds.AddToTimeline(note, Audience.FromBoost(boostedBy), boostedBy);
+            _feeds.AddToTimeline(note, Audience.Boosts(boostedBy), boostedBy);
         }
 
         foreach (var creator in note.Creators.Where(creator => creator.HasLocalAuthority(_options)))

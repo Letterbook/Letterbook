@@ -7,7 +7,7 @@ public class FollowerRelation : IObjectRef
     public Guid Id { get; set; }
     public Profile Subject { get; set; }
     public Profile Follows { get; set; }
-    public FollowResult State { get; set; }
+    public FollowState State { get; set; }
     public DateTime Date { get; set; }
 
     private FollowerRelation()
@@ -19,7 +19,7 @@ public class FollowerRelation : IObjectRef
         Date = DateTime.UtcNow;
     }
 
-    public FollowerRelation(Profile subject, Profile follows, FollowResult state)
+    public FollowerRelation(Profile subject, Profile follows, FollowState state)
     {
         Id = Guid.NewGuid();
         Subject = subject;

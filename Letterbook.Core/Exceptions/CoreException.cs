@@ -19,31 +19,31 @@ public class CoreException : Exception
     {
     }
 
-    public static CoreException Duplicate(string message, object id,
+    public static CoreException Duplicate(string message, object id, Exception? innerEx = null,
         [CallerMemberName] string name="",
         [CallerFilePath] string path="",
         [CallerLineNumber] int line=-1)
     {
-        var ex = new CoreException(message)
+        var ex = new CoreException(message, innerEx)
         {
-            HResult = (int)ErrorCodes.DuplicateEntry,
             Source = $"{path} [{name}:{line}]"
         };
+        ex.HResult += (int)ErrorCodes.DuplicateEntry;
         ex.Data.Add("Id", id);
 
         return ex;
     }
 
-    public static CoreException Invalid(string message, IDictionary<string, object>? details = null,
+    public static CoreException Invalid(string message, IDictionary<string, object>? details = null, Exception? innerEx = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
         [CallerLineNumber] int line = -1)
     {
-        var ex = new CoreException(message)
+        var ex = new CoreException(message, innerEx)
         {
-            HResult = (int)ErrorCodes.InvalidRequest,
             Source = $"{path} [{name}:{line}]"
         };
+        ex.HResult += (int)ErrorCodes.InvalidRequest;
         if (details == null) return ex;
         
         foreach (var detail in details)
@@ -55,26 +55,26 @@ public class CoreException : Exception
     }
 
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
-    public static CoreException Invalid(string message, string key, object value,
+    public static CoreException Invalid(string message, string key, object value, Exception? innerEx = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
         [CallerLineNumber] int line = -1)
     {
         var details = new Dictionary<string, object>();
         details.Add(key, value);
-        return Invalid(message, details, name, path, line);
+        return Invalid(message, details, innerEx, name, path, line);
     }
     
-    public static CoreException Missing(string message, string key,
+    public static CoreException Missing(string message, string key, Exception? innerEx = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
         [CallerLineNumber] int line = -1)
     {
-        var ex = new CoreException(message)
+        var ex = new CoreException(message, innerEx)
         {
-            HResult = (int)ErrorCodes.MissingData,
             Source = $"{path} [{name}:{line}]",
         };
+        ex.HResult += (int)ErrorCodes.MissingData;
         ex.Data.Add("Key", key);
 
         return ex;

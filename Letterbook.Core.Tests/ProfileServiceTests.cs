@@ -26,8 +26,9 @@ public class ProfileServiceTests : WithMocks
         _fakeProfile = new FakeProfile("letterbook.example");
         var genericFaker = new Faker();
         CoreOptionsMock.Value.MaxCustomFields = 2;
-        
-        _service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object, Mock.Of<IProfileEventService>());
+
+        _service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object,
+            Mock.Of<IProfileEventService>(), Mock.Of<IActivityPubClient>());
         _profile = _fakeProfile.Generate();
     }
 

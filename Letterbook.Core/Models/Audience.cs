@@ -31,8 +31,16 @@ public class Audience : IEquatable<Audience>, IObjectRef
     /// </summary>
     public static Audience Public => _public;
     public static Audience FromUri(Uri uri) => new () { Id = uri };
-    public static Audience FromFollowers(Profile creator) => FromUri(creator.FollowersCollection.Id);
-    public static Audience FromBoost(Profile creator)
+    public static Audience Followers(Profile creator) => FromUri(creator.FollowersCollection.Id);
+
+    public static Audience Subscribers(Profile creator)
+    {
+        var builder = new UriBuilder(creator.FollowersCollection.Id);
+        builder.Fragment += "subscribe";
+        return FromUri(builder.Uri);
+    }
+    
+    public static Audience Boosts(Profile creator)
     {
         var builder = new UriBuilder(creator.FollowersCollection.Id);
         builder.Fragment += "boosts";

@@ -12,6 +12,9 @@ public sealed class FakeNote : Faker<Note>
         RuleFor(note => note.Creators, (_, note) => new ObjectCollection<Profile>(new Uri(note.Id, "/followers")){profile});
     }
 
+    public FakeNote(FakeProfile profileFaker) : this(profileFaker.Generate())
+    {}
+
     public FakeNote() : this(new FakeProfile().Generate())
     {}
 }
