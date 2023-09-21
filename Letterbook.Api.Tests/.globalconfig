@@ -1,0 +1,4 @@
+﻿#### Diagnostic configuration ####
+
+# Ignore nullability warnings in test projects
+dotnet_diagnostic.CS8603.severity = none

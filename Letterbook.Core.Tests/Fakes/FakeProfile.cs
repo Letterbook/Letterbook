@@ -19,11 +19,11 @@ public sealed class FakeProfile : Faker<Profile>
     {
         CustomInstantiator(f => new Profile(uri));
 
-        RuleFor(p => p.FollowersCollection,
-            (f, p) => new ObjectCollection<Profile>() { Id = new Uri(p.Id, "/followers") });
+        RuleFor(p => p.FollowersCollection, (f, p) => ObjectCollection<Profile>.Followers(p.Id));
         RuleFor(p => p.DisplayName, (f) => f.Internet.UserName());
         RuleFor(p => p.Description, (f) => f.Lorem.Paragraph());
         RuleFor(p => p.CustomFields,
             (f) => new CustomField[] { new() { Label = "UUID", Value = $"{f.Random.Guid()}" } });
+        RuleFor(p => p.FollowersCollection, (f, p) => ObjectCollection<Profile>.Followers(p.Id));
     }
 }
