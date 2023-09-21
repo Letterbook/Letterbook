@@ -4,9 +4,9 @@
 public class WebFingerJsonResourceDescriptor
 {
     public string Subject { get; set; }
-    public List<string> Aliases { get; set; }
-    public List<string> Properties { get; set; }
-    public List<Link> Links { get; set; }
+    public List<string> Aliases { get; set; } = new();
+    public List<string> Properties { get; set; } = new();
+    public List<Link> Links { get; set; } = new();
 }
 
 public class Link
