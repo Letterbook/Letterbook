@@ -73,14 +73,18 @@ public class Profile : IObjectRef, IEquatable<Profile>
 
     public Profile ShallowClone() => (Profile)MemberwiseClone();
 
-    public void AddFollower(Profile follower, FollowState state)
+    public FollowerRelation AddFollower(Profile follower, FollowState state)
     {
-        FollowersCollection.Add(new FollowerRelation(this, follower, state));
+        var relation = new FollowerRelation(this, follower, state);
+        FollowersCollection.Add(relation);
+        return relation;
     }
 
-    public void AddFollowing(Profile following, FollowState state)
+    public FollowerRelation AddFollowing(Profile following, FollowState state)
     {
-        Following.Add(new FollowerRelation(following, this, state));
+        var relation = new FollowerRelation(following, this, state);
+        Following.Add(relation);
+        return relation;
     }
     
     // Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?

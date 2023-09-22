@@ -4,6 +4,7 @@ using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Extensions;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.Core.Values;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -28,7 +29,7 @@ public class ProfileServiceTests : WithMocks
         CoreOptionsMock.Value.MaxCustomFields = 2;
 
         _service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object,
-            Mock.Of<IProfileEventService>(), Mock.Of<IActivityPubClient>());
+            Mock.Of<IProfileEventService>(), ActivityPubClientMock.Object);
         _profile = _fakeProfile.Generate();
     }
 
@@ -239,5 +240,98 @@ public class ProfileServiceTests : WithMocks
         
         Assert.NotNull(actual.Updated);
         Assert.Empty(actual.Updated.CustomFields);
+    }
+
+    [Fact(DisplayName = "Should add local follows")]
+    public async Task FollowLocalProfile()
+    {
+        var target = _fakeProfile.Generate();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)_profile.LocalId!)))
+            .ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)target.LocalId!)))
+            .ReturnsAsync(target);
+
+        var actual = await _service.Follow((Guid)_profile.LocalId!, (Guid)target.LocalId!);
+        
+        Assert.Equal(FollowState.Accepted, actual);
+        Assert.Single(_profile.Following);
+        Assert.Single(target.FollowersCollection);
+        Assert.Equal(_profile.Following.First(), target.FollowersCollection.First());
+    }
+    
+    [Fact(DisplayName = "Should add local follows by URL")]
+    public async Task FollowLocalProfileUrl()
+    {
+        var target = _fakeProfile.Generate();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)_profile.LocalId!)))
+            .ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
+            .ReturnsAsync(target);
+
+        var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
+        
+        Assert.Equal(FollowState.Accepted, actual);
+        Assert.Single(_profile.Following);
+        Assert.Single(target.FollowersCollection);
+        Assert.Equal(_profile.Following.First(), target.FollowersCollection.First());
+    }
+
+    [Fact(DisplayName = "Should add remote follows accepted")]
+    public async Task FollowRemoteAccept()
+    {
+        var target = new FakeProfile().Generate();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)_profile.LocalId!)))
+            .ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
+            .ReturnsAsync(default(Profile));
+        ActivityPubClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
+        ActivityPubClientMock.Setup(m => m.SendFollow(target.Inbox, It.IsAny<FollowerRelation>()))
+            .ReturnsAsync(FollowState.Accepted);
+
+        var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
+        
+        Assert.Equal(FollowState.Accepted, actual);
+        Assert.Single(_profile.Following);
+        Assert.Single(target.FollowersCollection);
+        Assert.Equal(_profile.Following.First().Follows.Id, target.Id);
+    }
+    
+    [Fact(DisplayName = "Should add remote follows pending")]
+    public async Task FollowRemotePending()
+    {
+        var target = new FakeProfile().Generate();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)_profile.LocalId!)))
+            .ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
+            .ReturnsAsync(default(Profile));
+        ActivityPubClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
+        ActivityPubClientMock.Setup(m => m.SendFollow(target.Inbox, It.IsAny<FollowerRelation>()))
+            .ReturnsAsync(FollowState.Pending);
+
+        var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
+        
+        Assert.Equal(FollowState.Pending, actual);
+        Assert.Single(_profile.Following);
+        Assert.Single(target.FollowersCollection);
+        Assert.Equal(_profile.Following.First().Follows.Id, target.Id);
+    }
+    
+    [Fact(DisplayName = "Should not add rejected remote follows")]
+    public async Task FollowRemoteRejected()
+    {
+        var target = new FakeProfile().Generate();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)_profile.LocalId!)))
+            .ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
+            .ReturnsAsync(default(Profile));
+        ActivityPubClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
+        ActivityPubClientMock.Setup(m => m.SendFollow(target.Inbox, It.IsAny<FollowerRelation>()))
+            .ReturnsAsync(FollowState.Rejected);
+
+        var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
+        
+        Assert.Equal(FollowState.Rejected, actual);
+        Assert.Empty(_profile.Following);
+        Assert.Empty(target.FollowersCollection);
     }
 }

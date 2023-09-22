@@ -212,13 +212,12 @@ public class ProfileService : IProfileService
     private async Task<FollowState> Follow(Profile self, Profile target, bool subscribeOnly,
         IEnumerable<Uri> additionalAudience)
     {
-        // follow is local
         if (target.Authority == _coreConfig.BaseUri().Authority)
         {
             // TODO: Check for blocks
             // TODO: Check for requiresApproval
-            self.AddFollowing(target, FollowState.Accepted);
-            target.AddFollower(self, FollowState.Accepted);
+            var relation = self.AddFollowing(target, FollowState.Accepted);
+            target.FollowersCollection.Add(relation);
             self.Audiences.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
             self.Audiences.Add(Audience.Boosts(target));
             foreach (var uri in additionalAudience)
@@ -226,29 +225,40 @@ public class ProfileService : IProfileService
                 self.Audiences.Add(Audience.FromUri(uri));
             }
             await _profiles.Commit();
-            return FollowState.Accepted;
+            return relation.State;
         }
-        else
+        
+        // TODO: Check for blocks
+        // TODO: Check for requiresApproval
+        var follow = new FollowerRelation(self, target, FollowState.Pending);
+        var result = await _client.As(self).SendFollow(target.Inbox, follow);
+        follow.State = result;
+        switch (follow.State)
         {
-            // TODO: Check for blocks
-            // TODO: Check for requiresApproval
-
-            var result = await _client.As(self)
-                .SendFollow(target.Inbox, new FollowerRelation(self, target, FollowState.Pending));
-            // result == result.Rejected ? return : self.Following.Add(new FollowerRelation(self, target, result));
-            // etc
-            throw new NotImplementedException();
+            case FollowState.Accepted:
+            case FollowState.Pending:
+                follow.State = result;
+                self.Following.Add(follow);
+                target.FollowersCollection.Add(follow);
+                self.Audiences.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
+                self.Audiences.Add(Audience.Boosts(target));
+                await _profiles.Commit();
+                return follow.State;
+            case FollowState.None:
+            case FollowState.Rejected:
+            default:
+                return follow.State;
         }
     }
 
-    public async Task<FollowState> Follow(Guid selfId, Uri targetId, Uri? audienceId)
+    public async Task<FollowState> Follow(Guid selfId, Uri targetId, Uri? audienceId = null)
     {
         var self = await RequireProfile(selfId);
         var target = await ResolveProfile(self, targetId);
         return await Follow(self, target, false, audienceId is null ? Array.Empty<Uri>() : new []{audienceId});
     }
 
-    public async Task<FollowState> Follow(Guid selfId, Guid targetId, Uri? audienceId)
+    public async Task<FollowState> Follow(Guid selfId, Guid targetId, Uri? audienceId = null)
     {
         var self = await RequireProfile(selfId);
         var target = await RequireProfile(targetId);
