@@ -23,7 +23,8 @@ public static class DtoMapper
             .ForMember(dest => dest.CustomFields, opt => opt.MapFrom(src => src.Attachment))
             .ForMember(dest => dest.Inbox, opt => opt.MapFrom(src => src.Inbox.Id))
             .ForMember(dest => dest.Outbox, opt => opt.MapFrom(src => src.Outbox.Id))
-            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name))
+            .AfterMap((_, profile) => profile.Updated = DateTime.UtcNow);
         
         cfg.CreateMap<DTO.Object, Models.Profile>()
             .IncludeBase<DTO.IResolvable, Models.Profile>();
