@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Letterbook.Core.Models;
 
-namespace Letterbook.Core.Mappers;
+namespace Letterbook.Api.Mappers;
 
 public static class DtoMapper
 {
@@ -14,8 +14,8 @@ public static class DtoMapper
 
     private static void ConfigureProfile(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<DTO.Actor, Models.Profile>()
-            .IncludeBase<DTO.IResolvable, Models.Profile>()
+        cfg.CreateMap<DTO.Actor, Core.Models.Profile>()
+            .IncludeBase<DTO.IResolvable, Core.Models.Profile>()
             .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
             .ForMember(dest => dest.FollowersCollection, opt => opt.MapFrom(src => src.Followers))
@@ -26,13 +26,13 @@ public static class DtoMapper
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name))
             .AfterMap((_, profile) => profile.Updated = DateTime.UtcNow);
         
-        cfg.CreateMap<DTO.Object, Models.Profile>()
-            .IncludeBase<DTO.IResolvable, Models.Profile>();
+        cfg.CreateMap<DTO.Object, Core.Models.Profile>()
+            .IncludeBase<DTO.IResolvable, Core.Models.Profile>();
         
-        cfg.CreateMap<DTO.Link, Models.Profile>()
-            .IncludeBase<DTO.IResolvable, Models.Profile>();
+        cfg.CreateMap<DTO.Link, Core.Models.Profile>()
+            .IncludeBase<DTO.IResolvable, Core.Models.Profile>();
         
-        cfg.CreateMap<DTO.IResolvable, Models.Profile>()
+        cfg.CreateMap<DTO.IResolvable, Core.Models.Profile>()
             .IncludeBase<DTO.IResolvable, IObjectRef>()
             // Handle these on concrete types
             .ForMember(dest => dest.Type, opt => opt.Ignore())
