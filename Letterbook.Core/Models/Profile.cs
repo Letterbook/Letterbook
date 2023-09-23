@@ -62,10 +62,7 @@ public class Profile : IObjectRef
         profile.CustomFields = (CustomField[])CustomFields.Clone();
         profile.Audiences = new List<Audience>(Audiences);
         profile.RelatedAccounts = new List<LinkedProfile>(RelatedAccounts);
-        profile.FollowersCollection = new ObjectCollection<Profile>
-        {
-            Id = FollowersCollection.Id
-        };
+        profile.FollowersCollection = new ObjectCollection<Profile>(FollowersCollection.Id);
 
         return profile;
     }
