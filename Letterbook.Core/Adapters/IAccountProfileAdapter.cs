@@ -18,10 +18,19 @@ public interface IAccountProfileAdapter : IDisposable
     public Task<bool> AnyProfile(ProfileComparer comparer);
     public Task<Profile?> LookupProfile(Guid localId);
     public Task<Profile?> LookupProfile(Uri id);
+    
+    // Lookup Profile with related properties matching the following ID
+    public Task<Profile?> LookupProfileForFollowing(Uri id, Uri followingId);
+    public Task<Profile?> LookupProfileForFollowing(Guid localId, Uri followingId);
+    
+    // Lookup Profile with related properties matching the follower ID
+    public Task<Profile?> LookupProfileForFollowers(Uri localId, Uri followerId);
+    public Task<Profile?> LookupProfileForFollowers(Guid localId, Uri followerId);
     public IAsyncEnumerable<Profile> QueryProfiles(ProfileQuery query, int? limit = null);
 
     public bool RecordProfile(Profile profile);
 
+    public void Delete(object record);
     public Task Cancel();
     public Task Commit();
 }

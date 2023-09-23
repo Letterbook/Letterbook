@@ -16,16 +16,13 @@ public interface IProfileService
     Task<Profile?> LookupProfile(Guid localId);
     Task<Profile?> LookupProfile(Uri id);
     Task<IEnumerable<Profile>> FindProfiles(string handle);
-    Task<FollowState> Follow(Guid selfId, Uri targetId, Uri? audienceId = null);
-    Task<FollowState> Follow(Guid selfId, Guid localId, Uri? audienceId = null);
-    Task<FollowState> ReceiveFollowRequest(Uri selfId, Uri followerId);
-    Task<FollowState> ReceiveFollowResponse(Uri selfId, Uri followerId, FollowState response);
+    Task<FollowState> Follow(Guid selfId, Uri targetId);
+    Task<FollowState> Follow(Guid selfId, Guid localId);
+    Task<FollowState> ReceiveFollowRequest(Uri targetId, Uri followerId);
+    Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response);
     Task RemoveFollower(Guid selfId, Uri followerId);
-    Task RemoveFollower(Guid selfId, Guid followerId);
     Task Unfollow(Guid selfId, Uri followerId);
-    Task Unfollow(Guid selfId, Guid followerId);
     Task ReportProfile(Guid selfId, Uri profileId);
-    Task ReportProfile(Guid selfId, Guid localId);
     
     // - [ ] receive report
     // - [ ] block

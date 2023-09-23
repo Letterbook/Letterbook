@@ -19,6 +19,7 @@ public class CoreException : Exception
     {
     }
 
+    // Indicates creating a new resource would conflict with an existing resource
     public static CoreException Duplicate(string message, object id, Exception? innerEx = null,
         [CallerMemberName] string name="",
         [CallerFilePath] string path="",
@@ -26,24 +27,25 @@ public class CoreException : Exception
     {
         var ex = new CoreException(message, innerEx)
         {
-            Source = $"{path} [{name}:{line}]"
+            Source = FormatSource(path, name, line),
         };
-        ex.HResult += (int)ErrorCodes.DuplicateEntry;
+        ex.HResult |= (int)ErrorCodes.DuplicateEntry;
         ex.Data.Add("Id", id);
 
         return ex;
     }
 
-    public static CoreException Invalid(string message, IDictionary<string, object>? details = null, Exception? innerEx = null,
+    // Indicates that the request is not semantically valid or violates some application constraint
+    public static CoreException InvalidRequest(string message, IDictionary<string, object>? details = null, Exception? innerEx = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
         [CallerLineNumber] int line = -1)
     {
         var ex = new CoreException(message, innerEx)
         {
-            Source = $"{path} [{name}:{line}]"
+            Source = FormatSource(path, name, line),
         };
-        ex.HResult += (int)ErrorCodes.InvalidRequest;
+        ex.HResult |= (int)ErrorCodes.InvalidRequest;
         if (details == null) return ex;
         
         foreach (var detail in details)
@@ -55,28 +57,51 @@ public class CoreException : Exception
     }
 
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
-    public static CoreException Invalid(string message, string key, object value, Exception? innerEx = null,
+    public static CoreException InvalidRequest(string message, string key, object value, Exception? innerEx = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
         [CallerLineNumber] int line = -1)
     {
         var details = new Dictionary<string, object>();
         details.Add(key, value);
-        return Invalid(message, details, innerEx, name, path, line);
+        return InvalidRequest(message, details, innerEx, name, path, line);
     }
-    
-    public static CoreException Missing(string message, string key, Exception? innerEx = null,
+
+    // Indicates the server has been asked to modify an object it does not control
+    public static CoreException WrongAuthority(string message, Uri target, Uri? source = null, Exception? innerEx = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
         [CallerLineNumber] int line = -1)
     {
         var ex = new CoreException(message, innerEx)
         {
-            Source = $"{path} [{name}:{line}]",
+            Source = FormatSource(path, name, line),
         };
-        ex.HResult += (int)ErrorCodes.MissingData;
-        ex.Data.Add("Key", key);
+        ex.HResult |= (int)ErrorCodes.WrongAuthority;
+        ex.Data.Add("Target", target);
+        if(source != null) ex.Data.Add("Source", source);
 
         return ex;
+    }
+    
+    // Indicates some required data could not be found
+    public static CoreException MissingData(string message, Type type, object id, Exception? innerEx = null,
+        [CallerMemberName] string name = "",
+        [CallerFilePath] string path = "",
+        [CallerLineNumber] int line = -1)
+    {
+        var ex = new CoreException(message, innerEx)
+        {
+            Source = FormatSource(path, name, line),
+        };
+        ex.HResult |= (int)ErrorCodes.MissingData;
+        ex.Data.Add(type.ToString(), id);
+
+        return ex;
+    }
+
+    private static string FormatSource(string path, string name, int line)
+    {
+        return $"{path} [{name}:{line}]";
     }
 }

@@ -75,16 +75,60 @@ public class Profile : IObjectRef, IEquatable<Profile>
 
     public FollowerRelation AddFollower(Profile follower, FollowState state)
     {
-        var relation = new FollowerRelation(this, follower, state);
+        var relation = new FollowerRelation(follower, this, state);
         FollowersCollection.Add(relation);
         return relation;
     }
-
-    public FollowerRelation AddFollowing(Profile following, FollowState state)
+    
+    public int RemoveFollower(Profile follower)
     {
-        var relation = new FollowerRelation(following, this, state);
+        return FollowersCollection.RemoveWhere(relation => relation.Subject == follower);
+    }
+
+    public FollowerRelation Follow(Profile following, FollowState state)
+    {
+        var relation = new FollowerRelation(this, following, state);
         Following.Add(relation);
         return relation;
+    }
+
+    public int Unfollow(Profile following)
+    {
+        // There's a pretty good chance that Following is a HashSet. If it was constructed in app code,
+        // then it definitely is. If it was constructed by EFCore, then it probably is. But, it's possible that
+        // EFCore will choose another collection
+        if (Following is HashSet<FollowerRelation> f)
+        {
+            return f.RemoveWhere(relation => relation.Follows == following);
+        }
+        
+        var count = 0;
+        var targets = Following.Where(relation => relation.Follows == following);
+        foreach (var target in targets)
+        {
+            Following.Remove(target);
+            count++;
+        }
+
+        return count;
+    }
+    
+    public int LeaveAudience(Profile following)
+    {
+        if (Audiences is HashSet<Audience> memberships)
+        {
+            return memberships.RemoveWhere(m => m.Source == following);
+        }
+        
+        var count = 0;
+        var targets = Audiences.Where(m => m.Source == following);
+        foreach (var target in targets)
+        {
+            Audiences.Remove(target);
+            count++;
+        }
+
+        return count;
     }
     
     // Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?
