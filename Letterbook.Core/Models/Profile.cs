@@ -147,6 +147,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
     }
 
     // Really only useful for doing equality comparisons, but that's a thing we do sometimes.
+    // Don't persist this anywhere.
     public static Profile CreateEmpty(Uri id)
     {
         return new Profile()
@@ -159,7 +160,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Id.Equals(other.Id);
+        return Id.ToString().Equals(other.Id.ToString());
     }
 
     public override bool Equals(object? obj)

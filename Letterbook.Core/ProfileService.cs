@@ -6,7 +6,6 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Stateless;
 
 namespace Letterbook.Core;
 
@@ -267,12 +266,10 @@ public class ProfileService : IProfileService
         }
         
         var target = await ResolveProfile(targetId);
-        var follower = await ResolveProfile(followerId);
+        // var follower = await ResolveProfile(followerId);
         
         // TODO(moderation): check blocks and requiresApproval
-        var relation = new FollowerRelation(target, follower, FollowState.Accepted);
-        target.FollowersCollection.Add(relation);
-        follower.Following.Add(relation);
+        var relation = target.AddFollower(Profile.CreateEmpty(followerId), FollowState.Accepted);
         await _profiles.Commit();
         
         return relation.State;
@@ -297,8 +294,9 @@ public class ProfileService : IProfileService
             case FollowState.None:
             case FollowState.Rejected:
             default:
+                profile.Unfollow(Profile.CreateEmpty(targetId));
                 profile.LeaveAudience(Profile.CreateEmpty(targetId));
-                _profiles.Delete(relation);
+                // _profiles.Delete(relation);
                 await _profiles.Commit();
                 return FollowState.None;
         }
