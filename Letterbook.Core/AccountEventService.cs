@@ -37,9 +37,11 @@ public class AccountEventService : IAccountEventService
         _channel.OnNext(message);
     }
 
-    public void Updated(Account account)
+    public void Updated(Account original, Account updated)
     {
-        var message = FormatMessage(account, nameof(Updated));
+        // TODO: warn on equality
+        // if (ReferenceEquals(original, updated)) _logger.LogWarning("");
+        var message = FormatMessage((original, updated), nameof(Updated));
         _channel.OnNext(message);
     }
 
@@ -58,8 +60,27 @@ public class AccountEventService : IAccountEventService
             Data = value,
             Type = $"{nameof(ActivityEventService)}.{value.GetType()}.{action}",
             Subject = value.Id.ToString(),
-            Time = DateTimeOffset.UtcNow
+            Time = DateTimeOffset.UtcNow,
+            ["ltrauth"] = "" // I'd really like events to carry authentication info
+            // But then either core services will require auth info as tramp data
+            // Or controllers have to send events, rather than core services
         };
     }
+    
+    private CloudEvent FormatMessage((Account original, Account updated) values, string action)
+    {
+        return new CloudEvent
+        {
+            Id = Guid.NewGuid().ToString(),
+            Source = _options.BaseUri(),
+            Data = values,
+            Type = $"{nameof(ActivityEventService)}.{values.updated.GetType()}.{action}",
+            Subject = values.updated.Id.ToString(),
+            Time = DateTimeOffset.UtcNow,
+            ["ltrauth"] = ""
+        };
+    }
+    
+    
 
 }

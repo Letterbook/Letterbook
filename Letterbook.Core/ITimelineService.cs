@@ -8,5 +8,5 @@ public interface ITimelineService
     public void HandleBoost(Note note);
     public void HandleUpdate(Note note);
     public void HandleDelete(Note note);
-    public Task<IEnumerable<TimelineEntry>> GetFeed(string recipientId, DateTime begin, int limit = 40);
+    public Task<IEnumerable<TimelineEntry>> GetFeed(Guid recipientId, DateTime begin, int limit = 40);
 }

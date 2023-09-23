@@ -1,4 +1,5 @@
-﻿using Letterbook.Core.Adapters;
+﻿using System.Linq.Expressions;
+using Letterbook.Core.Adapters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -32,12 +33,27 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         throw new NotImplementedException();
     }
 
-    public Task<Models.Profile?> LookupProfile(string localId)
+    public IQueryable<Models.Account> SearchAccounts()
     {
         throw new NotImplementedException();
     }
 
-    public IQueryable<Models.Profile> SearchProfiles()
+    public Task<bool> AnyProfile(IAccountProfileAdapter.ProfileComparer comparer)
+    {
+        return _context.Profiles.AnyAsync(profile => comparer(profile));
+    }
+
+    public Task<Models.Profile?> LookupProfile(Guid localId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Models.Profile?> LookupProfile(Uri id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IAsyncEnumerable<Models.Profile> QueryProfiles(IAccountProfileAdapter.ProfileQuery query, int? limit)
     {
         throw new NotImplementedException();
     }
@@ -47,11 +63,6 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         throw new NotImplementedException();
     }
 
-    public IQueryable<Models.Account> SearchAccounts()
-    {
-        return _context.Accounts.AsQueryable();
-    }
-    
     public Task Cancel()
     {
         if (_context.Database.CurrentTransaction is not null)

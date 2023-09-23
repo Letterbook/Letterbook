@@ -54,6 +54,19 @@ public class Profile : IObjectRef
     public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
     public ObjectCollection<Profile> FollowersCollection { get; set; }
 
+    public Profile ShallowClone() => (Profile)MemberwiseClone();
+
+    public Profile DeepClone()
+    {
+        var profile = ShallowClone();
+        profile.CustomFields = (CustomField[])CustomFields.Clone();
+        profile.Audiences = new List<Audience>(Audiences);
+        profile.RelatedAccounts = new List<LinkedProfile>(RelatedAccounts);
+        profile.FollowersCollection = new ObjectCollection<Profile>(FollowersCollection.Id);
+
+        return profile;
+    }
+
     // Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?
     // The only use case I'm imagining for a service is to represent the server itself
     public static Profile CreateIndividual(Uri baseUri, string handle)

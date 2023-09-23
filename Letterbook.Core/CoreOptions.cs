@@ -7,4 +7,5 @@ public class CoreOptions
     public string DomainName { get; set; } = "letterbook.example";
     public string Scheme { get; set; } = "https";
     public string Port { get; set; } = "443";
+    public int MaxCustomFields { get; set; } = 10;
 }

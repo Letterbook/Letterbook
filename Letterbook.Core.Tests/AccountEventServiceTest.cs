@@ -62,12 +62,13 @@ public class AccountEventServiceTest : WithMocks
     public void PublishesUpdatedEvent()
     {
         var account = _fakeAccount.Generate();
+        var updated = account.ShallowClone();
         _subject.Subscribe(c =>
         {
             var action = c.Type!.Split(".").Last();
             Assert.Equal("Updated", action);
         });
-        _service.Updated(account);
+        _service.Updated(account, updated);
     }
     
     [Fact]
