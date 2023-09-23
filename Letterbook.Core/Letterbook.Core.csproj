@@ -24,7 +24,6 @@
       <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
       <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.15.1" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-      <PackageReference Include="Stateless" Version="5.13.0" />
     </ItemGroup>
 
     <ItemGroup>
