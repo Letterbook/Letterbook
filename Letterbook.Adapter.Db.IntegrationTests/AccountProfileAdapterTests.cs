@@ -13,8 +13,6 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     private AccountProfileAdapter _adapter;
     private RelationalContext _context;
     private RelationalContext _actual;
-    private FakeProfile _fakeProfile;
-    private FakeAccount _fakeAccount;
     
     public AccountProfileAdapterTests(ITestOutputHelper output, PostgresFixture postgres)
     {
@@ -24,11 +22,15 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
         _context = _postgres.CreateContext();
         _actual = _postgres.CreateContext();
         _adapter = new AccountProfileAdapter(Mock.Of<ILogger<AccountProfileAdapter>>(), _context);
-        
-        _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
     }
     
     [Fact]
     public void Exists()
     {}
+
+    [Fact(DisplayName = "")]
+    public async Task AnyProfileTest()
+    {
+        return;
+    }
 }
