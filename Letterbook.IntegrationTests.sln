@@ -26,6 +26,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Api", "Letterboo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Api.IntegrationTests", "Letterbook.Api.IntegrationTests\Letterbook.Api.IntegrationTests.csproj", "{AE1F64BB-A42E-4B22-A47E-4EB06A4CA59A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Db", "Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj", "{886E00B3-F958-47BA-8B6C-28A2E29760D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Db.IntegrationTests", "Letterbook.Adapter.Db.IntegrationTests\Letterbook.Adapter.Db.IntegrationTests.csproj", "{195967F1-6DCB-493D-938D-9E925FE62C5A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,5 +63,13 @@ Global
 		{AE1F64BB-A42E-4B22-A47E-4EB06A4CA59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE1F64BB-A42E-4B22-A47E-4EB06A4CA59A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE1F64BB-A42E-4B22-A47E-4EB06A4CA59A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{886E00B3-F958-47BA-8B6C-28A2E29760D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{886E00B3-F958-47BA-8B6C-28A2E29760D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{886E00B3-F958-47BA-8B6C-28A2E29760D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{886E00B3-F958-47BA-8B6C-28A2E29760D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{195967F1-6DCB-493D-938D-9E925FE62C5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{195967F1-6DCB-493D-938D-9E925FE62C5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{195967F1-6DCB-493D-938D-9E925FE62C5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{195967F1-6DCB-493D-938D-9E925FE62C5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
