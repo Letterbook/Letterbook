@@ -21,7 +21,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
         Type = default;
         Handle = default!;
         DisplayName = default!;
-        FollowersCollection = default!;
+        Followers = default!;
         CustomFields = default!;
         Description = default!;
     }
@@ -47,7 +47,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
 
         builder.Path = "/actor/shared_inbox";
         SharedInbox = builder.Uri;
-        FollowersCollection = ObjectCollection<FollowerRelation>.Followers(Id);
+        Followers = ObjectCollection<FollowerRelation>.Followers(Id);
     }
 
     public Uri Id { get; set; }
@@ -68,21 +68,40 @@ public class Profile : IObjectRef, IEquatable<Profile>
     public ActivityActorType Type { get; set; }
     public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
     public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
-    public ObjectCollection<FollowerRelation> FollowersCollection { get; set; }
+    public ObjectCollection<FollowerRelation> Followers { get; set; }
     public ICollection<FollowerRelation> Following { get; set; } = new HashSet<FollowerRelation>();
 
     public Profile ShallowClone() => (Profile)MemberwiseClone();
 
+    public Profile ShallowCopy(Profile? copyFrom)
+    {
+        if (copyFrom is null) return this;
+        if (!Equals(copyFrom)) return this;
+        
+        Inbox = copyFrom.Inbox ?? Inbox;
+        Outbox = copyFrom.Outbox ?? Outbox;
+        SharedInbox = copyFrom.SharedInbox ?? SharedInbox;
+        Type = copyFrom.Type == ActivityActorType.Unknown ? Type : copyFrom.Type;
+        Handle = string.IsNullOrEmpty(copyFrom.Handle) ? Handle : copyFrom.Handle;
+        DisplayName = string.IsNullOrEmpty(copyFrom.DisplayName) ? DisplayName : copyFrom.DisplayName;
+        CustomFields = (copyFrom.CustomFields is not null && copyFrom.CustomFields.Length != 0)
+            ? copyFrom.CustomFields
+            : CustomFields;
+        Description = copyFrom.Description ?? Description;
+
+        return this;
+    }
+
     public FollowerRelation AddFollower(Profile follower, FollowState state)
     {
         var relation = new FollowerRelation(follower, this, state);
-        FollowersCollection.Add(relation);
+        Followers.Add(relation);
         return relation;
     }
     
     public int RemoveFollower(Profile follower)
     {
-        return FollowersCollection.RemoveWhere(relation => relation.Subject == follower);
+        return Followers.RemoveWhere(relation => relation.Follower == follower);
     }
 
     public FollowerRelation Follow(Profile following, FollowState state)

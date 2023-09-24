@@ -40,37 +40,49 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 
     public Task<bool> AnyProfile(IAccountProfileAdapter.ProfileComparer comparer)
     {
-        return _context.Profiles.AnyAsync(profile => comparer(profile));
+        return _context.Profiles.AnyAsync();
+    }
+
+    public Task<bool> AnyProfile(string handle)
+    {
+        return _context.Profiles.AnyAsync(profile => profile.Handle == handle);
+    }
+
+    public Task<bool> AnyProfile(Uri id)
+    {
+        return _context.Profiles.AnyAsync(profile => profile.Id == id);
     }
 
     public Task<Models.Profile?> LookupProfile(Guid localId)
     {
-        throw new NotImplementedException();
+        return _context.Profiles.FirstOrDefaultAsync(profile => profile.LocalId == localId);
     }
 
     public Task<Models.Profile?> LookupProfile(Uri id)
     {
-        throw new NotImplementedException();
+        return _context.Profiles.FirstOrDefaultAsync(profile => profile.Id == id);
     }
 
-    public Task<Models.Profile?> LookupProfileForFollowing(Uri id, Uri followingId)
+    public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)
     {
-        throw new NotImplementedException();
+        return _context.Profiles.Where(profile => profile.Id == id)
+            .Include(profile => profile.Following.Where(relation => relation.Follows.Id == relationId))
+                .ThenInclude(relation => relation.Follows)
+            .Include(profile => profile.Followers.Where(relation => relation.Follower.Id == relationId))
+                .ThenInclude(relation => relation.Follower)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync();
     }
 
-    public Task<Models.Profile?> LookupProfileForFollowing(Guid localId, Uri followingId)
+    public Task<Models.Profile?> LookupProfileWithRelation(Guid localId, Uri relationId)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<Models.Profile?> LookupProfileForFollowers(Uri localId, Uri followerId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<Models.Profile?> LookupProfileForFollowers(Guid localId, Uri followerId)
-    {
-        throw new NotImplementedException();
+        return _context.Profiles.Where(profile => profile.LocalId == localId)
+            .Include(profile => profile.Following.Where(relation => relation.Follows.Id == relationId))
+                .ThenInclude(relation => relation.Follows)
+            .Include(profile => profile.Followers.Where(relation => relation.Follower.Id == relationId))
+                .ThenInclude(relation => relation.Follower)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync();
     }
 
     public IAsyncEnumerable<Models.Profile> QueryProfiles(IAccountProfileAdapter.ProfileQuery query, int? limit)

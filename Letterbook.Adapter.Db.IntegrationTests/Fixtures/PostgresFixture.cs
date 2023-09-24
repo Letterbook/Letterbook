@@ -1,6 +1,7 @@
 ﻿using Letterbook.Core.Models;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.Core.Values;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Xunit.Abstractions;
@@ -31,13 +32,18 @@ public class PostgresFixture
             Profiles.AddRange(new FakeProfile("letterbook.example", Accounts[0]).Generate(3));
             Profiles.Add(new FakeProfile("letterbook.example", Accounts[1]).Generate());
             Profiles.AddRange(new FakeProfile().Generate(3));
+            
+            // Profiles[0]
+            Profiles[0].Follow(Profiles[4], FollowState.Accepted);
+            Profiles[0].Follow(Profiles[5], FollowState.Accepted);
+            Profiles[0].AddFollower(Profiles[4], FollowState.Accepted);
 
             using (RelationalContext context = CreateContext())
             {
                 context.Database.EnsureDeleted();
                 context.Database.Migrate();
                 context.AddRange(Accounts);
-                context.SaveChanges();
+                // context.SaveChanges();
                 context.AddRange(Profiles);
                 context.SaveChanges();
             }
