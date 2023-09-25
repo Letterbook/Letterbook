@@ -12,6 +12,8 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 /// </summary>
 [ApiController]
 [Route("[controller]")]
+[AcceptHeader("application/ld+json",
+    "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", "application/activity+json")]
 public class ActorController
 {
     private readonly SnakeCaseRouteTransformer _transformer = new();
