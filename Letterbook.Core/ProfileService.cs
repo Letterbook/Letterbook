@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-public class ProfileService : IProfileService
+public partial class ProfileService : IProfileService
 {
     private ILogger<ProfileService> _logger;
     private CoreOptions _options;
@@ -207,17 +207,17 @@ public class ProfileService : IProfileService
 
     // Stop here
 
-    public Task<FollowResult> Follow(Guid selfId, Uri profileId, Uri? audienceId)
+    public Task<FollowState> Follow(Guid selfId, Uri profileId, Uri? audienceId)
     {
         throw new NotImplementedException();
     }
 
-    public Task<FollowResult> Follow(Guid selfId, Guid localId, Uri? audienceId)
+    public Task<FollowState> Follow(Guid selfId, Guid localId, Uri? audienceId)
     {
         throw new NotImplementedException();
     }
 
-    public Task<FollowResult> ReceiveFollower(Uri selfId, Uri followerId)
+    public Task<FollowState> ReceiveFollower(Uri selfId, Uri followerId)
     {
         throw new NotImplementedException();
     }
