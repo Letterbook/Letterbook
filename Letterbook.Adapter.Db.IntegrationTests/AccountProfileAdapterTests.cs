@@ -1,4 +1,5 @@
-﻿using Letterbook.Adapter.Db.IntegrationTests.Fixtures;
+﻿using System.Security.Cryptography;
+using Letterbook.Adapter.Db.IntegrationTests.Fixtures;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Microsoft.Extensions.Logging;
@@ -133,5 +134,20 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
         Assert.Single(actual.Following.AsEnumerable());
+    }
+
+    [Trait("AccountProfileAdapter", "FindProfilesByHandle")]
+    [Fact(DisplayName = "Find profile by handle")]
+    public async Task FindProfileByHandleTest()
+    {
+        var actual = _adapter.FindProfilesByHandle(_profiles[0].Handle);
+        var list = new List<Profile>();
+        await foreach (var each in actual)
+        {
+            list.Add(each);
+        }
+
+        Assert.Contains(_profiles[0], list);
+        Assert.DoesNotContain(_profiles[1], list);
     }
 }

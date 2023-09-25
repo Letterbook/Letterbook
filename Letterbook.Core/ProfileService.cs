@@ -192,9 +192,7 @@ public class ProfileService : IProfileService
 
     public async Task<IEnumerable<Profile>> FindProfiles(string handle)
     {
-        var results = _profiles.QueryProfiles(source => source
-            .Where(p => p.Handle == handle)
-            .OrderBy(p => p.Handle));
+        var results = _profiles.FindProfilesByHandle(handle);
 
         var profiles = new List<Profile>();
         await foreach (var profile in results)
@@ -366,10 +364,12 @@ public class ProfileService : IProfileService
             if (profile != null)
             {
                 profile.ShallowCopy(await _client.As(onBehalfOf).Fetch<Profile>(profileId));
+                _profiles.Update(profile);
             }
             else
             {
                 profile = await _client.As(onBehalfOf).Fetch<Profile>(profileId);
+                _profiles.Add(profile);
             }
         }
         catch (AdapterException)
@@ -378,7 +378,6 @@ public class ProfileService : IProfileService
             await _profiles.Cancel();
             throw;
         }
-        _profiles.RecordProfile(profile);
         _logger.LogInformation("Fetched Profile {ProfileId} from origin", profileId);
         return profile;
         

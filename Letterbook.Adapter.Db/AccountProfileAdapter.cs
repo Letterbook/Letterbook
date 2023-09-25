@@ -1,6 +1,6 @@
-﻿using System.Linq.Expressions;
-using Letterbook.Core.Adapters;
+﻿using Letterbook.Core.Adapters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Adapter.Db;
@@ -85,19 +85,44 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
             .FirstOrDefaultAsync();
     }
 
-    public IAsyncEnumerable<Models.Profile> QueryProfiles(IAccountProfileAdapter.ProfileQuery query, int? limit)
+    public IAsyncEnumerable<Models.Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0)
     {
-        throw new NotImplementedException();
+        limit = limit >= 100 ? 100 : limit;
+        var query = _context.Profiles.OrderBy(profile => profile.Id)
+            .Skip(limit * page)
+            .Take(limit);
+        query = partial 
+            ? query.Where(profile => profile.Handle.StartsWith(handle)) 
+            : query.Where(profile => profile.Handle == handle);
+        return query.AsAsyncEnumerable();
     }
 
-    public bool RecordProfile(Models.Profile profile)
+    public void Add(Models.Profile profile)
     {
-        throw new NotImplementedException();
+        _context.Profiles.Add(profile);
+    }
+
+    public void AddRange(IEnumerable<Models.Profile> profile)
+    {
+        _context.Profiles.AddRange(profile);
+    }
+
+    public void Update(Models.Profile profile)
+    {
+        _context.Profiles.Update(profile);
+    }
+
+    public void UpdateRange(IEnumerable<Models.Profile> profile)
+    {
+        _context.Profiles.UpdateRange(profile);
     }
 
     public void Delete(object record)
     {
-        throw new NotImplementedException();
+        if (record is EntityEntry entry)
+        {
+            entry.State = EntityState.Deleted;
+        }
     }
 
     public Task Cancel()
