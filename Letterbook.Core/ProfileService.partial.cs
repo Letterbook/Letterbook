@@ -19,6 +19,11 @@ public partial class ProfileService
         throw new NotImplementedException();
     }
 
+    public Task<FollowState> ReceiveFollowRequest(Guid localId, Uri followerId)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response)
     {
         throw new NotImplementedException();
