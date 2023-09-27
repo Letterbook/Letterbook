@@ -35,7 +35,7 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 
     public IQueryable<Models.Account> SearchAccounts()
     {
-        throw new NotImplementedException();
+        return _context.Accounts.AsQueryable();
     }
 
     public Task<bool> AnyProfile(IAccountProfileAdapter.ProfileComparer comparer)
