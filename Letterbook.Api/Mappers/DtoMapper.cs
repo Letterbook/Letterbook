@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Letterbook.Core.Models;
 
-namespace Letterbook.Core.Mappers;
+namespace Letterbook.Api.Mappers;
 
 public static class DtoMapper
 {
@@ -14,33 +14,43 @@ public static class DtoMapper
 
     private static void ConfigureProfile(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<DTO.Actor, Models.Profile>()
-            .IncludeBase<DTO.IResolvable, Models.Profile>()
+        cfg.CreateMap<DTO.Actor, Core.Models.Profile>()
+            .IncludeBase<DTO.IResolvable, Core.Models.Profile>()
             .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
             .ForMember(dest => dest.FollowersCollection, opt => opt.MapFrom(src => src.Followers))
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Content))
             .ForMember(dest => dest.CustomFields, opt => opt.MapFrom(src => src.Attachment))
-            .ForMember(dest => dest.DisplayName, opt => opt.Ignore());
+            .ForMember(dest => dest.Inbox, opt => opt.MapFrom(src => src.Inbox.Id))
+            .ForMember(dest => dest.Outbox, opt => opt.MapFrom(src => src.Outbox.Id))
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name))
+            .AfterMap((_, profile) => profile.Updated = DateTime.UtcNow);
         
-        cfg.CreateMap<DTO.Object, Models.Profile>()
-            .IncludeBase<DTO.IResolvable, Models.Profile>();
+        cfg.CreateMap<DTO.Object, Core.Models.Profile>()
+            .IncludeBase<DTO.IResolvable, Core.Models.Profile>();
         
-        cfg.CreateMap<DTO.Link, Models.Profile>()
-            .IncludeBase<DTO.IResolvable, Models.Profile>();
+        cfg.CreateMap<DTO.Link, Core.Models.Profile>()
+            .IncludeBase<DTO.IResolvable, Core.Models.Profile>();
         
-        cfg.CreateMap<DTO.IResolvable, Models.Profile>()
+        cfg.CreateMap<DTO.IResolvable, Core.Models.Profile>()
             .IncludeBase<DTO.IResolvable, IObjectRef>()
-            .ForMember(dest => dest.LocalId, opt => opt.Ignore())
+            // Handle these on concrete types
             .ForMember(dest => dest.Type, opt => opt.Ignore())
-            .ForMember(dest => dest.Authority, opt => opt.Ignore())
-            .ForMember(dest => dest.OwnedBy, opt => opt.Ignore())
-            .ForMember(dest => dest.RelatedAccounts, opt => opt.Ignore())
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
             .ForMember(dest => dest.DisplayName, opt => opt.Ignore())
             .ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
+            .ForMember(dest => dest.Following, opt => opt.Ignore())
+            .ForMember(dest => dest.Inbox, opt => opt.Ignore())
+            .ForMember(dest => dest.Outbox, opt => opt.Ignore())
+            .ForMember(dest => dest.SharedInbox, opt => opt.Ignore())
             .ForMember(dest => dest.Description, opt => opt.Ignore())
             .ForMember(dest => dest.CustomFields, opt => opt.Ignore())
+            // Really ignore these, they don't exist in AP
+            .ForMember(dest => dest.Authority, opt => opt.Ignore())
+            .ForMember(dest => dest.LocalId, opt => opt.Ignore())
+            .ForMember(dest => dest.RelatedAccounts, opt => opt.Ignore())
+            .ForMember(dest => dest.OwnedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.Updated, opt => opt.Ignore())
             .ForMember(dest => dest.Audiences, opt => opt.Ignore());
 
         cfg.CreateMap<DTO.IResolvable, CustomField>()

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
@@ -13,17 +12,19 @@ namespace Letterbook.Core;
 public class ProfileService : IProfileService
 {
     private ILogger<ProfileService> _logger;
-    private CoreOptions _options;
+    private CoreOptions _coreConfig;
     private IAccountProfileAdapter _profiles;
     private IProfileEventService _profileEvents;
+    private readonly IActivityPubClient _client;
 
     public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options,
-        IAccountProfileAdapter profiles, IProfileEventService profileEvents)
+        IAccountProfileAdapter profiles, IProfileEventService profileEvents, IActivityPubClient client)
     {
         _logger = logger;
-        _options = options.Value;
+        _coreConfig = options.Value;
         _profiles = profiles;
         _profileEvents = profileEvents;
+        _client = client;
     }
 
     public Task<Profile> CreateProfile(Profile profile)
@@ -37,8 +38,7 @@ public class ProfileService : IProfileService
         if (account == null)
         {
             _logger.LogError("Failed to create a new profile because no account exists with ID {AccountId}", ownerId);
-            throw CoreException.Invalid("Cannot attach new Profile to Account because Account could not be found",
-                "AccountId", ownerId);
+            throw CoreException.MissingData("Cannot attach new Profile to Account because Account could not be found", typeof(Account), ownerId);
         }
 
         if (await _profiles.AnyProfile(p => p.Handle == handle))
@@ -48,7 +48,7 @@ public class ProfileService : IProfileService
             throw CoreException.Duplicate("Profile already exists", handle);
         }
 
-        var profile = Profile.CreateIndividual(_options.BaseUri(), handle);
+        var profile = Profile.CreateIndividual(_coreConfig.BaseUri(), handle);
         profile.OwnedBy = account;
         account.LinkedProfiles.Add(new LinkedProfile(account, profile, ProfilePermission.All));
         _profiles.RecordAccount(account);
@@ -67,7 +67,7 @@ public class ProfileService : IProfileService
     /// <exception cref="CoreException"></exception>
     public async Task<UpdateResponse<Profile>> UpdateDisplayName(Guid localId, string displayName)
     {
-        // TODO: vulgarity filters
+        // TODO(moderation): vulgarity filters
         var profile = await RequireProfile(localId);
         if (profile.DisplayName == displayName) return new UpdateResponse<Profile>
         {
@@ -111,8 +111,8 @@ public class ProfileService : IProfileService
         string value)
     {
         var profile = await RequireProfile(localId);
-        if (profile.CustomFields.Length >= _options.MaxCustomFields)
-            throw CoreException.Invalid("Cannot add any more custom fields");
+        if (profile.CustomFields.Length >= _coreConfig.MaxCustomFields)
+            throw CoreException.InvalidRequest("Cannot add any more custom fields");
         var original = profile.ShallowClone();
 
         var customFields = profile.CustomFields.ToList();
@@ -133,7 +133,7 @@ public class ProfileService : IProfileService
     {
         var profile = await RequireProfile(localId);
         if (index >= profile.CustomFields.Length)
-            throw CoreException.Invalid("Cannot remove custom field because it doesn't exist");
+            throw CoreException.InvalidRequest("Cannot remove custom field because it doesn't exist");
         var original = profile.ShallowClone();
 
         var customFields = profile.CustomFields.ToList();
@@ -155,7 +155,7 @@ public class ProfileService : IProfileService
     {
         var profile = await RequireProfile(localId);
         if (index >= profile.CustomFields.Length)
-            throw CoreException.Invalid("Cannot update custom field because it doesn't exist");
+            throw CoreException.InvalidRequest("Cannot update custom field because it doesn't exist");
         var field = profile.CustomFields[index];
         if (field.Label == key && field.Value == value) return new UpdateResponse<Profile>
         {
@@ -205,41 +205,123 @@ public class ProfileService : IProfileService
         return profiles;
     }
 
-    // Stop here
-
-    public Task<FollowResult> Follow(Guid selfId, Uri profileId, Uri? audienceId)
+    private async Task<FollowState> Follow(Profile self, Profile target, bool subscribeOnly)
     {
-        throw new NotImplementedException();
+        if (target.Authority == _coreConfig.BaseUri().Authority)
+        {
+            // TODO(moderation): Check for blocks
+            // TODO(moderation): Check for requiresApproval
+            var relation = self.Follow(target, FollowState.Accepted);
+            // target.FollowersCollection.Add(relation);
+            self.Audiences.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
+            self.Audiences.Add(Audience.Boosts(target));
+            await _profiles.Commit();
+            return relation.State;
+        }
+        
+        // TODO(moderation): Check for blocks
+        // TODO(moderation): Check for requiresApproval
+        var follow = new FollowerRelation(self, target, FollowState.Pending);
+        var result = await _client.As(self).SendFollow(target.Inbox, follow);
+        follow.State = result;
+        switch (follow.State)
+        {
+            case FollowState.Accepted:
+            case FollowState.Pending:
+                self.Follow(target, result);
+                // follow.State = result;
+                // self.Following.Add(follow);
+                // target.FollowersCollection.Add(follow);
+                self.Audiences.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
+                self.Audiences.Add(Audience.Boosts(target));
+                await _profiles.Commit();
+                return follow.State;
+            case FollowState.None:
+            case FollowState.Rejected:
+            default:
+                return follow.State;
+        }
     }
 
-    public Task<FollowResult> Follow(Guid selfId, Guid localId, Uri? audienceId)
+    public async Task<FollowState> Follow(Guid selfId, Uri targetId)
     {
-        throw new NotImplementedException();
+        var self = await RequireProfile(selfId);
+        var target = await ResolveProfile(targetId, self);
+        return await Follow(self, target, false);
     }
 
-    public Task<FollowResult> ReceiveFollower(Uri selfId, Uri followerId)
+    public async Task<FollowState> Follow(Guid selfId, Guid targetId)
     {
-        throw new NotImplementedException();
+        var self = await RequireProfile(selfId);
+        var target = await RequireProfile(targetId);
+        return await Follow(self, target, false);
     }
 
-    public Task RemoveFollower(Guid selfId, Uri followerId)
+    public async Task<FollowState> ReceiveFollowRequest(Uri targetId, Uri followerId)
     {
-        throw new NotImplementedException();
+        if(targetId.Authority != _coreConfig.BaseUri().Authority)
+        {
+            _logger.LogWarning("Profile {FollowerId} tried to follow {TargetId}, but this is not the origin server", followerId, targetId);
+            throw CoreException.WrongAuthority($"Cannot follow Profile {targetId} because it has a different origin server", targetId);
+        }
+        
+        var target = await ResolveProfile(targetId);
+        // var follower = await ResolveProfile(followerId);
+        
+        // TODO(moderation): check blocks and requiresApproval
+        var relation = target.AddFollower(Profile.CreateEmpty(followerId), FollowState.Accepted);
+        await _profiles.Commit();
+        
+        return relation.State;
     }
 
-    public Task RemoveFollower(Guid selfId, Guid followerId)
+    public async Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response)
     {
-        throw new NotImplementedException();
+        if(selfId.Authority != _coreConfig.BaseUri().Authority)
+        {
+            _logger.LogWarning("Received a response to a follow request from {TargetId} concerning {SelfId}, but this is not the origin server", targetId, selfId);
+            throw CoreException.WrongAuthority($"Cannot update Profile {selfId} because it has a different origin server", selfId);
+        }
+        var profile = await _profiles.LookupProfileForFollowing(selfId, targetId) ?? throw CoreException.MissingData($"Cannot update Profile {selfId} because it could not be found", typeof(Profile), selfId);
+        var relation = profile.Following.FirstOrDefault(r => r.Follows.Id == targetId) ?? throw CoreException.MissingData($"Cannot update following relationship for {selfId} concerning {targetId} because it could not be found", typeof(FollowerRelation), targetId);
+        switch (response)
+        {
+            case FollowState.Accepted:
+            case FollowState.Pending:
+                relation.State = response;
+                await _profiles.Commit();
+                return relation.State;
+            case FollowState.None:
+            case FollowState.Rejected:
+            default:
+                profile.Unfollow(Profile.CreateEmpty(targetId));
+                profile.LeaveAudience(Profile.CreateEmpty(targetId));
+                // _profiles.Delete(relation);
+                await _profiles.Commit();
+                return FollowState.None;
+        }
     }
-
-    public Task Unfollow(Guid selfId, Uri followerId)
+    
+    public async Task RemoveFollower(Guid selfId, Uri followerId)
     {
-        throw new NotImplementedException();
+        var self = await _profiles.LookupProfileForFollowers(selfId, followerId)
+                   ?? throw CoreException.MissingData(
+                       $"Failed to update local profile {selfId} because it could not be found", typeof(Profile),
+                       selfId);
+
+        self.RemoveFollower(Profile.CreateEmpty(followerId));
+        await _profiles.Commit();
     }
-
-    public Task Unfollow(Guid selfId, Guid followerId)
+    
+    public async Task Unfollow(Guid selfId, Uri followerId)
     {
-        throw new NotImplementedException();
+        var self = await _profiles.LookupProfileForFollowing(selfId, followerId)
+                   ?? throw CoreException.MissingData(
+                       $"Failed to update local profile {selfId} because it could not be found", typeof(Profile),
+                       selfId);
+
+        self.Unfollow(Profile.CreateEmpty(followerId));
+        await _profiles.Commit();
     }
 
     public Task ReportProfile(Guid selfId, Uri profileId)
@@ -252,7 +334,6 @@ public class ProfileService : IProfileService
         throw new NotImplementedException();
     }
 
-    [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
     private async Task<Profile> RequireProfile(Guid localId,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
@@ -260,8 +341,37 @@ public class ProfileService : IProfileService
     {
         var profile = await _profiles.LookupProfile(localId);
         if (profile != null) return profile;
+
         _logger.LogError("Cannot update Profile {ProfileId} because it could not be found", localId);
-        throw CoreException.Invalid("Failed to update Profile because it could not be found", "ProfileId", localId,
-            name, path, line);
+        await _profiles.Cancel();
+        // ReSharper disable ExplicitCallerInfoArgument Pass original call site details for better error reporting
+        throw CoreException.MissingData("Failed to update Profile because it could not be found", typeof(Profile), localId,
+            null, name, path, line);
+        // ReSharper restore ExplicitCallerInfoArgument
+    }
+    
+    private async Task<Profile> ResolveProfile(Uri profileId,
+        Profile? onBehalfOf = null,
+        [CallerMemberName] string name = "",
+        [CallerFilePath] string path = "",
+        [CallerLineNumber] int line = -1)
+    {
+        var profile = await _profiles.LookupProfile(profileId);
+        if (profile != null && profile.Updated.Add(TimeSpan.FromHours(12)) >= DateTime.UtcNow) return profile;
+
+        try
+        {
+            profile = await _client.As(onBehalfOf).Fetch<Profile>(profileId);
+        }
+        catch (AdapterException)
+        {
+            _logger.LogError("Cannot resolve Profile {ProfileId}", profileId);
+            await _profiles.Cancel();
+            throw;
+        }
+        _profiles.RecordProfile(profile);
+        _logger.LogInformation("Fetched Profile {ProfileId} from origin", profileId);
+        return profile;
+        
     }
 }

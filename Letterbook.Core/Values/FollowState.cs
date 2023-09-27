@@ -1,7 +1,8 @@
 ﻿namespace Letterbook.Core.Values;
 
-public enum FollowResult : int
+public enum FollowState : int
 {
+    None,
     Accepted,
     Pending,
     Rejected

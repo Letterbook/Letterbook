@@ -53,12 +53,37 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         throw new NotImplementedException();
     }
 
+    public Task<Models.Profile?> LookupProfileForFollowing(Uri id, Uri followingId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Models.Profile?> LookupProfileForFollowing(Guid localId, Uri followingId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Models.Profile?> LookupProfileForFollowers(Uri localId, Uri followerId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Models.Profile?> LookupProfileForFollowers(Guid localId, Uri followerId)
+    {
+        throw new NotImplementedException();
+    }
+
     public IAsyncEnumerable<Models.Profile> QueryProfiles(IAccountProfileAdapter.ProfileQuery query, int? limit)
     {
         throw new NotImplementedException();
     }
 
     public bool RecordProfile(Models.Profile profile)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Delete(object record)
     {
         throw new NotImplementedException();
     }

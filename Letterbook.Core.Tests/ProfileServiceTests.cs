@@ -4,6 +4,7 @@ using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Extensions;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.Core.Values;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -24,10 +25,10 @@ public class ProfileServiceTests : WithMocks
         _output.WriteLine($"Bogus seed: {Init.WithSeed()}");
         _fakeAccount = new FakeAccount();
         _fakeProfile = new FakeProfile("letterbook.example");
-        var genericFaker = new Faker();
         CoreOptionsMock.Value.MaxCustomFields = 2;
-        
-        _service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object, Mock.Of<IProfileEventService>());
+
+        _service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object,
+            Mock.Of<IProfileEventService>(), ActivityPubClientMock.Object);
         _profile = _fakeProfile.Generate();
     }
 
@@ -220,7 +221,6 @@ public class ProfileServiceTests : WithMocks
             .ReturnsAsync(_profile);
 
         var actual = await _service.UpdateCustomField((Guid)_profile.LocalId!, 0, "test item", "test value");
-        // var (_, actual) = await _service.UpdateCustomField((Guid)_profile.LocalId!, 0, "test item", "test value");
         
         Assert.NotNull(actual.Updated);
         Assert.Equal("test item", actual.Updated.CustomFields[0].Label);
@@ -238,5 +238,155 @@ public class ProfileServiceTests : WithMocks
         
         Assert.NotNull(actual.Updated);
         Assert.Empty(actual.Updated.CustomFields);
+    }
+
+    [Fact(DisplayName = "Should add local follows")]
+    public async Task FollowLocalProfile()
+    {
+        var target = _fakeProfile.Generate();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)_profile.LocalId!)))
+            .ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)target.LocalId!)))
+            .ReturnsAsync(target);
+
+        var actual = await _service.Follow((Guid)_profile.LocalId!, (Guid)target.LocalId!);
+        
+        Assert.Equal(FollowState.Accepted, actual);
+        Assert.Contains(target, _profile.Following.Select(r => r.Follows));
+    }
+    
+    [Fact(DisplayName = "Should add local follows by URL")]
+    public async Task FollowLocalProfileUrl()
+    {
+        var target = _fakeProfile.Generate();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)_profile.LocalId!)))
+            .ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
+            .ReturnsAsync(target);
+
+        var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
+        
+        Assert.Equal(FollowState.Accepted, actual);
+        Assert.Contains(target, _profile.Following.Select(r => r.Follows));
+    }
+
+    [Fact(DisplayName = "Should add remote follows accepted")]
+    public async Task FollowRemoteAccept()
+    {
+        var target = new FakeProfile().Generate();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)_profile.LocalId!)))
+            .ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
+            .ReturnsAsync(default(Profile));
+        ActivityPubClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
+        ActivityPubClientMock.Setup(m => m.SendFollow(target.Inbox, It.IsAny<FollowerRelation>()))
+            .ReturnsAsync(FollowState.Accepted);
+
+        var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
+        
+        Assert.Equal(FollowState.Accepted, actual);
+        Assert.Contains(target, _profile.Following.Select(r => r.Follows));
+    }
+    
+    [Fact(DisplayName = "Should add remote follows pending")]
+    public async Task FollowRemotePending()
+    {
+        var target = new FakeProfile().Generate();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)_profile.LocalId!)))
+            .ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
+            .ReturnsAsync(default(Profile));
+        ActivityPubClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
+        ActivityPubClientMock.Setup(m => m.SendFollow(target.Inbox, It.IsAny<FollowerRelation>()))
+            .ReturnsAsync(FollowState.Pending);
+
+        var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
+        
+        Assert.Equal(FollowState.Pending, actual);
+        Assert.Contains(target, _profile.Following.Select(r => r.Follows));
+    }
+    
+    [Fact(DisplayName = "Should not add rejected remote follows")]
+    public async Task FollowRemoteRejected()
+    {
+        var target = new FakeProfile().Generate();
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)_profile.LocalId!)))
+            .ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
+            .ReturnsAsync(default(Profile));
+        ActivityPubClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
+        ActivityPubClientMock.Setup(m => m.SendFollow(target.Inbox, It.IsAny<FollowerRelation>()))
+            .ReturnsAsync(FollowState.Rejected);
+
+        var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
+        
+        Assert.Equal(FollowState.Rejected, actual);
+        Assert.Empty(_profile.Following);
+        Assert.Empty(target.FollowersCollection);
+    }
+
+    [Fact(DisplayName = "Should add a new follower")]
+    public async Task ReceiveFollowRequest()
+    {
+        var follower = new FakeProfile().Generate();
+        AccountProfileMock.Setup(m => m.LookupProfile(_profile.Id)).ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(follower.Id)).ReturnsAsync(follower);
+
+        var actual = await _service.ReceiveFollowRequest(_profile.Id, follower.Id);
+        
+        Assert.Equal(FollowState.Accepted, actual);
+        Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Subject));
+    }
+
+    [Fact(DisplayName = "Should update a pending follow")]
+    public async Task FollowReply()
+    {
+        var target = new FakeProfile().Generate();
+        _profile.Follow(target, FollowState.Pending);
+        AccountProfileMock.Setup(m => m.LookupProfileForFollowing(_profile.Id, target.Id)).ReturnsAsync(_profile);
+
+        var actual = await _service.ReceiveFollowReply(_profile.Id, target.Id, FollowState.Accepted);
+        
+        Assert.Equal(FollowState.Accepted, actual);
+        Assert.Equal(FollowState.Accepted, _profile.Following.FirstOrDefault(r => r.Follows.Id == target.Id)?.State);
+    }
+    
+    [Fact(DisplayName = "Should remove a pending follow on reject")]
+    public async Task FollowReplyReject()
+    {
+        var target = new FakeProfile().Generate();
+        _profile.Follow(target, FollowState.Pending);
+        AccountProfileMock.Setup(m => m.LookupProfileForFollowing(_profile.Id, target.Id)).ReturnsAsync(_profile);
+
+        var actual = await _service.ReceiveFollowReply(_profile.Id, target.Id, FollowState.Rejected);
+        
+        Assert.Equal(FollowState.None, actual);
+        Assert.DoesNotContain(target, _profile.Following.Select(r => r.Follows));
+
+        // Assert.Equal(FollowState.Accepted, _profile.Following.FirstOrDefault(r => r.Follows.Id == target.Id)?.State);
+    }
+
+    [Fact(DisplayName = "Should remove a follower")]
+    public async Task RemoveFollower()
+    {
+        var follower = new FakeProfile().Generate();
+        _profile.AddFollower(follower, FollowState.Accepted);
+        AccountProfileMock.Setup(m => m.LookupProfileForFollowers((Guid)_profile.LocalId!, follower.Id)).ReturnsAsync(_profile);
+
+        await _service.RemoveFollower(_profile.LocalId!.Value, follower.Id);
+        
+        Assert.DoesNotContain(follower, _profile.FollowersCollection.Select(r => r.Subject));
+    }
+
+    [Fact(DisplayName = "Should unfollow")]
+    public async Task Unfollow()
+    {
+        var follower = new FakeProfile().Generate();
+        _profile.Follow(follower, FollowState.Accepted);
+        AccountProfileMock.Setup(m => m.LookupProfileForFollowing((Guid)_profile.LocalId!, follower.Id)).ReturnsAsync(_profile);
+
+        await _service.Unfollow(_profile.LocalId!.Value, follower.Id);
+        
+        Assert.DoesNotContain(follower, _profile.Following.Select(r => r.Follows));
     }
 }

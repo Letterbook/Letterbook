@@ -60,7 +60,7 @@ public class WebFingerTests : IDisposable
     [Fact(Skip = "not implemented")]
     public async Task ItReturnsAJsonResourceDescriptor()
     {
-        var profile = Profile.CreatePerson(new Uri("https://uss-voyager.example"), "coffee_nebula");
+        var profile = Profile.CreateIndividual(new Uri("https://uss-voyager.example"), "coffee_nebula");
 
         // _web.FakeAccountService.AlwaysReturn(profile);
 

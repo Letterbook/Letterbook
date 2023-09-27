@@ -17,13 +17,12 @@ public sealed class FakeProfile : Faker<Profile>
 
     public FakeProfile(Uri uri)
     {
-        CustomInstantiator(f => new Profile(uri));
+        CustomInstantiator(f => Profile.CreateEmpty(new Uri(uri, $"/{f.Internet.UserName()}")));
 
-        RuleFor(p => p.FollowersCollection, (f, p) => ObjectCollection<Profile>.Followers(p.Id));
+        RuleFor(p => p.FollowersCollection, (f, p) => ObjectCollection<FollowerRelation>.Followers(p.Id));
         RuleFor(p => p.DisplayName, (f) => f.Internet.UserName());
         RuleFor(p => p.Description, (f) => f.Lorem.Paragraph());
         RuleFor(p => p.CustomFields,
             (f) => new CustomField[] { new() { Label = "UUID", Value = $"{f.Random.Guid()}" } });
-        RuleFor(p => p.FollowersCollection, (f, p) => ObjectCollection<Profile>.Followers(p.Id));
     }
 }
