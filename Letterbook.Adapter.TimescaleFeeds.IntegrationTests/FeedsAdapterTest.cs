@@ -43,7 +43,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleFixture>
     {
         using (_adapter)
         {
-            await _adapter.AddToTimeline(_note, Audience.FromFollowers(_note.Creators.First()));
+            await _adapter.AddToTimeline(_note, Audience.Followers(_note.Creators.First()));
             await _adapter.Commit();
         }
 
@@ -59,7 +59,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleFixture>
             .Select(i => _fake.Internet.UrlWithPath())
             .ToArray();
         _note.Visibility.Clear();
-        _note.Visibility.UnionWith(audiences.Select(u => Audience.FromUri(new Uri(u))));
+        _note.Visibility.UnionWith(audiences.Select(u => Audience.FromUri(new Uri(u), Profile.CreateEmpty(new Uri(u)))));
 
         using (_adapter)
         {
@@ -79,7 +79,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleFixture>
             .Select(i => _fake.Internet.UrlWithPath())
             .ToArray();
         _note.Visibility.Clear();
-        _note.Visibility.UnionWith(audiences.Select(u => Audience.FromUri(new Uri(u))));
+        _note.Visibility.UnionWith(audiences.Select(u => Audience.FromUri(new Uri(u), Profile.CreateEmpty(new Uri(u)))));
 
         var arrange = new FeedsAdapter(_actual);
         await arrange.AddToTimeline(_note, _note.Visibility);
@@ -103,7 +103,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleFixture>
             .Select(i => _fake.Internet.UrlWithPath())
             .ToArray();
         _note.Visibility.Clear();
-        _note.Visibility.UnionWith(audiences.Select(u => Audience.FromUri(new Uri(u))));
+        _note.Visibility.UnionWith(audiences.Select(u => Audience.FromUri(new Uri(u), Profile.CreateEmpty(new Uri(u)))));
 
         var arrange = new FeedsAdapter(_actual);
         await arrange.AddToTimeline(_note, _note.Visibility);
@@ -124,7 +124,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleFixture>
     public async void QueryTimelines()
     {
         var booster = new FakeProfile("https://letterbook.example");
-        var boostAudience = Audience.FromBoost(booster);
+        var boostAudience = Audience.Boosts(booster);
         var notes = new FakeNote().Generate(3);
         var arrange = new FeedsAdapter(_actual);
         foreach (var n in notes)

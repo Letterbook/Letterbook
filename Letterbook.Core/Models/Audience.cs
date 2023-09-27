@@ -12,13 +12,15 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public class Audience : IEquatable<Audience>, IObjectRef
 {
-    private static Audience _public = FromUri(new CompactIri("as", "public"));
+    private static Audience _public = FromUri(new CompactIri("as", "public"), Profile.CreateEmpty(new CompactIri("as", "public")));
     private Audience()
     {
         Id = default!;
+        Source = default!;
     }
     
     public Uri Id { get; set; }
+    public Profile Source { get; set; }
     // LocalId isn't a meaningful concept for Audience, but it's required by IObjectRef
     public Guid? LocalId { get; set; }
     public string Authority => Id.Authority;
@@ -30,15 +32,23 @@ public class Audience : IEquatable<Audience>, IObjectRef
     /// public objects. So Letterbook infers the followers audience in this case.
     /// </summary>
     public static Audience Public => _public;
-    public static Audience FromUri(Uri uri) => new () { Id = uri };
-    public static Audience FromFollowers(Profile creator) => FromUri(creator.FollowersCollection.Id);
-    public static Audience FromBoost(Profile creator)
+    public static Audience FromUri(Uri id, Profile source) => new () { Id = id, Source = source};
+    public static Audience Followers(Profile creator) => FromUri(creator.Followers.Id, creator);
+
+    public static Audience Subscribers(Profile creator)
     {
-        var builder = new UriBuilder(creator.FollowersCollection.Id);
-        builder.Fragment += "boosts";
-        return FromUri(builder.Uri);
+        var builder = new UriBuilder(creator.Followers.Id);
+        builder.Fragment += "subscribe";
+        return FromUri(builder.Uri, creator);
     }
-    public static Audience FromMention(Profile subject) => FromUri(subject.Id);
+    
+    public static Audience Boosts(Profile creator)
+    {
+        var builder = new UriBuilder(creator.Followers.Id);
+        builder.Fragment += "boosts";
+        return FromUri(builder.Uri, creator);
+    }
+    public static Audience FromMention(Profile subject) => FromUri(subject.Id, subject);
 
     public bool Equals(Audience? other)
     {

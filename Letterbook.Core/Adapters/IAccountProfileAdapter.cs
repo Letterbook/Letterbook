@@ -15,12 +15,21 @@ public interface IAccountProfileAdapter : IDisposable
     public Task<Account?> LookupAccount(Guid id);
     public IQueryable<Account> SearchAccounts();
 
-    public Task<bool> AnyProfile(ProfileComparer comparer);
+    public Task<bool> AnyProfile(string handle);
     public Task<Profile?> LookupProfile(Guid localId);
     public Task<Profile?> LookupProfile(Uri id);
-    public IAsyncEnumerable<Profile> QueryProfiles(ProfileQuery query, int? limit = null);
+    
+    // Lookup Profile including relations to another profile
+    public Task<Profile?> LookupProfileWithRelation(Uri id, Uri relationId);
+    public Task<Profile?> LookupProfileWithRelation(Guid localId, Uri relationId);
+    
+    public IAsyncEnumerable<Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0);
 
-    public bool RecordProfile(Profile profile);
+    public void Add(Profile profile);
+    public void AddRange(IEnumerable<Profile> profile);
+    public void Update(Profile profile);
+    public void UpdateRange(IEnumerable<Profile> profile);
+    public void Delete(object record);
 
     public Task Cancel();
     public Task Commit();

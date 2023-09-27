@@ -29,8 +29,8 @@ public class TimelineServiceTest : WithMocks
 
         _outputHelper.WriteLine($"Bogus Seed: {Init.WithSeed()}");
         _opts = CoreOptionsMock.Value;
-        _note = new FakeNote();
         _profile = new FakeProfile(_opts.DomainName);
+        _note = new FakeNote(_profile);
         TestNote = _note.Generate();
     }
 
@@ -58,7 +58,7 @@ public class TimelineServiceTest : WithMocks
     [Fact(DisplayName = "HandleCreate should add follower posts to the creator's follower audience")]
     public void AddToFollowersOnCreate()
     {
-        var expected = Audience.FromFollowers(TestNote.Creators.First());
+        var expected = Audience.Followers(TestNote.Creators.First());
         TestNote.Visibility.Add(expected);
 
         _timeline.HandleCreate(TestNote);
@@ -73,7 +73,7 @@ public class TimelineServiceTest : WithMocks
     [Fact(DisplayName = "HandleCreate should add public posts to the creator's follower audience")]
     public void AddToFollowersImplicitlyOnCreate()
     {
-        var expected = Audience.FromFollowers(TestNote.Creators.First());
+        var expected = Audience.Followers(TestNote.Creators.First());
         TestNote.Visibility.Add(Audience.Public);
 
         _timeline.HandleCreate(TestNote);
@@ -140,7 +140,7 @@ public class TimelineServiceTest : WithMocks
     public void NoAddPrivateOnCreate()
     {
         TestNote.Visibility.Remove(Audience.Public);
-        TestNote.Visibility.Remove(Audience.FromFollowers(TestNote.Creators.First()));
+        TestNote.Visibility.Remove(Audience.Followers(TestNote.Creators.First()));
         var mentioned = Mention.To(_profile.Generate());
         TestNote.Mentions.Add(mentioned);
 
@@ -148,7 +148,7 @@ public class TimelineServiceTest : WithMocks
 
         _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), Audience.Public, It.IsAny<Profile>()), Times.Never);
         _feeds.Verify(
-            m => m.AddToTimeline(It.IsAny<Note>(), Audience.FromFollowers(TestNote.Creators.First()),
+            m => m.AddToTimeline(It.IsAny<Note>(), Audience.Followers(TestNote.Creators.First()),
                 It.IsAny<Profile>()),
             Times.Never);
         _feeds.Verify(
@@ -158,7 +158,7 @@ public class TimelineServiceTest : WithMocks
         _feeds.Verify(
             m => m.AddToTimeline(It.IsAny<Note>(),
                 It.Is<ICollection<Audience>>(audience =>
-                    audience.Contains(Audience.FromFollowers(TestNote.Creators.First()))), It.IsAny<Profile>()),
+                    audience.Contains(Audience.Followers(TestNote.Creators.First()))), It.IsAny<Profile>()),
             Times.Never);
     }
 
@@ -172,14 +172,14 @@ public class TimelineServiceTest : WithMocks
 
         _timeline.HandleBoost(TestNote);
 
-        _feeds.Verify(m => m.AddToTimeline(TestNote, Audience.FromBoost(booster), booster), Times.Once);
+        _feeds.Verify(m => m.AddToTimeline(TestNote, Audience.Boosts(booster), booster), Times.Once);
     }
 
     [Trait("TimelineService", "HandleBoost")]
     [Fact(DisplayName = "HandleBoost should not add follower posts to any feed")]
     public void NoAddFollowersToTimelineOnBoost()
     {
-        TestNote.Visibility.Add(Audience.FromFollowers(TestNote.Creators.First()));
+        TestNote.Visibility.Add(Audience.Followers(TestNote.Creators.First()));
         var booster = _profile.Generate();
         TestNote.BoostedBy.Add(booster);
 
@@ -224,7 +224,7 @@ public class TimelineServiceTest : WithMocks
     [Fact(DisplayName = "HandleUpdate should add to followers timeline")]
     public void AddToFollowersOnUpdate()
     {
-        var expected = Audience.FromFollowers(TestNote.Creators.First());
+        var expected = Audience.Followers(TestNote.Creators.First());
         TestNote.Visibility.Add(expected);
 
         _timeline.HandleUpdate(TestNote);
@@ -240,7 +240,7 @@ public class TimelineServiceTest : WithMocks
     public void AddToAllFollowersOnUpdate()
     {
         TestNote.Creators.Add(_profile.Generate());
-        var audience = TestNote.Creators.Select(Audience.FromFollowers).ToArray();
+        var audience = TestNote.Creators.Select(Audience.Followers).ToArray();
         TestNote.Visibility.Add(Audience.Public);
 
         _timeline.HandleUpdate(TestNote);
@@ -325,7 +325,7 @@ public class TimelineServiceTest : WithMocks
     public void NoAddPrivateToFollowersOnUpdate()
     {
         TestNote.Creators.Add(_profile.Generate());
-        var audience = TestNote.Creators.Select(Audience.FromFollowers).ToArray();
+        var audience = TestNote.Creators.Select(Audience.Followers).ToArray();
         TestNote.Visibility.Remove(Audience.Public);
 
         _timeline.HandleUpdate(TestNote);

@@ -11,14 +11,14 @@ public class Mention : IEquatable<Mention>
     private static Mention _publicSpecialMention = new()
     {
         Id = Guid.Empty,
-        Subject = new Profile(new CompactIri("as", "public")),
+        Subject = Profile.CreateEmpty(new CompactIri("as", "public")),
         Visibility = MentionVisibility.To
     };
 
     private static Mention _unlistedSpecialMention = new()
     {
         Id = Guid.Empty,
-        Subject = new Profile(new CompactIri("as", "public")),
+        Subject = Profile.CreateEmpty(new CompactIri("as", "public")),
         Visibility = MentionVisibility.Cc
     };
 
@@ -45,18 +45,6 @@ public class Mention : IEquatable<Mention>
         Subject = subject;
         Visibility = visibility;
     }
-
-    /// <summary>
-    /// This should be used for comparisons only, in visibility calculations. It will not make any sense to persist it
-    /// </summary>
-    /// <param name="subject"></param>
-    /// <returns></returns>
-    public static Mention Followers(Profile subject) => new()
-    {
-        Id = Guid.NewGuid(),
-        Subject = new Profile(subject.FollowersCollection.Id),
-        Visibility = MentionVisibility.To
-    };
 
     public bool Equals(Mention? other)
     {

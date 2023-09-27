@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Letterbook.Core.Mappers;
+using Letterbook.Api.Mappers;
 using Letterbook.Core.Models;
 
 namespace Letterbook.Api.Tests;

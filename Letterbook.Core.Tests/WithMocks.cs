@@ -1,4 +1,5 @@
 ﻿using Letterbook.Core.Adapters;
+using Letterbook.Core.Models;
 using Microsoft.Extensions.Options;
 using Moq;
 
@@ -11,6 +12,7 @@ public abstract class WithMocks
     protected Mock<IShareAdapter> ShareAdapter;
     protected Mock<IMessageBusAdapter> MessageBusAdapterMock;
     protected Mock<IAccountEventService> AccountEventServiceMock;
+    protected Mock<IActivityPubClient> ActivityPubClientMock;
     protected IOptions<CoreOptions> CoreOptionsMock;
 
     protected WithMocks()
@@ -20,6 +22,8 @@ public abstract class WithMocks
         ShareAdapter = new Mock<IShareAdapter>();
         MessageBusAdapterMock = new Mock<IMessageBusAdapter>();
         AccountEventServiceMock = new Mock<IAccountEventService>();
+        ActivityPubClientMock = new Mock<IActivityPubClient>();
+        ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubClientMock.Object);
         var mockOptions = new CoreOptions
         {
             DomainName = "letterbook.example",
