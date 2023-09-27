@@ -44,8 +44,7 @@ public class ProfileServiceTests : WithMocks
         var accountId = Guid.NewGuid();
         var expected = "testAccount";
         AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
-        AccountProfileMock.Setup(m => m.QueryProfiles(It.IsAny<IAccountProfileAdapter.ProfileQuery>(), It.IsAny<int?>()))
-            .Returns(() => new List<Profile>().AsAsyncEnumerable());
+        AccountProfileMock.Setup(m => m.AnyProfile(expected)).ReturnsAsync(false);
         
         var actual = await _service.CreateProfile(accountId, expected);
         
@@ -59,8 +58,7 @@ public class ProfileServiceTests : WithMocks
         var accountId = Guid.NewGuid();
         var expected = "testAccount";
         AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(default (Account));
-        AccountProfileMock.Setup(m => m.QueryProfiles(It.IsAny<IAccountProfileAdapter.ProfileQuery>(), It.IsAny<int?>()))
-            .Returns(() => new List<Profile>().AsAsyncEnumerable());
+        AccountProfileMock.Setup(m => m.AnyProfile(expected)).ReturnsAsync(false);
         
         await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
     }
@@ -73,8 +71,7 @@ public class ProfileServiceTests : WithMocks
         var existing = _fakeProfile.Generate();
         existing.Handle = expected;
         AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
-        AccountProfileMock.Setup(m => m.AnyProfile(It.IsAny<IAccountProfileAdapter.ProfileComparer>()))
-            .ReturnsAsync(true);
+        AccountProfileMock.Setup(m => m.AnyProfile(It.IsAny<string>())).ReturnsAsync(true);
 
         await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
     }
@@ -322,7 +319,7 @@ public class ProfileServiceTests : WithMocks
         
         Assert.Equal(FollowState.Rejected, actual);
         Assert.Empty(_profile.Following);
-        Assert.Empty(target.FollowersCollection);
+        Assert.Empty(target.Followers);
     }
 
     [Fact(DisplayName = "Should add a new follower")]
@@ -335,7 +332,7 @@ public class ProfileServiceTests : WithMocks
         var actual = await _service.ReceiveFollowRequest(_profile.Id, follower.Id);
         
         Assert.Equal(FollowState.Accepted, actual);
-        Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Subject));
+        Assert.Contains(follower, _profile.Followers.Select(r => r.Follower));
     }
 
     [Fact(DisplayName = "Should update a pending follow")]
@@ -343,7 +340,7 @@ public class ProfileServiceTests : WithMocks
     {
         var target = new FakeProfile().Generate();
         _profile.Follow(target, FollowState.Pending);
-        AccountProfileMock.Setup(m => m.LookupProfileForFollowing(_profile.Id, target.Id)).ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.Id, target.Id)).ReturnsAsync(_profile);
 
         var actual = await _service.ReceiveFollowReply(_profile.Id, target.Id, FollowState.Accepted);
         
@@ -356,7 +353,7 @@ public class ProfileServiceTests : WithMocks
     {
         var target = new FakeProfile().Generate();
         _profile.Follow(target, FollowState.Pending);
-        AccountProfileMock.Setup(m => m.LookupProfileForFollowing(_profile.Id, target.Id)).ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.Id, target.Id)).ReturnsAsync(_profile);
 
         var actual = await _service.ReceiveFollowReply(_profile.Id, target.Id, FollowState.Rejected);
         
@@ -371,11 +368,11 @@ public class ProfileServiceTests : WithMocks
     {
         var follower = new FakeProfile().Generate();
         _profile.AddFollower(follower, FollowState.Accepted);
-        AccountProfileMock.Setup(m => m.LookupProfileForFollowers((Guid)_profile.LocalId!, follower.Id)).ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfileWithRelation((Guid)_profile.LocalId!, follower.Id)).ReturnsAsync(_profile);
 
         await _service.RemoveFollower(_profile.LocalId!.Value, follower.Id);
         
-        Assert.DoesNotContain(follower, _profile.FollowersCollection.Select(r => r.Subject));
+        Assert.DoesNotContain(follower, _profile.Followers.Select(r => r.Follower));
     }
 
     [Fact(DisplayName = "Should unfollow")]
@@ -383,7 +380,7 @@ public class ProfileServiceTests : WithMocks
     {
         var follower = new FakeProfile().Generate();
         _profile.Follow(follower, FollowState.Accepted);
-        AccountProfileMock.Setup(m => m.LookupProfileForFollowing((Guid)_profile.LocalId!, follower.Id)).ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfileWithRelation((Guid)_profile.LocalId!, follower.Id)).ReturnsAsync(_profile);
 
         await _service.Unfollow(_profile.LocalId!.Value, follower.Id);
         

@@ -11,5 +11,9 @@ public class ConfigureProfile : IEntityTypeConfiguration<Models.Profile>
         builder.HasIndex(profile => profile.LocalId);
         builder.HasOne<Models.Account>(profile => profile.OwnedBy);
         builder.Property(profile => profile.CustomFields).HasColumnType("jsonb");
+        // builder.HasMany(profile => profile.Following)
+            // .WithOne(relation => relation.Follower);
+        // builder.HasMany(profile => profile.Followers)
+            // .WithOne(relation => relation.Follows);
     }
 }

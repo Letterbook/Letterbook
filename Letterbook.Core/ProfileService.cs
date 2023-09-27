@@ -41,7 +41,7 @@ public class ProfileService : IProfileService
             throw CoreException.MissingData("Cannot attach new Profile to Account because Account could not be found", typeof(Account), ownerId);
         }
 
-        if (await _profiles.AnyProfile(p => p.Handle == handle))
+        if (await _profiles.AnyProfile(handle))
         {
             _logger.LogError("Cannot create a new profile because a profile already exists with handle {Handle}",
                 handle);
@@ -192,9 +192,7 @@ public class ProfileService : IProfileService
 
     public async Task<IEnumerable<Profile>> FindProfiles(string handle)
     {
-        var results = _profiles.QueryProfiles(source => source
-            .Where(p => p.Handle == handle)
-            .OrderBy(p => p.Handle));
+        var results = _profiles.FindProfilesByHandle(handle);
 
         var profiles = new List<Profile>();
         await foreach (var profile in results)
@@ -282,7 +280,7 @@ public class ProfileService : IProfileService
             _logger.LogWarning("Received a response to a follow request from {TargetId} concerning {SelfId}, but this is not the origin server", targetId, selfId);
             throw CoreException.WrongAuthority($"Cannot update Profile {selfId} because it has a different origin server", selfId);
         }
-        var profile = await _profiles.LookupProfileForFollowing(selfId, targetId) ?? throw CoreException.MissingData($"Cannot update Profile {selfId} because it could not be found", typeof(Profile), selfId);
+        var profile = await _profiles.LookupProfileWithRelation(selfId, targetId) ?? throw CoreException.MissingData($"Cannot update Profile {selfId} because it could not be found", typeof(Profile), selfId);
         var relation = profile.Following.FirstOrDefault(r => r.Follows.Id == targetId) ?? throw CoreException.MissingData($"Cannot update following relationship for {selfId} concerning {targetId} because it could not be found", typeof(FollowerRelation), targetId);
         switch (response)
         {
@@ -304,7 +302,7 @@ public class ProfileService : IProfileService
     
     public async Task RemoveFollower(Guid selfId, Uri followerId)
     {
-        var self = await _profiles.LookupProfileForFollowers(selfId, followerId)
+        var self = await _profiles.LookupProfileWithRelation(selfId, followerId)
                    ?? throw CoreException.MissingData(
                        $"Failed to update local profile {selfId} because it could not be found", typeof(Profile),
                        selfId);
@@ -315,7 +313,7 @@ public class ProfileService : IProfileService
     
     public async Task Unfollow(Guid selfId, Uri followerId)
     {
-        var self = await _profiles.LookupProfileForFollowing(selfId, followerId)
+        var self = await _profiles.LookupProfileWithRelation(selfId, followerId)
                    ?? throw CoreException.MissingData(
                        $"Failed to update local profile {selfId} because it could not be found", typeof(Profile),
                        selfId);
@@ -357,11 +355,22 @@ public class ProfileService : IProfileService
         [CallerLineNumber] int line = -1)
     {
         var profile = await _profiles.LookupProfile(profileId);
-        if (profile != null && profile.Updated.Add(TimeSpan.FromHours(12)) >= DateTime.UtcNow) return profile;
+        if (profile != null
+            && !profile.HasLocalAuthority(_coreConfig)
+            && profile.Updated.Add(TimeSpan.FromHours(12)) >= DateTime.UtcNow) return profile;
 
         try
         {
-            profile = await _client.As(onBehalfOf).Fetch<Profile>(profileId);
+            if (profile != null)
+            {
+                profile.ShallowCopy(await _client.As(onBehalfOf).Fetch<Profile>(profileId));
+                _profiles.Update(profile);
+            }
+            else
+            {
+                profile = await _client.As(onBehalfOf).Fetch<Profile>(profileId);
+                _profiles.Add(profile);
+            }
         }
         catch (AdapterException)
         {
@@ -369,7 +378,6 @@ public class ProfileService : IProfileService
             await _profiles.Cancel();
             throw;
         }
-        _profiles.RecordProfile(profile);
         _logger.LogInformation("Fetched Profile {ProfileId} from origin", profileId);
         return profile;
         

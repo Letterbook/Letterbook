@@ -1,6 +1,6 @@
-﻿using System.Linq.Expressions;
-using Letterbook.Core.Adapters;
+﻿using Letterbook.Core.Adapters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Adapter.Db;
@@ -35,57 +35,94 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 
     public IQueryable<Models.Account> SearchAccounts()
     {
-        throw new NotImplementedException();
+        return _context.Accounts.AsQueryable();
     }
 
     public Task<bool> AnyProfile(IAccountProfileAdapter.ProfileComparer comparer)
     {
-        return _context.Profiles.AnyAsync(profile => comparer(profile));
+        return _context.Profiles.AnyAsync();
+    }
+
+    public Task<bool> AnyProfile(string handle)
+    {
+        return _context.Profiles.AnyAsync(profile => profile.Handle == handle);
+    }
+
+    public Task<bool> AnyProfile(Uri id)
+    {
+        return _context.Profiles.AnyAsync(profile => profile.Id == id);
     }
 
     public Task<Models.Profile?> LookupProfile(Guid localId)
     {
-        throw new NotImplementedException();
+        return _context.Profiles.FirstOrDefaultAsync(profile => profile.LocalId == localId);
     }
 
     public Task<Models.Profile?> LookupProfile(Uri id)
     {
-        throw new NotImplementedException();
+        return _context.Profiles.FirstOrDefaultAsync(profile => profile.Id == id);
     }
 
-    public Task<Models.Profile?> LookupProfileForFollowing(Uri id, Uri followingId)
+    public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)
     {
-        throw new NotImplementedException();
+        return _context.Profiles.Where(profile => profile.Id == id)
+            .Include(profile => profile.Following.Where(relation => relation.Follows.Id == relationId))
+                .ThenInclude(relation => relation.Follows)
+            .Include(profile => profile.Followers.Where(relation => relation.Follower.Id == relationId))
+                .ThenInclude(relation => relation.Follower)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync();
     }
 
-    public Task<Models.Profile?> LookupProfileForFollowing(Guid localId, Uri followingId)
+    public Task<Models.Profile?> LookupProfileWithRelation(Guid localId, Uri relationId)
     {
-        throw new NotImplementedException();
+        return _context.Profiles.Where(profile => profile.LocalId == localId)
+            .Include(profile => profile.Following.Where(relation => relation.Follows.Id == relationId))
+                .ThenInclude(relation => relation.Follows)
+            .Include(profile => profile.Followers.Where(relation => relation.Follower.Id == relationId))
+                .ThenInclude(relation => relation.Follower)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync();
     }
 
-    public Task<Models.Profile?> LookupProfileForFollowers(Uri localId, Uri followerId)
+    public IAsyncEnumerable<Models.Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0)
     {
-        throw new NotImplementedException();
+        limit = limit >= 100 ? 100 : limit;
+        var query = _context.Profiles.OrderBy(profile => profile.Id)
+            .Skip(limit * page)
+            .Take(limit);
+        query = partial 
+            ? query.Where(profile => profile.Handle.StartsWith(handle)) 
+            : query.Where(profile => profile.Handle == handle);
+        return query.AsAsyncEnumerable();
     }
 
-    public Task<Models.Profile?> LookupProfileForFollowers(Guid localId, Uri followerId)
+    public void Add(Models.Profile profile)
     {
-        throw new NotImplementedException();
+        _context.Profiles.Add(profile);
     }
 
-    public IAsyncEnumerable<Models.Profile> QueryProfiles(IAccountProfileAdapter.ProfileQuery query, int? limit)
+    public void AddRange(IEnumerable<Models.Profile> profile)
     {
-        throw new NotImplementedException();
+        _context.Profiles.AddRange(profile);
     }
 
-    public bool RecordProfile(Models.Profile profile)
+    public void Update(Models.Profile profile)
     {
-        throw new NotImplementedException();
+        _context.Profiles.Update(profile);
+    }
+
+    public void UpdateRange(IEnumerable<Models.Profile> profile)
+    {
+        _context.Profiles.UpdateRange(profile);
     }
 
     public void Delete(object record)
     {
-        throw new NotImplementedException();
+        if (record is EntityEntry entry)
+        {
+            entry.State = EntityState.Deleted;
+        }
     }
 
     public Task Cancel()
