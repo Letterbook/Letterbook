@@ -14,8 +14,8 @@ public static class DtoMapper
 
     private static void ConfigureProfile(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<DTO.Actor, Core.Models.Profile>()
-            .IncludeBase<DTO.IResolvable, Core.Models.Profile>()
+        cfg.CreateMap<AsAp.Actor, Core.Models.Profile>()
+            .IncludeBase<AsAp.IResolvable, Core.Models.Profile>()
             .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
             .ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers))
@@ -26,14 +26,14 @@ public static class DtoMapper
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name))
             .AfterMap((_, profile) => profile.Updated = DateTime.UtcNow);
         
-        cfg.CreateMap<DTO.Object, Core.Models.Profile>()
-            .IncludeBase<DTO.IResolvable, Core.Models.Profile>();
+        cfg.CreateMap<AsAp.Object, Core.Models.Profile>()
+            .IncludeBase<AsAp.IResolvable, Core.Models.Profile>();
         
-        cfg.CreateMap<DTO.Link, Core.Models.Profile>()
-            .IncludeBase<DTO.IResolvable, Core.Models.Profile>();
+        cfg.CreateMap<AsAp.Link, Core.Models.Profile>()
+            .IncludeBase<AsAp.IResolvable, Core.Models.Profile>();
         
-        cfg.CreateMap<DTO.IResolvable, Core.Models.Profile>()
-            .IncludeBase<DTO.IResolvable, IObjectRef>()
+        cfg.CreateMap<AsAp.IResolvable, Core.Models.Profile>()
+            .IncludeBase<AsAp.IResolvable, IObjectRef>()
             // Handle these on concrete types
             .ForMember(dest => dest.Type, opt => opt.Ignore())
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
@@ -53,15 +53,15 @@ public static class DtoMapper
             .ForMember(dest => dest.Updated, opt => opt.Ignore())
             .ForMember(dest => dest.Audiences, opt => opt.Ignore());
 
-        cfg.CreateMap<DTO.IResolvable, CustomField>()
+        cfg.CreateMap<AsAp.IResolvable, CustomField>()
             .ForAllMembers(opts => opts.Ignore());
     }
 
     private static void ConfigureNote(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<DTO.Object, Note>()
-            .IncludeBase<DTO.IResolvable, IObjectRef>()
-            .IncludeBase<DTO.Object, IObjectRef>()
+        cfg.CreateMap<AsAp.Object, Note>()
+            .IncludeBase<AsAp.IResolvable, IObjectRef>()
+            .IncludeBase<AsAp.Object, IObjectRef>()
             .ForMember(dest => dest.Creators, opt => opt.MapFrom(src => src.AttributedTo))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.Published))
             .ForMember(dest => dest.InReplyTo, opt => opt.Ignore())
@@ -76,9 +76,9 @@ public static class DtoMapper
 
     private static void ConfigureDtoResolvables(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<DTO.IResolvable, IObjectRef>()
+        cfg.CreateMap<AsAp.IResolvable, IObjectRef>()
             .ForMember(dest => dest.LocalId, opt => opt.Ignore());
-        cfg.CreateMap<DTO.Object, IObjectRef>().ConstructUsing((src, context) =>
+        cfg.CreateMap<AsAp.Object, IObjectRef>().ConstructUsing((src, context) =>
             {
                 Enum.TryParse<ActivityObjectType>(src.Type, out var type);
                 switch (type)
@@ -92,10 +92,10 @@ public static class DtoMapper
                         throw new ArgumentOutOfRangeException(nameof(src.Type), $"Unsupported Object type {src.Type}");
                 }
             })
-            .IncludeBase<DTO.IResolvable, IObjectRef>()
+            .IncludeBase<AsAp.IResolvable, IObjectRef>()
             .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority));
-        cfg.CreateMap<DTO.Link, ObjectRef>()
-            .IncludeBase<DTO.IResolvable, IObjectRef>()
+        cfg.CreateMap<AsAp.Link, ObjectRef>()
+            .IncludeBase<AsAp.IResolvable, IObjectRef>()
             .ForMember(dest => dest.LocalId, opt => opt.Ignore());
     }
 }

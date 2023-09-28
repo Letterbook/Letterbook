@@ -13,10 +13,17 @@ public class CoreException : Exception
     /// <param name="message"></param>
     public CoreException(string? message) : base(message)
     {
+        HResult = 0;
     }
 
     public CoreException(string? message, Exception? innerException) : base(message, innerException)
     {
+        HResult = 0;
+    }
+    
+    public bool Flagged(ErrorCodes code)
+    {
+        return ((ErrorCodes)HResult & code) == code;
     }
 
     // Indicates creating a new resource would conflict with an existing resource

@@ -57,13 +57,16 @@ public class Program
         // Register Services
         builder.Services.AddScoped<IActivityService, ActivityService>();
         builder.Services.AddScoped<IActivityEventService, ActivityEventService>();
+        builder.Services.AddScoped<IProfileEventService, ProfileEventService>();
         builder.Services.AddScoped<IAccountService, AccountService>();
+        builder.Services.AddScoped<IProfileService, ProfileService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
+        builder.Services.AddScoped<IActivityPubClient, ActivityPubClient>();
         
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();
-        // builder.Services.AddHostedService<WorkerScope<SeedAdminWorker>>();
+        builder.Services.AddHostedService<WorkerScope<SeedAdminWorker>>();
         // TODO: clean up and make things buildable again, then see if you can log in
         
         // Register Adapters
