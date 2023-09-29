@@ -115,6 +115,7 @@ public class ActorController : ControllerBase
                     if (activity.Actor.Count > 1) return BadRequest(new ErrorMessage(ErrorCodes.None, "Only one Actor can follow at a time"));
                     var actor = activity.Actor.FirstOrDefault();
                     if (actor?.Id is null) return BadRequest(new ErrorMessage(ErrorCodes.None, "Actor ID is required for follower"));
+                    
                     var state = await _profileService.ReceiveFollowRequest(localId, actor.Id);
                     
                     return state switch

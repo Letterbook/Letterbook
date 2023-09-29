@@ -1,9 +1,11 @@
 ﻿using Bogus;
+using Letterbook.ActivityPub;
+
 #pragma warning disable CS8603 // Possible null reference return.
 
 namespace Letterbook.Api.Tests.Fakes;
 
-public class FakeActivity : Faker<DTO.Activity>
+public class FakeActivity : Faker<AsAp.Activity>
 {
     public static string[] ActivityTypes = { 
         "Accept",
@@ -49,11 +51,11 @@ public class FakeActivity : Faker<DTO.Activity>
         "Update",
     };
     
-    public FakeActivity(string? activityType, DTO.Object? subject, DTO.Actor? actor)
+    public FakeActivity(string? activityType = null, AsAp.Actor? actor = null)
     {
         RuleFor(o => o.Type, (f) => activityType ?? f.PickRandom(CommonActivityTypes));
-        RuleFor(o => o.Id, (f) => new Uri($"https://letterbook.example/{activityType}/{f.Random.Number()}"));
-        RuleFor(o => o.Actor, () => new List<DTO.IResolvable> { actor ?? new FakeActor().Generate() } );
+        RuleFor(o => o.Id, (f) => new CompactIri($"https://letterbook.example/{activityType}/{f.Random.Number()}"));
+        RuleFor(o => o.Actor, () => new List<AsAp.IResolvable> { actor ?? new FakeActor().Generate() } );
         RuleFor(o => o.Attachment, () => null);
         RuleFor(o => o.Audience, () => null);
         RuleFor(o => o.To, () => null);
@@ -64,21 +66,6 @@ public class FakeActivity : Faker<DTO.Activity>
         RuleFor(o => o.Summary, () => null);
         RuleFor(o => o.Preview, () => null);
         RuleFor(o => o.InReplyTo, () => null);
-        RuleFor(o => o.Object, () => new List<DTO.IResolvable> { subject ?? new FakeNote().Generate() });
-    }
-
-    public FakeActivity(DTO.Object subject, DTO.Actor actor) : this("Create", subject, actor)
-    {
-    }
-
-    public FakeActivity(DTO.Actor actor) : this(new FakeNote().Generate(), actor)
-    {
-    }
-
-    public FakeActivity(DTO.Object subject) : this(subject, new FakeActor().Generate())
-    {
-    }
-    public FakeActivity() : this(new FakeNote().Generate())
-    {
+        RuleFor(o => o.Object, () => new List<AsAp.IResolvable> { new FakeNote().Generate() });
     }
 }
