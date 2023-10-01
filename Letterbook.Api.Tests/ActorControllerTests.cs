@@ -98,4 +98,24 @@ public class ActorControllerTests : WithMocks
         Assert.NotNull(actualObject);
         Assert.Equal("Reject", actualObject.Type);
     }
+    
+    [Fact(DisplayName = "Should remove a follower")]
+    [Trait("Inbox", "Undo:Follow")]
+    public async Task TestUndoFollow()
+    {
+        var follow = _fakeActivity.Generate();
+        follow.Type = "Follow";
+        follow.Actor = _activity.Actor;
+        _activity.Type = "Undo";
+        _activity.Object[0] = follow;
+
+        ProfileServiceMock.Setup(service =>
+                service.RemoveFollower(_profile.LocalId!.Value, _activity.Actor.First().Id!))
+            .Returns(Task.CompletedTask);
+
+        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), _activity);
+        
+        var actual = response as OkResult;
+        Assert.NotNull(actual);
+    }
 }
