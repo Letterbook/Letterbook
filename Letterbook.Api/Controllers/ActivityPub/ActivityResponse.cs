@@ -4,7 +4,7 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 
 // TODO: Move to Letterbook.ActivityPub
 // There's more complexity here than is reasonable to handle so casually
-public static class Activity
+public static class ActivityResponse
 {
     public static AsAp.Activity AcceptActivity(string activityType, CompactIri? subjectId = null)
     {

@@ -120,16 +120,17 @@ public class ActorController : ControllerBase
                     
                     return state switch
                     {
-                        FollowState.Accepted => Ok(Activity.AcceptActivity("Follow", activity.Id)), // Accept(Follow)
-                        FollowState.Pending => Ok(Activity.TentativeAcceptActivity("Follow", activity.Id)), // PendingAccept(Follow)
-                        _ => Ok(Activity.RejectActivity("Follow", activity.Id)), // Reject(Follow)
+                        FollowState.Accepted => Ok(ActivityResponse.AcceptActivity("Follow", activity.Id)), // Accept(Follow)
+                        FollowState.Pending => Ok(ActivityResponse.TentativeAcceptActivity("Follow", activity.Id)), // PendingAccept(Follow)
+                        _ => Ok(ActivityResponse.RejectActivity("Follow", activity.Id)), // Reject(Follow)
                     };
                 case ActivityType.Like:
                     break;
                 case ActivityType.Move:
                     break;
                 case ActivityType.Undo:
-                    // Unwrap and reparse
+                    // var subject
+                        
                     break;
                 case ActivityType.Update:
                     break;
@@ -203,5 +204,23 @@ public class ActorController : ControllerBase
     public IActionResult PostOutbox(int id)
     {
         throw new NotImplementedException();
+    }
+
+    private IActionResult HandleUndo(Guid localId, AsAp.Activity activity)
+    {
+        if (activity.Object.Count > 1)
+            return BadRequest(new ErrorMessage(ErrorCodes.None, "Cannot Undo multiple activities"));
+        if (activity.Object.First() is AsAp.Object)
+            return BadRequest(new ErrorMessage(ErrorCodes.None, "Cannot Undo an object"));
+        var subject = (AsAp.Activity)activity.Object.First();
+        var activityType = Enum.Parse<ActivityType>(subject.Type);
+        return activityType switch
+        {
+            ActivityType.Announce => Ok(),
+            ActivityType.Block => Ok(),
+            ActivityType.Follow => Ok(),
+            ActivityType.Like => Ok(),
+            _ => Accepted()
+        };
     }
 }
