@@ -4,6 +4,12 @@ using Letterbook.Core.Values;
 
 namespace Letterbook.Core;
 
+/// <summary>
+/// TBH, I'm not sure where this class should eventually live. Probably in its own adapter assembly?
+///
+/// Anyway, this not implemented stub is here to keep the project runnable. Obviously anything that depends on this will
+/// be broken for now.
+/// </summary>
 public class ActivityPubClient : IActivityPubClient
 {
     public IActivityPubClient As(Profile? onBehalfOf)

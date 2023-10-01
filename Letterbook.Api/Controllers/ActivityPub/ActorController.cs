@@ -95,7 +95,6 @@ public class ActorController : ControllerBase
             switch (activityType)
             {
                 case ActivityType.Accept:
-                    // Unwrap and reparse
                     break;
                 case ActivityType.Add:
                     break;
@@ -112,40 +111,24 @@ public class ActorController : ControllerBase
                 case ActivityType.Flag:
                     break;
                 case ActivityType.Follow:
-                    if (activity.Actor.Count > 1) return BadRequest(new ErrorMessage(ErrorCodes.None, "Only one Actor can follow at a time"));
-                    var actor = activity.Actor.FirstOrDefault();
-                    if (actor?.Id is null) return BadRequest(new ErrorMessage(ErrorCodes.None, "Actor ID is required for follower"));
-                    
-                    var state = await _profileService.ReceiveFollowRequest(localId, actor.Id);
-                    
-                    return state switch
-                    {
-                        FollowState.Accepted => Ok(ActivityResponse.AcceptActivity("Follow", activity.Id)), // Accept(Follow)
-                        FollowState.Pending => Ok(ActivityResponse.TentativeAcceptActivity("Follow", activity.Id)), // PendingAccept(Follow)
-                        _ => Ok(ActivityResponse.RejectActivity("Follow", activity.Id)), // Reject(Follow)
-                    };
+                    return await InboxFollow(localId, activity);
                 case ActivityType.Like:
                     break;
                 case ActivityType.Move:
                     break;
                 case ActivityType.Undo:
-                    // var subject
-                        
-                    break;
+                    return await InboxUndo(localId, activity);
                 case ActivityType.Update:
                     break;
                 case ActivityType.Question:
                     break;
                 case ActivityType.Reject:
-                    // Unwrap and reparse
                     break;
                 case ActivityType.Remove:
                     break;
                 case ActivityType.TentativeReject:
-                    // Unwrap and reparse
                     break;
                 case ActivityType.TentativeAccept:
-                    // Unwrap and reparse
                     break;
                 // Some of these activities may be worth understanding eventually, even if letterbook will likely never
                 // produce them.
@@ -205,22 +188,59 @@ public class ActorController : ControllerBase
     {
         throw new NotImplementedException();
     }
-
-    private IActionResult HandleUndo(Guid localId, AsAp.Activity activity)
+    
+    /* * * * * * * * * * * * *
+     * Support methods       *
+     * * * * * * * * * * * * */
+    
+    private async Task<IActionResult> InboxUndo(Guid id, AsAp.Activity activity)
     {
         if (activity.Object.Count > 1)
-            return BadRequest(new ErrorMessage(ErrorCodes.None, "Cannot Undo multiple activities"));
-        if (activity.Object.First() is AsAp.Object)
-            return BadRequest(new ErrorMessage(ErrorCodes.None, "Cannot Undo an object"));
-        var subject = (AsAp.Activity)activity.Object.First();
+            return new BadRequestObjectResult(new ErrorMessage(
+                ErrorCodes.None.With((int)ActivityPubErrorCodes.UnknownSemantics), "Cannot Undo multiple Activities"));
+        if (activity.Object.SingleOrDefault() is not AsAp.Activity subject)
+            return new BadRequestObjectResult(new ErrorMessage(
+                ErrorCodes.None.With((int)ActivityPubErrorCodes.UnknownSemantics), "Object of an Undo must be another Activity"));
         var activityType = Enum.Parse<ActivityType>(subject.Type);
-        return activityType switch
+        switch (activityType)
         {
-            ActivityType.Announce => Ok(),
-            ActivityType.Block => Ok(),
-            ActivityType.Follow => Ok(),
-            ActivityType.Like => Ok(),
-            _ => Accepted()
+            case ActivityType.Announce:
+                throw new NotImplementedException();
+            case ActivityType.Block:
+                throw new NotImplementedException();
+            case ActivityType.Follow:
+                if ((activity.Actor.SingleOrDefault() ?? subject.Actor.SingleOrDefault()) is not AsAp.Actor actor)
+                    return new BadRequestObjectResult(new ErrorMessage(
+                        ErrorCodes.None.With((int)ActivityPubErrorCodes.UnknownSemantics),
+                        "Exactly one Actor can unfollow at a time"));
+                if (actor.Id is null)
+                    return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.InvalidRequest,
+                        "Actor ID is required to unfollow"));
+                
+                await _profileService.RemoveFollower(id, actor.Id);
+                
+                return new OkResult();
+            case ActivityType.Like:
+                throw new NotImplementedException();
+            default:
+                _logger.LogInformation("Ignored unknown Undo target {ActivityType}", activityType);
+                return new AcceptedResult();
+        }
+    }
+
+    private async Task<IActionResult> InboxFollow(Guid localId, AsAp.Activity activity)
+    {
+        if (activity.Actor.Count > 1) return BadRequest(new ErrorMessage(ErrorCodes.None, "Only one Actor can follow at a time"));
+        var actor = activity.Actor.FirstOrDefault();
+        if (actor?.Id is null) return BadRequest(new ErrorMessage(ErrorCodes.None, "Actor ID is required for follower"));
+                    
+        var state = await _profileService.ReceiveFollowRequest(localId, actor.Id);
+                    
+        return state switch
+        {
+            FollowState.Accepted => Ok(ActivityResponse.AcceptActivity("Follow", activity.Id)), // Accept(Follow)
+            FollowState.Pending => Ok(ActivityResponse.TentativeAcceptActivity("Follow", activity.Id)), // PendingAccept(Follow)
+            _ => Ok(ActivityResponse.RejectActivity("Follow", activity.Id)), // Reject(Follow)
         };
     }
 }
