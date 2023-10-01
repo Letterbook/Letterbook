@@ -20,12 +20,12 @@ Content-Type: application/json
 }
 
 ###
-# curl -X 'POST'   'http://localhost:5127/actor/4/inbox'   -H 'accept: */*'   -H 'Content-Type: application/ld+json'   -d '{
+# curl -X 'POST'   'http://localhost:5127/actor/eebmU6ZHx06ezAYNia2_GA/inbox'   -H 'accept: application/ld+json'   -H 'Content-Type: application/ld+json'   -d '{
 #  "type": "Follow",
 #  "actor": "https://social.example/user/1"
 #}'
 POST http://localhost:5127/actor/eebmU6ZHx06ezAYNia2_GA/inbox
-accept: */*
+accept: application/ld+json
 Content-Type: application/ld+json
 
 {
