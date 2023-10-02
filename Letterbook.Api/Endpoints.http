@@ -24,6 +24,7 @@ Content-Type: application/json
 #  "type": "Follow",
 #  "actor": "https://social.example/user/1"
 #}'
+# TODO: https://stackoverflow.com/a/62950860
 POST http://localhost:5127/actor/eebmU6ZHx06ezAYNia2_GA/inbox
 accept: application/ld+json
 Content-Type: application/ld+json
@@ -34,5 +35,4 @@ Content-Type: application/ld+json
 }
 
 ###
-
 

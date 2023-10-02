@@ -7,7 +7,9 @@ namespace Letterbook.Api;
 
 /// <summary>
 /// AspNet doesn't have this kind of content type filtering built-in, for some reason. I guess they expect everything
-/// to be handled by content negotiation? Anyway, this should allow controllers to handle only activitypub requests.
+/// to be handled by content negotiation? That doesn't work for us, because we would return different content, not just
+/// different views of it.
+/// Anyway, this should allow controllers to handle only activitypub requests.
 /// That way we can handle regular web requests with their own controller.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
