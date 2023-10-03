@@ -132,6 +132,10 @@ To run these dependencies, simply do
 docker-compose up
 ```
 
+If it's your first time setting up the database you will need to apply the Database migrations by running the entity framework tools.
+
+This processes is documented in [Letterbook.Adapter.Db](Letterbook.Adapter.Db/readme.md).
+
 ## License
 
 Letterbook is licensed under the [AGPL, version 3.0][license]. The maintainers may, at our discretion, change the license to any future version. Anyone who contributes to the project must do so under the same terms. That is, you are licensing your work to the project and the other contributors under that same license and any future version as becomes necessary.
