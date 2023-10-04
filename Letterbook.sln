@@ -48,6 +48,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Timescal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.TimescaleFeeds.Tests", "Letterbook.Adapter.TimescaleFeeds.Tests\Letterbook.Adapter.TimescaleFeeds.Tests.csproj", "{E9879DF8-A3EC-4843-BC01-21C77A13D2D7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.ActivityPub", "Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj", "{3B5FBC03-4098-4146-A3D2-58F4B31390CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{E9879DF8-A3EC-4843-BC01-21C77A13D2D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9879DF8-A3EC-4843-BC01-21C77A13D2D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9879DF8-A3EC-4843-BC01-21C77A13D2D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B5FBC03-4098-4146-A3D2-58F4B31390CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B5FBC03-4098-4146-A3D2-58F4B31390CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B5FBC03-4098-4146-A3D2-58F4B31390CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B5FBC03-4098-4146-A3D2-58F4B31390CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}

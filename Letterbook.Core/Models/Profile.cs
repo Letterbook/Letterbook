@@ -22,6 +22,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
         Handle = default!;
         DisplayName = default!;
         Followers = default!;
+        Following = default!;
         CustomFields = default!;
         Description = default!;
     }
@@ -48,6 +49,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
         builder.Path = "/actor/shared_inbox";
         SharedInbox = builder.Uri;
         Followers = ObjectCollection<FollowerRelation>.Followers(Id);
+        Following = ObjectCollection<FollowerRelation>.Following(Id);
     }
 
     public Uri Id { get; set; }
@@ -69,7 +71,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
     public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
     public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
     public ObjectCollection<FollowerRelation> Followers { get; set; }
-    public ICollection<FollowerRelation> Following { get; set; } = new HashSet<FollowerRelation>();
+    public ObjectCollection<FollowerRelation> Following { get; set; }
 
     public Profile ShallowClone() => (Profile)MemberwiseClone();
 
