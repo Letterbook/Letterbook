@@ -1,4 +1,12 @@
-﻿# Migrations
+﻿# Setup Entity Framework
+
+Install the [Entity Framework Core CLI tools](https://learn.microsoft.com/en-us/ef/core/cli/dotnet).
+
+```shell
+dotnet tool install --global dotnet-ef
+```
+
+# Migrations
 
 To generate a new migration:
 ```shell
