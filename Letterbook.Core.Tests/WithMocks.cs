@@ -12,6 +12,7 @@ public abstract class WithMocks
     protected Mock<IMessageBusAdapter> MessageBusAdapterMock;
     protected Mock<IAccountEventService> AccountEventServiceMock;
     protected Mock<IActivityPubClient> ActivityPubClientMock;
+    protected Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock;
     protected Mock<IProfileService> ProfileServiceMock;
     protected Mock<IActivityService> ActivityServiceMock;
     protected IOptions<CoreOptions> CoreOptionsMock;
@@ -23,8 +24,9 @@ public abstract class WithMocks
         MessageBusAdapterMock = new Mock<IMessageBusAdapter>();
         AccountEventServiceMock = new Mock<IAccountEventService>();
         ActivityPubClientMock = new Mock<IActivityPubClient>();
+        ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
         ProfileServiceMock = new Mock<IProfileService>();
-        ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubClientMock.Object);
+        ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
         ActivityServiceMock = new Mock<IActivityService>();
         var mockOptions = new CoreOptions
         {

@@ -50,6 +50,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Timescal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.ActivityPub", "Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj", "{3B5FBC03-4098-4146-A3D2-58F4B31390CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.ActivityPub.Test", "Letterbook.Adapter.ActivityPub.Test\Letterbook.Adapter.ActivityPub.Test.csproj", "{151935AD-3AB8-48CB-BBAD-6AF6309B36DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +101,10 @@ Global
 		{3B5FBC03-4098-4146-A3D2-58F4B31390CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B5FBC03-4098-4146-A3D2-58F4B31390CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B5FBC03-4098-4146-A3D2-58F4B31390CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{151935AD-3AB8-48CB-BBAD-6AF6309B36DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{151935AD-3AB8-48CB-BBAD-6AF6309B36DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{151935AD-3AB8-48CB-BBAD-6AF6309B36DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{151935AD-3AB8-48CB-BBAD-6AF6309B36DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}

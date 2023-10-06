@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
@@ -62,7 +63,8 @@ public class Program
         builder.Services.AddScoped<IProfileService, ProfileService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
-        builder.Services.AddScoped<IActivityPubClient, ActivityPubClient>();
+        builder.Services.AddScoped<IActivityPubClient, Client>()
+            .AddHttpClient<IActivityPubClient>();
         
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();
