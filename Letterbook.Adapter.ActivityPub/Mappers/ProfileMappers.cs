@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Globalization;
+using AutoMapper;
 using Letterbook.ActivityPub;
 using Letterbook.Core.Models;
 
@@ -36,6 +37,9 @@ public static class ProfileMappers
 
         cfg.CreateMap<Uri, AsAp.Collection>(MemberList.None)
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src));
+
+        // cfg.CreateMap<string, AsAp.ContentMap>()
+            // .ConstructUsing(s => new AsAp.ContentMap(CultureInfo.InvariantCulture.Name){} );
     }
 
     public static void ConfigureBaseObject(IMapperConfigurationExpression cfg)

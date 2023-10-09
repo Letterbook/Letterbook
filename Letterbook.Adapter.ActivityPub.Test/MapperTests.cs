@@ -1,4 +1,3 @@
-using System.Globalization;
 using AutoMapper;
 using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Core.Tests.Fakes;
