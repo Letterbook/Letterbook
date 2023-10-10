@@ -1,7 +1,8 @@
-﻿
+﻿version: '2'
+name: letterbook
 
 services:
-  timescale:
+  letterbook_timescale:
     container_name: timescale
     image: timescale/timescaledb:2.11.2-pg15-oss
     environment:
@@ -10,9 +11,10 @@ services:
       - POSTGRES_DB=letterbook_feeds
     ports:
       - "5433:5432"
+    volumes:
+      - letterbook_ts_data:/var/lib/postgresql/data
     restart: always
-
-  postgres:
+  letterbook_db:
     container_name: postgres
     image: postgres:15-alpine
     environment:
@@ -21,4 +23,16 @@ services:
       - POSTGRES_DB=letterbook
     ports:
       - "5432:5432"
+    volumes:
+      - letterbook_db_data:/var/lib/postgresql/data
     restart: always
+    
+    
+
+volumes:
+  letterbook_db_data:
+    driver: local
+  letterbook_ts_data:
+    driver: local
+
+  
