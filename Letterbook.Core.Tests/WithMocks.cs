@@ -16,9 +16,11 @@ public abstract class WithMocks
     protected Mock<IProfileService> ProfileServiceMock;
     protected Mock<IActivityService> ActivityServiceMock;
     protected IOptions<CoreOptions> CoreOptionsMock;
+    protected Mock<HttpMessageHandler> HttpMessageHandlerMock;
 
     protected WithMocks()
     {
+        HttpMessageHandlerMock = new Mock<HttpMessageHandler>();
         ActivityAdapterMock = new Mock<IActivityAdapter>();
         AccountProfileMock = new Mock<IAccountProfileAdapter>();
         MessageBusAdapterMock = new Mock<IMessageBusAdapter>();

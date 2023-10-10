@@ -220,7 +220,7 @@ public class ProfileService : IProfileService
         // TODO(moderation): Check for blocks
         // TODO(moderation): Check for requiresApproval
         var follow = new FollowerRelation(self, target, FollowState.Pending);
-        var result = await _client.As(self).SendFollow(target.Inbox, follow);
+        var result = await _client.As(self).SendFollow(target.Inbox);
         follow.State = result;
         switch (follow.State)
         {
