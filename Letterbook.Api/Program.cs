@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Letterbook.Adapter.ActivityPub;
@@ -15,6 +16,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NSign.Client;
+using NSign.Signatures;
 
 namespace Letterbook.Api;
 
@@ -50,6 +53,29 @@ public class Program
                 options.RequireHttpsMetadata = false;
             });
 
+        // Configure Http Signatures
+        builder.Services
+            .Configure<AddContentDigestOptions>(options => options.WithHash(AddContentDigestOptions.Hash.Sha256))
+            .ConfigureMessageSigningOptions(options =>
+            {
+                options.WithMandatoryComponent(SignatureComponent.Method);
+                options.WithMandatoryComponent(SignatureComponent.Authority);
+                options.WithMandatoryComponent(SignatureComponent.RequestTarget);
+                options.WithOptionalComponent(SignatureComponent.ContentDigest);
+                options.SetParameters = component =>
+                {
+                    component.WithCreatedNow();
+                    component.WithExpires(TimeSpan.FromSeconds(150));
+                };
+            })
+            .Services.AddHttpClient<IActivityPubClient>(client =>
+            {
+                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("dotnet",
+                    Environment.Version.ToString(2)));
+                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("letterbook", "0.0-dev"));
+                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(coreOptions.DomainName));
+            });
+
         // Register options
         builder.Services.Configure<CoreOptions>(coreSection);
         builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptions.ConfigKey));
@@ -63,8 +89,7 @@ public class Program
         builder.Services.AddScoped<IProfileService, ProfileService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
-        builder.Services.AddScoped<IActivityPubClient, Client>()
-            .AddHttpClient<IActivityPubClient>();
+        builder.Services.AddScoped<IActivityPubClient, Client>();
         
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();

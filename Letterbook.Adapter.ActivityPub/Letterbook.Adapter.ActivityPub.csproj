@@ -11,6 +11,8 @@
       <PackageReference Include="AutoMapper.Collection" Version="9.0.0" />
       <PackageReference Include="Letterbook.ActivityPub" Version="1.0.0-ci0035-83" />
       <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="10.9.0" />
+      <PackageReference Include="NSign.Client" Version="0.19.1" />
+      <PackageReference Include="NSign.SignatureProviders" Version="0.19.1" />
     </ItemGroup>
 
     <ItemGroup>
