@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using NSign;
 using NSign.Client;
 using NSign.Signatures;
 
@@ -54,6 +55,7 @@ public class Program
             });
 
         // Configure Http Signatures
+        const string activityPubAccept = @"application/ld+json; profile=""https://www.w3.org/ns/activitystreams""";
         builder.Services
             .Configure<AddContentDigestOptions>(options => options.WithHash(AddContentDigestOptions.Hash.Sha256))
             .ConfigureMessageSigningOptions(options =>
@@ -62,19 +64,27 @@ public class Program
                 options.WithMandatoryComponent(SignatureComponent.Authority);
                 options.WithMandatoryComponent(SignatureComponent.RequestTarget);
                 options.WithOptionalComponent(SignatureComponent.ContentDigest);
+                options.WithMandatoryComponent(new HttpHeaderComponent("Date"));
                 options.SetParameters = component =>
                 {
                     component.WithCreatedNow();
                     component.WithExpires(TimeSpan.FromSeconds(150));
                 };
             })
-            .Services.AddHttpClient<IActivityPubClient>(client =>
+            .Services
+            .AddHttpClient<IActivityPubClient, Client>(client =>
             {
+                client.DefaultRequestHeaders.Accept.ParseAdd(activityPubAccept);
                 client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("dotnet",
                     Environment.Version.ToString(2)));
+                // TODO: get version from Product Version
                 client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("letterbook", "0.0-dev"));
                 client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(coreOptions.DomainName));
-            });
+            })
+            .AddContentDigestAndSigningHandlers()
+            .Services
+            .AddScoped<ISigner, RsaSigner>()
+            .AddScoped<IKeyContainer, KeyContainer>();
 
         // Register options
         builder.Services.Configure<CoreOptions>(coreSection);
@@ -89,7 +99,6 @@ public class Program
         builder.Services.AddScoped<IProfileService, ProfileService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
-        builder.Services.AddScoped<IActivityPubClient, Client>();
         
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();

@@ -50,6 +50,8 @@ public class Profile : IObjectRef, IEquatable<Profile>
         SharedInbox = builder.Uri;
         Followers = ObjectCollection<FollowerRelation>.Followers(Id);
         Following = ObjectCollection<FollowerRelation>.Following(Id);
+        Keys.Add(SigningKey.Rsa(0));
+        Keys.Add(SigningKey.Dsa(1));
     }
 
     public Uri Id { get; set; }
@@ -72,6 +74,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
     public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
     public ObjectCollection<FollowerRelation> Followers { get; set; }
     public ObjectCollection<FollowerRelation> Following { get; set; }
+    public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
 
     public Profile ShallowClone() => (Profile)MemberwiseClone();
 

@@ -19,19 +19,13 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     private readonly HttpClient _httpClient;
     private Models.Profile? _profile = default;
     private IMapper _profileMapper = new Mapper(ProfileMappers.DefaultProfile);
-    private const string ProfileErr = "Activities must be performed by a specific Profile";
+    private IKeyContainer _keys;
 
-    public Client(ILogger<Client> logger, HttpClient httpClient)
+    public Client(ILogger<Client> logger, HttpClient httpClient, IKeyContainer keys)
     {
-        const string mime =
-            """
-            application/ld+json; profile="https://www.w3.org/ns/activitystreams"
-            """;
         _logger = logger;
         _httpClient = httpClient;
-        _httpClient.DefaultRequestHeaders.Accept.ParseAdd(mime);
-        // TODO: User-agent
-        // $"dotnet/{Environment.Version.Major}.{Environment.Version.Minor} letterbook/{app version??} (baseUrl)"
+        _keys = keys;
     }
     
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
@@ -54,6 +48,8 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     public IActivityPubAuthenticatedClient As(Models.Profile? onBehalfOf)
     {
         _profile = onBehalfOf;
+        var signingKey = _profile.Keys.First(key => key.Family == SigningKey.KeyFamily.Rsa);
+        _keys.SetKey(signingKey);
         return this;
     }
 

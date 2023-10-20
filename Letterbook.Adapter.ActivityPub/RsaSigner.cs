@@ -7,7 +7,7 @@ using NSign.Signatures;
 
 namespace Letterbook.Adapter.ActivityPub;
 
-internal sealed class RsaSigner : ISigner
+public sealed class RsaSigner : ISigner
 {
     private readonly byte[] _signingKey;
     private readonly string _keyId;
@@ -19,7 +19,7 @@ internal sealed class RsaSigner : ISigner
         _keyId = keyId;
         
         RSA rsa = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();
-        rsa.ImportRSAPrivateKey(_signingKey.AsSpan(), out _);
+        rsa.ImportRSAPrivateKey(_signingKey, out _);
         _innerSigner = new RsaPkcs15Sha256SignatureProvider(rsa, rsa, _keyId);
     }
 
