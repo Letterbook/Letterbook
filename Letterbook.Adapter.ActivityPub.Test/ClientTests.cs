@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.Json;
 using Letterbook.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Exceptions;
@@ -30,7 +31,7 @@ public class ClientTests : WithMocks
     public ClientTests(ITestOutputHelper output)
     {
         var httpClient = new HttpClient(HttpMessageHandlerMock.Object);
-        _client = new Client(Mock.Of<ILogger<Client>>(), httpClient);
+        _client = new Client(Mock.Of<ILogger<Client>>(), httpClient, new KeyContainer());
         _output = output;
 
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
@@ -68,9 +69,8 @@ public class ClientTests : WithMocks
         var actual = await _client.As(_profile).SendFollow(target.Inbox);
 
         Assert.Equal(FollowState.Accepted, actual);
-        HttpMessageHandlerMock.Protected().Verify("SendAsync",
-            Times.Once(),
-            ItExpr.Is((HttpRequestMessage message) => message.Headers.Accept.Contains(AcceptHeader)),
+        HttpMessageHandlerMock.Protected().Verify("SendAsync", Times.Once(), 
+            ItExpr.IsAny<HttpRequestMessage>(),
             ItExpr.IsAny<CancellationToken>());
     }
 

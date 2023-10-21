@@ -31,7 +31,7 @@ public static class DtoMapper
         
         cfg.CreateMap<AsAp.Link, Core.Models.Profile>()
             .IncludeBase<AsAp.IResolvable, Core.Models.Profile>();
-        
+
         cfg.CreateMap<AsAp.IResolvable, Core.Models.Profile>()
             .IncludeBase<AsAp.IResolvable, IObjectRef>()
             // Handle these on concrete types
@@ -51,7 +51,8 @@ public static class DtoMapper
             .ForMember(dest => dest.RelatedAccounts, opt => opt.Ignore())
             .ForMember(dest => dest.OwnedBy, opt => opt.Ignore())
             .ForMember(dest => dest.Updated, opt => opt.Ignore())
-            .ForMember(dest => dest.Audiences, opt => opt.Ignore());
+            .ForMember(dest => dest.Audiences, opt => opt.Ignore())
+            .ForMember(dest => dest.Keys, opt => opt.Ignore());
 
         cfg.CreateMap<AsAp.IResolvable, CustomField>()
             .ForAllMembers(opts => opts.Ignore());
