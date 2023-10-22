@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Runtime.CompilerServices;
 using Letterbook.Core.Exceptions;
+using Letterbook.Core.Extensions;
 
 namespace Letterbook.Adapter.ActivityPub.Exceptions;
 
@@ -44,4 +46,27 @@ public class ClientException : AdapterException
 
         return ex;
     }
+
+    public static ClientException SignatureError(Guid keyId, string keyLabel, Exception? innerEx = null,
+        [CallerMemberName] string name="",
+        [CallerFilePath] string path="",
+        [CallerLineNumber] int line=-1)
+    {
+        var ex = new ClientException("No private signing key available. This may be a remote profile.", innerEx)
+        {
+            Source = FormatSource(path, name, line),
+        };
+        ex.HResult |= (int)ErrorCodes.MissingData
+            .With(ErrorCodes.PermissionDenied)
+            .With(ErrorCodes.WrongAuthority);
+        ex.Data["id"] = keyId;
+        ex.Data["label"] = keyLabel;
+
+        return ex;
+    }
+
+    [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
+    public static ClientException SignatureError([CallerMemberName] string name = "",
+        [CallerFilePath] string path = "",
+        [CallerLineNumber] int line = -1) => SignatureError(Guid.Empty, null, null, name, path, line);
 }

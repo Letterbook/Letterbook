@@ -1,25 +1,26 @@
 ﻿using System.Security.Cryptography;
-using System.Text;
-using Microsoft.AspNetCore.Http;
+using Letterbook.Adapter.ActivityPub.Exceptions;
 using NSign;
 using NSign.Providers;
 using NSign.Signatures;
 
 namespace Letterbook.Adapter.ActivityPub;
 
-public sealed class RsaSigner : ISigner
+public sealed class ClientSigner : ISigner
 {
+    private readonly IKeyContainer _keyContainer;
     private readonly byte[] _signingKey;
     private readonly string _keyId;
     private readonly ISigner _innerSigner;
 
-    public RsaSigner(byte[] signingKey, string keyId)
+    public ClientSigner(IKeyContainer keyContainer)
     {
-        _signingKey = signingKey;
-        _keyId = keyId;
+        _keyContainer = keyContainer;
+
+        if (!_keyContainer.TryGetKey(out var key)) throw ClientException.SignatureError();
         
         RSA rsa = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();
-        rsa.ImportRSAPrivateKey(_signingKey, out _);
+        rsa.ImportRSAPrivateKey((key.PrivateKey ?? throw ClientException.SignatureError(key.Id, key.Label)).Span, out _);
         _innerSigner = new RsaPkcs15Sha256SignatureProvider(rsa, rsa, _keyId);
     }
 

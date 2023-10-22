@@ -83,7 +83,7 @@ public class Program
             })
             .AddContentDigestAndSigningHandlers()
             .Services
-            .AddScoped<ISigner, RsaSigner>()
+            .AddScoped<ISigner, ClientSigner>()
             .AddScoped<IKeyContainer, KeyContainer>();
 
         // Register options
