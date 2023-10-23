@@ -4,7 +4,7 @@ using NSign;
 using NSign.Providers;
 using NSign.Signatures;
 
-namespace Letterbook.Adapter.ActivityPub;
+namespace Letterbook.Adapter.ActivityPub.Signatures;
 
 public sealed class ClientSigner : ISigner
 {

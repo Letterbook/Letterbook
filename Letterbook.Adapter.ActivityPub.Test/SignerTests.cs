@@ -1,4 +1,5 @@
 ﻿using Letterbook.Adapter.ActivityPub.Exceptions;
+using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Core.Tests.Fakes;
 using NSign;
 using NSign.Signatures;

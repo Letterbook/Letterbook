@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Letterbook.Adapter.ActivityPub;
+using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
@@ -81,7 +82,7 @@ public class Program
                 client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("letterbook", "0.0-dev"));
                 client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(coreOptions.DomainName));
             })
-            .AddContentDigestAndSigningHandlers()
+            .AddMastodonSignatures()
             .Services
             .AddScoped<ISigner, ClientSigner>()
             .AddScoped<IKeyContainer, KeyContainer>();
