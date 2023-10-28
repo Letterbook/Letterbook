@@ -28,8 +28,9 @@ public abstract class WithMocks
         ActivityPubClientMock = new Mock<IActivityPubClient>();
         ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
         ProfileServiceMock = new Mock<IProfileService>();
-        ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
         ActivityServiceMock = new Mock<IActivityService>();
+        
+        ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
         var mockOptions = new CoreOptions
         {
             DomainName = "letterbook.example",

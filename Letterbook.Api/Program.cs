@@ -66,6 +66,7 @@ public class Program
                 options.WithMandatoryComponent(SignatureComponent.RequestTarget);
                 options.WithOptionalComponent(SignatureComponent.ContentDigest);
                 options.WithMandatoryComponent(new HttpHeaderComponent("Date"));
+                options.SignatureName = "ltr";
                 options.SetParameters = component =>
                 {
                     component.WithCreatedNow();
@@ -80,13 +81,9 @@ public class Program
                     Environment.Version.ToString(2)));
                 // TODO: get version from Product Version
                 client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("letterbook", "0.0-dev"));
-                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(coreOptions.DomainName));
-            })
-            .AddMastodonSignatures()
-            .Services
-            .AddScoped<ISigner, ClientSigner>()
-            .AddScoped<IKeyContainer, KeyContainer>();
-
+                client.DefaultRequestHeaders.UserAgent.TryParseAdd(coreOptions.DomainName);
+            });
+        
         // Register options
         builder.Services.Configure<CoreOptions>(coreSection);
         builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptions.ConfigKey));
@@ -104,7 +101,6 @@ public class Program
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();
         builder.Services.AddHostedService<WorkerScope<SeedAdminWorker>>();
-        // TODO: clean up and make things buildable again, then see if you can log in
         
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();

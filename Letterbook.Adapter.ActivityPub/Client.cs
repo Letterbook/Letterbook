@@ -19,9 +19,9 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     private readonly HttpClient _httpClient;
     private Models.Profile? _profile = default;
     private IMapper _profileMapper = new Mapper(ProfileMappers.DefaultProfile);
-    private IKeyContainer _keys;
+    private KeyContainer _keys;
 
-    public Client(ILogger<Client> logger, HttpClient httpClient, IKeyContainer keys)
+    public Client(ILogger<Client> logger, HttpClient httpClient, KeyContainer keys)
     {
         _logger = logger;
         _httpClient = httpClient;
@@ -63,8 +63,9 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         follow.Actor.Add(actor);
         var request = new HttpRequestMessage(HttpMethod.Post, inbox)
         {
-            Content = JsonContent.Create(follow, options: JsonOptions.ActivityPub)
+            Content = JsonContent.Create(follow, options: JsonOptions.ActivityPub),
         };
+        request.Headers.Date = DateTimeOffset.Now;
 
         var response = await _httpClient.SendAsync(request);
         

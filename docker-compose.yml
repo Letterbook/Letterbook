@@ -27,8 +27,12 @@ services:
       - letterbook_db_data:/var/lib/postgresql/data
     restart: always
     
-    
-
+  httpbin:
+    container_name: httpbin
+    image: kennethreitz/httpbin
+    ports:
+      - '8200:80'
+  
 volumes:
   letterbook_db_data:
     driver: local

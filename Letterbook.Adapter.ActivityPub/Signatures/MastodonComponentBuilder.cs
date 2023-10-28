@@ -3,9 +3,9 @@ using NSign.Signatures;
 
 namespace Letterbook.Adapter.ActivityPub.Signatures;
 
-public class MastodonComponentBuilder : ISignatureComponentBuildVisitor
+public class MastodonComponentBuilder : ISignatureComponentVisitor
 {
-    private readonly MessageContext _context;
+    private readonly HttpRequestMessage _message;
     private List<string> _derivedParams = new List<string>();
     private List<string> _derivedParamsValues = new List<string>();
     private List<string> _headerParams = new List<string>();
@@ -20,12 +20,12 @@ public class MastodonComponentBuilder : ISignatureComponentBuildVisitor
      * Signature: keyId="https://my-example.com/actor#main-key",headers="(request-target) host date",signature="Y2FiYW...IxNGRiZDk4ZA=="
      */
     
-    public string SignatureInput => BuildSigningDocument();
-    public string? SignatureParamsValue => BuildDocumentSpec();
+    public string SigningDocument => BuildSigningDocument();
+    public string? SigningDocumentSpec => BuildDocumentSpec();
 
-    public MastodonComponentBuilder(MessageContext context)
+    public MastodonComponentBuilder(HttpRequestMessage message)
     {
-        _context = context;
+        _message = message;
     }
 
     /// <summary>
@@ -37,10 +37,9 @@ public class MastodonComponentBuilder : ISignatureComponentBuildVisitor
     
     public void Visit(HttpHeaderComponent httpHeader)
     {
-        bool bindRequest = httpHeader.BindRequest;
         string fieldName = httpHeader.ComponentName;
 
-        if (TryGetHeaderValues(bindRequest, fieldName, out IEnumerable<string> values))
+        if (TryGetHeaderValues(fieldName, out IEnumerable<string> values))
         {
             AddHeader(fieldName, String.Join(", ", values));
         }
@@ -104,7 +103,7 @@ public class MastodonComponentBuilder : ISignatureComponentBuildVisitor
     public void Visit(DerivedComponent derived)
     {
         if (derived.ComponentName == Constants.DerivedComponents.RequestTarget)
-            AddRequestTarget(_context.GetDerivedComponentValue(derived)!);
+            AddRequestTarget(_message.GetDerivedComponentValue(derived));
     }
 
     /// <summary>
@@ -115,7 +114,6 @@ public class MastodonComponentBuilder : ISignatureComponentBuildVisitor
     /// <param name="signatureParamsComponent"></param>
     public void Visit(SignatureParamsComponent signatureParamsComponent)
     {
-        // TODO: visit and build everything
         var hasTarget = false;
         foreach (SignatureComponent component in signatureParamsComponent.Components)
         {
@@ -126,7 +124,7 @@ public class MastodonComponentBuilder : ISignatureComponentBuildVisitor
             }
         }
         
-        // cavage-draft-8 requires (I think?) including the request target in the signing document
+        // draft-cavage-8 requires (I think?) including the request target in the signing document
         if (!hasTarget) new DerivedComponent(Constants.DerivedComponents.RequestTarget).Accept(this);
         
     }
@@ -141,30 +139,11 @@ public class MastodonComponentBuilder : ISignatureComponentBuildVisitor
 
     #region Private Methods
 
-    protected bool TryGetHeaderValues(bool bindRequest, string headerName, out IEnumerable<string> values)
-    {
-        if (bindRequest)
-        {
-            return TryGetRequestHeaderValues(headerName, out values);
-        }
-        else
-        {
-            return TryGetHeaderValues(headerName, out values);
-        }
-    }
-
     protected bool TryGetHeaderValues(string headerName, out IEnumerable<string> values)
     {
-        values = _context.GetHeaderValues(headerName);
-        return values.Any();
+        return _message.Headers.TryGetValues(headerName, out values);
     }
 
-    protected bool TryGetRequestHeaderValues(string headerName, out IEnumerable<string> values)
-    {
-        values = _context.GetRequestHeaderValues(headerName);
-        return values.Any();
-    }
-    
     private void AddHeader(string header, string value)
     {
         _headerParams.Add(header);

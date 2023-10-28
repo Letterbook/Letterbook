@@ -5,10 +5,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
-
+    
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="12.0.1" />
       <PackageReference Include="AutoMapper.Collection" Version="9.0.0" />
+      <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1" />
       <PackageReference Include="Letterbook.ActivityPub" Version="1.0.0-ci0035-83" />
       <PackageReference Include="Letterbook.NSign.Client" Version="0.19.1" />
       <PackageReference Include="Letterbook.NSign.SignatureProviders" Version="0.19.1" />

@@ -12,8 +12,9 @@ public class SigningKey
     public ReadOnlyMemory<byte>? PrivateKey { get; set; }
     public DateTimeOffset Created { get; set; }
     public DateTimeOffset Expires { get; set; }
+    public Uri KeyUri { get; set; }
 
-    public static SigningKey Rsa(int keyOrder, string label = "System generated key")
+    public static SigningKey Rsa(int keyOrder, Uri keyUri, string label = "System generated key")
     {
         using RSA keyPair = RSA.Create();
         return new SigningKey()
@@ -22,14 +23,15 @@ public class SigningKey
             KeyOrder = keyOrder,
             Label = label,
             Family = KeyFamily.Rsa,
-            PublicKey = keyPair.ExportRSAPublicKey(),
-            PrivateKey = keyPair.ExportRSAPrivateKey(),
+            PublicKey = keyPair.ExportSubjectPublicKeyInfo(),
+            PrivateKey = keyPair.ExportPkcs8PrivateKey(),
             Created = DateTimeOffset.UtcNow,
-            Expires = DateTimeOffset.MaxValue
+            Expires = DateTimeOffset.MaxValue,
+            KeyUri = keyUri
         };
     }
     
-    public static SigningKey Dsa(int keyOrder, string label = "System generated key")
+    public static SigningKey Dsa(int keyOrder, Uri keyUri, string label = "System generated key")
     {
         using DSA keyPair = DSA.Create();
         return new SigningKey()
@@ -38,33 +40,59 @@ public class SigningKey
             KeyOrder = keyOrder,
             Label = label,
             Family = KeyFamily.Dsa,
-            PublicKey = keyPair.ExportPkcs8PrivateKey(),
-            PrivateKey = keyPair.ExportSubjectPublicKeyInfo(),
+            PublicKey = keyPair.ExportSubjectPublicKeyInfo(),
+            PrivateKey = keyPair.ExportPkcs8PrivateKey(),
             Created = DateTimeOffset.UtcNow,
-            Expires = DateTimeOffset.MaxValue
+            Expires = DateTimeOffset.MaxValue,
+            KeyUri = keyUri
         };
     }
     
-    public static SigningKey Hmac(int keyOrder, string label = "System generated key")
+    public static SigningKey EcDsa(int keyOrder, Uri keyUri, string label = "System generated key")
     {
-        using HMAC key = new HMACSHA256();
+        using ECDsa keyPair = ECDsa.Create(ECCurve.CreateFromFriendlyName("ed25519"));
         return new SigningKey()
         {
             Id = Guid.NewGuid(),
             KeyOrder = keyOrder,
             Label = label,
-            Family = KeyFamily.Hmac,
-            PublicKey = key.Key,
-            PrivateKey = key.Key,
+            Family = KeyFamily.EcDsa,
+            PublicKey = keyPair.ExportSubjectPublicKeyInfo(),
+            PrivateKey = keyPair.ExportPkcs8PrivateKey(),
             Created = DateTimeOffset.UtcNow,
-            Expires = DateTimeOffset.MaxValue
+            Expires = DateTimeOffset.MaxValue,
+            KeyUri = keyUri
         };
+    }
+    
+    public RSA GetRsa()
+    {
+        RSA alg = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();
+        if (PrivateKey is {} pk) alg.ImportPkcs8PrivateKey(pk.Span, out _);
+        else alg.ImportSubjectPublicKeyInfo(PublicKey.Span, out _);
+        return alg;
+    }
+    
+    public DSA GetDsa()
+    {
+        DSA alg = OperatingSystem.IsWindows() ? new DSACng() : new DSAOpenSsl();
+        if (PrivateKey is {} pk) alg.ImportPkcs8PrivateKey(pk.Span, out _);
+        else alg.ImportSubjectPublicKeyInfo(PublicKey.Span, out _);
+        return alg;
+    }
+    
+    public ECDsa GetEcDsa()
+    {
+        ECDsa alg = OperatingSystem.IsWindows() ? new ECDsaCng() : new ECDsaOpenSsl();
+        if (PrivateKey is {} pk) alg.ImportPkcs8PrivateKey(pk.Span, out _);
+        else alg.ImportSubjectPublicKeyInfo(PublicKey.Span, out _);
+        return alg;
     }
     
     public enum KeyFamily
     {
         Rsa,
         Dsa,
-        Hmac
+        EcDsa
     }
 }

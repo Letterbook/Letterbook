@@ -93,7 +93,7 @@ public sealed class FakeProfile : Faker<Profile>
             {
                 new SigningKey()
                 {
-                    Created = f.Date.Past(1, DateTime.Parse("2020-01-01")),
+                    Created = f.Date.Past(1, DateTime.Parse("2020-01-01").ToUniversalTime()),
                     Expires = DateTimeOffset.MaxValue,
                     Family = SigningKey.KeyFamily.Rsa,
                     Id = f.Random.Guid(),
