@@ -5,6 +5,6 @@
 /// </summary>
 public interface IClientSigner
 {
-    public HttpRequestMessage SignRequest(Models.SigningKey signingKey, string keyId,
-        HttpRequestMessage message, string signatureId);
+    public HttpRequestMessage SignRequest(Models.SigningKey signingKey, HttpRequestMessage message,
+        string? signatureId);
 }

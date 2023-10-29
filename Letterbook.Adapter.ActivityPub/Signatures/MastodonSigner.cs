@@ -19,7 +19,7 @@ public class MastodonSigner : IClientSigner
         _options = options.Value;
     }
 
-    public HttpRequestMessage SignRequest(Models.SigningKey signingKey, string keyId, HttpRequestMessage message,
+    public HttpRequestMessage SignRequest(Models.SigningKey signingKey, HttpRequestMessage message,
         string signatureId = "mastodon")
     {
         if (signingKey.Family != KeyFamily.Rsa)
@@ -38,14 +38,15 @@ public class MastodonSigner : IClientSigner
                 inputSpec.SignatureParameters.AddComponent(spec.Component);
         }
 
-        inputSpec.SignatureParameters.KeyId = keyId;
+        inputSpec.SignatureParameters.KeyId = signingKey.KeyUri.ToString();
         inputSpec.SignatureParameters.Algorithm = Constants.SignatureAlgorithms.RsaPkcs15Sha256;
         builder.Visit(inputSpec.SignatureParameters);
 
         var signature = SignRsa(signingKey.GetRsa(), builder.SigningDocument);
 
-        message.Headers.Add(Constants.Headers.SignatureInput, builder.SigningDocumentSpec);
-        message.Headers.Add(Constants.Headers.Signature, $"keyId=\"{keyId}\",headers=\"{builder.SigningDocumentSpec}\",signature=\"{Convert.ToBase64String(signature)}\"");
+        message.Headers.Add(Constants.Headers.SignatureInput, $"{signatureId}={builder.SigningDocumentSpec}");
+        message.Headers.Add(Constants.Headers.Signature,
+            $"keyId=\"{signingKey.KeyUri}\",headers=\"{builder.SigningDocumentSpec}\",signature=\"{Convert.ToBase64String(signature)}\"");
 
         return message;
     }
