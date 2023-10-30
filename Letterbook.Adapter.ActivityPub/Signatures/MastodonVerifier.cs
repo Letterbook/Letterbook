@@ -103,22 +103,21 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
         SignatureInputSpec ParseSpec(string headersString)
         {
             _logger.LogDebug("Parsing Mastodon signature headers '{Headers}'", headersString);
-            var spec = new SignatureInputSpec("test-spec");
+            var spec = new SignatureInputSpec("spec");
             var match = DerivedComponentsRegex().Match(headersString);
             if (match.Success)
             {
-                foreach (var token in match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                foreach (var token in match.Value.Split(new []{' ', '(', ')'}, StringSplitOptions.RemoveEmptyEntries))
                 {
                     spec.SignatureParameters.AddComponent(new DerivedComponent("@" + token));
                 }
             }
 
             var comps = headersString
-                .Substring(match.Length)
-                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Substring(match.Length + 1)
+                .Split(new []{' ', '"'}, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Select<string, SignatureComponent>(s =>
                 {
-                    if (s == "host") return DerivedComponent.Authority;
                     if (DerivedComponents.Contains(s)) return new DerivedComponent(s);
                     if (DerivedComponents.Contains("@" + s)) return new DerivedComponent("@" + s);
                     return new HttpHeaderComponent(s);

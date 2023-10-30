@@ -127,4 +127,47 @@ public class MastodonSignatureTests
         var verifier = new MastodonVerifier(_verifierLogger);
         Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
     }
+    
+    [Fact(DisplayName = "Should handle host/@authority")]
+    public void TestSignAndVerifyHost()
+    {
+        _serviceCollection.AddOptions<MessageSigningOptions>()
+            .Configure(options =>
+            {
+                options.WithMandatoryComponent(SignatureComponent.RequestTarget);
+                options.WithMandatoryComponent(SignatureComponent.Authority);
+            });
+        var provider = _serviceCollection.BuildServiceProvider();
+        
+        var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
+        var actual = signer.SignRequest(_signingKey, new HttpRequestMessage(HttpMethod.Get, "http://example.com"));
+
+        var verifier = new MastodonVerifier(_verifierLogger);
+        Assert.Equal("mastodon=(request-target) host", actual.Headers.GetValues("Signature-Input").First());
+        Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
+    }
+    
+    [Theory(DisplayName = "Should ignore other derived components")]
+    // [InlineData(Constants.DerivedComponents.Authority)]
+    [InlineData(Constants.DerivedComponents.Method)]
+    [InlineData(Constants.DerivedComponents.Scheme)]
+    [InlineData(Constants.DerivedComponents.Path)]
+    [InlineData(Constants.DerivedComponents.Query)]
+    public void TestComponents(string name)
+    {
+        _serviceCollection.AddOptions<MessageSigningOptions>()
+            .Configure(options =>
+            {
+                options.WithMandatoryComponent(SignatureComponent.RequestTarget);
+                options.WithMandatoryComponent(new DerivedComponent(name));
+            });
+        var provider = _serviceCollection.BuildServiceProvider();
+        
+        var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
+        var actual = signer.SignRequest(_signingKey, new HttpRequestMessage(HttpMethod.Get, "http://example.com"));
+        Assert.Equal("mastodon=(request-target)", actual.Headers.GetValues("Signature-Input").First());
+
+        var verifier = new MastodonVerifier(_verifierLogger);
+        Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
+    }
 }

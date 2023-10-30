@@ -43,6 +43,13 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
         {
             AddHeader(fieldName, String.Join(", ", values));
         }
+        else
+        {
+            if (fieldName == "host")
+            {
+                AddHeader(fieldName, _message.GetDerivedComponentValue(DerivedComponent.Authority));
+            }
+        }
     }
     
     public void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
@@ -102,8 +109,16 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
     /// <param name="derived"></param>
     public void Visit(DerivedComponent derived)
     {
-        if (derived.ComponentName == Constants.DerivedComponents.RequestTarget)
-            AddRequestTarget(_message.GetDerivedComponentValue(derived));
+        var method = new DerivedComponent(Constants.DerivedComponents.Method);
+        switch (derived.ComponentName)
+        {
+            case Constants.DerivedComponents.RequestTarget:
+                AddRequestTarget($"{_message.GetDerivedComponentValue(method)} {_message.GetDerivedComponentValue(derived)}");
+                break;
+            case Constants.DerivedComponents.Authority:
+                AddHeader("host", _message.GetDerivedComponentValue(derived));
+                break;
+        }
     }
 
     /// <summary>
