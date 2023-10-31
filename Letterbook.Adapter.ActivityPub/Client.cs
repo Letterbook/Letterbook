@@ -19,16 +19,17 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     private readonly HttpClient _httpClient;
     private Models.Profile? _profile = default;
     private IMapper _profileMapper = new Mapper(ProfileMappers.DefaultProfile);
-    private KeyContainer _keys;
+    private HttpRequestMessage _message;
 
-    public Client(ILogger<Client> logger, HttpClient httpClient, KeyContainer keys)
+    public Client(ILogger<Client> logger, HttpClient httpClient)
     {
         _logger = logger;
         _httpClient = httpClient;
-        _keys = keys;
+        _message = new HttpRequestMessage();
     }
     
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
+    // Stream saves on allocations
     private static async Task<Stream?> ReadResponse(HttpResponseMessage response, 
         [CallerMemberName] string name="",
         [CallerFilePath] string path="",
@@ -47,9 +48,11 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     
     public IActivityPubAuthenticatedClient As(Models.Profile? onBehalfOf)
     {
+        if (onBehalfOf == null) return this;
+        
         _profile = onBehalfOf;
-        var signingKey = _profile.Keys.First(key => key.Family == SigningKey.KeyFamily.Rsa);
-        _keys.SetKey(signingKey);
+        _message.Options.Set(new HttpRequestOptionsKey<IEnumerable<SigningKey>>(), _profile.Keys);
+        
         return this;
     }
 

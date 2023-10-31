@@ -56,33 +56,16 @@ public class Program
             });
 
         // Configure Http Signatures
-        const string activityPubAccept = @"application/ld+json; profile=""https://www.w3.org/ns/activitystreams""";
-        builder.Services
-            .Configure<AddContentDigestOptions>(options => options.WithHash(AddContentDigestOptions.Hash.Sha256))
-            .ConfigureMessageSigningOptions(options =>
-            {
-                options.WithMandatoryComponent(SignatureComponent.Method);
-                options.WithMandatoryComponent(SignatureComponent.Authority);
-                options.WithMandatoryComponent(SignatureComponent.RequestTarget);
-                options.WithOptionalComponent(SignatureComponent.ContentDigest);
-                options.WithMandatoryComponent(new HttpHeaderComponent("Date"));
-                options.SignatureName = "ltr";
-                options.SetParameters = component =>
-                {
-                    component.WithCreatedNow();
-                    component.WithExpires(TimeSpan.FromSeconds(150));
-                };
-            })
-            .Services
-            .AddHttpClient<IActivityPubClient, Client>(client =>
-            {
-                client.DefaultRequestHeaders.Accept.ParseAdd(activityPubAccept);
-                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("dotnet",
-                    Environment.Version.ToString(2)));
-                // TODO: get version from Product Version
-                client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("letterbook", "0.0-dev"));
-                client.DefaultRequestHeaders.UserAgent.TryParseAdd(coreOptions.DomainName);
-            });
+        // Note: Starting to move DI config out into adapter as much as possible.
+        // I want to reduce how tightly coupled the process hosting component is from the project that handles API
+        // routes and controllers. Partly because it feels cleaner.
+        // Mostly because high-availability and/or horizontally scaled deployments
+        // will have more than one process, likely on more than one host.
+        //
+        // Workers (ex: SeedAdminWorker and future queue or maintenance workers) should be able to scale independently
+        // of the API, and shouldn't need a whole AspNetCore service just to host them.
+        // This helps with that.
+        builder.Services.AddActivityPubClient(coreOptions.DomainName);
         
         // Register options
         builder.Services.Configure<CoreOptions>(coreSection);
@@ -165,8 +148,4 @@ public class Program
 
         app.Run();
     }
-}
-
-public class SomeOptions
-{
 }

@@ -19,8 +19,8 @@ public class MastodonSigner : IClientSigner
         _options = options.Value;
     }
 
-    public HttpRequestMessage SignRequest(Models.SigningKey signingKey, HttpRequestMessage message,
-        string signatureId = "mastodon")
+    public HttpRequestMessage SignRequest(HttpRequestMessage message,
+        Models.SigningKey signingKey)
     {
         if (signingKey.Family != KeyFamily.Rsa)
         {
@@ -30,7 +30,7 @@ public class MastodonSigner : IClientSigner
 
         var checkInput = new InputCheckingVisitor(message);
         var builder = new MastodonComponentBuilder(message);
-        var inputSpec = new SignatureInputSpec(signatureId);
+        var inputSpec = new SignatureInputSpec("mastodon");
         foreach (var spec in _options.ComponentsToInclude)
         {
             checkInput.Visit(spec.Component);
@@ -44,7 +44,7 @@ public class MastodonSigner : IClientSigner
 
         var signature = SignRsa(signingKey.GetRsa(), builder.SigningDocument);
 
-        message.Headers.Add(Constants.Headers.SignatureInput, $"{signatureId}={builder.SigningDocumentSpec}");
+        message.Headers.Add(Constants.Headers.SignatureInput, $"mastodon={builder.SigningDocumentSpec}");
         message.Headers.Add(Constants.Headers.Signature,
             $"keyId=\"{signingKey.KeyUri}\",headers=\"{builder.SigningDocumentSpec}\",signature=\"{Convert.ToBase64String(signature)}\"");
 
