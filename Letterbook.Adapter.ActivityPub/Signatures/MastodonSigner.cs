@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSign;
+using static NSign.Constants;
 using NSign.Signatures;
 using static Letterbook.Core.Models.SigningKey;
 
@@ -33,19 +34,19 @@ public class MastodonSigner : IClientSigner
         var inputSpec = new SignatureInputSpec("mastodon");
         foreach (var spec in _options.ComponentsToInclude)
         {
-            checkInput.Visit(spec.Component);
+            spec.Component.Accept(checkInput);
             if (spec.Mandatory || checkInput.Found)
                 inputSpec.SignatureParameters.AddComponent(spec.Component);
         }
 
         inputSpec.SignatureParameters.KeyId = signingKey.KeyUri.ToString();
-        inputSpec.SignatureParameters.Algorithm = Constants.SignatureAlgorithms.RsaPkcs15Sha256;
+        inputSpec.SignatureParameters.Algorithm = SignatureAlgorithms.RsaPkcs15Sha256;
         builder.Visit(inputSpec.SignatureParameters);
 
         var signature = SignRsa(signingKey.GetRsa(), builder.SigningDocument);
 
-        message.Headers.Add(Constants.Headers.SignatureInput, $"mastodon={builder.SigningDocumentSpec}");
-        message.Headers.Add(Constants.Headers.Signature,
+        message.Headers.Add(Headers.SignatureInput, $"mastodon={builder.SigningDocumentSpec}");
+        message.Headers.Add(Headers.Signature,
             $"keyId=\"{signingKey.KeyUri}\",headers=\"{builder.SigningDocumentSpec}\",signature=\"{Convert.ToBase64String(signature)}\"");
 
         return message;

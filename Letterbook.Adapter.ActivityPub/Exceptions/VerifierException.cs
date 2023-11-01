@@ -1,9 +1,8 @@
-﻿using System.Net;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
-using NSign;
+using static NSign.Constants;
 
 namespace Letterbook.Adapter.ActivityPub.Exceptions;
 
@@ -41,9 +40,9 @@ public class VerifierException : CoreException
             Source = FormatSource(path, name, line),
         };
         ex.HResult |= (int)ErrorCodes.PermissionDenied.With(ErrorCodes.InvalidRequest);
-        if (headers.TryGetValues(Constants.Headers.Signature, out var signatures))
+        if (headers.TryGetValues(Headers.Signature, out var signatures))
             ex.Data["Signature Header"] = signatures;
-        if (headers.TryGetValues(Constants.Headers.SignatureInput, out var inputs))
+        if (headers.TryGetValues(Headers.SignatureInput, out var inputs))
             ex.Data["Signature-Input Header"] = inputs;
         if (headers.TryGetValues("User-Agent", out var userAgent))
             ex.Data["User-Agent Header"] = userAgent;

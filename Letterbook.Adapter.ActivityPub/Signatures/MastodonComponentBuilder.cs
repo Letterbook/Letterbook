@@ -1,4 +1,6 @@
-﻿using NSign;
+﻿using System.Diagnostics.CodeAnalysis;
+using NSign;
+using static NSign.Constants;
 using NSign.Signatures;
 
 namespace Letterbook.Adapter.ActivityPub.Signatures;
@@ -47,7 +49,7 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
         {
             if (fieldName == "host")
             {
-                AddHeader(fieldName, _message.GetDerivedComponentValue(DerivedComponent.Authority));
+                AddHeader(fieldName, _message.GetDerivedComponentValue(SignatureComponent.Authority));
             }
         }
     }
@@ -109,13 +111,13 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
     /// <param name="derived"></param>
     public void Visit(DerivedComponent derived)
     {
-        var method = new DerivedComponent(Constants.DerivedComponents.Method);
+        var method = new DerivedComponent(DerivedComponents.Method);
         switch (derived.ComponentName)
         {
-            case Constants.DerivedComponents.RequestTarget:
+            case DerivedComponents.RequestTarget:
                 AddRequestTarget($"{_message.GetDerivedComponentValue(method)} {_message.GetDerivedComponentValue(derived)}");
                 break;
-            case Constants.DerivedComponents.Authority:
+            case DerivedComponents.Authority:
                 AddHeader("host", _message.GetDerivedComponentValue(derived));
                 break;
         }
@@ -133,14 +135,14 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
         foreach (SignatureComponent component in signatureParamsComponent.Components)
         {
             component.Accept(this);
-            if (component is DerivedComponent dc && dc.ComponentName == Constants.DerivedComponents.RequestTarget)
+            if (component is DerivedComponent dc && dc.ComponentName == DerivedComponents.RequestTarget)
             {
                 hasTarget = true;
             }
         }
         
         // draft-cavage-8 requires (I think?) including the request target in the signing document
-        if (!hasTarget) new DerivedComponent(Constants.DerivedComponents.RequestTarget).Accept(this);
+        if (!hasTarget) new DerivedComponent(DerivedComponents.RequestTarget).Accept(this);
         
     }
 
@@ -154,10 +156,15 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
 
     #region Private Methods
 
-    protected bool TryGetHeaderValues(string headerName, out IEnumerable<string> values)
+    private bool TryGetHeaderValues(string header, [NotNullWhen(true)] out IEnumerable<string>? values)
     {
-        return _message.Headers.TryGetValues(headerName, out values);
+        return _message.Headers.TryGetValues(header, out values)
+               || (_message.Content != null && _message.Content.Headers.TryGetValues(header, out values));
     }
+    // protected bool TryGetHeaderValues(string headerName, out IEnumerable<string> values)
+    // {
+        // return _message.Headers.TryGetValues(headerName, out values);
+    // }
 
     private void AddHeader(string header, string value)
     {

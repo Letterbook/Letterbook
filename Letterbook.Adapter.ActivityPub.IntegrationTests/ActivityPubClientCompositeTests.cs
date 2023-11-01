@@ -33,7 +33,7 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
     {
     }
 
-    [Fact]
+    [Fact(Skip = "no backend")]
     public async Task SendFollow()
     {
         var remote = new Uri("http://localhost:8200/anything");

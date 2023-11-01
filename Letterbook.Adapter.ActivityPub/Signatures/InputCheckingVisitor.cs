@@ -1,5 +1,7 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
 using NSign;
+using static NSign.Constants;
 using NSign.Signatures;
 using StructuredFieldValues;
 
@@ -18,17 +20,17 @@ internal sealed class InputCheckingVisitor : ISignatureComponentVisitor
 
     public void Visit(SignatureComponent component)
     {
-        // Intentionally left blank because signature components can't be unavailable
+        /* Intentionally left blank because signature components can't be unavailable */
     }
     
     public void Visit(HttpHeaderComponent httpHeader)
     {
-        Found &= _context.Headers.TryGetValues(httpHeader.ComponentName, out _);
+        Found &= TryGetHeaderValues(_context, httpHeader.ComponentName, out _);
     }
     
     public void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
     {
-        Found &= _context.Headers.TryGetValues(httpHeaderDictionary.ComponentName, out var values)
+        Found &= TryGetHeaderValues(_context, httpHeaderDictionary.ComponentName, out var values)
                  && HasKey(values, httpHeaderDictionary.Key);
     }
     
@@ -43,19 +45,19 @@ internal sealed class InputCheckingVisitor : ISignatureComponentVisitor
     {
         switch (derived.ComponentName)
         {
-            case Constants.DerivedComponents.Method:
-            case Constants.DerivedComponents.TargetUri:
-            case Constants.DerivedComponents.Authority:
-            case Constants.DerivedComponents.Scheme:
-            case Constants.DerivedComponents.RequestTarget:
-            case Constants.DerivedComponents.Path:
-            case Constants.DerivedComponents.Query:
+            case DerivedComponents.Method:
+            case DerivedComponents.TargetUri:
+            case DerivedComponents.Authority:
+            case DerivedComponents.Scheme:
+            case DerivedComponents.RequestTarget:
+            case DerivedComponents.Path:
+            case DerivedComponents.Query:
                 break;
-            case Constants.DerivedComponents.Status:
+            case DerivedComponents.Status:
                 Found = false;
                 break;
-            case Constants.DerivedComponents.SignatureParams:
-            case Constants.DerivedComponents.QueryParam:
+            case DerivedComponents.SignatureParams:
+            case DerivedComponents.QueryParam:
                 throw new NotSupportedException(
                     $"Derived component '{derived.ComponentName}' must be added through the corresponding class.");
 
@@ -89,5 +91,12 @@ internal sealed class InputCheckingVisitor : ISignatureComponentVisitor
         }
 
         return false;
+    }
+
+    private static bool TryGetHeaderValues(HttpRequestMessage message, string header,
+        [NotNullWhen(true)] out IEnumerable<string>? values)
+    {
+        return message.Headers.TryGetValues(header, out values)
+               || (message.Content != null && message.Content.Headers.TryGetValues(header, out values));
     }
 }

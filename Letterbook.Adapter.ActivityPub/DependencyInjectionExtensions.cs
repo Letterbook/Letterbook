@@ -13,8 +13,12 @@ public static class DependencyInjectionExtensions
 
     public static IHttpClientBuilder AddSigningClient(this IHttpClientBuilder clientBuilder)
     {
-        clientBuilder.Services.AddTransient<ClientHandler>();
-        return clientBuilder.AddContentDigestHandler()
+        clientBuilder.Services
+            .AddTransient<AddContentDigestHandler>()
+            .AddTransient<ClientHandler>()
+            .AddTransient<IClientSigner, MastodonSigner>();
+        return clientBuilder
+            .AddHttpMessageHandler<AddContentDigestHandler>()
             .AddHttpMessageHandler<ClientHandler>();
     }
 

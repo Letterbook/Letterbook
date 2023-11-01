@@ -31,7 +31,7 @@ public class ClientTests : WithMocks
     public ClientTests(ITestOutputHelper output)
     {
         var httpClient = new HttpClient(HttpMessageHandlerMock.Object);
-        _client = new Client(Mock.Of<ILogger<Client>>(), httpClient, new KeyContainer());
+        _client = new Client(Mock.Of<ILogger<Client>>(), httpClient);
         _output = output;
 
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");

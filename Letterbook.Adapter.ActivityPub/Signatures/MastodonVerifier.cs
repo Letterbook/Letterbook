@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Letterbook.Adapter.ActivityPub.Exceptions;
 using Microsoft.Extensions.Logging;
 using NSign;
+using static NSign.Constants;
 using NSign.Signatures;
 
 namespace Letterbook.Adapter.ActivityPub.Signatures;
@@ -12,16 +13,16 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 {
     private HashSet<string> DerivedComponents = new()
     {
-        Constants.DerivedComponents.Authority,
-        Constants.DerivedComponents.Status,
-        Constants.DerivedComponents.RequestTarget,
-        Constants.DerivedComponents.TargetUri,
-        Constants.DerivedComponents.Path,
-        Constants.DerivedComponents.Method,
-        Constants.DerivedComponents.Query,
-        Constants.DerivedComponents.Scheme,
-        Constants.DerivedComponents.QueryParam,
-        Constants.DerivedComponents.SignatureParams
+        NSign.Constants.DerivedComponents.Authority,
+        NSign.Constants.DerivedComponents.Status,
+        NSign.Constants.DerivedComponents.RequestTarget,
+        NSign.Constants.DerivedComponents.TargetUri,
+        NSign.Constants.DerivedComponents.Path,
+        NSign.Constants.DerivedComponents.Method,
+        NSign.Constants.DerivedComponents.Query,
+        NSign.Constants.DerivedComponents.Scheme,
+        NSign.Constants.DerivedComponents.QueryParam,
+        NSign.Constants.DerivedComponents.SignatureParams
     };
 
     [GeneratedRegex(@"\(.*\)")]
@@ -54,7 +55,7 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 
     public IEnumerable<MastodonSignatureComponents> ParseMastodonSignatureComponents(HttpRequestMessage message)
     {
-        if (!message.Headers.TryGetValues(Constants.Headers.Signature, out var values))
+        if (!message.Headers.TryGetValues(Headers.Signature, out var values))
             throw VerifierException.NoSignatures();
 
         var mastodonSignatures = values

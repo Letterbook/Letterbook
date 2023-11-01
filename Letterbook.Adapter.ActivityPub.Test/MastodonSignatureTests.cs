@@ -7,8 +7,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using NSign;
+using static NSign.Constants;
 using NSign.Signatures;
 using Xunit.Abstractions;
+// using Constants = Letterbook.Adapter.ActivityPub.Signatures.Constants;
 
 namespace Letterbook.Adapter.ActivityPub.Test;
 
@@ -148,10 +150,10 @@ public class MastodonSignatureTests
     }
     
     [Theory(DisplayName = "Should ignore other derived components")]
-    [InlineData(Constants.DerivedComponents.Method)]
-    [InlineData(Constants.DerivedComponents.Scheme)]
-    [InlineData(Constants.DerivedComponents.Path)]
-    [InlineData(Constants.DerivedComponents.Query)]
+    [InlineData(DerivedComponents.Method)]
+    [InlineData(DerivedComponents.Scheme)]
+    [InlineData(DerivedComponents.Path)]
+    [InlineData(DerivedComponents.Query)]
     public void TestComponents(string name)
     {
         _serviceCollection.AddOptions<MessageSigningOptions>()
@@ -171,8 +173,8 @@ public class MastodonSignatureTests
     }
     
     [Theory(DisplayName = "Should include headers")]
-    [InlineData(Constants.Headers.ContentLength)]
-    [InlineData(Constants.Headers.ContentType)]
+    [InlineData(Headers.ContentLength)]
+    [InlineData(Headers.ContentType)]
     [InlineData("date")]
     public void TestHeaders(string name)
     {

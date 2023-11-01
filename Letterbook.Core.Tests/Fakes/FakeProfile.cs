@@ -56,7 +56,7 @@ public sealed class FakeProfile : Faker<Profile>
         {
             var localId = f.Random.Guid();
             var builder = new UriBuilder(uri);
-            builder.Path = $"/Actor/{ShortId.ToShortId(localId)}";
+            builder.Path += $"/Actor/{ShortId.ToShortId(localId)}";
             var id = builder.Uri;
             var basePath = builder.Path;
             builder.Path = basePath + "/inbox";
@@ -89,7 +89,7 @@ public sealed class FakeProfile : Faker<Profile>
         RuleFor(p => p.CustomFields,
             (f) => new CustomField[] { new() { Label = "UUID", Value = $"{f.Random.Guid()}" } });
         RuleFor(p => p.Keys,
-            f => new List<SigningKey>()
+            (f, profile) => new List<SigningKey>()
             {
                 new SigningKey()
                 {
@@ -97,8 +97,9 @@ public sealed class FakeProfile : Faker<Profile>
                     Expires = DateTimeOffset.MaxValue,
                     Family = SigningKey.KeyFamily.Rsa,
                     Id = f.Random.Guid(),
-                    PrivateKey = rsa.ExportRSAPrivateKey(),
-                    PublicKey = rsa.ExportRSAPublicKey(),
+                    KeyUri = new Uri(uri, $"Actor/{profile.LocalId!.Value.ToShortId()}/keys/0"),
+                    PrivateKey = rsa.ExportPkcs8PrivateKey(),
+                    PublicKey = rsa.ExportSubjectPublicKeyInfo(),
                     KeyOrder = 0,
                     Label = "Static test key"
                 }

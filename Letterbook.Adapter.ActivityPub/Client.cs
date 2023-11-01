@@ -1,11 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Json;
 using AutoMapper;
 using Letterbook.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Exceptions;
 using Letterbook.Adapter.ActivityPub.Mappers;
+using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Values;
@@ -51,7 +53,9 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         if (onBehalfOf == null) return this;
         
         _profile = onBehalfOf;
-        _message.Options.Set(new HttpRequestOptionsKey<IEnumerable<SigningKey>>(), _profile.Keys);
+        var httpRequestOptionsKey = new HttpRequestOptionsKey<IEnumerable<SigningKey>>(Constants.SigningKeysOptionsId);
+        _message.Options.Set(httpRequestOptionsKey, _profile.Keys);
+        // _message.Properties(Constants.SigningKeysOptionsId, _profile.Keys);
         
         return this;
     }
@@ -64,13 +68,12 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
             Type = "Follow",
         };
         follow.Actor.Add(actor);
-        var request = new HttpRequestMessage(HttpMethod.Post, inbox)
-        {
-            Content = JsonContent.Create(follow, options: JsonOptions.ActivityPub),
-        };
-        request.Headers.Date = DateTimeOffset.Now;
+        
+        _message.Method = HttpMethod.Post;
+        _message.RequestUri = inbox;
+        _message.Content = JsonContent.Create(follow, options: JsonOptions.ActivityPub);
 
-        var response = await _httpClient.SendAsync(request);
+        var response = await _httpClient.SendAsync(_message);
         
         var stream = await ReadResponse(response);
         if (stream == null)
