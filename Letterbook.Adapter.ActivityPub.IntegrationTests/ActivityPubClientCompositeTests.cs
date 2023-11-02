@@ -24,7 +24,7 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
         _output = output;
         _hostFactory = hostFactory;
 
-        _output.WriteLine($"Bogus seed: {Init.WithSeed()}");
+        _output.WriteLine($"Bogus seed: {Init.WithSeed(99263675)}");
         _fakeProfile = new FakeProfile(_hostFactory.Server.BaseAddress.Authority);
     }
     
@@ -33,16 +33,16 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
     {
     }
 
-    [Fact(Skip = "no backend")]
+    [Fact]
     public async Task SendFollow()
     {
-        var remote = new Uri("http://localhost:8200/anything");
+        var remote = new Uri("http://localhost:3080/users/user");
         var profile = _fakeProfile.Generate();
         var target = new FakeProfile(remote).Generate();
         HostFixture.Mocks.AccountProfileMock.Setup(m => m.LookupProfile((Guid)profile.LocalId!))
             .ReturnsAsync(profile);
-        HostFixture.Mocks.AccountProfileMock.Setup(m => m.LookupProfile(remote))
-            .ReturnsAsync(target);
+        // HostFixture.Mocks.AccountProfileMock.Setup(m => m.LookupProfile(remote))
+            // .ReturnsAsync(target);
 
         using var scope = _hostFactory.Services.CreateScope();
         

@@ -10,3 +10,7 @@ Accept: application/ld+json; profile="https://www.w3.org/ns/activitystreams"
 ####
 GET https://www.w3.org/ns/activitystreams#public
 Accept: application/ld+json; profile="https://www.w3.org/ns/activitystreams"
+
+####
+GET http://localhost:3080/users/user/
+Accept: application/ld+json; profile="https://www.w3.org/ns/activitystreams"

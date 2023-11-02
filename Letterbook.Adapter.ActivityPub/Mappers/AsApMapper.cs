@@ -1,38 +1,52 @@
 ﻿using AutoMapper;
 using Letterbook.Core.Models;
 
-namespace Letterbook.Api.Mappers;
+namespace Letterbook.Adapter.ActivityPub.Mappers;
 
-public static class DtoMapper
+public static class AsApMapper
 {
     public static MapperConfiguration Config = new(cfg =>
     {
         ConfigureDtoResolvables(cfg);
         ConfigureProfile(cfg);
         ConfigureNote(cfg);
+        // ConfigureCollections(cfg);
     });
+
+    // public static MapperConfiguration DefaultActor = new(cfg =>
+    // {
+    //     ConfigureProfile(cfg);
+    //     cfg.CreateMap<AsAp.IResolvable, IObjectRef>()
+    //         .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
+    //     cfg.CreateMap<AsAp.IResolvable, ObjectCollection<IObjectRef>>()
+    //         .ConstructUsing((resolvable, context) => new ObjectCollection<IObjectRef>(resolvable.Id));
+    //     // .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+    //     // .ForMember(dest => dest.LocalId, opt => opt.Ignore());
+    //     // ConfigureCollections(cfg);
+    // });
 
     private static void ConfigureProfile(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<AsAp.Actor, Core.Models.Profile>()
-            .IncludeBase<AsAp.IResolvable, Core.Models.Profile>()
+        cfg.CreateMap<AsAp.Actor, Models.Profile>()
+            .IncludeBase<AsAp.IResolvable, Models.Profile>()
             .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
-            .ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers))
+            .ForMember(dest => dest.Followers,
+                opt => opt.MapFrom<DefaultObjectCollectionResolver, AsAp.IResolvable>(src => src.Followers))
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Content))
             .ForMember(dest => dest.CustomFields, opt => opt.MapFrom(src => src.Attachment))
             .ForMember(dest => dest.Inbox, opt => opt.MapFrom(src => src.Inbox.Id))
             .ForMember(dest => dest.Outbox, opt => opt.MapFrom(src => src.Outbox.Id))
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name))
             .AfterMap((_, profile) => profile.Updated = DateTime.UtcNow);
-        
-        cfg.CreateMap<AsAp.Object, Core.Models.Profile>()
-            .IncludeBase<AsAp.IResolvable, Core.Models.Profile>();
-        
-        cfg.CreateMap<AsAp.Link, Core.Models.Profile>()
-            .IncludeBase<AsAp.IResolvable, Core.Models.Profile>();
 
-        cfg.CreateMap<AsAp.IResolvable, Core.Models.Profile>()
+        cfg.CreateMap<AsAp.Object, Models.Profile>()
+            .IncludeBase<AsAp.IResolvable, Models.Profile>();
+
+        cfg.CreateMap<AsAp.Link, Models.Profile>()
+            .IncludeBase<AsAp.IResolvable, Models.Profile>();
+
+        cfg.CreateMap<AsAp.IResolvable, Models.Profile>()
             .IncludeBase<AsAp.IResolvable, IObjectRef>()
             // Handle these on concrete types
             .ForMember(dest => dest.Type, opt => opt.Ignore())
@@ -98,5 +112,20 @@ public static class DtoMapper
         cfg.CreateMap<AsAp.Link, ObjectRef>()
             .IncludeBase<AsAp.IResolvable, IObjectRef>()
             .ForMember(dest => dest.LocalId, opt => opt.Ignore());
+    }
+
+    private static void ConfigureCollections(IMapperConfigurationExpression cfg)
+    {
+        cfg.CreateMap<AsAp.Collection, ObjectCollection<IObjectRef>>()
+            .IncludeBase<AsAp.IResolvable, ObjectCollection<IObjectRef>>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
+
+        cfg.CreateMap<AsAp.Link, ObjectCollection<IObjectRef>>()
+            .IncludeBase<AsAp.IResolvable, ObjectCollection<IObjectRef>>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Href));
+
+        cfg.CreateMap<AsAp.IResolvable, ObjectCollection<IObjectRef>>()
+            .ForMember(dest => dest.LocalId, opt => opt.Ignore())
+            .ForMember(dest => dest.Authority, opt => opt.Ignore());
     }
 }

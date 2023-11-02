@@ -28,4 +28,10 @@
       <ProjectReference Include="..\Letterbook.Core.Tests\Letterbook.Core.Tests.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Data\Actor.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

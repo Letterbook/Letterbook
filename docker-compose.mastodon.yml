@@ -5,7 +5,11 @@
 
 # Can be used standalone, or overlaid with the default docker-compose. Ex:
 # docker-compose -f docker-compose.yml -f docker-compose.mastodon.yml up
-version: '2'
+
+# defaults
+# admin: user@bitnami.org
+# password: bitnami1
+version: '3.10'
 name: mastodon
 
 services:
@@ -31,6 +35,7 @@ services:
       - MASTODON_DATABASE_PASSWORD=bitnami1
       - MASTODON_ELASTICSEARCH_PASSWORD=bitnami123
       - LOCAL_DOMAIN=localhost:3080
+      - WEB_DOMAIN=localhost:3080
   mastodon-streaming:
     depends_on:
       - mastodon

@@ -12,6 +12,7 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Microsoft.Extensions.Logging;
+using Profile = AutoMapper.Profile;
 
 namespace Letterbook.Adapter.ActivityPub;
 
@@ -19,9 +20,11 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 {
     private readonly ILogger<Client> _logger;
     private readonly HttpClient _httpClient;
+    private readonly HttpRequestMessage _message;
     private Models.Profile? _profile = default;
-    private IMapper _profileMapper = new Mapper(ProfileMappers.DefaultProfile);
-    private HttpRequestMessage _message;
+    
+    private static readonly IMapper ProfileMapper = new Mapper(ProfileMappers.DefaultProfile);
+    private static readonly IMapper AsApMapper = new Mapper(Mappers.AsApMapper.Config);
 
     public Client(ILogger<Client> logger, HttpClient httpClient)
     {
@@ -62,7 +65,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
     public async Task<FollowState> SendFollow(Uri inbox)
     {
-        var actor = _profileMapper.Map<AsAp.Actor>(_profile);
+        var actor = ProfileMapper.Map<AsAp.Actor>(_profile);
         var follow = new AsAp.Activity()
         {
             Type = "Follow",
@@ -173,7 +176,13 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
     public async Task<T> Fetch<T>(Uri id) where T : IObjectRef
     {
-        throw new NotImplementedException();
+        var response = await _httpClient.GetAsync(id);
+        var stream = await ReadResponse(response);
+        var fetchType = typeof(T).IsAssignableFrom(typeof(Models.Profile)) ? typeof(AsAp.Actor) : typeof(AsAp.Object);
+        var obj = await JsonSerializer.DeserializeAsync(stream, fetchType, JsonOptions.ActivityPub);
+
+        var mapped = AsApMapper.Map<T>(obj);
+        return mapped;
     }
 
     public void Dispose()
