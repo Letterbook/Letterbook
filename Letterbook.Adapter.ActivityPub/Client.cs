@@ -40,6 +40,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         [CallerFilePath] string path="",
         [CallerLineNumber] int line=-1)
     {
+        var strResp = await response.Content.ReadAsStringAsync();
         return (int)response.StatusCode switch
         {
             >= 500 => throw ClientException.RemoteHostError(response.StatusCode, name: name, path: path, line: line),

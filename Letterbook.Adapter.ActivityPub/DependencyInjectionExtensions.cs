@@ -32,6 +32,7 @@ public static class DependencyInjectionExtensions
                 options.WithMandatoryComponent(SignatureComponent.Authority);
                 options.WithMandatoryComponent(SignatureComponent.RequestTarget);
                 options.WithOptionalComponent(SignatureComponent.ContentDigest);
+                options.WithOptionalComponent(new HttpHeaderComponent("Digest"));
                 options.WithMandatoryComponent(new HttpHeaderComponent("Date"));
                 options.SetParameters = component =>
                 {

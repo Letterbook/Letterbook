@@ -20,6 +20,8 @@ public class ClientHandler : DelegatingHandler
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         request.Headers.Date ??= DateTimeOffset.Now;
+        if (request.Content?.Headers.TryGetValues("Content-Digest", out var digest) == true)
+            request.Headers.Add("Digest", digest);
         if (request.Options.TryGetValue(new HttpRequestOptionsKey<IEnumerable<Models.SigningKey>>(Constants.SigningKeysOptionsId),
                 out IEnumerable<Models.SigningKey>? keys))
         {
