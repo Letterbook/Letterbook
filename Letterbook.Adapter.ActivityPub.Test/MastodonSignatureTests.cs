@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using Bogus;
 using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Core.Tests.Fakes;
@@ -189,11 +190,14 @@ public class MastodonSignatureTests
         var content = new StringContent("hello, world");
         var message = new HttpRequestMessage(HttpMethod.Post, "http://example.com")
         {
-            Content = content
+            Content = content,
         };
+        message.Headers.Date = DateTimeOffset.UnixEpoch;
+        message.Content.Headers.ContentLength = 100;
+        message.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("text/plain");
         var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
         var actual = signer.SignRequest(message, _signingKey);
-        Assert.Equal($"mastodon=(request-target), {name}", actual.Headers.GetValues("Signature-Input").First());
+        Assert.Equal($"mastodon=(request-target) {name}", actual.Headers.GetValues("Signature-Input").First());
 
         var verifier = new MastodonVerifier(_verifierLogger);
         Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
