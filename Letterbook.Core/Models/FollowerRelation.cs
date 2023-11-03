@@ -12,11 +12,11 @@ public class FollowerRelation : IObjectRef
 
     private FollowerRelation()
     {
-        // Id = Guid.Empty;
-        // Follower = default!;
-        // Follows = default!;
-        // State = default;
-        // Date = DateTime.UtcNow;
+        Id = Guid.Empty;
+        Follower = default!;
+        Follows = default!;
+        State = default;
+        Date = DateTime.UtcNow;
     }
 
     public FollowerRelation(Profile follower, Profile follows, FollowState state)

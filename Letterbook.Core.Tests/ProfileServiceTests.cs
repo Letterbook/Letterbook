@@ -2,7 +2,6 @@
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
-using Letterbook.Core.Tests.Extensions;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Microsoft.Extensions.Logging;
@@ -10,6 +9,7 @@ using Moq;
 using Xunit.Abstractions;
 
 namespace Letterbook.Core.Tests;
+
 
 public class ProfileServiceTests : WithMocks
 {

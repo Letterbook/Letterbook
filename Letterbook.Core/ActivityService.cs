@@ -5,6 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Core;
 
+/// <summary>
+/// This whole class probably needs to be replaced. It just isn't going to handle activities this way.
+/// </summary>
 public class ActivityService : IActivityService
 {
     private readonly IActivityAdapter _activityAdapter;

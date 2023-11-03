@@ -12,6 +12,7 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Api.Tests;
 
+
 public class ActorControllerTests : WithMocks
 {
     private ITestOutputHelper _output;
@@ -37,13 +38,13 @@ public class ActorControllerTests : WithMocks
     }
 
     [Fact]
-    public async Task Exists()
+    public void Exists()
     {
         Assert.NotNull(_controller);
     }
 
     [Fact(DisplayName = "Should accept follow activity")]
-    [Trait("Inbox", "Follow")]
+    
     public async Task TestFollowAccept()
     {
         _activity.Type = "Follow";
@@ -62,7 +63,7 @@ public class ActorControllerTests : WithMocks
     }
     
     [Fact(DisplayName = "Should tentative accept follow activity")]
-    [Trait("Inbox", "Follow")]
+    
     public async Task TestFollowTentativeAccept()
     {
         _activity.Type = "Follow";
@@ -81,7 +82,7 @@ public class ActorControllerTests : WithMocks
     }
     
     [Fact(DisplayName = "Should reject follow activity")]
-    [Trait("Inbox", "Follow")]
+    
     public async Task TestFollowReject()
     {
         _activity.Type = "Follow";
@@ -100,7 +101,7 @@ public class ActorControllerTests : WithMocks
     }
     
     [Fact(DisplayName = "Should remove a follower")]
-    [Trait("Inbox", "Undo:Follow")]
+    
     public async Task TestUndoFollow()
     {
         var follow = _fakeActivity.Generate();

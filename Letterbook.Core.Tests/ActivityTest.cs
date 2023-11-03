@@ -4,8 +4,10 @@ using Letterbook.Core.Tests.Fakes;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
+// ReSharper disable PrivateFieldCanBeConvertedToLocalVariable
 
 namespace Letterbook.Core.Tests;
+
 
 public class ActivityTest : WithMocks
 {
