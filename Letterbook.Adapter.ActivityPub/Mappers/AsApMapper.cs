@@ -10,20 +10,7 @@ public static class AsApMapper
         ConfigureDtoResolvables(cfg);
         ConfigureProfile(cfg);
         ConfigureNote(cfg);
-        // ConfigureCollections(cfg);
     });
-
-    // public static MapperConfiguration DefaultActor = new(cfg =>
-    // {
-    //     ConfigureProfile(cfg);
-    //     cfg.CreateMap<AsAp.IResolvable, IObjectRef>()
-    //         .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
-    //     cfg.CreateMap<AsAp.IResolvable, ObjectCollection<IObjectRef>>()
-    //         .ConstructUsing((resolvable, context) => new ObjectCollection<IObjectRef>(resolvable.Id));
-    //     // .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-    //     // .ForMember(dest => dest.LocalId, opt => opt.Ignore());
-    //     // ConfigureCollections(cfg);
-    // });
 
     private static void ConfigureProfile(IMapperConfigurationExpression cfg)
     {
@@ -59,6 +46,7 @@ public static class AsApMapper
             .ForMember(dest => dest.SharedInbox, opt => opt.Ignore())
             .ForMember(dest => dest.Description, opt => opt.Ignore())
             .ForMember(dest => dest.CustomFields, opt => opt.Ignore())
+            .ForMember(dest => dest.Keys, opt => opt.Ignore())
             // Really ignore these, they don't exist in AP
             .ForMember(dest => dest.Authority, opt => opt.Ignore())
             .ForMember(dest => dest.LocalId, opt => opt.Ignore())
@@ -66,7 +54,7 @@ public static class AsApMapper
             .ForMember(dest => dest.OwnedBy, opt => opt.Ignore())
             .ForMember(dest => dest.Updated, opt => opt.Ignore())
             .ForMember(dest => dest.Audiences, opt => opt.Ignore())
-            .ForMember(dest => dest.Keys, opt => opt.Ignore());
+            ;
 
         cfg.CreateMap<AsAp.IResolvable, CustomField>()
             .ForAllMembers(opts => opts.Ignore());
@@ -112,20 +100,5 @@ public static class AsApMapper
         cfg.CreateMap<AsAp.Link, ObjectRef>()
             .IncludeBase<AsAp.IResolvable, IObjectRef>()
             .ForMember(dest => dest.LocalId, opt => opt.Ignore());
-    }
-
-    private static void ConfigureCollections(IMapperConfigurationExpression cfg)
-    {
-        cfg.CreateMap<AsAp.Collection, ObjectCollection<IObjectRef>>()
-            .IncludeBase<AsAp.IResolvable, ObjectCollection<IObjectRef>>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
-
-        cfg.CreateMap<AsAp.Link, ObjectCollection<IObjectRef>>()
-            .IncludeBase<AsAp.IResolvable, ObjectCollection<IObjectRef>>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Href));
-
-        cfg.CreateMap<AsAp.IResolvable, ObjectCollection<IObjectRef>>()
-            .ForMember(dest => dest.LocalId, opt => opt.Ignore())
-            .ForMember(dest => dest.Authority, opt => opt.Ignore());
     }
 }

@@ -1,4 +1,8 @@
-﻿
+﻿// Copyright (c) 2021, Unisys
+//
+// Adapted from NSign, used under the terms of the MIT license
+// https://github.com/Unisys/NSign/commit/660b2412cd523ed175d387cf32f549065b3cc56f
+
 using System.Diagnostics.CodeAnalysis;
 using NSign;
 using static NSign.Constants;

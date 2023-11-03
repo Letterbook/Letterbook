@@ -11,10 +11,10 @@ using NSign;
 using static NSign.Constants;
 using NSign.Signatures;
 using Xunit.Abstractions;
-// using Constants = Letterbook.Adapter.ActivityPub.Signatures.Constants;
 
 namespace Letterbook.Adapter.ActivityPub.Test;
 
+[Trait("Signatures", "Mastodon")]
 public class MastodonSignatureTests
 {
     private readonly ITestOutputHelper _output;

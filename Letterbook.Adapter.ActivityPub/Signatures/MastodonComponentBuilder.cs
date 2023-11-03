@@ -54,54 +54,20 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
         }
     }
     
+    /// <summary>
+    /// Do nothing, this is not supported by draft-cavage-8
+    /// </summary>
+    /// <param name="component"></param>
     public void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
     {
-        // TODO: needed?
-        // bool bindRequest = httpHeaderDictionary.BindRequest;
-        // string fieldName = httpHeaderDictionary.ComponentName;
-        //
-        // if (TryGetHeaderValues(bindRequest, fieldName, out IEnumerable<string> values) &&
-        //     values.TryGetStructuredDictionaryValue(httpHeaderDictionary.Key, out ParsedItem? lastValue))
-        // {
-        //     Debug.Assert(lastValue.HasValue, "lastValue must have a value.");
-        //
-        //     AddInputWithKey(httpHeaderDictionary,
-        //         lastValue.Value.Value.SerializeAsString() +
-        //         lastValue.Value.Parameters.SerializeAsParameters());
-        //     return;
-        // }
-        //
-        // throw new SignatureComponentMissingException(httpHeaderDictionary);
-
-        throw new NotImplementedException();
     }
     
+    /// <summary>
+    /// Do nothing, this is not supported by draft-cavage-8
+    /// </summary>
+    /// <param name="component"></param>
     public void Visit(HttpHeaderStructuredFieldComponent httpHeaderStructuredField)
     {
-        // TODO: needed?
-        // bool bindRequest = httpHeaderStructuredField.BindRequest;
-        // string fieldName = httpHeaderStructuredField.ComponentName;
-        //
-        // if (TryGetHeaderValues(bindRequest, fieldName, out IEnumerable<string> values))
-        // {
-        //     // Let's look up the type of the structured field so we know how to parse it.
-        //     if (!_context.HttpFieldOptions.StructuredFieldsMap.TryGetValue(fieldName, out StructuredFieldType type))
-        //     {
-        //         throw new UnknownStructuredFieldComponentException(httpHeaderStructuredField);
-        //     }
-        //
-        //     if (!type.TryParseStructuredFieldValue(values, out StructuredFieldValue structuredValue))
-        //     {
-        //         throw new StructuredFieldParsingException(fieldName, type);
-        //     }
-        //
-        //     AddHeader(fieldName, structuredValue.Serialize());
-        // }
-        // else
-        // {
-        //     throw new SignatureComponentMissingException(httpHeaderStructuredField);
-        // }
-        throw new NotImplementedException();
     }
 
     /// <summary>

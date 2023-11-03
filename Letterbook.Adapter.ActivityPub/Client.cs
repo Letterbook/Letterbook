@@ -1,18 +1,17 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using AutoMapper;
 using Letterbook.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Exceptions;
 using Letterbook.Adapter.ActivityPub.Mappers;
-using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Microsoft.Extensions.Logging;
-using Profile = AutoMapper.Profile;
+// TODO: Remove after fully implemented
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace Letterbook.Adapter.ActivityPub;
 
@@ -40,16 +39,21 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         [CallerFilePath] string path="",
         [CallerLineNumber] int line=-1)
     {
-        var strResp = await response.Content.ReadAsStringAsync();
-        return (int)response.StatusCode switch
+        switch ((int)response.StatusCode)
         {
-            >= 500 => throw ClientException.RemoteHostError(response.StatusCode, name: name, path: path, line: line),
-            >= 400 and < 500 => throw ClientException.RequestError(response.StatusCode, name: name, path: path, line: line),
-            >= 300 and < 400 => default, // TODO: handle redirects
-            >= 201 and < 300 => default, // TODO: 2xx
-            200 => await response.Content.ReadAsStreamAsync(),
-            < 200 => default,
-        };
+            case >= 500:
+                throw ClientException.RemoteHostError(response.StatusCode, name: name, path: path, line: line);
+            case >= 400 and < 500:
+                throw ClientException.RequestError(response.StatusCode, name: name, path: path, line: line);
+            case >= 300 and < 400:
+                return default;
+            case >= 201 and < 300:
+                return default;
+            case 200:
+                return await response.Content.ReadAsStreamAsync();
+            default:
+                return default;
+        }
     }
     
     public IActivityPubAuthenticatedClient As(Models.Profile? onBehalfOf)
@@ -57,9 +61,8 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         if (onBehalfOf == null) return this;
         
         _profile = onBehalfOf;
-        var httpRequestOptionsKey = new HttpRequestOptionsKey<IEnumerable<SigningKey>>(Constants.SigningKeysOptionsId);
+        var httpRequestOptionsKey = new HttpRequestOptionsKey<IEnumerable<SigningKey>>(IClientSigner.SigningKeysOptionsId);
         _message.Options.Set(httpRequestOptionsKey, _profile.Keys);
-        // _message.Properties(Constants.SigningKeysOptionsId, _profile.Keys);
         
         return this;
     }

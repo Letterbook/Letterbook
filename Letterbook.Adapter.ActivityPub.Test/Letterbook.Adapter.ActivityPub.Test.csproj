@@ -30,7 +30,7 @@
 
     <ItemGroup>
       <None Update="Data\Actor.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
 

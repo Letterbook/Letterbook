@@ -17,9 +17,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using NSign;
-using NSign.Client;
-using NSign.Signatures;
 
 namespace Letterbook.Api;
 
