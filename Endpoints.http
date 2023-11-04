@@ -35,4 +35,6 @@ Content-Type: application/ld+json
 }
 
 ###
+GET {{host}}/.well-known/webfinger?resource=acct:admin@{{host}}
 
+###
