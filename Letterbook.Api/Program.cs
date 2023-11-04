@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Events;
 
 namespace Letterbook.Api;
 
@@ -21,11 +23,23 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        // Pre initialize Serilog
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .CreateBootstrapLogger();
+        
         var builder = WebApplication.CreateBuilder(args);
         var coreSection = builder.Configuration.GetSection(CoreOptions.ConfigKey);
         var coreOptions = coreSection.Get<CoreOptions>() 
                    ?? throw new ArgumentException("Invalid configuration", nameof(CoreOptions));
 
+        // Register Serilog - Serialized Logging (configured in appsettings.json)
+        builder.Host.UseSerilog((context, services, configuration) => configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services));
+        
         // Register controllers
         builder.Services.AddControllers(options =>
         {
@@ -125,8 +139,10 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
-        
+
         app.UsePathBase(new PathString("/api/v1"));
+        
+        app.UseSerilogRequestLogging();
 
         app.MapControllers();
 
