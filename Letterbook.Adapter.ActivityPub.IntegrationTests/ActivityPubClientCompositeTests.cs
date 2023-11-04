@@ -1,15 +1,15 @@
 using Letterbook.Core;
-using Letterbook.Core.Adapters;
 using Letterbook.Core.Tests.Fakes;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Moq;
 using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.ActivityPub.IntegrationTests;
 
+// These tests bypass the API (which mostly doesn't exist yet), and mock the database (because managing test data is 
+// hard). Everything else is live. So, the end result is they send real federated messages using the real core logic
+// and AP client. The test data is entirely fabricated by the test, and we don't have to worry about our own
+// authentication.
 [Trait("ActivityPub", "Client")]
 [Trait("Composite", "ActivityPub")]
 [Trait("Composite", "Mastodon")]
@@ -24,6 +24,9 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
         _output = output;
         _hostFactory = hostFactory;
 
+        // Initialize with a consistent seed, so we get consistent data.
+        // This might not actually be necessary, or even desirable. It's hard to think through in the abstract.
+        // We can change it when federation actually works, if needed.
         _output.WriteLine($"Bogus seed: {Init.WithSeed(99263675)}");
         _fakeProfile = new FakeProfile(_hostFactory.Server.BaseAddress.Authority);
     }
@@ -31,6 +34,7 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
     [Fact]
     public void Exists()
     {
+        Assert.NotNull(_hostFactory);
     }
 
     [Fact(Skip = "Requires keys controllers (and maybe dns?)")]
