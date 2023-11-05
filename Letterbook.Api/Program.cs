@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Metrics;
 
 namespace Letterbook.Api;
 
@@ -47,6 +48,14 @@ public class Program
                 };
                 // TODO(Security): Figure out how to do this only in Development
                 options.RequireHttpsMetadata = false;
+            });
+        
+        // Register Open Telemetry
+        builder.Services.AddOpenTelemetry()
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation();
+                metrics.AddPrometheusExporter();
             });
 
         // Register options
@@ -122,6 +131,8 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.MapPrometheusScrapingEndpoint();
         
         app.UsePathBase(new PathString("/api/v1"));
 
