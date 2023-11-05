@@ -15,6 +15,8 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OpenTelemetry.Metrics;
+using Serilog;
+using Serilog.Events;
 
 namespace Letterbook.Api;
 
@@ -22,11 +24,23 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        // Pre initialize Serilog
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .CreateBootstrapLogger();
+        
         var builder = WebApplication.CreateBuilder(args);
         var coreSection = builder.Configuration.GetSection(CoreOptions.ConfigKey);
         var coreOptions = coreSection.Get<CoreOptions>() 
                    ?? throw new ArgumentException("Invalid configuration", nameof(CoreOptions));
 
+        // Register Serilog - Serialized Logging (configured in appsettings.json)
+        builder.Host.UseSerilog((context, services, configuration) => configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services));
+        
         // Register controllers
         builder.Services.AddControllers(options =>
         {
@@ -66,9 +80,12 @@ public class Program
         // Register Services
         builder.Services.AddScoped<IActivityService, ActivityService>();
         builder.Services.AddScoped<IActivityEventService, ActivityEventService>();
+        builder.Services.AddScoped<IProfileEventService, ProfileEventService>();
         builder.Services.AddScoped<IAccountService, AccountService>();
+        builder.Services.AddScoped<IProfileService, ProfileService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
+        builder.Services.AddScoped<IActivityPubClient, ActivityPubClient>();
         
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();
@@ -133,8 +150,10 @@ public class Program
         app.UseAuthorization();
 
         app.MapPrometheusScrapingEndpoint();
-        
+      
         app.UsePathBase(new PathString("/api/v1"));
+        
+        app.UseSerilogRequestLogging();
 
         app.MapControllers();
 

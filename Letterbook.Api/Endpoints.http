@@ -20,4 +20,19 @@ Content-Type: application/json
 }
 
 ###
+# curl -X 'POST'   'http://localhost:5127/actor/eebmU6ZHx06ezAYNia2_GA/inbox'   -H 'accept: application/ld+json'   -H 'Content-Type: application/ld+json'   -d '{
+#  "type": "Follow",
+#  "actor": "https://social.example/user/1"
+#}'
+# TODO: https://stackoverflow.com/a/62950860
+POST http://localhost:5127/actor/eebmU6ZHx06ezAYNia2_GA/inbox
+accept: application/ld+json
+Content-Type: application/ld+json
+
+{
+  "type": "Follow",
+  "actor": "https://social.example/user/1"
+}
+
+###
 

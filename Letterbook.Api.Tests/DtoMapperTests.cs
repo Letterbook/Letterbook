@@ -23,13 +23,13 @@ public class DtoMapperTests
     [Fact]
     public void CanMapSimpleNote()
     {
-        var dto = new DTO.Object()
+        var dto = new AsAp.Object()
         {
             Id = "https://mastodon.example/note/1234",
             Type = "Note",
             Content = "Some test content",
         };
-        dto.AttributedTo.Add(new DTO.Link("https://letterbook.example/@testuser"));
+        dto.AttributedTo.Add(new AsAp.Link("https://letterbook.example/@testuser"));
         var actual = _mapper.Map<Note>(dto);
             
         Assert.NotNull(actual);

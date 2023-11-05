@@ -273,6 +273,18 @@ public class ProfileService : IProfileService
         return relation.State;
     }
 
+    public async Task<FollowState> ReceiveFollowRequest(Guid localId, Uri followerId)
+    {
+        var target = await RequireProfile(localId);
+        // var follower = await ResolveProfile(followerId);
+        
+        // TODO(moderation): check blocks and requiresApproval
+        var relation = target.AddFollower(Profile.CreateEmpty(followerId), FollowState.Accepted);
+        await _profiles.Commit();
+        
+        return relation.State;
+    }
+
     public async Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response)
     {
         if(selfId.Authority != _coreConfig.BaseUri().Authority)
