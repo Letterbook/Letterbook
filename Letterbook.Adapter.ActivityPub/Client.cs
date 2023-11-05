@@ -98,8 +98,9 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
             if (responseActivity.Type.Equals("Reject", StringComparison.InvariantCultureIgnoreCase))
                 return FollowState.Rejected;
         
-            if (responseActivity.Type.Equals("PendingAccept", StringComparison.InvariantCultureIgnoreCase)
-                || responseActivity.Type.Equals("PendingReject", StringComparison.InvariantCultureIgnoreCase))
+            var isPending = responseActivity.Type.Equals("PendingAccept", StringComparison.InvariantCultureIgnoreCase);
+            var isRejected = responseActivity.Type.Equals("PendingReject", StringComparison.InvariantCultureIgnoreCase);
+            if (isPending || isRejected)
                 return FollowState.Pending;
 
             _logger.LogWarning("Unrecognized response to {Activity}: {ResponseActivity}", nameof(SendFollow), responseActivity.Type);
