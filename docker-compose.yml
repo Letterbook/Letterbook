@@ -36,8 +36,7 @@ services:
   prometheus:
       container_name: prometheus
       image: prom/prometheus:v2.47.2
-      # network_mode: "host"
       ports:
-        - "9090:9090" # Not used since this is using Host mode
+        - "9090:9090"
       volumes:
         - "./Letterbook.Dashboards/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
