@@ -1,9 +1,5 @@
-using System;
-using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using DarkLink.Web.WebFinger.Server;
 using Letterbook.Adapter.ActivityPub;
-using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
@@ -17,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Metrics;
 using Serilog;
 using Serilog.Events;
 
@@ -44,14 +41,12 @@ public class Program
             .ReadFrom.Services(services));
         
         // Register controllers
-        builder.Services.AddControllers(options =>
-        {
-            options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
-        }).AddJsonOptions(opts =>
-        {
-            opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-        });
+        builder.Services
+            .AddControllers(options =>
+            {
+                options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
+            });
+        builder.Services.AddWebfinger();
 
         // Register Authentication
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -64,6 +59,14 @@ public class Program
                 };
                 // TODO(Security): Figure out how to do this only in Development
                 options.RequireHttpsMetadata = false;
+            });
+        
+        // Register Open Telemetry
+        builder.Services.AddOpenTelemetry()
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation();
+                metrics.AddPrometheusExporter();
             });
 
         // Configure Http Signatures
@@ -152,11 +155,16 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+        
+        app.UseWebFingerScoped();
 
+        app.MapPrometheusScrapingEndpoint();
+      
         app.UsePathBase(new PathString("/api/v1"));
         
         app.UseSerilogRequestLogging();
 
+        app.UsePathBase(new PathString("/api/v1"));
         app.MapControllers();
 
         app.Run();

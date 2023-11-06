@@ -2,6 +2,7 @@
 
 namespace Letterbook.Core.Tests;
 
+
 public class ShortIdTests
 {
     public static IEnumerable<object[]> GuidList(int count) =>

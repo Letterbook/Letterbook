@@ -2,7 +2,8 @@
 name: letterbook
 
 services:
-  letterbook_timescale:
+  # Services required for Letterbook operation
+  timescale:
     container_name: timescale
     image: timescale/timescaledb:2.11.2-pg15-oss
     environment:
@@ -33,10 +34,25 @@ services:
     ports:
       - '8200:80'
   
+  # Optional Dashboarding and Observability Services
+  grafana:
+      container_name: grafana
+      image: grafana/grafana-oss:10.2.0
+      ports:
+        - "3000:3000"
+      volumes:
+        - "./Letterbook.Dashboards/Grafana/provisioning:/etc/grafana/provisioning"
+        
+  prometheus:
+      container_name: prometheus
+      image: prom/prometheus:v2.47.2
+      ports:
+        - "9090:9090"
+      volumes:
+        - "./Letterbook.Dashboards/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+
 volumes:
   letterbook_db_data:
     driver: local
   letterbook_ts_data:
     driver: local
-
-  
