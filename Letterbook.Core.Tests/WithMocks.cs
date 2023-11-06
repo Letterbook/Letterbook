@@ -12,20 +12,25 @@ public abstract class WithMocks
     protected Mock<IMessageBusAdapter> MessageBusAdapterMock;
     protected Mock<IAccountEventService> AccountEventServiceMock;
     protected Mock<IActivityPubClient> ActivityPubClientMock;
+    protected Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock;
     protected Mock<IProfileService> ProfileServiceMock;
     protected Mock<IActivityService> ActivityServiceMock;
     protected IOptions<CoreOptions> CoreOptionsMock;
+    protected Mock<HttpMessageHandler> HttpMessageHandlerMock;
 
     protected WithMocks()
     {
+        HttpMessageHandlerMock = new Mock<HttpMessageHandler>();
         ActivityAdapterMock = new Mock<IActivityAdapter>();
         AccountProfileMock = new Mock<IAccountProfileAdapter>();
         MessageBusAdapterMock = new Mock<IMessageBusAdapter>();
         AccountEventServiceMock = new Mock<IAccountEventService>();
         ActivityPubClientMock = new Mock<IActivityPubClient>();
+        ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
         ProfileServiceMock = new Mock<IProfileService>();
-        ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubClientMock.Object);
         ActivityServiceMock = new Mock<IActivityService>();
+        
+        ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
         var mockOptions = new CoreOptions
         {
             DomainName = "letterbook.example",

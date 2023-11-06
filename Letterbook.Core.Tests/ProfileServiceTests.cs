@@ -271,12 +271,12 @@ public class ProfileServiceTests : WithMocks
     public async Task FollowRemoteAccept()
     {
         var target = new FakeProfile().Generate();
-        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Guid>(self => self == (Guid)_profile.LocalId!)))
+        AccountProfileMock.Setup(m => m.LookupProfile((Guid)_profile.LocalId!))
             .ReturnsAsync(_profile);
-        AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
+        AccountProfileMock.Setup(m => m.LookupProfile(target.Id))
             .ReturnsAsync(default(Profile));
-        ActivityPubClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
-        ActivityPubClientMock.Setup(m => m.SendFollow(target.Inbox, It.IsAny<FollowerRelation>()))
+        ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
+        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox))
             .ReturnsAsync(FollowState.Accepted);
 
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
@@ -293,8 +293,8 @@ public class ProfileServiceTests : WithMocks
             .ReturnsAsync(_profile);
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
             .ReturnsAsync(default(Profile));
-        ActivityPubClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
-        ActivityPubClientMock.Setup(m => m.SendFollow(target.Inbox, It.IsAny<FollowerRelation>()))
+        ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
+        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox))
             .ReturnsAsync(FollowState.Pending);
 
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
@@ -311,8 +311,8 @@ public class ProfileServiceTests : WithMocks
             .ReturnsAsync(_profile);
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
             .ReturnsAsync(default(Profile));
-        ActivityPubClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
-        ActivityPubClientMock.Setup(m => m.SendFollow(target.Inbox, It.IsAny<FollowerRelation>()))
+        ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
+        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox))
             .ReturnsAsync(FollowState.Rejected);
 
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);

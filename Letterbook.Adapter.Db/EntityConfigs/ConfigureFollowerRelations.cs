@@ -9,8 +9,6 @@ public class ConfigureFollowerRelations : IEntityTypeConfiguration<Models.Follow
     {
         builder.HasKey(relation => relation.Id);
         builder.HasIndex(relation => relation.Date);
-        // builder.Property(relation => relation.Follows).IsRequired();
-        // builder.Property(relation => relation.Follower).IsRequired();
         builder.HasOne<Models.Profile>(relation => relation.Follower)
             .WithMany(profile => profile.Following);
         builder.HasOne<Models.Profile>(relation => relation.Follows)

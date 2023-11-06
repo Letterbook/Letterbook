@@ -1,6 +1,9 @@
 using System;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Letterbook.Adapter.ActivityPub;
+using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
@@ -14,6 +17,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Metrics;
+using Serilog;
+using Serilog.Events;
 
 namespace Letterbook.Api;
 
@@ -21,11 +27,23 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        // Pre initialize Serilog
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .CreateBootstrapLogger();
+        
         var builder = WebApplication.CreateBuilder(args);
         var coreSection = builder.Configuration.GetSection(CoreOptions.ConfigKey);
         var coreOptions = coreSection.Get<CoreOptions>() 
                    ?? throw new ArgumentException("Invalid configuration", nameof(CoreOptions));
 
+        // Register Serilog - Serialized Logging (configured in appsettings.json)
+        builder.Host.UseSerilog((context, services, configuration) => configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services));
+        
         // Register controllers
         builder.Services.AddControllers(options =>
         {
@@ -48,7 +66,27 @@ public class Program
                 // TODO(Security): Figure out how to do this only in Development
                 options.RequireHttpsMetadata = false;
             });
+        
+        // Register Open Telemetry
+        builder.Services.AddOpenTelemetry()
+            .WithMetrics(metrics =>
+            {
+                metrics.AddAspNetCoreInstrumentation();
+                metrics.AddPrometheusExporter();
+            });
 
+        // Configure Http Signatures
+        // Note: Starting to move DI config out into adapter as much as possible.
+        // I want to reduce how tightly coupled the process hosting component is from the project that handles API
+        // routes and controllers. Partly because it feels cleaner.
+        // Mostly because high-availability and/or horizontally scaled deployments
+        // will have more than one process, likely on more than one host.
+        //
+        // Workers (ex: SeedAdminWorker and future queue or maintenance workers) should be able to scale independently
+        // of the API, and shouldn't need a whole AspNetCore service just to host them.
+        // This helps with that.
+        builder.Services.AddActivityPubClient(coreOptions.DomainName);
+        
         // Register options
         builder.Services.Configure<CoreOptions>(coreSection);
         builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptions.ConfigKey));
@@ -62,12 +100,10 @@ public class Program
         builder.Services.AddScoped<IProfileService, ProfileService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
-        builder.Services.AddScoped<IActivityPubClient, ActivityPubClient>();
         
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();
         builder.Services.AddHostedService<WorkerScope<SeedAdminWorker>>();
-        // TODO: clean up and make things buildable again, then see if you can log in
         
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
@@ -125,15 +161,15 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
-        
+
+        app.MapPrometheusScrapingEndpoint();
+      
         app.UsePathBase(new PathString("/api/v1"));
+        
+        app.UseSerilogRequestLogging();
 
         app.MapControllers();
 
         app.Run();
     }
-}
-
-public class SomeOptions
-{
 }
