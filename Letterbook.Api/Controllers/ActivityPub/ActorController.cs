@@ -169,7 +169,8 @@ public class ActorController : ControllerBase
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     public async Task<ActionResult> SharedInbox(AsAp.Activity activity)
     {
-        await _activityService.ReceiveNotes(new Note[] { }, Enum.Parse<ActivityType>(activity.Type), null);
+        throw new NotImplementedException();
+        // await _activityService.ReceiveNotes(new Note[] { }, Enum.Parse<ActivityType>(activity.Type), null);
         return Accepted();
     }
 

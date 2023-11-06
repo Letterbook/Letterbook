@@ -8,6 +8,7 @@ using Moq;
 
 namespace Letterbook.Core.Tests;
 
+
 public class ActivityEventServiceTest : WithMocks
 {
     private ActivityEventService _service;

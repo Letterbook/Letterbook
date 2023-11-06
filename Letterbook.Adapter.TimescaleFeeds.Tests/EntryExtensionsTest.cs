@@ -3,6 +3,7 @@ using Letterbook.Adapter.TimescaleFeeds.Extensions;
 
 namespace Letterbook.Adapter.TimescaleFeeds._Tests;
 
+
 public class EntryExtensionsTest
 {
     [Fact]
