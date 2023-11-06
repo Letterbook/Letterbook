@@ -6,6 +6,7 @@ using Moq;
 
 namespace Letterbook.Core.Tests;
 
+
 public class AccountEventServiceTest : WithMocks
 {
     private AccountEventService _service;
