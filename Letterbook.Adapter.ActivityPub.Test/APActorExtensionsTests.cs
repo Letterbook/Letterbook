@@ -25,14 +25,14 @@ public class APActorExtensionsTests
 
         var json = _serializer.SerializeToElement(actor);
         
-        Assert.True(json.TryGetProperty("publicKey", out var publicKey), "missing publicKey"); // Fails
+        Assert.True(json.TryGetProperty("publicKey", out var publicKey), "missing publicKey");
         Assert.True(publicKey.TryGetProperty("publicKeyPem", out var publicKeyPem), "missing publicKeyPem");
         Assert.Equal(actor.PublicKey.PublicKeyPem, publicKeyPem.GetString());
         Assert.True(json.TryGetProperty("type", out var type));
         
         // It should be some kind of Actor type. How should that be set?
-        Assert.NotEqual("Object", type.GetString());
-        // Also, the publicKey object shouldn't have a `type`, but it does. Should it inherit from something else?
+        Assert.NotEqual("Object", type.GetString()); // Fails
+        // Also, the publicKey object should _not_ have a `type`, but it does. Should it inherit from something else?
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class APActorExtensionsTests
                      }
                    }
                    """;
-        // How would I deserialize an object whose derived type I don't know in advance?
+        // How would I deserialize an object whose derived type I don't know in advance? I also tried to deserialize to ASObject and APActor, both fail.
         var poco = _serializer.Deserialize<ASType>(json); // throws
         
         Assert.True(poco?.Is<APActorExtensions>());
