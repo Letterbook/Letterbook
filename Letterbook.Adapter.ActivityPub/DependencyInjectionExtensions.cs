@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using Letterbook.Adapter.ActivityPub.Signatures;
+using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Microsoft.Extensions.DependencyInjection;
 using NSign.Client;
@@ -9,8 +10,6 @@ namespace Letterbook.Adapter.ActivityPub;
 
 public static class DependencyInjectionExtensions
 {
-    const string ActivityPubAccept = @"application/ld+json; profile=""https://www.w3.org/ns/activitystreams""";
-
     public static IHttpClientBuilder AddSigningClient(this IHttpClientBuilder clientBuilder)
     {
         clientBuilder.Services
@@ -43,7 +42,7 @@ public static class DependencyInjectionExtensions
             .Services
             .AddHttpClient<IActivityPubClient, Client>(client =>
             {
-                client.DefaultRequestHeaders.Accept.ParseAdd(ActivityPubAccept);
+                client.DefaultRequestHeaders.Accept.ParseAdd(Constants.ActivityPubAccept);
                 client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("dotnet",
                     Environment.Version.ToString(2)));
                 // TODO: get version from Product Version

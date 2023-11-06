@@ -1,9 +1,5 @@
-using System;
-using System.Net.Http.Headers;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using DarkLink.Web.WebFinger.Server;
 using Letterbook.Adapter.ActivityPub;
-using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
@@ -45,14 +41,12 @@ public class Program
             .ReadFrom.Services(services));
         
         // Register controllers
-        builder.Services.AddControllers(options =>
-        {
-            options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
-        }).AddJsonOptions(opts =>
-        {
-            opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            opts.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-        });
+        builder.Services
+            .AddControllers(options =>
+            {
+                options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
+            });
+        builder.Services.AddWebfinger();
 
         // Register Authentication
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -161,6 +155,8 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+        
+        app.UseWebFingerScoped();
 
         app.MapPrometheusScrapingEndpoint();
       
@@ -168,6 +164,7 @@ public class Program
         
         app.UseSerilogRequestLogging();
 
+        app.UsePathBase(new PathString("/api/v1"));
         app.MapControllers();
 
         app.Run();
