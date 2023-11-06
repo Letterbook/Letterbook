@@ -1,6 +1,9 @@
 using System;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Letterbook.Adapter.ActivityPub;
+using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
@@ -72,6 +75,18 @@ public class Program
                 metrics.AddPrometheusExporter();
             });
 
+        // Configure Http Signatures
+        // Note: Starting to move DI config out into adapter as much as possible.
+        // I want to reduce how tightly coupled the process hosting component is from the project that handles API
+        // routes and controllers. Partly because it feels cleaner.
+        // Mostly because high-availability and/or horizontally scaled deployments
+        // will have more than one process, likely on more than one host.
+        //
+        // Workers (ex: SeedAdminWorker and future queue or maintenance workers) should be able to scale independently
+        // of the API, and shouldn't need a whole AspNetCore service just to host them.
+        // This helps with that.
+        builder.Services.AddActivityPubClient(coreOptions.DomainName);
+        
         // Register options
         builder.Services.Configure<CoreOptions>(coreSection);
         builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptions.ConfigKey));
@@ -85,12 +100,10 @@ public class Program
         builder.Services.AddScoped<IProfileService, ProfileService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
-        builder.Services.AddScoped<IActivityPubClient, ActivityPubClient>();
         
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();
         builder.Services.AddHostedService<WorkerScope<SeedAdminWorker>>();
-        // TODO: clean up and make things buildable again, then see if you can log in
         
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
@@ -159,8 +172,4 @@ public class Program
 
         app.Run();
     }
-}
-
-public class SomeOptions
-{
 }

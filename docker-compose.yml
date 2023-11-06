@@ -1,4 +1,5 @@
-﻿
+﻿version: '3.10'
+name: letterbook
 
 services:
   # Services required for Letterbook operation
@@ -11,9 +12,10 @@ services:
       - POSTGRES_DB=letterbook_feeds
     ports:
       - "5433:5432"
+    volumes:
+      - letterbook_ts_data:/var/lib/postgresql/data
     restart: always
-
-  postgres:
+  letterbook_db:
     container_name: postgres
     image: postgres:15-alpine
     environment:
@@ -22,8 +24,16 @@ services:
       - POSTGRES_DB=letterbook
     ports:
       - "5432:5432"
+    volumes:
+      - letterbook_db_data:/var/lib/postgresql/data
     restart: always
-
+    
+  httpbin:
+    container_name: httpbin
+    image: kennethreitz/httpbin
+    ports:
+      - '8200:80'
+  
   # Optional Dashboarding and Observability Services
   grafana:
       container_name: grafana
@@ -40,3 +50,9 @@ services:
         - "9090:9090"
       volumes:
         - "./Letterbook.Dashboards/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+
+volumes:
+  letterbook_db_data:
+    driver: local
+  letterbook_ts_data:
+    driver: local

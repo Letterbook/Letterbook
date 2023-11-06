@@ -29,10 +29,18 @@ public class ObjectCollection<T> : HashSet<T>, ICollection<T>, IObjectRef where 
         b.Path += "/audience";
         return new ObjectCollection<T>(b.Uri);
     }
+    
     public static ObjectCollection<T> Followers(Uri id)
     {
         var b = new UriBuilder(id);
         b.Path += "/followers";
+        return new ObjectCollection<T>(b.Uri);
+    }
+    
+    public static ObjectCollection<T> Following(Uri id)
+    {
+        var b = new UriBuilder(id);
+        b.Path += "/following";
         return new ObjectCollection<T>(b.Uri);
     }
 }

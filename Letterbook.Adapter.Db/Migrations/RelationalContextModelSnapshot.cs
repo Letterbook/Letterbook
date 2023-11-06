@@ -295,6 +295,49 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.ToTable("Profiles");
                 });
 
+            modelBuilder.Entity("Letterbook.Core.Models.SigningKey", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("Expires")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Family")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("KeyOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("KeyUri")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("PrivateKey")
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ProfileId")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("PublicKey")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("SigningKey");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("Id")
@@ -650,6 +693,13 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("OwnedBy");
                 });
 
+            modelBuilder.Entity("Letterbook.Core.Models.SigningKey", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Profile", null)
+                        .WithMany("Keys")
+                        .HasForeignKey("ProfileId");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -759,6 +809,8 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("Followers");
 
                     b.Navigation("Following");
+
+                    b.Navigation("Keys");
 
                     b.Navigation("RelatedAccounts");
                 });
