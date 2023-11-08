@@ -39,7 +39,7 @@ public class MastodonSigner : IClientSigner
                 inputSpec.SignatureParameters.AddComponent(spec.Component);
         }
 
-        inputSpec.SignatureParameters.KeyId = signingKey.KeyUri.ToString();
+        inputSpec.SignatureParameters.KeyId = signingKey.Id.ToString();
         inputSpec.SignatureParameters.Algorithm = SignatureAlgorithms.RsaPkcs15Sha256;
         builder.Visit(inputSpec.SignatureParameters);
 
@@ -47,7 +47,7 @@ public class MastodonSigner : IClientSigner
 
         message.Headers.Add(Headers.SignatureInput, $"mastodon={builder.SigningDocumentSpec}");
         message.Headers.Add(Headers.Signature,
-            $"keyId=\"{signingKey.KeyUri}\",headers=\"{builder.SigningDocumentSpec}\",signature=\"{Convert.ToBase64String(signature)}\"");
+            $"keyId=\"{signingKey.Id}\",headers=\"{builder.SigningDocumentSpec}\",signature=\"{Convert.ToBase64String(signature)}\"");
 
         return message;
     }
