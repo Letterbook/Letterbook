@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.ActivityPub.Test;
 
-[Trait("ActivityPub", "Client")]
+
 public class ClientTests : WithMocks
 {
     private Client _client;

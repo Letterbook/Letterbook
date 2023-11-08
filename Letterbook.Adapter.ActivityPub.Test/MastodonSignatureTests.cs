@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.ActivityPub.Test;
 
-[Trait("Signatures", "Mastodon")]
+
 public class MastodonSignatureTests
 {
     private readonly ITestOutputHelper _output;
@@ -88,9 +88,9 @@ public class MastodonSignatureTests
             Created = DateTimeOffset.UnixEpoch,
             Expires = DateTimeOffset.MaxValue,
             Family = Models.SigningKey.KeyFamily.Rsa,
-            Id = faker.Random.Guid(),
+            LocalId = faker.Random.Guid(),
             KeyOrder = 0,
-            KeyUri = new Uri("http://letterbook.example/test/key#0"),
+            Id = new Uri("http://letterbook.example/test/key#0"),
             Label = "Test key",
             PrivateKey = _rsa.ExportPkcs8PrivateKey(),
             PublicKey = _rsa.ExportSubjectPublicKeyInfo()

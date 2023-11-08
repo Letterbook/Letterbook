@@ -33,7 +33,7 @@ public class MapperTests
     }
 
     [Fact]
-    [Trait("Mappers", "Profile")]
+    
     public void ValidConfig()
     {
         ProfileMappers.DefaultProfile.AssertConfigurationIsValid();
@@ -41,7 +41,7 @@ public class MapperTests
     }
 
     [Fact]
-    [Trait("Mappers", "Profile")]
+    
     public void MapProfileDefault()
     {
         var actual = _profileMapper.Map<AsAp.Actor>(_profile);
@@ -54,7 +54,7 @@ public class MapperTests
     }
     
     [Fact]
-    [Trait("Mappers", "ActivityPub")]
+    
     public void CanMapSimpleNote()
     {
         var dto = new AsAp.Object()
@@ -72,7 +72,7 @@ public class MapperTests
     }
     
     [Fact]
-    [Trait("Mappers", "ActivityPub")]
+    
     public void CanMapActor()
     {
         using var fs = new FileStream(Path.Join(DataDir, "Actor.json"), FileMode.Open);
