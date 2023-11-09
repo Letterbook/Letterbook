@@ -25,8 +25,16 @@ public static class AsApMapper
             .ForMember(dest => dest.Inbox, opt => opt.MapFrom(src => src.Inbox.Id))
             .ForMember(dest => dest.Outbox, opt => opt.MapFrom(src => src.Outbox.Id))
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.Keys, opt => opt.MapFrom(src => src.PublicKey))
             .AfterMap((_, profile) => profile.Updated = DateTime.UtcNow);
 
+        cfg.CreateMap<AsAp.PublicKey, Models.SigningKey>(MemberList.None)
+            .ForMember(dest => dest.PublicKey,
+                opt => opt.ConvertUsing(PublicKeyConverter.Instance, key => key.PublicKeyPem));
+
+        cfg.CreateMap<AsAp.PublicKey, IList<SigningKey>>(MemberList.None)
+            .ConvertUsing(PublicKeyConverter.Instance);
+        
         cfg.CreateMap<AsAp.Object, Models.Profile>()
             .IncludeBase<AsAp.IResolvable, Models.Profile>();
 

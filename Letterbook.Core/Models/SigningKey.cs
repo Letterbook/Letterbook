@@ -91,6 +91,7 @@ public class SigningKey
     
     public enum KeyFamily
     {
+        Unknown,
         Rsa,
         Dsa,
         EcDsa
