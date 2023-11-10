@@ -249,7 +249,7 @@ public class ProfileServiceTests : WithMocks
         var actual = await _service.Follow((Guid)_profile.LocalId!, (Guid)target.LocalId!);
         
         Assert.Equal(FollowState.Accepted, actual);
-        Assert.Contains(target, _profile.Following.Select(r => r.Follows));
+        Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
     }
     
     [Fact(DisplayName = "Should add local follows by URL")]
@@ -264,7 +264,7 @@ public class ProfileServiceTests : WithMocks
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
         
         Assert.Equal(FollowState.Accepted, actual);
-        Assert.Contains(target, _profile.Following.Select(r => r.Follows));
+        Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
     }
 
     [Fact(DisplayName = "Should add remote follows accepted")]
@@ -282,7 +282,7 @@ public class ProfileServiceTests : WithMocks
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
         
         Assert.Equal(FollowState.Accepted, actual);
-        Assert.Contains(target, _profile.Following.Select(r => r.Follows));
+        Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
     }
     
     [Fact(DisplayName = "Should add remote follows pending")]
@@ -300,7 +300,7 @@ public class ProfileServiceTests : WithMocks
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
         
         Assert.Equal(FollowState.Pending, actual);
-        Assert.Contains(target, _profile.Following.Select(r => r.Follows));
+        Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
     }
     
     [Fact(DisplayName = "Should not add rejected remote follows")]
@@ -318,8 +318,8 @@ public class ProfileServiceTests : WithMocks
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
         
         Assert.Equal(FollowState.Rejected, actual);
-        Assert.Empty(_profile.Following);
-        Assert.Empty(target.Followers);
+        Assert.Empty(_profile.FollowingCollection);
+        Assert.Empty(target.FollowersCollection);
     }
 
     [Fact(DisplayName = "Should add a new follower")]
@@ -332,7 +332,7 @@ public class ProfileServiceTests : WithMocks
         var actual = await _service.ReceiveFollowRequest(_profile.Id, follower.Id);
         
         Assert.Equal(FollowState.Accepted, actual);
-        Assert.Contains(follower, _profile.Followers.Select(r => r.Follower));
+        Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
     }
 
     [Fact(DisplayName = "Should update a pending follow")]
@@ -345,7 +345,7 @@ public class ProfileServiceTests : WithMocks
         var actual = await _service.ReceiveFollowReply(_profile.Id, target.Id, FollowState.Accepted);
         
         Assert.Equal(FollowState.Accepted, actual);
-        Assert.Equal(FollowState.Accepted, _profile.Following.FirstOrDefault(r => r.Follows.Id == target.Id)?.State);
+        Assert.Equal(FollowState.Accepted, _profile.FollowingCollection.FirstOrDefault(r => r.Follows.Id == target.Id)?.State);
     }
     
     [Fact(DisplayName = "Should remove a pending follow on reject")]
@@ -358,7 +358,7 @@ public class ProfileServiceTests : WithMocks
         var actual = await _service.ReceiveFollowReply(_profile.Id, target.Id, FollowState.Rejected);
         
         Assert.Equal(FollowState.None, actual);
-        Assert.DoesNotContain(target, _profile.Following.Select(r => r.Follows));
+        Assert.DoesNotContain(target, _profile.FollowingCollection.Select(r => r.Follows));
 
         // Assert.Equal(FollowState.Accepted, _profile.Following.FirstOrDefault(r => r.Follows.Id == target.Id)?.State);
     }
@@ -372,7 +372,7 @@ public class ProfileServiceTests : WithMocks
 
         await _service.RemoveFollower(_profile.LocalId!.Value, follower.Id);
         
-        Assert.DoesNotContain(follower, _profile.Followers.Select(r => r.Follower));
+        Assert.DoesNotContain(follower, _profile.FollowersCollection.Select(r => r.Follower));
     }
 
     [Fact(DisplayName = "Should unfollow")]
@@ -384,6 +384,6 @@ public class ProfileServiceTests : WithMocks
 
         await _service.Unfollow(_profile.LocalId!.Value, follower.Id);
         
-        Assert.DoesNotContain(follower, _profile.Following.Select(r => r.Follows));
+        Assert.DoesNotContain(follower, _profile.FollowingCollection.Select(r => r.Follows));
     }
 }

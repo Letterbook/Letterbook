@@ -47,8 +47,8 @@ public class MapperTests
         Assert.Equal(actual.Id, _profile.Id);
         Assert.Equal(actual.Inbox.Id, _profile.Inbox);
         Assert.Equal(actual.Outbox.Id, _profile.Outbox);
-        Assert.Equal(actual.Following?.Id, _profile.Following.Id);
-        Assert.Equal(actual.Followers?.Id, _profile.Followers.Id);
+        Assert.Equal(actual.Following?.Id, _profile.FollowingCollection.Id);
+        Assert.Equal(actual.Followers?.Id, _profile.FollowersCollection.Id);
     }
 
     [Fact]

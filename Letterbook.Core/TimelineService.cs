@@ -107,7 +107,7 @@ public class TimelineService : ITimelineService
         // That's not the same thing as putting posts into follower's feeds.
         // This ensures we include public posts in the followers audience in case the sender doesn't specify it
         if (!result.Contains(Audience.Public)) return result;
-        result.UnionWith(note.Creators.Select(c => Audience.FromUri(c.Followers.Id, c)));
+        result.UnionWith(note.Creators.Select(c => Audience.FromUri(c.FollowersCollection.Id, c)));
 
         return result;
     }

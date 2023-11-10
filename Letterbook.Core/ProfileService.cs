@@ -289,7 +289,7 @@ public class ProfileService : IProfileService
             throw CoreException.WrongAuthority($"Cannot update Profile {selfId} because it has a different origin server", selfId);
         }
         var profile = await _profiles.LookupProfileWithRelation(selfId, targetId) ?? throw CoreException.MissingData($"Cannot update Profile {selfId} because it could not be found", typeof(Profile), selfId);
-        var relation = profile.Following.FirstOrDefault(r => r.Follows.Id == targetId) ?? throw CoreException.MissingData($"Cannot update following relationship for {selfId} concerning {targetId} because it could not be found", typeof(FollowerRelation), targetId);
+        var relation = profile.FollowingCollection.FirstOrDefault(r => r.Follows.Id == targetId) ?? throw CoreException.MissingData($"Cannot update following relationship for {selfId} concerning {targetId} because it could not be found", typeof(FollowerRelation), targetId);
         switch (response)
         {
             case FollowState.Accepted:

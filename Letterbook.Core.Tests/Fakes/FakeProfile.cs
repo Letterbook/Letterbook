@@ -73,8 +73,8 @@ public sealed class FakeProfile : Faker<Profile>
                 profile.Inbox = inbox;
                 profile.Outbox = outbox;
                 profile.SharedInbox = sharedInbox;
-                profile.Followers = ObjectCollection<FollowerRelation>.Followers(id);
-                profile.Following = ObjectCollection<FollowerRelation>.Following(id);
+                profile.FollowersCollection = ObjectCollection<FollowerRelation>.Followers(id);
+                profile.FollowingCollection = ObjectCollection<FollowerRelation>.Following(id);
             }
             return profile;
         });
@@ -82,7 +82,7 @@ public sealed class FakeProfile : Faker<Profile>
         RSA rsa = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();
         rsa.ImportFromPem(TestKeyRsaPrivate);
         
-        RuleFor(p => p.Followers, (f, p) => ObjectCollection<FollowerRelation>.Followers(p.Id));
+        RuleFor(p => p.FollowersCollection, (f, p) => ObjectCollection<FollowerRelation>.Followers(p.Id));
         RuleFor(p => p.DisplayName, (f) => f.Internet.UserName());
         RuleFor(p => p.Handle, (f, p) => p.Handle ?? $"@{f.Internet.UserName()}@{uri.Authority}");
         RuleFor(p => p.Description, (f) => f.Lorem.Paragraph());
