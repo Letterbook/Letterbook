@@ -51,11 +51,10 @@ public class Profile : IObjectRef, IEquatable<Profile>
         Followers = ObjectCollection<FollowerRelation>.Followers(Id);
         Following = ObjectCollection<FollowerRelation>.Following(Id);
         
-        builder.Path = basePath + "/public_keys";
-        builder.Fragment = "0";
+        builder.Path = basePath + "/public_keys/0";
         Keys.Add(SigningKey.Rsa(0, builder.Uri));
-        builder.Fragment = "1";
-        Keys.Add(SigningKey.Dsa(1, builder.Uri));
+        builder.Path = basePath + "/public_keys/1";
+        Keys.Add(SigningKey.EcDsa(1, builder.Uri));
     }
 
     public Uri Id { get; set; }

@@ -55,15 +55,15 @@ public sealed class FakeProfile : Faker<Profile>
         CustomInstantiator(f =>
         {
             var localId = f.Random.Guid();
-            var builder = new UriBuilder(uri);
-            builder.Path += $"/Actor/{ShortId.ToShortId(localId)}";
+            var builder = new UriBuilder(uri.Authority);
+            builder.Path += $"actor/{ShortId.ToShortId(localId)}";
             var id = builder.Uri;
             var basePath = builder.Path;
             builder.Path = basePath + "/inbox";
             var inbox = builder.Uri;
             builder.Path = basePath + "/outbox";
             var outbox = builder.Uri;
-            builder.Path = "/actor/shared_inbox";
+            builder.Path = "actor/shared_inbox";
             var sharedInbox = builder.Uri;
             var profile = Profile.CreateEmpty(id);
             {
@@ -97,7 +97,7 @@ public sealed class FakeProfile : Faker<Profile>
                     Expires = DateTimeOffset.MaxValue,
                     Family = SigningKey.KeyFamily.Rsa,
                     LocalId = f.Random.Guid(),
-                    Id = new Uri(uri, $"Actor/{profile.LocalId!.Value.ToShortId()}/keys/0"),
+                    Id = new Uri(uri, $"actor/{profile.LocalId!.Value.ToShortId()}/public_keys/0"),
                     PrivateKey = rsa.ExportPkcs8PrivateKey(),
                     PublicKey = rsa.ExportSubjectPublicKeyInfo(),
                     KeyOrder = 0,

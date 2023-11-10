@@ -38,7 +38,7 @@ public class ActorController : ControllerBase
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult<AsAp.Actor> GetActor(int id)
+    public ActionResult<AsAp.Actor> GetActor(string id)
     {
         throw new NotImplementedException();
     }

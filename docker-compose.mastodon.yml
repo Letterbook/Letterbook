@@ -36,6 +36,7 @@ services:
       - MASTODON_ELASTICSEARCH_PASSWORD=bitnami123
       - LOCAL_DOMAIN=localhost:3080
       - WEB_DOMAIN=localhost:3080
+      - ALLOWED_PRIVATE_ADDRESSES=host.docker.internal,127.0.0.1/32,192.168.1.0/24
   mastodon-streaming:
     depends_on:
       - mastodon

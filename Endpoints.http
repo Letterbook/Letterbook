@@ -38,3 +38,7 @@ Content-Type: application/ld+json
 GET {{host}}/.well-known/webfinger?resource=acct:admin@{{host}}
 
 ###
+GET http://{{host}}/actor/P_IuHPxvOEKcJ-0ETLMpEQ
+Accept: application/ld+json
+
+###

@@ -42,9 +42,11 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         switch ((int)response.StatusCode)
         {
             case >= 500:
+                var body500 = await response.Content.ReadAsStringAsync();
                 throw ClientException.RemoteHostError(response.StatusCode, name: name, path: path, line: line);
             case >= 400 and < 500:
-                throw ClientException.RequestError(response.StatusCode, name: name, path: path, line: line);
+                var body = await response.Content.ReadAsStringAsync();
+                throw ClientException.RequestError(response.StatusCode, name, body: body, path: path, line: line);
             case >= 300 and < 400:
                 return default;
             case >= 201 and < 300:
@@ -62,7 +64,9 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         
         _profile = onBehalfOf;
         var httpRequestOptionsKey = new HttpRequestOptionsKey<IEnumerable<SigningKey>>(IClientSigner.SigningKeysOptionsId);
+        var httpRequestOptionsProfile = new HttpRequestOptionsKey<Uri>(IClientSigner.ProfileOptionsId);
         _message.Options.Set(httpRequestOptionsKey, _profile.Keys);
+        _message.Options.Set(httpRequestOptionsProfile, _profile.Id);
         
         return this;
     }

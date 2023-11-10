@@ -1,6 +1,7 @@
 using Letterbook.Core;
 using Letterbook.Core.Tests.Fakes;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit.Abstractions;
 
@@ -18,17 +19,20 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
     private readonly ITestOutputHelper _output;
     private readonly HostFixture _hostFactory;
     private FakeProfile _fakeProfile;
+    private readonly IOptions<CoreOptions> _options;
 
     public ActivityPubClientCompositeTests(ITestOutputHelper output, HostFixture hostFactory)
     {
         _output = output;
         _hostFactory = hostFactory;
+        _options = _hostFactory.Services.GetService<IOptions<CoreOptions>>();
+        _output.WriteLine(_options.Value.DomainName);
 
         // Initialize with a consistent seed, so we get consistent data.
         // This might not actually be necessary, or even desirable. It's hard to think through in the abstract.
         // We can change it when federation actually works, if needed.
         _output.WriteLine($"Bogus seed: {Init.WithSeed(99263675)}");
-        _fakeProfile = new FakeProfile(_hostFactory.Server.BaseAddress.Authority);
+        _fakeProfile = new FakeProfile(_options.Value.DomainName);
     }
     
     [Fact]
@@ -37,7 +41,7 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
         Assert.NotNull(_hostFactory);
     }
 
-    [Fact(Skip = "Requires keys controllers (and maybe dns?)")]
+    [Fact(Skip = "Requires actor controllers")]
     public async Task SendFollow()
     {
         var remote = new Uri("http://localhost:3080/users/user");
