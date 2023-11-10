@@ -50,7 +50,7 @@ public class SigningKey
     
     public static SigningKey EcDsa(int keyOrder, Uri keyUri, string label = "System generated key")
     {
-        using ECDsa keyPair = ECDsa.Create(ECCurve.CreateFromFriendlyName("ed25519"));
+        using ECDsa keyPair = ECDsa.Create();
         return new SigningKey()
         {
             LocalId = Guid.NewGuid(),
