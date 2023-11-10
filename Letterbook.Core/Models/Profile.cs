@@ -50,10 +50,11 @@ public class Profile : IObjectRef, IEquatable<Profile>
         SharedInbox = builder.Uri;
         Followers = ObjectCollection<FollowerRelation>.Followers(Id);
         Following = ObjectCollection<FollowerRelation>.Following(Id);
-        
-        builder.Path = basePath + "/public_keys/0";
+
+        builder.Path = basePath;
+        builder.Fragment = "public_keys/0";
         Keys.Add(SigningKey.Rsa(0, builder.Uri));
-        builder.Path = basePath + "/public_keys/1";
+        builder.Fragment = "public_keys/1";
         Keys.Add(SigningKey.EcDsa(1, builder.Uri));
     }
 

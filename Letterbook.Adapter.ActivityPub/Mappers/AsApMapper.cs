@@ -18,8 +18,7 @@ public static class AsApMapper
             .IncludeBase<AsAp.IResolvable, Models.Profile>()
             .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
-            .ForMember(dest => dest.Followers,
-                opt => opt.MapFrom<DefaultObjectCollectionResolver, AsAp.IResolvable>(src => src.Followers))
+            .ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers))
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Content))
             .ForMember(dest => dest.CustomFields, opt => opt.MapFrom(src => src.Attachment))
             .ForMember(dest => dest.Inbox, opt => opt.MapFrom(src => src.Inbox.Id))
@@ -28,6 +27,9 @@ public static class AsApMapper
             .ForMember(dest => dest.Keys, opt => opt.MapFrom(src => src.PublicKey))
             .AfterMap((_, profile) => profile.Updated = DateTime.UtcNow);
 
+        cfg.CreateMap<AsAp.Collection, ObjectCollection<FollowerRelation>>()
+            .ConvertUsing<AsCollectionConverter>();
+        
         cfg.CreateMap<AsAp.PublicKey, Models.SigningKey>(MemberList.None)
             .ForMember(dest => dest.PublicKey,
                 opt => opt.ConvertUsing(PublicKeyConverter.Instance, key => key.PublicKeyPem));

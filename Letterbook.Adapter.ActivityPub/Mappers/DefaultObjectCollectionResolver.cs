@@ -1,17 +1,20 @@
 ﻿using AutoMapper;
+using Letterbook.ActivityPub;
 using Letterbook.Core.Models;
 
 namespace Letterbook.Adapter.ActivityPub.Mappers;
 
 public class DefaultObjectCollectionResolver :
-    IMemberValueResolver<AsAp.Actor, Models.Profile, AsAp.IResolvable, ObjectCollection<FollowerRelation>>
+    ITypeConverter<ObjectCollection<FollowerRelation>, AsAp.IResolvable>, 
+    ITypeConverter<ObjectCollection<FollowerRelation>, AsAp.Collection>
 {
-    public ObjectCollection<FollowerRelation> Resolve(AsAp.Actor source, Models.Profile destination,
-        AsAp.IResolvable sourceMember, ObjectCollection<FollowerRelation> destMember,
-        ResolutionContext context)
+    public AsAp.IResolvable Convert(ObjectCollection<FollowerRelation> source, AsAp.IResolvable destination, ResolutionContext context)
     {
-        destMember ??= new ObjectCollection<FollowerRelation>();
-        destMember.Id = sourceMember.Id ?? destMember.Id;
-        return destMember;
+        return new AsAp.Link(source.Id.ToString());
+    }
+
+    public AsAp.Collection Convert(ObjectCollection<FollowerRelation> source, AsAp.Collection destination, ResolutionContext context)
+    {
+        return source == null ? default : new AsAp.Collection(){Id = CompactIri.FromUri(source.Id)};
     }
 }

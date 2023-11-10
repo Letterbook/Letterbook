@@ -3,6 +3,7 @@ using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
+using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
@@ -137,7 +138,7 @@ public class Program
                     new List<string>()
                 }
             });
-
+            options.OperationFilter<RequiredHeaders>();
         });
 
         builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());

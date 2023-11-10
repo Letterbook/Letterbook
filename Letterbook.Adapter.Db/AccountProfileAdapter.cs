@@ -55,7 +55,10 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 
     public Task<Models.Profile?> LookupProfile(Guid localId)
     {
-        return _context.Profiles.FirstOrDefaultAsync(profile => profile.LocalId == localId);
+        return _context.Profiles
+            .Include(profile => profile.Keys)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(profile => profile.LocalId == localId);
     }
 
     public Task<Models.Profile?> LookupProfile(Uri id)

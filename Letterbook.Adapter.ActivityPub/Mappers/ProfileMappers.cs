@@ -21,12 +21,8 @@ public static class ProfileMappers
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Description))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Handle))
             .ForMember(dest => dest.Attachment, opt => opt.Ignore())
-            .ForMember(dest => dest.Followers,
-                opt => opt.MapFrom<DefaultOrderedCollectionResolver, ObjectCollection<FollowerRelation>>(src =>
-                    src.Followers))
-            .ForMember(dest => dest.Following,
-                opt => opt.MapFrom<DefaultOrderedCollectionResolver, ObjectCollection<FollowerRelation>>(src =>
-                    src.Following))
+            .ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers))
+            .ForMember(dest => dest.Following, opt => opt.MapFrom(src => src.Following))
             .ForMember(dest => dest.Liked, opt => opt.Ignore())
             .ForMember(dest => dest.PublicKey, opt => opt.MapFrom<SigningKeyConverter, IList<SigningKey>>(src => src.Keys))
             .ForMember(dest => dest.Endpoints, opt => opt.Ignore())
@@ -44,6 +40,9 @@ public static class ProfileMappers
     
     public static void ConfigureCommonTypes(IMapperConfigurationExpression cfg)
     {
+        cfg.CreateMap<ObjectCollection<FollowerRelation>, AsAp.Collection>()
+            .ConvertUsing<DefaultObjectCollectionResolver>();
+        
         cfg.CreateMap<Uri, CompactIri?>()
             .ConstructUsing((uri) => CompactIri.FromUri(uri));
 

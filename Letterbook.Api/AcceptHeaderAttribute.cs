@@ -16,7 +16,7 @@ namespace Letterbook.Api;
 public class AcceptHeaderAttribute : Attribute, IActionConstraint
 {
     public int Order => 0;
-    public MediaTypeCollection ContentTypes { get; set; }
+    public MediaTypeCollection? ContentTypes { get; set; }
     
     public AcceptHeaderAttribute(string contentType, params string[] otherContentTypes)
     {            
@@ -52,7 +52,7 @@ public class AcceptHeaderAttribute : Attribute, IActionConstraint
                 (contentResult, contentType) => contentResult || acceptType.IsSubsetOf(new MediaType(contentType))));
     }
     
-    private MediaTypeCollection GetContentTypes(string firstArg, string[] args)
+    private MediaTypeCollection? GetContentTypes(string firstArg, string[] args)
     {
         var completeArgs = new List<string>();
         completeArgs.Add(firstArg);
