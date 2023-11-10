@@ -65,6 +65,10 @@ public sealed class FakeProfile : Faker<Profile>
             var outbox = builder.Uri;
             builder.Path = "actor/shared_inbox";
             var sharedInbox = builder.Uri;
+            builder.Path = basePath + "/followers";
+            var followers = builder.Uri;
+            builder.Path = basePath + "/following";
+            var following = builder.Uri;
             var profile = Profile.CreateEmpty(id);
             {
                 profile.LocalId = localId;
@@ -73,8 +77,10 @@ public sealed class FakeProfile : Faker<Profile>
                 profile.Inbox = inbox;
                 profile.Outbox = outbox;
                 profile.SharedInbox = sharedInbox;
-                profile.FollowersCollection = ObjectCollection<FollowerRelation>.Followers(id);
-                profile.FollowingCollection = ObjectCollection<FollowerRelation>.Following(id);
+                profile.Followers = followers;
+                profile.Following = following;
+                // profile.FollowersCollection = ObjectCollection<FollowerRelation>.Followers(id);
+                // profile.FollowingCollection = ObjectCollection<FollowerRelation>.Following(id);
             }
             return profile;
         });
@@ -82,7 +88,6 @@ public sealed class FakeProfile : Faker<Profile>
         RSA rsa = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();
         rsa.ImportFromPem(TestKeyRsaPrivate);
         
-        RuleFor(p => p.FollowersCollection, (f, p) => ObjectCollection<FollowerRelation>.Followers(p.Id));
         RuleFor(p => p.DisplayName, (f) => f.Internet.UserName());
         RuleFor(p => p.Handle, (f, p) => p.Handle ?? $"@{f.Internet.UserName()}@{uri.Authority}");
         RuleFor(p => p.Description, (f) => f.Lorem.Paragraph());
