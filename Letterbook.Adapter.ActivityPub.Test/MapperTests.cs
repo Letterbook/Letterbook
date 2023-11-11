@@ -44,11 +44,11 @@ public class MapperTests
     {
         var actual = _profileMapper.Map<AsAp.Actor>(_profile);
         
-        Assert.Equal(actual.Id, _profile.Id);
-        Assert.Equal(actual.Inbox.Id, _profile.Inbox);
-        Assert.Equal(actual.Outbox.Id, _profile.Outbox);
-        Assert.Equal(actual.Following?.Id, _profile.Following);
-        Assert.Equal(actual.Followers?.Id, _profile.Followers);
+        Assert.Equal(_profile.Id, actual.Id);
+        Assert.Equal(_profile.Inbox, actual.Inbox.Id);
+        Assert.Equal(_profile.Outbox, actual.Outbox.Id);
+        Assert.Equal(_profile.Following, actual.Following?.Id);
+        Assert.Equal( _profile.Followers, actual.Followers?.Id);
     }
 
     [Fact]
