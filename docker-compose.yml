@@ -43,7 +43,6 @@ services:
       - '8200:80'
     restart: unless-stopped
   
-  # Optional Dashboarding and Observability Services
   grafana:    
     depends_on:
       - loki
