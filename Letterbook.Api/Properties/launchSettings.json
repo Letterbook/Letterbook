@@ -29,14 +29,14 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "http-integration": {
+    "integration": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5127",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Integration"
+        "ASPNETCORE_ENVIRONMENT": "Sandcastle"
       }
     },
     "https": {

@@ -145,7 +145,7 @@ public class Program
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
+        if (!app.Environment.IsProduction())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
@@ -161,13 +161,11 @@ public class Program
 
         app.MapPrometheusScrapingEndpoint();
       
-        app.UsePathBase(new PathString("/api/v1"));
-        
         app.UseSerilogRequestLogging();
 
         app.UsePathBase(new PathString("/api/v1"));
         app.MapControllers();
 
-        app.Run();
+        app.Run("http://localhost:5127");
     }
 }

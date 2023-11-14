@@ -19,7 +19,6 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 {
     private readonly ILogger<Client> _logger;
     private readonly HttpClient _httpClient;
-    private readonly HttpRequestMessage _message;
     private Models.Profile? _profile = default;
     
     private static readonly IMapper ProfileMapper = new Mapper(ProfileMappers.DefaultProfile);
@@ -29,7 +28,6 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     {
         _logger = logger;
         _httpClient = httpClient;
-        _message = new HttpRequestMessage();
     }
     
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
@@ -63,12 +61,21 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         if (onBehalfOf == null) return this;
         
         _profile = onBehalfOf;
-        var httpRequestOptionsKey = new HttpRequestOptionsKey<IEnumerable<SigningKey>>(IClientSigner.SigningKeysOptionsId);
-        var httpRequestOptionsProfile = new HttpRequestOptionsKey<Uri>(IClientSigner.ProfileOptionsId);
-        _message.Options.Set(httpRequestOptionsKey, _profile.Keys);
-        _message.Options.Set(httpRequestOptionsProfile, _profile.Id);
         
         return this;
+    }
+
+    private HttpRequestMessage SignedRequest(HttpMethod method, Uri uri)
+    {
+        var message = new HttpRequestMessage(method, uri);
+        if (_profile == null) return message;
+        
+        var httpRequestOptionsKey = new HttpRequestOptionsKey<IEnumerable<SigningKey>>(IClientSigner.SigningKeysOptionsId);
+        var httpRequestOptionsProfile = new HttpRequestOptionsKey<Uri>(IClientSigner.ProfileOptionsId);
+        message.Options.Set(httpRequestOptionsKey, _profile.Keys);
+        message.Options.Set(httpRequestOptionsProfile, _profile.Id);
+
+        return message;
     }
 
     public async Task<FollowState> SendFollow(Uri inbox)
@@ -80,11 +87,10 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         };
         follow.Actor.Add(actor);
         
-        _message.Method = HttpMethod.Post;
-        _message.RequestUri = inbox;
-        _message.Content = JsonContent.Create(follow, options: JsonOptions.ActivityPub);
+        var message = SignedRequest(HttpMethod.Post, inbox);
+        message.Content = JsonContent.Create(follow, options: JsonOptions.ActivityPub);
 
-        var response = await _httpClient.SendAsync(_message);
+        var response = await _httpClient.SendAsync(message);
         
         var stream = await ReadResponse(response);
         if (stream == null)
@@ -185,7 +191,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
     public async Task<T> Fetch<T>(Uri id) where T : IObjectRef
     {
-        var response = await _httpClient.GetAsync(id);
+        var response = await _httpClient.SendAsync(SignedRequest(HttpMethod.Get, id));
         var stream = await ReadResponse(response);
         var fetchType = typeof(T).IsAssignableFrom(typeof(Models.Profile)) ? typeof(AsAp.Actor) : typeof(AsAp.Object);
         var obj = await JsonSerializer.DeserializeAsync(stream, fetchType, JsonOptions.ActivityPub);

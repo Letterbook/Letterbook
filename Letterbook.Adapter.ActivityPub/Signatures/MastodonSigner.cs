@@ -23,19 +23,6 @@ public class MastodonSigner : IClientSigner
     public HttpRequestMessage SignRequest(HttpRequestMessage message,
         Models.SigningKey signingKey)
     {
-        if (!message.Options
-                .TryGetValue(new HttpRequestOptionsKey<Uri>(IClientSigner.ProfileOptionsId), out Uri? profileId))
-        {
-            _logger.LogWarning("Couldn't get Profile ID, Mastodon is unlikely to accept this request");
-        }
-        
-        if (profileId != null)
-        {
-            var keyIdBuilder = new UriBuilder(profileId);
-            keyIdBuilder.Fragment += "publicKey";
-            profileId = keyIdBuilder.Uri;
-        }
-        
         if (signingKey.Family != KeyFamily.Rsa)
         {
             _logger.LogWarning("");
@@ -52,7 +39,7 @@ public class MastodonSigner : IClientSigner
                 inputSpec.SignatureParameters.AddComponent(spec.Component);
         }
 
-        inputSpec.SignatureParameters.KeyId = profileId?.ToString() ?? signingKey.Id.ToString();
+        inputSpec.SignatureParameters.KeyId = signingKey.Id.ToString();
         inputSpec.SignatureParameters.Algorithm = SignatureAlgorithms.RsaPkcs15Sha256;
         builder.Visit(inputSpec.SignatureParameters);
 
@@ -60,7 +47,7 @@ public class MastodonSigner : IClientSigner
 
         message.Headers.Add(Headers.SignatureInput, $"mastodon={builder.SigningDocumentSpec}");
         message.Headers.Add(Headers.Signature,
-            $"keyId=\"{profileId ?? signingKey.Id}\",headers=\"{builder.SigningDocumentSpec}\",signature=\"{Convert.ToBase64String(signature)}\"");
+            $"keyId=\"{signingKey.Id}\",headers=\"{builder.SigningDocumentSpec}\",signature=\"{Convert.ToBase64String(signature)}\"");
 
         return message;
     }
