@@ -19,7 +19,8 @@ public static class ProfileMappers
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Description))
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Handle))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName))
+            .ForMember(dest => dest.PreferredUsername, opt => opt.MapFrom(src => src.Handle))
             .ForMember(dest => dest.Attachment, opt => opt.Ignore())
             .ForMember(dest => dest.Liked, opt => opt.Ignore())
             .ForMember(dest => dest.PublicKey,

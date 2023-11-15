@@ -161,7 +161,7 @@ public class Program
 
         app.MapPrometheusScrapingEndpoint();
       
-        app.UseSerilogRequestLogging();
+        // app.UseSerilogRequestLogging();
 
         app.UsePathBase(new PathString("/api/v1"));
         app.MapControllers();

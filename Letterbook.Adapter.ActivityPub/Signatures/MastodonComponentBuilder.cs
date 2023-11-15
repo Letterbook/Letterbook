@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using NSign;
 using static NSign.Constants;
 using NSign.Signatures;
 
@@ -12,16 +11,16 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
     private List<string> _derivedParamsValues = new List<string>();
     private List<string> _headerParams = new List<string>();
     private List<string> _headerParamsValues = new List<string>();
-    
+
     /* Draft 19 looks like
      * "@signature-params": ("@method" "@authority" "@path" "content-digest" "content-length" "content-type");created=1618884473;keyid="test-key-rsa-pss"
      */
-    
+
     /* Mastodon/draft-cavage-8 looks like
      * headers="(request-target) host date"
      * Signature: keyId="https://my-example.com/actor#main-key",headers="(request-target) host date",signature="Y2FiYW...IxNGRiZDk4ZA=="
      */
-    
+
     public string SigningDocument => BuildSigningDocument();
     public string? SigningDocumentSpec => BuildDocumentSpec();
 
@@ -35,15 +34,20 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
     /// </summary>
     /// <param name="component"></param>
     public void Visit(SignatureComponent component)
-    { }
-    
+    {
+    }
+
     public void Visit(HttpHeaderComponent httpHeader)
     {
         string fieldName = httpHeader.ComponentName;
 
-        if (TryGetHeaderValues(fieldName, out IEnumerable<string> values))
+        if (TryGetHeaderValues(fieldName, out var values))
         {
-            AddHeader(fieldName, String.Join(", ", values));
+            // Mastodon only understands the Digest header, which is a non-standard header that was
+            // replaced with content-digest in the httpsig drafts years ago
+            AddHeader(
+                fieldName.Equals("content-digest", StringComparison.InvariantCultureIgnoreCase) ? "digest" : fieldName,
+                string.Join(", ", values));
         }
         else
         {
@@ -53,19 +57,19 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
             }
         }
     }
-    
+
     /// <summary>
     /// Do nothing, this is not supported by draft-cavage-8
     /// </summary>
-    /// <param name="component"></param>
+    /// <param name="httpHeaderDictionary"></param>
     public void Visit(HttpHeaderDictionaryStructuredComponent httpHeaderDictionary)
     {
     }
-    
+
     /// <summary>
     /// Do nothing, this is not supported by draft-cavage-8
     /// </summary>
-    /// <param name="component"></param>
+    /// <param name="httpHeaderStructuredField"></param>
     public void Visit(HttpHeaderStructuredFieldComponent httpHeaderStructuredField)
     {
     }
@@ -81,7 +85,8 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
         switch (derived.ComponentName)
         {
             case DerivedComponents.RequestTarget:
-                AddRequestTarget($"{_message.GetDerivedComponentValue(method)} {_message.GetDerivedComponentValue(derived)}");
+                AddRequestTarget(
+                    $"{_message.GetDerivedComponentValue(method).ToLowerInvariant()} {_message.GetDerivedComponentValue(derived)}");
                 break;
             case DerivedComponents.Authority:
                 AddHeader("host", _message.GetDerivedComponentValue(derived));
@@ -101,15 +106,14 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
         foreach (SignatureComponent component in signatureParamsComponent.Components)
         {
             component.Accept(this);
-            if (component is DerivedComponent dc && dc.ComponentName == DerivedComponents.RequestTarget)
+            if (component is DerivedComponent { ComponentName: DerivedComponents.RequestTarget })
             {
                 hasTarget = true;
             }
         }
-        
+
         // draft-cavage-8 requires (I think?) including the request target in the signing document
         if (!hasTarget) new DerivedComponent(DerivedComponents.RequestTarget).Accept(this);
-        
     }
 
     /// <summary>
@@ -129,7 +133,7 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
     }
     // protected bool TryGetHeaderValues(string headerName, out IEnumerable<string> values)
     // {
-        // return _message.Headers.TryGetValues(headerName, out values);
+    // return _message.Headers.TryGetValues(headerName, out values);
     // }
 
     private void AddHeader(string header, string value)
@@ -153,6 +157,6 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
     {
         return string.Join(' ', _derivedParams.Concat(_headerParams));
     }
-    
+
     #endregion
 }

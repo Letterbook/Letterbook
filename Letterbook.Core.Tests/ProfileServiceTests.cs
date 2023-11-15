@@ -49,7 +49,7 @@ public class ProfileServiceTests : WithMocks
         var actual = await _service.CreateProfile(accountId, expected);
         
         Assert.NotNull(actual);
-        Assert.Equal($"@{expected}@letterbook.example", actual.Handle);
+        Assert.Equal(expected, actual.Handle);
     }
     
     [Fact(DisplayName = "Should not create an orphan profile")]

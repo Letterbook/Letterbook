@@ -41,11 +41,11 @@ GET {{host}}/.well-known/webfinger?resource=acct:admin@{{host}}
 ###
 GET {{host}}/.well-known/webfinger?resource=acct:admin@host.docker.internal:5127
 
-### sandcastle webfinger
-GET https://{{host}}/.well-known/webfinger?resource=acct:admin@host.castle
+### self webfinger
+GET https://{{host}}/.well-known/webfinger?resource=acct:admin@{{host}}
 
-### webfinger
-GET http://localhost:3080/.well-known/webfinger?resource=acct:user@localhost:3080
+### peer webfinger
+GET http://{{peer}}/.well-known/webfinger?resource=acct:user@{{peer}}
 
 ###
 # {{profile}} can be defined in http-client.private.env.json, which is git-ignored

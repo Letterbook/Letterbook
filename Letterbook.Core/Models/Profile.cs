@@ -171,7 +171,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
         var profile = new Profile(baseUri, localId)
         {
             Type = ActivityActorType.Person,
-            Handle = $"@{handle}@{baseUri.Authority}",
+            Handle = handle,
             DisplayName = handle,
         };
         profile.Audiences.Add(Audience.FromMention(profile));

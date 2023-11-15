@@ -32,7 +32,7 @@ public class WebfingerTests : WithMocks
         ProfileServiceMock.Setup(m => m.FindProfiles(_profile.Handle))
             .ReturnsAsync(new List<Models.Profile> { _profile });
 
-        var actual = await _provider.GetResourceDescriptorAsync(new Uri($"acct:{_profile.Handle.TrimStart('@')}"),
+        var actual = await _provider.GetResourceDescriptorAsync(new Uri($"acct:{_profile.Handle}@letterbook.example"),
             Array.Empty<string>(), Mock.Of<HttpRequest>(), CancellationToken.None);
 
         Assert.NotNull(actual);
@@ -46,7 +46,7 @@ public class WebfingerTests : WithMocks
         ProfileServiceMock.Setup(m => m.FindProfiles(_profile.Handle))
             .ReturnsAsync(Array.Empty<Models.Profile>());
 
-        var actual = await _provider.GetResourceDescriptorAsync(new Uri($"acct:{_profile.Handle.TrimStart('@')}"),
+        var actual = await _provider.GetResourceDescriptorAsync(new Uri($"acct:{_profile.Handle}@letterbook.example"),
             Array.Empty<string>(), Mock.Of<HttpRequest>(), CancellationToken.None);
 
         Assert.Null(actual);
@@ -61,7 +61,7 @@ public class WebfingerTests : WithMocks
         ProfileServiceMock.Setup(m => m.FindProfiles(_profile.Handle))
             .ReturnsAsync(Array.Empty<Models.Profile>());
 
-        var actual = await _provider.GetResourceDescriptorAsync(new Uri($"acct:{_profile.Handle.TrimStart('@')}"),
+        var actual = await _provider.GetResourceDescriptorAsync(new Uri($"acct:{_profile.Handle}"),
             Array.Empty<string>(), req.Object, CancellationToken.None);
 
         Assert.Null(actual);

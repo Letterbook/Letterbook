@@ -73,7 +73,7 @@ public sealed class FakeProfile : Faker<Profile>
             {
                 profile.LocalId = localId;
                 profile.Id = id;
-                profile.Handle = $"@{f.Internet.UserName()}@{uri.Authority}";
+                profile.Handle = f.Internet.UserName();
                 profile.Inbox = inbox;
                 profile.Outbox = outbox;
                 profile.SharedInbox = sharedInbox;
