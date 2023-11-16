@@ -1,4 +1,5 @@
-﻿GET {{host}}/actor
+﻿###
+GET {{host}}/actor
 
 ###
 GET {{host}}/api/v1/actor
@@ -38,3 +39,32 @@ Content-Type: application/ld+json
 GET {{host}}/.well-known/webfinger?resource=acct:admin@{{host}}
 
 ###
+GET {{host}}/.well-known/webfinger?resource=acct:admin@host.docker.internal:5127
+
+### self webfinger
+GET https://{{host}}/.well-known/webfinger?resource=acct:admin@{{host}}
+
+### peer webfinger
+GET http://{{peer}}/.well-known/webfinger?resource=acct:user@{{peer}}
+
+###
+# {{profile}} can be defined in http-client.private.env.json, which is git-ignored
+# That way we're not stepping on each other's local test data and creating merge conflicts
+GET https://{{host}}/actor/{{profile}}#publicKey-0
+Accept: application/ld+json
+
+### debug follow
+POST https://{{host}}/{{profile}}/follow
+Content-Type: application/json
+
+{
+  "targetId": "https://mastodon.castle/users/user"
+}
+
+### fetch mastodon
+GET https://mastodon.castle/users/user
+Accept: application/ld+json
+
+### webfinger mastodon
+GET https://mastodon.castle/.well-known/webfinger?resource=acct:user@mastodon.castle
+

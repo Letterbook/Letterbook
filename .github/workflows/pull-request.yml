@@ -44,7 +44,7 @@ jobs:
       
       - name: Install EF Tools
         run: |
-          dotnet tool install --global dotnet-ef
+          dotnet tool install --global dotnet-ef --version 7.0.8
           dotnet tool restore
       
       - name: Test Migrations

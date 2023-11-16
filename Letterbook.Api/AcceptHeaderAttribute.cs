@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 
 namespace Letterbook.Api;
@@ -16,7 +15,7 @@ namespace Letterbook.Api;
 public class AcceptHeaderAttribute : Attribute, IActionConstraint
 {
     public int Order => 0;
-    public MediaTypeCollection ContentTypes { get; set; }
+    public MediaTypeCollection? ContentTypes { get; set; }
     
     public AcceptHeaderAttribute(string contentType, params string[] otherContentTypes)
     {            
@@ -39,8 +38,9 @@ public class AcceptHeaderAttribute : Attribute, IActionConstraint
     public bool Accept(ActionConstraintContext context)
     {
         var acceptHeader = context.RouteContext.HttpContext.Request.Headers[HeaderNames.Accept];
+        var contentHeader = context.RouteContext.HttpContext.Request.Headers[HeaderNames.ContentType];
 
-        return IsMatch(acceptHeader);
+        return IsMatch(acceptHeader) || IsMatch(contentHeader);
     }
 
     public bool IsMatch(string? acceptHeader)
@@ -52,7 +52,7 @@ public class AcceptHeaderAttribute : Attribute, IActionConstraint
                 (contentResult, contentType) => contentResult || acceptType.IsSubsetOf(new MediaType(contentType))));
     }
     
-    private MediaTypeCollection GetContentTypes(string firstArg, string[] args)
+    private MediaTypeCollection? GetContentTypes(string firstArg, string[] args)
     {
         var completeArgs = new List<string>();
         completeArgs.Add(firstArg);

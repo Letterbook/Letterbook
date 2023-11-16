@@ -55,7 +55,10 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 
     public Task<Models.Profile?> LookupProfile(Guid localId)
     {
-        return _context.Profiles.FirstOrDefaultAsync(profile => profile.LocalId == localId);
+        return _context.Profiles
+            .Include(profile => profile.Keys)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(profile => profile.LocalId == localId);
     }
 
     public Task<Models.Profile?> LookupProfile(Uri id)
@@ -66,9 +69,9 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
     public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)
     {
         return _context.Profiles.Where(profile => profile.Id == id)
-            .Include(profile => profile.Following.Where(relation => relation.Follows.Id == relationId))
+            .Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId))
                 .ThenInclude(relation => relation.Follows)
-            .Include(profile => profile.Followers.Where(relation => relation.Follower.Id == relationId))
+            .Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
                 .ThenInclude(relation => relation.Follower)
             .AsSplitQuery()
             .FirstOrDefaultAsync();
@@ -77,9 +80,9 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
     public Task<Models.Profile?> LookupProfileWithRelation(Guid localId, Uri relationId)
     {
         return _context.Profiles.Where(profile => profile.LocalId == localId)
-            .Include(profile => profile.Following.Where(relation => relation.Follows.Id == relationId))
+            .Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId))
                 .ThenInclude(relation => relation.Follows)
-            .Include(profile => profile.Followers.Where(relation => relation.Follower.Id == relationId))
+            .Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
                 .ThenInclude(relation => relation.Follower)
             .AsSplitQuery()
             .FirstOrDefaultAsync();

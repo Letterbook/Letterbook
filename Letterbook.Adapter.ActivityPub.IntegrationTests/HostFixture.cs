@@ -29,11 +29,6 @@ public class HostFixture : WebApplicationFactory<Program>
         sink.OnMessage(new DiagnosticMessage("Bogus Seed: {0}", Init.WithSeed()));
     }
 
-    // protected override IHost CreateHost(IHostBuilder builder)
-    // {
-        // builder.
-    // }
-
     /// <summary>
     /// Mock the db adapter, leave everything else with the real implementation
     /// This should make it a lot easier to manage test data
@@ -41,6 +36,7 @@ public class HostFixture : WebApplicationFactory<Program>
     /// <param name="builder"></param>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Integration");
         builder.ConfigureTestServices(services =>
         {
             if (services.SingleOrDefault(descriptor => descriptor.ServiceType == typeof(IAccountProfileAdapter)) is { } adapter)
@@ -58,11 +54,6 @@ public class HostFixture : WebApplicationFactory<Program>
                 services.Remove(seed);
             }
 
-            // if (services.SingleOrDefault(descriptor => descriptor.ServiceType == typeof(RelationalContext)) is { } relation)
-            // {
-                // services.Remove(relation);
-            // }
-            
             services.AddScoped<IAccountProfileAdapter>(_ => Mocks.AccountProfileMock.Object);
             services.AddScoped<IActivityAdapter>(_ => Mocks.ActivityAdapterMock.Object);
             services.AddScoped<SeedAdminWorker>(p => 

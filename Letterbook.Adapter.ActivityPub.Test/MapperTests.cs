@@ -33,7 +33,6 @@ public class MapperTests
     }
 
     [Fact]
-    [Trait("Mappers", "Profile")]
     public void ValidConfig()
     {
         ProfileMappers.DefaultProfile.AssertConfigurationIsValid();
@@ -41,20 +40,31 @@ public class MapperTests
     }
 
     [Fact]
-    [Trait("Mappers", "Profile")]
     public void MapProfileDefault()
     {
         var actual = _profileMapper.Map<AsAp.Actor>(_profile);
         
-        Assert.Equal(actual.Id, _profile.Id);
-        Assert.Equal(actual.Inbox.Id, _profile.Inbox);
-        Assert.Equal(actual.Outbox.Id, _profile.Outbox);
-        Assert.Equal(actual.Following?.Id, _profile.Following.Id);
-        Assert.Equal(actual.Followers?.Id, _profile.Followers.Id);
+        Assert.Equal(_profile.Id, actual.Id);
+        Assert.Equal(_profile.Inbox, actual.Inbox.Id);
+        Assert.Equal(_profile.Outbox, actual.Outbox.Id);
+        Assert.Equal(_profile.Following, actual.Following?.Id);
+        Assert.Equal( _profile.Followers, actual.Followers?.Id);
+    }
+
+    [Fact]
+    public void CanMapProfileDefaultSigningKey()
+    {
+        var expected = _profile.Keys.First().GetRsa().ExportSubjectPublicKeyInfoPem();
+        
+        var actual = _profileMapper.Map<AsAp.Actor>(_profile);
+
+        Assert.Equal(actual?.PublicKey?.PublicKeyPem, expected);
+        Assert.Equal(actual?.PublicKey?.Owner.Id, _profile.Id);
+        Assert.Equal(actual?.PublicKey?.Id, _profile.Keys.First().Id);
     }
     
+    
     [Fact]
-    [Trait("Mappers", "ActivityPub")]
     public void CanMapSimpleNote()
     {
         var dto = new AsAp.Object()
@@ -72,7 +82,6 @@ public class MapperTests
     }
     
     [Fact]
-    [Trait("Mappers", "ActivityPub")]
     public void CanMapActor()
     {
         using var fs = new FileStream(Path.Join(DataDir, "Actor.json"), FileMode.Open);
@@ -85,5 +94,21 @@ public class MapperTests
         // Might need to just get rid of them. I thought having that type would make thing easier, not harder.
         // Assert.Equal("http://localhost:3080/users/user/followers", profile.Followers.Id.ToString());
         Assert.Equal("http://localhost:3080/users/user/inbox", profile.Inbox.ToString());
+    }
+    
+    [Fact]
+    public void CanMapActorPublicKey()
+    {
+        var expected =
+            "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4Kkwp47KloIaR8m9RJpddiaheHzm3f3qGja6CqQnw/gHxmlkJA/bFQXYzRZA8olVjsoPmp4gHCHRMzxm6eYeuRu0k628n0KkgZ+FapQGAamR9uNtAoV8Fr3x1FMqiiyOXP07kdsF4NUDOI+DotTezAGXrJT9AFqW1J7uJjL9aqWBJkwUkc/bjg12LZmtcvVftbEhzoi3RX4Etc4z5tK9VgHo6mENkZ5Hd6DOnG0ORVcFehZVamKACB9A7q5ln9l/jkCnGpAVzrl4lbTN5bfJ7cyZKkeQ+XNU7edzS6W9Crlekpal2L+J32Rwk6khTYGgY/a9jrfX//tVPUpwSKLlCwIDAQAB";
+        using var fs = new FileStream(Path.Join(DataDir, "Actor.json"), FileMode.Open);
+        var actor = JsonSerializer.Deserialize<AsAp.Actor>(fs, JsonOptions.ActivityPub)!;
+
+        var profile = _asApMapper.Map<Models.Profile>(actor);
+        var actual = profile.Keys.FirstOrDefault();
+        
+        Assert.NotNull(actual);
+        Assert.Equal(expected, Convert.ToBase64String(actual.PublicKey.ToArray()));
+        Assert.Equal("http://localhost:3080/users/user#main-key", actual.Id.ToString());
     }
 }

@@ -18,15 +18,23 @@ public static class AsApMapper
             .IncludeBase<AsAp.IResolvable, Models.Profile>()
             .ForMember(dest => dest.Authority, opt => opt.MapFrom(src => src.Id!.Authority))
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
-            .ForMember(dest => dest.Followers,
-                opt => opt.MapFrom<DefaultObjectCollectionResolver, AsAp.IResolvable>(src => src.Followers))
+            .ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers != null ? src.Followers.Id : null))
+            .ForMember(dest => dest.Following, opt => opt.MapFrom(src => src.Following != null ? src.Following.Id : null))
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Content))
             .ForMember(dest => dest.CustomFields, opt => opt.MapFrom(src => src.Attachment))
             .ForMember(dest => dest.Inbox, opt => opt.MapFrom(src => src.Inbox.Id))
             .ForMember(dest => dest.Outbox, opt => opt.MapFrom(src => src.Outbox.Id))
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.Keys, opt => opt.MapFrom(src => src.PublicKey))
             .AfterMap((_, profile) => profile.Updated = DateTime.UtcNow);
 
+        cfg.CreateMap<AsAp.PublicKey, Models.SigningKey>(MemberList.None)
+            .ForMember(dest => dest.PublicKey,
+                opt => opt.ConvertUsing(PublicKeyConverter.Instance, key => key.PublicKeyPem));
+
+        cfg.CreateMap<AsAp.PublicKey, IList<SigningKey>>(MemberList.None)
+            .ConvertUsing(PublicKeyConverter.Instance);
+        
         cfg.CreateMap<AsAp.Object, Models.Profile>()
             .IncludeBase<AsAp.IResolvable, Models.Profile>();
 
@@ -39,6 +47,8 @@ public static class AsApMapper
             .ForMember(dest => dest.Type, opt => opt.Ignore())
             .ForMember(dest => dest.Handle, opt => opt.Ignore())
             .ForMember(dest => dest.DisplayName, opt => opt.Ignore())
+            .ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
+            .ForMember(dest => dest.FollowingCollection, opt => opt.Ignore())
             .ForMember(dest => dest.Followers, opt => opt.Ignore())
             .ForMember(dest => dest.Following, opt => opt.Ignore())
             .ForMember(dest => dest.Inbox, opt => opt.Ignore())
@@ -70,7 +80,6 @@ public static class AsApMapper
             .ForMember(dest => dest.InReplyTo, opt => opt.Ignore())
             .ForMember(dest => dest.LikedBy, opt => opt.Ignore())
             .ForMember(dest => dest.BoostedBy, opt => opt.Ignore())
-            // .ForMember(dest => dest.InReplyTo, opt => opt.MapFrom(src => src.InReplyTo.FirstOrDefault()))
             .ForMember(dest => dest.Client, opt => opt.Ignore()) // TODO: take from Activity, somehow
             .ForMember(dest => dest.Visibility, opt => opt.Ignore()) // TODO: ugh, this will be complicated
             .ForMember(dest => dest.Replies, opt => opt.Ignore()) // TODO: List<> to (paged) Collection

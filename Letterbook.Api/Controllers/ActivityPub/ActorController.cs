@@ -1,4 +1,6 @@
-﻿using Letterbook.Api.Dto;
+﻿using AutoMapper;
+using Letterbook.Adapter.ActivityPub.Mappers;
+using Letterbook.Api.Dto;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
@@ -16,7 +18,9 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [ApiController]
 [Route("[controller]")]
 [AcceptHeader("application/ld+json",
-    "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", "application/activity+json")]
+    "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", 
+    "application/activity+json")]
+[JsonLdSerializer]
 public class ActorController : ControllerBase
 {
     private readonly SnakeCaseRouteTransformer _transformer = new();
@@ -24,6 +28,7 @@ public class ActorController : ControllerBase
     private readonly ILogger<ActorController> _logger;
     private readonly IActivityService _activityService;
     private readonly IProfileService _profileService;
+    private static readonly IMapper ProfileMapper = new Mapper(ProfileMappers.DefaultProfile);
 
     public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
         IActivityService activityService, IProfileService profileService)
@@ -32,15 +37,28 @@ public class ActorController : ControllerBase
         _logger = logger;
         _activityService = activityService;
         _profileService = profileService;
-        _logger.LogInformation("Loaded ActorController");
+        _logger.LogInformation("Loaded {Controller}", nameof(ActorController));
     }
 
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult<AsAp.Actor> GetActor(int id)
+    public async Task<IActionResult> GetActor(string id)
     {
-        throw new NotImplementedException();
+        Guid localId;
+        try
+        {
+            localId = ShortId.ToGuid(id);
+        }
+        catch (Exception)
+        {
+            return BadRequest();
+        }
+
+        var profile = await _profileService.LookupProfile(localId);
+        if (profile == null) return NotFound();
+
+        return Ok(ProfileMapper.Map<AsAp.Actor>(profile));
     }
 
     [HttpGet]

@@ -22,6 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development"
 		CONTRIBUTING.md = CONTRIBUTING.md
 		docker-compose.mastodon.yml = docker-compose.mastodon.yml
 		Endpoints.http = Endpoints.http
+		http-client.env.json = http-client.env.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D5E41A46-D753-4214-AF70-1839E56B4A14}"

@@ -5,7 +5,7 @@ namespace Letterbook.Core.Models;
 /// <summary>
 /// Audience is the collection or category of profiles that can view some content
 /// This usually means something like "everyone" and/or "the followers of the content's creator(s)"
-/// Sometimes it's the specifically addressed people, or the everyone on the local instance
+/// Sometimes it's the specifically addressed people, or everyone on the local instance
 ///
 /// Audience targeting is used internally to build feeds and notifications. It's also used externally to imply
 /// visibility controls for federated content.
@@ -33,18 +33,18 @@ public class Audience : IEquatable<Audience>, IObjectRef
     /// </summary>
     public static Audience Public => _public;
     public static Audience FromUri(Uri id, Profile source) => new () { Id = id, Source = source};
-    public static Audience Followers(Profile creator) => FromUri(creator.Followers.Id, creator);
+    public static Audience Followers(Profile creator) => FromUri(creator.Followers, creator);
 
     public static Audience Subscribers(Profile creator)
     {
-        var builder = new UriBuilder(creator.Followers.Id);
+        var builder = new UriBuilder(creator.Followers);
         builder.Fragment += "subscribe";
         return FromUri(builder.Uri, creator);
     }
     
     public static Audience Boosts(Profile creator)
     {
-        var builder = new UriBuilder(creator.Followers.Id);
+        var builder = new UriBuilder(creator.Followers);
         builder.Fragment += "boosts";
         return FromUri(builder.Uri, creator);
     }

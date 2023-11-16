@@ -4,6 +4,7 @@ using Letterbook.Adapter.Db;
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    partial class RelationalContextModelSnapshot : ModelSnapshot
+    [Migration("20231110023225_SigningKeyId")]
+    partial class SigningKeyId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -256,14 +259,6 @@ namespace Letterbook.Adapter.Db.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Followers")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Following")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -570,13 +565,13 @@ namespace Letterbook.Adapter.Db.Migrations
             modelBuilder.Entity("Letterbook.Core.Models.FollowerRelation", b =>
                 {
                     b.HasOne("Letterbook.Core.Models.Profile", "Follower")
-                        .WithMany("FollowingCollection")
+                        .WithMany("Following")
                         .HasForeignKey("FollowerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Letterbook.Core.Models.Profile", "Follows")
-                        .WithMany("FollowersCollection")
+                        .WithMany("Followers")
                         .HasForeignKey("FollowsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -811,9 +806,9 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("Letterbook.Core.Models.Profile", b =>
                 {
-                    b.Navigation("FollowersCollection");
+                    b.Navigation("Followers");
 
-                    b.Navigation("FollowingCollection");
+                    b.Navigation("Following");
 
                     b.Navigation("Keys");
 

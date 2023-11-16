@@ -36,8 +36,11 @@ public class WebfingerProvider : IResourceDescriptorProvider
                 request.Headers.TryGetValue("User-Agent", out var ua) ? ua : "unknown");
             return default;
         }
-        
-        var profiles = await _profiles.FindProfiles("@" + resource.AbsolutePath);
+
+        var handle = match.Value.Split('@', 2,
+            StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+        if (handle == null) return default;
+        var profiles = await _profiles.FindProfiles(handle);
         if (profiles.FirstOrDefault() is { } subject)
         {
             var descriptor = JsonResourceDescriptor.Empty with

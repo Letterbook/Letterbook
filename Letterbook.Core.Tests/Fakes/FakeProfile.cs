@@ -55,26 +55,32 @@ public sealed class FakeProfile : Faker<Profile>
         CustomInstantiator(f =>
         {
             var localId = f.Random.Guid();
-            var builder = new UriBuilder(uri);
-            builder.Path += $"/Actor/{ShortId.ToShortId(localId)}";
+            var builder = new UriBuilder(uri.Authority);
+            builder.Path += $"actor/{ShortId.ToShortId(localId)}";
             var id = builder.Uri;
             var basePath = builder.Path;
             builder.Path = basePath + "/inbox";
             var inbox = builder.Uri;
             builder.Path = basePath + "/outbox";
             var outbox = builder.Uri;
-            builder.Path = "/actor/shared_inbox";
+            builder.Path = "actor/shared_inbox";
             var sharedInbox = builder.Uri;
+            builder.Path = basePath + "/followers";
+            var followers = builder.Uri;
+            builder.Path = basePath + "/following";
+            var following = builder.Uri;
             var profile = Profile.CreateEmpty(id);
             {
                 profile.LocalId = localId;
                 profile.Id = id;
-                profile.Handle = $"@{f.Internet.UserName()}@{uri.Authority}";
+                profile.Handle = f.Internet.UserName();
                 profile.Inbox = inbox;
                 profile.Outbox = outbox;
                 profile.SharedInbox = sharedInbox;
-                profile.Followers = ObjectCollection<FollowerRelation>.Followers(id);
-                profile.Following = ObjectCollection<FollowerRelation>.Following(id);
+                profile.Followers = followers;
+                profile.Following = following;
+                // profile.FollowersCollection = ObjectCollection<FollowerRelation>.Followers(id);
+                // profile.FollowingCollection = ObjectCollection<FollowerRelation>.Following(id);
             }
             return profile;
         });
@@ -82,7 +88,6 @@ public sealed class FakeProfile : Faker<Profile>
         RSA rsa = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();
         rsa.ImportFromPem(TestKeyRsaPrivate);
         
-        RuleFor(p => p.Followers, (f, p) => ObjectCollection<FollowerRelation>.Followers(p.Id));
         RuleFor(p => p.DisplayName, (f) => f.Internet.UserName());
         RuleFor(p => p.Handle, (f, p) => p.Handle ?? $"@{f.Internet.UserName()}@{uri.Authority}");
         RuleFor(p => p.Description, (f) => f.Lorem.Paragraph());
@@ -96,8 +101,8 @@ public sealed class FakeProfile : Faker<Profile>
                     Created = f.Date.Past(1, DateTime.Parse("2020-01-01").ToUniversalTime()),
                     Expires = DateTimeOffset.MaxValue,
                     Family = SigningKey.KeyFamily.Rsa,
-                    Id = f.Random.Guid(),
-                    KeyUri = new Uri(uri, $"Actor/{profile.LocalId!.Value.ToShortId()}/keys/0"),
+                    LocalId = f.Random.Guid(),
+                    Id = new Uri(uri, $"actor/{profile.LocalId!.Value.ToShortId()}/public_keys/0"),
                     PrivateKey = rsa.ExportPkcs8PrivateKey(),
                     PublicKey = rsa.ExportSubjectPublicKeyInfo(),
                     KeyOrder = 0,

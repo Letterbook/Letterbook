@@ -18,11 +18,11 @@ public class Profile : IObjectRef, IEquatable<Profile>
         Id = default!;
         Inbox = default!;
         Outbox = default!;
+        Followers = default!;
+        Following = default!;
         Type = default;
         Handle = default!;
         DisplayName = default!;
-        Followers = default!;
-        Following = default!;
         CustomFields = default!;
         Description = default!;
     }
@@ -46,22 +46,28 @@ public class Profile : IObjectRef, IEquatable<Profile>
         builder.Path = basePath + "/outbox";
         Outbox = builder.Uri;
 
+        builder.Path = basePath + "/followers";
+        Followers = builder.Uri;
+        
+        builder.Path = basePath + "/following";
+        Following = builder.Uri;
+
         builder.Path = "/actor/shared_inbox";
         SharedInbox = builder.Uri;
-        Followers = ObjectCollection<FollowerRelation>.Followers(Id);
-        Following = ObjectCollection<FollowerRelation>.Following(Id);
         
-        builder.Path = basePath + "/public_keys";
-        builder.Fragment = "0";
+        builder.Path = basePath;
+        builder.Fragment = "public_keys/0";
         Keys.Add(SigningKey.Rsa(0, builder.Uri));
-        builder.Fragment = "1";
-        Keys.Add(SigningKey.Dsa(1, builder.Uri));
+        builder.Fragment = "public_keys/1";
+        Keys.Add(SigningKey.EcDsa(1, builder.Uri));
     }
 
     public Uri Id { get; set; }
     public Uri Inbox { get; set; }
     public Uri Outbox { get; set; }
     public Uri? SharedInbox { get; set; }
+    public Uri Followers { get; set; }
+    public Uri Following { get; set; }
     public Guid? LocalId { get; set; }
     public string Authority => Id.Authority;
     public string Handle { get; set; }
@@ -76,8 +82,8 @@ public class Profile : IObjectRef, IEquatable<Profile>
     public ActivityActorType Type { get; set; }
     public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
     public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
-    public ObjectCollection<FollowerRelation> Followers { get; set; }
-    public ObjectCollection<FollowerRelation> Following { get; set; }
+    public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
+    public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
     public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
 
     public Profile ShallowClone() => (Profile)MemberwiseClone();
@@ -104,37 +110,35 @@ public class Profile : IObjectRef, IEquatable<Profile>
     public FollowerRelation AddFollower(Profile follower, FollowState state)
     {
         var relation = new FollowerRelation(follower, this, state);
-        Followers.Add(relation);
+        FollowersCollection.Add(relation);
         return relation;
     }
     
     public int RemoveFollower(Profile follower)
     {
-        return Followers.RemoveWhere(relation => relation.Follower == follower);
+        var matches = FollowersCollection.Where(relation => relation.Follower == follower).ToList();
+        foreach (var match in matches)
+        {
+            FollowersCollection.Remove(match);
+        }
+
+        return matches.Count();
     }
 
     public FollowerRelation Follow(Profile following, FollowState state)
     {
         var relation = new FollowerRelation(this, following, state);
-        Following.Add(relation);
+        FollowingCollection.Add(relation);
         return relation;
     }
 
     public int Unfollow(Profile following)
     {
-        // There's a pretty good chance that Following is a HashSet. If it was constructed in app code,
-        // then it definitely is. If it was constructed by EFCore, then it probably is. But, it's possible that
-        // EFCore will choose another collection
-        if (Following is HashSet<FollowerRelation> f)
-        {
-            return f.RemoveWhere(relation => relation.Follows == following);
-        }
-        
         var count = 0;
-        var targets = Following.Where(relation => relation.Follows == following);
+        var targets = FollowingCollection.Where(relation => relation.Follows == following).ToList();
         foreach (var target in targets)
         {
-            Following.Remove(target);
+            FollowingCollection.Remove(target);
             count++;
         }
 
@@ -167,7 +171,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
         var profile = new Profile(baseUri, localId)
         {
             Type = ActivityActorType.Person,
-            Handle = $"@{handle}@{baseUri.Authority}",
+            Handle = handle,
             DisplayName = handle,
         };
         profile.Audiences.Add(Audience.FromMention(profile));

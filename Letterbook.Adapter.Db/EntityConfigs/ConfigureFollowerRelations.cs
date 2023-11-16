@@ -10,8 +10,8 @@ public class ConfigureFollowerRelations : IEntityTypeConfiguration<Models.Follow
         builder.HasKey(relation => relation.Id);
         builder.HasIndex(relation => relation.Date);
         builder.HasOne<Models.Profile>(relation => relation.Follower)
-            .WithMany(profile => profile.Following);
+            .WithMany(profile => profile.FollowingCollection);
         builder.HasOne<Models.Profile>(relation => relation.Follows)
-            .WithMany(profile => profile.Followers);
+            .WithMany(profile => profile.FollowersCollection);
     }
 }
