@@ -32,7 +32,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
     // Stream saves on allocations
-    private static async Task<Stream?> ReadResponse(HttpResponseMessage response, 
+    private async Task<Stream?> ReadResponse(HttpResponseMessage response, 
         [CallerMemberName] string name="",
         [CallerFilePath] string path="",
         [CallerLineNumber] int line=-1)
@@ -40,10 +40,15 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         switch ((int)response.StatusCode)
         {
             case >= 500:
-                var body500 = await response.Content.ReadAsStringAsync();
+                _logger.LogInformation("Received server error from {Uri}", response.RequestMessage?.RequestUri);
+                if (_logger.IsEnabled(LogLevel.Debug))
+                    _logger.LogDebug("Server response had headers {Headers} and body {Body}", response.Headers,
+                        await response.Content.ReadAsStringAsync());
                 throw ClientException.RemoteHostError(response.StatusCode, name: name, path: path, line: line);
             case >= 400 and < 500:
                 var body = await response.Content.ReadAsStringAsync();
+                _logger.LogInformation("Received client error from {Uri}", response.RequestMessage?.RequestUri);
+                _logger.LogDebug("Server response had headers {Headers} and body {Body}", response.Headers, body);
                 throw ClientException.RequestError(response.StatusCode, name, body: body, path: path, line: line);
             case >= 300 and < 400:
                 return default;
@@ -197,7 +202,9 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         var obj = await JsonSerializer.DeserializeAsync(stream, fetchType, JsonOptions.ActivityPub);
 
         var mapped = AsApMapper.Map<T>(obj);
-        return mapped;
+        if (mapped.Id == id) return mapped;
+        _logger.LogError("Remote fetch for Object {Id} returned {ObjectId}", id, mapped.Id);
+        throw ClientException.RemoteObjectError(mapped.Id, "Peer provided object is not the same as requested");
     }
 
     public void Dispose()

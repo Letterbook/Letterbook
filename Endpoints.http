@@ -58,7 +58,7 @@ POST https://{{host}}/{{profile}}/follow
 Content-Type: application/json
 
 {
-  "targetId": "https://mastodon.castle/users/user"
+  "targetId": "http://mastodon.castle/users/user"
 }
 
 ### fetch mastodon
@@ -68,3 +68,5 @@ Accept: application/ld+json
 ### webfinger mastodon
 GET https://mastodon.castle/.well-known/webfinger?resource=acct:user@mastodon.castle
 
+### httpbin
+GET https://httpbin.castle/headers

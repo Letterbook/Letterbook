@@ -26,6 +26,7 @@ public interface IAccountProfileAdapter : IDisposable
     public IAsyncEnumerable<Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0);
 
     public void Add(Profile profile);
+    // public void Add(Audience audienceMember);
     public void AddRange(IEnumerable<Profile> profile);
     public void Update(Profile profile);
     public void UpdateRange(IEnumerable<Profile> profile);

@@ -17,7 +17,7 @@ public static class ProfileMappers
         cfg.CreateMap<Models.Profile, AsAp.Actor>(MemberList.Destination)
             .IncludeBase<Models.Profile, AsAp.Object>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Description))
+            .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Description))
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName))
             .ForMember(dest => dest.PreferredUsername, opt => opt.MapFrom(src => src.Handle))

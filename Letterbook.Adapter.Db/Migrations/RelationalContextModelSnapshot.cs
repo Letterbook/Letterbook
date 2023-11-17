@@ -135,7 +135,6 @@ namespace Letterbook.Adapter.Db.Migrations
             modelBuilder.Entity("Letterbook.Core.Models.FollowerRelation", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("Date")

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
@@ -219,35 +220,34 @@ public class ProfileService : IProfileService
         
         // TODO(moderation): Check for blocks
         // TODO(moderation): Check for requiresApproval
-        var follow = new FollowerRelation(self, target, FollowState.Pending);
-        follow.State = await _client.As(self).SendFollow(target.Inbox);
-        switch (follow.State)
+        var followState = await _client.As(self).SendFollow(target.Inbox);
+        switch (followState)
         {
             case FollowState.Accepted:
             case FollowState.Pending:
-                self.Follow(target, follow.State);
-                self.Audiences.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
+                self.Follow(target, followState);
+                self.Audiences.Add(Audience.Followers(target));
                 self.Audiences.Add(Audience.Boosts(target));
                 await _profiles.Commit();
-                return follow.State;
+                return followState;
             case FollowState.None:
             case FollowState.Rejected:
             default:
-                return follow.State;
+                return followState;
         }
     }
 
     public async Task<FollowState> Follow(Guid selfId, Uri targetId)
     {
-        var self = await RequireProfile(selfId);
+        var self = await RequireProfile(selfId, targetId);
         var target = await ResolveProfile(targetId, self);
         return await Follow(self, target, false);
     }
 
     public async Task<FollowState> Follow(Guid selfId, Guid targetId)
     {
-        var self = await RequireProfile(selfId);
         var target = await RequireProfile(targetId);
+        var self = await RequireProfile(selfId, target.Id);
         return await Follow(self, target, false);
     }
 
@@ -340,20 +340,21 @@ public class ProfileService : IProfileService
         throw new NotImplementedException();
     }
 
-    private async Task<Profile> RequireProfile(Guid localId,
+    [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
+    private async Task<Profile> RequireProfile(Guid localId, Uri? relationId = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
         [CallerLineNumber] int line = -1)
     {
-        var profile = await _profiles.LookupProfile(localId);
+        var profile = relationId != null 
+            ? await _profiles.LookupProfileWithRelation(localId, relationId)
+            : await _profiles.LookupProfile(localId);
         if (profile != null) return profile;
 
         _logger.LogError("Cannot update Profile {ProfileId} because it could not be found", localId);
         await _profiles.Cancel();
-        // ReSharper disable ExplicitCallerInfoArgument Pass original call site details for better error reporting
         throw CoreException.MissingData("Failed to update Profile because it could not be found", typeof(Profile), localId,
             null, name, path, line);
-        // ReSharper restore ExplicitCallerInfoArgument
     }
     
     private async Task<Profile> ResolveProfile(Uri profileId,
@@ -371,7 +372,8 @@ public class ProfileService : IProfileService
         {
             if (profile != null)
             {
-                profile.ShallowCopy(await _client.As(onBehalfOf).Fetch<Profile>(profileId));
+                var fetched = await _client.As(onBehalfOf).Fetch<Profile>(profileId);
+                profile.ShallowCopy(fetched);
                 _profiles.Update(profile);
             }
             else
@@ -379,6 +381,8 @@ public class ProfileService : IProfileService
                 profile = await _client.As(onBehalfOf).Fetch<Profile>(profileId);
                 _profiles.Add(profile);
             }
+
+            await _profiles.Commit();
         }
         catch (AdapterException)
         {

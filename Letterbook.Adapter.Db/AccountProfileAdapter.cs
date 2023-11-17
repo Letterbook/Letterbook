@@ -73,6 +73,8 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
                 .ThenInclude(relation => relation.Follows)
             .Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
                 .ThenInclude(relation => relation.Follower)
+            .Include(profile => profile.Keys)
+            .Include(profile => profile.Audiences)
             .AsSplitQuery()
             .FirstOrDefaultAsync();
     }
@@ -84,6 +86,8 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
                 .ThenInclude(relation => relation.Follows)
             .Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
                 .ThenInclude(relation => relation.Follower)
+            .Include(profile => profile.Keys)
+            .Include(profile => profile.Audiences)
             .AsSplitQuery()
             .FirstOrDefaultAsync();
     }
@@ -104,6 +108,11 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
     {
         _context.Profiles.Add(profile);
     }
+
+    // public void Add(Models.Audience audienceMember)
+    // {
+        // _context.Profiles.
+    // }
 
     public void AddRange(IEnumerable<Models.Profile> profile)
     {
@@ -145,6 +154,7 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
             return _context.Database.CommitTransactionAsync();
         }
 
+        _context.ChangeTracker.DetectChanges();
         return _context.SaveChangesAsync();
     }
 
