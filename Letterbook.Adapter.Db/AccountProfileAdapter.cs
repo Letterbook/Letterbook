@@ -38,11 +38,6 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         return _context.Accounts.AsQueryable();
     }
 
-    public Task<bool> AnyProfile(IAccountProfileAdapter.ProfileComparer comparer)
-    {
-        return _context.Profiles.AnyAsync();
-    }
-
     public Task<bool> AnyProfile(string handle)
     {
         return _context.Profiles.AnyAsync(profile => profile.Handle == handle);
@@ -66,10 +61,9 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         return _context.Profiles.FirstOrDefaultAsync(profile => profile.Id == id);
     }
 
-    public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)
+    private Task<Models.Profile?> WithRelation(IQueryable<Models.Profile> query, Uri relationId)
     {
-        return _context.Profiles.Where(profile => profile.Id == id)
-            .Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId))
+        return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId))
                 .ThenInclude(relation => relation.Follows)
             .Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
                 .ThenInclude(relation => relation.Follower)
@@ -78,18 +72,15 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
             .AsSplitQuery()
             .FirstOrDefaultAsync();
     }
+    
+    public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)
+    {
+        return WithRelation(_context.Profiles.Where(profile => profile.Id == id), relationId);
+    }
 
     public Task<Models.Profile?> LookupProfileWithRelation(Guid localId, Uri relationId)
     {
-        return _context.Profiles.Where(profile => profile.LocalId == localId)
-            .Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId))
-                .ThenInclude(relation => relation.Follows)
-            .Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
-                .ThenInclude(relation => relation.Follower)
-            .Include(profile => profile.Keys)
-            .Include(profile => profile.Audiences)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync();
+        return WithRelation(_context.Profiles.Where(profile => profile.LocalId == localId), relationId);
     }
 
     public IAsyncEnumerable<Models.Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0)
@@ -108,11 +99,6 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
     {
         _context.Profiles.Add(profile);
     }
-
-    // public void Add(Models.Audience audienceMember)
-    // {
-        // _context.Profiles.
-    // }
 
     public void AddRange(IEnumerable<Models.Profile> profile)
     {
@@ -154,7 +140,6 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
             return _context.Database.CommitTransactionAsync();
         }
 
-        _context.ChangeTracker.DetectChanges();
         return _context.SaveChangesAsync();
     }
 
