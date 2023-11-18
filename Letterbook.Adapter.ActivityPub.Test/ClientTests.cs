@@ -65,7 +65,7 @@ public class ClientTests : WithMocks
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(target.Inbox);
+        var actual = await _client.As(_profile).SendFollow(target);
 
         Assert.Equal(FollowState.Accepted, actual);
         HttpMessageHandlerMock.Protected().Verify("SendAsync", Times.Once(), 
@@ -94,7 +94,7 @@ public class ClientTests : WithMocks
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(target.Inbox);
+        var actual = await _client.As(_profile).SendFollow(target);
 
         Assert.Equal(FollowState.Rejected, actual);
     }
@@ -120,7 +120,7 @@ public class ClientTests : WithMocks
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(target.Inbox);
+        var actual = await _client.As(_profile).SendFollow(target);
 
         Assert.Equal(FollowState.Pending, actual);
     }
@@ -146,7 +146,7 @@ public class ClientTests : WithMocks
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(target.Inbox);
+        var actual = await _client.As(_profile).SendFollow(target);
 
         Assert.Equal(FollowState.Pending, actual);
     }
@@ -168,7 +168,7 @@ public class ClientTests : WithMocks
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(target.Inbox);
+        var actual = await _client.As(_profile).SendFollow(target);
 
         Assert.Equal(FollowState.None, actual);
     }
@@ -192,7 +192,7 @@ public class ClientTests : WithMocks
                 }
             );
 
-        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(target.Inbox));
+        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(target));
     }
     
     [Fact(DisplayName = "Should handle client errors returned from peer servers")]
@@ -214,6 +214,6 @@ public class ClientTests : WithMocks
                 }
             );
 
-        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(target.Inbox));
+        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(target));
     }
 }
