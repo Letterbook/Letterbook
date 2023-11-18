@@ -220,7 +220,7 @@ public class ProfileService : IProfileService
         
         // TODO(moderation): Check for blocks
         // TODO(moderation): Check for requiresApproval
-        var followState = await _client.As(self).SendFollow(target.Inbox);
+        var followState = await _client.As(self).SendFollow(target);
         switch (followState)
         {
             case FollowState.Accepted:
@@ -272,10 +272,10 @@ public class ProfileService : IProfileService
     public async Task<FollowState> ReceiveFollowRequest(Guid localId, Uri followerId)
     {
         var target = await RequireProfile(localId);
-        // var follower = await ResolveProfile(followerId);
+        var follower = await ResolveProfile(followerId);
         
         // TODO(moderation): check blocks and requiresApproval
-        var relation = target.AddFollower(Profile.CreateEmpty(followerId), FollowState.Accepted);
+        var relation = target.AddFollower(follower, FollowState.Accepted);
         await _profiles.Commit();
         
         return relation.State;

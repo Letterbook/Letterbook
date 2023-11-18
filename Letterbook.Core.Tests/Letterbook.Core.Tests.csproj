@@ -40,10 +40,6 @@
         <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Extensions\" />
-    </ItemGroup>
-
 
 
 </Project>

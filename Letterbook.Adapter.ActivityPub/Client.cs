@@ -83,14 +83,18 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         return message;
     }
 
-    public async Task<FollowState> SendFollow(Uri inbox)
+    public async Task<FollowState> SendFollow(Models.Profile target)
     {
+        var inbox = target.Inbox;
         var actor = ProfileMapper.Map<AsAp.Actor>(_profile);
         var follow = new AsAp.Activity()
         {
             Type = "Follow",
         };
         follow.Actor.Add(actor);
+        // Interop(mastodon): Mastodon requires the target to be in the Follow.Subject, even though the activity is 
+        // about to be delivered to the target's Inbox
+        follow.Object.Add(new AsAp.Link(CompactIri.FromUri(target.Id)));
         
         var message = SignedRequest(HttpMethod.Post, inbox);
         message.Content = JsonContent.Create(follow, options: JsonOptions.ActivityPub);
@@ -128,7 +132,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
             return FollowState.None;
         }
     }
-    
+
     public async Task<object> SendCreate(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();

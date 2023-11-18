@@ -27,6 +27,7 @@
     <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.6.0-rc.1" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.6.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.6.0-beta.2" />
+    <PackageReference Include="Request.Body.Peeker" Version="1.1.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="7.0.1" />

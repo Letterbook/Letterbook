@@ -284,7 +284,7 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(target.Id))
             .ReturnsAsync(default(Profile));
         ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
-        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox))
+        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target))
             .ReturnsAsync(FollowState.Accepted);
 
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
@@ -304,7 +304,7 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
             .ReturnsAsync(default(Profile));
         ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
-        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox))
+        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target))
             .ReturnsAsync(FollowState.Pending);
 
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
@@ -324,7 +324,7 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
             .ReturnsAsync(default(Profile));
         ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
-        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox))
+        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target))
             .ReturnsAsync(FollowState.Rejected);
 
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);

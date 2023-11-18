@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Text;
+using AutoMapper;
 using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Api.Dto;
 using Letterbook.Core;
