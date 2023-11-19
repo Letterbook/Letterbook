@@ -1,6 +1,8 @@
-﻿namespace Letterbook.Core.Adapters;
+﻿using Letterbook.Core.Models;
+
+namespace Letterbook.Core.Adapters;
 
 public interface IActivityMessageService
 {
-    public void Deliver(DTO.Activity activity, Uri inbox);
+    public void Deliver(Uri inbox, DTO.Activity activity, Profile? onBehalfOf);
 }

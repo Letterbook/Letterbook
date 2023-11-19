@@ -7,6 +7,7 @@ using Letterbook.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Exceptions;
 using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Microsoft.Extensions.Logging;
@@ -23,6 +24,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     
     private static readonly IMapper ProfileMapper = new Mapper(ProfileMappers.DefaultProfile);
     private static readonly IMapper AsApMapper = new Mapper(Mappers.AsApMapper.Config);
+    private static readonly IMapper ToLinkMapper = new Mapper(ProfileMappers.DefaultLink);
 
     public Client(ILogger<Client> logger, HttpClient httpClient)
     {
@@ -30,9 +32,21 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         _httpClient = httpClient;
     }
     
+    // Using Stream instead of string or bytes saves on memory allocations
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
-    // Stream saves on allocations
     private async Task<Stream?> ReadResponse(HttpResponseMessage response, 
+        [CallerMemberName] string name="",
+        [CallerFilePath] string path="",
+        [CallerLineNumber] int line=-1)
+    {
+        if(await ValidateResponseHeaders(response, name, path, line))
+            return await response.Content.ReadAsStreamAsync();
+        return default;
+    }
+
+    // ValueTask is more efficient when you expect to frequently just return a synchronous value
+    [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
+    private async ValueTask<bool> ValidateResponseHeaders(HttpResponseMessage response,
         [CallerMemberName] string name="",
         [CallerFilePath] string path="",
         [CallerLineNumber] int line=-1)
@@ -51,14 +65,15 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
                 _logger.LogDebug("Server response had headers {Headers} and body {Body}", response.Headers, body);
                 throw ClientException.RequestError(response.StatusCode, name, body: body, path: path, line: line);
             case >= 300 and < 400:
-                return default;
+                return false;
             case >= 201 and < 300:
                 return default;
             case 200:
-                return await response.Content.ReadAsStreamAsync();
+                return true;
             default:
-                return default;
+                return false;
         }
+
     }
     
     public IActivityPubAuthenticatedClient As(Models.Profile? onBehalfOf)
@@ -168,9 +183,46 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendAccept(Uri inbox, IContentRef content)
+    public async Task<object> SendAccept(Uri inbox, Uri subjectId)
     {
-        throw new NotImplementedException();
+        var activity = new AsAp.Activity()
+        {
+            LdContext = new []{AsAp.LdContext.ActivityStreams},
+            Type = "Accept"
+        };
+        if(_profile is not null) activity.Actor.Add(ToLinkMapper.Map<AsAp.Link>(_profile));
+        activity.Object.Add(ToLinkMapper.Map<AsAp.Link>(subjectId));
+
+        return SendAccept(inbox, activity);
+    }
+
+    public async Task<object> SendAccept(Uri inbox, ActivityType activityType)
+    {
+        if (_profile is null)
+            throw CoreException.MissingData("Cannot build a semantic Accept Activity without an Actor or Object",
+                typeof(Models.Profile), null);
+        var activity = new AsAp.Activity()
+        {
+            LdContext = new []{AsAp.LdContext.ActivityStreams},
+            Type = "Accept"
+        };
+        activity.Actor.Add(ToLinkMapper.Map<AsAp.Link>(_profile));
+        activity.Object.Add(new AsAp.Activity()
+        {
+            Type = activityType.ToString()
+        });
+
+        return SendAccept(inbox, activity);
+    }
+
+    private async Task SendAccept(Uri inbox, AsAp.Activity activity)
+    {
+        var message = SignedRequest(HttpMethod.Post, inbox);
+        message.Content = JsonContent.Create(activity, options: JsonOptions.ActivityPub);
+        
+        var response = await _httpClient.SendAsync(message);
+        
+        await ValidateResponseHeaders(response);
     }
 
     public async Task<object> SendReject(Uri inbox, IContentRef content)

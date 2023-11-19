@@ -251,7 +251,7 @@ public class ProfileService : IProfileService
         return await Follow(self, target, false);
     }
 
-    public async Task<FollowState> ReceiveFollowRequest(Uri targetId, Uri followerId)
+    public async Task<FollowState> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId)
     {
         if(targetId.Authority != _coreConfig.BaseUri().Authority)
         {
@@ -260,24 +260,31 @@ public class ProfileService : IProfileService
         }
         
         var target = await ResolveProfile(targetId);
-        // var follower = await ResolveProfile(followerId);
-        
-        // TODO(moderation): check blocks and requiresApproval
-        var relation = target.AddFollower(Profile.CreateEmpty(followerId), FollowState.Accepted);
-        await _profiles.Commit();
-        
-        return relation.State;
+        var follower = await ResolveProfile(followerId);
+
+        return await ReceiveFollowRequest(target, follower, requestId);
     }
 
-    public async Task<FollowState> ReceiveFollowRequest(Guid localId, Uri followerId)
+    public async Task<FollowState> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId)
     {
         var target = await RequireProfile(localId);
         var follower = await ResolveProfile(followerId);
-        
-        // TODO(moderation): check blocks and requiresApproval
+
+        return await ReceiveFollowRequest(target, follower, requestId);
+    }
+
+    private async Task<FollowState> ReceiveFollowRequest(Profile target, Profile follower, Uri? requestId)
+    {
         var relation = target.AddFollower(follower, FollowState.Accepted);
         await _profiles.Commit();
+        if (relation.State == FollowState.Rejected) return relation.State;
         
+        // Todo: punt more AP responses to a delivery queue
+        // Todo: also, implement that delivery queue
+        if (requestId is not null)
+            await _client.As(target).SendAccept(follower.Inbox, requestId);
+        else
+            await _client.As(target).SendAccept(follower.Inbox, ActivityType.Follow);
         return relation.State;
     }
 

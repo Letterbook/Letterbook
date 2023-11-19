@@ -50,7 +50,7 @@ public class ActorControllerTests : WithMocks
         _activity.Type = "Follow";
 
         ProfileServiceMock.Setup(service =>
-                service.ReceiveFollowRequest(_profile.LocalId!.Value, _activity.Actor.First().Id!))
+                service.ReceiveFollowRequest(_profile.LocalId!.Value, _activity.Actor.First().Id!, null))
             .ReturnsAsync(FollowState.Accepted);
 
         var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), _activity);
@@ -69,7 +69,7 @@ public class ActorControllerTests : WithMocks
         _activity.Type = "Follow";
 
         ProfileServiceMock.Setup(service =>
-                service.ReceiveFollowRequest(_profile.LocalId!.Value, _activity.Actor.First().Id!))
+                service.ReceiveFollowRequest(_profile.LocalId!.Value, _activity.Actor.First().Id!, null))
             .ReturnsAsync(FollowState.Pending);
 
         var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), _activity);
@@ -88,7 +88,7 @@ public class ActorControllerTests : WithMocks
         _activity.Type = "Follow";
 
         ProfileServiceMock.Setup(service =>
-                service.ReceiveFollowRequest(_profile.LocalId!.Value, _activity.Actor.First().Id!))
+                service.ReceiveFollowRequest(_profile.LocalId!.Value, _activity.Actor.First().Id!, null))
             .ReturnsAsync(FollowState.Rejected);
 
         var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), _activity);

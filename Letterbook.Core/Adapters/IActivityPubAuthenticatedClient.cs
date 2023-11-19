@@ -13,7 +13,8 @@ public interface IActivityPubAuthenticatedClient : IActivityPubClient
     Task<object> SendBoost(Uri inbox, IContentRef content);
     Task<object> SendLike(Uri inbox, IContentRef content);
     Task<object> SendDislike(Uri inbox, IContentRef content);
-    Task<object> SendAccept(Uri inbox, IContentRef content);
+    Task<object> SendAccept(Uri inbox, Uri subjectId);
+    Task<object> SendAccept(Uri inbox, ActivityType activityType);
     Task<object> SendReject(Uri inbox, IContentRef content);
     Task<object> SendPending(Uri inbox, IContentRef content);
     Task<object> SendAdd(Uri inbox, IContentRef content, Uri collection);

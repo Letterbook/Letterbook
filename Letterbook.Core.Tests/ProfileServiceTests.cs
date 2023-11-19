@@ -341,7 +341,7 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(_profile.Id)).ReturnsAsync(_profile);
         AccountProfileMock.Setup(m => m.LookupProfile(follower.Id)).ReturnsAsync(follower);
 
-        var actual = await _service.ReceiveFollowRequest(_profile.Id, follower.Id);
+        var actual = await _service.ReceiveFollowRequest(_profile.Id, follower.Id, null);
 
         Assert.Equal(FollowState.Accepted, actual);
         Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));

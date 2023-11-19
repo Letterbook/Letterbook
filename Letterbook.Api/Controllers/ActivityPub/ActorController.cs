@@ -114,7 +114,7 @@ public class ActorController : ControllerBase
             switch (activityType)
             {
                 case ActivityType.Accept:
-                    break;
+                    return await InboxAccept(localId, activity);
                 case ActivityType.Add:
                     break;
                 case ActivityType.Announce:
@@ -183,6 +183,7 @@ public class ActorController : ControllerBase
         throw new NotImplementedException();
     }
 
+
     [HttpPost]
     [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
@@ -212,6 +213,11 @@ public class ActorController : ControllerBase
     /* * * * * * * * * * * * *
      * Support methods       *
      * * * * * * * * * * * * */
+    
+    private async Task<IActionResult> InboxAccept(Guid localId, AsAp.Activity activity)
+    {
+        throw new NotImplementedException();
+    }
     
     private async Task<IActionResult> InboxUndo(Guid id, AsAp.Activity activity)
     {
@@ -253,7 +259,7 @@ public class ActorController : ControllerBase
         var actor = activity.Actor.FirstOrDefault();
         if (actor?.Id is null) return BadRequest(new ErrorMessage(ErrorCodes.None, "Actor ID is required for follower"));
                     
-        var state = await _profileService.ReceiveFollowRequest(localId, actor.Id);
+        var state = await _profileService.ReceiveFollowRequest(localId, actor.Id, activity.Id);
                     
         return state switch
         {
