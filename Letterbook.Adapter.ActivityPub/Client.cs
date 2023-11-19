@@ -114,6 +114,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         var message = SignedRequest(HttpMethod.Post, inbox);
         message.Content = JsonContent.Create(follow, options: JsonOptions.ActivityPub);
 
+        _logger.LogDebug("Sending {Activity}", JsonSerializer.Serialize(follow, JsonOptions.ActivityPub));
         var response = await _httpClient.SendAsync(message);
         
         var stream = await ReadResponse(response);
@@ -183,22 +184,22 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendAccept(Uri inbox, Uri subjectId)
+    public async Task<object> SendAccept(Uri inbox, ActivityType activityToAccept, Uri requestorId, Uri? subjectId)
     {
-        var activity = new AsAp.Activity()
-        {
-            LdContext = new []{AsAp.LdContext.ActivityStreams},
-            Type = "Accept"
-        };
-        if(_profile is not null) activity.Actor.Add(ToLinkMapper.Map<AsAp.Link>(_profile));
-        activity.Object.Add(ToLinkMapper.Map<AsAp.Link>(subjectId));
-
-        return SendAccept(inbox, activity);
-    }
-
-    public async Task<object> SendAccept(Uri inbox, ActivityType activityType)
-    {
-        if (_profile is null)
+        /*** Mastodon expects objects that look like this
+         * {
+         *   '@context': 'https://www.w3.org/ns/activitystreams',
+         *   id: 'foo',
+         *   type: 'Accept',
+         *   actor: ActivityPub::TagManager.instance.uri_for(sender),
+         *   object: {
+         *     id: 'bar',
+         *     type: 'Follow',
+         *     actor: ActivityPub::TagManager.instance.uri_for(recipient),
+         *     object: ActivityPub::TagManager.instance.uri_for(sender),
+         *   }
+         */
+        if (_profile is null && subjectId is null)
             throw CoreException.MissingData("Cannot build a semantic Accept Activity without an Actor or Object",
                 typeof(Models.Profile), null);
         var activity = new AsAp.Activity()
@@ -207,10 +208,17 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
             Type = "Accept"
         };
         activity.Actor.Add(ToLinkMapper.Map<AsAp.Link>(_profile));
-        activity.Object.Add(new AsAp.Activity()
+        
+        // This is essentially a recreation of the activity that was originally sent to us
+        var obj = new AsAp.Activity()
         {
-            Type = activityType.ToString()
-        });
+            Type = activityToAccept.ToString()
+        };
+        obj.Object.Add(ToLinkMapper.Map<AsAp.Link>(_profile));
+        if (subjectId is not null) obj.Id = CompactIri.FromUri(subjectId);
+        obj.Actor.Add(ToLinkMapper.Map<AsAp.Link>(requestorId));
+        
+        activity.Object.Add(obj);
 
         return SendAccept(inbox, activity);
     }
@@ -220,6 +228,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         var message = SignedRequest(HttpMethod.Post, inbox);
         message.Content = JsonContent.Create(activity, options: JsonOptions.ActivityPub);
         
+        _logger.LogDebug("Sending {Activity}", JsonSerializer.Serialize(activity, JsonOptions.ActivityPub));
         var response = await _httpClient.SendAsync(message);
         
         await ValidateResponseHeaders(response);

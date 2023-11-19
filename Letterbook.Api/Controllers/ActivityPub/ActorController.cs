@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using AutoMapper;
 using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Api.Dto;
@@ -109,6 +110,9 @@ public class ActorController : ControllerBase
     {
         var localId = ShortId.ToGuid(id);
         var activityType = Enum.Parse<ActivityType>(activity.Type);
+        _logger.LogInformation("Start processing {Activity} activity", activity.Type);
+        _logger.LogDebug("Activity {Detail}", JsonSerializer.Serialize(activity, Letterbook.ActivityPub.JsonOptions.ActivityPub));
+        await LogActivity();
         try
         {
             switch (activityType)
@@ -213,6 +217,28 @@ public class ActorController : ControllerBase
     /* * * * * * * * * * * * *
      * Support methods       *
      * * * * * * * * * * * * */
+
+    private async ValueTask LogActivity()
+    {
+        if (!_logger.IsEnabled(LogLevel.Debug) || !HttpContext.Request.Body.CanRead) return;
+
+        try
+        {
+            HttpContext.Request.Body.Seek(0, SeekOrigin.Begin);
+            var buffer = new byte[HttpContext.Request.Body.Length];
+            var read = await HttpContext.Request.Body.ReadAsync(buffer, 0, (int)HttpContext.Request.Body.Length);
+
+            if (read > 0)
+            {
+                _logger.LogDebug("Raw activity {Json}", Encoding.UTF8.GetString(buffer));
+            }
+            else _logger.LogDebug("Couldn't (re)read the request body");
+        }
+        finally
+        {
+            HttpContext.Request.Body.Seek(0, SeekOrigin.Begin);
+        }
+    }
     
     private async Task<IActionResult> InboxAccept(Guid localId, AsAp.Activity activity)
     {
@@ -269,3 +295,53 @@ public class ActorController : ControllerBase
         };
     }
 }
+
+/*** The problem: Letterbook.AP can't serialize/deserialize nested Activities
+// Parsed
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "http://mastodon.castle/users/user#follows/32/undo",
+  "type": "Undo",
+  "actor": "http://mastodon.castle/users/user",
+  "object": {
+    "id": "http://mastodon.castle/6dc45337-040b-43d2-8238-de9b7f377750",
+    "type": "Follow"
+  }
+}
+// Received
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "http://mastodon.castle/users/user#follows/32/undo",
+  "type": "Undo",
+  "actor": "http://mastodon.castle/users/user",
+  "object": {
+    "id": "http://mastodon.castle/6dc45337-040b-43d2-8238-de9b7f377750",
+    "type": "Follow",
+    "actor": "http://mastodon.castle/users/user",
+    "object": "https://host.castle/actor/ahwPS_-DYE2h9RlTo0p4jg"
+  }
+}
+
+// Sent
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "type": "Accept",
+  "actor": "https://host.castle/actor/ahwPS_-DYE2h9RlTo0p4jg",
+  "object": {
+    "id": "http://mastodon.castle/fbdfbd1c-489e-4edb-980f-0273a03c0992",
+    "type": "Follow"
+  }
+}
+
+// Tried to Send
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "type": "Accept",
+  "actor": "https://host.castle/actor/ahwPS_-DYE2h9RlTo0p4jg",
+  "object": {
+    "id": "http://mastodon.castle/fbdfbd1c-489e-4edb-980f-0273a03c0992",
+    "type": "Follow",
+    "actor": "http://mastodon.castle/users/user"
+  }
+}
+*/

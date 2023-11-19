@@ -143,10 +143,16 @@ public class Program
 
         builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
         var app = builder.Build();
-
         // Configure the HTTP request pipeline.
+
+        // Configure development niceties
         if (!app.Environment.IsProduction())
         {
+            app.Use((context, next) =>
+            {
+                context.Request.EnableBuffering();
+                return next();
+            });
             app.UseSwagger();
             app.UseSwaggerUI();
             // app.Services.GetService<JwtBearerHandler>()
@@ -161,7 +167,7 @@ public class Program
 
         app.MapPrometheusScrapingEndpoint();
       
-        // app.UseSerilogRequestLogging();
+        app.UseSerilogRequestLogging();
 
         app.UsePathBase(new PathString("/api/v1"));
         app.MapControllers();

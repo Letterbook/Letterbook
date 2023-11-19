@@ -281,10 +281,7 @@ public class ProfileService : IProfileService
         
         // Todo: punt more AP responses to a delivery queue
         // Todo: also, implement that delivery queue
-        if (requestId is not null)
-            await _client.As(target).SendAccept(follower.Inbox, requestId);
-        else
-            await _client.As(target).SendAccept(follower.Inbox, ActivityType.Follow);
+        await _client.As(target).SendAccept(follower.Inbox, ActivityType.Follow, follower.Id, requestId);
         return relation.State;
     }
 
