@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using Letterbook.ActivityPub;
+using Letterbook.Adapter.ActivityPub.Types;
 
 namespace Letterbook.Adapter.ActivityPub.Mappers;
 
 public class SigningKeyConverter :
     ITypeConverter<Models.SigningKey, AsAp.PublicKey?>,
     ITypeConverter<IList<Models.SigningKey>, AsAp.PublicKey?>,
-    IMemberValueResolver<Models.Profile, AsAp.Actor, IList<Models.SigningKey>, AsAp.PublicKey?>
+    IMemberValueResolver<Models.Profile, AsAp.Actor, IList<Models.SigningKey>, AsAp.PublicKey?>, IMemberValueResolver<Models.Profile, ActorExtensions, IList<Models.SigningKey>, PublicKey?>
 {
     public AsAp.PublicKey Convert(Models.SigningKey source, AsAp.PublicKey? destination, ResolutionContext context)
     {
@@ -47,5 +48,12 @@ public class SigningKeyConverter :
         destMember = context.Mapper.Map<AsAp.PublicKey>(sourceMember);
         destMember.Owner = context.Mapper.Map<AsAp.Link>(source.Id);
         return destMember;
+    }
+
+    // TODO(now): for APSharp
+    public PublicKey Resolve(Models.Profile source, ActorExtensions destination, IList<Models.SigningKey> sourceMember, PublicKey? destMember,
+        ResolutionContext context)
+    {
+        throw new NotImplementedException();
     }
 }
