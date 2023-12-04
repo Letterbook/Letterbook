@@ -8,10 +8,8 @@ public class ConfigureFollowerRelations : IEntityTypeConfiguration<Models.Follow
     public void Configure(EntityTypeBuilder<Models.FollowerRelation> builder)
     {
         builder.HasKey(relation => relation.Id);
+        builder.Property(relation => relation.Id)
+            .ValueGeneratedNever();
         builder.HasIndex(relation => relation.Date);
-        builder.HasOne<Models.Profile>(relation => relation.Follower)
-            .WithMany(profile => profile.FollowingCollection);
-        builder.HasOne<Models.Profile>(relation => relation.Follows)
-            .WithMany(profile => profile.FollowersCollection);
     }
 }

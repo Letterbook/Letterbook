@@ -30,6 +30,21 @@ public class ClientException : AdapterException
 
         return ex;
     }
+    
+    public static ClientException RemoteObjectError(Uri remoteId, string? message = null, Exception? innerEx = null,
+        [CallerMemberName] string name="",
+        [CallerFilePath] string path="",
+        [CallerLineNumber] int line=-1)
+    {
+        var ex = new ClientException(message, innerEx)
+        {
+            Source = FormatSource(path, name, line),
+        };
+        ex.HResult |= (int)ErrorCodes.PeerError.With(ErrorCodes.MissingData);
+        ex.Data["Remote ID"] = remoteId;
+
+        return ex;
+    }
 
     public static ClientException RequestError(HttpStatusCode code, string? message = null, string? body = null, Exception? innerEx = null,
         [CallerMemberName] string name="",

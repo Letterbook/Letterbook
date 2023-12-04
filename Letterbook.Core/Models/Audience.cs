@@ -54,7 +54,7 @@ public class Audience : IEquatable<Audience>, IObjectRef
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Id.Equals(other.Id);
+        return Id.ToString().Equals(other.Id.ToString());
     }
 
     public override bool Equals(object? obj)
@@ -67,7 +67,7 @@ public class Audience : IEquatable<Audience>, IObjectRef
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Id);
+        return HashCode.Combine(Id.ToString());
     }
 
     public static bool operator ==(Audience? left, Audience? right)

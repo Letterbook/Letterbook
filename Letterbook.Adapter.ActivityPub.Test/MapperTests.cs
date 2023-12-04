@@ -90,10 +90,8 @@ public class MapperTests
         var profile = _asApMapper.Map<Models.Profile>(actor);
         
         Assert.Equal("http://localhost:3080/users/user", profile.Id.ToString());
-        // Mapping ObjectCollection is broken
-        // Might need to just get rid of them. I thought having that type would make thing easier, not harder.
-        // Assert.Equal("http://localhost:3080/users/user/followers", profile.Followers.Id.ToString());
         Assert.Equal("http://localhost:3080/users/user/inbox", profile.Inbox.ToString());
+        Assert.Equal(Models.ActivityActorType.Person, profile.Type);
     }
     
     [Fact]
