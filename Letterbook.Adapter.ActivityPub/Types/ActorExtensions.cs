@@ -1,6 +1,6 @@
 ﻿using ActivityPub.Types;
 using ActivityPub.Types.AS;
-using Letterbook.Adapter.ActivityPub.Types;
+// using Letterbook.Adapter.ActivityPub.Types;
 // ReSharper disable InconsistentNaming
 
 namespace Letterbook.Adapter.ActivityPub.Types;

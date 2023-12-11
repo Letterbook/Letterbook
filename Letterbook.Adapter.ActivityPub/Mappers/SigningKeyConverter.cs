@@ -7,7 +7,10 @@ namespace Letterbook.Adapter.ActivityPub.Mappers;
 public class SigningKeyConverter :
     ITypeConverter<Models.SigningKey, AsAp.PublicKey?>,
     ITypeConverter<IList<Models.SigningKey>, AsAp.PublicKey?>,
-    IMemberValueResolver<Models.Profile, AsAp.Actor, IList<Models.SigningKey>, AsAp.PublicKey?>, IMemberValueResolver<Models.Profile, ActorExtensions, IList<Models.SigningKey>, PublicKey?>
+    IMemberValueResolver<Models.Profile, AsAp.Actor, IList<Models.SigningKey>, AsAp.PublicKey?>,
+    IMemberValueResolver<Models.Profile, ActorExtensions, IList<Models.SigningKey>, PublicKey?>,
+    ITypeConverter<IList<Models.SigningKey>, PublicKey?>,
+    ITypeConverter<Models.SigningKey, PublicKey?>
 {
     public AsAp.PublicKey Convert(Models.SigningKey source, AsAp.PublicKey? destination, ResolutionContext context)
     {
@@ -54,6 +57,39 @@ public class SigningKeyConverter :
     public PublicKey Resolve(Models.Profile source, ActorExtensions destination, IList<Models.SigningKey> sourceMember, PublicKey? destMember,
         ResolutionContext context)
     {
-        throw new NotImplementedException();
+        destMember = context.Mapper.Map<PublicKey>(sourceMember);
+        return destMember;
+    }
+
+    public PublicKey? Convert(IList<Models.SigningKey> source, PublicKey? destination, ResolutionContext context)
+    {
+        var signingKey = source.OrderBy(key => key.KeyOrder)
+            .FirstOrDefault(key => key.Family == Models.SigningKey.KeyFamily.Rsa);
+        if (signingKey == null)
+        {
+            return default!;
+        }
+
+        destination = context.Mapper.Map<PublicKey>(signingKey);
+        return destination;
+    }
+
+    public PublicKey? Convert(Models.SigningKey source, PublicKey? destination, ResolutionContext context)
+    {
+        destination ??= new PublicKey();
+        destination.Id = source.Id.ToString();
+        var pem = source.Family switch
+        {
+            Models.SigningKey.KeyFamily.Rsa => source.GetRsa().ExportSubjectPublicKeyInfoPem(),
+            Models.SigningKey.KeyFamily.Dsa => source.GetDsa().ExportSubjectPublicKeyInfoPem(),
+            Models.SigningKey.KeyFamily.EcDsa => source.GetEcDsa().ExportSubjectPublicKeyInfoPem(),
+            _ => null
+        };
+        if (pem == null)
+        {
+            return default!;
+        }
+        destination.PublicKeyPem = pem;
+        return destination;
     }
 }

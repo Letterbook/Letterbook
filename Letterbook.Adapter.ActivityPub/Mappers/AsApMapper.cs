@@ -14,6 +14,11 @@ public static class AsApMapper
         ConfigureNote(cfg);
     });
 
+    public static MapperConfiguration ActorConfig = new(cfg =>
+    {
+        ConfigureActor(cfg);
+    });
+
     private static void ConfigureActor(IMapperConfigurationExpression cfg)
     {
         cfg.CreateMap<Models.Profile, ActorExtensions>()
@@ -27,6 +32,12 @@ public static class AsApMapper
                 opt => opt.MapFrom<SigningKeyConverter, IList<SigningKey>>(src => src.Keys))
             .ForMember(dest => dest.Endpoints, opt => opt.Ignore())
             .ForMember(dest => dest.Streams, opt => opt.Ignore());
+        
+        cfg.CreateMap<SigningKey, PublicKey?>()
+            .ConvertUsing<SigningKeyConverter>();
+        
+        cfg.CreateMap<IList<SigningKey>, PublicKey?>()
+            .ConvertUsing<SigningKeyConverter>();
     }
 
     private static void ConfigureProfile(IMapperConfigurationExpression cfg)

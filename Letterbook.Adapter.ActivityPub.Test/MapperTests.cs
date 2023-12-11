@@ -3,6 +3,7 @@ using System.Text.Json;
 using AutoMapper;
 using Letterbook.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Mappers;
+using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Core.Tests.Fakes;
 using Xunit.Abstractions;
 
@@ -14,6 +15,7 @@ public class MapperTests
     private IMapper _profileMapper;
     private IMapper _asApMapper;
     private IMapper _asApActor;
+    private IMapper _APSharpMapper;
     private FakeProfile _fakeProfile;
     private Models.Profile _profile;
     private static string DataDir => Path.Join(
@@ -25,6 +27,7 @@ public class MapperTests
         _output = output;
         _profileMapper = new Mapper(ProfileMappers.DefaultProfile);
         _asApMapper = new Mapper(AsApMapper.Config);
+        _APSharpMapper = new Mapper(AsApMapper.ActorConfig);
         // _asApActor = new Mapper(AsApMapper.DefaultActor);
         
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
@@ -108,5 +111,13 @@ public class MapperTests
         Assert.NotNull(actual);
         Assert.Equal(expected, Convert.ToBase64String(actual.PublicKey.ToArray()));
         Assert.Equal("http://localhost:3080/users/user#main-key", actual.Id.ToString());
+    }
+
+    [Fact]
+    public void MapActorExtensions()
+    {
+        var actual = _APSharpMapper.Map<ActorExtensions>(_profile);
+        
+        Assert.Equal(_profile.Id.ToString(), actual.Id);
     }
 }
