@@ -18,9 +18,10 @@ public class MapperTests
     private IMapper _APSharpMapper;
     private FakeProfile _fakeProfile;
     private Models.Profile _profile;
+
     private static string DataDir => Path.Join(
         Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
-    
+
 
     public MapperTests(ITestOutputHelper output)
     {
@@ -29,7 +30,7 @@ public class MapperTests
         _asApMapper = new Mapper(AsApMapper.Config);
         _APSharpMapper = new Mapper(AsApMapper.ActorConfig);
         // _asApActor = new Mapper(AsApMapper.DefaultActor);
-        
+
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
         _fakeProfile = new FakeProfile("letterbook.example");
         _profile = _fakeProfile.Generate();
@@ -46,27 +47,27 @@ public class MapperTests
     public void MapProfileDefault()
     {
         var actual = _profileMapper.Map<AsAp.Actor>(_profile);
-        
+
         Assert.Equal(_profile.Id, actual.Id);
         Assert.Equal(_profile.Inbox, actual.Inbox.Id);
         Assert.Equal(_profile.Outbox, actual.Outbox.Id);
         Assert.Equal(_profile.Following, actual.Following?.Id);
-        Assert.Equal( _profile.Followers, actual.Followers?.Id);
+        Assert.Equal(_profile.Followers, actual.Followers?.Id);
     }
 
     [Fact]
     public void CanMapProfileDefaultSigningKey()
     {
         var expected = _profile.Keys.First().GetRsa().ExportSubjectPublicKeyInfoPem();
-        
+
         var actual = _profileMapper.Map<AsAp.Actor>(_profile);
 
         Assert.Equal(actual?.PublicKey?.PublicKeyPem, expected);
         Assert.Equal(actual?.PublicKey?.Owner.Id, _profile.Id);
         Assert.Equal(actual?.PublicKey?.Id, _profile.Keys.First().Id);
     }
-    
-    
+
+
     [Fact]
     public void CanMapSimpleNote()
     {
@@ -78,12 +79,12 @@ public class MapperTests
         };
         dto.AttributedTo.Add(new AsAp.Link("https://letterbook.example/@testuser"));
         var actual = _asApMapper.Map<Models.Note>(dto);
-            
+
         Assert.NotNull(actual);
         Assert.Equal("Some test content", actual.Content);
         Assert.Equal("https://letterbook.example/@testuser", actual.Creators.First().Id.ToString());
     }
-    
+
     [Fact]
     public void CanMapActor()
     {
@@ -91,12 +92,12 @@ public class MapperTests
         var actor = JsonSerializer.Deserialize<AsAp.Actor>(fs, JsonOptions.ActivityPub)!;
 
         var profile = _asApMapper.Map<Models.Profile>(actor);
-        
+
         Assert.Equal("http://localhost:3080/users/user", profile.Id.ToString());
         Assert.Equal("http://localhost:3080/users/user/inbox", profile.Inbox.ToString());
         Assert.Equal(Models.ActivityActorType.Person, profile.Type);
     }
-    
+
     [Fact]
     public void CanMapActorPublicKey()
     {
@@ -107,17 +108,34 @@ public class MapperTests
 
         var profile = _asApMapper.Map<Models.Profile>(actor);
         var actual = profile.Keys.FirstOrDefault();
-        
+
         Assert.NotNull(actual);
         Assert.Equal(expected, Convert.ToBase64String(actual.PublicKey.ToArray()));
         Assert.Equal("http://localhost:3080/users/user#main-key", actual.Id.ToString());
     }
 
     [Fact]
-    public void MapActorExtensions()
+    public void CanMapActorCore()
     {
         var actual = _APSharpMapper.Map<ActorExtensions>(_profile);
-        
+
         Assert.Equal(_profile.Id.ToString(), actual.Id);
+        Assert.Equal(_profile.Inbox.ToString(), actual.Inbox.HRef);
+        Assert.Equal(_profile.Outbox.ToString(), actual.Outbox.HRef);
+        Assert.Equal(_profile.Following.ToString(), actual.Following?.HRef!);
+        Assert.Equal(_profile.Followers.ToString(), actual.Followers?.HRef!);
+        Assert.Equal(_profile.Handle, actual.PreferredUsername?.DefaultValue);
+        Assert.Equal(_profile.DisplayName, actual.Name?.DefaultValue);
+    }
+
+    [Fact]
+    public void CanMapActorExtensionsPublicKey()
+    {
+        var expectedKey = _profile.Keys.First();
+        var expectedPem = expectedKey.GetRsa().ExportSubjectPublicKeyInfoPem();
+        var actual = _APSharpMapper.Map<ActorExtensions>(_profile);
+
+        Assert.Equal(expectedPem, actual.PublicKey?.PublicKeyPem);
+        Assert.Equal(expectedKey.Id.ToString(), actual.PublicKey?.Id);
     }
 }

@@ -1,8 +1,13 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using ActivityPub.Types.AS;
+using ActivityPub.Types.AS.Extended.Activity;
+using ActivityPub.Types.Conversion;
+using ActivityPub.Types.Util;
 using Letterbook.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Exceptions;
+using Letterbook.Adapter.ActivityPub.Test.Fixtures;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
@@ -14,7 +19,7 @@ using Xunit.Abstractions;
 namespace Letterbook.Adapter.ActivityPub.Test;
 
 
-public class ClientTests : WithMocks
+public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 {
     private Client _client;
     private ITestOutputHelper _output;
@@ -27,10 +32,10 @@ public class ClientTests : WithMocks
                """);
 
 
-    public ClientTests(ITestOutputHelper output)
+    public ClientTests(ITestOutputHelper output, JsonLdSerializerFixture fixture)
     {
         var httpClient = new HttpClient(HttpMessageHandlerMock.Object);
-        _client = new Client(Mock.Of<ILogger<Client>>(), httpClient);
+        _client = new Client(Mock.Of<ILogger<Client>>(), httpClient, fixture.JsonLdSerializer);
         _output = output;
 
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
@@ -215,5 +220,22 @@ public class ClientTests : WithMocks
             );
 
         await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(target));
+    }
+
+    [Fact(DisplayName = "Should send an Accept(Follow)")]
+    public void SendAcceptFollow()
+    {
+        Assert.Fail("TODO");
+        // var actual = await _client.SendAccept();
+        //
+        // HttpMessageHandlerMock.Protected().Verify("SendAsync", Times.Once(), 
+        //     ItExpr.Is<HttpRequestMessage>(message => false),
+        //     ItExpr.IsAny<CancellationToken>());
+        // Assert.NotNull(actual);
+        // Assert.NotNull(actual.Object.First());
+        // Assert.NotNull(actual.Actor.First());
+        // Assert.True(actual.Object.First().Value!.Is<ASActivity>(out var follow));
+        // Assert.NotNull(follow.Object.First());
+        // Assert.NotNull(follow.Actor.First());
     }
 }

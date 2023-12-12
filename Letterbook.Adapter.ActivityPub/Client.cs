@@ -1,11 +1,16 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using ActivityPub.Types.AS;
+using ActivityPub.Types.AS.Extended.Activity;
+using ActivityPub.Types.Conversion;
 using AutoMapper;
 using Letterbook.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Exceptions;
 using Letterbook.Adapter.ActivityPub.Mappers;
+using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
@@ -20,16 +25,19 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 {
     private readonly ILogger<Client> _logger;
     private readonly HttpClient _httpClient;
+    private readonly IJsonLdSerializer _jsonLdSerializer;
+    private readonly JsonLdSerializerOptions _jsonLdSerializerOptions;
     private Models.Profile? _profile = default;
     
     private static readonly IMapper ProfileMapper = new Mapper(ProfileMappers.DefaultProfile);
     private static readonly IMapper AsApMapper = new Mapper(Mappers.AsApMapper.Config);
     private static readonly IMapper ToLinkMapper = new Mapper(ProfileMappers.DefaultLink);
 
-    public Client(ILogger<Client> logger, HttpClient httpClient)
+    public Client(ILogger<Client> logger, HttpClient httpClient, IJsonLdSerializer jsonLdSerializer)
     {
         _logger = logger;
         _httpClient = httpClient;
+        _jsonLdSerializer = jsonLdSerializer;
     }
     
     // Using Stream instead of string or bytes saves on memory allocations
@@ -191,36 +199,24 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
          *   '@context': 'https://www.w3.org/ns/activitystreams',
          *   id: 'foo',
          *   type: 'Accept',
-         *   actor: ActivityPub::TagManager.instance.uri_for(sender),
+         *   actor: 'https://letterbook.example/actor/me',
          *   object: {
          *     id: 'bar',
          *     type: 'Follow',
-         *     actor: ActivityPub::TagManager.instance.uri_for(recipient),
-         *     object: ActivityPub::TagManager.instance.uri_for(sender),
+         *     actor: 'https://mastodon.example/user/them',
+         *     object: 'https://letterbook.example/actor/me',
          *   }
          */
-        if (_profile is null && subjectId is null)
-            throw CoreException.MissingData("Cannot build a semantic Accept Activity without an Actor or Object",
+        if (_profile is null || subjectId is null)
+            throw CoreException.MissingData("Cannot build a semantic Accept Activity without an Actor and Object",
                 typeof(Models.Profile), null);
-        var activity = new AsAp.Activity()
-        {
-            LdContext = new []{AsAp.LdContext.ActivityStreams},
-            Type = "Accept"
-        };
-        activity.Actor.Add(ToLinkMapper.Map<AsAp.Link>(_profile));
-        
-        // This is essentially a recreation of the activity that was originally sent to us
-        var obj = new AsAp.Activity()
-        {
-            Type = activityToAccept.ToString()
-        };
-        obj.Object.Add(ToLinkMapper.Map<AsAp.Link>(_profile));
-        if (subjectId is not null) obj.Id = CompactIri.FromUri(subjectId);
-        obj.Actor.Add(ToLinkMapper.Map<AsAp.Link>(requestorId));
-        
-        activity.Object.Add(obj);
+        ASActivity acceptObject = BuildActivity(activityToAccept);
+        var accept = BuildActivity(ActivityType.Accept, _profile, acceptObject);
 
-        return SendAccept(inbox, activity);
+        acceptObject.Actor.Add(requestorId);
+        acceptObject.Object.Add(_profile.Id);
+        
+        return SendAccept(inbox, accept);
     }
 
     private async Task SendAccept(Uri inbox, AsAp.Activity activity)
@@ -229,6 +225,18 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         message.Content = JsonContent.Create(activity, options: JsonOptions.ActivityPub);
         
         _logger.LogDebug("Sending {Activity}", JsonSerializer.Serialize(activity, JsonOptions.ActivityPub));
+        var response = await _httpClient.SendAsync(message);
+        
+        await ValidateResponseHeaders(response);
+    }
+
+    private async Task SendAccept(Uri inbox, ASActivity activity)
+    {
+        var message = SignedRequest(HttpMethod.Post, inbox);
+        var payload = _jsonLdSerializer.Serialize(activity);
+        message.Content = new StringContent(payload, Constants.LdJsonHeader);
+        
+        _logger.LogDebug("Sending {Activity}", payload);
         var response = await _httpClient.SendAsync(message);
         
         await ValidateResponseHeaders(response);
@@ -270,6 +278,58 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         if (mapped.Id == id) return mapped;
         _logger.LogError("Remote fetch for Object {Id} returned {ObjectId}", id, mapped.Id);
         throw ClientException.RemoteObjectError(mapped.Id, "Peer provided object is not the same as requested");
+    }
+
+    private ASActivity BuildActivity(ActivityType type)
+    {
+        return type switch
+        {
+            ActivityType.Accept => new AcceptActivity(),
+            ActivityType.Add => new AddActivity(),
+            ActivityType.Announce => new AnnounceActivity(),
+            ActivityType.Arrive => new ArriveActivity(),
+            ActivityType.Block => new BlockActivity(),
+            ActivityType.Create => new CreateActivity(),
+            ActivityType.Delete => new DeleteActivity(),
+            ActivityType.Dislike => new DislikeActivity(),
+            ActivityType.Flag => new FlagActivity(),
+            ActivityType.Follow => new FollowActivity(),
+            ActivityType.Ignore => new IgnoreActivity(),
+            ActivityType.Invite => new InviteActivity(),
+            ActivityType.Join => new JoinActivity(),
+            ActivityType.Leave => new LeaveActivity(),
+            ActivityType.Like => new LikeActivity(),
+            ActivityType.Listen => new ListenActivity(),
+            ActivityType.Move => new MoveActivity(),
+            ActivityType.Offer => new OfferActivity(),
+            ActivityType.Question => new QuestionActivity(),
+            ActivityType.Reject => new RejectActivity(),
+            ActivityType.Read => new ReadActivity(),
+            ActivityType.Remove => new RemoveActivity(),
+            ActivityType.TentativeReject => new TentativeRejectActivity(),
+            ActivityType.TentativeAccept => new TentativeAcceptActivity(),
+            ActivityType.Travel => new TravelActivity(),
+            ActivityType.Undo => new UndoActivity(),
+            ActivityType.Update => new UpdateActivity(),
+            ActivityType.View => new ViewActivity(),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
+    private ASActivity BuildActivity(ActivityType type, Models.Profile actor)
+    {
+        var activity = BuildActivity(type);
+        activity.Actor.Add(actor.Id);
+
+        return activity;
+    }
+
+    private ASActivity BuildActivity(ActivityType type, Models.Profile actor, ASObject @object)
+    {
+        var activity = BuildActivity(type, actor);
+        activity.Object.Add(@object);
+
+        return activity;
     }
 
     public void Dispose()
