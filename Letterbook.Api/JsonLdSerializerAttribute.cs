@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Letterbook.Adapter.ActivityPub;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using JsonOptions = Letterbook.ActivityPub.JsonOptions;
@@ -12,9 +13,9 @@ public class JsonLdSerializerAttribute : ActionFilterAttribute
         if (ctx.Result is OkObjectResult objectResult)
         {
             objectResult.Formatters.Clear();
-            objectResult.Formatters.Add(new SystemTextJsonOutputFormatter(JsonOptions.ActivityPub));
-            objectResult.ContentTypes.Clear();
-            objectResult.ContentTypes.Add("application/ld+json");
+            objectResult.Formatters.Add(new JsonLdOutputFormatter());
+            // objectResult.ContentTypes.Clear();
+            // objectResult.ContentTypes.Add("application/ld+json");
         }
     }
 }

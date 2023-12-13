@@ -1,10 +1,8 @@
-﻿using System.Net;
+﻿using System.Linq.Expressions;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
-using ActivityPub.Types.AS;
-using ActivityPub.Types.AS.Extended.Activity;
-using ActivityPub.Types.Conversion;
-using ActivityPub.Types.Util;
+using System.Text.Json.Nodes;
 using Letterbook.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Exceptions;
 using Letterbook.Adapter.ActivityPub.Test.Fixtures;
@@ -18,13 +16,13 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.ActivityPub.Test;
 
-
 public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 {
     private Client _client;
     private ITestOutputHelper _output;
     private FakeProfile _fakeProfile;
     private Models.Profile _profile;
+    private Models.Profile _targetProfile;
 
     private readonly MediaTypeWithQualityHeaderValue AcceptHeader = MediaTypeWithQualityHeaderValue
         .Parse("""
@@ -41,6 +39,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
         _fakeProfile = new FakeProfile("letterbook.example");
         _profile = _fakeProfile.Generate();
+        _targetProfile = new FakeProfile().Generate();
     }
 
     [Fact]
@@ -52,7 +51,6 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
     [Fact(DisplayName = "Should send a Follow")]
     public async Task ShouldFollow()
     {
-        var target = new FakeProfile().Generate();
         var response = JsonSerializer.Serialize(new AsAp.Activity()
         {
             Type = "Accept",
@@ -70,10 +68,10 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(target);
+        var actual = await _client.As(_profile).SendFollow(_targetProfile);
 
         Assert.Equal(FollowState.Accepted, actual);
-        HttpMessageHandlerMock.Protected().Verify("SendAsync", Times.Once(), 
+        HttpMessageHandlerMock.Protected().Verify("SendAsync", Times.Once(),
             ItExpr.IsAny<HttpRequestMessage>(),
             ItExpr.IsAny<CancellationToken>());
     }
@@ -81,7 +79,6 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
     [Fact(DisplayName = "Should handle a Reject")]
     public async Task ShouldFollowReject()
     {
-        var target = new FakeProfile().Generate();
         var response = JsonSerializer.Serialize(new AsAp.Activity()
         {
             Type = "Reject",
@@ -99,7 +96,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(target);
+        var actual = await _client.As(_profile).SendFollow(_targetProfile);
 
         Assert.Equal(FollowState.Rejected, actual);
     }
@@ -107,7 +104,6 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
     [Fact(DisplayName = "Should handle a PendingReject")]
     public async Task ShouldFollowPendingReject()
     {
-        var target = new FakeProfile().Generate();
         var response = JsonSerializer.Serialize(new AsAp.Activity()
         {
             Type = "PendingReject",
@@ -125,7 +121,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(target);
+        var actual = await _client.As(_profile).SendFollow(_targetProfile);
 
         Assert.Equal(FollowState.Pending, actual);
     }
@@ -133,7 +129,6 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
     [Fact(DisplayName = "Should handle a PendingAccept")]
     public async Task ShouldFollowPendingAccept()
     {
-        var target = new FakeProfile().Generate();
         var response = JsonSerializer.Serialize(new AsAp.Activity()
         {
             Type = "PendingAccept",
@@ -151,15 +146,14 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(target);
+        var actual = await _client.As(_profile).SendFollow(_targetProfile);
 
         Assert.Equal(FollowState.Pending, actual);
     }
-    
+
     [Fact(DisplayName = "Should handle a nonsense response")]
     public async Task ShouldFollowNonsense()
     {
-        var target = new FakeProfile().Generate();
         var response = JsonSerializer.Serialize(new AsAp.Activity() { Type = "Question", }, JsonOptions.ActivityPub);
         HttpMessageHandlerMock.Protected()
             .Setup<Task<HttpResponseMessage>>("SendAsync",
@@ -173,15 +167,14 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(target);
+        var actual = await _client.As(_profile).SendFollow(_targetProfile);
 
         Assert.Equal(FollowState.None, actual);
     }
-    
+
     [Fact(DisplayName = "Should handle server errors")]
     public async Task ShouldHandleServerErrors()
     {
-        var target = new FakeProfile().Generate();
         var response = """
                        {"Error": "This is not an ActivityPub object, so it shouldn't parse as one"}
                        """;
@@ -197,13 +190,12 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(target));
+        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile));
     }
-    
+
     [Fact(DisplayName = "Should handle client errors returned from peer servers")]
     public async Task ShouldHandleClientErrors()
     {
-        var target = new FakeProfile().Generate();
         var response = """
                        {"Error": "This is not an ActivityPub object, so it shouldn't parse as one"}
                        """;
@@ -219,23 +211,38 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(target));
+        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile));
     }
 
-    [Fact(DisplayName = "Should send an Accept(Follow)")]
-    public void SendAcceptFollow()
+    [Fact(DisplayName = "Should send an Accept:Follow")]
+    public async Task SendAcceptFollow()
     {
-        Assert.Fail("TODO");
-        // var actual = await _client.SendAccept();
-        //
-        // HttpMessageHandlerMock.Protected().Verify("SendAsync", Times.Once(), 
-        //     ItExpr.Is<HttpRequestMessage>(message => false),
-        //     ItExpr.IsAny<CancellationToken>());
-        // Assert.NotNull(actual);
-        // Assert.NotNull(actual.Object.First());
-        // Assert.NotNull(actual.Actor.First());
-        // Assert.True(actual.Object.First().Value!.Is<ASActivity>(out var follow));
-        // Assert.NotNull(follow.Object.First());
-        // Assert.NotNull(follow.Actor.First());
+        HttpRequestMessage? message = default;
+        HttpMessageHandlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .Callback((HttpRequestMessage m, CancellationToken _) => message = m)
+            .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.Accepted });
+
+        await _client.As(_profile).SendAccept(_targetProfile.Inbox, Models.ActivityType.Follow,
+            _targetProfile.Id, _profile.Id);
+
+        Assert.NotNull(message?.Content);
+
+        var payload = await message.Content.ReadAsStringAsync();
+        var actualAccept = JsonNode.Parse(payload);
+     
+        // Assert on the outer Accept activity
+        Assert.NotNull(actualAccept);
+        Assert.Equal("Accept", actualAccept["type"]!.GetValue<string>());
+        Assert.Equal(_profile.Id.ToString(), actualAccept["actor"]!.GetValue<string>());
+
+        // Assert on the inner Follow activity
+        var actualFollow = actualAccept["object"];
+        Assert.NotNull(actualFollow);
+        Assert.Equal("Follow", actualFollow["type"]!.GetValue<string>());
+        Assert.Equal(_targetProfile.Id.ToString(), actualFollow["actor"]!.GetValue<string>());
+        Assert.Equal(_profile.Id.ToString(), actualFollow["object"]!.GetValue<string>());
     }
 }

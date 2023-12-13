@@ -251,7 +251,7 @@ public class ProfileService : IProfileService
         return await Follow(self, target, false);
     }
 
-    public async Task<FollowState> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId)
+    public async Task<FollowerRelation> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId)
     {
         if(targetId.Authority != _coreConfig.BaseUri().Authority)
         {
@@ -265,7 +265,7 @@ public class ProfileService : IProfileService
         return await ReceiveFollowRequest(target, follower, requestId);
     }
 
-    public async Task<FollowState> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId)
+    public async Task<FollowerRelation> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId)
     {
         var target = await RequireProfile(localId);
         var follower = await ResolveProfile(followerId);
@@ -273,16 +273,16 @@ public class ProfileService : IProfileService
         return await ReceiveFollowRequest(target, follower, requestId);
     }
 
-    private async Task<FollowState> ReceiveFollowRequest(Profile target, Profile follower, Uri? requestId)
+    private async Task<FollowerRelation> ReceiveFollowRequest(Profile target, Profile follower, Uri? requestId)
     {
         var relation = target.AddFollower(follower, FollowState.Accepted);
         await _profiles.Commit();
-        if (relation.State == FollowState.Rejected) return relation.State;
+        // if (relation.State == FollowState.Rejected) return relation;
         
         // Todo: punt more AP responses to a delivery queue
         // Todo: also, implement that delivery queue
-        await _client.As(target).SendAccept(follower.Inbox, ActivityType.Follow, follower.Id, requestId);
-        return relation.State;
+        // await _client.As(target).SendAccept(follower.Inbox, ActivityType.Follow, follower.Id, requestId);
+        return relation;
     }
 
     public async Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response)

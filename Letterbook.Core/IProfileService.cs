@@ -18,8 +18,8 @@ public interface IProfileService
     Task<IEnumerable<Profile>> FindProfiles(string handle);
     Task<FollowState> Follow(Guid selfId, Uri targetId);
     Task<FollowState> Follow(Guid selfId, Guid localId);
-    Task<FollowState> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId);
-    Task<FollowState> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId);
+    Task<FollowerRelation> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId);
+    Task<FollowerRelation> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId);
     Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response);
     Task RemoveFollower(Guid selfId, Uri followerId);
     Task Unfollow(Guid selfId, Uri followerId);

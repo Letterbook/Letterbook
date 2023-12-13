@@ -115,7 +115,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
             Type = "Follow",
         };
         follow.Actor.Add(actor);
-        // Interop(mastodon): Mastodon requires the target to be in the Follow.Subject, even though the activity is 
+        // Interop(mastodon): Mastodon requires the target to be in the Follow.Object, even though the activity is 
         // about to be delivered to the target's Inbox
         follow.Object.Add(new AsAp.Link(CompactIri.FromUri(target.Id)));
         
@@ -210,8 +210,8 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         if (_profile is null || subjectId is null)
             throw CoreException.MissingData("Cannot build a semantic Accept Activity without an Actor and Object",
                 typeof(Models.Profile), null);
-        ASActivity acceptObject = BuildActivity(activityToAccept);
-        var accept = BuildActivity(ActivityType.Accept, _profile, acceptObject);
+        ASActivity acceptObject = Activities.BuildActivity(activityToAccept);
+        var accept = Activities.BuildActivity(ActivityType.Accept, _profile, acceptObject);
 
         acceptObject.Actor.Add(requestorId);
         acceptObject.Object.Add(_profile.Id);
@@ -278,58 +278,6 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         if (mapped.Id == id) return mapped;
         _logger.LogError("Remote fetch for Object {Id} returned {ObjectId}", id, mapped.Id);
         throw ClientException.RemoteObjectError(mapped.Id, "Peer provided object is not the same as requested");
-    }
-
-    private ASActivity BuildActivity(ActivityType type)
-    {
-        return type switch
-        {
-            ActivityType.Accept => new AcceptActivity(),
-            ActivityType.Add => new AddActivity(),
-            ActivityType.Announce => new AnnounceActivity(),
-            ActivityType.Arrive => new ArriveActivity(),
-            ActivityType.Block => new BlockActivity(),
-            ActivityType.Create => new CreateActivity(),
-            ActivityType.Delete => new DeleteActivity(),
-            ActivityType.Dislike => new DislikeActivity(),
-            ActivityType.Flag => new FlagActivity(),
-            ActivityType.Follow => new FollowActivity(),
-            ActivityType.Ignore => new IgnoreActivity(),
-            ActivityType.Invite => new InviteActivity(),
-            ActivityType.Join => new JoinActivity(),
-            ActivityType.Leave => new LeaveActivity(),
-            ActivityType.Like => new LikeActivity(),
-            ActivityType.Listen => new ListenActivity(),
-            ActivityType.Move => new MoveActivity(),
-            ActivityType.Offer => new OfferActivity(),
-            ActivityType.Question => new QuestionActivity(),
-            ActivityType.Reject => new RejectActivity(),
-            ActivityType.Read => new ReadActivity(),
-            ActivityType.Remove => new RemoveActivity(),
-            ActivityType.TentativeReject => new TentativeRejectActivity(),
-            ActivityType.TentativeAccept => new TentativeAcceptActivity(),
-            ActivityType.Travel => new TravelActivity(),
-            ActivityType.Undo => new UndoActivity(),
-            ActivityType.Update => new UpdateActivity(),
-            ActivityType.View => new ViewActivity(),
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
-    }
-
-    private ASActivity BuildActivity(ActivityType type, Models.Profile actor)
-    {
-        var activity = BuildActivity(type);
-        activity.Actor.Add(actor.Id);
-
-        return activity;
-    }
-
-    private ASActivity BuildActivity(ActivityType type, Models.Profile actor, ASObject @object)
-    {
-        var activity = BuildActivity(type, actor);
-        activity.Object.Add(@object);
-
-        return activity;
     }
 
     public void Dispose()

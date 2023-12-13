@@ -1,3 +1,4 @@
+using System.Net;
 using ActivityPub.Types;
 using ActivityPub.Types.Conversion;
 using DarkLink.Web.WebFinger.Server;
@@ -13,6 +14,7 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Workers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -48,6 +50,22 @@ public class Program
             .AddControllers(options =>
             {
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
+                // options.OutputFormatters.Insert(0, new JsonLdOutputFormatter());
+            })
+            .Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                    var problemDetails = new ValidationProblemDetails(context.ModelState)
+                    {
+                        Instance = context.HttpContext.Request.Path,
+                        Status = (int)HttpStatusCode.BadRequest,
+                    };
+                    logger.LogInformation("Validation failed {@Problem}", problemDetails);
+
+                    return new BadRequestObjectResult(problemDetails);
+                };
             });
         builder.Services.AddWebfinger();
 

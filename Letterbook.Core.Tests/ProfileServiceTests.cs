@@ -343,7 +343,7 @@ public class ProfileServiceTests : WithMocks
 
         var actual = await _service.ReceiveFollowRequest(_profile.Id, follower.Id, null);
 
-        Assert.Equal(FollowState.Accepted, actual);
+        Assert.Equal(FollowState.Accepted, actual.State);
         Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
     }
 
