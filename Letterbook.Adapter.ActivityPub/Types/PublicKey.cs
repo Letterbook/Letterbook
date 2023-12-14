@@ -8,6 +8,18 @@ namespace Letterbook.Adapter.ActivityPub.Types;
 
 public class PublicKey : ASObject, IASModel<PublicKey, PublicKeyEntity, ASObject>
 {
+    // { "sec": "https://w3id.org/security/v1#" }
+    public static IJsonLDContext DefiningContext { get; } = new JsonLDContext
+    {
+        new(new Dictionary<string, JsonLDTerm>()
+        {
+            ["sec"] = new()
+            {
+                Id = "https://w3id.org/security/v1#"
+            }
+        })
+    };
+
     private PublicKeyEntity Entity { get; }
 
     public PublicKey() => Entity = TypeMap.Extend<PublicKeyEntity>();
