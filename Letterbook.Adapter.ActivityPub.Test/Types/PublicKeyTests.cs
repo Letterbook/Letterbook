@@ -10,8 +10,8 @@ public class PublicKeyTests : IClassFixture<JsonLdSerializerFixture>
 
     public PublicKeyTests(JsonLdSerializerFixture fixture)
     {
+        fixture.WriteIndented = false;
         _serializer = fixture.JsonLdSerializer;
-        _serializer.SerializerOptions.WriteIndented = false;
     }
 
     [Fact]
@@ -30,5 +30,19 @@ public class PublicKeyTests : IClassFixture<JsonLdSerializerFixture>
 
         const string ExpectedJson = """{"sec":"https://w3id.org/security/v1#"}""";
         Assert.Contains(ExpectedJson, contextJson);
+    }
+
+    [Fact]
+    public void ItShould_ExcludeASType()
+    {
+        var pubKey = new PublicKey
+        {
+            Id = "https://example.com/pubkey",
+            PublicKeyPem = "key"
+        };
+        
+        var contextJson = _serializer.SerializeToElement(pubKey);
+
+        Assert.False(contextJson.TryGetProperty("type", out _));
     }
 }

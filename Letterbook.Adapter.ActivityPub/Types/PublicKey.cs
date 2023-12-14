@@ -6,7 +6,7 @@ using ActivityPub.Types.Util;
 
 namespace Letterbook.Adapter.ActivityPub.Types;
 
-public class PublicKey : ASObject, IASModel<PublicKey, PublicKeyEntity, ASObject>
+public class PublicKey : ASType, IASModel<PublicKey, PublicKeyEntity, ASType>
 {
     // { "sec": "https://w3id.org/security/v1#" }
     public static IJsonLDContext DefiningContext { get; } = new JsonLDContext
