@@ -6,6 +6,7 @@ using ActivityPub.Types.Conversion;
 using AutoMapper;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Mappers;
+using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Api.Dto;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
@@ -36,6 +37,7 @@ public class ActorController : ControllerBase
     private readonly IActivityService _activityService;
     private readonly IProfileService _profileService;
     private static readonly IMapper ProfileMapper = new Mapper(ProfileMappers.DefaultProfile);
+    private static readonly IMapper ActorMapper = new Mapper(AsApMapper.ActorConfig);
 
     public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger, IJsonLdSerializer ldSerializer,
         IActivityService activityService, IProfileService profileService)
@@ -65,8 +67,9 @@ public class ActorController : ControllerBase
 
         var profile = await _profileService.LookupProfile(localId);
         if (profile == null) return NotFound();
+        var actor = ActorMapper.Map<ActorExtensions>(profile);
 
-        return Ok(ProfileMapper.Map<AsAp.Actor>(profile));
+        return Ok(actor);
     }
 
     [HttpGet]
