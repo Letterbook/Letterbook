@@ -28,18 +28,17 @@ public class JsonLdFormatterTests : IClassFixture<JsonLdSerializerFixture>
         _serviceCollection.AddLogging();
         _serializer = fixture.JsonLdSerializer;
         _formatter = new JsonLdOutputFormatter();
-        
-        _activity = new FollowActivity();
-        _activity.Actor.Add(new PersonActor
+
+        var person = new PersonActor
         {
             Inbox = "https://example.com/inbox",
             Outbox = "https://example.com/outbox"
-        });
-        _actor = new ActorExtensions()
+        }; 
+        _actor = new ActorExtensions(person)
         {
             Id = "https://example.com/actor",
-            Inbox = "https://example.com/inbox",
-            Outbox = "https://example.com/outbox",
+            Inbox = person.Inbox,
+            Outbox = person.Outbox,
             PublicKey =
                 new PublicKey
                 {
@@ -48,6 +47,10 @@ public class JsonLdFormatterTests : IClassFixture<JsonLdSerializerFixture>
                 }
         };
         _actor.PublicKey.Owner = _actor.Id;
+        
+        _activity = new FollowActivity();
+        _activity.Actor.Add(_actor);
+        
     }
 
     [Fact]
@@ -83,7 +86,7 @@ public class JsonLdFormatterTests : IClassFixture<JsonLdSerializerFixture>
 
         httpContext.Response.Body.Position = 0;
         using var reader = new StreamReader(httpContext.Response.Body);
-        var actual = reader.ReadToEnd();
+        var actual = await reader.ReadToEndAsync();
         Assert.NotEqual("", actual);
     }
     
@@ -108,8 +111,8 @@ public class JsonLdFormatterTests : IClassFixture<JsonLdSerializerFixture>
 
         httpContext.Response.Body.Position = 0;
         using var reader = new StreamReader(httpContext.Response.Body);
-        var actual = reader.ReadToEnd();
-        Assert.Matches("----begin fake public key----", actual);
+        var actual = await reader.ReadToEndAsync();
+        Assert.Contains("----begin fake public key----", actual);
     }
 
     [Fact]
@@ -117,7 +120,7 @@ public class JsonLdFormatterTests : IClassFixture<JsonLdSerializerFixture>
     {
         var actual = _serializer.Serialize(_actor);
         Assert.NotNull(actual);
-        Assert.Matches("----begin fake public key----", actual);
+        Assert.Contains("----begin fake public key----", actual);
     }
 
     [Fact]

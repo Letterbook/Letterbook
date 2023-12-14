@@ -1,55 +1,59 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.Util;
 
 namespace Letterbook.Adapter.ActivityPub.Types;
 
-public class PublicKey : ASType, IASModel<PublicKey, PublicKeyEntity>
+public class PublicKey : ASObject, IASModel<PublicKey, PublicKeyEntity, ASObject>
 {
     private PublicKeyEntity Entity { get; }
 
-    public PublicKey() => Entity = new PublicKeyEntity
-    {
-        Owner = default!,
-        PublicKeyPem = default!,
-        Id = default!
-    };
+    public PublicKey() : this(new TypeMap()) {}
     
-    public PublicKey(TypeMap typeMap) : base(typeMap) => Entity = TypeMap.AsEntity<PublicKeyEntity>();
-
-    public new string Id
+    public PublicKey(TypeMap typeMap) : base(typeMap)
+        => Entity = TypeMap.Extend<PublicKeyEntity>();
+    
+    public PublicKey(ASType existingGraph) : this(existingGraph.TypeMap) {}
+    
+    [SetsRequiredMembers]
+    public PublicKey(TypeMap typeMap, PublicKeyEntity? entity) : base(typeMap, null)
     {
-        get => Entity.Id;
+        Entity = entity ?? typeMap.AsEntity<PublicKeyEntity>();
+        Id = Entity.Id ?? throw new ArgumentException($"The provided entity is invalid - required {nameof(PublicKeyEntity.Id)} property is missing");
+        PublicKeyPem = Entity.PublicKeyPem ?? throw new ArgumentException($"The provided entity is invalid - required {nameof(PublicKeyEntity.PublicKeyPem)} property is missing");
+    }
+
+    static PublicKey IASModel<PublicKey>.FromGraph(TypeMap typeMap) => new(typeMap, null);
+
+    public required new string Id
+    {
+        get => Entity.Id!;
         set => Entity.Id = value;
     }
     
-    public Linkable<APActor> Owner
+    public Linkable<APActor>? Owner
     {
         get => Entity.Owner;
         set => Entity.Owner = value;
     }
 
-    public string PublicKeyPem
+    public required string PublicKeyPem
     {
-        get => Entity.PublicKeyPem;
+        get => Entity.PublicKeyPem!;
         set => Entity.PublicKeyPem = value;
-    }
-
-    public static PublicKey FromGraph(TypeMap typeMap)
-    {
-        throw new NotImplementedException();
     }
 }
 
 public sealed class PublicKeyEntity : ASEntity<PublicKey, PublicKeyEntity>
 {
     [JsonPropertyName("id")]
-    public required string Id { get; set; }
+    public string? Id { get; set; }
     
     [JsonPropertyName("owner")]
-    public required Linkable<APActor> Owner { get; set; }
+    public Linkable<APActor>? Owner { get; set; }
     
     [JsonPropertyName("publicKeyPem")]
-    public required string PublicKeyPem { get; set; }
+    public string? PublicKeyPem { get; set; }
 }

@@ -76,7 +76,13 @@ public class SigningKeyConverter :
 
     public PublicKey? Convert(Models.SigningKey source, PublicKey? destination, ResolutionContext context)
     {
-        destination ??= new PublicKey();
+        // Null-override is safe, because both properties are set here.
+        destination ??= new PublicKey
+        {
+            Id = null!,
+            PublicKeyPem = null!
+        };
+        
         destination.Id = source.Id.ToString();
         var pem = source.Family switch
         {
