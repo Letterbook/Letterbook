@@ -10,10 +10,10 @@ public class ActorExtensions : APActor, IASModel<ActorExtensions, APActorExtensi
 {
     private APActorExtensionsEntity Entity { get; }
     
-    public ActorExtensions() : this(new TypeMap()) {}
+    public ActorExtensions() => Entity = TypeMap.Extend<APActorExtensionsEntity>();
     
-    public ActorExtensions(TypeMap typeMap) : base(typeMap)
-        => Entity = TypeMap.Extend<APActorExtensionsEntity>();
+    public ActorExtensions(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
+        => Entity = TypeMap.ProjectTo<APActorExtensionsEntity>(isExtending);
     
     public ActorExtensions(ASType existingGraph) : this(existingGraph.TypeMap) {}
     

@@ -10,10 +10,10 @@ public class PublicKey : ASObject, IASModel<PublicKey, PublicKeyEntity, ASObject
 {
     private PublicKeyEntity Entity { get; }
 
-    public PublicKey() : this(new TypeMap()) {}
+    public PublicKey() => Entity = TypeMap.Extend<PublicKeyEntity>();
     
-    public PublicKey(TypeMap typeMap) : base(typeMap)
-        => Entity = TypeMap.Extend<PublicKeyEntity>();
+    public PublicKey(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
+        => Entity = TypeMap.ProjectTo<PublicKeyEntity>(isExtending);
     
     public PublicKey(ASType existingGraph) : this(existingGraph.TypeMap) {}
     
