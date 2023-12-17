@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ActivityPub.Types" Version="0.1.0-snapshot.2023-12-16.15-32-27.585" />
+    <PackageReference Include="ActivityPub.Types" Version="0.1.0-rc-5.2" />
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AutoMapper.Collection" Version="9.0.0" />
     <PackageReference Include="DarkLink.Web.WebFinger.Server" Version="1.0.0" />

@@ -65,6 +65,18 @@ Content-Type: application/json
   "targetId": "http://mastodon.castle/users/user"
 }
 
+### self inbox follow
+POST https://{{host}}/actor/{{profile}}/inbox
+Content-Type: application/ld+json
+
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "http://mastodon.castle/3197012f-5599-4017-a884-7801f86b3e68",
+  "type": "Follow",
+  "actor": "http://mastodon.castle/users/user",
+  "object": "https://host.castle/actor/{{profile}}"
+}
+
 ### fetch mastodon
 GET https://mastodon.castle/users/user
 Accept: application/ld+json

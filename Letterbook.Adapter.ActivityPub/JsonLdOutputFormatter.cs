@@ -17,23 +17,18 @@ public class JsonLdOutputFormatter : TextOutputFormatter
         SupportedMediaTypes.Add(@"application/ld+json; profile=""https://www.w3.org/ns/activitystreams""");
         SupportedEncodings.Add(Encoding.UTF8);
     }
-    
-    public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
+
+    protected override bool CanWriteType(Type? type) => typeof(ASType).IsAssignableFrom(type);
+
+    public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
     {
         var httpContext = context.HttpContext;
         var provider = httpContext.RequestServices;
         var logger = provider.GetRequiredService<ILogger<JsonLdOutputFormatter>>();
 
-        if (context.Object is not ASObject asObject)
-        {
-            logger.LogError("Cannot serialize unrecognized object type {Type}", context.Object?.GetType());
-            logger.LogDebug("Unknown object details {@Object}", context.Object);
-            throw new NotSupportedException("Cannot serialize response");
-        }
-        
         var serializer = provider.GetRequiredService<IJsonLdSerializer>();
-        var json = serializer.Serialize(asObject);
+        var json = serializer.Serialize(context.Object);
         logger.LogDebug("Writing response body {Json}", json);
-        await httpContext.Response.WriteAsync(json); //.WriteAsync(json, selectedEncoding);
+        return httpContext.Response.WriteAsync(json);
     }
 }

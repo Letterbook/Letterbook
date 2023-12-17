@@ -50,7 +50,8 @@ public class Program
             .AddControllers(options =>
             {
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
-                // options.OutputFormatters.Insert(0, new JsonLdOutputFormatter());
+                options.OutputFormatters.Insert(0, new JsonLdOutputFormatter());
+                options.InputFormatters.Insert(0, new JsonLdInputFormatter());
             })
             .Services.Configure<ApiBehaviorOptions>(options =>
             {

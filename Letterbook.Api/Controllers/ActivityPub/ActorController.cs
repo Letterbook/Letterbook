@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Text.Json;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
 using ActivityPub.Types.Conversion;
@@ -24,10 +23,10 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 /// </summary>
 [ApiController]
 [Route("[controller]")]
-[AcceptHeader("application/ld+json",
+[Consumes("application/ld+json",
     "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", 
     "application/activity+json")]
-[JsonLdSerializer]
+// [JsonLdSerializer]
 public class ActorController : ControllerBase
 {
     private readonly SnakeCaseRouteTransformer _transformer = new();
@@ -115,7 +114,7 @@ public class ActorController : ControllerBase
     [ProducesResponseType(StatusCodes.Status410Gone)]
     [ProducesResponseType(StatusCodes.Status421MisdirectedRequest)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-    public async Task<IActionResult> PostInbox(string id, ASObject activity)
+    public async Task<IActionResult> PostInbox(string id, ASType activity)
     {
         var localId = ShortId.ToGuid(id);
         _logger.LogInformation("Start processing {Activity} activity", activity.GetType());
