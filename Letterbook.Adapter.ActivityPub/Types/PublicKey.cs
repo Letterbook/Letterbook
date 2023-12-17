@@ -8,14 +8,18 @@ namespace Letterbook.Adapter.ActivityPub.Types;
 
 public class PublicKey : ASType, IASModel<PublicKey, PublicKeyEntity, ASType>
 {
+    // { "sec": "https://w3id.org/security/v1#" }
+    public static IJsonLDContext DefiningContext { get; } = new JsonLDContext
+    {
+        new("https://w3id.org/security/v1")
+    };
+
     private PublicKeyEntity Entity { get; }
 
-    static string IASModel<PublicKey>.ASTypeName => null!;
+    public PublicKey() => Entity = TypeMap.Extend<PublicKeyEntity>();
     
-    public PublicKey() : this(new TypeMap()) {}
-    
-    public PublicKey(TypeMap typeMap) : base(typeMap)
-        => Entity = TypeMap.Extend<PublicKeyEntity>();
+    public PublicKey(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
+        => Entity = TypeMap.ProjectTo<PublicKeyEntity>(isExtending);
     
     public PublicKey(ASType existingGraph) : this(existingGraph.TypeMap) {}
     

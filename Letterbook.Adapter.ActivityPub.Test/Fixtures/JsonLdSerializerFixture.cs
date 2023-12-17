@@ -21,6 +21,17 @@ namespace Letterbook.Adapter.ActivityPub.Test.Fixtures;
 [UsedImplicitly]
 public sealed class JsonLdSerializerFixture
 {
+    public bool WriteIndented
+    {
+        get => JsonLdSerializer.SerializerOptions.WriteIndented;
+        set
+        {
+            // This avoid a crash when set in a test constructor
+            if (JsonLdSerializer.SerializerOptions.WriteIndented)
+                JsonLdSerializer.SerializerOptions.WriteIndented = value;
+        }
+    }
+    
     public JsonLdSerializerFixture()
     {
         var serviceCollection = new ServiceCollection();

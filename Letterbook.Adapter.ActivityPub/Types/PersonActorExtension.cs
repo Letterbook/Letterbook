@@ -4,25 +4,22 @@ using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Actor;
 
-// using Letterbook.Adapter.ActivityPub.Types;
-// ReSharper disable InconsistentNaming
-
 namespace Letterbook.Adapter.ActivityPub.Types;
 
-public class PersonActorExtension : PersonActor, IASModel<PersonActorExtension, PersonActorExtensionsEntity, PersonActor>
+public class PersonActorExtension : PersonActor, IASModel<PersonActorExtension, PersonActorExtensionEntity, PersonActor>
 {
-    private PersonActorExtensionsEntity Entity { get; }
+    private PersonActorExtensionEntity Entity { get; }
     
-    public PersonActorExtension() : this(new TypeMap()) {}
+    public PersonActorExtension() => Entity = TypeMap.Extend<PersonActorExtensionEntity>();
     
-    public PersonActorExtension(TypeMap typeMap) : base(typeMap)
-        => Entity = TypeMap.Extend<PersonActorExtensionsEntity>();
+    public PersonActorExtension(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
+        => Entity = TypeMap.ProjectTo<PersonActorExtensionEntity>(isExtending);
     
     public PersonActorExtension(ASType existingGraph) : this(existingGraph.TypeMap) {}
     
     [SetsRequiredMembers]
-    public PersonActorExtension(TypeMap typeMap, PersonActorExtensionsEntity? entity) : base(typeMap, null)
-        => Entity = entity ?? typeMap.AsEntity<PersonActorExtensionsEntity>();
+    public PersonActorExtension(TypeMap typeMap, PersonActorExtensionEntity? entity) : base(typeMap, null)
+        => Entity = entity ?? typeMap.AsEntity<PersonActorExtensionEntity>();
 
     static PersonActorExtension IASModel<PersonActorExtension>.FromGraph(TypeMap typeMap) => new(typeMap, null);
 
@@ -33,7 +30,7 @@ public class PersonActorExtension : PersonActor, IASModel<PersonActorExtension, 
     }
 }
 
-public sealed class PersonActorExtensionsEntity : ASEntity<PersonActorExtension, PersonActorExtensionsEntity>
+public sealed class PersonActorExtensionEntity : ASEntity<PersonActorExtension, PersonActorExtensionEntity>
 {
     [JsonPropertyName("publicKey")]
     public PublicKey? PublicKey { get; set; }
