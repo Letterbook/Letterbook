@@ -19,7 +19,7 @@ public class JsonLdFormatterTests : IClassFixture<JsonLdSerializerFixture>
     private IJsonLdSerializer _serializer;
     private ServiceCollection _serviceCollection;
     private ASActivity _activity;
-    private ActorExtensions _actor;
+    private PersonActorExtension _personActor;
 
     public JsonLdFormatterTests(JsonLdSerializerFixture fixture)
     {
@@ -34,7 +34,7 @@ public class JsonLdFormatterTests : IClassFixture<JsonLdSerializerFixture>
             Inbox = "https://example.com/inbox",
             Outbox = "https://example.com/outbox"
         }; 
-        _actor = new ActorExtensions(person)
+        _personActor = new PersonActorExtension(person)
         {
             Id = "https://example.com/actor",
             Inbox = person.Inbox,
@@ -46,10 +46,10 @@ public class JsonLdFormatterTests : IClassFixture<JsonLdSerializerFixture>
                     PublicKeyPem = "----begin fake public key----",
                 }
         };
-        _actor.PublicKey.Owner = _actor.Id;
+        _personActor.PublicKey.Owner = _personActor.Id;
         
         _activity = new FollowActivity();
-        _activity.Actor.Add(_actor);
+        _activity.Actor.Add(_personActor);
         
     }
 
@@ -99,7 +99,7 @@ public class JsonLdFormatterTests : IClassFixture<JsonLdSerializerFixture>
         var context = new OutputFormatterWriteContext(
             httpContext,
             (stream, encoding) => new HttpResponseStreamWriter(stream, encoding),
-            typeof(ActorExtensions),
+            typeof(PersonActorExtension),
             _activity
         ) {
             ContentType = "application/ld+json"
@@ -118,7 +118,7 @@ public class JsonLdFormatterTests : IClassFixture<JsonLdSerializerFixture>
     [Fact]
     public void SerializeActorWithExtensions()
     {
-        var actual = _serializer.Serialize(_actor);
+        var actual = _serializer.Serialize(_personActor);
         Assert.NotNull(actual);
         Assert.Contains("----begin fake public key----", actual);
     }

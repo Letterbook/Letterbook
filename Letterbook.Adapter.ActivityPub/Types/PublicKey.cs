@@ -6,10 +6,12 @@ using ActivityPub.Types.Util;
 
 namespace Letterbook.Adapter.ActivityPub.Types;
 
-public class PublicKey : ASObject, IASModel<PublicKey, PublicKeyEntity, ASObject>
+public class PublicKey : ASType, IASModel<PublicKey, PublicKeyEntity, ASType>
 {
     private PublicKeyEntity Entity { get; }
 
+    static string IASModel<PublicKey>.ASTypeName => null!;
+    
     public PublicKey() : this(new TypeMap()) {}
     
     public PublicKey(TypeMap typeMap) : base(typeMap)
@@ -27,7 +29,7 @@ public class PublicKey : ASObject, IASModel<PublicKey, PublicKeyEntity, ASObject
 
     static PublicKey IASModel<PublicKey>.FromGraph(TypeMap typeMap) => new(typeMap, null);
 
-    public required new string Id
+    public new required string Id
     {
         get => Entity.Id!;
         set => Entity.Id = value;

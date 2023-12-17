@@ -33,6 +33,7 @@ public class JsonLdOutputFormatter : TextOutputFormatter
         
         var serializer = provider.GetRequiredService<IJsonLdSerializer>();
         var json = serializer.Serialize(asObject);
+        logger.LogDebug("Writing response body {Json}", json);
         await httpContext.Response.WriteAsync(json); //.WriteAsync(json, selectedEncoding);
     }
 }

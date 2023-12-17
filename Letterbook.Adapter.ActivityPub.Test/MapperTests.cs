@@ -117,7 +117,7 @@ public class MapperTests
     [Fact]
     public void CanMapActorCore()
     {
-        var actual = _APSharpMapper.Map<ActorExtensions>(_profile);
+        var actual = _APSharpMapper.Map<PersonActorExtension>(_profile);
 
         Assert.Equal(_profile.Id.ToString(), actual.Id);
         Assert.Equal(_profile.Inbox.ToString(), actual.Inbox.HRef);
@@ -133,7 +133,7 @@ public class MapperTests
     {
         var expectedKey = _profile.Keys.First();
         var expectedPem = expectedKey.GetRsa().ExportSubjectPublicKeyInfoPem();
-        var actual = _APSharpMapper.Map<ActorExtensions>(_profile);
+        var actual = _APSharpMapper.Map<PersonActorExtension>(_profile);
 
         Assert.Equal(expectedPem, actual.PublicKey?.PublicKeyPem);
         Assert.Equal(expectedKey.Id.ToString(), actual.PublicKey?.Id);

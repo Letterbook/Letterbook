@@ -8,7 +8,7 @@ public class SigningKeyConverter :
     ITypeConverter<Models.SigningKey, AsAp.PublicKey?>,
     ITypeConverter<IList<Models.SigningKey>, AsAp.PublicKey?>,
     IMemberValueResolver<Models.Profile, AsAp.Actor, IList<Models.SigningKey>, AsAp.PublicKey?>,
-    IMemberValueResolver<Models.Profile, ActorExtensions, IList<Models.SigningKey>, PublicKey?>,
+    IMemberValueResolver<Models.Profile, PersonActorExtension, IList<Models.SigningKey>, PublicKey?>,
     ITypeConverter<IList<Models.SigningKey>, PublicKey?>,
     ITypeConverter<Models.SigningKey, PublicKey?>
 {
@@ -54,7 +54,7 @@ public class SigningKeyConverter :
     }
 
     // TODO(now): for APSharp
-    public PublicKey Resolve(Models.Profile source, ActorExtensions destination, IList<Models.SigningKey> sourceMember, PublicKey? destMember,
+    public PublicKey Resolve(Models.Profile source, PersonActorExtension destination, IList<Models.SigningKey> sourceMember, PublicKey? destMember,
         ResolutionContext context)
     {
         destMember = context.Mapper.Map<PublicKey>(sourceMember);

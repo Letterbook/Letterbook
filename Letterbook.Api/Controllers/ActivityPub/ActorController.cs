@@ -67,7 +67,7 @@ public class ActorController : ControllerBase
 
         var profile = await _profileService.LookupProfile(localId);
         if (profile == null) return NotFound();
-        var actor = ActorMapper.Map<ActorExtensions>(profile);
+        var actor = ActorMapper.Map<PersonActorExtension>(profile);
 
         return Ok(actor);
     }

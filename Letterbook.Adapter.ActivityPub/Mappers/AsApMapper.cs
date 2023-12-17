@@ -21,7 +21,7 @@ public static class AsApMapper
 
     private static void ConfigureActor(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<Models.Profile, ActorExtensions>()
+        cfg.CreateMap<Models.Profile, PersonActorExtension>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Description))
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName))

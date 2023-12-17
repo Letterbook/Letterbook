@@ -44,6 +44,10 @@ GET {{host}}/.well-known/webfinger?resource=acct:admin@host.docker.internal:5127
 ### self webfinger
 GET https://{{host}}/.well-known/webfinger?resource=acct:admin@{{host}}
 
+### self actor
+GET https://{{host}}/actor/{{profile}}
+Accept: application/ld+json
+
 ### peer webfinger
 GET http://{{peer}}/.well-known/webfinger?resource=acct:user@{{peer}}
 
