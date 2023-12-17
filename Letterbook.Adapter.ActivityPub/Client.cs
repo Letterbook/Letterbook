@@ -52,7 +52,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         return default;
     }
 
-    // ValueTask is more efficient when you expect to frequently just return a synchronous value
+    // ValueTask is more efficient than Task when you expect to frequently just return a synchronous value
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
     private async ValueTask<bool> ValidateResponseHeaders(HttpResponseMessage response,
         [CallerMemberName] string name="",
@@ -70,8 +70,8 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
             case >= 400 and < 500:
                 var body = await response.Content.ReadAsStringAsync();
                 _logger.LogInformation("Received client error from {Uri}", response.RequestMessage?.RequestUri);
-                _logger.LogDebug("Server response had headers {Headers} and body {Body}", response.Headers, body);
-                throw ClientException.RequestError(response.StatusCode, name, body: body, path: path, line: line);
+                _logger.LogDebug("Client error response had headers {Headers} and body {Body}", response.Headers, body);
+                throw ClientException.RequestError(response.StatusCode, $"Couldn't fetch resource from peer ({response.RequestMessage?.RequestUri})", name: name, body: body, path: path, line: line);
             case >= 300 and < 400:
                 return false;
             case >= 201 and < 300:
