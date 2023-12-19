@@ -275,8 +275,10 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
     public async Task<object> SendDocument(Uri inbox, ASType document)
     {
-        var message = SignedRequest(HttpMethod.Post, inbox);
-        var payload = _jsonLdSerializer.Serialize(document);
+        var message = SignedRequest(HttpMethod.Post, inbox, document);
+        var response = await _httpClient.SendAsync(message);
+        
+        await ValidateResponseHeaders(response);
         throw new NotImplementedException();
     }
 

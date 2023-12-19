@@ -1,14 +1,15 @@
 ﻿using ActivityPub.Types.AS;
 using ActivityPub.Types.Conversion;
 using CloudNative.CloudEvents;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Letterbook.Core.Adapters;
+namespace Letterbook.Core;
 
-class ActivityMessageService : IActivityMessageService
+public class ActivityMessageService : IActivityMessageService
 {
     private readonly IMessageBusAdapter _messageBusAdapter;
     private readonly IJsonLdSerializer _serializer;
@@ -26,16 +27,19 @@ class ActivityMessageService : IActivityMessageService
         _channel = _messageBusAdapter.OpenChannel<ASType>();
     }
 
-    public void Deliver(Uri inbox, ASType activity, Profile? onBehalfOf) =>
+    public void Deliver(Uri inbox, ASType activity, Profile? onBehalfOf)
+    {
         _channel.OnNext(FormatMessage(inbox, activity, onBehalfOf));
+    }
 
     private CloudEvent FormatMessage(Uri inbox, ASType activity, Profile? onBehalfOf)
     {
+        var types = activity.TypeMap.ASTypes;
         var subject = activity.Is<ASObject>(out var o)
             ? o.Id 
             : activity.Is<ASLink>(out var l) 
                 ? l.HRef.ToString() 
-                : string.Join(',', activity.TypeMap.ASTypes);
+                : string.Join(',', types);
         return new CloudEvent
         {
             Id = Guid.NewGuid().ToString(),
@@ -44,8 +48,9 @@ class ActivityMessageService : IActivityMessageService
             Type = $"{nameof(IActivityMessageService)}",
             Subject = subject,
             Time = DateTimeOffset.UtcNow,
-            ["destination"] = inbox,
-            ["profile"] = onBehalfOf,
+            [IActivityMessageService.DestinationKey] = inbox,
+            [IActivityMessageService.ProfileKey] = onBehalfOf,
+            [IActivityMessageService.ActivityTypesKey] = types,
             ["ltrauth"] = "",
         };
     }

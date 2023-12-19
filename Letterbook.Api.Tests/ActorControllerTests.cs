@@ -5,6 +5,7 @@ using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Api.Controllers.ActivityPub;
 using Letterbook.Api.Tests.Fakes;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests;
@@ -33,7 +34,7 @@ public class ActorControllerTests : WithMocks
     {
         _output = output;
         _controller = new ActorController(CoreOptionsMock, Mock.Of<ILogger<ActorController>>(),
-            Mock.Of<IJsonLdSerializer>(), ActivityServiceMock.Object, ProfileServiceMock.Object);
+            Mock.Of<IJsonLdSerializer>(), ProfileServiceMock.Object, Mock.Of<IActivityMessageService>());
 
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
         _fakeActor = new FakeActor();

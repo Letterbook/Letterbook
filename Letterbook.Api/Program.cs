@@ -116,6 +116,7 @@ public class Program
         builder.Services.AddScoped<IProfileService, ProfileService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
+        builder.Services.AddScoped<IActivityMessageService, ActivityMessageService>();
 
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();

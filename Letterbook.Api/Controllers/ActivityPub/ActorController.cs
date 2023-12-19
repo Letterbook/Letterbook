@@ -9,6 +9,7 @@ using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Api.Dto;
 using Letterbook.Core;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
@@ -30,23 +31,19 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 // [JsonLdSerializer]
 public class ActorController : ControllerBase
 {
-    private readonly SnakeCaseRouteTransformer _transformer = new();
-    private readonly Uri _baseUri;
     private readonly ILogger<ActorController> _logger;
     private readonly IJsonLdSerializer _ldSerializer;
-    private readonly IActivityService _activityService;
     private readonly IProfileService _profileService;
-    private static readonly IMapper ProfileMapper = new Mapper(ProfileMappers.DefaultProfile);
+    private readonly IActivityMessageService _messageService;
     private static readonly IMapper ActorMapper = new Mapper(AsApMapper.ActorConfig);
 
     public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger, IJsonLdSerializer ldSerializer,
-        IActivityService activityService, IProfileService profileService)
+        IProfileService profileService, IActivityMessageService messageService)
     {
-        _baseUri = new Uri($"{config.Value.Scheme}://{config.Value.DomainName}");
         _logger = logger;
         _ldSerializer = ldSerializer;
-        _activityService = activityService;
         _profileService = profileService;
+        _messageService = messageService;
         _logger.LogInformation("Loaded {Controller}", nameof(ActorController));
     }
 
@@ -239,12 +236,21 @@ public class ActorController : ControllerBase
         followRequest.TryGetId(out var activityId);
         var relation = await _profileService.ReceiveFollowRequest(localId, actorId, activityId);
                     
-        return relation.State switch
+        var resultActivity = relation.State switch
         {
-            FollowState.Accepted => Ok(Activities.BuildActivity(ActivityType.Accept, relation.Follows, followRequest)),
-            FollowState.Pending => Ok(Activities.BuildActivity(ActivityType.TentativeAccept, relation.Follows, followRequest)),
-            _ => Ok(Activities.BuildActivity(ActivityType.Reject, relation.Follows, followRequest))
+            FollowState.Accepted => Activities.BuildActivity(ActivityType.Accept, relation.Follows, followRequest),
+            FollowState.Pending => Activities.BuildActivity(ActivityType.TentativeAccept, relation.Follows, followRequest),
+            _ => Activities.BuildActivity(ActivityType.Reject, relation.Follows, followRequest)
         };
+
+        // We should publish and implement a reply negotiation mechanism. The options are basically response or inbox.
+        // Response would mean reply "in-band" via the http response.
+        // Inbox would mean reply "out-of-band" via a new POST to the actor's inbox.
+        // But, that doesn't exist, yet. The if(false) is so we don't forget.
+        var acceptResponse = false;
+        if (acceptResponse) return Ok(resultActivity);
+        _messageService.Deliver(relation.Follower.Inbox, resultActivity, relation.Follows);
+        return Accepted();
     }
 }
 

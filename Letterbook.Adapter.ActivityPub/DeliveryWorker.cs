@@ -30,13 +30,12 @@ public class DeliveryWorker : IObserver<CloudEvent>
     public async void OnNext(CloudEvent value)
     {
         var scope = _provider.CreateScope();
-        if (value["profile"] is not Models.Profile profile ||
+        if (value[IActivityMessageService.ProfileKey] is not Models.Profile profile ||
             value.Data is not ASType document ||
-            value["destination"] is not Uri destination)
+            value[IActivityMessageService.DestinationKey] is not Uri destination)
             return;
 
         var client = scope.ServiceProvider.GetRequiredService<IActivityPubClient>().As(profile);
         await client.SendDocument(destination, document);
-        throw new NotImplementedException();
     }
 }

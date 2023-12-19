@@ -10,5 +10,8 @@ namespace Letterbook.Core.Adapters;
 /// </summary>
 public interface IActivityMessageService
 {
+    public const string DestinationKey = "Destination";
+    public const string ProfileKey = "Profile";
+    public const string ActivityTypesKey = "ActivityTypes";
     public void Deliver(Uri inbox, ASType activity, Profile? onBehalfOf);
 }
