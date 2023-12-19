@@ -25,11 +25,12 @@ public class RxMessageBus : IMessageBusAdapter, IMessageBusClient
         return channel.AsObserver();
     }
 
-    public IObservable<CloudEvent> ListenChannel<T>()
+    public IObservable<CloudEvent> ListenChannel<T>(TimeSpan delay)
     {
         // TODO: Figure out how to define a new DI scope on subscribe
         var channel = GetSubject(typeof(T).ToString());
         return channel.AsObservable()
+            .Delay(delay)
             .SubscribeOn(TaskPoolScheduler.Default);
     }
 

@@ -1,4 +1,5 @@
-﻿using Letterbook.Core.Models;
+﻿using ActivityPub.Types.AS;
+using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 
 namespace Letterbook.Core.Adapters;
@@ -19,4 +20,5 @@ public interface IActivityPubAuthenticatedClient : IActivityPubClient
     Task<object> SendAdd(Uri inbox, IContentRef content, Uri collection);
     Task<object> SendRemove(Uri inbox, IContentRef content, Uri collection);
     Task<object> SendUnfollow(Uri inbox);
+    Task<object> SendDocument(Uri inbox, ASType document);
 }

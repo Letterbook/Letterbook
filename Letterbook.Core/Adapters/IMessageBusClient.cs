@@ -4,5 +4,5 @@ namespace Letterbook.Core.Adapters;
 
 public interface IMessageBusClient
 {
-    public IObservable<CloudEvent> ListenChannel<T>();
+    public IObservable<CloudEvent> ListenChannel<T>(TimeSpan delay);
 }

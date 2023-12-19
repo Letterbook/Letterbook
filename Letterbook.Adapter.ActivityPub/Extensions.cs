@@ -35,4 +35,22 @@ public static class Extensions
         id = default;
         return false;
     }
+
+    public static bool TryGetId(this ASType asType, [NotNullWhen(true)] out Uri? id)
+    {
+        if (asType.Id != null)
+        {
+            id = new Uri(asType.Id);
+            return true;
+        }
+
+        if (asType.Is<ASLink>(out var link))
+        {
+            id = link.HRef;
+            return true;
+        }
+
+        id = default;
+        return false;
+    }
 }

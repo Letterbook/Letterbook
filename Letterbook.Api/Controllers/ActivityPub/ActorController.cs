@@ -2,6 +2,7 @@
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
 using ActivityPub.Types.Conversion;
+using ActivityPub.Types.Util;
 using AutoMapper;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Mappers;
@@ -203,37 +204,29 @@ public class ActorController : ControllerBase
     
     private async Task<IActionResult> InboxUndo(Guid id, ASActivity activity)
     {
-        throw new NotImplementedException();
-        // if (activity.Object.Count > 1)
-        //     return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
-        //         "Cannot Undo multiple Activities"));
-        // if (activity.Object.SingleOrDefault() is not AsAp.Activity subject)
-        //     return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics, 
-        //         "Object of an Undo must be another Activity"));
-        // var activityType = Enum.Parse<ActivityType>(subject.Type);
-        // switch (activityType)
-        // {
-        //     case ActivityType.Announce:
-        //         throw new NotImplementedException();
-        //     case ActivityType.Block:
-        //         throw new NotImplementedException();
-        //     case ActivityType.Follow:
-        //         if ((activity.Actor.SingleOrDefault() ?? subject.Actor.SingleOrDefault()) is not AsAp.Actor actor)
-        //             return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
-        //                 "Exactly one Actor can unfollow at a time"));
-        //         if (actor.Id is null)
-        //             return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.InvalidRequest,
-        //                 "Actor ID is required to unfollow"));
-        //         
-        //         await _profileService.RemoveFollower(id, actor.Id);
-        //         
-        //         return new OkResult();
-        //     case ActivityType.Like:
-        //         throw new NotImplementedException();
-        //     default:
-        //         _logger.LogInformation("Ignored unknown Undo target {ActivityType}", activityType);
-        //         return new AcceptedResult();
-        // }
+        if (activity.Object.SingleOrDefault()?.Value is not ASActivity activityObject)
+            return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics, 
+                "Object of an Undo must have exactly one value, which must be another Activity"));
+        if (activityObject.Is<AnnounceActivity>(out var announceActivity))
+            throw new NotImplementedException();
+        if (activityObject.Is<BlockActivity>(out var blockActivity))
+            throw new NotImplementedException();
+        if (activityObject.Is<FollowActivity>(out var followActivity))
+        {
+            if ((followActivity.Actor.SingleOrDefault() ?? activityObject.Actor.SingleOrDefault()) is not { } actor)
+                return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
+                    "Undo:Follow can only be performed by exactly one Actor at a time"));
+            if (!actor.TryGetId(out var actorId))
+                return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.InvalidRequest,
+                    "Actor ID is required to Undo:Follow"));
+            await _profileService.RemoveFollower(id, actorId);
+            return new OkResult();
+        }
+        if (activityObject.Is<LikeActivity>(out var likeActivity))
+            throw new NotImplementedException();
+        
+        _logger.LogInformation("Ignored unknown Undo target {ActivityType}", activityObject.TypeMap.ASTypes);
+        return new AcceptedResult();
     }
 
     private async Task<IActionResult> InboxFollow(Guid localId, ASActivity followRequest)

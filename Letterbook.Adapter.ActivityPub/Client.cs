@@ -93,6 +93,16 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         return this;
     }
 
+    private HttpRequestMessage SignedRequest(HttpMethod method, Uri uri, ASType document)
+    {
+        var message = SignedRequest(method, uri);
+        var payload = _jsonLdSerializer.Serialize(document);
+        message.Content = new StringContent(payload, Constants.LdJsonHeader);
+        _logger.LogDebug("Sending {Activity}", payload);
+
+        return message;
+    }
+    
     private HttpRequestMessage SignedRequest(HttpMethod method, Uri uri)
     {
         var message = new HttpRequestMessage(method, uri);
@@ -232,11 +242,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
     private async Task SendAccept(Uri inbox, ASActivity activity)
     {
-        var message = SignedRequest(HttpMethod.Post, inbox);
-        var payload = _jsonLdSerializer.Serialize(activity);
-        message.Content = new StringContent(payload, Constants.LdJsonHeader);
-        
-        _logger.LogDebug("Sending {Activity}", payload);
+        var message = SignedRequest(HttpMethod.Post, inbox, activity);
         var response = await _httpClient.SendAsync(message);
         
         await ValidateResponseHeaders(response);
@@ -264,6 +270,13 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
     public async Task<object> SendUnfollow(Uri inbox)
     {
+        throw new NotImplementedException();
+    }
+
+    public async Task<object> SendDocument(Uri inbox, ASType document)
+    {
+        var message = SignedRequest(HttpMethod.Post, inbox);
+        var payload = _jsonLdSerializer.Serialize(document);
         throw new NotImplementedException();
     }
 

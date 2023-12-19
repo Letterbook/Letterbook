@@ -119,7 +119,9 @@ public class Program
 
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();
+        builder.Services.AddScoped<DeliveryWorker>();
         builder.Services.AddHostedService<WorkerScope<SeedAdminWorker>>();
+        builder.Services.AddHostedService<DeliveryWorkerHost>();
 
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
