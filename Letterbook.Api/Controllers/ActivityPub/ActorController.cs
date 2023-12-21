@@ -35,15 +35,17 @@ public class ActorController : ControllerBase
     private readonly IJsonLdSerializer _ldSerializer;
     private readonly IProfileService _profileService;
     private readonly IActivityMessageService _messageService;
+    private readonly IActivityPubDocument _apDoc;
     private static readonly IMapper ActorMapper = new Mapper(AsApMapper.ActorConfig);
 
     public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger, IJsonLdSerializer ldSerializer,
-        IProfileService profileService, IActivityMessageService messageService)
+        IProfileService profileService, IActivityMessageService messageService, IActivityPubDocument apDoc)
     {
         _logger = logger;
         _ldSerializer = ldSerializer;
         _profileService = profileService;
         _messageService = messageService;
+        _apDoc = apDoc;
         _logger.LogInformation("Loaded {Controller}", nameof(ActorController));
     }
 
@@ -117,7 +119,6 @@ public class ActorController : ControllerBase
         var localId = ShortId.ToGuid(id);
         _logger.LogInformation("Start processing {Activity} activity", activity.GetType());
         _logger.LogDebug("Activity {Detail}", _ldSerializer.Serialize(activity));
-        await LogActivity();
         try
         {
             if (activity.Is<AcceptActivity>(out var accept))
@@ -172,28 +173,6 @@ public class ActorController : ControllerBase
      * Support methods       *
      * * * * * * * * * * * * */
 
-    private async ValueTask LogActivity()
-    {
-        if (!_logger.IsEnabled(LogLevel.Debug) || !HttpContext.Request.Body.CanRead) return;
-
-        try
-        {
-            HttpContext.Request.Body.Seek(0, SeekOrigin.Begin);
-            var buffer = new byte[HttpContext.Request.Body.Length];
-            var read = await HttpContext.Request.Body.ReadAsync(buffer, 0, (int)HttpContext.Request.Body.Length);
-
-            if (read > 0)
-            {
-                _logger.LogDebug("Raw activity {Json}", Encoding.UTF8.GetString(buffer));
-            }
-            else _logger.LogDebug("Couldn't (re)read the request body");
-        }
-        finally
-        {
-            HttpContext.Request.Body.Seek(0, SeekOrigin.Begin);
-        }
-    }
-    
     private async Task<IActionResult> InboxAccept(Guid localId, ASActivity activity)
     {
         throw new NotImplementedException();
@@ -236,11 +215,11 @@ public class ActorController : ControllerBase
         followRequest.TryGetId(out var activityId);
         var relation = await _profileService.ReceiveFollowRequest(localId, actorId, activityId);
                     
-        var resultActivity = relation.State switch
+        ASType resultActivity = relation.State switch
         {
-            FollowState.Accepted => Activities.BuildActivity(ActivityType.Accept, relation.Follows, followRequest),
-            FollowState.Pending => Activities.BuildActivity(ActivityType.TentativeAccept, relation.Follows, followRequest),
-            _ => Activities.BuildActivity(ActivityType.Reject, relation.Follows, followRequest)
+            FollowState.Accepted => _apDoc.Accept(relation.Follows, followRequest),
+            FollowState.Pending => _apDoc.TentativeAccept(relation.Follows, followRequest),
+            _ => _apDoc.Reject(relation.Follows, followRequest)
         };
 
         // We should publish and implement a reply negotiation mechanism. The options are basically response or inbox.

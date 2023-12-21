@@ -1,4 +1,5 @@
-﻿using CloudNative.CloudEvents;
+﻿using ActivityPub.Types.AS;
+using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,7 +21,7 @@ public class DeliveryWorkerHost : BackgroundService
         _provider = provider;
         _messageBus = messageBus;
         // This is... pretty much just a gross hack to give peers time to actually process their own stuff
-        _observable = _messageBus.ListenChannel<IActivityMessageService>(TimeSpan.FromMilliseconds(50));
+        _observable = _messageBus.ListenChannel<ASType>(nameof(DeliveryWorkerHost));
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)

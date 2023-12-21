@@ -27,12 +27,11 @@ public class RxMessageBus : IMessageBusAdapter, IMessageBusClient
         return channel.AsObserver();
     }
 
-    public IObservable<CloudEvent> ListenChannel<T>(TimeSpan delay, [CallerMemberName]string? name = "")
+    public IObservable<CloudEvent> ListenChannel<T>([CallerMemberName] string? name = "")
     {
         _logger.LogInformation("{Name} listening on {Channel}", name, typeof(T));
         var channel = GetSubject(typeof(T).ToString());
         return channel.AsObservable()
-            .Delay(delay)
             .Do(ce => _logger.LogInformation(
                 "{Name} handling message on channel {Channel} - {Id} type {Type} subject {Subject}", 
                 name, typeof(T), ce.Id, ce.Type, ce.Subject))

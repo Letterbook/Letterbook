@@ -34,12 +34,11 @@ public class ActivityMessageService : IActivityMessageService
 
     private CloudEvent FormatMessage(Uri inbox, ASType activity, Profile? onBehalfOf)
     {
-        var types = activity.TypeMap.ASTypes;
         var subject = activity.Is<ASObject>(out var o)
             ? o.Id 
             : activity.Is<ASLink>(out var l) 
                 ? l.HRef.ToString() 
-                : string.Join(',', types);
+                : string.Join(',', activity.TypeMap.ASTypes);
         return new CloudEvent
         {
             Id = Guid.NewGuid().ToString(),
@@ -48,9 +47,8 @@ public class ActivityMessageService : IActivityMessageService
             Type = $"{nameof(IActivityMessageService)}",
             Subject = subject,
             Time = DateTimeOffset.UtcNow,
-            [IActivityMessageService.DestinationKey] = inbox,
-            [IActivityMessageService.ProfileKey] = onBehalfOf,
-            [IActivityMessageService.ActivityTypesKey] = types,
+            [IActivityMessageService.DestinationKey] = inbox.ToString(),
+            [IActivityMessageService.ProfileKey] = onBehalfOf?.LocalId?.ToShortId() ?? "",
             ["ltrauth"] = "",
         };
     }

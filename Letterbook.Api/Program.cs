@@ -127,6 +127,8 @@ public class Program
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
         builder.Services.AddSingleton<IMessageBusAdapter, RxMessageBus>();
+        builder.Services.AddSingleton<IMessageBusClient, RxMessageBus>();
+        builder.Services.AddSingleton<IActivityPubDocument, Document>();
         builder.Services.AddDbContext<RelationalContext>();
         builder.Services.AddDbContext<FeedsContext>();
         builder.Services.AddIdentity<Account, IdentityRole<Guid>>()

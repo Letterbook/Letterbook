@@ -68,10 +68,7 @@ public class ActorControllerTests : WithMocks
 
         var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
         
-        var actual = response as OkObjectResult;
-        var actualObject = actual?.Value as AcceptActivity;
-        Assert.NotNull(actual);
-        Assert.NotNull(actualObject);
+        Assert.IsType<AcceptedResult>(response);
     }
     
     [Fact(DisplayName = "Should tentative accept follow activity")]
@@ -86,10 +83,7 @@ public class ActorControllerTests : WithMocks
 
         var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
         
-        var actual = response as OkObjectResult;
-        var actualObject = actual?.Value as TentativeAcceptActivity;
-        Assert.NotNull(actual);
-        Assert.NotNull(actualObject);
+        Assert.IsType<AcceptedResult>(response);
     }
     
     [Fact(DisplayName = "Should reject follow activity")]
@@ -104,10 +98,7 @@ public class ActorControllerTests : WithMocks
 
         var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
         
-        var actual = response as OkObjectResult;
-        var actualObject = actual?.Value as RejectActivity;
-        Assert.NotNull(actual);
-        Assert.NotNull(actualObject);
+        Assert.IsType<AcceptedResult>(response);
     }
     
     [Fact(DisplayName = "Should remove a follower", Skip = "Not implemented")]
@@ -120,8 +111,6 @@ public class ActorControllerTests : WithMocks
             .Returns(Task.CompletedTask);
 
         var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
-        
-        var actual = response as OkResult;
-        Assert.NotNull(actual);
+        Assert.IsType<AcceptedResult>(response);
     }
 }
