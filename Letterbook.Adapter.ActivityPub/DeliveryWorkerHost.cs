@@ -21,12 +21,13 @@ public class DeliveryWorkerHost : BackgroundService
         _provider = provider;
         _messageBus = messageBus;
         // This is... pretty much just a gross hack to give peers time to actually process their own stuff
-        _observable = _messageBus.ListenChannel<ASType>(nameof(DeliveryWorkerHost));
+        _observable = _messageBus.ListenChannel<ASType>(TimeSpan.FromMicroseconds(150), nameof(DeliveryWorkerHost));
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _subscription = _observable.Subscribe(_provider.GetRequiredService<DeliveryWorker>());
+        _logger.LogDebug("Subscribed {@Subscription}", _subscription);
         stoppingToken.Register(() =>
         {
             _subscription.Dispose();

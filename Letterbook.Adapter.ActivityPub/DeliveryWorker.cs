@@ -19,23 +19,27 @@ public class DeliveryWorker : IObserver<CloudEvent>
 
     public void OnCompleted()
     {
+        _logger.LogWarning("{Worker} completed", nameof(DeliveryWorker));
         throw new NotImplementedException();
     }
 
     public void OnError(Exception error)
     {
+        _logger.LogError("{Worker} errored", nameof(DeliveryWorker));
         throw new NotImplementedException();
     }
 
     public async void OnNext(CloudEvent value)
     {
+        _logger.LogDebug("Handle message {Type}", value.Type);
         var scope = _provider.CreateScope();
         if (value[IActivityMessageService.ProfileKey] is not Models.Profile profile ||
             value.Data is not ASType document ||
             value[IActivityMessageService.DestinationKey] is not Uri destination)
-            return;
+            return; // TODO: HERE
 
         var client = scope.ServiceProvider.GetRequiredService<IActivityPubClient>().As(profile);
-        await client.SendDocument(destination, document);
+        var response = await client.SendDocument(destination, document);
+        _logger.LogDebug("Handled message {Type}", value.Type);
     }
 }

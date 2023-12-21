@@ -18,27 +18,23 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Api.Tests;
 
-
 public class ActorControllerTests : WithMocks
 {
     private ITestOutputHelper _output;
     private ActorController _controller;
-    // private FakeActivity _fakeActivity;
-    private FakeActor _fakeActor;
     private FakeProfile _fakeProfile;
     private FakeProfile _fakeRemoteProfile;
     private Profile _profile;
     private Profile _remoteProfile;
-    
+
     public ActorControllerTests(ITestOutputHelper output)
     {
         _output = output;
         _controller = new ActorController(CoreOptionsMock, Mock.Of<ILogger<ActorController>>(),
-            Mock.Of<IJsonLdSerializer>(), ProfileServiceMock.Object, Mock.Of<IActivityMessageService>());
+            Mock.Of<IJsonLdSerializer>(), ProfileServiceMock.Object, Mock.Of<IActivityMessageService>(),
+            new Document());
 
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
-        _fakeActor = new FakeActor();
-        // _fakeActivity = new FakeActivity(null, _fakeActor.Generate());
         _fakeProfile = new FakeProfile("http://letterbook.example");
         _fakeRemoteProfile = new FakeProfile();
         _profile = _fakeProfile.Generate();
@@ -67,10 +63,10 @@ public class ActorControllerTests : WithMocks
             .ReturnsAsync(BuildRelation(FollowState.Accepted));
 
         var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
-        
+
         Assert.IsType<AcceptedResult>(response);
     }
-    
+
     [Fact(DisplayName = "Should tentative accept follow activity")]
     public async Task TestFollowTentativeAccept()
     {
@@ -82,10 +78,10 @@ public class ActorControllerTests : WithMocks
             .ReturnsAsync(BuildRelation(FollowState.Pending));
 
         var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
-        
+
         Assert.IsType<AcceptedResult>(response);
     }
-    
+
     [Fact(DisplayName = "Should reject follow activity")]
     public async Task TestFollowReject()
     {
@@ -97,14 +93,15 @@ public class ActorControllerTests : WithMocks
             .ReturnsAsync(BuildRelation(FollowState.Rejected));
 
         var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
-        
+
         Assert.IsType<AcceptedResult>(response);
     }
-    
+
     [Fact(DisplayName = "Should remove a follower", Skip = "Not implemented")]
     public async Task TestUndoFollow()
     {
-        var activity = Activities.BuildActivity(ActivityType.Undo, _remoteProfile, Activities.BuildActivity(ActivityType.Follow, _remoteProfile));
+        var activity = Activities.BuildActivity(ActivityType.Undo, _remoteProfile,
+            Activities.BuildActivity(ActivityType.Follow, _remoteProfile));
 
         ProfileServiceMock.Setup(service =>
                 service.RemoveFollower(_profile.LocalId!.Value, _remoteProfile.Id))

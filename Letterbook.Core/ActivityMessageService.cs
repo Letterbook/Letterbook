@@ -24,11 +24,12 @@ public class ActivityMessageService : IActivityMessageService
         _options = options.Value;
         _serializer = serializer;
         _logger = logger;
-        _channel = _messageBusAdapter.OpenChannel<ASType>();
+        _channel = _messageBusAdapter.OpenChannel<ASType>(nameof(ActivityMessageService));
     }
 
     public void Deliver(Uri inbox, ASType activity, Profile? onBehalfOf)
     {
+        _logger.LogInformation("Scheduled message type {Activity} for delivery to {Inbox}", activity.GetType(), inbox);
         _channel.OnNext(FormatMessage(inbox, activity, onBehalfOf));
     }
 
@@ -44,7 +45,7 @@ public class ActivityMessageService : IActivityMessageService
             Id = Guid.NewGuid().ToString(),
             Source = _options.BaseUri(),
             Data = _serializer.Serialize(activity),
-            Type = $"{nameof(IActivityMessageService)}",
+            Type = activity.GetType().ToString(),
             Subject = subject,
             Time = DateTimeOffset.UtcNow,
             [IActivityMessageService.DestinationKey] = inbox.ToString(),

@@ -275,10 +275,12 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
     public async Task<object> SendDocument(Uri inbox, ASType document)
     {
+        _logger.LogDebug("Sending document to {Inbox}", inbox);
         var message = SignedRequest(HttpMethod.Post, inbox, document);
         var response = await _httpClient.SendAsync(message);
         
-        await ValidateResponseHeaders(response);
+        var success = await ValidateResponseHeaders(response);
+        _logger.LogDebug("Sent document to {Inbox} - {Result}", inbox, response.StatusCode);
         throw new NotImplementedException();
     }
 

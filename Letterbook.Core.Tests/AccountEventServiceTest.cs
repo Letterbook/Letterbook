@@ -16,7 +16,7 @@ public class AccountEventServiceTest : WithMocks
     public AccountEventServiceTest()
     {
         _subject = new Subject<CloudEvent>();
-        MessageBusAdapterMock.Setup(m => m.OpenChannel<It.IsAnyType>())
+        MessageBusAdapterMock.Setup(m => m.OpenChannel<It.IsAnyType>(nameof(AccountEventServiceTest)))
             .Returns(_subject.AsObserver());
         _fakeAccount = new FakeAccount();
 

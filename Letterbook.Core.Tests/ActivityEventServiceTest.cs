@@ -19,7 +19,7 @@ public class ActivityEventServiceTest : WithMocks
     public ActivityEventServiceTest()
     {
         _subject = new Subject<CloudEvent>();
-        MessageBusAdapterMock.Setup(m => m.OpenChannel<It.IsAnyType>())
+        MessageBusAdapterMock.Setup(m => m.OpenChannel<It.IsAnyType>(nameof(ActivityEventServiceTest)))
             .Returns(_subject.AsObserver());
         _fakeNote = new FakeNote();
         _fakeProfile = new FakeProfile();

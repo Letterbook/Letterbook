@@ -3,14 +3,10 @@
 
 using ActivityPub.Types;
 using ActivityPub.Types.Conversion;
-using ActivityPub.Types.Conversion.Converters;
-using ActivityPub.Types.Conversion.Overrides;
-using ActivityPub.Types.Internal;
-using ActivityPub.Types.Internal.Pivots;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Letterbook.Adapter.ActivityPub.Test.Fixtures;
+namespace Letterbook.Core.Tests.Fixtures;
 
 /// <summary>
 ///     Provides a pre-initialized <see cref="IJsonLdSerializer" /> instance for use in tests.
@@ -44,5 +40,5 @@ public sealed class JsonLdSerializerFixture
         JsonLdSerializer = serviceProvider.GetRequiredService<IJsonLdSerializer>();
     }
 
-    internal IJsonLdSerializer JsonLdSerializer { get; }
+    public IJsonLdSerializer JsonLdSerializer { get; }
 }

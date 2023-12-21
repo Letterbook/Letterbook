@@ -1,6 +1,6 @@
 ﻿using ActivityPub.Types.Conversion;
-using Letterbook.Adapter.ActivityPub.Test.Fixtures;
 using Letterbook.Adapter.ActivityPub.Types;
+using Letterbook.Core.Tests.Fixtures;
 
 namespace Letterbook.Adapter.ActivityPub.Test.Types;
 
