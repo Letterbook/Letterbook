@@ -1,5 +1,4 @@
-﻿using ActivityPub.Types.AS;
-using CloudNative.CloudEvents;
+﻿using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Microsoft.Extensions.Logging;

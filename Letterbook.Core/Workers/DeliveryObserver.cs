@@ -28,7 +28,7 @@ public class DeliveryObserver: IMessageObserver
 
     public void OnNext(CloudEvent message)
     {
-        var scope = _provider.CreateScope();
+        using var scope = _provider.CreateScope();
         var worker = scope.ServiceProvider.GetRequiredService<DeliveryWorker>();
         var task = worker.DoWork(message);
 

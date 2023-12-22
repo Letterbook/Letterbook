@@ -1,5 +1,8 @@
-﻿using Letterbook.Core.Adapters;
+﻿using ActivityPub.Types;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
+using Letterbook.Core.Workers;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Moq;
 
@@ -17,6 +20,7 @@ public abstract class WithMocks
     protected Mock<IActivityService> ActivityServiceMock;
     protected IOptions<CoreOptions> CoreOptionsMock;
     protected Mock<HttpMessageHandler> HttpMessageHandlerMock;
+    protected ServiceCollection MockedServiceCollection;
 
     protected WithMocks()
     {
@@ -38,5 +42,15 @@ public abstract class WithMocks
             Scheme = "http"
         };
         CoreOptionsMock = Options.Create(mockOptions);
+
+        MockedServiceCollection = new ServiceCollection();
+        MockedServiceCollection.AddScoped<IAccountProfileAdapter>(_ => AccountProfileMock.Object);
+        MockedServiceCollection.AddScoped<IMessageBusAdapter>(_ => MessageBusAdapterMock.Object);
+        MockedServiceCollection.AddScoped<IAccountEventService>(_ => AccountEventServiceMock.Object);
+        MockedServiceCollection.AddScoped<IActivityPubClient>(_ => ActivityPubClientMock.Object);
+        MockedServiceCollection.AddScoped<IActivityPubAuthenticatedClient>(_ => ActivityPubAuthClientMock.Object);
+        MockedServiceCollection.AddScoped<IProfileService>(_ => ProfileServiceMock.Object);
+        MockedServiceCollection.AddScoped<IActivityService>(_ => ActivityServiceMock.Object);
+        MockedServiceCollection.TryAddTypesModule();
     }
 }
