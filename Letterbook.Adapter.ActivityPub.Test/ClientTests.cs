@@ -51,11 +51,6 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
     [Fact(DisplayName = "Should send a Follow")]
     public async Task ShouldFollow()
     {
-        var response = JsonSerializer.Serialize(new AsAp.Activity()
-        {
-            Type = "Accept",
-            Object = new List<AsAp.IResolvable>() { new AsAp.Activity() { Type = "Follow" } }
-        }, JsonOptions.ActivityPub);
         HttpMessageHandlerMock.Protected()
             .Setup<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -63,27 +58,21 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
             .ReturnsAsync(
                 new HttpResponseMessage
                 {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(response)
+                    StatusCode = HttpStatusCode.OK
                 }
             );
 
         var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
 
-        Assert.Equal(FollowState.Accepted, actual.Data);
+        Assert.Equal(FollowState.Pending, actual.Data);
         HttpMessageHandlerMock.Protected().Verify("SendAsync", Times.Once(),
             ItExpr.IsAny<HttpRequestMessage>(),
             ItExpr.IsAny<CancellationToken>());
     }
 
-    [Fact(DisplayName = "Should handle a Reject")]
-    public async Task ShouldFollowReject()
+    [Fact(DisplayName = "Should handle unauthorized")]
+    public async Task ShouldHandle401()
     {
-        var response = JsonSerializer.Serialize(new AsAp.Activity()
-        {
-            Type = "Reject",
-            Object = new List<AsAp.IResolvable>() { new AsAp.Activity() { Type = "Follow" } }
-        }, JsonOptions.ActivityPub);
         HttpMessageHandlerMock.Protected()
             .Setup<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -91,24 +80,17 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
             .ReturnsAsync(
                 new HttpResponseMessage
                 {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(response)
+                    StatusCode = HttpStatusCode.Unauthorized
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
-
-        Assert.Equal(FollowState.Rejected, actual.Data);
+        var ex = await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
+        Assert.Matches("Couldn't fetch resource from peer", ex.Message);
     }
-
-    [Fact(DisplayName = "Should handle a PendingReject")]
-    public async Task ShouldFollowPendingReject()
+    
+    [Fact(DisplayName = "Should handle forbidden")]
+    public async Task ShouldHandle403()
     {
-        var response = JsonSerializer.Serialize(new AsAp.Activity()
-        {
-            Type = "PendingReject",
-            Object = new List<AsAp.IResolvable>() { new AsAp.Activity() { Type = "Follow" } }
-        }, JsonOptions.ActivityPub);
         HttpMessageHandlerMock.Protected()
             .Setup<Task<HttpResponseMessage>>("SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
@@ -116,60 +98,12 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
             .ReturnsAsync(
                 new HttpResponseMessage
                 {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(response)
+                    StatusCode = HttpStatusCode.Forbidden
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
-
-        Assert.Equal(FollowState.Pending, actual.Data);
-    }
-
-    [Fact(DisplayName = "Should handle a PendingAccept")]
-    public async Task ShouldFollowPendingAccept()
-    {
-        var response = JsonSerializer.Serialize(new AsAp.Activity()
-        {
-            Type = "PendingAccept",
-            Object = new List<AsAp.IResolvable>() { new AsAp.Activity() { Type = "Follow" } }
-        }, JsonOptions.ActivityPub);
-        HttpMessageHandlerMock.Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(
-                new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(response)
-                }
-            );
-
-        var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
-
-        Assert.Equal(FollowState.Pending, actual.Data);
-    }
-
-    [Fact(DisplayName = "Should handle a nonsense response")]
-    public async Task ShouldFollowNonsense()
-    {
-        var response = JsonSerializer.Serialize(new AsAp.Activity() { Type = "Question", }, JsonOptions.ActivityPub);
-        HttpMessageHandlerMock.Protected()
-            .Setup<Task<HttpResponseMessage>>("SendAsync",
-                ItExpr.IsAny<HttpRequestMessage>(),
-                ItExpr.IsAny<CancellationToken>())
-            .ReturnsAsync(
-                new HttpResponseMessage
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    Content = new StringContent(response)
-                }
-            );
-
-        var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
-
-        Assert.Equal(FollowState.None, actual.Data);
+        var ex = await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
+        Assert.Matches("Couldn't fetch resource from peer", ex.Message);
     }
 
     [Fact(DisplayName = "Should handle server errors")]

@@ -73,7 +73,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
                 var body = await response.Content.ReadAsStringAsync();
                 _logger.LogInformation("Received client error from {Uri}", response.RequestMessage?.RequestUri);
                 _logger.LogDebug("Client error response had headers {Headers} and body {Body}", response.Headers, body);
-                throw ClientException.RequestError(response.StatusCode, $"Couldn't fetch resource from peer ({response.RequestMessage?.RequestUri})", name: name, body: body, path: path, line: line);
+                throw ClientException.RequestError(response.StatusCode, $"Couldn't fetch resource from peer ({response.RequestMessage?.RequestUri})", body, name: name, path: path, line: line);
             case >= 300 and < 400:
                 return false;
             case >= 201 and < 300:
@@ -132,64 +132,15 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     {
         var response = await Send(inbox, _document.Follow(_profile!, target));
         
-        var stream = await ReadResponse(response);
-        if (stream == null)
+        // To my knowledge, there are no existing fedi services that can actually respond in-band,
+        // so we'll just assume Pending for the moment
+        // TODO(FEP): Research and/or publish reply negotiation mechanisms
+        return new ClientResponse<FollowState>()
         {
-            return new ClientResponse<FollowState>()
-            {
-                StatusCode = response.StatusCode,
-                Data = FollowState.Pending,
-                DeliveredAddress = response.RequestMessage?.RequestUri
-            };
-        }
-        try
-        {
-            var responseActivity = await JsonSerializer.DeserializeAsync<ASType>(stream, JsonOptions.ActivityPub);
-            if (responseActivity == null) throw new NotImplementedException();
-
-            if (responseActivity.Is<AcceptActivity>())
-                return new ClientResponse<FollowState>()
-                {
-                    StatusCode = response.StatusCode,
-                    Data = FollowState.Accepted,
-                    DeliveredAddress = response.RequestMessage?.RequestUri
-                };
-        
-            if (responseActivity.Is<RejectActivity>())
-                return new ClientResponse<FollowState>()
-                {
-                    StatusCode = response.StatusCode,
-                    Data = FollowState.Rejected,
-                    DeliveredAddress = response.RequestMessage?.RequestUri
-                };
-        
-            if (responseActivity.Is<TentativeAcceptActivity>() || responseActivity.Is<TentativeRejectActivity>())
-                return new ClientResponse<FollowState>()
-                {
-                    StatusCode = response.StatusCode,
-                    Data = FollowState.Pending,
-                    DeliveredAddress = response.RequestMessage?.RequestUri
-                };
-
-            _logger.LogWarning("Unrecognized response to {Activity}: {ResponseActivity}", nameof(SendFollow), responseActivity.TypeMap.ASTypes);
-            _logger.LogDebug("Unrecognized response to {Activity}: {@ResponseActivity}", nameof(SendFollow), responseActivity);
-            return new ClientResponse<FollowState>()
-            {
-                StatusCode = response.StatusCode,
-                Data = FollowState.None,
-                DeliveredAddress = response.RequestMessage?.RequestUri
-            };
-        }
-        catch (JsonException e)
-        {
-            _logger.LogError("Invalid response to {Activity}: {Message}", nameof(SendFollow), e.Message);
-            return new ClientResponse<FollowState>()
-            {
-                StatusCode = response.StatusCode,
-                Data = FollowState.None,
-                DeliveredAddress = response.RequestMessage?.RequestUri
-            };
-        }
+            StatusCode = response.StatusCode,
+            Data = FollowState.Pending,
+            DeliveredAddress = response.RequestMessage?.RequestUri
+        };
     }
 
     public async Task<object> SendCreate(Uri inbox, IContentRef content)
@@ -252,17 +203,6 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         acceptObject.Object.Add(_profile.Id);
         
         return SendAccept(inbox, accept);
-    }
-
-    private async Task SendAccept(Uri inbox, AsAp.Activity activity)
-    {
-        var message = SignedRequest(HttpMethod.Post, inbox);
-        message.Content = JsonContent.Create(activity, options: JsonOptions.ActivityPub);
-        
-        _logger.LogDebug("Sending {Activity}", JsonSerializer.Serialize(activity, JsonOptions.ActivityPub));
-        var response = await _httpClient.SendAsync(message);
-        
-        await ValidateResponseHeaders(response);
     }
 
     private async Task SendAccept(Uri inbox, ASActivity activity)
