@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Adapter.RxMessageBus;
 
-internal class RxMessageChannels : IRxMessageChannels
+public class RxMessageChannels : IRxMessageChannels
 {
     private readonly ILogger<RxMessageChannels> _logger;
     private Dictionary<string, Subject<CloudEvent>> _channels;
