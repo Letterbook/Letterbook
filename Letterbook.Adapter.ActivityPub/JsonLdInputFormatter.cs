@@ -27,16 +27,17 @@ public class JsonLdInputFormatter : TextInputFormatter
         var logger = provider.GetRequiredService<ILogger<JsonLdInputFormatter>>();
 
         var serializer = provider.GetRequiredService<IJsonLdSerializer>();
-        var result = serializer.DeserializeAsync<ASType>(httpContext.Request.Body);
+        var result = await serializer.DeserializeAsync<ASType>(httpContext.Request.Body);
 
-        await LogActivity(httpContext.Request.Body, logger);
-        return await InputFormatterResult.SuccessAsync(await result);
+        await LogActivity(httpContext.Request.Body, logger, result, serializer);
+        return await InputFormatterResult.SuccessAsync(result);
     }
 
-    private async ValueTask LogActivity(Stream body, ILogger logger)
+    private async ValueTask LogActivity(Stream body, ILogger logger, ASType? parsed, IJsonLdSerializer serializer)
     {
         if (!logger.IsEnabled(LogLevel.Debug) || !body.CanRead) return;
 
+        logger.LogDebug("Parsed Activity {Activity}", serializer.Serialize(parsed));
         try
         {
             body.Seek(0, SeekOrigin.Begin);
@@ -51,7 +52,7 @@ public class JsonLdInputFormatter : TextInputFormatter
         }
         catch (Exception e)
         {
-            logger.LogError("Error logging raw Activity {Error}", e);
+            logger.LogError(e, "Error logging raw Activity {Error}", e.Message);
         }
     }
 }

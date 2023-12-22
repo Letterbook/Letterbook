@@ -117,8 +117,6 @@ public class ActorController : ControllerBase
     public async Task<IActionResult> PostInbox(string id, ASType activity)
     {
         var localId = ShortId.ToGuid(id);
-        _logger.LogInformation("Start processing {Activity} activity", activity.GetType());
-        _logger.LogDebug("Activity {Detail}", _ldSerializer.Serialize(activity));
         try
         {
             if (activity.Is<AcceptActivity>(out var accept))

@@ -29,7 +29,10 @@ public class ActivityMessageService : IActivityMessageService
 
     public void Deliver(Uri inbox, ASType activity, Profile? onBehalfOf)
     {
-        _logger.LogInformation("Scheduled message type {Activity} for delivery to {Inbox}", activity.GetType(), inbox);
+        _logger.LogInformation("Scheduled message type {Activity} for delivery to {Inbox}",
+            activity.GetType(), inbox);
+        _logger.LogDebug("Scheduled message type {Activity} from ({Thread})", 
+            activity.GetType(), Environment.CurrentManagedThreadId);
         _channel.OnNext(FormatMessage(inbox, activity, onBehalfOf));
     }
 

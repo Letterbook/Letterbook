@@ -30,10 +30,16 @@ public class RxMessageBus : IMessageBusAdapter, IMessageBusClient
     {
         var channel = _channels.GetSubject(typeof(T).ToString());
         _logger.LogInformation("{Name} listening on {Channel}", name, typeof(T));
-        return channel.AsObservable()
-            .Do(ce => _logger.LogInformation(
-                "Start handling {Type} message on channel {Channel} in {Name}",
-                ce.Type, typeof(T), name))
-            .SubscribeOn(TaskPoolScheduler.Default);
+        return channel
+            .SubscribeOn(TaskPoolScheduler.Default)
+            .Delay(delay)
+            .Do(ce =>
+            {
+                _logger.LogInformation(
+                    "Start handling {Type} message on channel {Channel} in {Name}",
+                    ce.Type, typeof(T), name);
+                _logger.LogDebug("Start handling {Type} on ({Thread})", ce.Type, Environment.CurrentManagedThreadId);
+            })
+            .AsObservable();
     }
 }
