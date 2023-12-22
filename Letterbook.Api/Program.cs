@@ -1,5 +1,6 @@
 using System.Net;
 using ActivityPub.Types;
+using ActivityPub.Types.AS;
 using ActivityPub.Types.Conversion;
 using DarkLink.Web.WebFinger.Server;
 using Letterbook.Adapter.ActivityPub;
@@ -121,8 +122,9 @@ public class Program
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();
         builder.Services.AddScoped<DeliveryWorker>();
+        builder.Services.AddSingleton<DeliveryObserver>();
         builder.Services.AddHostedService<WorkerScope<SeedAdminWorker>>();
-        builder.Services.AddHostedService<DeliveryWorkerHost>();
+        builder.Services.AddHostedService<MessageWorkerHost<DeliveryObserver, ASType>>((DeliveryObserverFactory));
 
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
@@ -198,5 +200,15 @@ public class Program
         app.MapControllers();
 
         app.Run("http://localhost:5127");
+    }
+
+    private static MessageWorkerHost<DeliveryObserver, ASType> DeliveryObserverFactory(IServiceProvider provider)
+    {
+        // Set a 50ms delay on the delivery observer
+        // This is just a guess at a sufficient amount of time for peers to become ready to accept reply messages
+        // We don't want to sit on them for too long, because they'll just sitting in RAM
+        return new MessageWorkerHost<DeliveryObserver, ASType>(
+            provider.GetRequiredService<ILogger<MessageWorkerHost<DeliveryObserver, ASType>>>(), provider,
+            provider.GetRequiredService<IMessageBusClient>(), 50);
     }
 }

@@ -273,15 +273,37 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendDocument(Uri inbox, ASType document)
+    public async Task<ClientResponse<object>> SendDocument(Uri inbox, ASType document)
     {
         _logger.LogDebug("Sending document to {Inbox}", inbox);
         var message = SignedRequest(HttpMethod.Post, inbox, document);
         var response = await _httpClient.SendAsync(message);
         
-        var success = await ValidateResponseHeaders(response);
+        await ValidateResponseHeaders(response);
         _logger.LogDebug("Sent document to {Inbox} - {Result}", inbox, response.StatusCode);
-        throw new NotImplementedException();
+        return new ClientResponse<object>()
+        {
+            StatusCode = response.StatusCode,
+            Data = default,
+            DeliveredAddress = response.RequestMessage?.RequestUri
+        };
+    }
+
+    public async Task<ClientResponse<object>> SendDocument(Uri inbox, string document)
+    {
+        _logger.LogDebug("Sending document to {Inbox}", inbox);
+        var message = SignedRequest(HttpMethod.Post, inbox);
+        message.Content = new StringContent(document, Constants.LdJsonHeader);
+        var response = await _httpClient.SendAsync(message);
+        
+        await ValidateResponseHeaders(response);
+        _logger.LogDebug("Sent document to {Inbox} - {Result}", inbox, response.StatusCode);
+        return new ClientResponse<object>()
+        {
+            StatusCode = response.StatusCode,
+            Data = default,
+            DeliveredAddress = response.RequestMessage?.RequestUri
+        };
     }
 
     public async Task<T> Fetch<T>(Uri id) where T : IObjectRef

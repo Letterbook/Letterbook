@@ -20,5 +20,6 @@ public interface IActivityPubAuthenticatedClient : IActivityPubClient
     Task<object> SendAdd(Uri inbox, IContentRef content, Uri collection);
     Task<object> SendRemove(Uri inbox, IContentRef content, Uri collection);
     Task<object> SendUnfollow(Uri inbox);
-    Task<object> SendDocument(Uri inbox, ASType document);
+    Task<ClientResponse<object>> SendDocument(Uri inbox, ASType document);
+    Task<ClientResponse<object>> SendDocument(Uri inbox, string document);
 }
