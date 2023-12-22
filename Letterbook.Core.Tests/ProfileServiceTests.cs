@@ -1,4 +1,5 @@
-﻿using Bogus;
+﻿using System.Net;
+using Bogus;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
@@ -284,8 +285,13 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(target.Id))
             .ReturnsAsync(default(Profile));
         ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
-        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target))
-            .ReturnsAsync(FollowState.Accepted);
+        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox, target))
+            .ReturnsAsync(new ClientResponse<FollowState>()
+            {
+                Data = FollowState.Accepted,
+                StatusCode = HttpStatusCode.OK,
+                DeliveredAddress = target.Inbox 
+            });
 
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
 
@@ -304,8 +310,13 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
             .ReturnsAsync(default(Profile));
         ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
-        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target))
-            .ReturnsAsync(FollowState.Pending);
+        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox, target))
+            .ReturnsAsync(new ClientResponse<FollowState>()
+            {
+                Data = FollowState.Pending,
+                StatusCode = HttpStatusCode.OK,
+                DeliveredAddress = target.Inbox 
+            });
 
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
 
@@ -324,8 +335,13 @@ public class ProfileServiceTests : WithMocks
         AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.Id)))
             .ReturnsAsync(default(Profile));
         ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.Id)).ReturnsAsync(target);
-        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target))
-            .ReturnsAsync(FollowState.Rejected);
+        ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox, target))
+            .ReturnsAsync(new ClientResponse<FollowState>()
+            {
+                Data = FollowState.Rejected,
+                StatusCode = HttpStatusCode.OK,
+                DeliveredAddress = target.Inbox 
+            });
 
         var actual = await _service.Follow((Guid)_profile.LocalId!, target.Id);
 

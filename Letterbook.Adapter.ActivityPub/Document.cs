@@ -46,7 +46,10 @@ public class Document : IActivityPubDocument
 
     public FollowActivity Follow(Models.Profile actor, Models.Profile target)
     {
-        throw new NotImplementedException();
+        var doc = new FollowActivity();
+        doc.Actor.Add(ActorLink(actor));
+        doc.Object.Add(ActorLink(target));
+        return doc;
     }
 
     public LikeActivity Like(Models.Profile actor, Models.IContentRef content)

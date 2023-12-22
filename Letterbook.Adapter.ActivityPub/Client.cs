@@ -26,6 +26,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     private readonly ILogger<Client> _logger;
     private readonly HttpClient _httpClient;
     private readonly IJsonLdSerializer _jsonLdSerializer;
+    private readonly IActivityPubDocument _document;
     private readonly JsonLdSerializerOptions _jsonLdSerializerOptions;
     private Models.Profile? _profile = default;
     
@@ -33,11 +34,12 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     private static readonly IMapper AsApMapper = new Mapper(Mappers.AsApMapper.Config);
     private static readonly IMapper ToLinkMapper = new Mapper(ProfileMappers.DefaultLink);
 
-    public Client(ILogger<Client> logger, HttpClient httpClient, IJsonLdSerializer jsonLdSerializer)
+    public Client(ILogger<Client> logger, HttpClient httpClient, IJsonLdSerializer jsonLdSerializer, IActivityPubDocument document)
     {
         _logger = logger;
         _httpClient = httpClient;
         _jsonLdSerializer = jsonLdSerializer;
+        _document = document;
     }
     
     // Using Stream instead of string or bytes saves on memory allocations
@@ -81,7 +83,17 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
             default:
                 return false;
         }
+    }
 
+    private async Task<HttpResponseMessage> Send(Uri inbox, ASType document)
+    {
+        _logger.LogDebug("Sending document to {Inbox}", inbox);
+        var message = SignedRequest(HttpMethod.Post, inbox, document);
+        var response = await _httpClient.SendAsync(message);
+        
+        await ValidateResponseHeaders(response);
+        _logger.LogDebug("Sent document to {Inbox} - {Result}", inbox, response.StatusCode);
+        return response;
     }
     
     public IActivityPubAuthenticatedClient As(Models.Profile? onBehalfOf)
@@ -116,54 +128,67 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         return message;
     }
 
-    public async Task<FollowState> SendFollow(Models.Profile target)
+    public async Task<ClientResponse<FollowState>> SendFollow(Uri inbox, Models.Profile target)
     {
-        var inbox = target.Inbox;
-        var actor = ProfileMapper.Map<AsAp.Actor>(_profile);
-        var follow = new AsAp.Activity()
-        {
-            Type = "Follow",
-        };
-        follow.Actor.Add(actor);
-        // Interop(mastodon): Mastodon requires the target to be in the Follow.Object, even though the activity is 
-        // about to be delivered to the target's Inbox
-        follow.Object.Add(new AsAp.Link(CompactIri.FromUri(target.Id)));
-        
-        var message = SignedRequest(HttpMethod.Post, inbox);
-        message.Content = JsonContent.Create(follow, options: JsonOptions.ActivityPub);
-
-        _logger.LogDebug("Sending {Activity}", JsonSerializer.Serialize(follow, JsonOptions.ActivityPub));
-        var response = await _httpClient.SendAsync(message);
+        var response = await Send(inbox, _document.Follow(_profile!, target));
         
         var stream = await ReadResponse(response);
         if (stream == null)
         {
-            return FollowState.Pending;
+            return new ClientResponse<FollowState>()
+            {
+                StatusCode = response.StatusCode,
+                Data = FollowState.Pending,
+                DeliveredAddress = response.RequestMessage?.RequestUri
+            };
         }
         try
         {
-            var responseActivity = await JsonSerializer.DeserializeAsync<AsAp.Activity>(stream, JsonOptions.ActivityPub);
+            var responseActivity = await JsonSerializer.DeserializeAsync<ASType>(stream, JsonOptions.ActivityPub);
             if (responseActivity == null) throw new NotImplementedException();
 
-            if (responseActivity.Type.Equals("Accept", StringComparison.InvariantCultureIgnoreCase))
-                return FollowState.Accepted;
+            if (responseActivity.Is<AcceptActivity>())
+                return new ClientResponse<FollowState>()
+                {
+                    StatusCode = response.StatusCode,
+                    Data = FollowState.Accepted,
+                    DeliveredAddress = response.RequestMessage?.RequestUri
+                };
         
-            if (responseActivity.Type.Equals("Reject", StringComparison.InvariantCultureIgnoreCase))
-                return FollowState.Rejected;
+            if (responseActivity.Is<RejectActivity>())
+                return new ClientResponse<FollowState>()
+                {
+                    StatusCode = response.StatusCode,
+                    Data = FollowState.Rejected,
+                    DeliveredAddress = response.RequestMessage?.RequestUri
+                };
         
-            var isPending = responseActivity.Type.Equals("PendingAccept", StringComparison.InvariantCultureIgnoreCase);
-            var isRejected = responseActivity.Type.Equals("PendingReject", StringComparison.InvariantCultureIgnoreCase);
-            if (isPending || isRejected)
-                return FollowState.Pending;
+            if (responseActivity.Is<TentativeAcceptActivity>() || responseActivity.Is<TentativeRejectActivity>())
+                return new ClientResponse<FollowState>()
+                {
+                    StatusCode = response.StatusCode,
+                    Data = FollowState.Pending,
+                    DeliveredAddress = response.RequestMessage?.RequestUri
+                };
 
-            _logger.LogWarning("Unrecognized response to {Activity}: {ResponseActivity}", nameof(SendFollow), responseActivity.Type);
+            _logger.LogWarning("Unrecognized response to {Activity}: {ResponseActivity}", nameof(SendFollow), responseActivity.TypeMap.ASTypes);
             _logger.LogDebug("Unrecognized response to {Activity}: {@ResponseActivity}", nameof(SendFollow), responseActivity);
-            return FollowState.None;
+            return new ClientResponse<FollowState>()
+            {
+                StatusCode = response.StatusCode,
+                Data = FollowState.None,
+                DeliveredAddress = response.RequestMessage?.RequestUri
+            };
         }
         catch (JsonException e)
         {
             _logger.LogError("Invalid response to {Activity}: {Message}", nameof(SendFollow), e.Message);
-            return FollowState.None;
+            return new ClientResponse<FollowState>()
+            {
+                StatusCode = response.StatusCode,
+                Data = FollowState.None,
+                DeliveredAddress = response.RequestMessage?.RequestUri
+            };
         }
     }
 

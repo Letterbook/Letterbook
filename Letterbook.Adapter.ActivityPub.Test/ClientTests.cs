@@ -33,7 +33,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
     public ClientTests(ITestOutputHelper output, JsonLdSerializerFixture fixture)
     {
         var httpClient = new HttpClient(HttpMessageHandlerMock.Object);
-        _client = new Client(Mock.Of<ILogger<Client>>(), httpClient, fixture.JsonLdSerializer);
+        _client = new Client(Mock.Of<ILogger<Client>>(), httpClient, fixture.JsonLdSerializer, new Document());
         _output = output;
 
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
@@ -68,9 +68,9 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(_targetProfile);
+        var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
 
-        Assert.Equal(FollowState.Accepted, actual);
+        Assert.Equal(FollowState.Accepted, actual.Data);
         HttpMessageHandlerMock.Protected().Verify("SendAsync", Times.Once(),
             ItExpr.IsAny<HttpRequestMessage>(),
             ItExpr.IsAny<CancellationToken>());
@@ -96,9 +96,9 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(_targetProfile);
+        var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
 
-        Assert.Equal(FollowState.Rejected, actual);
+        Assert.Equal(FollowState.Rejected, actual.Data);
     }
 
     [Fact(DisplayName = "Should handle a PendingReject")]
@@ -121,9 +121,9 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(_targetProfile);
+        var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
 
-        Assert.Equal(FollowState.Pending, actual);
+        Assert.Equal(FollowState.Pending, actual.Data);
     }
 
     [Fact(DisplayName = "Should handle a PendingAccept")]
@@ -146,9 +146,9 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(_targetProfile);
+        var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
 
-        Assert.Equal(FollowState.Pending, actual);
+        Assert.Equal(FollowState.Pending, actual.Data);
     }
 
     [Fact(DisplayName = "Should handle a nonsense response")]
@@ -167,9 +167,9 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        var actual = await _client.As(_profile).SendFollow(_targetProfile);
+        var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
 
-        Assert.Equal(FollowState.None, actual);
+        Assert.Equal(FollowState.None, actual.Data);
     }
 
     [Fact(DisplayName = "Should handle server errors")]
@@ -190,7 +190,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile));
+        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
     }
 
     [Fact(DisplayName = "Should handle client errors returned from peer servers")]
@@ -211,7 +211,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
                 }
             );
 
-        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile));
+        await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
     }
 
     [Fact(DisplayName = "Should send an Accept:Follow")]

@@ -6,7 +6,7 @@ namespace Letterbook.Core.Adapters;
 
 public interface IActivityPubAuthenticatedClient : IActivityPubClient
 {
-    Task<FollowState> SendFollow(Profile profile);
+    Task<ClientResponse<FollowState>> SendFollow(Uri inbox, Profile profile);
     Task<object> SendCreate(Uri inbox, IContentRef content);
     Task<object> SendUpdate(Uri inbox, IContentRef content);
     Task<object> SendDelete(Uri inbox, IContentRef content);

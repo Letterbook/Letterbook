@@ -220,20 +220,20 @@ public class ProfileService : IProfileService
         
         // TODO(moderation): Check for blocks
         // TODO(moderation): Check for requiresApproval
-        var followState = await _client.As(self).SendFollow(target);
-        switch (followState)
+        var followState = await _client.As(self).SendFollow(target.Inbox, target);
+        switch (followState.Data)
         {
             case FollowState.Accepted:
             case FollowState.Pending:
-                self.Follow(target, followState);
+                self.Follow(target, followState.Data);
                 self.Audiences.Add(Audience.Followers(target));
                 self.Audiences.Add(Audience.Boosts(target));
                 await _profiles.Commit();
-                return followState;
+                return followState.Data;
             case FollowState.None:
             case FollowState.Rejected:
             default:
-                return followState;
+                return followState.Data;
         }
     }
 
