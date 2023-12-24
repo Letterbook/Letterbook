@@ -71,9 +71,11 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
                 throw ClientException.RemoteHostError(response.StatusCode, name: name, path: path, line: line);
             case >= 400 and < 500:
                 var body = await response.Content.ReadAsStringAsync();
-                _logger.LogInformation("Received client error from {Uri}", response.RequestMessage?.RequestUri);
+                _logger.LogInformation("Received client error from {Method} {Uri}", response.RequestMessage?.Method, response.RequestMessage?.RequestUri);
                 _logger.LogDebug("Client error response had headers {Headers} and body {Body}", response.Headers, body);
-                throw ClientException.RequestError(response.StatusCode, $"Couldn't fetch resource from peer ({response.RequestMessage?.RequestUri})", body, name: name, path: path, line: line);
+                throw ClientException.RequestError(response.StatusCode,
+                    $"Couldn't {response.RequestMessage?.Method.ToString() ?? "METHOD UNKNOWN"} AP resource ({response.RequestMessage?.RequestUri})",
+                    body, name: name, path: path, line: line);
             case >= 300 and < 400:
                 return false;
             case >= 201 and < 300:
@@ -130,7 +132,9 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
     public async Task<ClientResponse<FollowState>> SendFollow(Uri inbox, Models.Profile target)
     {
-        var response = await Send(inbox, _document.Follow(_profile!, target));
+        var doc = _document.Follow(_profile!, target);
+        doc.Id = $"{_profile!.Id}#follow/{target.Id}";
+        var response = await Send(inbox, doc);
         
         // To my knowledge, there are no existing fedi services that can actually respond in-band,
         // so we'll just assume Pending for the moment

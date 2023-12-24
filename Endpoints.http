@@ -41,15 +41,25 @@ GET {{host}}/.well-known/webfinger?resource=acct:admin@{{host}}
 ###
 GET {{host}}/.well-known/webfinger?resource=acct:admin@host.docker.internal:5127
 
-### self webfinger
+### https self webfinger
 GET https://{{host}}/.well-known/webfinger?resource=acct:admin@{{host}}
+
+### self webfinger
+GET http://{{host}}/.well-known/webfinger?resource=acct:admin@local.host:5127
 
 ### self actor
 GET https://{{host}}/actor/{{profile}}
 Accept: application/ld+json
 
 ### peer webfinger
-GET http://{{peer}}/.well-known/webfinger?resource=acct:user@{{peer}}
+GET http://{{peer}}/.well-known/webfinger?resource=acct:{{peer_acct}}
+
+### https peer webfinger
+GET https://{{peer}}/.well-known/webfinger?resource=acct:{{peer_acct}}
+
+### peer actor
+GET {{peer_profile}}
+Accept: application/ld+json
 
 ###
 # {{profile}} can be defined in http-client.private.env.json, which is git-ignored
@@ -58,11 +68,11 @@ GET https://{{host}}/actor/{{profile}}#publicKey-0
 Accept: application/ld+json
 
 ### debug follow
-POST https://{{host}}/{{profile}}/follow
+POST http://{{host}}/{{profile}}/follow
 Content-Type: application/json
 
 {
-  "targetId": "http://mastodon.castle/users/user"
+  "targetId": "{{peer_profile}}"
 }
 
 ### self inbox follow
@@ -82,7 +92,7 @@ GET https://mastodon.castle/users/user
 Accept: application/ld+json
 
 ### webfinger mastodon
-GET https://mastodon.castle/.well-known/webfinger?resource=acct:user@mastodon.castle
+GET http://localhost:3000/.well-known/webfinger?resource=acct:mastodondev@localhost:3000
 
 ### httpbin
 GET https://httpbin.castle/headers
