@@ -53,7 +53,6 @@ public class SigningKeyConverter :
         return destMember;
     }
 
-    // TODO(now): for APSharp
     public PublicKey Resolve(Models.Profile source, PersonActorExtension destination, IList<Models.SigningKey> sourceMember, PublicKey? destMember,
         ResolutionContext context)
     {
