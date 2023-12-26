@@ -63,7 +63,19 @@ services:
     volumes:
       - "./Letterbook.Dashboards/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
     restart: unless-stopped
-    
+
+  letterbook_db_metrics_exporter:
+    image: prometheuscommunity/postgres-exporter
+    depends_on:
+      - letterbook_db
+    environment:
+      - "DATA_SOURCE_NAME=postgresql://letterbook:letterbookpw@postgres:5432/postgres?sslmode=disable"
+    ports:
+      - 9187:9187
+    volumes:
+      - "./Letterbook.Dashboards/Postgres/Prometheus/postgres_exporter.yml:/postgres_exporter.yml"
+    restart: unless-stopped
+
 volumes:
   letterbook_db_data:
     driver: local
