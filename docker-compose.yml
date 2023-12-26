@@ -64,7 +64,8 @@ services:
       - "./Letterbook.Dashboards/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
     restart: unless-stopped
 
-  letterbook_db_metrics_exporter:
+  db_metrics_exporter:
+    container_name: metrics_exporter
     image: prometheuscommunity/postgres-exporter
     depends_on:
       - timescale
