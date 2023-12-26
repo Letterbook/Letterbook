@@ -34,7 +34,7 @@ You'll be able to do things like prevent federated posts from appearing in promo
 - Spam and quality filters
 - And more
 
-### For Members
+### [For Members](https://github.com/Letterbook/Letterbook/issues/133)
 #### Frequently requested features
 - Quote replies
 - Collapse notifications
