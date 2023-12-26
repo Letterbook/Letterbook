@@ -72,9 +72,8 @@ services:
   letterbook_db_metrics_exporter:
     image: prometheuscommunity/postgres-exporter
     depends_on:
+      - timescale
       - letterbook_db
-    environment:
-      - "DATA_SOURCE_NAME=postgresql://letterbook:letterbookpw@postgres:5432/postgres?sslmode=disable"
     ports:
       - 9187:9187
     volumes:
