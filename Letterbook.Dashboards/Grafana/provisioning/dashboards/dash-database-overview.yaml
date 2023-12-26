@@ -4,5 +4,6 @@ providers:
   - name: Dashboards
     type: file
     options:
+      foldersFromFilesStructure: true
       path:
         /etc/grafana/provisioning/dashboards/definitions
