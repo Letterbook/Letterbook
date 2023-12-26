@@ -147,42 +147,43 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         };
     }
 
-    public async Task<object> SendCreate(Uri inbox, IContentRef content)
+    public async Task<ClientResponse<object>> SendCreate(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendUpdate(Uri inbox, IContentRef content)
+    public async Task<ClientResponse<object>> SendUpdate(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendDelete(Uri inbox, IContentRef content)
+    public async Task<ClientResponse<object>> SendDelete(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendBlock(Uri inbox, IContentRef content)
+    public async Task<ClientResponse<object>> SendBlock(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendBoost(Uri inbox, IContentRef content)
+    public async Task<ClientResponse<object>> SendBoost(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendLike(Uri inbox, IContentRef content)
+    public async Task<ClientResponse<object>> SendLike(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendDislike(Uri inbox, IContentRef content)
+    public async Task<ClientResponse<object>> SendDislike(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendAccept(Uri inbox, ActivityType activityToAccept, Uri requestorId, Uri? subjectId)
+    public async Task<ClientResponse<object>> SendAccept(Uri inbox, ActivityType activityToAccept, Uri requestorId,
+        Uri? subjectId)
     {
         /*** Mastodon expects objects that look like this
          * {
@@ -206,38 +207,45 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         acceptObject.Actor.Add(requestorId);
         acceptObject.Object.Add(_profile.Id);
         
-        return SendAccept(inbox, accept);
+        return await SendAccept(inbox, accept);
     }
 
-    private async Task SendAccept(Uri inbox, ASActivity activity)
+    private async Task<ClientResponse<object>> SendAccept(Uri inbox, ASActivity activity)
     {
         var message = SignedRequest(HttpMethod.Post, inbox, activity);
         var response = await _httpClient.SendAsync(message);
         
         await ValidateResponseHeaders(response);
+
+        return new ClientResponse<object>()
+        {
+            DeliveredAddress = response.RequestMessage?.RequestUri,
+            Data = default,
+            StatusCode = response.StatusCode
+        };
     }
 
-    public async Task<object> SendReject(Uri inbox, IContentRef content)
+    public async Task<ClientResponse<object>> SendReject(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendPending(Uri inbox, IContentRef content)
+    public async Task<ClientResponse<object>> SendPending(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendAdd(Uri inbox, IContentRef content, Uri collection)
+    public async Task<ClientResponse<object>> SendAdd(Uri inbox, IContentRef content, Uri collection)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendRemove(Uri inbox, IContentRef content, Uri collection)
+    public async Task<ClientResponse<object>> SendRemove(Uri inbox, IContentRef content, Uri collection)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<object> SendUnfollow(Uri inbox)
+    public async Task<ClientResponse<object>> SendUnfollow(Uri inbox)
     {
         throw new NotImplementedException();
     }
