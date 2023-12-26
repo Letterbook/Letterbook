@@ -70,7 +70,7 @@ This project is still in the very early stages, but we would love to have more c
 
 ## History
 
-It might help to put all this in context of what has and hasn't. [Jenniferplusplus](https://hachyderm.io/@jenniferplusplus/111342566946755633) shared a timeline graphic very similar to this on mastodon, and you might have seen it there. So, it seems to be fitting to try to situate this project in that timeline. At this point, we've essentially climbed the first mountain, and now we're surveying all of the other mountains we still have ahead of us. Right now is a great time to join the project. There's so much that needs to be done, and also a solid foundation to work from.
+It might help to put all this in context of what has and hasn't been done already. [Jenniferplusplus](https://hachyderm.io/@jenniferplusplus/111342566946755633) shared a timeline graphic very similar to this on mastodon, and you might have seen it there. So, it seems to be fitting to try to situate this project in that timeline. At this point, we've essentially climbed the first mountain, and now we're surveying all of the other mountains we still have ahead of us. Right now is a great time to join the project. There's so much that needs to be done, and also a solid foundation to work from.
 
 ```mermaid
 %%{init: { 'theme': 'default' } }%%
