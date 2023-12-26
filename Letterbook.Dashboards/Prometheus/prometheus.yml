@@ -11,8 +11,16 @@ scrape_configs:
       - targets: ['db_metrics_exporter:9187']
     params:
       # Mapping container and DB to auth
-      target: [letterbook_db/letterbook, timescale/letterbook_feeds]
-      auth_module: [letterbook_db, timescale_db]
+      target: [letterbook_db/letterbook]
+      auth_module: [letterbook_db]
+  - job_name: 'postgres-timescale'
+    metrics_path: /probe
+    static_configs:
+      - targets: ['db_metrics_exporter:9187']
+    params:
+      # Mapping container and DB to auth
+      target: [timescale/letterbook_feeds]
+      auth_module: [timescale_db]
   - job_name: docker
     # For information setting this up: https://docs.docker.com/config/daemon/prometheus/
     static_configs:
