@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+  - name: Database Overview
+    folder: Operations
+    type: file
+    options:
+      path:
+        /etc/grafana/provisioning/dashboards/definitions/dash-database-overview.json
