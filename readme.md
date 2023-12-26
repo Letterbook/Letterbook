@@ -17,7 +17,7 @@ Letterbook doesn't maintain any live state. Everything lives in the database, so
 #### First class observability
 Letterbook is thoroughly instrumented for both automatic and custom telemetry, including robust logging, metrics, and distributed tracing. We also provide out-of-the-box collection and dashboards for our telemetry. You can investigate errors, bugs, and performance issues the same way we the developers would.
 
-### For Moderators
+### [For Moderators](https://github.com/Letterbook/Letterbook/issues/132)
 #### Local-only posts
 Avoid context collapse! You can talk to your users and they can talk to each other, without risking context collapse by exposure to the whole fediverse.
 
