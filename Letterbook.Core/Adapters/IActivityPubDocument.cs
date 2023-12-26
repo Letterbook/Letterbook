@@ -20,4 +20,5 @@ public interface IActivityPubDocument
     TentativeAcceptActivity TentativeAccept(Profile actor, ASObject asObject);
     UndoActivity Undo(Profile actor, ASType @object);
     UpdateActivity Update(Profile actor, IContentRef content);
+    ASActivity BuildActivity(Models.ActivityType type);
 }

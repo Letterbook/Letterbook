@@ -26,6 +26,7 @@ public class ActorControllerTests : WithMocks
     private FakeProfile _fakeRemoteProfile;
     private Profile _profile;
     private Profile _remoteProfile;
+    private IActivityPubDocument _document;
 
     public ActorControllerTests(ITestOutputHelper output)
     {
@@ -39,6 +40,7 @@ public class ActorControllerTests : WithMocks
         _fakeRemoteProfile = new FakeProfile();
         _profile = _fakeProfile.Generate();
         _remoteProfile = _fakeRemoteProfile.Generate();
+        _document = new Document();
     }
 
     private FollowerRelation BuildRelation(FollowState state)
@@ -55,7 +57,7 @@ public class ActorControllerTests : WithMocks
     [Fact(DisplayName = "Should accept follow activity")]
     public async Task TestFollowAccept()
     {
-        var activity = Activities.BuildActivity(ActivityType.Follow, _remoteProfile);
+        var activity = _document.Follow(_remoteProfile, _profile);
         activity.Object.Add(_profile.Id);
 
         ProfileServiceMock.Setup(service =>
@@ -70,7 +72,7 @@ public class ActorControllerTests : WithMocks
     [Fact(DisplayName = "Should tentative accept follow activity")]
     public async Task TestFollowTentativeAccept()
     {
-        var activity = Activities.BuildActivity(ActivityType.Follow, _remoteProfile);
+        var activity = _document.Follow(_remoteProfile, _profile);
         activity.Object.Add(_profile.Id);
 
         ProfileServiceMock.Setup(service =>
@@ -85,7 +87,7 @@ public class ActorControllerTests : WithMocks
     [Fact(DisplayName = "Should reject follow activity")]
     public async Task TestFollowReject()
     {
-        var activity = Activities.BuildActivity(ActivityType.Follow, _remoteProfile);
+        var activity = _document.Follow(_remoteProfile, _profile);
         activity.Object.Add(_profile.Id);
 
         ProfileServiceMock.Setup(service =>
@@ -94,20 +96,6 @@ public class ActorControllerTests : WithMocks
 
         var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
 
-        Assert.IsType<AcceptedResult>(response);
-    }
-
-    [Fact(DisplayName = "Should remove a follower", Skip = "Not implemented")]
-    public async Task TestUndoFollow()
-    {
-        var activity = Activities.BuildActivity(ActivityType.Undo, _remoteProfile,
-            Activities.BuildActivity(ActivityType.Follow, _remoteProfile));
-
-        ProfileServiceMock.Setup(service =>
-                service.RemoveFollower(_profile.LocalId!.Value, _remoteProfile.Id))
-            .Returns(Task.CompletedTask);
-
-        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
         Assert.IsType<AcceptedResult>(response);
     }
 }

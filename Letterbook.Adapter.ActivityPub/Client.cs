@@ -200,8 +200,8 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         if (_profile is null || subjectId is null)
             throw CoreException.MissingData("Cannot build a semantic Accept Activity without an Actor and Object",
                 typeof(Models.Profile), null);
-        ASActivity acceptObject = Activities.BuildActivity(activityToAccept);
-        var accept = Activities.BuildActivity(ActivityType.Accept, _profile, acceptObject);
+        ASActivity acceptObject = _document.BuildActivity(activityToAccept);
+        var accept = _document.Accept(_profile, acceptObject);
 
         acceptObject.Actor.Add(requestorId);
         acceptObject.Object.Add(_profile.Id);
