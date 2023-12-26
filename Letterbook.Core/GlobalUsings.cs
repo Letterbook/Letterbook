@@ -1,1 +1,1 @@
-﻿global using DTO = Letterbook.ActivityPub.Models;
+﻿

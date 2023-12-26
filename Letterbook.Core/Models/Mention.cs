@@ -1,6 +1,4 @@
-﻿using Letterbook.ActivityPub;
-
-namespace Letterbook.Core.Models;
+﻿namespace Letterbook.Core.Models;
 
 /// <summary>
 /// A Mention is when some kind of object (usually a Note, sometimes an Image, theoretically others) is addressed to 
@@ -8,17 +6,17 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public class Mention : IEquatable<Mention>
 {
-    private static Mention _publicSpecialMention = new()
+    private static readonly Mention PublicSpecialMention = new()
     {
         Id = Guid.Empty,
-        Subject = Profile.CreateEmpty(new CompactIri("as", "public")),
+        Subject = Profile.CreateEmpty(new Uri(Constants.ActivityPubPublicCollection)),
         Visibility = MentionVisibility.To
     };
 
-    private static Mention _unlistedSpecialMention = new()
+    private static readonly Mention UnlistedSpecialMention = new()
     {
         Id = Guid.Empty,
-        Subject = Profile.CreateEmpty(new CompactIri("as", "public")),
+        Subject = Profile.CreateEmpty(new Uri(Constants.ActivityPubPublicCollection)),
         Visibility = MentionVisibility.Cc
     };
 
@@ -26,8 +24,8 @@ public class Mention : IEquatable<Mention>
     public Profile Subject { get; set; }
     public MentionVisibility Visibility { get; set; }
 
-    public static Mention Public => _publicSpecialMention;
-    public static Mention Unlisted => _unlistedSpecialMention;
+    public static Mention Public => PublicSpecialMention;
+    public static Mention Unlisted => UnlistedSpecialMention;
     public static Mention To(Profile subject) => Create(subject, MentionVisibility.To);
     public static Mention Bto(Profile subject) => Create(subject, MentionVisibility.Bto);
     public static Mention Cc(Profile subject) => Create(subject, MentionVisibility.Cc);
