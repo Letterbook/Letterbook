@@ -8,17 +8,11 @@ scrape_configs:
   - job_name: 'postgres-letterbook'
     metrics_path: /probe # This uses Prometheus multi-targeting: https://prometheus.io/docs/guides/multi-target-exporter/
     static_configs:
-      - targets: ['letterbook_db_metrics_exporter:9187']
+      - targets: ['db_metrics_exporter:9187']
     params:
-      target: [letterbook_db/letterbook]
-      auth_module: [letterbook_db]
-  - job_name: 'postgres-timescale'
-    metrics_path: /probe
-    static_configs:
-      - targets: ['letterbook_db_metrics_exporter:9187']
-    params:
-      target: [timescale/letterbook_feeds]
-      auth_module: [timescale_db]
+      # Mapping container and DB to auth
+      target: [letterbook_db/letterbook, timescale/letterbook_feeds]
+      auth_module: [letterbook_db, timescale_db]
   - job_name: docker
     # For information setting this up: https://docs.docker.com/config/daemon/prometheus/
     static_configs:
