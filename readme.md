@@ -5,11 +5,11 @@
 Letterbook was started in the hope of making the fediverse a better and more sustainable experience for the people who run it. Namely, the admins, operators, moderators, and the like. We also want to make it a safer and more inclusive space for the people who make the fediverse their social media home. Those are big aspirations, but we have some solid plans about how to start, and we would love more input about where to go from there.
 
 ## Features
-I hope it goes without saying, but we will support nearly all of the features you use regularly on other fedi apps. Things like
+I hope it goes without saying, but we will support nearly all of the features you use regularly on other fedi apps. Things like hashtags, custom emojis, lists, filters, editable posts, and so on.
 
 ### For Admins and Ops
 #### Easy setup for new instances
-Letterbook initially deploys as a single executable with simple load-balanced scaling. 1 server and 1 database is all you need to run yourself. And if you do see huge scale in your future, you can still scale outward to distributed task workers and microservices.
+Letterbook initially deploys as a single executable with simple load-balanced scaling. 1 server and 1 database is all you need to get up and running, aside from ancillary services like object storage and email. And if you do see huge scale in your future, you can still scale outward to distributed task workers and microservices.
 
 #### Lower cost and complexity
 Letterbook doesn't maintain any live state. Everything lives in the database, so there's no need to run a Redis cluster or similar to act as shared state storage. We also expect to have significantly lower compute demands, due to both the architectural choices to avoid expensive infrastructure and system sprawl, and the use of C#, a very high performance compiled language.
