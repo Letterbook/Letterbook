@@ -99,7 +99,7 @@ public class ActorController : ControllerBase
     [HttpPost]
     [ActionName("Inbox")]
     [Route("{id}/[action]")]
-    [ProducesResponseType(typeof (AsAp.Activity), StatusCodes.Status200OK, "application/ld+json")]
+    [ProducesResponseType(typeof (ASActivity), StatusCodes.Status200OK, "application/ld+json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -137,7 +137,7 @@ public class ActorController : ControllerBase
     [HttpPost]
     [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
-    public async Task<ActionResult> SharedInbox(AsAp.Activity activity)
+    public async Task<ActionResult> SharedInbox(ASType activity)
     {
         throw new NotImplementedException();
     }
