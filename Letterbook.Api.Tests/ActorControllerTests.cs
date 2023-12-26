@@ -32,8 +32,7 @@ public class ActorControllerTests : WithMocks
     {
         _output = output;
         _controller = new ActorController(CoreOptionsMock, Mock.Of<ILogger<ActorController>>(),
-            Mock.Of<IJsonLdSerializer>(), ProfileServiceMock.Object, Mock.Of<IActivityMessageService>(),
-            new Document());
+            ProfileServiceMock.Object, Mock.Of<IActivityMessageService>(), new Document());
 
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
         _fakeProfile = new FakeProfile("http://letterbook.example");

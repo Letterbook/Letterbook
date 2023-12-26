@@ -1,8 +1,5 @@
-﻿using System.Text;
-using ActivityPub.Types.AS;
+﻿using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
-using ActivityPub.Types.Conversion;
-using ActivityPub.Types.Util;
 using AutoMapper;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Mappers;
@@ -12,7 +9,6 @@ using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
-using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -28,21 +24,18 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [Consumes("application/ld+json",
     "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", 
     "application/activity+json")]
-// [JsonLdSerializer]
 public class ActorController : ControllerBase
 {
     private readonly ILogger<ActorController> _logger;
-    private readonly IJsonLdSerializer _ldSerializer;
     private readonly IProfileService _profileService;
     private readonly IActivityMessageService _messageService;
     private readonly IActivityPubDocument _apDoc;
     private static readonly IMapper ActorMapper = new Mapper(AsApMapper.ActorConfig);
 
-    public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger, IJsonLdSerializer ldSerializer,
+    public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
         IProfileService profileService, IActivityMessageService messageService, IActivityPubDocument apDoc)
     {
         _logger = logger;
-        _ldSerializer = ldSerializer;
         _profileService = profileService;
         _messageService = messageService;
         _apDoc = apDoc;
@@ -147,8 +140,6 @@ public class ActorController : ControllerBase
     public async Task<ActionResult> SharedInbox(AsAp.Activity activity)
     {
         throw new NotImplementedException();
-        // await _activityService.ReceiveNotes(new Note[] { }, Enum.Parse<ActivityType>(activity.Type), null);
-        return Accepted();
     }
 
     [HttpGet]
@@ -230,53 +221,3 @@ public class ActorController : ControllerBase
         return Accepted();
     }
 }
-
-/*** The problem: Letterbook.AP can't serialize/deserialize nested Activities
-// Parsed
-{
-  "@context": "https://www.w3.org/ns/activitystreams",
-  "id": "http://mastodon.castle/users/user#follows/32/undo",
-  "type": "Undo",
-  "actor": "http://mastodon.castle/users/user",
-  "object": {
-    "id": "http://mastodon.castle/6dc45337-040b-43d2-8238-de9b7f377750",
-    "type": "Follow"
-  }
-}
-// Received
-{
-  "@context": "https://www.w3.org/ns/activitystreams",
-  "id": "http://mastodon.castle/users/user#follows/32/undo",
-  "type": "Undo",
-  "actor": "http://mastodon.castle/users/user",
-  "object": {
-    "id": "http://mastodon.castle/6dc45337-040b-43d2-8238-de9b7f377750",
-    "type": "Follow",
-    "actor": "http://mastodon.castle/users/user",
-    "object": "https://host.castle/actor/ahwPS_-DYE2h9RlTo0p4jg"
-  }
-}
-
-// Sent
-{
-  "@context": "https://www.w3.org/ns/activitystreams",
-  "type": "Accept",
-  "actor": "https://host.castle/actor/ahwPS_-DYE2h9RlTo0p4jg",
-  "object": {
-    "id": "http://mastodon.castle/fbdfbd1c-489e-4edb-980f-0273a03c0992",
-    "type": "Follow"
-  }
-}
-
-// Tried to Send
-{
-  "@context": "https://www.w3.org/ns/activitystreams",
-  "type": "Accept",
-  "actor": "https://host.castle/actor/ahwPS_-DYE2h9RlTo0p4jg",
-  "object": {
-    "id": "http://mastodon.castle/fbdfbd1c-489e-4edb-980f-0273a03c0992",
-    "type": "Follow",
-    "actor": "http://mastodon.castle/users/user"
-  }
-}
-*/
