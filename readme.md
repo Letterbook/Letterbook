@@ -7,7 +7,7 @@ Letterbook is a federated microblogging service, implementing ActivityPub. The p
 ## Features
 I hope it goes without saying, but we will support most of the features you use regularly on other fedi apps. Things like hashtags, custom emojis, lists, filters, editable posts, account migration, and so on.
 
-### For Admins and Ops
+### [For Admins and Ops](https://github.com/Letterbook/Letterbook/issues/131)
 #### Easy setup for new instances
 Letterbook initially deploys as a single executable with simple load-balanced scaling. 1 server and 1 database is all you need to get up and running, aside from ancillary services like object storage and email. And if you do see huge scale in your future, you can still scale outward to distributed task workers and microservices.
 
