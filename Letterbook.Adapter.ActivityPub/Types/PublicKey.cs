@@ -16,17 +16,17 @@ public class PublicKey : ASType, IASModel<PublicKey, PublicKeyEntity, ASType>
 
     private PublicKeyEntity Entity { get; }
 
-    public PublicKey() => Entity = TypeMap.Extend<PublicKeyEntity>();
+    public PublicKey() => Entity = TypeMap.Extend<PublicKey, PublicKeyEntity>();
     
     public PublicKey(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
-        => Entity = TypeMap.ProjectTo<PublicKeyEntity>(isExtending);
+        => Entity = TypeMap.ProjectTo<PublicKey, PublicKeyEntity>(isExtending);
     
     public PublicKey(ASType existingGraph) : this(existingGraph.TypeMap) {}
     
     [SetsRequiredMembers]
     public PublicKey(TypeMap typeMap, PublicKeyEntity? entity) : base(typeMap, null)
     {
-        Entity = entity ?? typeMap.AsEntity<PublicKeyEntity>();
+        Entity = entity ?? typeMap.AsEntity<PublicKey, PublicKeyEntity>();
         Id = Entity.Id ?? throw new ArgumentException($"The provided entity is invalid - required {nameof(PublicKeyEntity.Id)} property is missing");
         PublicKeyPem = Entity.PublicKeyPem ?? throw new ArgumentException($"The provided entity is invalid - required {nameof(PublicKeyEntity.PublicKeyPem)} property is missing");
     }

@@ -27,7 +27,8 @@ public class JsonLdInputFormatter : TextInputFormatter
         var logger = provider.GetRequiredService<ILogger<JsonLdInputFormatter>>();
 
         var serializer = provider.GetRequiredService<IJsonLdSerializer>();
-        var result = await serializer.DeserializeAsync<ASType>(httpContext.Request.Body);
+        // TODO(APSharp): replace with Deserialize<ASType>(httpContext.Request.Body) when available
+        var result = serializer.Deserialize<ASType>(await new StreamReader(httpContext.Request.Body).ReadToEndAsync());
 
         await LogActivity(httpContext.Request.Body, logger, result, serializer);
         return await InputFormatterResult.SuccessAsync(result);

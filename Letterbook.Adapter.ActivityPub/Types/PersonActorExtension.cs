@@ -10,16 +10,16 @@ public class PersonActorExtension : PersonActor, IASModel<PersonActorExtension, 
 {
     private PersonActorExtensionEntity Entity { get; }
     
-    public PersonActorExtension() => Entity = TypeMap.Extend<PersonActorExtensionEntity>();
+    public PersonActorExtension() => Entity = TypeMap.Extend<PersonActorExtension, PersonActorExtensionEntity>();
     
     public PersonActorExtension(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
-        => Entity = TypeMap.ProjectTo<PersonActorExtensionEntity>(isExtending);
+        => Entity = TypeMap.ProjectTo<PersonActorExtension, PersonActorExtensionEntity>(isExtending);
     
     public PersonActorExtension(ASType existingGraph) : this(existingGraph.TypeMap) {}
     
     [SetsRequiredMembers]
     public PersonActorExtension(TypeMap typeMap, PersonActorExtensionEntity? entity) : base(typeMap, null)
-        => Entity = entity ?? typeMap.AsEntity<PersonActorExtensionEntity>();
+        => Entity = entity ?? typeMap.AsEntity<PersonActorExtension, PersonActorExtensionEntity>();
 
     static PersonActorExtension IASModel<PersonActorExtension>.FromGraph(TypeMap typeMap) => new(typeMap, null);
 

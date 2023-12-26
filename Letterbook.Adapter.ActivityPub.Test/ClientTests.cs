@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using Letterbook.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Exceptions;
 using Letterbook.Core.Tests;
@@ -85,7 +86,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
             );
 
         var ex = await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
-        Assert.Matches("Couldn't fetch resource from peer", ex.Message);
+        Assert.Matches(new Regex(@"Couldn't [\w\s]+ AP resource \(.*\)"), ex.Message);
     }
     
     [Fact(DisplayName = "Should handle forbidden")]
@@ -103,7 +104,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
             );
 
         var ex = await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
-        Assert.Matches("Couldn't fetch resource from peer", ex.Message);
+        Assert.Matches(new Regex(@"Couldn't [\w\s]+ AP resource \(.*\)"), ex.Message);
     }
 
     [Fact(DisplayName = "Should handle server errors")]
