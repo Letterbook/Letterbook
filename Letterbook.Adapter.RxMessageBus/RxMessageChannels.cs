@@ -17,15 +17,15 @@ public class RxMessageChannels : IRxMessageChannels
     
     public Subject<CloudEvent> GetSubject(string type)
     {
-        if (!_channels.ContainsKey(type))
+        if (_channels.TryGetValue(type, out var subject))
         {
-            var subject = new Subject<CloudEvent>();
-            _channels.Add(type, subject);
-            _logger.LogInformation("Created channel for {Type}", type);
+            _logger.LogDebug("Loaded existing channel for {Type}", type);
             return subject;
         }
-        
-        _logger.LogDebug("Loaded existing channel for {Type}", type);
-        return _channels[type];
+
+        subject = new Subject<CloudEvent>();
+        _channels.Add(type, subject);
+        _logger.LogInformation("Created channel for {Type}", type);
+        return subject;
     }
 }
