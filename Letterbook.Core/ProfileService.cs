@@ -220,20 +220,20 @@ public class ProfileService : IProfileService
         
         // TODO(moderation): Check for blocks
         // TODO(moderation): Check for requiresApproval
-        var followState = await _client.As(self).SendFollow(target.Inbox);
-        switch (followState)
+        var followState = await _client.As(self).SendFollow(target.Inbox, target);
+        switch (followState.Data)
         {
             case FollowState.Accepted:
             case FollowState.Pending:
-                self.Follow(target, followState);
+                self.Follow(target, followState.Data);
                 self.Audiences.Add(Audience.Followers(target));
                 self.Audiences.Add(Audience.Boosts(target));
                 await _profiles.Commit();
-                return followState;
+                return followState.Data;
             case FollowState.None:
             case FollowState.Rejected:
             default:
-                return followState;
+                return followState.Data;
         }
     }
 
@@ -251,7 +251,7 @@ public class ProfileService : IProfileService
         return await Follow(self, target, false);
     }
 
-    public async Task<FollowState> ReceiveFollowRequest(Uri targetId, Uri followerId)
+    public async Task<FollowerRelation> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId)
     {
         if(targetId.Authority != _coreConfig.BaseUri().Authority)
         {
@@ -260,25 +260,29 @@ public class ProfileService : IProfileService
         }
         
         var target = await ResolveProfile(targetId);
-        // var follower = await ResolveProfile(followerId);
-        
-        // TODO(moderation): check blocks and requiresApproval
-        var relation = target.AddFollower(Profile.CreateEmpty(followerId), FollowState.Accepted);
-        await _profiles.Commit();
-        
-        return relation.State;
+        var follower = await ResolveProfile(followerId);
+
+        return await ReceiveFollowRequest(target, follower, requestId);
     }
 
-    public async Task<FollowState> ReceiveFollowRequest(Guid localId, Uri followerId)
+    public async Task<FollowerRelation> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId)
     {
         var target = await RequireProfile(localId);
-        // var follower = await ResolveProfile(followerId);
-        
-        // TODO(moderation): check blocks and requiresApproval
-        var relation = target.AddFollower(Profile.CreateEmpty(followerId), FollowState.Accepted);
+        var follower = await ResolveProfile(followerId);
+
+        return await ReceiveFollowRequest(target, follower, requestId);
+    }
+
+    private async Task<FollowerRelation> ReceiveFollowRequest(Profile target, Profile follower, Uri? requestId)
+    {
+        var relation = target.AddFollower(follower, FollowState.Accepted);
         await _profiles.Commit();
+        // if (relation.State == FollowState.Rejected) return relation;
         
-        return relation.State;
+        // Todo: punt more AP responses to a delivery queue
+        // Todo: also, implement that delivery queue
+        // await _client.As(target).SendAccept(follower.Inbox, ActivityType.Follow, follower.Id, requestId);
+        return relation;
     }
 
     public async Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response)

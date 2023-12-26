@@ -39,6 +39,16 @@
         "ASPNETCORE_ENVIRONMENT": "Sandcastle"
       }
     },
+    "local": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "launchUrl": "swagger",
+      "applicationUrl": "http://localhost:5127",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Local"
+      }
+    },
     "https": {
       "commandName": "Project",
       "dotnetRunMessages": true,

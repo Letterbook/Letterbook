@@ -33,6 +33,15 @@ public static class ProfileMappers
             });
     });
 
+    public static MapperConfiguration DefaultLink = new(cfg =>
+    {
+        ConfigureCommonTypes(cfg);
+        
+        cfg.CreateMap<Models.IObjectRef, AsAp.Link>()
+            .ConstructUsing(obj => new AsAp.Link(CompactIri.FromUri(obj.Id)));
+            
+    });
+
     public static void ConfigureSigningKeys(IMapperConfigurationExpression cfg)
     {
         cfg.CreateMap<IList<SigningKey>, AsAp.PublicKey?>()

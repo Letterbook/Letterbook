@@ -1,12 +1,18 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using ActivityPub.Types.AS;
+using ActivityPub.Types.AS.Extended.Activity;
+using ActivityPub.Types.Conversion;
 using AutoMapper;
 using Letterbook.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Exceptions;
 using Letterbook.Adapter.ActivityPub.Mappers;
+using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Microsoft.Extensions.Logging;
@@ -19,20 +25,38 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 {
     private readonly ILogger<Client> _logger;
     private readonly HttpClient _httpClient;
+    private readonly IJsonLdSerializer _jsonLdSerializer;
+    private readonly IActivityPubDocument _document;
+    private readonly JsonLdSerializerOptions _jsonLdSerializerOptions;
     private Models.Profile? _profile = default;
     
     private static readonly IMapper ProfileMapper = new Mapper(ProfileMappers.DefaultProfile);
     private static readonly IMapper AsApMapper = new Mapper(Mappers.AsApMapper.Config);
+    private static readonly IMapper ToLinkMapper = new Mapper(ProfileMappers.DefaultLink);
 
-    public Client(ILogger<Client> logger, HttpClient httpClient)
+    public Client(ILogger<Client> logger, HttpClient httpClient, IJsonLdSerializer jsonLdSerializer, IActivityPubDocument document)
     {
         _logger = logger;
         _httpClient = httpClient;
+        _jsonLdSerializer = jsonLdSerializer;
+        _document = document;
     }
     
+    // Using Stream instead of string or bytes saves on memory allocations
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
-    // Stream saves on allocations
     private async Task<Stream?> ReadResponse(HttpResponseMessage response, 
+        [CallerMemberName] string name="",
+        [CallerFilePath] string path="",
+        [CallerLineNumber] int line=-1)
+    {
+        if(await ValidateResponseHeaders(response, name, path, line))
+            return await response.Content.ReadAsStreamAsync();
+        return default;
+    }
+
+    // ValueTask is more efficient than Task when you expect to frequently just return a synchronous value
+    [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
+    private async ValueTask<bool> ValidateResponseHeaders(HttpResponseMessage response,
         [CallerMemberName] string name="",
         [CallerFilePath] string path="",
         [CallerLineNumber] int line=-1)
@@ -47,18 +71,31 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
                 throw ClientException.RemoteHostError(response.StatusCode, name: name, path: path, line: line);
             case >= 400 and < 500:
                 var body = await response.Content.ReadAsStringAsync();
-                _logger.LogInformation("Received client error from {Uri}", response.RequestMessage?.RequestUri);
-                _logger.LogDebug("Server response had headers {Headers} and body {Body}", response.Headers, body);
-                throw ClientException.RequestError(response.StatusCode, name, body: body, path: path, line: line);
+                _logger.LogInformation("Received client error from {Method} {Uri}", response.RequestMessage?.Method, response.RequestMessage?.RequestUri);
+                _logger.LogDebug("Client error response had headers {Headers} and body {Body}", response.Headers, body);
+                throw ClientException.RequestError(response.StatusCode,
+                    $"Couldn't {response.RequestMessage?.Method.ToString() ?? "METHOD UNKNOWN"} AP resource ({response.RequestMessage?.RequestUri})",
+                    body, name: name, path: path, line: line);
             case >= 300 and < 400:
-                return default;
+                return false;
             case >= 201 and < 300:
                 return default;
             case 200:
-                return await response.Content.ReadAsStreamAsync();
+                return true;
             default:
-                return default;
+                return false;
         }
+    }
+
+    private async Task<HttpResponseMessage> Send(Uri inbox, ASType document)
+    {
+        _logger.LogDebug("Sending document to {Inbox}", inbox);
+        var message = SignedRequest(HttpMethod.Post, inbox, document);
+        var response = await _httpClient.SendAsync(message);
+        
+        await ValidateResponseHeaders(response);
+        _logger.LogDebug("Sent document to {Inbox} - {Result}", inbox, response.StatusCode);
+        return response;
     }
     
     public IActivityPubAuthenticatedClient As(Models.Profile? onBehalfOf)
@@ -70,6 +107,16 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         return this;
     }
 
+    private HttpRequestMessage SignedRequest(HttpMethod method, Uri uri, ASType document)
+    {
+        var message = SignedRequest(method, uri);
+        var payload = _jsonLdSerializer.Serialize(document);
+        message.Content = new StringContent(payload, Constants.LdJsonHeader);
+        _logger.LogDebug("Sending {Activity}", payload);
+
+        return message;
+    }
+    
     private HttpRequestMessage SignedRequest(HttpMethod method, Uri uri)
     {
         var message = new HttpRequestMessage(method, uri);
@@ -83,115 +130,157 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         return message;
     }
 
-    public async Task<FollowState> SendFollow(Uri inbox)
+    public async Task<ClientResponse<FollowState>> SendFollow(Uri inbox, Models.Profile target)
     {
-        var actor = ProfileMapper.Map<AsAp.Actor>(_profile);
-        var follow = new AsAp.Activity()
-        {
-            Type = "Follow",
-        };
-        follow.Actor.Add(actor);
+        var doc = _document.Follow(_profile!, target);
+        doc.Id = $"{_profile!.Id}#follow/{target.Id}";
+        var response = await Send(inbox, doc);
         
-        var message = SignedRequest(HttpMethod.Post, inbox);
-        message.Content = JsonContent.Create(follow, options: JsonOptions.ActivityPub);
+        // To my knowledge, there are no existing fedi services that can actually respond in-band,
+        // so we'll just assume Pending for the moment
+        // TODO(FEP): Research and/or publish reply negotiation mechanisms
+        return new ClientResponse<FollowState>()
+        {
+            StatusCode = response.StatusCode,
+            Data = FollowState.Pending,
+            DeliveredAddress = response.RequestMessage?.RequestUri
+        };
+    }
 
+    public async Task<ClientResponse<object>> SendCreate(Uri inbox, IContentRef content)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendUpdate(Uri inbox, IContentRef content)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendDelete(Uri inbox, IContentRef content)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendBlock(Uri inbox, IContentRef content)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendBoost(Uri inbox, IContentRef content)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendLike(Uri inbox, IContentRef content)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendDislike(Uri inbox, IContentRef content)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendAccept(Uri inbox, ActivityType activityToAccept, Uri requestorId,
+        Uri? subjectId)
+    {
+        /*** Mastodon expects objects that look like this
+         * {
+         *   '@context': 'https://www.w3.org/ns/activitystreams',
+         *   id: 'foo',
+         *   type: 'Accept',
+         *   actor: 'https://letterbook.example/actor/me',
+         *   object: {
+         *     id: 'bar',
+         *     type: 'Follow',
+         *     actor: 'https://mastodon.example/user/them',
+         *     object: 'https://letterbook.example/actor/me',
+         *   }
+         */
+        if (_profile is null || subjectId is null)
+            throw CoreException.MissingData("Cannot build a semantic Accept Activity without an Actor and Object",
+                typeof(Models.Profile), null);
+        ASActivity acceptObject = _document.BuildActivity(activityToAccept);
+        var accept = _document.Accept(_profile, acceptObject);
+
+        acceptObject.Actor.Add(requestorId);
+        acceptObject.Object.Add(_profile.Id);
+        
+        return await SendAccept(inbox, accept);
+    }
+
+    private async Task<ClientResponse<object>> SendAccept(Uri inbox, ASActivity activity)
+    {
+        var message = SignedRequest(HttpMethod.Post, inbox, activity);
         var response = await _httpClient.SendAsync(message);
         
-        var stream = await ReadResponse(response);
-        if (stream == null)
-        {
-            return FollowState.Pending;
-        }
-        try
-        {
-            var responseActivity = await JsonSerializer.DeserializeAsync<AsAp.Activity>(stream, JsonOptions.ActivityPub);
-            if (responseActivity == null) throw new NotImplementedException();
+        await ValidateResponseHeaders(response);
 
-            if (responseActivity.Type.Equals("Accept", StringComparison.InvariantCultureIgnoreCase))
-                return FollowState.Accepted;
+        return new ClientResponse<object>()
+        {
+            DeliveredAddress = response.RequestMessage?.RequestUri,
+            Data = default,
+            StatusCode = response.StatusCode
+        };
+    }
+
+    public async Task<ClientResponse<object>> SendReject(Uri inbox, IContentRef content)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendPending(Uri inbox, IContentRef content)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendAdd(Uri inbox, IContentRef content, Uri collection)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendRemove(Uri inbox, IContentRef content, Uri collection)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendUnfollow(Uri inbox)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<ClientResponse<object>> SendDocument(Uri inbox, ASType document)
+    {
+        _logger.LogDebug("Sending document to {Inbox}", inbox);
+        var message = SignedRequest(HttpMethod.Post, inbox, document);
+        var response = await _httpClient.SendAsync(message);
         
-            if (responseActivity.Type.Equals("Reject", StringComparison.InvariantCultureIgnoreCase))
-                return FollowState.Rejected;
-        
-            var isPending = responseActivity.Type.Equals("PendingAccept", StringComparison.InvariantCultureIgnoreCase);
-            var isRejected = responseActivity.Type.Equals("PendingReject", StringComparison.InvariantCultureIgnoreCase);
-            if (isPending || isRejected)
-                return FollowState.Pending;
-
-            _logger.LogWarning("Unrecognized response to {Activity}: {ResponseActivity}", nameof(SendFollow), responseActivity.Type);
-            _logger.LogDebug("Unrecognized response to {Activity}: {@ResponseActivity}", nameof(SendFollow), responseActivity);
-            return FollowState.None;
-        }
-        catch (JsonException e)
+        await ValidateResponseHeaders(response);
+        _logger.LogDebug("Sent document to {Inbox} - {Result}", inbox, response.StatusCode);
+        return new ClientResponse<object>()
         {
-            _logger.LogError("Invalid response to {Activity}: {Message}", nameof(SendFollow), e.Message);
-            return FollowState.None;
-        }
-    }
-    
-    public async Task<object> SendCreate(Uri inbox, IContentRef content)
-    {
-        throw new NotImplementedException();
+            StatusCode = response.StatusCode,
+            Data = default,
+            DeliveredAddress = response.RequestMessage?.RequestUri
+        };
     }
 
-    public async Task<object> SendUpdate(Uri inbox, IContentRef content)
+    public async Task<ClientResponse<object>> SendDocument(Uri inbox, string document)
     {
-        throw new NotImplementedException();
-    }
-
-    public async Task<object> SendDelete(Uri inbox, IContentRef content)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<object> SendBlock(Uri inbox, IContentRef content)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<object> SendBoost(Uri inbox, IContentRef content)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<object> SendLike(Uri inbox, IContentRef content)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<object> SendDislike(Uri inbox, IContentRef content)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<object> SendAccept(Uri inbox, IContentRef content)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<object> SendReject(Uri inbox, IContentRef content)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<object> SendPending(Uri inbox, IContentRef content)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<object> SendAdd(Uri inbox, IContentRef content, Uri collection)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<object> SendRemove(Uri inbox, IContentRef content, Uri collection)
-    {
-        throw new NotImplementedException();
-    }
-
-    public async Task<object> SendUnfollow(Uri inbox)
-    {
-        throw new NotImplementedException();
+        _logger.LogDebug("Sending document to {Inbox}", inbox);
+        var message = SignedRequest(HttpMethod.Post, inbox);
+        message.Content = new StringContent(document, Constants.LdJsonHeader);
+        var response = await _httpClient.SendAsync(message);
+        
+        await ValidateResponseHeaders(response);
+        _logger.LogDebug("Sent document to {Inbox} - {Result}", inbox, response.StatusCode);
+        return new ClientResponse<object>()
+        {
+            StatusCode = response.StatusCode,
+            Data = default,
+            DeliveredAddress = response.RequestMessage?.RequestUri
+        };
     }
 
     public async Task<T> Fetch<T>(Uri id) where T : IObjectRef

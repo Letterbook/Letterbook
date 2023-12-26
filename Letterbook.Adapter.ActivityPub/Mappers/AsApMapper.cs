@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using ActivityPub.Types.AS.Extended.Actor;
+using AutoMapper;
+using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Core.Models;
 
 namespace Letterbook.Adapter.ActivityPub.Mappers;
@@ -11,6 +13,32 @@ public static class AsApMapper
         ConfigureProfile(cfg);
         ConfigureNote(cfg);
     });
+
+    public static MapperConfiguration ActorConfig = new(cfg =>
+    {
+        ConfigureActor(cfg);
+    });
+
+    private static void ConfigureActor(IMapperConfigurationExpression cfg)
+    {
+        cfg.CreateMap<Models.Profile, PersonActorExtension>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Description))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.DisplayName))
+            .ForMember(dest => dest.PreferredUsername, opt => opt.MapFrom(src => src.Handle))
+            .ForMember(dest => dest.Attachment, opt => opt.Ignore())
+            .ForMember(dest => dest.Liked, opt => opt.Ignore())
+            .ForMember(dest => dest.PublicKey,
+                opt => opt.MapFrom<SigningKeyConverter, IList<SigningKey>>(src => src.Keys))
+            .ForMember(dest => dest.Endpoints, opt => opt.Ignore())
+            .ForMember(dest => dest.Streams, opt => opt.Ignore());
+        
+        cfg.CreateMap<SigningKey, PublicKey?>()
+            .ConvertUsing<SigningKeyConverter>();
+        
+        cfg.CreateMap<IList<SigningKey>, PublicKey?>()
+            .ConvertUsing<SigningKeyConverter>();
+    }
 
     private static void ConfigureProfile(IMapperConfigurationExpression cfg)
     {

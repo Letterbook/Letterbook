@@ -55,6 +55,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Activity
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.ActivityPub.Test", "Letterbook.Adapter.ActivityPub.Test\Letterbook.Adapter.ActivityPub.Test.csproj", "{151935AD-3AB8-48CB-BBAD-6AF6309B36DE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.RxMessageBus.Tests", "Letterbook.Adapter.RxMessageBus.Tests\Letterbook.Adapter.RxMessageBus.Tests.csproj", "{5172FA38-78CF-4E36-A302-8242C96E9087}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -108,6 +110,10 @@ Global
 		{151935AD-3AB8-48CB-BBAD-6AF6309B36DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{151935AD-3AB8-48CB-BBAD-6AF6309B36DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{151935AD-3AB8-48CB-BBAD-6AF6309B36DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5172FA38-78CF-4E36-A302-8242C96E9087}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5172FA38-78CF-4E36-A302-8242C96E9087}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5172FA38-78CF-4E36-A302-8242C96E9087}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5172FA38-78CF-4E36-A302-8242C96E9087}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}

@@ -58,6 +58,7 @@ public class ClientException : AdapterException
         ex.HResult |= (int)ErrorCodes.InvalidRequest;
         if (code == HttpStatusCode.Forbidden) ex.HResult |= (int)ErrorCodes.PermissionDenied;
         ex.Data["Error Code"] = code;
+        ex.Data["Body"] = body;
 
         return ex;
     }
