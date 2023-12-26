@@ -90,3 +90,4 @@ timeline
 ## Maintainers
 
 * [@jenniferplusplus@hachyderm.io](https://hachyderm.io/@jenniferplusplus)
+* [@runewake2@hachyderm.io](https://hachyderm.io/@runewake2)
