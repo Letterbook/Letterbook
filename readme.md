@@ -2,10 +2,10 @@
 
 [![Build](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml/badge.svg?branch=main)](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml)
 
-Letterbook was started in the hope of making the fediverse a better and more sustainable experience for the people who run it. Namely, the admins, operators, moderators, and the like. We also want to make it a safer and more inclusive space for the people who make the fediverse their social media home. Those are big aspirations, but we have some solid plans about how to start, and we would love more input about where to go from there.
+Letterbook is a federated microblogging service, implementing ActivityPub. The project was started with the hope to make hosting a fediverse server a better and more sustainable experience. We also want to make it a safer and more inclusive space for the people who make the fediverse their social media home. Those are big aspirations, but we have some solid plans about how to start, and we would love more input about where to go from there.
 
 ## Features
-I hope it goes without saying, but we will support nearly all of the features you use regularly on other fedi apps. Things like hashtags, custom emojis, lists, filters, editable posts, and so on.
+I hope it goes without saying, but we will support most of the features you use regularly on other fedi apps. Things like hashtags, custom emojis, lists, filters, editable posts, account migration, and so on.
 
 ### For Admins and Ops
 #### Easy setup for new instances
