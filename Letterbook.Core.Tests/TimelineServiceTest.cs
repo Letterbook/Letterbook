@@ -8,6 +8,8 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Core.Tests;
 
+
+
 public class TimelineServiceTest : WithMocks
 {
     private readonly ITestOutputHelper _outputHelper;
@@ -40,7 +42,7 @@ public class TimelineServiceTest : WithMocks
         Assert.NotNull(_timeline);
     }
 
-    [Trait("TimelineService", "HandleCreate")]
+    
     [Fact(DisplayName = "HandleCreate should add public posts to the public audience")]
     public void AddToPublicOnCreate()
     {
@@ -54,7 +56,7 @@ public class TimelineServiceTest : WithMocks
             Times.Once);
     }
 
-    [Trait("TimelineService", "HandleCreate")]
+    
     [Fact(DisplayName = "HandleCreate should add follower posts to the creator's follower audience")]
     public void AddToFollowersOnCreate()
     {
@@ -69,7 +71,7 @@ public class TimelineServiceTest : WithMocks
             Times.Once);
     }
 
-    [Trait("TimelineService", "HandleCreate")]
+    
     [Fact(DisplayName = "HandleCreate should add public posts to the creator's follower audience")]
     public void AddToFollowersImplicitlyOnCreate()
     {
@@ -84,7 +86,7 @@ public class TimelineServiceTest : WithMocks
             Times.Once);
     }
 
-    [Trait("TimelineService", "HandleCreate")]
+    
     [Fact(DisplayName = "HandleCreate should add any posts to the mentioned profiles' feeds")]
     public void AddToMentionsOnCreate()
     {
@@ -100,7 +102,7 @@ public class TimelineServiceTest : WithMocks
             Times.Once);
     }
 
-    [Trait("TimelineService", "HandleCreate")]
+    
     [Fact(DisplayName = "HandleCreate should add any posts to the mentioned profile's notifications")]
     public void AddMentionToNotificationsOnCreate()
     {
@@ -113,7 +115,7 @@ public class TimelineServiceTest : WithMocks
             Times.Once);
     }
 
-    [Trait("TimelineService", "HandleCreate")]
+    
     [Fact(DisplayName = "HandleCreate should add any posts to all of the mentioned profiles' notifications")]
     public void AddAllMentionsToNotificationsOnCreate()
     {
@@ -135,7 +137,7 @@ public class TimelineServiceTest : WithMocks
         }
     }
 
-    [Trait("TimelineService", "HandleCreate")]
+    
     [Fact(DisplayName = "HandleCreate should not add private posts to the public or follower feeds")]
     public void NoAddPrivateOnCreate()
     {
@@ -162,7 +164,7 @@ public class TimelineServiceTest : WithMocks
             Times.Never);
     }
 
-    [Trait("TimelineService", "HandleBoost")]
+    
     [Fact(DisplayName = "HandleBoost should add public posts to the boost feed")]
     public void AddPublicToTimelineOnBoost()
     {
@@ -175,7 +177,7 @@ public class TimelineServiceTest : WithMocks
         _feeds.Verify(m => m.AddToTimeline(TestNote, Audience.Boosts(booster), booster), Times.Once);
     }
 
-    [Trait("TimelineService", "HandleBoost")]
+    
     [Fact(DisplayName = "HandleBoost should not add follower posts to any feed")]
     public void NoAddFollowersToTimelineOnBoost()
     {
@@ -190,7 +192,7 @@ public class TimelineServiceTest : WithMocks
             Times.Never);
     }
 
-    [Trait("TimelineService", "HandleBoost")]
+    
     [Fact(DisplayName = "HandleBoost should not add private posts to any feed")]
     public void NoAddPrivateToTimelineOnBoost()
     {
@@ -205,7 +207,7 @@ public class TimelineServiceTest : WithMocks
             Times.Never);
     }
 
-    [Trait("TimelineService", "HandleBoost")]
+    
     [Fact(DisplayName = "HandleBoost should add notification for creator")]
     public void AddNotificationForCreatorOnBoost()
     {
@@ -220,7 +222,7 @@ public class TimelineServiceTest : WithMocks
             Times.Once);
     }
 
-    [Trait("TimelineService", "HandleUpdate")]
+    
     [Fact(DisplayName = "HandleUpdate should add to followers timeline")]
     public void AddToFollowersOnUpdate()
     {
@@ -235,7 +237,7 @@ public class TimelineServiceTest : WithMocks
             Times.Once);
     }
 
-    [Trait("TimelineService", "HandleUpdate")]
+    
     [Fact(DisplayName = "HandleUpdate should add to all creator's followers timeline")]
     public void AddToAllFollowersOnUpdate()
     {
@@ -254,7 +256,7 @@ public class TimelineServiceTest : WithMocks
                 It.IsAny<Profile>()), Times.Once);
     }
 
-    [Trait("TimelineService", "HandleUpdate")]
+    
     [Fact(DisplayName = "HandleUpdate should add to all mentioned profiles' notifications")]
     public void AddToAllMentionedNotifications()
     {
@@ -273,7 +275,7 @@ public class TimelineServiceTest : WithMocks
         }
     }
 
-    [Trait("TimelineService", "HandleUpdate")]
+    
     [Fact(DisplayName = "HandleUpdate should add to all boosters' notifications")]
     public void AddToAllBoostersNotifications()
     {
@@ -292,7 +294,7 @@ public class TimelineServiceTest : WithMocks
         }
     }
 
-    [Trait("TimelineService", "HandleUpdate")]
+    
     [Fact(DisplayName = "HandleUpdate should add to multiple creators' notifications")]
     public void AddToOtherCreatorsNotifications()
     {
@@ -305,7 +307,7 @@ public class TimelineServiceTest : WithMocks
             Times.Once);
     }
 
-    [Trait("TimelineService", "HandleUpdate")]
+    
     [Fact(DisplayName = "HandleUpdate should add post to mentioned profiles' feeds")]
     public void AddToMentionsOnUpdate()
     {
@@ -320,7 +322,7 @@ public class TimelineServiceTest : WithMocks
                 It.IsAny<Profile>()), Times.Once);
     }
 
-    [Trait("TimelineService", "HandleUpdate")]
+    
     [Fact(DisplayName = "HandleUpdate should not add private post to any creator's followers timeline")]
     public void NoAddPrivateToFollowersOnUpdate()
     {
@@ -337,7 +339,7 @@ public class TimelineServiceTest : WithMocks
                 It.IsAny<Profile>()), Times.Never);
     }
 
-    [Trait("TimelineService", "HandleUpdate")]
+    
     [Fact(DisplayName = "HandleUpdate should not add to single creator's notifications")]
     public void NoAddToSingleCreatorsNotifications()
     {
@@ -348,7 +350,7 @@ public class TimelineServiceTest : WithMocks
             Times.Never);
     }
 
-    [Trait("TimelineService", "HandleDelete")]
+    
     [Fact(DisplayName = "HandleDelete should remove the deleted post from all feeds")]
     public void RemoveFromFeedsOnDelete()
     {

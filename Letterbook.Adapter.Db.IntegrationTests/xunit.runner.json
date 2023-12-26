@@ -1,4 +1,5 @@
 ﻿{
   "$schema": "https://xunit.net/schema/current/xunit.runner.schema.json",
-  "diagnosticMessages": true
+  "parallelizeAssembly": true,
+  "_diagnosticMessages": true
 }

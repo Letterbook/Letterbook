@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Core.Tests;
 
+
 public class AccountServiceTest : WithMocks
 {
     private readonly ITestOutputHelper _outputHelper;

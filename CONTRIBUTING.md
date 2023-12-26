@@ -13,6 +13,8 @@
     - [Using Jetbrains Rider and VisualStudio](#using-jetbrains-rider-and-visualstudio)
   - [Secrets](#secrets)
   - [Dependencies](#dependencies)
+  - [Database](#database)
+  - [Peers](#peers)
 - [License](#license)
 
 It's easy to talk about contributing code, but there are many other very important ways to contribute. We would gladly welcome contributions in any of these areas:
@@ -134,6 +136,8 @@ To run these dependencies, simply do
 ```shell
 docker-compose up
 ```
+
+### Database
 
 If it's your first time setting up the database you will need to apply the Database migrations by running the entity framework tools.
 

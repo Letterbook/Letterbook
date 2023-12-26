@@ -38,11 +38,6 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         return _context.Accounts.AsQueryable();
     }
 
-    public Task<bool> AnyProfile(IAccountProfileAdapter.ProfileComparer comparer)
-    {
-        return _context.Profiles.AnyAsync();
-    }
-
     public Task<bool> AnyProfile(string handle)
     {
         return _context.Profiles.AnyAsync(profile => profile.Handle == handle);
@@ -55,7 +50,10 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 
     public Task<Models.Profile?> LookupProfile(Guid localId)
     {
-        return _context.Profiles.FirstOrDefaultAsync(profile => profile.LocalId == localId);
+        return _context.Profiles
+            .Include(profile => profile.Keys)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(profile => profile.LocalId == localId);
     }
 
     public Task<Models.Profile?> LookupProfile(Uri id)
@@ -63,26 +61,26 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         return _context.Profiles.FirstOrDefaultAsync(profile => profile.Id == id);
     }
 
-    public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)
+    private Task<Models.Profile?> WithRelation(IQueryable<Models.Profile> query, Uri relationId)
     {
-        return _context.Profiles.Where(profile => profile.Id == id)
-            .Include(profile => profile.Following.Where(relation => relation.Follows.Id == relationId))
+        return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId))
                 .ThenInclude(relation => relation.Follows)
-            .Include(profile => profile.Followers.Where(relation => relation.Follower.Id == relationId))
+            .Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
                 .ThenInclude(relation => relation.Follower)
+            .Include(profile => profile.Keys)
+            .Include(profile => profile.Audiences)
             .AsSplitQuery()
             .FirstOrDefaultAsync();
+    }
+    
+    public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)
+    {
+        return WithRelation(_context.Profiles.Where(profile => profile.Id == id), relationId);
     }
 
     public Task<Models.Profile?> LookupProfileWithRelation(Guid localId, Uri relationId)
     {
-        return _context.Profiles.Where(profile => profile.LocalId == localId)
-            .Include(profile => profile.Following.Where(relation => relation.Follows.Id == relationId))
-                .ThenInclude(relation => relation.Follows)
-            .Include(profile => profile.Followers.Where(relation => relation.Follower.Id == relationId))
-                .ThenInclude(relation => relation.Follower)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync();
+        return WithRelation(_context.Profiles.Where(profile => profile.LocalId == localId), relationId);
     }
 
     public IAsyncEnumerable<Models.Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0)

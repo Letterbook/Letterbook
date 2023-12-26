@@ -6,6 +6,7 @@ using Moq;
 
 namespace Letterbook.Core.Tests;
 
+
 public class AccountEventServiceTest : WithMocks
 {
     private AccountEventService _service;
@@ -15,7 +16,7 @@ public class AccountEventServiceTest : WithMocks
     public AccountEventServiceTest()
     {
         _subject = new Subject<CloudEvent>();
-        MessageBusAdapterMock.Setup(m => m.OpenChannel<It.IsAnyType>())
+        MessageBusAdapterMock.Setup(m => m.OpenChannel<It.IsAnyType>(It.IsAny<string?>()))
             .Returns(_subject.AsObserver());
         _fakeAccount = new FakeAccount();
 

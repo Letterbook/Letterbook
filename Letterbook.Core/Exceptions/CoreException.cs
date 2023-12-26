@@ -107,7 +107,7 @@ public class CoreException : Exception
         return ex;
     }
 
-    private static string FormatSource(string path, string name, int line)
+    protected static string FormatSource(string path, string name, int line)
     {
         return $"{path} [{name}:{line}]";
     }

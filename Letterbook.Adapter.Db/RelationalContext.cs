@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Letterbook.Adapter.Db.EntityConfigs;
 using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -46,5 +47,10 @@ public class RelationalContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+    }
+    
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<Uri>().HaveConversion<UriIdConverter, UriIdComparer>();
     }
 }

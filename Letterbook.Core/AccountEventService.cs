@@ -16,7 +16,7 @@ public class AccountEventService : IAccountEventService
     {
         _options = options.Value;
         _messageBusAdapter = messageBusAdapter;
-        _channel = _messageBusAdapter.OpenChannel<Account>();
+        _channel = _messageBusAdapter.OpenChannel<Account>(nameof(AccountEventService));
     }
 
     public void Created(Account account)

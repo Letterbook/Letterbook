@@ -8,6 +8,7 @@ using Moq;
 
 namespace Letterbook.Core.Tests;
 
+
 public class ActivityEventServiceTest : WithMocks
 {
     private ActivityEventService _service;
@@ -18,7 +19,7 @@ public class ActivityEventServiceTest : WithMocks
     public ActivityEventServiceTest()
     {
         _subject = new Subject<CloudEvent>();
-        MessageBusAdapterMock.Setup(m => m.OpenChannel<It.IsAnyType>())
+        MessageBusAdapterMock.Setup(m => m.OpenChannel<It.IsAnyType>(It.IsAny<string?>()))
             .Returns(_subject.AsObserver());
         _fakeNote = new FakeNote();
         _fakeProfile = new FakeProfile();

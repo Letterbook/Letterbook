@@ -3,6 +3,19 @@
 public enum ActivityObjectType
 {
     Unknown,
-    Note,
+    
+    Article,
+    Audio,
+    Document,
+    Event,
     Image,
+    Note,
+    Page,
+    Place,
+    Profile,
+    Relationship,
+    Tombstone,
+    Video,
+    Collection,
+    OrderedCollection,
 }

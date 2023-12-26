@@ -19,4 +19,7 @@
       <PackageReference Include="System.Reactive" Version="6.0.0" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Letterbook.Adapter.RxMessageBus.Tests" />
+    </ItemGroup>
 </Project>

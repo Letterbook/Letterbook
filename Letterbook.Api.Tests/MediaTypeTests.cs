@@ -1,5 +1,6 @@
 ﻿namespace Letterbook.Api.Tests;
 
+
 public class MediaTypeTests
 {
     private AcceptHeaderAttribute _attr = new("application/ld+json",
