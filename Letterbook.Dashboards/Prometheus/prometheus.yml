@@ -1,8 +1,17 @@
-﻿scrape_configs:
+scrape_configs:
   - job_name: 'letterbook'
-    
     metrics_path: /metrics
     scheme: http
     scrape_interval: 5s
     static_configs:
       - targets: ['host.docker.internal:5127'] # host.docker.internal maps the host machine to the internal docker network
+  - job_name: 'postgres'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['letterbook_db_metrics_exporter:9187']
+    params:
+      auth_module: [letterbook_db]
+  - job_name: docker
+    # For information setting this up: https://docs.docker.com/config/daemon/prometheus/
+    static_configs:
+      - targets: ["host.docker.internal:9323"]
