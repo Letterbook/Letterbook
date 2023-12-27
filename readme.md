@@ -2,14 +2,14 @@
 
 [![Build](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml/badge.svg?branch=main)](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml)
 
-Letterbook is a federated microblogging service, implementing ActivityPub. The project was started with the hope to make hosting a fediverse server a better and more sustainable experience. We also want to make it a safer and more inclusive space for the people who make the fediverse their social media home. Those are big aspirations, but we have some solid plans about how to start, and [we would love more input about where to go from there](#contributing).
+Letterbook is a federated microblogging service, implementing ActivityPub. The goal for the project is to make hosting a fediverse server a better and more sustainable experience. We also want to make it a safer and more inclusive space for the people who make the fediverse their social media home. Those are big aspirations, but we have some solid plans about how to start, and [we would love more input about where to go from there](#contributing).
 
 ## Features
-I hope it goes without saying, but we will support most of the features you use regularly on other fedi apps. Things like hashtags, custom emojis, lists, filters, editable posts, account migration, and so on.
+We don't have an exhaustive list, but we will support many of the features that are already common in the fediverse. You'll be able to post, edit your posts, use hashtags and custom emojis, and migrate accounts, for example.
 
 ### [For Admins and Ops](https://github.com/Letterbook/Letterbook/issues/131)
 #### Easy setup for new instances
-Letterbook initially deploys as a single executable with simple load-balanced scaling. 1 server and 1 database is all you need to get up and running, aside from ancillary services like object storage and email. And if you do see huge scale in your future, you can still scale outward to distributed task workers and microservices.
+Letterbook initially deploys as a single executable with simple load-balanced scaling. Aside from ancillary services like object storage and email, 1 server and 1 database is all you need to get up and running. And if you do see huge scale in your future, you can still scale outward to distributed task workers and microservices.
 
 #### Lower cost and complexity
 Letterbook doesn't maintain any live state. Everything lives in the database, so there's no need to run a Redis cluster or similar to act as shared state storage. We also expect to have significantly lower compute demands, due to both the architectural choices to avoid expensive infrastructure and system sprawl, and the use of C#, a very high performance compiled language.
@@ -42,7 +42,7 @@ You'll be able to do things like prevent federated posts from appearing in promo
 - Propose and accept edits to alt text and content warnings
 - Compose multi-post threads
 - Save drafts and scheduled posts
-- Formatted posts (bold, italics, lists, and block quotes, at least)
+- Formatted posts
 - Emoji reactions
 
 #### Mastodon apps
@@ -91,3 +91,4 @@ timeline
 
 * [@jenniferplusplus@hachyderm.io](https://hachyderm.io/@jenniferplusplus)
 * [@runewake2@hachyderm.io](https://hachyderm.io/@runewake2)
+* [@hazel@koehlercode.dev](https://hachyderm.io/@hazel@koehlercode.dev)
