@@ -4,7 +4,7 @@ Guidance on how, when, and why to use integration tests.
 
 ## Status
 
-- [ ] Decided
+- [x] Decided (2023-12-27)
 - [ ] Decided Against
 - [ ] Deferred
 - [ ] Superseded
