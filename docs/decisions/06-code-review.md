@@ -4,7 +4,7 @@ Informational discussion of the role code review should play in the project.
 
 ## Status
 
-- [ ] Decided
+- [x] Decided (2023-12-27)
 - [ ] Decided Against
 - [ ] Deferred
 - [ ] Superseded
