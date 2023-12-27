@@ -55,7 +55,7 @@ Letterbook will have features like topic detection and topic based feeds. Follow
 We hope to support long form, multi-page posts. We'll also be able to create multiple promoted feeds for your own posts, and have the ability to follow those feeds specifically. If for some strange reason people want to follow your analysis of CVEs and not your fursuit friday posts, that's a doable thing. And you'll eventually be able to co-author posts with other people.
 
 #### Real DMs
-We plan to provide a real direct message experience by implementing an XMPP server. If you used to use jabber, it's likely that your old favorite chat client is ready and waiting for you, better than ever. And if you never stopped, then you probably know that better than we do, and hopefully this is good news for you. You will of course be able to send and receive posts with restricted visibility, just like you do now, so you won't lose access to Mastodon-style direct messages with your contacts.
+We plan to provide a real direct message experience by implementing an XMPP server. If you previously used Jabber, then it's likely that your favorite chat client is ready and waiting for you, better than ever. And if you never stopped, then you probably know that better than we do, and hopefully this is good news for you. You will of course be able to send and receive posts with restricted visibility, just like you do now, so you won't lose access to Mastodon-style direct messages with your contacts.
 
 ## Background
 
