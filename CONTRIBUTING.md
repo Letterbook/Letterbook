@@ -17,16 +17,6 @@
   - [Peers](#peers)
 - [License](#license)
 
-It's easy to talk about contributing code, but there are many other very important ways to contribute. We would gladly welcome contributions in any of these areas:
-
-1. Research
-2. Visual design
-3. Documentation
-4. Feature requests
-5. Code
-
-And this list will only grow over time.
-
 
 ## Code of Conduct
 
@@ -49,13 +39,13 @@ We hope that you'll view contributing to the project as joining a team. As a tea
 
 Before you jump in and start working, the first thing to do is to talk to us. We will likely need to talk through the project goals, or the system design and architecture. And even if not, there's a good chance that whatever seems most urgent to you also seems most urgent to someone else. We would rather coordinate our efforts, to minimize waste and frustration when multiple people do overlapping work.
 
-### Github Issues
+### Getting started
 
-This is the first, best way to begin a discussion. We're trying to track our active and planned efforts here on the project repository, because this is where it's the most visible and approachable. We track our most active focus on Github project boards, and you should check those to get a sense of what's already planned and in-progress.
+The best thing to do is to look through our active project board. Currently, that's [Single User Preview][preview-board]. Go through our open issues, and the to do items in the epics. If something catches your eye, the best thing to do is to comment on it, and tag the maintainers so we see it. That helps us open up a dialog, and we can talk though our vision and make sure you're set up to work on the issue, if you choose. You're also welcome to open new issues if you don't find something you expected.
 
-Our currently active board is the [Single User Preview][preview-board].
+### More than code
 
-Please look through those boards before opening a new issue. But if you don't see an issue for the topic you want to discuss, then feel free to open a new one. If you do find an appropriate issue, please leave a comment to start or join the conversation. Either **creating or commenting on issues opens up communication**. It also allows issues to be assigned to you. We do that as a way to keep track of what people are working on, and who we should follow up with if we need to follow up.
+We are more than happy to have any contribution you can make. But, the things we most need are **user experience research and design**. And a close second is **web UI** design and/or implementation. We would love to talk to anyone with **trust and safety** experience, or general fediverse **admins**. We're building this for you, and we really want the tools we build to be useful for you. You can help make that happen, just by answer questions or giving advice. **Technical communicators, community managers, project managers, and marketing or developer relations** experience would also be such a boon to the project. Are you just hyped and want to stay up to date with what's happening in Letterbook? Let us know; we can chat. And if you're a **_librarian_** or have any kind of experience in that vein, please, **please reach out**.
 
 ## Documentation
 
@@ -154,7 +144,7 @@ Letterbook is licensed under the [AGPL, version 3.0][license]. The maintainers m
 [dotnet]: https://dotnet.microsoft.com/en-us/download
 [swagger]: http://localhost:5127/swagger/index.html
 [coc]: https://github.com/Letterbook/Letterbook/blob/main/CODE_OF_CONDUCT.md
-[preview-board]: https://github.com/orgs/Letterbook/projects/5/views/2
+[preview-board]: https://github.com/orgs/Letterbook/projects/5/views/4
 [minimum-board]: https://github.com/orgs/Letterbook/projects/1/views/2
 [license]: https://github.com/Letterbook/Letterbook/blob/main/LICENSE
 [adr-what]: https://www.redhat.com/architect/architecture-decision-records
