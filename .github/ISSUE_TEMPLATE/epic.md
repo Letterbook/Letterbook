@@ -13,7 +13,7 @@ assignees:
 - [ ] (List of tasks, steps, or issues to track or discuss)
 
 > [!TIP]
-> Update above list as needed, and convert them to issues when they're understood well enough to start development
+> Update above list as needed, and convert to issues when ready
 
 ## Goal
 (Long description of the feature or theme. What is the goal, who is it for, etc?)
