@@ -7,7 +7,11 @@ Letterbook is a federated microblogging service, implementing ActivityPub. The g
 ## Features
 We don't have an exhaustive list, but we will support many of the features that are already common in the fediverse. You'll be able to post, edit your posts, use hashtags and custom emojis, and migrate accounts, for example.
 
-### [For Admins and Ops](https://github.com/Letterbook/Letterbook/issues/131)
+<details>
+  <summary>
+      <h3><a href="https://github.com/Letterbook/Letterbook/issues/131">For Admins and Ops</a></h3>
+  </summary>
+
 #### Easy setup for new instances
 Letterbook initially deploys as a single executable with simple load-balanced scaling. Aside from ancillary services like object storage and email, 1 server and 1 database is all you need to get up and running. And if you do see huge scale in your future, you can still scale outward to distributed task workers and microservices.
 
@@ -16,8 +20,13 @@ Letterbook doesn't maintain any live state. Everything lives in the database, so
 
 #### First class observability
 Letterbook is thoroughly instrumented for both automatic and custom telemetry, including robust logging, metrics, and distributed tracing. We also provide out-of-the-box collection and dashboards for our telemetry. You can investigate errors, bugs, and performance issues the same way we the developers would.
+</details>
 
-### [For Moderators](https://github.com/Letterbook/Letterbook/issues/132)
+<details>
+  <summary>
+      <h3><a href="https://github.com/Letterbook/Letterbook/issues/132">For Moderators</a></h3>
+  </summary>
+
 #### Local-only posts
 Avoid context collapse! You can talk to your users and they can talk to each other, without risking context collapse by exposure to the whole fediverse.
 
@@ -33,8 +42,13 @@ You'll be able to do things like prevent federated posts from appearing in promo
 - Auditable privileged views of non-public posts
 - Spam and quality filters
 - And more
+</details>
 
-### [For Members](https://github.com/Letterbook/Letterbook/issues/133)
+<details>
+  <summary>
+      <h3><a href="https://github.com/Letterbook/Letterbook/issues/133">For Members</a></h3>
+  </summary>
+
 #### Frequently requested features
 - Quote replies
 - Collapse notifications
@@ -57,13 +71,18 @@ We hope to support long form, multi-page posts. We'll also be able to create mul
 #### Real DMs
 We plan to provide a real direct message experience by implementing an XMPP server. If you previously used Jabber, then it's likely that your favorite chat client is ready and waiting for you, better than ever. And if you never stopped, then you probably know that better than we do, and hopefully this is good news for you. You will of course be able to send and receive posts with restricted visibility, just like you do now, so you won't lose access to Mastodon-style direct messages with your contacts.
 
+</details>
+
 ## Background
 
-All of this is just the beginning of what we have planned for Letterbook. We're very excited about the future, and we get to build it together. If you'd like to read more about the thought process that went into starting the project, [you can do that here](https://jenniferplusplus.com/letterbook/).
+All of this is just the beginning of what we have planned for Letterbook. We're very excited about the future, and we get to build it together. If you'd like to know  more about the thought process that went into starting the project, [you can read the blog post](https://jenniferplusplus.com/letterbook/).
 
 ## Contributing
+> [!NOTE]
+> We use projects to organize the backlog  
+> Our current project is the [Single User Preview](https://github.com/orgs/Letterbook/projects/5/views/4)
 
-There are many ways to contribute if you're interested. It's a lot more than just code. Experience in these areas would be particularly helpful, right now.
+Be sure to look over the [Contributing Guide](./CONTRIBUTING.md), and please reach out to let us know you're interested in the project. There are many ways to contribute, it's a lot more than just code. Experience in these areas would be particularly helpful, right now. And this list will only grow over time.
 
 1. User experience research
 2. Trust and safety advice
@@ -73,11 +92,9 @@ There are many ways to contribute if you're interested. It's a lot more than jus
 6. Project management
 7. Technical communication
 
-And this list will only grow over time. To get a sense of what's planned and in-progress look through [our main project board, Single User Preview](https://github.com/orgs/Letterbook/projects/5/views/2). Look over the [Contributing Guide](./CONTRIBUTING.md). And please reach out to let us know you're interested in the project.
-
 ## History
 
-It might help to put all this in context of what has and hasn't been done already. [Jenniferplusplus](https://hachyderm.io/@jenniferplusplus/111342566946755633) shared a timeline graphic very similar to this on mastodon, and you might have seen it there. So, it seems to be fitting to try to situate this project in that timeline. At this point, we've essentially climbed the first mountain, and now we're surveying all of the other mountains we still have ahead of us. Right now is a great time to join the project. There's so much that needs to be done, and also a solid foundation to work from.
+It might help to put all this in context of what has and hasn't been done already. [Jenniferplusplus shared a timeline graphic](https://hachyderm.io/@jenniferplusplus/111342566946755633) very similar to this on mastodon, and you might have seen it there. So, it seems to be fitting to try to situate this project in that timeline. At this point, we've essentially climbed the first mountain, and now we're surveying all of the other mountains we still have ahead of us. Right now is a great time to join the project. There's so much that needs to be done, and also a solid foundation to work from.
 
 ```mermaid
 %%{init: { 'theme': 'default' } }%%
