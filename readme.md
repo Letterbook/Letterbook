@@ -63,10 +63,17 @@ All of this is just the beginning of what we have planned for Letterbook. We're 
 
 ## Contributing
 
-This project is still in the very early stages, but we would love to have more contributors. This is a project built *for* the community, and it should also be built *by* the community. Unfortunately, things probably aren't established enough yet that someone could jump in without guidance. But, we would be happy to provide that guidance! Please reach out here on github, or on the fediverse.
+There are many ways to contribute if you're interested. It's a lot more than just code. Experience in these areas would be particularly helpful, right now.
 
-1. The best way to get a sense of what's planned and in-progress is to look through [our main project board, Single User Preview](https://github.com/orgs/Letterbook/projects/5/views/2)
-2. After that, please have a look at the [Contributing Guide](./CONTRIBUTING.md)
+1. User experience research
+2. Trust and safety advice
+3. Visual design
+4. Web UI code
+5. Backend C# code
+6. Project management
+7. Technical communication
+
+And this list will only grow over time. To get a sense of what's planned and in-progress look through [our main project board, Single User Preview](https://github.com/orgs/Letterbook/projects/5/views/2). Look over the [Contributing Guide](./CONTRIBUTING.md). And please reach out to let us know you're interested in the project.
 
 ## History
 
