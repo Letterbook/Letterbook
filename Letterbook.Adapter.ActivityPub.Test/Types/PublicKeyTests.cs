@@ -15,6 +15,26 @@ public class PublicKeyTests : IClassFixture<JsonLdSerializerFixture>
     }
 
     [Fact]
+    public void ItShouldDeserialize()
+    {
+        var json = """
+                   {
+                   "type": "Person",
+                   "publicKey": {
+                     "id": "https://example.com/key",
+                     "publicKeyPem": "some key",
+                     "ownerId": "https://example.com/owner"
+                     }
+                   }
+                   """;
+        var actual = _serializer.Deserialize<PersonActorExtension>(json);
+        
+        Assert.NotNull(actual);
+        Assert.NotNull(actual.PublicKey);
+        Assert.NotNull(actual.PublicKey.Id);
+    }
+
+    [Fact]
     public void ItShould_IncludeJsonLdContext()
     {
         var pubKey = new PublicKey

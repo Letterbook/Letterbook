@@ -30,7 +30,7 @@ public class ActorController : ControllerBase
     private readonly IProfileService _profileService;
     private readonly IActivityMessageService _messageService;
     private readonly IActivityPubDocument _apDoc;
-    private static readonly IMapper ActorMapper = new Mapper(AsApMapper.ActorConfig);
+    private static readonly IMapper ActorMapper = new Mapper(AstMapper.Default);
 
     public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
         IProfileService profileService, IActivityMessageService messageService, IActivityPubDocument apDoc)

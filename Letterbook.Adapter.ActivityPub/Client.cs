@@ -1,13 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 using ActivityPub.Types.AS;
-using ActivityPub.Types.AS.Extended.Activity;
 using ActivityPub.Types.Conversion;
 using AutoMapper;
-using Letterbook.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Exceptions;
 using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Core;
@@ -27,12 +22,9 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     private readonly HttpClient _httpClient;
     private readonly IJsonLdSerializer _jsonLdSerializer;
     private readonly IActivityPubDocument _document;
-    private readonly JsonLdSerializerOptions _jsonLdSerializerOptions;
     private Models.Profile? _profile = default;
     
-    private static readonly IMapper ProfileMapper = new Mapper(ProfileMappers.DefaultProfile);
-    private static readonly IMapper AsApMapper = new Mapper(Mappers.AsApMapper.Config);
-    private static readonly IMapper ToLinkMapper = new Mapper(ProfileMappers.DefaultLink);
+    private static readonly IMapper DefaultMapper = new Mapper(AstMapper.Default);
 
     public Client(ILogger<Client> logger, HttpClient httpClient, IJsonLdSerializer jsonLdSerializer, IActivityPubDocument document)
     {
@@ -287,12 +279,14 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     {
         var response = await _httpClient.SendAsync(SignedRequest(HttpMethod.Get, id));
         var stream = await ReadResponse(response);
-        var fetchType = typeof(T).IsAssignableFrom(typeof(Models.Profile)) ? typeof(AsAp.Actor) : typeof(AsAp.Object);
-        var obj = await JsonSerializer.DeserializeAsync(stream, fetchType, JsonOptions.ActivityPub);
+        if (stream is null) throw ClientException.RemoteObjectError(id, "Peer provided no response");
 
-        var mapped = AsApMapper.Map<T>(obj);
+        var ast = await _jsonLdSerializer.DeserializeAsync<ASType>(stream);
+        var mapped = DefaultMapper.Map<T>(ast);
         if (mapped.Id == id) return mapped;
+        
         _logger.LogError("Remote fetch for Object {Id} returned {ObjectId}", id, mapped.Id);
+        _logger.LogDebug("Tried to map {ASType} to {ModelType}", ast?.Type, typeof(T));
         throw ClientException.RemoteObjectError(mapped.Id, "Peer provided object is not the same as requested");
     }
 
