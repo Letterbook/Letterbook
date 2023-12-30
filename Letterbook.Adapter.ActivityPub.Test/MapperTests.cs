@@ -46,7 +46,18 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
     }
 
     [Fact]
-    public void CanMapActor2()
+    public void CanMapLetterbookActor()
+    {
+        using var fs = new FileStream(Path.Join(DataDir, "LetterbookActor.json"), FileMode.Open);
+        var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
+        var mapped = _astMapper.Map<Profile>(actor);
+        
+        Assert.NotNull(mapped);
+    }
+    
+    // Broken; see https://github.com/warriordog/ActivityPubSharp/issues/152
+    [Fact]
+    public void CanMapMastodonActor()
     {
         using var fs = new FileStream(Path.Join(DataDir, "Actor.json"), FileMode.Open);
         var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
