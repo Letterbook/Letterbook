@@ -61,7 +61,7 @@ erDiagram
     
 ```
 
-So, everything becomes a post, with some child content items. It doesn't currently happen (much?) in the wild, but this would allow us to easily handle activities that include multiple content-like objects (multiple notes, images, questions, mix-and-match, etc). One other benefit this has is that it makes it easier to assign meaningful IDs to our `Activities`. This is because the post, as a container for its content, will tend to map very easily onto the activity that carried it. The types above are mostly illustrative, not complete or final. The idea is that they would implement an interface, call it `IContent`, which would provide enough information to build a feed of posts. That would 
+So, everything becomes a post, with some child content items. It doesn't currently happen (much?) in the wild, but this would allow us to easily handle activities that include multiple content-like objects (multiple notes, images, questions, mix-and-match, etc). The types above are mostly illustrative, not complete or final. The idea is that they would implement an interface, call it `IContent`, which would provide enough information to build a feed of posts. That would make it a lot easier to actually provide those feeds to clients. Without *something* like that, clients would have had to make at least one follow-up request to get the actual content of feed items that were otherwise only a list of IDs/URLs.
 
 ```mermaid
 classDiagram
