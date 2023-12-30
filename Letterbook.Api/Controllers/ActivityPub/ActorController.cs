@@ -137,7 +137,9 @@ public class ActorController : ControllerBase
     [HttpPost]
     [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task<ActionResult> SharedInbox(ASType activity)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         throw new NotImplementedException();
     }
@@ -162,7 +164,9 @@ public class ActorController : ControllerBase
      * Support methods       *
      * * * * * * * * * * * * */
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     private async Task<IActionResult> InboxAccept(Guid localId, ASActivity activity)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         throw new NotImplementedException();
     }
