@@ -8,7 +8,7 @@ public class Post
     public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
     public DateTime CreatedDate { get; set; }
     public ICollection<IContent> Contents { get; set; } = new HashSet<IContent>();
-    public ICollection<Audience> Visibility { get; set; } = new HashSet<Audience>();
+    public ICollection<Audience> Audience { get; set; } = new HashSet<Audience>();
     public ICollection<Mention> AddressedTo { get; set; } = new HashSet<Mention>();
     public string? Client { get; set; }
     public Post? InReplyTo { get; set; }
