@@ -25,7 +25,9 @@ public class ActivityService : IActivityService
     // TODO(Rebuild): I don't know if this pattern will really work anymore
     // If nothing else, the AP types should really only be mapped in adapters. Core logic should only work on
     // core data models as much as possible.
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task<bool> ReceiveNotes(IEnumerable<Note> notes, ActivityType activity, Profile actor)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         var actionTaken = false;
         switch (activity)

@@ -85,12 +85,16 @@ public class AccountService : IAccountService, IDisposable
         return await _accountAdapter.LookupAccount(id);
     }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task<Profile> LookupProfile(string queryTarget)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         throw new NotImplementedException();
     }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task<IEnumerable<Account>> FindAccounts(string email)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         throw new NotImplementedException();
     }

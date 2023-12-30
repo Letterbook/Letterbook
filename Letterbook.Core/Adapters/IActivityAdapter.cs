@@ -2,7 +2,7 @@
 
 namespace Letterbook.Core.Adapters;
 
-public interface IActivityAdapter : IAdapter
+public interface IActivityAdapter
 {
     bool RecordNote(Note note);
     bool RecordNotes(IEnumerable<Note> notes);

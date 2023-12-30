@@ -42,13 +42,13 @@ public static class AstMapper
             .ForMember(dest => dest.Updated, opt => opt.MapFrom(src => src.Updated))
             .ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers))
             .ForMember(dest => dest.Following, opt => opt.MapFrom(src => src.Following))
-            .ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey>(src => src.PublicKey))
+            .ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!))
             .AfterMap((_, profile) =>
             {
                 profile.Type = ActivityActorType.Person;
             });
         
-        cfg.CreateMap<PublicKey, SigningKey>()
+        cfg.CreateMap<PublicKey?, SigningKey?>()
             .ConvertUsing<PublicKeyConverter>();
     }
     
@@ -75,11 +75,12 @@ internal class ASLinkConverter : ITypeConverter<ASLink, Uri>
 
 [UsedImplicitly]
 internal class PublicKeyConverter : 
-    ITypeConverter<PublicKey, SigningKey>, 
-    IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey, IList<SigningKey>>
+    ITypeConverter<PublicKey?, SigningKey?>, 
+    IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>
 {
-    public SigningKey Convert(PublicKey source, SigningKey? destination, ResolutionContext context)
+    public SigningKey? Convert(PublicKey? source, SigningKey? destination, ResolutionContext context)
     {
+        if (source is null) return default;
         using TextReader tr = new StringReader(source.PublicKeyPem);
 
         var reader = new PemReader(tr);
@@ -103,12 +104,12 @@ internal class PublicKeyConverter :
         return destination;
     }
 
-    public IList<SigningKey> Resolve(PersonActorExtension source, Models.Profile destination, PublicKey sourceMember, IList<SigningKey>? destMember,
+    public IList<SigningKey> Resolve(PersonActorExtension source, Models.Profile destination, PublicKey? sourceMember, IList<SigningKey>? destMember,
         ResolutionContext context)
     {
         var key = context.Mapper.Map<SigningKey>(sourceMember);
         destMember ??= new List<SigningKey>();
-        destMember.Add(key);
+        if(key is not null) destMember.Add(key);
 
         return destMember;
     }

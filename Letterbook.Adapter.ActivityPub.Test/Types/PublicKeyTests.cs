@@ -19,8 +19,18 @@ public class PublicKeyTests : IClassFixture<JsonLdSerializerFixture>
     {
         var json = """
                    {
+                   "@context": [
+                     "https://www.w3.org/ns/activitystreams",
+                     "https://w3id.org/security/v1"
+                   ],
                    "type": "Person",
+                   "inbox": "https://example.com/inbox",
+                   "outbox": "https://example.com/outbox",
                    "publicKey": {
+                     "@context": [
+                       "https://www.w3.org/ns/activitystreams",
+                       "https://w3id.org/security/v1"
+                     ],
                      "id": "https://example.com/key",
                      "publicKeyPem": "some key",
                      "ownerId": "https://example.com/owner"
