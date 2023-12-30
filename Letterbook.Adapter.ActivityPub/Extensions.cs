@@ -23,6 +23,21 @@ public static class Extensions
         id = null;
         return false;
     }
+    
+    public static Uri? GetId(this Linkable<ASObject> linkable)
+    {
+        if (linkable.TryGetValue(out var value) && value.Id != null)
+        {
+            return new Uri(value.Id);
+        }
+        
+        if (linkable.TryGetLink(out var link))
+        {
+            return link.HRef;
+        }
+
+        return default;
+    }
 
     public static bool TryGetId(this ASObject aso, [NotNullWhen(true)]out Uri? id)
     {

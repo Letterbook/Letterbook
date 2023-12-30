@@ -1,4 +1,6 @@
 ﻿using ActivityPub.Types.AS;
+using ActivityPub.Types.AS.Extended.Object;
+using ActivityPub.Types.Util;
 using AutoMapper;
 using JetBrains.Annotations;
 using Letterbook.Adapter.ActivityPub.Types;
@@ -17,6 +19,7 @@ public static class AstMapper
     {
         ConfigureBaseTypes(cfg);
         FromActor(cfg);
+        FromNote(cfg);
     });
 
     private static void FromActor(IMapperConfigurationExpression cfg)
@@ -43,28 +46,75 @@ public static class AstMapper
             .ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers))
             .ForMember(dest => dest.Following, opt => opt.MapFrom(src => src.Following))
             .ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey>(src => src.PublicKey))
-            .AfterMap((_, profile) =>
-            {
-                profile.Type = ActivityActorType.Person;
-            });
-        
+            .AfterMap((_, profile) => { profile.Type = ActivityActorType.Person; });
+
         cfg.CreateMap<PublicKey, SigningKey>()
             .ConvertUsing<PublicKeyConverter>();
     }
-    
-    // Keep
+
+    private static void FromNote(IMapperConfigurationExpression cfg)
+    {
+        cfg.CreateMap<NoteObject, Note>(MemberList.Destination)
+            .IncludeBase<ASType, IObjectRef>()
+            .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))
+            .ForMember(dest => dest.Creators, opt => opt.MapFrom(src => src.AttributedTo))
+            .ForMember(dest => dest.InReplyTo, opt => opt.MapFrom(src => src.InReplyTo))
+            .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary))
+            .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.Summary))
+            .ForMember(dest => dest.Mentions, opt => opt.ConvertUsing<MentionsConverter, ASObject>())
+            .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Generator))
+            .ForMember(dest => dest.LikedBy, opt => opt.MapFrom(src => src.Likes))
+            .ForMember(dest => dest.BoostedBy, opt => opt.MapFrom(src => src.Shares))
+            .ForMember(dest => dest.Visibility, opt => opt.MapFrom(src => src.Audience));
+    }
+
     private static void ConfigureBaseTypes(IMapperConfigurationExpression cfg)
     {
         cfg.CreateMap<ASType, IObjectRef>(MemberList.Destination)
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Authority, opt => opt.Ignore())
             .ForMember(dest => dest.LocalId, opt => opt.Ignore());
+
+        cfg.CreateMap<Linkable<ASObject>, Note>()
+            .ConvertUsing<LinkableConverter>();
         
+        cfg.CreateMap<LinkableList<ASObject>, Note>()
+            .ConvertUsing<LinkableListPostConverter>();
+
         cfg.CreateMap<ASLink, Uri>()
             .ConvertUsing<ASLinkConverter>();
+
+        cfg.CreateMap<string, ReadOnlyMemory<byte>>()
+            .ConvertUsing<PublicKeyConverter>();
     }
 }
 
+internal class LinkableListPostConverter : ITypeConverter<LinkableList<ASObject>, Note>
+{
+    public Note Convert(LinkableList<ASObject> source, Note destination, ResolutionContext context)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+internal class LinkableConverter : ITypeConverter<Linkable<ASObject>, Note>
+{
+    public Note Convert(Linkable<ASObject> source, Note destination, ResolutionContext context)
+    {
+        return source.HasLink ? new Note(source.Link) : context.Mapper.Map<Note>(source.Value);
+    }
+}
+
+[UsedImplicitly]
+internal class MentionsConverter : IValueConverter<ASObject, ICollection<Mention>>
+{
+    public ICollection<Mention> Convert(ASObject sourceMember, ResolutionContext context)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+[UsedImplicitly]
 internal class ASLinkConverter : ITypeConverter<ASLink, Uri>
 {
     public Uri Convert(ASLink source, Uri destination, ResolutionContext context)
@@ -74,11 +124,13 @@ internal class ASLinkConverter : ITypeConverter<ASLink, Uri>
 }
 
 [UsedImplicitly]
-internal class PublicKeyConverter : 
-    ITypeConverter<PublicKey, SigningKey>, 
-    IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey, IList<SigningKey>>
+internal class PublicKeyConverter :
+    ITypeConverter<PublicKey, SigningKey>,
+    IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey, IList<SigningKey>>,
+    ITypeConverter<string, ReadOnlyMemory<byte>>
 {
-    public SigningKey Convert(PublicKey source, SigningKey? destination, ResolutionContext context)
+    SigningKey ITypeConverter<PublicKey, SigningKey>
+        .Convert(PublicKey source, SigningKey? destination, ResolutionContext context)
     {
         using TextReader tr = new StringReader(source.PublicKeyPem);
 
@@ -92,7 +144,7 @@ internal class PublicKeyConverter :
             _ => SigningKey.KeyFamily.Unknown
         };
 
-        destination ??= new SigningKey() { Id =new Uri(source.Id) };
+        destination ??= new SigningKey() { Id = new Uri(source.Id) };
 
         destination.Id = new Uri(source.Id);
         destination.Label = "From federation peer";
@@ -103,13 +155,24 @@ internal class PublicKeyConverter :
         return destination;
     }
 
-    public IList<SigningKey> Resolve(PersonActorExtension source, Models.Profile destination, PublicKey sourceMember, IList<SigningKey>? destMember,
-        ResolutionContext context)
+    IList<SigningKey> IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey, IList<SigningKey>>
+        .Resolve(PersonActorExtension source, Models.Profile destination, PublicKey sourceMember, 
+            IList<SigningKey>? destMember, ResolutionContext context)
     {
         var key = context.Mapper.Map<SigningKey>(sourceMember);
         destMember ??= new List<SigningKey>();
         destMember.Add(key);
 
         return destMember;
+    }
+
+    ReadOnlyMemory<byte> ITypeConverter<string, ReadOnlyMemory<byte>>
+        .Convert(string source, ReadOnlyMemory<byte> destination, ResolutionContext context)
+    {
+        var b64 = string.Join('\n',
+            source.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Skip(1)
+                .SkipLast(1));
+        return Convert.FromBase64String(b64);
     }
 }

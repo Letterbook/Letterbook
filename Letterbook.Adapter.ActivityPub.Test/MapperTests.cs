@@ -4,7 +4,6 @@ using ActivityPub.Types.AS.Extended.Actor;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Conversion;
 using AutoMapper;
-using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Fixtures;
@@ -16,7 +15,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 {
     private readonly ITestOutputHelper _output;
     private IMapper _profileMapper;
-    private IMapper _astMapper;
+    private static IMapper AstMapper => new Mapper(Mappers.AstMapper.Default);
     private IMapper _modelMapper;
     private IMapper _APSharpMapper;
     private FakeProfile _fakeProfile;
@@ -31,7 +30,6 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
     {
         _output = output;
         _serializer = serializerFixture.JsonLdSerializer;
-        _astMapper = new Mapper(AstMapper.Default);
         // _modelMapper = new Mapper(ModelMappers.Profile);
 
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
@@ -42,7 +40,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
     [Fact]
     public void ValidConfig()
     {
-        AstMapper.Default.AssertConfigurationIsValid();
+        Mappers.AstMapper.Default.AssertConfigurationIsValid();
     }
 
     [Fact]
@@ -50,7 +48,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
     {
         using var fs = new FileStream(Path.Join(DataDir, "LetterbookActor.json"), FileMode.Open);
         var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
-        var mapped = _astMapper.Map<Profile>(actor);
+        var mapped = AstMapper.Map<Models.Profile>(actor);
         
         Assert.NotNull(mapped);
     }
@@ -61,7 +59,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
     {
         using var fs = new FileStream(Path.Join(DataDir, "Actor.json"), FileMode.Open);
         var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
-        var mapped = _astMapper.Map<Profile>(actor);
+        var mapped = AstMapper.Map<Models.Profile>(actor);
         
         Assert.NotNull(mapped);
     }
@@ -91,7 +89,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
     }
 
 
-    [Fact(Skip = "broken")]
+    [Fact]
     public void CanMapSimpleNote()
     {
         var dto = new NoteObject()
@@ -103,7 +101,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
         {
             HRef = "https://letterbook.example/@testuser"
         });
-        var actual = _astMapper.Map<Models.Note>(dto);
+        var actual = AstMapper.Map<Models.Note>(dto);
 
         Assert.NotNull(actual);
         Assert.Equal("Some test content", actual.Content);
@@ -116,7 +114,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
         using var fs = new FileStream(Path.Join(DataDir, "Actor.json"), FileMode.Open);
         var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
 
-        var profile = _astMapper.Map<Models.Profile>(actor);
+        var profile = AstMapper.Map<Models.Profile>(actor);
 
         Assert.Equal("http://localhost:3080/users/user", profile.Id.ToString());
         Assert.Equal("http://localhost:3080/users/user/inbox", profile.Inbox.ToString());
@@ -131,7 +129,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
         using var fs = new FileStream(Path.Join(DataDir, "Actor.json"), FileMode.Open);
         var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
 
-        var profile = _astMapper.Map<Models.Profile>(actor);
+        var profile = AstMapper.Map<Models.Profile>(actor);
         var actual = profile.Keys.FirstOrDefault();
 
         Assert.NotNull(actual);
