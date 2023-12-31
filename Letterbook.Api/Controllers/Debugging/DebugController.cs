@@ -38,5 +38,5 @@ public class DebugController : ControllerBase
 
 public class FollowRequest
 {
-    public string TargetId { get; set; }
+    public required string TargetId { get; set; }
 }

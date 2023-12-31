@@ -14,10 +14,15 @@ namespace Letterbook.Adapter.ActivityPub.Test;
 public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 {
     private readonly ITestOutputHelper _output;
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
     private IMapper _profileMapper;
     private static IMapper AstMapper => new Mapper(Mappers.AstMapper.Default);
+#pragma warning disable CS0169 // Field is never used
     private IMapper _modelMapper;
+#pragma warning restore CS0169 // Field is never used
+#pragma warning disable CS0649 // Field is never assigned to, and will always have its default value
     private IMapper _APSharpMapper;
+#pragma warning restore CS0649 // Field is never assigned to, and will always have its default value
     private FakeProfile _fakeProfile;
     private Models.Profile _profile;
     private readonly IJsonLdSerializer _serializer;
@@ -26,7 +31,9 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
         Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
 
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     public MapperTests(ITestOutputHelper output, JsonLdSerializerFixture serializerFixture)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     {
         _output = output;
         _serializer = serializerFixture.JsonLdSerializer;

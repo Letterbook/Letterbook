@@ -26,7 +26,9 @@ public class MastodonSignatureTests
     
     #region TestKeys
 
+#pragma warning disable CS0414 // Field is assigned but its value is never used
     private string _testKeyRsaPublic =
+#pragma warning restore CS0414 // Field is assigned but its value is never used
         """
         -----BEGIN RSA PUBLIC KEY-----
         MIIBCgKCAQEAzf5EIIQ6LHWujJzGlNA2txC5174T6WIXQBTsu/n02/dEqL6kEZIV

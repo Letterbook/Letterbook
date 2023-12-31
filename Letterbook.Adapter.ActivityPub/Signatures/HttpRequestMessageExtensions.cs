@@ -3,6 +3,7 @@
 // Adapted from NSign, used under the terms of the MIT license
 // https://github.com/Unisys/NSign/commit/660b2412cd523ed175d387cf32f549065b3cc56f
 
+using Letterbook.Adapter.ActivityPub.Exceptions;
 using NSign.Signatures;
 using static NSign.Constants;
 
@@ -14,18 +15,21 @@ internal static class HttpRequestMessageExtensions
 {
     public static string GetDerivedComponentValue(this HttpRequestMessage request, DerivedComponent derivedComponent)
     {
+        if (request.RequestUri is not { } uri)
+            throw ClientException.SignatureError();
+        
         return derivedComponent.ComponentName switch
         {
             DerivedComponents.SignatureParams =>
                 throw new NotSupportedException("The '@signature-params' component cannot be included explicitly."),
             DerivedComponents.Method => request.Method.Method,
-            DerivedComponents.TargetUri => request.RequestUri.OriginalString,
-            DerivedComponents.Authority => request.RequestUri.Authority.ToLower(),
-            DerivedComponents.Scheme => request.RequestUri.Scheme.ToLower(),
-            DerivedComponents.RequestTarget => request.RequestUri.PathAndQuery,
-            DerivedComponents.Path => request.RequestUri.AbsolutePath,
+            DerivedComponents.TargetUri => uri.OriginalString,
+            DerivedComponents.Authority => uri.Authority.ToLower(),
+            DerivedComponents.Scheme => uri.Scheme.ToLower(),
+            DerivedComponents.RequestTarget => uri.PathAndQuery,
+            DerivedComponents.Path => uri.AbsolutePath,
             DerivedComponents.Query =>
-                String.IsNullOrWhiteSpace(request.RequestUri.Query) ? "?" : request.RequestUri.Query,
+                String.IsNullOrWhiteSpace(uri.Query) ? "?" : uri.Query,
             DerivedComponents.QueryParam =>
                 throw new NotSupportedException("The '@query-param' component must have the 'name' parameter set."),
             DerivedComponents.Status =>

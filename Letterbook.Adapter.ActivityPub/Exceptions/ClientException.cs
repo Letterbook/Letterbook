@@ -63,7 +63,7 @@ public class ClientException : AdapterException
         return ex;
     }
 
-    public static ClientException SignatureError(Guid keyId, string keyLabel, Exception? innerEx = null,
+    public static ClientException SignatureError(Guid keyId, string? keyLabel, Exception? innerEx = null,
         [CallerMemberName] string name="",
         [CallerFilePath] string path="",
         [CallerLineNumber] int line=-1)
