@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      
+        
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
@@ -33,11 +33,18 @@ jobs:
         run: dotnet build Letterbook.sln --configuration Release
       
       - name: Test
-        run: dotnet test Letterbook.sln --configuration Release --logger GitHubActions
+        run: dotnet test Letterbook.sln --configuration Release --logger GitHubActions --blame-crash --no-build
+        
+      - name: Save test crash report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: TestResults
+          path: '**/TestResults/'
       
       - name: Install EF Tools
         run: |
-          dotnet tool install --global dotnet-ef
+          dotnet tool install --global dotnet-ef --version 7.0.8
           dotnet tool restore
       
       - name: Test Migrations

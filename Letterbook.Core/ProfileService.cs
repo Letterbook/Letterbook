@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
@@ -219,43 +220,38 @@ public class ProfileService : IProfileService
         
         // TODO(moderation): Check for blocks
         // TODO(moderation): Check for requiresApproval
-        var follow = new FollowerRelation(self, target, FollowState.Pending);
-        var result = await _client.As(self).SendFollow(target.Inbox, follow);
-        follow.State = result;
-        switch (follow.State)
+        var followState = await _client.As(self).SendFollow(target.Inbox, target);
+        switch (followState.Data)
         {
             case FollowState.Accepted:
             case FollowState.Pending:
-                self.Follow(target, result);
-                // follow.State = result;
-                // self.Following.Add(follow);
-                // target.FollowersCollection.Add(follow);
-                self.Audiences.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
+                self.Follow(target, followState.Data);
+                self.Audiences.Add(Audience.Followers(target));
                 self.Audiences.Add(Audience.Boosts(target));
                 await _profiles.Commit();
-                return follow.State;
+                return followState.Data;
             case FollowState.None:
             case FollowState.Rejected:
             default:
-                return follow.State;
+                return followState.Data;
         }
     }
 
     public async Task<FollowState> Follow(Guid selfId, Uri targetId)
     {
-        var self = await RequireProfile(selfId);
+        var self = await RequireProfile(selfId, targetId);
         var target = await ResolveProfile(targetId, self);
         return await Follow(self, target, false);
     }
 
     public async Task<FollowState> Follow(Guid selfId, Guid targetId)
     {
-        var self = await RequireProfile(selfId);
         var target = await RequireProfile(targetId);
+        var self = await RequireProfile(selfId, target.Id);
         return await Follow(self, target, false);
     }
 
-    public async Task<FollowState> ReceiveFollowRequest(Uri targetId, Uri followerId)
+    public async Task<FollowerRelation> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId)
     {
         if(targetId.Authority != _coreConfig.BaseUri().Authority)
         {
@@ -264,25 +260,29 @@ public class ProfileService : IProfileService
         }
         
         var target = await ResolveProfile(targetId);
-        // var follower = await ResolveProfile(followerId);
-        
-        // TODO(moderation): check blocks and requiresApproval
-        var relation = target.AddFollower(Profile.CreateEmpty(followerId), FollowState.Accepted);
-        await _profiles.Commit();
-        
-        return relation.State;
+        var follower = await ResolveProfile(followerId);
+
+        return await ReceiveFollowRequest(target, follower, requestId);
     }
 
-    public async Task<FollowState> ReceiveFollowRequest(Guid localId, Uri followerId)
+    public async Task<FollowerRelation> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId)
     {
         var target = await RequireProfile(localId);
-        // var follower = await ResolveProfile(followerId);
-        
-        // TODO(moderation): check blocks and requiresApproval
-        var relation = target.AddFollower(Profile.CreateEmpty(followerId), FollowState.Accepted);
+        var follower = await ResolveProfile(followerId);
+
+        return await ReceiveFollowRequest(target, follower, requestId);
+    }
+
+    private async Task<FollowerRelation> ReceiveFollowRequest(Profile target, Profile follower, Uri? requestId)
+    {
+        var relation = target.AddFollower(follower, FollowState.Accepted);
         await _profiles.Commit();
+        // if (relation.State == FollowState.Rejected) return relation;
         
-        return relation.State;
+        // Todo: punt more AP responses to a delivery queue
+        // Todo: also, implement that delivery queue
+        // await _client.As(target).SendAccept(follower.Inbox, ActivityType.Follow, follower.Id, requestId);
+        return relation;
     }
 
     public async Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response)
@@ -293,7 +293,7 @@ public class ProfileService : IProfileService
             throw CoreException.WrongAuthority($"Cannot update Profile {selfId} because it has a different origin server", selfId);
         }
         var profile = await _profiles.LookupProfileWithRelation(selfId, targetId) ?? throw CoreException.MissingData($"Cannot update Profile {selfId} because it could not be found", typeof(Profile), selfId);
-        var relation = profile.Following.FirstOrDefault(r => r.Follows.Id == targetId) ?? throw CoreException.MissingData($"Cannot update following relationship for {selfId} concerning {targetId} because it could not be found", typeof(FollowerRelation), targetId);
+        var relation = profile.FollowingCollection.FirstOrDefault(r => r.Follows.Id == targetId) ?? throw CoreException.MissingData($"Cannot update following relationship for {selfId} concerning {targetId} because it could not be found", typeof(FollowerRelation), targetId);
         switch (response)
         {
             case FollowState.Accepted:
@@ -344,20 +344,21 @@ public class ProfileService : IProfileService
         throw new NotImplementedException();
     }
 
-    private async Task<Profile> RequireProfile(Guid localId,
+    [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
+    private async Task<Profile> RequireProfile(Guid localId, Uri? relationId = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
         [CallerLineNumber] int line = -1)
     {
-        var profile = await _profiles.LookupProfile(localId);
+        var profile = relationId != null 
+            ? await _profiles.LookupProfileWithRelation(localId, relationId)
+            : await _profiles.LookupProfile(localId);
         if (profile != null) return profile;
 
         _logger.LogError("Cannot update Profile {ProfileId} because it could not be found", localId);
         await _profiles.Cancel();
-        // ReSharper disable ExplicitCallerInfoArgument Pass original call site details for better error reporting
         throw CoreException.MissingData("Failed to update Profile because it could not be found", typeof(Profile), localId,
             null, name, path, line);
-        // ReSharper restore ExplicitCallerInfoArgument
     }
     
     private async Task<Profile> ResolveProfile(Uri profileId,
@@ -375,7 +376,8 @@ public class ProfileService : IProfileService
         {
             if (profile != null)
             {
-                profile.ShallowCopy(await _client.As(onBehalfOf).Fetch<Profile>(profileId));
+                var fetched = await _client.As(onBehalfOf).Fetch<Profile>(profileId);
+                profile.ShallowCopy(fetched);
                 _profiles.Update(profile);
             }
             else
@@ -383,6 +385,8 @@ public class ProfileService : IProfileService
                 profile = await _client.As(onBehalfOf).Fetch<Profile>(profileId);
                 _profiles.Add(profile);
             }
+
+            await _profiles.Commit();
         }
         catch (AdapterException)
         {

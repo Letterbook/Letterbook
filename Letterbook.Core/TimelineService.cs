@@ -1,4 +1,5 @@
 ﻿using Letterbook.Core.Adapters;
+using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.Extensions.Logging;
@@ -79,15 +80,17 @@ public class TimelineService : ITimelineService
 
     public void HandleDelete(Note note)
     {
-        // Need to figure out how to handle deleted boosts
+        // TODO: Also handle deleted boosts
         _feeds.RemoveFromTimelines(note);
     }
 
     public async Task<IEnumerable<TimelineEntry>> GetFeed(Guid recipientId, DateTime begin, int limit = 40)
     {
-        // TODO: Account for moderation conditions (block, mute, etc)
+        // TODO(moderation): Account for moderation conditions (block, mute, etc)
         var recipient = await _profileAdapter.LookupProfile(recipientId);
-        return _feeds.GetTimelineEntries(recipient.Audiences, begin, limit);
+        return recipient != null
+            ? _feeds.GetTimelineEntries(recipient.Audiences, begin, limit)
+            : throw CoreException.MissingData("Couldn't lookup Profile to load Feed", typeof(Guid), recipientId);
     }
 
     /// <summary>
@@ -104,7 +107,7 @@ public class TimelineService : ITimelineService
         // That's not the same thing as putting posts into follower's feeds.
         // This ensures we include public posts in the followers audience in case the sender doesn't specify it
         if (!result.Contains(Audience.Public)) return result;
-        result.UnionWith(note.Creators.Select(c => Audience.FromUri(c.Followers.Id, c)));
+        result.UnionWith(note.Creators.Select(c => Audience.FromUri(c.Followers, c)));
 
         return result;
     }

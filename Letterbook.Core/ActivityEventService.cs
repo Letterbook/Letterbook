@@ -23,9 +23,9 @@ public class ActivityEventService : IActivityEventService
     {
         _options = options.Value;
         _messageBusAdapter = messageBusAdapter;
-        _notesChannel = _messageBusAdapter.OpenChannel<Note>();
-        _imagesChannel = _messageBusAdapter.OpenChannel<Image>();
-        _profileChannel = _messageBusAdapter.OpenChannel<Profile>();
+        _notesChannel = _messageBusAdapter.OpenChannel<Note>(nameof(ActivityEventService));
+        _imagesChannel = _messageBusAdapter.OpenChannel<Image>(nameof(ActivityEventService));
+        _profileChannel = _messageBusAdapter.OpenChannel<Profile>(nameof(ActivityEventService));
     }
 
     public void Created<T>(T value) where T : class, IObjectRef

@@ -1,8 +1,14 @@
-﻿using Letterbook.Api.Dto;
+﻿using ActivityPub.Types.AS;
+using ActivityPub.Types.AS.Extended.Activity;
+using AutoMapper;
+using Letterbook.Adapter.ActivityPub;
+using Letterbook.Adapter.ActivityPub.Mappers;
+using Letterbook.Adapter.ActivityPub.Types;
+using Letterbook.Api.Dto;
 using Letterbook.Core;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
-using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -15,32 +21,47 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 /// </summary>
 [ApiController]
 [Route("[controller]")]
-[AcceptHeader("application/ld+json",
-    "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", "application/activity+json")]
+[Consumes("application/ld+json",
+    "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", 
+    "application/activity+json")]
 public class ActorController : ControllerBase
 {
-    private readonly SnakeCaseRouteTransformer _transformer = new();
-    private readonly Uri _baseUri;
     private readonly ILogger<ActorController> _logger;
-    private readonly IActivityService _activityService;
     private readonly IProfileService _profileService;
+    private readonly IActivityMessageService _messageService;
+    private readonly IActivityPubDocument _apDoc;
+    private static readonly IMapper ActorMapper = new Mapper(AsApMapper.ActorConfig);
 
     public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
-        IActivityService activityService, IProfileService profileService)
+        IProfileService profileService, IActivityMessageService messageService, IActivityPubDocument apDoc)
     {
-        _baseUri = new Uri($"{config.Value.Scheme}://{config.Value.DomainName}");
         _logger = logger;
-        _activityService = activityService;
         _profileService = profileService;
-        _logger.LogInformation("Loaded ActorController");
+        _messageService = messageService;
+        _apDoc = apDoc;
+        _logger.LogInformation("Loaded {Controller}", nameof(ActorController));
     }
 
 
     [HttpGet]
     [Route("{id}")]
-    public ActionResult<AsAp.Actor> GetActor(int id)
+    public async Task<IActionResult> GetActor(string id)
     {
-        throw new NotImplementedException();
+        Guid localId;
+        try
+        {
+            localId = ShortId.ToGuid(id);
+        }
+        catch (Exception)
+        {
+            return BadRequest();
+        }
+
+        var profile = await _profileService.LookupProfile(localId);
+        if (profile == null) return NotFound();
+        var actor = ActorMapper.Map<PersonActorExtension>(profile);
+
+        return Ok(actor);
     }
 
     [HttpGet]
@@ -86,91 +107,39 @@ public class ActorController : ControllerBase
     [ProducesResponseType(StatusCodes.Status410Gone)]
     [ProducesResponseType(StatusCodes.Status421MisdirectedRequest)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-    public async Task<IActionResult> PostInbox(string id, AsAp.Activity activity)
+    public async Task<IActionResult> PostInbox(string id, ASType activity)
     {
         var localId = ShortId.ToGuid(id);
-        var activityType = Enum.Parse<ActivityType>(activity.Type);
         try
         {
-            switch (activityType)
-            {
-                case ActivityType.Accept:
-                    break;
-                case ActivityType.Add:
-                    break;
-                case ActivityType.Announce:
-                    break;
-                case ActivityType.Block:
-                    break;
-                case ActivityType.Create:
-                    break;
-                case ActivityType.Delete:
-                    break;
-                case ActivityType.Dislike:
-                    break;
-                case ActivityType.Flag:
-                    break;
-                case ActivityType.Follow:
-                    return await InboxFollow(localId, activity);
-                case ActivityType.Like:
-                    break;
-                case ActivityType.Move:
-                    break;
-                case ActivityType.Undo:
-                    return await InboxUndo(localId, activity);
-                case ActivityType.Update:
-                    break;
-                case ActivityType.Question:
-                    break;
-                case ActivityType.Reject:
-                    break;
-                case ActivityType.Remove:
-                    break;
-                case ActivityType.TentativeReject:
-                    break;
-                case ActivityType.TentativeAccept:
-                    break;
-                // Some of these activities may be worth understanding eventually, even if letterbook will likely never
-                // produce them.
-                // Esp listen, read, travel, and view
-                case ActivityType.Arrive:
-                case ActivityType.Ignore:
-                case ActivityType.Invite:
-                case ActivityType.Join:
-                case ActivityType.Leave:
-                case ActivityType.Listen:
-                case ActivityType.Offer:
-                case ActivityType.Read:
-                case ActivityType.Travel:
-                case ActivityType.View:
-                    _logger.LogInformation("Ignored unhandled activity {ActivityType}", activityType);
-                    _logger.LogDebug("Ignored unhandled activity details {@Activity}", activity);
-                    return Accepted();
-                case ActivityType.Unknown:
-                default:
-                    _logger.LogWarning("Ignored unknown activity {ActivityType}", activityType);
-                    _logger.LogDebug("Ignored unknown activity details {@Activity}", activity);
-                    return Accepted(); // ?
-            }
+            if (activity.Is<AcceptActivity>(out var accept))
+                return await InboxAccept(localId, accept);
+            if (activity.Is<FollowActivity>(out var follow))
+                return await InboxFollow(localId, follow);
+            if (activity.Is<UndoActivity>(out var undo))
+                return await InboxUndo(localId, undo);
+            
+            _logger.LogWarning("Ignored unknown activity {ActivityType}", activity.GetType());
+            _logger.LogDebug("Ignored unknown activity details {@Activity}", activity);
+            return Accepted();
         }
         catch (CoreException e)
         {
-            if (e.Flagged(ErrorCodes.WrongAuthority)) return StatusCode(422, new ErrorMessage(e));
+            if (e.Flagged(ErrorCodes.WrongAuthority)) return StatusCode(421, new ErrorMessage(e));
             if (e.Flagged(ErrorCodes.InvalidRequest)) return UnprocessableEntity(new ErrorMessage(e));
             if (e.Flagged(ErrorCodes.MissingData)) return NotFound(new ErrorMessage(e));
             if (e.Flagged(ErrorCodes.DuplicateEntry)) return Conflict(new ErrorMessage(e));
             throw;
         }
-        throw new NotImplementedException();
     }
+
 
     [HttpPost]
     [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     public async Task<ActionResult> SharedInbox(AsAp.Activity activity)
     {
-        await _activityService.ReceiveNotes(new Note[] { }, Enum.Parse<ActivityType>(activity.Type), null);
-        return Accepted();
+        throw new NotImplementedException();
     }
 
     [HttpGet]
@@ -192,55 +161,63 @@ public class ActorController : ControllerBase
     /* * * * * * * * * * * * *
      * Support methods       *
      * * * * * * * * * * * * */
-    
-    private async Task<IActionResult> InboxUndo(Guid id, AsAp.Activity activity)
+
+    private async Task<IActionResult> InboxAccept(Guid localId, ASActivity activity)
     {
-        if (activity.Object.Count > 1)
-            return new BadRequestObjectResult(new ErrorMessage(
-                ErrorCodes.None.With((int)ActivityPubErrorCodes.UnknownSemantics), "Cannot Undo multiple Activities"));
-        if (activity.Object.SingleOrDefault() is not AsAp.Activity subject)
-            return new BadRequestObjectResult(new ErrorMessage(
-                ErrorCodes.None.With((int)ActivityPubErrorCodes.UnknownSemantics), "Object of an Undo must be another Activity"));
-        var activityType = Enum.Parse<ActivityType>(subject.Type);
-        switch (activityType)
+        throw new NotImplementedException();
+    }
+    
+    private async Task<IActionResult> InboxUndo(Guid id, ASActivity activity)
+    {
+        if (activity.Object.SingleOrDefault()?.Value is not ASActivity activityObject)
+            return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics, 
+                "Object of an Undo must have exactly one value, which must be another Activity"));
+        if (activityObject.Is<AnnounceActivity>(out var announceActivity))
+            throw new NotImplementedException();
+        if (activityObject.Is<BlockActivity>(out var blockActivity))
+            throw new NotImplementedException();
+        if (activityObject.Is<FollowActivity>(out var followActivity))
         {
-            case ActivityType.Announce:
-                throw new NotImplementedException();
-            case ActivityType.Block:
-                throw new NotImplementedException();
-            case ActivityType.Follow:
-                if ((activity.Actor.SingleOrDefault() ?? subject.Actor.SingleOrDefault()) is not AsAp.Actor actor)
-                    return new BadRequestObjectResult(new ErrorMessage(
-                        ErrorCodes.None.With((int)ActivityPubErrorCodes.UnknownSemantics),
-                        "Exactly one Actor can unfollow at a time"));
-                if (actor.Id is null)
-                    return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.InvalidRequest,
-                        "Actor ID is required to unfollow"));
-                
-                await _profileService.RemoveFollower(id, actor.Id);
-                
-                return new OkResult();
-            case ActivityType.Like:
-                throw new NotImplementedException();
-            default:
-                _logger.LogInformation("Ignored unknown Undo target {ActivityType}", activityType);
-                return new AcceptedResult();
+            if ((followActivity.Actor.SingleOrDefault() ?? activityObject.Actor.SingleOrDefault()) is not { } actor)
+                return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
+                    "Undo:Follow can only be performed by exactly one Actor at a time"));
+            if (!actor.TryGetId(out var actorId))
+                return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.InvalidRequest,
+                    "Actor ID is required to Undo:Follow"));
+            await _profileService.RemoveFollower(id, actorId);
+            return new OkResult();
         }
+        if (activityObject.Is<LikeActivity>(out var likeActivity))
+            throw new NotImplementedException();
+        
+        _logger.LogInformation("Ignored unknown Undo target {ActivityType}", activityObject.TypeMap.ASTypes);
+        return new AcceptedResult();
     }
 
-    private async Task<IActionResult> InboxFollow(Guid localId, AsAp.Activity activity)
+    private async Task<IActionResult> InboxFollow(Guid localId, ASActivity followRequest)
     {
-        if (activity.Actor.Count > 1) return BadRequest(new ErrorMessage(ErrorCodes.None, "Only one Actor can follow at a time"));
-        var actor = activity.Actor.FirstOrDefault();
-        if (actor?.Id is null) return BadRequest(new ErrorMessage(ErrorCodes.None, "Actor ID is required for follower"));
+        if (followRequest.Actor.Count > 1) return BadRequest(new ErrorMessage(ErrorCodes.None, "Only one Actor can follow at a time"));
+        var actor = followRequest.Actor.First();
+        if (!actor.TryGetId(out var actorId))
+            return BadRequest(new ErrorMessage(ErrorCodes.None, "Actor ID is required for follower"));
+
+        followRequest.TryGetId(out var activityId);
+        var relation = await _profileService.ReceiveFollowRequest(localId, actorId, activityId);
                     
-        var state = await _profileService.ReceiveFollowRequest(localId, actor.Id);
-                    
-        return state switch
+        ASType resultActivity = relation.State switch
         {
-            FollowState.Accepted => Ok(ActivityResponse.AcceptActivity("Follow", activity.Id)), // Accept(Follow)
-            FollowState.Pending => Ok(ActivityResponse.TentativeAcceptActivity("Follow", activity.Id)), // PendingAccept(Follow)
-            _ => Ok(ActivityResponse.RejectActivity("Follow", activity.Id)), // Reject(Follow)
+            FollowState.Accepted => _apDoc.Accept(relation.Follows, followRequest),
+            FollowState.Pending => _apDoc.TentativeAccept(relation.Follows, followRequest),
+            _ => _apDoc.Reject(relation.Follows, followRequest)
         };
+
+        // We should publish and implement a reply negotiation mechanism. The options are basically response or inbox.
+        // Response would mean reply "in-band" via the http response.
+        // Inbox would mean reply "out-of-band" via a new POST to the actor's inbox.
+        // But, that doesn't exist, yet. The if(false) is so we don't forget.
+        var acceptResponse = false;
+        if (acceptResponse) return Ok(resultActivity);
+        _messageService.Deliver(relation.Follower.Inbox, resultActivity, relation.Follows);
+        return Accepted();
     }
 }

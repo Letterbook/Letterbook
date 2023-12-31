@@ -18,8 +18,6 @@ public class Image : IExpiring, IContentRef
     public Image(Uri id)
     {
         Id = id;
-        Creators = ObjectCollection<Profile>.Creators(id);
-        Visibility = ObjectCollection<Audience>.Audience(id);
         CreatedDate = default;
         MimeType = default!;
         FileLocation = default!;
@@ -29,13 +27,13 @@ public class Image : IExpiring, IContentRef
     public Uri Id { get; set; }
     public Guid? LocalId { get; set; }
     public string Authority => Id.Authority;
-    public ObjectCollection<Profile> Creators { get; set; }
+    public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
     public DateTime CreatedDate { get; set; }
     public ActivityObjectType Type => ActivityObjectType.Image;
     public ContentType MimeType { get; set; }
     public Uri FileLocation { get; set; } // good enough?
     public DateTime Expiration { get; set; }
     public string? Description { get; set; }
-    public ObjectCollection<Audience> Visibility { get; set; }
+    public ICollection<Audience> Visibility { get; set; } = new HashSet<Audience>();
     public ICollection<Mention> Mentions { get; set; } = new HashSet<Mention>();
 }

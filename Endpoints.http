@@ -1,0 +1,98 @@
+﻿###
+GET {{host}}/actor
+
+###
+GET {{host}}/api/v1/actor
+
+###
+GET {{host}}/api/v1/accounts/11/scheduled_statuses
+
+###
+GET {{host}}/api/v1/connect/token
+
+###
+POST {{host}}/api/v1/user_account/login
+accept: */*
+Content-Type: application/json
+
+{
+  "email": "admin@letterbook.example",
+  "password": "Password1!"
+}
+
+###
+# curl -X 'POST'   'http://localhost:5127/actor/eebmU6ZHx06ezAYNia2_GA/inbox'   -H 'accept: application/ld+json'   -H 'Content-Type: application/ld+json'   -d '{
+#  "type": "Follow",
+#  "actor": "https://social.example/user/1"
+#}'
+# TODO: https://stackoverflow.com/a/62950860
+POST http://localhost:5127/actor/eebmU6ZHx06ezAYNia2_GA/inbox
+accept: application/ld+json
+Content-Type: application/ld+json
+
+{
+  "type": "Follow",
+  "actor": "https://social.example/user/1"
+}
+
+###
+GET {{host}}/.well-known/webfinger?resource=acct:admin@{{host}}
+
+###
+GET {{host}}/.well-known/webfinger?resource=acct:admin@host.docker.internal:5127
+
+### https self webfinger
+GET https://{{host}}/.well-known/webfinger?resource=acct:admin@{{host}}
+
+### self webfinger
+GET http://{{host}}/.well-known/webfinger?resource=acct:admin@local.host:5127
+
+### self actor
+GET https://{{host}}/actor/{{profile}}
+Accept: application/ld+json
+
+### peer webfinger
+GET http://{{peer}}/.well-known/webfinger?resource=acct:{{peer_acct}}
+
+### https peer webfinger
+GET https://{{peer}}/.well-known/webfinger?resource=acct:{{peer_acct}}
+
+### peer actor
+GET {{peer_profile}}
+Accept: application/ld+json
+
+###
+# {{profile}} can be defined in http-client.private.env.json, which is git-ignored
+# That way we're not stepping on each other's local test data and creating merge conflicts
+GET https://{{host}}/actor/{{profile}}#publicKey-0
+Accept: application/ld+json
+
+### debug follow
+POST http://{{host}}/{{profile}}/follow
+Content-Type: application/json
+
+{
+  "targetId": "{{peer_profile}}"
+}
+
+### self inbox follow
+POST https://{{host}}/actor/{{profile}}/inbox
+Content-Type: application/ld+json
+
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "http://mastodon.castle/3197012f-5599-4017-a884-7801f86b3e68",
+  "type": "Follow",
+  "actor": "http://mastodon.castle/users/user",
+  "object": "https://host.castle/actor/{{profile}}"
+}
+
+### fetch mastodon
+GET https://mastodon.castle/users/user
+Accept: application/ld+json
+
+### webfinger mastodon
+GET http://localhost:3000/.well-known/webfinger?resource=acct:mastodondev@localhost:3000
+
+### httpbin
+GET https://httpbin.castle/headers

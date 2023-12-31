@@ -1,5 +1,11 @@
-﻿using Letterbook.Api.Controllers.ActivityPub;
+﻿using ActivityPub.Types.AS;
+using ActivityPub.Types.AS.Extended.Activity;
+using ActivityPub.Types.Conversion;
+using Letterbook.Adapter.ActivityPub;
+using Letterbook.Adapter.ActivityPub.Mappers;
+using Letterbook.Api.Controllers.ActivityPub;
 using Letterbook.Api.Tests.Fakes;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests;
@@ -16,106 +22,79 @@ public class ActorControllerTests : WithMocks
 {
     private ITestOutputHelper _output;
     private ActorController _controller;
-    private FakeActivity _fakeActivity;
-    private FakeActor _fakeActor;
     private FakeProfile _fakeProfile;
+    private FakeProfile _fakeRemoteProfile;
     private Profile _profile;
-    private AsAp.Activity _activity;
-    
+    private Profile _remoteProfile;
+    private IActivityPubDocument _document;
+
     public ActorControllerTests(ITestOutputHelper output)
     {
         _output = output;
         _controller = new ActorController(CoreOptionsMock, Mock.Of<ILogger<ActorController>>(),
-            ActivityServiceMock.Object, ProfileServiceMock.Object);
+            ProfileServiceMock.Object, Mock.Of<IActivityMessageService>(), new Document());
 
         _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
-        _fakeActor = new FakeActor();
-        _fakeActivity = new FakeActivity(null, _fakeActor.Generate());
         _fakeProfile = new FakeProfile("http://letterbook.example");
+        _fakeRemoteProfile = new FakeProfile();
         _profile = _fakeProfile.Generate();
-        _activity = _fakeActivity.Generate();
+        _remoteProfile = _fakeRemoteProfile.Generate();
+        _document = new Document();
+    }
+
+    private FollowerRelation BuildRelation(FollowState state)
+    {
+        return new FollowerRelation(_remoteProfile, _profile, state);
     }
 
     [Fact]
-    public async Task Exists()
+    public void Exists()
     {
         Assert.NotNull(_controller);
     }
 
     [Fact(DisplayName = "Should accept follow activity")]
-    [Trait("Inbox", "Follow")]
     public async Task TestFollowAccept()
     {
-        _activity.Type = "Follow";
+        var activity = _document.Follow(_remoteProfile, _profile);
+        activity.Object.Add(_profile.Id);
 
         ProfileServiceMock.Setup(service =>
-                service.ReceiveFollowRequest(_profile.LocalId!.Value, _activity.Actor.First().Id!))
-            .ReturnsAsync(FollowState.Accepted);
+                service.ReceiveFollowRequest(_profile.LocalId!.Value, _remoteProfile.Id, It.IsAny<Uri?>()))
+            .ReturnsAsync(BuildRelation(FollowState.Accepted));
 
-        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), _activity);
-        
-        var actual = response as OkObjectResult;
-        var actualObject = actual?.Value as AsAp.Activity;
-        Assert.NotNull(actual);
-        Assert.NotNull(actualObject);
-        Assert.Equal("Accept", actualObject.Type);
+        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
+
+        Assert.IsType<AcceptedResult>(response);
     }
-    
+
     [Fact(DisplayName = "Should tentative accept follow activity")]
-    [Trait("Inbox", "Follow")]
     public async Task TestFollowTentativeAccept()
     {
-        _activity.Type = "Follow";
+        var activity = _document.Follow(_remoteProfile, _profile);
+        activity.Object.Add(_profile.Id);
 
         ProfileServiceMock.Setup(service =>
-                service.ReceiveFollowRequest(_profile.LocalId!.Value, _activity.Actor.First().Id!))
-            .ReturnsAsync(FollowState.Pending);
+                service.ReceiveFollowRequest(_profile.LocalId!.Value, _remoteProfile.Id, It.IsAny<Uri?>()))
+            .ReturnsAsync(BuildRelation(FollowState.Pending));
 
-        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), _activity);
-        
-        var actual = response as OkObjectResult;
-        var actualObject = actual?.Value as AsAp.Activity;
-        Assert.NotNull(actual);
-        Assert.NotNull(actualObject);
-        Assert.Equal("TentativeAccept", actualObject.Type);
+        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
+
+        Assert.IsType<AcceptedResult>(response);
     }
-    
+
     [Fact(DisplayName = "Should reject follow activity")]
-    [Trait("Inbox", "Follow")]
     public async Task TestFollowReject()
     {
-        _activity.Type = "Follow";
+        var activity = _document.Follow(_remoteProfile, _profile);
+        activity.Object.Add(_profile.Id);
 
         ProfileServiceMock.Setup(service =>
-                service.ReceiveFollowRequest(_profile.LocalId!.Value, _activity.Actor.First().Id!))
-            .ReturnsAsync(FollowState.Rejected);
+                service.ReceiveFollowRequest(_profile.LocalId!.Value, _remoteProfile.Id, null))
+            .ReturnsAsync(BuildRelation(FollowState.Rejected));
 
-        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), _activity);
-        
-        var actual = response as OkObjectResult;
-        var actualObject = actual?.Value as AsAp.Activity;
-        Assert.NotNull(actual);
-        Assert.NotNull(actualObject);
-        Assert.Equal("Reject", actualObject.Type);
-    }
-    
-    [Fact(DisplayName = "Should remove a follower")]
-    [Trait("Inbox", "Undo:Follow")]
-    public async Task TestUndoFollow()
-    {
-        var follow = _fakeActivity.Generate();
-        follow.Type = "Follow";
-        follow.Actor = _activity.Actor;
-        _activity.Type = "Undo";
-        _activity.Object[0] = follow;
+        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
 
-        ProfileServiceMock.Setup(service =>
-                service.RemoveFollower(_profile.LocalId!.Value, _activity.Actor.First().Id!))
-            .Returns(Task.CompletedTask);
-
-        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), _activity);
-        
-        var actual = response as OkResult;
-        Assert.NotNull(actual);
+        Assert.IsType<AcceptedResult>(response);
     }
 }

@@ -1,6 +1,8 @@
-﻿
+﻿version: '3.10'
+name: letterbook
 
 services:
+  # Services required for Letterbook operation
   timescale:
     container_name: timescale
     image: timescale/timescaledb:2.11.2-pg15-oss
@@ -10,9 +12,10 @@ services:
       - POSTGRES_DB=letterbook_feeds
     ports:
       - "5433:5432"
+    volumes:
+      - letterbook_ts_data:/var/lib/postgresql/data
     restart: always
-
-  postgres:
+  letterbook_db:
     container_name: postgres
     image: postgres:15-alpine
     environment:
@@ -21,4 +24,48 @@ services:
       - POSTGRES_DB=letterbook
     ports:
       - "5432:5432"
+    volumes:
+      - letterbook_db_data:/var/lib/postgresql/data
     restart: always
+
+  # Optional Dashboarding and Observability Services 
+  loki:
+    container_name: loki
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    restart: unless-stopped
+    
+  httpbin:
+    container_name: httpbin
+    image: kennethreitz/httpbin
+    ports:
+      - '8200:80'
+    restart: unless-stopped
+  
+  grafana:    
+    depends_on:
+      - loki
+      - prometheus
+    container_name: grafana
+    image: grafana/grafana-oss:10.2.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./Letterbook.Dashboards/Grafana/provisioning:/etc/grafana/provisioning"
+    restart: unless-stopped
+    
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.47.2
+    ports:
+      - "9090:9090"
+    volumes:
+      - "./Letterbook.Dashboards/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+    restart: unless-stopped
+    
+volumes:
+  letterbook_db_data:
+    driver: local
+  letterbook_ts_data:
+    driver: local

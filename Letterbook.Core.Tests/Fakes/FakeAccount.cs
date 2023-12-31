@@ -8,7 +8,18 @@ public class FakeAccount : Faker<Account>
     public FakeAccount()
     {
         CustomInstantiator(faker =>
-            Account.CreateAccount(new Uri(faker.Internet.Url()), faker.Internet.Email(), faker.Internet.UserName()));
+        {
+            var uri = faker.Internet.Url();
+            var profile = new FakeProfile(uri).Generate();
+            var account = new Account()
+            {
+                Email = faker.Internet.Email(),
+                UserName = faker.Internet.UserName()
+            };
+            profile.OwnedBy = account;
+            account.LinkedProfiles.Add(new LinkedProfile(account, profile, ProfilePermission.All));
+            return account;
+        });
     }
 
     public FakeAccount(bool empty = true)

@@ -135,7 +135,6 @@ namespace Letterbook.Adapter.Db.Migrations
             modelBuilder.Entity("Letterbook.Core.Models.FollowerRelation", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("Date")
@@ -259,6 +258,14 @@ namespace Letterbook.Adapter.Db.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Followers")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Following")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Handle")
                         .IsRequired()
                         .HasColumnType("text");
@@ -293,6 +300,46 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.HasIndex("OwnedById");
 
                     b.ToTable("Profiles");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.SigningKey", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("Expires")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Family")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("KeyOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Label")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("LocalId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("PrivateKey")
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ProfileId")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("PublicKey")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("SigningKey");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -522,13 +569,13 @@ namespace Letterbook.Adapter.Db.Migrations
             modelBuilder.Entity("Letterbook.Core.Models.FollowerRelation", b =>
                 {
                     b.HasOne("Letterbook.Core.Models.Profile", "Follower")
-                        .WithMany("Following")
+                        .WithMany("FollowingCollection")
                         .HasForeignKey("FollowerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Letterbook.Core.Models.Profile", "Follows")
-                        .WithMany("Followers")
+                        .WithMany("FollowersCollection")
                         .HasForeignKey("FollowsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -650,6 +697,13 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("OwnedBy");
                 });
 
+            modelBuilder.Entity("Letterbook.Core.Models.SigningKey", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Profile", null)
+                        .WithMany("Keys")
+                        .HasForeignKey("ProfileId");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -756,9 +810,11 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("Letterbook.Core.Models.Profile", b =>
                 {
-                    b.Navigation("Followers");
+                    b.Navigation("FollowersCollection");
 
-                    b.Navigation("Following");
+                    b.Navigation("FollowingCollection");
+
+                    b.Navigation("Keys");
 
                     b.Navigation("RelatedAccounts");
                 });
