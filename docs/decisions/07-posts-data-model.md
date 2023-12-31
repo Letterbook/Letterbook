@@ -141,8 +141,6 @@ For reference, the model we have now is that various classes (`Note` and `Image`
 
 ## Discussion
 
-### minor activities
-A Post can have more than one content, and a content item can theoretically exist in more than one post. If a post is `Liked` by someone, should that Like follow the content to other posts? I think probably not, right? For example, suppose you upload a photo, then post that photo with a note. The later you add that photo to an album. Should the view of the photo in the album show all the Likes that the Post received? What if you reuse the photo in another post in the future?
 
 ### notes or just post body?
 Is it better to have notes as a content object of the post, or should the note just be sort of body properties on the post? It's probably more complicated to serialize reliably if the post body becomes a note on the wire. But it would save a join for the large majority of records. Sort of. The join is still necessary for the query, because we still need the other content items. But there would be no results from the other joined tables most of the time, and I expect the query planner to handle that efficiently.
