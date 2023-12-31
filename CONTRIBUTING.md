@@ -3,7 +3,8 @@
 - [Code of Conduct](#code-of-conduct)
   - [Responsible "AI" Contributions](#responsible-ai-contributions)
 - [Collaboration](#collaboration)
-  - [Github Issues](#github-issues)
+  - [Getting started](#getting-started)
+  - [More than code](#more-than-code)
 - [Documentation](#documentation)
   - [Useful links](#useful-links)
 - [Development](#development)
@@ -68,7 +69,7 @@ Most things are not implemented, but some of it has been stubbed out to provide 
 
 ### Build and Run
 
-In all cases, you will need to have the dotnet 7.0 sdk installed on your system. [Microsoft publishes][dotnet] instructions to download it on every platform they support (Windows, MacOS, and several common linux distros).
+In all cases, you will need to have the dotnet 8.0 sdk installed on your system. [Microsoft publishes][dotnet] instructions to download it on every platform they support (Windows, MacOS, and several common linux distros).
 
 To confirm it's available and working, do:
 

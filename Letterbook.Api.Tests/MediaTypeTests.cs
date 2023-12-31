@@ -30,7 +30,7 @@ public class MediaTypeTests
     [InlineData("*/*")]
     [InlineData("")]
     [InlineData(null)]
-    public void AttributeDeny(string given)
+    public void AttributeDeny(string? given)
     {
         Assert.False(_attr.IsMatch(given));
     }

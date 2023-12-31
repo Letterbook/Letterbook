@@ -24,7 +24,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: 8.0.x
       
       - name: Restore
         run: dotnet restore Letterbook.sln
@@ -44,7 +44,7 @@ jobs:
       
       - name: Install EF Tools
         run: |
-          dotnet tool install --global dotnet-ef --version 7.0.8
+          dotnet tool install --global dotnet-ef --version 8.0.0
           dotnet tool restore
       
       - name: Test Migrations
