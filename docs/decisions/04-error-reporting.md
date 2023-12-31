@@ -6,7 +6,7 @@ Patterns and guidance to build consistent Exceptions with useful reporting and d
 
 - [ ] Decided
 - [ ] Decided Against
-- [ ] Deferred
+- [x] Deferred (2023-12-30)
 - [ ] Superseded
 
 # Decision
