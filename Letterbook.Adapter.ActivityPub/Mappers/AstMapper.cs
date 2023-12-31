@@ -19,7 +19,6 @@ public static class AstMapper
     {
         ConfigureBaseTypes(cfg);
         FromActor(cfg);
-        FromNote(cfg);
     });
 
     private static void FromActor(IMapperConfigurationExpression cfg)
@@ -39,7 +38,6 @@ public static class AstMapper
             .ForMember(dest => dest.Handle, opt => opt.MapFrom(src => src.PreferredUsername))
             // .ForMember(dest => dest.CustomFields, opt => opt.MapFrom(src => src.Attachment))
             .ForMember(dest => dest.CustomFields, opt => opt.Ignore())
-            .ForMember(dest => dest.Keys, opt => opt.MapFrom(src => src.PublicKey))
             .ForMember(dest => dest.Inbox, opt => opt.MapFrom(src => src.Inbox))
             .ForMember(dest => dest.Outbox, opt => opt.MapFrom(src => src.Outbox))
             .ForMember(dest => dest.Updated, opt => opt.MapFrom(src => src.Updated))
@@ -129,7 +127,8 @@ internal class ASLinkConverter : ITypeConverter<ASLink, Uri>
 [UsedImplicitly]
 internal class PublicKeyConverter : 
     ITypeConverter<PublicKey?, SigningKey?>, 
-    IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>
+    IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>, 
+    ITypeConverter<string, ReadOnlyMemory<byte>>
 {
     public SigningKey? Convert(PublicKey? source, SigningKey? destination, ResolutionContext context)
     {
@@ -157,7 +156,7 @@ internal class PublicKeyConverter :
         return destination;
     }
 
-    IList<SigningKey> IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey, IList<SigningKey>>
+    IList<SigningKey> IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>
         .Resolve(PersonActorExtension source, Models.Profile destination, PublicKey? sourceMember, 
             IList<SigningKey>? destMember, ResolutionContext context)
     {
@@ -175,6 +174,6 @@ internal class PublicKeyConverter :
             source.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Skip(1)
                 .SkipLast(1));
-        return Convert.FromBase64String(b64);
+        return System.Convert.FromBase64String(b64);
     }
 }
