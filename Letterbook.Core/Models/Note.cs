@@ -1,46 +1,42 @@
-﻿using System.Collections;
+﻿using JetBrains.Annotations;
 
 namespace Letterbook.Core.Models;
 
-public class Note : IContentRef
+/// <summary>
+/// A short, single page, textual post content. Corresponds to AS NoteObject.
+/// Posts that include a Note should usually serialize as a Note in AP documents
+/// </summary>
+public class Note : IContent
 {
-    private Note(ICollection<Profile> creators, ICollection<Audience> visibility, IList<Note> replies, IList<Profile> likedBy, IList<Profile> boostedBy)
+    [UsedImplicitly]
+    private Note()
     {
-        Creators = creators;
-        Visibility = visibility;
-        Replies = replies;
-        LikedBy = likedBy;
-        BoostedBy = boostedBy;
-        Id = default!;
+        Uri = default!;
+        Post = default!;
         Content = default!;
-        CreatedDate = default!;
     }
+    
+    public Guid Id { get; set; }
+    public Uri Uri { get; set; }
+    public string? Summary { get; set; }
+    public string? Preview { get; set; }
+    public Uri? Source { get; set; }
+    public string Type => "Note";
+    
+    public Post Post { get; set; }
+    public string Content { get; set; }
 
-    public Note(Uri id)
+    public Note(Post post, string content) : this(post, post.Uri, content)
     {
-        Id = id;
-        CreatedDate = DateTime.UtcNow;
+        Post = post;
+        Content = content;
     }
-
-    public Uri Id { get; set; }
-    public Guid? LocalId { get; set; }
-    public string Authority => Id.Authority;
-    public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
-    public DateTime CreatedDate { get; set; }
-    public ActivityObjectType Type => ActivityObjectType.Note;
-    public string Content { get; set; } = string.Empty; // TODO: HTML encode & sanitize
-    public string? Summary { get; set; } // TODO: strip all HTML
-    public ICollection<Audience> Visibility { get; set; } = new HashSet<Audience>();
-    public ICollection<Mention> Mentions { get; set; } = new HashSet<Mention>();
-    public string? Client { get; set; }
-    public Note? InReplyTo { get; set; }
-    public IList<Note> Replies { get; set; } = new List<Note>();
-    public IList<Profile> LikedBy { get; set; } = new List<Profile>();
-    public IList<Profile> BoostedBy { get; set; } = new List<Profile>();
-
-    // You may be wondering, what's the difference between Attachments and tags?
-    // The answer is that the spec authors had good intentions, but at this point it's not clear.
-    // Tags are intended to be references, and attachments are intended to be included, like an email attachment.
-    // public IList<IContentRef> Attachments { get; set; }
-    // public ICollection<IContentRef> Tags { get; set; }
+    
+    public Note(Post post, Uri uri, string content)
+    {
+        Id = Guid.NewGuid();
+        Uri = uri;
+        Content = content;
+        Post = post;
+    }
 }

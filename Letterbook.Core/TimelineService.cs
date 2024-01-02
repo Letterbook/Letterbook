@@ -22,68 +22,70 @@ public class TimelineService : ITimelineService
         _profileAdapter = profileAdapter;
     }
 
-    public void HandleCreate(Note note)
+    public void HandleCreate(Post post)
     {
         // TODO: account for moderation conditions (blocks, etc)
-        var audience = DefaultAudience(note);
-        var mentions = note.Mentions.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
+        var audience = DefaultAudience(post);
+        var mentions = post.AddressedTo.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
 
         audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
-        _feeds.AddToTimeline(note, audience);
+        _feeds.AddToTimeline(post);
 
         foreach (var mention in mentions)
         {
-            _feeds.AddNotification(mention.Subject, note, note.Creators, ActivityType.Create);
+            _feeds.AddNotification(mention.Subject, post, ActivityType.Create);
         }
     }
 
-    public void HandleBoost(Note note)
+    public void HandleBoost(Post post)
     {
-        var boostedBy = note.BoostedBy.Last();
-        if (note.Visibility.Contains(Audience.Public) || note.Mentions.Contains(Mention.Public) ||
-            note.Mentions.Contains(Mention.Unlisted))
+        var boostedBy = post.SharesCollection.Last();
+        if (post.Audience.Contains(Audience.Public) 
+            || post.AddressedTo.Contains(Mention.Public) 
+            || post.AddressedTo.Contains(Mention.Unlisted))
         {
-            _feeds.AddToTimeline(note, Audience.Boosts(boostedBy), boostedBy);
+            _feeds.AddToTimeline(post, boostedBy);
         }
 
-        foreach (var creator in note.Creators.Where(creator => creator.HasLocalAuthority(_options)))
+        foreach (var creator in post.Creators.Where(creator => creator.HasLocalAuthority(_options)))
         {
-            _feeds.AddNotification(creator, note, new []{boostedBy}, ActivityType.Announce);
+            _feeds.AddNotification(creator, post, ActivityType.Announce, boostedBy);
         }
-        
     }
 
-    public void HandleUpdate(Note note)
+    public void HandleUpdate(Post note)
     {
         var audience = DefaultAudience(note);
-        var mentions = note.Mentions.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
+        var mentions = note.AddressedTo.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
 
         audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
-        _feeds.AddToTimeline(note, audience);
+        _feeds.AddToTimeline(note);
 
         foreach (var mention in mentions)
         {
-            _feeds.AddNotification(mention.Subject, note, note.Creators, ActivityType.Update);
+            _feeds.AddNotification(mention.Subject, note, ActivityType.Update);
         }
 
-        foreach (var profile in note.BoostedBy.Where(profile => profile.HasLocalAuthority(_options)))
+        foreach (var profile in note.SharesCollection.Where(profile => profile.HasLocalAuthority(_options)))
         {
-            _feeds.AddNotification(profile, note, note.Creators, ActivityType.Update);
+            _feeds.AddNotification(profile, note, ActivityType.Update);
         }
 
         if (note.Creators.Count <= 1) return;
         foreach (var profile in note.Creators.Where(profile => profile.HasLocalAuthority(_options)))
         {
-            _feeds.AddNotification(profile, note, note.Creators, ActivityType.Update);
+            _feeds.AddNotification(profile, note, ActivityType.Update);
         }
     }
 
-    public void HandleDelete(Note note)
+    public void HandleDelete(Post note)
     {
         // TODO: Also handle deleted boosts
         _feeds.RemoveFromTimelines(note);
     }
 
+    
+    // public async Task<IEnumerable<Post>> GetFeed(Guid recipientId, DateTime begin, int limit = 40)
     public async Task<IEnumerable<TimelineEntry>> GetFeed(Guid recipientId, DateTime begin, int limit = 40)
     {
         // TODO(moderation): Account for moderation conditions (block, mute, etc)
@@ -98,16 +100,16 @@ public class TimelineService : ITimelineService
     /// </summary>
     /// <param name="note"></param>
     /// <returns></returns>
-    private HashSet<Audience> DefaultAudience(Note note)
+    private HashSet<Audience> DefaultAudience(Post post)
     {
         var result = new HashSet<Audience>();
-        result.UnionWith(note.Visibility);
+        result.UnionWith(post.Audience);
 
         // The "public audience" would be equivalent to Mastodon's federated global feed
         // That's not the same thing as putting posts into follower's feeds.
         // This ensures we include public posts in the followers audience in case the sender doesn't specify it
         if (!result.Contains(Audience.Public)) return result;
-        result.UnionWith(note.Creators.Select(c => Audience.FromUri(c.Followers, c)));
+        result.UnionWith(post.Creators.Select(c => Audience.FromUri(c.Followers, c)));
 
         return result;
     }

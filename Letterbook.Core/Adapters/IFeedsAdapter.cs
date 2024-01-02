@@ -9,10 +9,14 @@ public interface IFeedsAdapter : IDisposable
     public Task<int> AddToTimeline<T>(T subject, ICollection<Audience> audience, Profile? boostedBy = default)
         where T : IContentRef;
 
-    public void AddNotification<T>(Profile recipient, T subject, IEnumerable<Profile> actors, ActivityType activity)
-        where T : IContentRef;
+    public Task<int> AddToTimeline(Post post, Profile? sharedBy = default);
+
+    public void AddNotification<T>(Profile recipient, T subject, IEnumerable<Profile> actors, ActivityType activity) where T : IContentRef;
+    public void AddNotification(Profile recipient, Post post, ActivityType activity); 
+    public void AddNotification(Profile recipient, Post post, ActivityType activity, Profile sharedBy); 
 
     public Task<int> RemoveFromTimelines<T>(T subject) where T : IContentRef;
+    public Task<int> RemoveFromTimelines(Post post);
     public Task<int> RemoveFromTimelines<T>(T subject, ICollection<Audience> audiences) where T : IContentRef;
     public IEnumerable<Notification> GetAggregateNotifications(Profile recipient, DateTime begin, int limit);
 

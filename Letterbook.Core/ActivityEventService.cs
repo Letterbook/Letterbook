@@ -15,108 +15,95 @@ public class ActivityEventService : IActivityEventService
 {
     private readonly CoreOptions _options;
     private readonly IMessageBusAdapter _messageBusAdapter;
-    private readonly IObserver<CloudEvent> _notesChannel;
-    private readonly IObserver<CloudEvent> _imagesChannel;
-    private readonly IObserver<CloudEvent> _profileChannel;
+    private readonly IObserver<CloudEvent> _channel;
 
     public ActivityEventService(IOptions<CoreOptions> options, IMessageBusAdapter messageBusAdapter)
     {
         _options = options.Value;
         _messageBusAdapter = messageBusAdapter;
-        _notesChannel = _messageBusAdapter.OpenChannel<Note>(nameof(ActivityEventService));
-        _imagesChannel = _messageBusAdapter.OpenChannel<Image>(nameof(ActivityEventService));
-        _profileChannel = _messageBusAdapter.OpenChannel<Profile>(nameof(ActivityEventService));
+        _channel = _messageBusAdapter.OpenChannel<Post>(nameof(ActivityEventService));
     }
 
-    public void Created<T>(T value) where T : class, IObjectRef
+    public void Created(Post value)
     {
         var message = FormatMessage(value, nameof(Created));
-        var channel = GetChannel(value);
+        var channel = GetChannel();
         channel.OnNext(message);
     }
 
-    public void Updated<T>(T value) where T : class, IObjectRef
+    public void Updated(Post value)
     {
         var message = FormatMessage(value, nameof(Updated));
-        var channel = GetChannel(value);
+        var channel = GetChannel();
         channel.OnNext(message);
     }
 
-    public void Deleted<T>(T value) where T : class, IObjectRef
+    public void Deleted(Post value)
     {
         var message = FormatMessage(value, nameof(Deleted));
-        var channel = GetChannel(value);
+        var channel = GetChannel();
         channel.OnNext(message);
     }
 
-    public void Flagged<T>(T value) where T : class, IObjectRef
+    public void Flagged(Post value)
     {
         var message = FormatMessage(value, nameof(Flagged));
-        var channel = GetChannel(value);
+        var channel = GetChannel();
         channel.OnNext(message);
     }
 
-    public void Liked<T>(T value) where T : class, IObjectRef
+    public void Liked(Post value)
     {
         var message = FormatMessage(value, nameof(Liked));
-        var channel = GetChannel(value);
+        var channel = GetChannel();
         channel.OnNext(message);
     }
 
-    public void Boosted<T>(T value) where T : class, IObjectRef
+    public void Boosted(Post value)
     {
         var message = FormatMessage(value, nameof(Boosted));
-        var channel = GetChannel(value);
+        var channel = GetChannel();
         channel.OnNext(message);
     }
 
-    public void Approved<T>(T value) where T : class, IObjectRef
+    public void Approved(Post value)
     {
         var message = FormatMessage(value, nameof(Approved));
-        var channel = GetChannel(value);
+        var channel = GetChannel();
         channel.OnNext(message);
     }
 
-    public void Rejected<T>(T value) where T : class, IObjectRef
+    public void Rejected(Post value)
     {
         var message = FormatMessage(value, nameof(Rejected));
-        var channel = GetChannel(value);
+        var channel = GetChannel();
         channel.OnNext(message);
     }
 
-    public void Requested<T>(T value) where T : class, IObjectRef
+    public void Requested(Post value)
     {
         var message = FormatMessage(value, nameof(Requested));
-        var channel = GetChannel(value);
+        var channel = GetChannel();
         channel.OnNext(message);
     }
     
-    public void Offered<T>(T value) where T : class, IObjectRef
+    public void Offered(Post value)
     {
         var message = FormatMessage(value, nameof(Offered));
-        var channel = GetChannel(value);
+        var channel = GetChannel();
         channel.OnNext(message);
     }
 
-    public void Mentioned<T>(T value) where T : class, IObjectRef
+    public void Mentioned(Post value)
     {
         var message = FormatMessage(value, nameof(Mentioned));
-        var channel = GetChannel(value);
+        var channel = GetChannel();
         channel.OnNext(message);
     }
 
-    private IObserver<CloudEvent> GetChannel(IObjectRef value)
-    {
-        return value switch
-        {
-            Note => _notesChannel,
-            Image => _imagesChannel,
-            Profile => _profileChannel,
-            _ => throw new ArgumentOutOfRangeException(nameof(value), value.GetType(), $"Unsupported type {value.GetType()}")
-        };
-    }
+    private IObserver<CloudEvent> GetChannel() => _channel;
 
-    private CloudEvent FormatMessage(IObjectRef value, string action)
+    private CloudEvent FormatMessage(Post value, string action)
     {
         return new CloudEvent
         {
