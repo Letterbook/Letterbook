@@ -4,7 +4,7 @@ We can expect almost any of the ActivityStreams Object types to federate in a wa
 
 ## Status
 
-- [ ] Decided 
+- [x] Decided (2024-01-02)
 - [ ] Decided Against 
 - [ ] Deferred 
 - [ ] Superseded 
@@ -158,3 +158,8 @@ Do we need `IContent`, or is the base/abstract `Content` class enough?
 
 ### AS inReplyTo
 AP/AS have some types that are pretty obviously content: `Note`, `Image`, `Document`, `Video`, `Audio`, `Article`, `Page`, `Event`, `Question`. It's not hard to figure out what it means for something to be `inReplyTo` one of those types. But, `Object` is the base type for everything in ActivityStreams, and the spec permits any object to be `inReplyTo` any other object. What does it mean if a `Note` is in reply to a `Collection`, or a `Profile`, or an `Update`? I don't know, and neither do the spec authors. So, we're just not dealing with that. If we ever start receiving federated documents doing that, then we can decide how to handle it. And honestly that might mean we just choose to discard those activities for being incomprehensible to our data model. It seems like that would have to be either a very different app than ours, or just a nonsensical implementation.
+
+### Quotes?
+How does this design model quote posts?
+
+There are a couple of options. We can experiment when we get to that point, but the one that seems most likely is if `Post` also implements `IContent`, and then other posts can simply be part of the contents collection. [See the PR for some discussion](https://github.com/Letterbook/Letterbook/pull/144).
