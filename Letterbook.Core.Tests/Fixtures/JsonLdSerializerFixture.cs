@@ -23,7 +23,7 @@ public sealed class JsonLdSerializerFixture
         set
         {
             // This avoid a crash when set in a test constructor
-            if (JsonLdSerializer.SerializerOptions.WriteIndented)
+            if (JsonLdSerializer.SerializerOptions is { WriteIndented: true, IsReadOnly: false })
                 JsonLdSerializer.SerializerOptions.WriteIndented = value;
         }
     }
