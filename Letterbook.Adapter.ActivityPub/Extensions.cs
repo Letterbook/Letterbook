@@ -23,7 +23,7 @@ public static class Extensions
         id = null;
         return false;
     }
-
+    
     public static bool TryGetId(this ASObject aso, [NotNullWhen(true)]out Uri? id)
     {
         if (aso.Id != null)

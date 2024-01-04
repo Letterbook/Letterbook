@@ -48,11 +48,11 @@ public class AcceptHeaderAttribute : Attribute, IActionConstraint
         if (string.IsNullOrEmpty(acceptHeader)) return false;
         var acceptTypes = acceptHeader.Split(",").Select(each => new MediaType(each));
         return acceptTypes.Aggregate(false,
-            (result, acceptType) => result || ContentTypes.Aggregate(false,
-                (contentResult, contentType) => contentResult || acceptType.IsSubsetOf(new MediaType(contentType))));
+            (result, acceptType) => ContentTypes != null && (result || ContentTypes.Aggregate(false,
+                (contentResult, contentType) => contentResult || acceptType.IsSubsetOf(new MediaType(contentType)))));
     }
     
-    private MediaTypeCollection? GetContentTypes(string firstArg, string[] args)
+    private MediaTypeCollection GetContentTypes(string firstArg, string[] args)
     {
         var completeArgs = new List<string>();
         completeArgs.Add(firstArg);

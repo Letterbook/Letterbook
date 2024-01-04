@@ -15,11 +15,42 @@ public class PublicKeyTests : IClassFixture<JsonLdSerializerFixture>
     }
 
     [Fact]
+    public void ItShouldDeserialize()
+    {
+        var json = """
+                   {
+                   "@context": [
+                     "https://www.w3.org/ns/activitystreams",
+                     "https://w3id.org/security/v1"
+                   ],
+                   "type": "Person",
+                   "inbox": "https://example.com/inbox",
+                   "outbox": "https://example.com/outbox",
+                   "publicKey": {
+                     "@context": [
+                       "https://www.w3.org/ns/activitystreams",
+                       "https://w3id.org/security/v1"
+                     ],
+                     "id": "https://example.com/key",
+                     "publicKeyPem": "some key",
+                     "owner": "https://example.com/owner"
+                     }
+                   }
+                   """;
+        var actual = _serializer.Deserialize<PersonActorExtension>(json);
+        
+        Assert.NotNull(actual);
+        Assert.NotNull(actual.PublicKey);
+        Assert.NotNull(actual.PublicKey.Id);
+    }
+
+    [Fact(Skip = "Needs APSharp#152")]
     public void ItShould_IncludeJsonLdContext()
     {
         var pubKey = new PublicKey
         {
             Id = "https://example.com/pubkey",
+            Owner = default!,
             PublicKeyPem = "key"
         };
 
@@ -38,6 +69,7 @@ public class PublicKeyTests : IClassFixture<JsonLdSerializerFixture>
         var pubKey = new PublicKey
         {
             Id = "https://example.com/pubkey",
+            Owner = default!,
             PublicKeyPem = "key"
         };
         

@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
     
     <ItemGroup>
-      <PackageReference Include="ActivityPub.Types" Version="0.1.0-snapshot.2023-12-25.03-27-58.349" />
+      <PackageReference Include="ActivityPub.Types" Version="0.1.0-snapshot.2023-12-29.15-35-53" />
       <PackageReference Include="AutoMapper" Version="12.0.1" />
       <PackageReference Include="AutoMapper.Collection" Version="9.0.0" />
       <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1" />
-      <PackageReference Include="Letterbook.ActivityPub" Version="1.0.0-ci0039-95" />
       <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="10.9.0" />
       <PackageReference Include="NSign.Abstractions" Version="0.19.1" />
       <PackageReference Include="NSign.Client" Version="0.19.1" />

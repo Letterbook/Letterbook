@@ -9,7 +9,7 @@ namespace Letterbook.Adapter.TimescaleFeeds;
 public class FeedsContext : DbContext
 {
     private FeedsDbOptions _feedsDbOptions;
-    public DbSet<TimelineEntry> Feeds { get; set; }
+    public DbSet<TimelineEntry> Feeds { get; set; } = null!;
 
     // Called by the designer to create and run migrations
     internal FeedsContext(DbContextOptions<FeedsContext> options) : base(options)

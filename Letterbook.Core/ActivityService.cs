@@ -1,5 +1,4 @@
 ﻿using Letterbook.Core.Adapters;
-using Letterbook.ActivityPub.Models;
 using Letterbook.Core.Models;
 using Microsoft.Extensions.Logging;
 
@@ -14,7 +13,7 @@ public class ActivityService : IActivityService
     private readonly ILogger<ActivityService> _logger;
     private readonly IActivityEventService _events;
 
-    // TODO: pubsub adapter
+    // TODO: remove/replace ActivityAdapter. We should map to and persist core data models
     public ActivityService(IActivityAdapter activityAdapter, ILogger<ActivityService> logger,
         IActivityEventService eventService)
     {
@@ -23,19 +22,12 @@ public class ActivityService : IActivityService
         _events = eventService;
     }
 
-    public Activity Create()
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="notes">The Notes references as the object of the activity</param>
-    /// <param name="activity">The type of activity being taken</param>
-    /// <param name="actor">The Actor to whom this activity is attributed</param>
-    /// <returns>True if any action was taken, false otherwise</returns>
+    // TODO(Rebuild): I don't know if this pattern will really work anymore
+    // If nothing else, the AP types should really only be mapped in adapters. Core logic should only work on
+    // core data models as much as possible.
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task<bool> ReceiveNotes(IEnumerable<Note> notes, ActivityType activity, Profile actor)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         var actionTaken = false;
         switch (activity)
@@ -108,10 +100,5 @@ public class ActivityService : IActivityService
                 _logger.LogInformation("Ignored semantically nonsensical Activity {Activity}", activity);
                 return false;
         }
-    }
-
-    public void Deliver(Activity activity)
-    {
-        throw new NotImplementedException();
     }
 }

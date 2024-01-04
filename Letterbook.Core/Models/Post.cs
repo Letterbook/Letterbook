@@ -2,6 +2,11 @@
 
 public class Post
 {
+    private Post()
+    {
+        Id = default!;
+    }
+
     public Uri Id { get; set; }
     public Guid? LocalId { get; set; }
     public string Authority => Id.Authority;

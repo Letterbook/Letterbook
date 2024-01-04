@@ -30,7 +30,7 @@ public class ActorController : ControllerBase
     private readonly IProfileService _profileService;
     private readonly IActivityMessageService _messageService;
     private readonly IActivityPubDocument _apDoc;
-    private static readonly IMapper ActorMapper = new Mapper(AsApMapper.ActorConfig);
+    private static readonly IMapper ActorMapper = new Mapper(AstMapper.Default);
 
     public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
         IProfileService profileService, IActivityMessageService messageService, IActivityPubDocument apDoc)
@@ -99,7 +99,7 @@ public class ActorController : ControllerBase
     [HttpPost]
     [ActionName("Inbox")]
     [Route("{id}/[action]")]
-    [ProducesResponseType(typeof (AsAp.Activity), StatusCodes.Status200OK, "application/ld+json")]
+    [ProducesResponseType(typeof (ASActivity), StatusCodes.Status200OK, "application/ld+json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -137,7 +137,9 @@ public class ActorController : ControllerBase
     [HttpPost]
     [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status202Accepted)]
-    public async Task<ActionResult> SharedInbox(AsAp.Activity activity)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+    public async Task<ActionResult> SharedInbox(ASType activity)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         throw new NotImplementedException();
     }
@@ -162,7 +164,9 @@ public class ActorController : ControllerBase
      * Support methods       *
      * * * * * * * * * * * * */
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     private async Task<IActionResult> InboxAccept(Guid localId, ASActivity activity)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         throw new NotImplementedException();
     }

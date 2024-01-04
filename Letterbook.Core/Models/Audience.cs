@@ -1,6 +1,4 @@
-﻿using Letterbook.ActivityPub;
-
-namespace Letterbook.Core.Models;
+﻿namespace Letterbook.Core.Models;
 
 /// <summary>
 /// Audience is the collection or category of profiles that can view some content
@@ -12,7 +10,7 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public class Audience : IEquatable<Audience>, IObjectRef
 {
-    private static Audience _public = FromUri(new CompactIri("as", "public"), Profile.CreateEmpty(new CompactIri("as", "public")));
+    private static Audience _public = FromUri(new Uri(Constants.ActivityPubPublicCollection), Profile.CreateEmpty(new Uri(Constants.ActivityPubPublicCollection)));
     private Audience()
     {
         Id = default!;

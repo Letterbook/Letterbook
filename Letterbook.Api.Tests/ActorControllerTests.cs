@@ -1,10 +1,5 @@
-﻿using ActivityPub.Types.AS;
-using ActivityPub.Types.AS.Extended.Activity;
-using ActivityPub.Types.Conversion;
-using Letterbook.Adapter.ActivityPub;
-using Letterbook.Adapter.ActivityPub.Mappers;
+﻿using Letterbook.Adapter.ActivityPub;
 using Letterbook.Api.Controllers.ActivityPub;
-using Letterbook.Api.Tests.Fakes;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;

@@ -92,7 +92,7 @@ public class CoreException : Exception
     }
     
     // Indicates some required data could not be found
-    public static CoreException MissingData(string message, Type type, object id, Exception? innerEx = null,
+    public static CoreException MissingData(string message, Type type, object? id, Exception? innerEx = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
         [CallerLineNumber] int line = -1)

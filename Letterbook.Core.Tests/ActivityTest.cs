@@ -33,12 +33,6 @@ public class ActivityTest : WithMocks
         _fakeProfile = new FakeProfile();
     }
 
-    [Fact(DisplayName = "Create method should exist")]
-    public void TestCreateExists()
-    {
-        Assert.Throws<NotImplementedException>(() => _activityService.Create());
-    }
-
     [Fact(DisplayName = "Should create notes")]
     public async void TestCreateNotes()
     {
@@ -139,11 +133,5 @@ public class ActivityTest : WithMocks
         var done = await _activityService.ReceiveNotes(notes, ActivityType.Dislike, actor);
 
         Assert.False(done);
-    }
-
-    [Fact(DisplayName = "Deliver method should exist")]
-    public void TestDeliverExists()
-    {
-        Assert.Throws<NotImplementedException>(() => _activityService.Deliver(null!));
     }
 }
