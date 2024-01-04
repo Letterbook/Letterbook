@@ -5,8 +5,16 @@ namespace Letterbook.Core.Tests;
 
 public class ShortIdTests
 {
-    public static IEnumerable<object[]> GuidList(int count) =>
-        Enumerable.Range(0, count).Select(_ => new object[] { Guid.NewGuid() });
+    public static TheoryData<Guid> GuidList(int count)
+    {
+        var data = new TheoryData<Guid>();
+        for (var i = 0; i < count; i++)
+        {
+            data.Add(Guid.NewGuid());
+        }
+
+        return data;
+    }
 
     [Theory]
     [MemberData(nameof(GuidList), 10)]
