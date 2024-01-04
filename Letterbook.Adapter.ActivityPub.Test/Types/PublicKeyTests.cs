@@ -33,7 +33,7 @@ public class PublicKeyTests : IClassFixture<JsonLdSerializerFixture>
                      ],
                      "id": "https://example.com/key",
                      "publicKeyPem": "some key",
-                     "ownerId": "https://example.com/owner"
+                     "owner": "https://example.com/owner"
                      }
                    }
                    """;
@@ -44,7 +44,7 @@ public class PublicKeyTests : IClassFixture<JsonLdSerializerFixture>
         Assert.NotNull(actual.PublicKey.Id);
     }
 
-    [Fact]
+    [Fact(Skip = "Needs APSharp#152")]
     public void ItShould_IncludeJsonLdContext()
     {
         var pubKey = new PublicKey
