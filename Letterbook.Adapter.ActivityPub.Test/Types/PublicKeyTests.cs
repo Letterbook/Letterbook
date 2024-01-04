@@ -50,6 +50,7 @@ public class PublicKeyTests : IClassFixture<JsonLdSerializerFixture>
         var pubKey = new PublicKey
         {
             Id = "https://example.com/pubkey",
+            Owner = default!,
             PublicKeyPem = "key"
         };
 
@@ -68,6 +69,7 @@ public class PublicKeyTests : IClassFixture<JsonLdSerializerFixture>
         var pubKey = new PublicKey
         {
             Id = "https://example.com/pubkey",
+            Owner = default!,
             PublicKeyPem = "key"
         };
         

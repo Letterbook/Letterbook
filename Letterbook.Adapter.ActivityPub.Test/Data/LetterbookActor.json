@@ -1,0 +1,38 @@
+﻿{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams",
+    "https://w3id.org/security/v1"
+  ],
+  "id": "http://localhost:3080/users/user",
+  "type": "Person",
+  "following": "http://localhost:3080/users/user/following",
+  "followers": "http://localhost:3080/users/user/followers",
+  "inbox": "http://localhost:3080/users/user/inbox",
+  "outbox": "http://localhost:3080/users/user/outbox",
+  "featured": "http://localhost:3080/users/user/collections/featured",
+  "featuredTags": "http://localhost:3080/users/user/collections/tags",
+  "preferredUsername": "user",
+  "name": "user",
+  "summary": "",
+  "url": "http://localhost:3080/@user",
+  "manuallyApprovesFollowers": false,
+  "discoverable": false,
+  "indexable": false,
+  "published": "2023-11-01T00:00:00Z",
+  "memorial": false,
+  "devices": "http://localhost:3080/users/user/collections/devices",
+  "publicKey": {
+    "@context": [
+      "https://www.w3.org/ns/activitystreams",
+      "https://w3id.org/security/v1"
+    ],
+    "id": "http://localhost:3080/users/user#main-key",
+    "owner": "http://localhost:3080/users/user",
+    "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4Kkwp47KloIaR8m9RJpd\ndiaheHzm3f3qGja6CqQnw/gHxmlkJA/bFQXYzRZA8olVjsoPmp4gHCHRMzxm6eYe\nuRu0k628n0KkgZ+FapQGAamR9uNtAoV8Fr3x1FMqiiyOXP07kdsF4NUDOI+DotTe\nzAGXrJT9AFqW1J7uJjL9aqWBJkwUkc/bjg12LZmtcvVftbEhzoi3RX4Etc4z5tK9\nVgHo6mENkZ5Hd6DOnG0ORVcFehZVamKACB9A7q5ln9l/jkCnGpAVzrl4lbTN5bfJ\n7cyZKkeQ+XNU7edzS6W9Crlekpal2L+J32Rwk6khTYGgY/a9jrfX//tVPUpwSKLl\nCwIDAQAB\n-----END PUBLIC KEY-----\n"
+  },
+  "tag": [],
+  "attachment": [],
+  "endpoints": {
+    "sharedInbox": "http://localhost:3080/inbox"
+  }
+}

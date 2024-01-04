@@ -43,6 +43,7 @@ public class JsonLdFormatterTests : IClassFixture<JsonLdSerializerFixture>
                 new PublicKey
                 {
                     Id = "https://example.com/key",
+                    Owner = default!,
                     PublicKeyPem = "----begin fake public key----",
                 }
         };
