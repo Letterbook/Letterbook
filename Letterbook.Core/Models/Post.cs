@@ -1,20 +1,26 @@
-﻿namespace Letterbook.Core.Models;
+﻿using Letterbook.Core.Exceptions;
+using Medo;
+
+namespace Letterbook.Core.Models;
 
 public class Post
 {
-    private Post()
+    public Post()
     {
-        Uri = default!;
+        Id = Uuid7.NewGuid();
+        ContentRoot = default!;
+        IdUri = default!;
         Thread = default!;
     }
     
-    public Guid Id { get; set; }
-    public Uri Uri { get; set; }
-    public Uri Thread { get; set; }
+    public Uuid7 Id { get; set; }
+    public required IContent ContentRoot { get; set; }
+    public required Uri IdUri { get; set; }
+    public required Uri Thread { get; set; }
     public string? Summary { get; set; }
     public string? Preview { get; set; }
     public string? Source { get; set; }
-    public string Hostname => Uri.Host;
+    public string Hostname => IdUri.Host;
 
     /// <summary>
     /// Authority is preprocessed this way for easy instance level moderation. It puts the host in reverse dns order.
@@ -24,11 +30,11 @@ public class Post
     /// easily covers truth.social, and also block-evasion.truth.social, and truth.social:8443
     /// </summary>
     public string Authority =>
-        Uri.IsDefaultPort
-            ? string.Join('.', Uri.Host.Split('.').Reverse())
-            : string.Join('.', Uri.Host.Split('.').Reverse()) + Uri.Port;
+        IdUri.IsDefaultPort
+            ? string.Join('.', IdUri.Host.Split('.').Reverse())
+            : string.Join('.', IdUri.Host.Split('.').Reverse()) + IdUri.Port;
     public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
-    public DateTime CreatedDate { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public ICollection<IContent> Contents { get; set; } = new HashSet<IContent>();
     public ICollection<Audience> Audience { get; set; } = new HashSet<Audience>();
     public ICollection<Mention> AddressedTo { get; set; } = new HashSet<Mention>();
@@ -40,4 +46,44 @@ public class Post
     public IList<Profile> LikesCollection { get; set; } = new List<Profile>();
     public Uri? Shares { get; set; }
     public IList<Profile> SharesCollection { get; set; } = new List<Profile>();
+
+    // TODO: Post Factory
+    public static Post Create<T>(Profile creator, T content) where T : class, IContent
+    {
+        throw new NotImplementedException();
+    }
+
+    public static Post Create<T>(Profile creator, string? summary = null, string? preview = null, Uri? source = null)
+        where T : class, IContent
+    {
+        // TODO: Canonical
+        var canonicalUri = new Uri("");
+        return Create(creator, NewContent<T>(canonicalUri, summary, preview, source));
+    }
+
+    public T AddContent<T>(Uri canonicalUri, string? summary = null, string? preview = null, Uri? source = null)
+        where T : class, IContent
+    {
+        var t = NewContent<T>(canonicalUri, summary, preview, source);
+        return AddContent(t);
+    }
+
+    public T AddContent<T>(T content) where T : class, IContent
+    {
+        Contents.Add(content);
+        return content;
+    }
+
+    private static T NewContent<T>(Uri canonicalUri, string? summary = null, string? preview = null, Uri? source = null)
+        where T : class, IContent
+    {
+        if (Activator.CreateInstance(typeof(T), true) is not T t) 
+            throw CoreException.InternalError($"Can't create Content type {typeof(T)}");
+        t.IdUri = canonicalUri;
+        t.Summary = summary;
+        t.Preview = preview;
+        t.Source = source;
+
+        return t;
+    }
 }

@@ -55,18 +55,19 @@ public static class AstMapper
 
     private static void FromNote(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<NoteObject, Note>(MemberList.Destination)
+        cfg.CreateMap<NoteObject, Post>(MemberList.Destination)
             .IncludeBase<ASType, IObjectRef>()
-            .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))
+            // TODO (soon)
+            // .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))
             .ForMember(dest => dest.Creators, opt => opt.MapFrom(src => src.AttributedTo))
             .ForMember(dest => dest.InReplyTo, opt => opt.MapFrom(src => src.InReplyTo))
             .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.Summary))
-            .ForMember(dest => dest.Mentions, opt => opt.ConvertUsing<MentionsConverter, ASObject>())
+            .ForMember(dest => dest.AddressedTo, opt => opt.ConvertUsing<MentionsConverter, ASObject>())
             .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Generator))
-            .ForMember(dest => dest.LikedBy, opt => opt.MapFrom(src => src.Likes))
-            .ForMember(dest => dest.BoostedBy, opt => opt.MapFrom(src => src.Shares))
-            .ForMember(dest => dest.Visibility, opt => opt.MapFrom(src => src.Audience));
+            .ForMember(dest => dest.LikesCollection, opt => opt.MapFrom(src => src.Likes))
+            .ForMember(dest => dest.SharesCollection, opt => opt.MapFrom(src => src.Shares))
+            .ForMember(dest => dest.Audience, opt => opt.MapFrom(src => src.Audience));
     }
 
     private static void ConfigureBaseTypes(IMapperConfigurationExpression cfg)
