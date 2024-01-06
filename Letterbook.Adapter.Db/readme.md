@@ -8,6 +8,8 @@ dotnet tool install --global dotnet-ef
 
 # Migrations
 
+You should either run these commands from this subdirectory or add the `--project Letterbook.Adapter.DB` flag.
+
 To generate a new migration:
 ```shell
 dotnet ef migrations add NAME
