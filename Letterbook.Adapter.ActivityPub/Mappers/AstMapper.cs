@@ -77,7 +77,7 @@ public static class AstMapper
             .ForMember(dest => dest.Authority, opt => opt.Ignore())
             .ForMember(dest => dest.LocalId, opt => opt.Ignore());
 
-        cfg.CreateMap<Linkable<ASObject>, Note>()
+        cfg.CreateMap<Linkable<ASObject>, Post>()
             .ConvertUsing<LinkableConverter>();
         
         cfg.CreateMap<LinkableList<ASObject>, Note>()
@@ -99,12 +99,13 @@ internal class LinkableListPostConverter : ITypeConverter<LinkableList<ASObject>
     }
 }
 
-internal class LinkableConverter : ITypeConverter<Linkable<ASObject>, Note>
+internal class LinkableConverter : ITypeConverter<Linkable<ASObject>, Post>
 {
-    public Note Convert(Linkable<ASObject> source, Note destination, ResolutionContext context)
-    {
-        return source.HasLink ? new Note(source.Link) : context.Mapper.Map<Note>(source.Value);
-    }
+     public Post Convert(Linkable<ASObject> source, Post destination, ResolutionContext context)
+     {
+         throw new NotImplementedException();
+         // return source.HasLink ? new Note(source.Link) : context.Mapper.Map<Note>(source.Value);
+     }
 }
 
 [UsedImplicitly]

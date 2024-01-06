@@ -8,13 +8,13 @@ public class Post
     public Post()
     {
         Id = Uuid7.NewGuid();
-        ContentRoot = default!;
+        ContentRootId = Uuid7.Empty!;
         IdUri = default!;
         Thread = default!;
     }
     
     public Uuid7 Id { get; set; }
-    public required IContent ContentRoot { get; set; }
+    public required Uuid7 ContentRootId { get; set; }
     public required Uri IdUri { get; set; }
     public required Uri Thread { get; set; }
     public string? Summary { get; set; }

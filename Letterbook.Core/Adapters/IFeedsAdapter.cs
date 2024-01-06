@@ -12,8 +12,7 @@ public interface IFeedsAdapter : IDisposable
     public Task<int> AddToTimeline(Post post, Profile? sharedBy = default);
 
     public void AddNotification<T>(Profile recipient, T subject, IEnumerable<Profile> actors, ActivityType activity) where T : IContentRef;
-    public void AddNotification(Profile recipient, Post post, ActivityType activity); 
-    public void AddNotification(Profile recipient, Post post, ActivityType activity, Profile sharedBy); 
+    public void AddNotification(Profile recipient, Post post, ActivityType activity, Profile? sharedBy = default); 
 
     public Task<int> RemoveFromTimelines<T>(T subject) where T : IContentRef;
     public Task<int> RemoveFromTimelines(Post post);

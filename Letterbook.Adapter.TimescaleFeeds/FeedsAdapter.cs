@@ -3,7 +3,6 @@ using System.Text;
 using Letterbook.Adapter.TimescaleFeeds.Extensions;
 using Letterbook.Core.Adapters;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Models = Letterbook.Core.Models;
 
 namespace Letterbook.Adapter.TimescaleFeeds;
@@ -83,12 +82,7 @@ public class FeedsAdapter : IFeedsAdapter
         throw new NotImplementedException();
     }
 
-    public void AddNotification(Models.Profile recipient, Models.Post post, Models.ActivityType activity)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void AddNotification(Models.Profile recipient, Models.Post post, Models.ActivityType activity, Models.Profile sharedBy)
+    public void AddNotification(Models.Profile recipient, Models.Post post, Models.ActivityType activity, Models.Profile? sharedBy)
     {
         throw new NotImplementedException();
     }
