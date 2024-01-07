@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Letterbook.Adapter.Db.EntityConfigs;
 using Letterbook.Core.Models;
+using Medo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -52,5 +53,6 @@ public class RelationalContext : DbContext
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Properties<Uri>().HaveConversion<UriIdConverter, UriIdComparer>();
+        configurationBuilder.Properties<Uuid7>().HaveConversion<UuidConverter>();
     }
 }

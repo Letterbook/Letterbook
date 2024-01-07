@@ -35,7 +35,7 @@ public class Post
             : string.Join('.', IdUri.Host.Split('.').Reverse()) + IdUri.Port;
     public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-    public ICollection<IContent> Contents { get; set; } = new HashSet<IContent>();
+    public ICollection<Content> Contents { get; set; } = new HashSet<Content>();
     public ICollection<Audience> Audience { get; set; } = new HashSet<Audience>();
     public ICollection<Mention> AddressedTo { get; set; } = new HashSet<Mention>();
     public string? Client { get; set; }
@@ -48,13 +48,13 @@ public class Post
     public IList<Profile> SharesCollection { get; set; } = new List<Profile>();
 
     // TODO: Post Factory
-    public static Post Create<T>(Profile creator, T content) where T : class, IContent
+    public static Post Create<T>(Profile creator, T content) where T : Content
     {
         throw new NotImplementedException();
     }
 
     public static Post Create<T>(Profile creator, string? summary = null, string? preview = null, Uri? source = null)
-        where T : class, IContent
+        where T : Content
     {
         // TODO: Canonical
         var canonicalUri = new Uri("");
@@ -62,13 +62,13 @@ public class Post
     }
 
     public T AddContent<T>(Uri canonicalUri, string? summary = null, string? preview = null, Uri? source = null)
-        where T : class, IContent
+        where T : Content
     {
         var t = NewContent<T>(canonicalUri, summary, preview, source);
         return AddContent(t);
     }
 
-    public T AddContent<T>(T content) where T : class, IContent
+    public T AddContent<T>(T content) where T : Content
     {
         Contents.Add(content);
         return content;

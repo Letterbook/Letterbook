@@ -8,7 +8,5 @@ public class ConfigureNote : IEntityTypeConfiguration<Note>
 {
     public void Configure(EntityTypeBuilder<Note> builder)
     {
-        builder.HasOne<Post>().WithMany();
-        builder.HasIndex(note => note.IdUri);
     }
 }

@@ -10,10 +10,11 @@ public class ConfigurePost : IEntityTypeConfiguration<Models.Post>
         builder.HasIndex(post => post.IdUri);
         builder.HasIndex(post => post.Thread);
         builder.HasIndex(post => post.ContentRootId);
-        
-        builder.HasMany<Models.Mention>(post => post.AddressedTo)
-            .WithOne("MentionedIn");
-        builder.HasMany<Models.Profile>()
+
+        builder.HasMany<Models.Content>(post => post.Contents)
+            .WithOne(content => content.Post);
+        builder.OwnsMany<Models.Mention>(post => post.AddressedTo);
+        builder.HasMany<Models.Profile>(post => post.Creators)
             .WithMany("CreatedPosts")
             .UsingEntity("PostsCreatedByProfile");
         builder.HasMany<Models.Profile>(post => post.LikesCollection)
@@ -23,7 +24,7 @@ public class ConfigurePost : IEntityTypeConfiguration<Models.Post>
             .WithMany("SharedPosts")
             .UsingEntity("PostsSharedByProfile");
         builder.HasMany<Models.Audience>(post => post.Audience)
-            .WithMany("Audience")
+            .WithMany("Post")
             .UsingEntity("PostsToAudience");
         builder.HasMany<Models.Post>(post => post.RepliesCollection)
             .WithOne(post => post.InReplyTo);
