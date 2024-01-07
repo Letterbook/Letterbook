@@ -4,6 +4,8 @@ using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Npgsql;
+
 #pragma warning disable CS8618
 // EntityFramework does the right thing
 
@@ -40,7 +42,9 @@ public class RelationalContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        options.UseNpgsql(_config.GetConnectionString());
+        var builder = new NpgsqlDataSourceBuilder(_config.GetConnectionString());
+        builder.EnableDynamicJson();
+        options.UseNpgsql(builder.Build());
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
