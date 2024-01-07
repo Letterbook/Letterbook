@@ -79,6 +79,8 @@ dotnet --version
 
 #### Using the `dotnet` CLI
 
+Before continuing to run the project, you'll need to setup [Dependencies][#Dependencies].
+
 ```shell
 dotnet watch run --project Letterbook.Api
 ```
@@ -127,6 +129,8 @@ To run these dependencies, simply do
 ```shell
 docker-compose up
 ```
+
+Note that if you already have Postgres running locally on its default port, docker cannot override the default port and provide its postgresql instance instead. You'll need to either shutdown your local postgres instance or change the port mappings in `docker-compose.yml` and `/Letterbook.Api/appsettings.Development.json`.
 
 ### Database
 
