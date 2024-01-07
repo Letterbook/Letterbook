@@ -16,7 +16,7 @@ public class Post
     public Uuid7 Id { get; set; }
     public required Uuid7 ContentRootId { get; set; }
     public required Uri IdUri { get; set; }
-    public required Uri Thread { get; set; }
+    public ThreadContext Thread { get; set; }
     public string? Summary { get; set; }
     public string? Preview { get; set; }
     public string? Source { get; set; }
