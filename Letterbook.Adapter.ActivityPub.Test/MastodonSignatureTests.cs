@@ -151,7 +151,40 @@ public class MastodonSignatureTests
         Assert.Equal("mastodon=(request-target) host", actual.Headers.GetValues("Signature-Input").First());
         Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
     }
-    
+
+    [Theory(DisplayName = "Should allow root-URI key ID with and without trailing slash")]
+    [InlineData("http://letterbook.example#0")]
+    [InlineData("http://letterbook.example/#0")]
+    public void TestTrailingSlash(string keyId)
+    {
+        _serviceCollection.AddOptions<MessageSigningOptions>()
+            .Configure(options =>
+            {
+                options.WithMandatoryComponent(SignatureComponent.RequestTarget);
+            });
+        var provider = _serviceCollection.BuildServiceProvider();
+
+        var signingKey = new Models.SigningKey()
+        {
+            Created = _signingKey.Created,
+            Expires = _signingKey.Expires,
+            Family = _signingKey.Family,
+            LocalId = _signingKey.LocalId,
+            KeyOrder = _signingKey.KeyOrder,
+            Id = new Uri(keyId),
+            Label = _signingKey.Label,
+            PrivateKey = _signingKey.PrivateKey,
+            PublicKey = _signingKey.PublicKey
+        };
+
+        var actual = new HttpRequestMessage(HttpMethod.Get, "http://example.com");
+        actual.Headers.Add(Headers.SignatureInput, "mastodon=(request-target)");
+        actual.Headers.Add(Headers.Signature, $"keyId=\"{keyId}\",headers=\"(request-target)\",signature=\"HyB9GWpVPsGH1IhoEXYvFMaFT7lPv/kmgMwR4XDCuekUcP9bDEtlMX02sACtibD7vT8K+548bnsQcxVvJcFhJiEjINX4C10vl8f6PGEdzFNh6vDe851Ro5kmEVj70IRdqmD3UoxL9H5d9GSkaMZGVH6O4OcwYnT244K3SkaUUorVlkNVDr0TrKRqDx509J6Dj0eR/zGPuYeqFb4G7iYxITxDZ50BZ/cm83ar9zEL3U4hnuR/dgeh4UZGD6RmEKbKUflt/o8fcoanosQuG4YT684lbWamryJ+DXh1rjgNRV/bKehFM9l+6Mf9CpSSFTOmD0ATet4cUQqtH0G4XSKcSA==\"");
+
+        var verifier = new MastodonVerifier(_verifierLogger);
+        Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, signingKey));
+    }
+
     [Theory(DisplayName = "Should ignore other derived components")]
     [InlineData(DerivedComponents.Method)]
     [InlineData(DerivedComponents.Scheme)]
