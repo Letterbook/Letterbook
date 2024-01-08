@@ -16,9 +16,9 @@ public class Note : Content
     public Note()
     {}
 
-    public Note(Post post, Uri idUri, string content)
+    public Note(Post post, Uri fediId, string content)
     {
-        IdUri = idUri;
+        FediId = fediId;
         Content = content;
         Post = post;
         Post.Contents.Add(this);

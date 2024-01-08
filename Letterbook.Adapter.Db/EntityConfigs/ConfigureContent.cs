@@ -9,6 +9,6 @@ public class ConfigureContent : IEntityTypeConfiguration<Models.Content>
     {
         builder.HasDiscriminator();
         builder.HasKey(note => note.Id);
-        builder.HasIndex(note => note.IdUri);
+        builder.HasIndex(note => note.FediId);
     }
 }

@@ -9,18 +9,18 @@ public class Post
     {
         Id = Uuid7.NewGuid();
         ContentRootId = Uuid7.Empty!;
-        IdUri = default!;
+        FediId = default!;
         Thread = default!;
     }
     
     public Uuid7 Id { get; set; }
     public required Uuid7 ContentRootId { get; set; }
-    public required Uri IdUri { get; set; }
+    public required Uri FediId { get; set; }
     public ThreadContext Thread { get; set; }
     public string? Summary { get; set; }
     public string? Preview { get; set; }
     public string? Source { get; set; }
-    public string Hostname => IdUri.Host;
+    public string Hostname => FediId.Host;
 
     /// <summary>
     /// Authority is preprocessed this way for easy instance level moderation. It puts the host in reverse dns order.
@@ -30,9 +30,9 @@ public class Post
     /// easily covers truth.social, and also block-evasion.truth.social, and truth.social:8443
     /// </summary>
     public string Authority =>
-        IdUri.IsDefaultPort
-            ? string.Join('.', IdUri.Host.Split('.').Reverse())
-            : string.Join('.', IdUri.Host.Split('.').Reverse()) + IdUri.Port;
+        FediId.IsDefaultPort
+            ? string.Join('.', FediId.Host.Split('.').Reverse())
+            : string.Join('.', FediId.Host.Split('.').Reverse()) + FediId.Port;
     public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public ICollection<Content> Contents { get; set; } = new HashSet<Content>();
@@ -79,7 +79,7 @@ public class Post
     {
         if (Activator.CreateInstance(typeof(T), true) is not T t) 
             throw CoreException.InternalError($"Can't create Content type {typeof(T)}");
-        t.IdUri = canonicalUri;
+        t.FediId = canonicalUri;
         t.Summary = summary;
         t.Preview = preview;
         t.Source = source;

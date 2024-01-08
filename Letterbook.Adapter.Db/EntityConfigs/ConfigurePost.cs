@@ -7,7 +7,7 @@ public class ConfigurePost : IEntityTypeConfiguration<Models.Post>
 {
     public void Configure(EntityTypeBuilder<Models.Post> builder)
     {
-        builder.HasIndex(post => post.IdUri);
+        builder.HasIndex(post => post.FediId);
         builder.HasIndex(post => post.ContentRootId);
 
         builder.HasMany<Models.Content>(post => post.Contents)
