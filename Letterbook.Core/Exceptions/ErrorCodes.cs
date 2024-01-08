@@ -12,6 +12,7 @@ public enum ErrorCodes
     DuplicateEntry = 0x4,
     MissingData = 0x8,
     PermissionDenied = 0xF,
+    InternalError = 0x0F00,
     // ActivityPub Errors - 0x0_1000 to 0xF_0000
     UnknownVocabulary = 0x1000,
     UnknownSemantics = 0x2000,

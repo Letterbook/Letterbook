@@ -55,18 +55,19 @@ public static class AstMapper
 
     private static void FromNote(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<NoteObject, Note>(MemberList.Destination)
+        cfg.CreateMap<NoteObject, Post>(MemberList.Destination)
             .IncludeBase<ASType, IObjectRef>()
-            .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))
+            // TODO (soon)
+            // .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))
             .ForMember(dest => dest.Creators, opt => opt.MapFrom(src => src.AttributedTo))
             .ForMember(dest => dest.InReplyTo, opt => opt.MapFrom(src => src.InReplyTo))
             .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.Summary))
-            .ForMember(dest => dest.Mentions, opt => opt.ConvertUsing<MentionsConverter, ASObject>())
+            .ForMember(dest => dest.AddressedTo, opt => opt.ConvertUsing<MentionsConverter, ASObject>())
             .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Generator))
-            .ForMember(dest => dest.LikedBy, opt => opt.MapFrom(src => src.Likes))
-            .ForMember(dest => dest.BoostedBy, opt => opt.MapFrom(src => src.Shares))
-            .ForMember(dest => dest.Visibility, opt => opt.MapFrom(src => src.Audience));
+            .ForMember(dest => dest.LikesCollection, opt => opt.MapFrom(src => src.Likes))
+            .ForMember(dest => dest.SharesCollection, opt => opt.MapFrom(src => src.Shares))
+            .ForMember(dest => dest.Audience, opt => opt.MapFrom(src => src.Audience));
     }
 
     private static void ConfigureBaseTypes(IMapperConfigurationExpression cfg)
@@ -76,7 +77,7 @@ public static class AstMapper
             .ForMember(dest => dest.Authority, opt => opt.Ignore())
             .ForMember(dest => dest.LocalId, opt => opt.Ignore());
 
-        cfg.CreateMap<Linkable<ASObject>, Note>()
+        cfg.CreateMap<Linkable<ASObject>, Post>()
             .ConvertUsing<LinkableConverter>();
         
         cfg.CreateMap<LinkableList<ASObject>, Note>()
@@ -98,12 +99,13 @@ internal class LinkableListPostConverter : ITypeConverter<LinkableList<ASObject>
     }
 }
 
-internal class LinkableConverter : ITypeConverter<Linkable<ASObject>, Note>
+internal class LinkableConverter : ITypeConverter<Linkable<ASObject>, Post>
 {
-    public Note Convert(Linkable<ASObject> source, Note destination, ResolutionContext context)
-    {
-        return source.HasLink ? new Note(source.Link) : context.Mapper.Map<Note>(source.Value);
-    }
+     public Post Convert(Linkable<ASObject> source, Post destination, ResolutionContext context)
+     {
+         throw new NotImplementedException();
+         // return source.HasLink ? new Note(source.Link) : context.Mapper.Map<Note>(source.Value);
+     }
 }
 
 [UsedImplicitly]

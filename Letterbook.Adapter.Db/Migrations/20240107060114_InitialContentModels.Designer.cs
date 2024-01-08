@@ -4,6 +4,7 @@ using Letterbook.Adapter.Db;
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    partial class RelationalContextModelSnapshot : ModelSnapshot
+    [Migration("20240107060114_InitialContentModels")]
+    partial class InitialContentModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -137,7 +140,7 @@ namespace Letterbook.Adapter.Db.Migrations
                         .HasMaxLength(8)
                         .HasColumnType("character varying(8)");
 
-                    b.Property<string>("FediId")
+                    b.Property<string>("IdUri")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -155,7 +158,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FediId");
+                    b.HasIndex("IdUri");
 
                     b.HasIndex("PostId");
 
@@ -258,7 +261,7 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FediId")
+                    b.Property<string>("IdUri")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -283,18 +286,19 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<string>("Summary")
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("ThreadId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Thread")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ContentRootId");
 
-                    b.HasIndex("FediId");
+                    b.HasIndex("IdUri");
 
                     b.HasIndex("InReplyToId");
 
-                    b.HasIndex("ThreadId");
+                    b.HasIndex("Thread");
 
                     b.ToTable("Post");
                 });
@@ -398,27 +402,6 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.HasIndex("ProfileId");
 
                     b.ToTable("SigningKey");
-                });
-
-            modelBuilder.Entity("Letterbook.Core.Models.ThreadContext", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("IdUri")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("RootId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdUri");
-
-                    b.HasIndex("RootId");
-
-                    b.ToTable("ThreadContext");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -761,10 +744,6 @@ namespace Letterbook.Adapter.Db.Migrations
                         .WithMany("RepliesCollection")
                         .HasForeignKey("InReplyToId");
 
-                    b.HasOne("Letterbook.Core.Models.ThreadContext", "Thread")
-                        .WithMany("Posts")
-                        .HasForeignKey("ThreadId");
-
                     b.OwnsMany("Letterbook.Core.Models.Mention", "AddressedTo", b1 =>
                         {
                             b1.Property<Guid>("PostId")
@@ -802,8 +781,6 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("AddressedTo");
 
                     b.Navigation("InReplyTo");
-
-                    b.Navigation("Thread");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.Profile", b =>
@@ -820,17 +797,6 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.HasOne("Letterbook.Core.Models.Profile", null)
                         .WithMany("Keys")
                         .HasForeignKey("ProfileId");
-                });
-
-            modelBuilder.Entity("Letterbook.Core.Models.ThreadContext", b =>
-                {
-                    b.HasOne("Letterbook.Core.Models.Post", "Root")
-                        .WithMany()
-                        .HasForeignKey("RootId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Root");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -961,11 +927,6 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("Keys");
 
                     b.Navigation("RelatedAccounts");
-                });
-
-            modelBuilder.Entity("Letterbook.Core.Models.ThreadContext", b =>
-                {
-                    b.Navigation("Posts");
                 });
 #pragma warning restore 612, 618
         }

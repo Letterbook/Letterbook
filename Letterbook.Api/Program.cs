@@ -110,7 +110,6 @@ public class Program
         builder.Services.Configure<DbOptions>(builder.Configuration.GetSection(DbOptions.ConfigKey));
 
         // Register Services
-        builder.Services.AddScoped<IActivityService, ActivityService>();
         builder.Services.AddScoped<IActivityEventService, ActivityEventService>();
         builder.Services.AddScoped<IProfileEventService, ProfileEventService>();
         builder.Services.AddScoped<IAccountService, AccountService>();

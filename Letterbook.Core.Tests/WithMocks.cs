@@ -17,7 +17,6 @@ public abstract class WithMocks
     protected Mock<IActivityPubClient> ActivityPubClientMock;
     protected Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock;
     protected Mock<IProfileService> ProfileServiceMock;
-    protected Mock<IActivityService> ActivityServiceMock;
     protected IOptions<CoreOptions> CoreOptionsMock;
     protected Mock<HttpMessageHandler> HttpMessageHandlerMock;
     protected ServiceCollection MockedServiceCollection;
@@ -32,7 +31,6 @@ public abstract class WithMocks
         ActivityPubClientMock = new Mock<IActivityPubClient>();
         ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
         ProfileServiceMock = new Mock<IProfileService>();
-        ActivityServiceMock = new Mock<IActivityService>();
         
         ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
         var mockOptions = new CoreOptions
@@ -50,7 +48,6 @@ public abstract class WithMocks
         MockedServiceCollection.AddScoped<IActivityPubClient>(_ => ActivityPubClientMock.Object);
         MockedServiceCollection.AddScoped<IActivityPubAuthenticatedClient>(_ => ActivityPubAuthClientMock.Object);
         MockedServiceCollection.AddScoped<IProfileService>(_ => ProfileServiceMock.Object);
-        MockedServiceCollection.AddScoped<IActivityService>(_ => ActivityServiceMock.Object);
         MockedServiceCollection.TryAddTypesModule();
     }
 }
