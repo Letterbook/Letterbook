@@ -58,7 +58,7 @@ public static class AstMapper
         cfg.CreateMap<NoteObject, Post>(MemberList.Destination)
             .IncludeBase<ASType, IObjectRef>()
             // TODO (soon)
-            // .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))
+            .ForMember(dest => dest.Contents, opt => opt.MapFrom<NoteContentResolver, NaturalLanguageString?>(src => src.Content))
             .ForMember(dest => dest.Creators, opt => opt.MapFrom(src => src.AttributedTo))
             .ForMember(dest => dest.InReplyTo, opt => opt.MapFrom(src => src.InReplyTo))
             .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary))
@@ -88,6 +88,32 @@ public static class AstMapper
 
         cfg.CreateMap<string, ReadOnlyMemory<byte>>()
             .ConvertUsing<PublicKeyConverter>();
+    }
+}
+
+internal class NoteContentResolver : IMemberValueResolver<NoteObject, Post, NaturalLanguageString?, ICollection<Content>>
+{
+    ICollection<Content> IMemberValueResolver<NoteObject, Post, NaturalLanguageString?, ICollection<Content>>
+        .Resolve(NoteObject source, Post post, NaturalLanguageString? sourceContent,
+            ICollection<Content>? dest, ResolutionContext context)
+    {
+        if (!source.TryGetId(out var id)) return post.Contents;
+        var note = new Note
+        {
+            FediId = id,
+            Post = post,
+            // TODO: empty content
+            // also, multiple languages
+            // or even just single languages, but with knowledge of what language is specified
+            Content = sourceContent?.DefaultValue ?? ""
+        };
+        if (source.Preview?.TryGetValue(out var value) == true)
+            note.Preview = context.Mapper.Map<string>(value);
+        else
+            note.GeneratePreview();    
+        post.AddContent(note);
+
+        return post.Contents;
     }
 }
 

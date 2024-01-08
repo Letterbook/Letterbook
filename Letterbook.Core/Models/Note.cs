@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using JetBrains.Annotations;
-
+﻿
 namespace Letterbook.Core.Models;
 
 /// <summary>
@@ -9,18 +7,21 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public class Note : Content
 {
-    public override string Type => "Note";
-
     public required string Content { get; set; }
+    public override string Type => "Note";
     
-    public Note()
-    {}
-
-    public Note(Post post, Uri idUri, string content)
+    public override string? GeneratePreview()
     {
-        IdUri = idUri;
-        Content = content;
-        Post = post;
-        Post.Contents.Add(this);
+        // TODO: implement this in a less naive way
+        // Something like first paragraph or x words/characters
+        // Also, probably a good idea to generate from the source text, not the rendered content
+        // (that means we would need to implement a source text)
+        return Content.Substring(0, 100);
     }
+
+    public override void Sanitize()
+    {
+        throw new NotImplementedException();
+    }
+
 }

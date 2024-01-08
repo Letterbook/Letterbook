@@ -8,19 +8,19 @@ public class Post
     public Post()
     {
         Id = Uuid7.NewGuid();
-        ContentRootId = Uuid7.Empty!;
-        IdUri = default!;
+        ContentRootIdUri = default!;
+        FediId = default!;
         Thread = default!;
     }
     
     public Uuid7 Id { get; set; }
-    public required Uuid7 ContentRootId { get; set; }
-    public required Uri IdUri { get; set; }
+    public Uri ContentRootIdUri { get; set; }
+    public required Uri FediId { get; set; }
     public ThreadContext Thread { get; set; }
     public string? Summary { get; set; }
     public string? Preview { get; set; }
     public string? Source { get; set; }
-    public string Hostname => IdUri.Host;
+    public string Hostname => FediId.Host;
 
     /// <summary>
     /// Authority is preprocessed this way for easy instance level moderation. It puts the host in reverse dns order.
@@ -30,9 +30,9 @@ public class Post
     /// easily covers truth.social, and also block-evasion.truth.social, and truth.social:8443
     /// </summary>
     public string Authority =>
-        IdUri.IsDefaultPort
-            ? string.Join('.', IdUri.Host.Split('.').Reverse())
-            : string.Join('.', IdUri.Host.Split('.').Reverse()) + IdUri.Port;
+        FediId.IsDefaultPort
+            ? string.Join('.', FediId.Host.Split('.').Reverse())
+            : string.Join('.', FediId.Host.Split('.').Reverse()) + FediId.Port;
     public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public ICollection<Content> Contents { get; set; } = new HashSet<Content>();
@@ -53,12 +53,20 @@ public class Post
         throw new NotImplementedException();
     }
 
-    public static Post Create<T>(Profile creator, string? summary = null, string? preview = null, Uri? source = null)
-        where T : Content
+    public static Post Create<T>(Profile creator, Uri id, string? summary = null, string? preview = null,
+        Uri? source = null) where T : Content => Create<T>(new List<Profile> { creator }, id, summary, preview, source);
+
+    public static Post Create<T>(IEnumerable<Profile> creators, Uri id, string? summary = null, string? preview = null,
+        Uri? source = null) where T : Content
     {
-        // TODO: Canonical
-        var canonicalUri = new Uri("");
-        return Create(creator, NewContent<T>(canonicalUri, summary, preview, source));
+        var post = new Post
+        {
+            FediId = id,
+            ContentRootIdUri = id,
+        };
+        (post.Creators as HashSet<Profile>)!.UnionWith(creators);
+        post.Contents.Add(NewContent<T>(id, summary, preview, source));
+        return post;
     }
 
     public T AddContent<T>(Uri canonicalUri, string? summary = null, string? preview = null, Uri? source = null)
@@ -70,6 +78,7 @@ public class Post
 
     public T AddContent<T>(T content) where T : Content
     {
+        if (Contents.Count == 0) ContentRootIdUri = content.FediId;
         Contents.Add(content);
         return content;
     }
@@ -79,7 +88,7 @@ public class Post
     {
         if (Activator.CreateInstance(typeof(T), true) is not T t) 
             throw CoreException.InternalError($"Can't create Content type {typeof(T)}");
-        t.IdUri = canonicalUri;
+        t.FediId = canonicalUri;
         t.Summary = summary;
         t.Preview = preview;
         t.Source = source;
