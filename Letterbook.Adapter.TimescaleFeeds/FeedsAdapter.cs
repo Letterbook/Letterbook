@@ -3,7 +3,6 @@ using System.Text;
 using Letterbook.Adapter.TimescaleFeeds.Extensions;
 using Letterbook.Core.Adapters;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Models = Letterbook.Core.Models;
 
 namespace Letterbook.Adapter.TimescaleFeeds;
@@ -72,8 +71,18 @@ public class FeedsAdapter : IFeedsAdapter
         return await _feedsContext.Database.ExecuteSqlAsync(sql);
     }
 
+    public Task<int> AddToTimeline(Models.Post post, Models.Profile? sharedBy = default)
+    {
+        throw new NotImplementedException();
+    }
+
     public void AddNotification<T>(Models.Profile recipient, T subject, IEnumerable<Models.Profile> actors,
         Models.ActivityType activity) where T : Models.IContentRef
+    {
+        throw new NotImplementedException();
+    }
+
+    public void AddNotification(Models.Profile recipient, Models.Post post, Models.ActivityType activity, Models.Profile? sharedBy)
     {
         throw new NotImplementedException();
     }
@@ -86,6 +95,11 @@ public class FeedsAdapter : IFeedsAdapter
             DELETE FROM "Feeds"
             WHERE "EntityId" = {subject.Id.ToString()};
             """);
+    }
+
+    public Task<int> RemoveFromTimelines(Models.Post post)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<int> RemoveFromTimelines<T>(T subject, ICollection<Models.Audience> audiences) where T : Models.IContentRef

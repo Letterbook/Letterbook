@@ -91,27 +91,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
         Assert.Equal(actual?.PublicKey?.Owner?.Value?.Id, _profile.Id.ToString());
         Assert.Equal(actual?.PublicKey?.Id, _profile.Keys.First().Id.ToString());
     }
-
-
-    [Fact(Skip = "broken, pending new model types (ADR-07)")]
-    public void CanMapSimpleNote()
-    {
-        var dto = new NoteObject()
-        {
-            Id = "https://mastodon.example/note/1234",
-            Content = "Some test content",
-        };
-        dto.AttributedTo.Add(new ASLink
-        {
-            HRef = "https://letterbook.example/@testuser"
-        });
-        var actual = AstMapper.Map<Models.Note>(dto);
-
-        Assert.NotNull(actual);
-        Assert.Equal("Some test content", actual.Content);
-        Assert.Equal("https://letterbook.example/@testuser", actual.Creators.First().Id.ToString());
-    }
-
+    
     [Fact(Skip = "Need ModelMapper")]
     public void CanMapActorCore()
     {

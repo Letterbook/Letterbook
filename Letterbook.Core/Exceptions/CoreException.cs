@@ -107,6 +107,20 @@ public class CoreException : Exception
         return ex;
     }
 
+    public static CoreException InternalError(string message, Exception? innerEx = null,
+        [CallerMemberName] string name = "",
+        [CallerFilePath] string path = "",
+        [CallerLineNumber] int line = -1)
+    {
+        var ex = new CoreException(message, innerEx)
+        {
+            Source = FormatSource(path, name, line),
+        };
+        ex.HResult |= (int)ErrorCodes.InternalError;
+
+        return ex;
+    }
+
     protected static string FormatSource(string path, string name, int line)
     {
         return $"{path} [{name}:{line}]";
