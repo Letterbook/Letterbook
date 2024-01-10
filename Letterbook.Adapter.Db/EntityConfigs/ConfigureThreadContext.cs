@@ -7,10 +7,12 @@ public class ConfigureThreadContext : IEntityTypeConfiguration<Models.ThreadCont
 {
     public void Configure(EntityTypeBuilder<Models.ThreadContext> builder)
     {
-        builder.HasIndex(conversation => conversation.IdUri);
+        builder.HasIndex(conversation => conversation.FediId);
 
         builder.HasOne<Models.Post>(conversation => conversation.Root);
         builder.HasMany<Models.Post>(conversation => conversation.Posts)
             .WithOne(post => post.Thread);
+
+        builder.Ignore(thread => thread.Heuristics);
     }
 }

@@ -1,4 +1,6 @@
-﻿using ActivityPub.Types.AS;
+﻿using System.Collections.ObjectModel;
+using ActivityPub.Types.AS;
+using ActivityPub.Types.AS.Collection;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Util;
 using AutoMapper;
@@ -19,12 +21,15 @@ public static class AstMapper
     {
         ConfigureBaseTypes(cfg);
         FromActor(cfg);
+        FromNote(cfg);
     });
 
     private static void FromActor(IMapperConfigurationExpression cfg)
     {
         cfg.CreateMap<PersonActorExtension, Models.Profile>(MemberList.Destination)
-            .IncludeBase<ASType, IObjectRef>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Authority, opt => opt.Ignore())
+            .ForMember(dest => dest.LocalId, opt => opt.Ignore())
             .ForMember(dest => dest.Type, opt => opt.Ignore())
             .ForMember(dest => dest.SharedInbox, opt => opt.Ignore())
             .ForMember(dest => dest.OwnedBy, opt => opt.Ignore())
@@ -44,11 +49,8 @@ public static class AstMapper
             .ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers))
             .ForMember(dest => dest.Following, opt => opt.MapFrom(src => src.Following))
             .ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!))
-            .AfterMap((_, profile) =>
-            {
-                profile.Type = ActivityActorType.Person;
-            });
-        
+            .AfterMap((_, profile) => { profile.Type = ActivityActorType.Person; });
+
         cfg.CreateMap<PublicKey?, SigningKey?>()
             .ConvertUsing<PublicKeyConverter>();
     }
@@ -56,9 +58,9 @@ public static class AstMapper
     private static void FromNote(IMapperConfigurationExpression cfg)
     {
         cfg.CreateMap<NoteObject, Post>(MemberList.Destination)
-            .IncludeBase<ASType, IObjectRef>()
-            // TODO (soon)
-            .ForMember(dest => dest.Contents, opt => opt.MapFrom<NoteContentResolver, NaturalLanguageString?>(src => src.Content))
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Contents,
+                opt => opt.MapFrom<NoteContentResolver, NaturalLanguageString?>(src => src.Content))
             .ForMember(dest => dest.Creators, opt => opt.MapFrom(src => src.AttributedTo))
             .ForMember(dest => dest.InReplyTo, opt => opt.MapFrom(src => src.InReplyTo))
             .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary))
@@ -66,20 +68,26 @@ public static class AstMapper
             .ForMember(dest => dest.AddressedTo, opt => opt.ConvertUsing<MentionsConverter, ASObject>())
             .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Generator))
             .ForMember(dest => dest.LikesCollection, opt => opt.MapFrom(src => src.Likes))
+            .ForMember(dest => dest.Likes, opt => opt.MapFrom(src => src.Likes))
             .ForMember(dest => dest.SharesCollection, opt => opt.MapFrom(src => src.Shares))
-            .ForMember(dest => dest.Audience, opt => opt.MapFrom(src => src.Audience));
+            .ForMember(dest => dest.Shares, opt => opt.MapFrom(src => src.Shares))
+            .ForMember(dest => dest.ContentRootIdUri, opt => opt.Ignore())
+            .ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Thread,
+                opt => opt.MapFrom<PostContextConverter, LinkableList<ASObject>?>(src => src.InReplyTo))
+            .ForMember(dest => dest.RepliesCollection, opt => opt.MapFrom(src => src.Replies))
+            .ForMember(dest => dest.Replies, opt => opt.MapFrom(src => src.Replies))
+            .ForMember(dest => dest.Audience, opt => opt.MapFrom<AudienceResolver, LinkableList<ASObject>>(src => src.Audience));
     }
 
     private static void ConfigureBaseTypes(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<ASType, IObjectRef>(MemberList.Destination)
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.Authority, opt => opt.Ignore())
-            .ForMember(dest => dest.LocalId, opt => opt.Ignore());
+        // cfg.CreateMap<Linkable<ASObject>, Post>()
+        // .ConvertUsing<LinkableConverter>();
 
-        cfg.CreateMap<Linkable<ASObject>, Post>()
+        cfg.CreateMap<Linkable<ASObject>, Uri>()
             .ConvertUsing<LinkableConverter>();
-        
+
         cfg.CreateMap<LinkableList<ASObject>, Note>()
             .ConvertUsing<LinkableListPostConverter>();
 
@@ -91,7 +99,124 @@ public static class AstMapper
     }
 }
 
-internal class NoteContentResolver : IMemberValueResolver<NoteObject, Post, NaturalLanguageString?, ICollection<Content>>
+[UsedImplicitly]
+internal class AudienceResolver : IMemberValueResolver<NoteObject, Post, LinkableList<ASObject>, ICollection<Audience>>
+{
+    public ICollection<Audience> Resolve(NoteObject src, Post post, LinkableList<ASObject> srcAudience, ICollection<Audience> postAudience,
+        ResolutionContext mappingContext)
+    {
+        AddToAudience(srcAudience);
+        AddToAudience(src.To);
+        AddToAudience(src.CC);
+        AddToAudience(src.BCC);
+        AddToAudience(src.BTo);
+
+        return postAudience;
+
+        void AddToAudience(LinkableList<ASObject> objects)
+        {
+            foreach (var audience in objects.LinkItems.SelectIds())
+            {
+                postAudience.Add(Audience.FromUri(audience));
+            }
+
+            foreach (var id in objects.ValueItems.SelectIds())
+            {
+                postAudience.Add(Audience.FromUri(id));
+            }
+        }
+    }
+}
+
+[UsedImplicitly]
+internal class PostContextConverter : IMemberValueResolver<ASObject, Post, LinkableList<ASObject>?, ThreadContext>
+{
+    /***
+     * We want to track a thread context. This has several benefits.
+     * 1. We can index and query on it. That's pretty great, actually.
+     * 2. We can use it to facilitate some reply-control. Actually doing reply-control is a problem for later, of course.
+     *
+     * There are several possibilities for a valid context collection
+     *
+     * src.InReplyTo is empty                       a top level post, we need to create a thread context bound to the container collection
+     * - src.Context is a Collection                <= use src.Context
+     * - src.Context is a link
+     * --- src.Context links to src.Replies         <= use src.Replies
+     * --- src.Context links to something else      ??
+     * - src.Context is another object              ??
+     * - src.Target is a collection                 <= use src.Target ??
+     * else                                         <= use src.Replies
+     *
+     * src.InReplyTo is not empty                   a reply, we need to collect heuristics to find the right context
+     * - src.Context is a Collection                <= probably right; need to walk up thread to confirm
+     * - src.Context is a link
+     * --- links to src.Target                      <= might be right; need to walk up thread to confirm
+     * --- links to something in src.InReplyTo      probably the OP
+     ***/
+    public ThreadContext Resolve(ASObject src, Post post, LinkableList<ASObject>? inReplyTo, ThreadContext thread,
+        ResolutionContext mappingContext)
+    {
+        // TODO: add checks for src.Target (needs APSharp update to add Target to Object)
+        return inReplyTo?.Any() == false
+            ? NewThread(src, post)
+            : NewReply(src, post, mappingContext);
+    }
+
+    private static ThreadContext NewThread(ASObject src, Post post)
+    {
+        if (src.Context?.TryGetValue(out var ctx) == true
+            && ctx.Is<ASCollection>()
+            && ctx.TryGetId(out var ctxId))
+        {
+            return Result(ctxId);
+        }
+
+        return Result(new Uri(src.Replies?.Id ?? src.Id!));
+
+        ThreadContext Result(Uri id)
+        {
+            var result = new ThreadContext
+            {
+                FediId = id,
+                Root = post,
+                Heuristics = new Heuristics
+                {
+                    NewThread = true
+                }
+            };
+            result.Posts.Add(post);
+            return result;
+        }
+    }
+
+    private static ThreadContext NewReply(ASObject src, Post post, ResolutionContext mappingContext)
+    {
+        var heuristic = new Heuristics
+        {
+            NewThread = false
+        };
+
+        if (src.Context?.TryGetValue(out var ctx) == true && ctx.Is<ASCollection>(out var ctxCollection))
+            heuristic.Context = ctxCollection.Id is not null ? new Uri(ctxCollection.Id) : null;
+
+        if (src.Context?.TryGetLink(out var link) == true && link.Is<ASLink>(out var ctxLink))
+            heuristic.Root = ctxLink.HRef;
+
+        string? s = null;
+        Extensions.NotNull(s);
+        return new ThreadContext
+        {
+            FediId = new Uri(Extensions.NotNull(src.Replies?.Id, src.Context?.Value?.Id,
+                src.Context?.Link?.HRef.ToString(), src.Id)),
+            Root = post,
+            Heuristics = heuristic
+        };
+    }
+}
+
+[UsedImplicitly]
+internal class
+    NoteContentResolver : IMemberValueResolver<NoteObject, Post, NaturalLanguageString?, ICollection<Content>>
 {
     ICollection<Content> IMemberValueResolver<NoteObject, Post, NaturalLanguageString?, ICollection<Content>>
         .Resolve(NoteObject source, Post post, NaturalLanguageString? sourceContent,
@@ -110,13 +235,15 @@ internal class NoteContentResolver : IMemberValueResolver<NoteObject, Post, Natu
         if (source.Preview?.TryGetValue(out var value) == true)
             note.Preview = context.Mapper.Map<string>(value);
         else
-            note.GeneratePreview();    
+            note.GeneratePreview();
         post.AddContent(note);
 
         return post.Contents;
     }
 }
 
+// The idea with this is to map from received activities to posts
+// but, that choice might honestly be better handled outside mapper logic
 internal class LinkableListPostConverter : ITypeConverter<LinkableList<ASObject>, Note>
 {
     public Note Convert(LinkableList<ASObject> source, Note destination, ResolutionContext context)
@@ -125,13 +252,23 @@ internal class LinkableListPostConverter : ITypeConverter<LinkableList<ASObject>
     }
 }
 
-internal class LinkableConverter : ITypeConverter<Linkable<ASObject>, Post>
+[UsedImplicitly]
+internal class LinkableConverter :
+    ITypeConverter<Linkable<ASObject>, Post>,
+    ITypeConverter<Linkable<ASObject>, Uri>
 {
-     public Post Convert(Linkable<ASObject> source, Post destination, ResolutionContext context)
-     {
-         throw new NotImplementedException();
-         // return source.HasLink ? new Note(source.Link) : context.Mapper.Map<Note>(source.Value);
-     }
+    Post ITypeConverter<Linkable<ASObject>, Post>
+        .Convert(Linkable<ASObject> source, Post destination, ResolutionContext context)
+    {
+        throw new NotImplementedException();
+        // return source.HasLink ? new Note(source.Link) : context.Mapper.Map<Note>(source.Value);
+    }
+
+    Uri ITypeConverter<Linkable<ASObject>, Uri>
+        .Convert(Linkable<ASObject> source, Uri destination, ResolutionContext context)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 [UsedImplicitly]
@@ -153,9 +290,9 @@ internal class ASLinkConverter : ITypeConverter<ASLink, Uri>
 }
 
 [UsedImplicitly]
-internal class PublicKeyConverter : 
-    ITypeConverter<PublicKey?, SigningKey?>, 
-    IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>, 
+internal class PublicKeyConverter :
+    ITypeConverter<PublicKey?, SigningKey?>,
+    IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>,
     ITypeConverter<string, ReadOnlyMemory<byte>>
 {
     public SigningKey? Convert(PublicKey? source, SigningKey? destination, ResolutionContext context)
@@ -185,12 +322,12 @@ internal class PublicKeyConverter :
     }
 
     IList<SigningKey> IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>
-        .Resolve(PersonActorExtension source, Models.Profile destination, PublicKey? sourceMember, 
+        .Resolve(PersonActorExtension source, Models.Profile destination, PublicKey? sourceMember,
             IList<SigningKey>? destMember, ResolutionContext context)
     {
         var key = context.Mapper.Map<SigningKey>(sourceMember);
         destMember ??= new List<SigningKey>();
-        if(key is not null) destMember.Add(key);
+        if (key is not null) destMember.Add(key);
 
         return destMember;
     }

@@ -153,5 +153,13 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 
             Assert.NotNull(mapped);
         }
+
+        [Fact]
+        public void NoItDoesnt()
+        {
+            string? s = null;
+            Assert.Throws<ArgumentOutOfRangeException>(() => Extensions.NotNull(s));
+            Assert.Throws<ArgumentOutOfRangeException>(() => Extensions.NotNull());
+        }
     }
 }

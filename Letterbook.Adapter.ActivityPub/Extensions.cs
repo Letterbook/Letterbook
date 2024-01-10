@@ -53,4 +53,14 @@ public static class Extensions
         id = default;
         return false;
     }
+
+    public static string NotNull(params string?[] args) =>
+        args.FirstOrDefault(s => s is not null)
+        ?? throw new ArgumentOutOfRangeException(nameof(args), "All of the attempted values were null");
+
+    public static IEnumerable<Uri> SelectIds(this IEnumerable<ASObject> objects) =>
+        objects.Select(o => o.Id).OfType<string>().Select(s => new Uri(s));
+
+    public static IEnumerable<Uri> SelectIds(this IEnumerable<ASLink> links) =>
+        links.Select(o => o.HRef.Uri);
 }
