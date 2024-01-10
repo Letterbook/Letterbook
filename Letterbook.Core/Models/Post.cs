@@ -1,4 +1,5 @@
-﻿using Letterbook.Core.Exceptions;
+﻿using System.Diagnostics.CodeAnalysis;
+using Letterbook.Core.Exceptions;
 using Medo;
 
 namespace Letterbook.Core.Models;
@@ -12,7 +13,14 @@ public class Post
         FediId = default!;
         Thread = default!;
     }
-    
+
+    [SetsRequiredMembers]
+    public Post(Uri fediId, ThreadContext thread) : this()
+    {
+        FediId = fediId;
+        Thread = thread;
+    }
+
     public Uuid7 Id { get; set; }
     public Uri ContentRootIdUri { get; set; }
     public required Uri FediId { get; set; }

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using ActivityPub.Types.AS;
+using ActivityPub.Types.AS.Collection;
 using ActivityPub.Types.Util;
 
 namespace Letterbook.Adapter.ActivityPub;
@@ -23,6 +24,25 @@ public static class Extensions
         id = null;
         return false;
     }
+
+    public static bool TryGetId(this Linkable<ASCollection> linkable, [NotNullWhen(true)] out Uri? id)
+    {
+        if (linkable.TryGetValue(out var value) && value.Id != null)
+        {
+            id = new Uri(value.Id);
+            return true;
+        }
+        
+        if (linkable.TryGetLink(out var link))
+        {
+            id = link.HRef;
+            return true;
+        }
+
+        id = null;
+        return false;
+    }
+
     
     public static bool TryGetId(this ASObject aso, [NotNullWhen(true)]out Uri? id)
     {

@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using ActivityPub.Types.AS;
+﻿using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Util;
@@ -61,38 +60,47 @@ public static class AstMapper
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Contents,
                 opt => opt.MapFrom<NoteContentResolver, NaturalLanguageString?>(src => src.Content))
-            .ForMember(dest => dest.Creators, opt => opt.MapFrom(src => src.AttributedTo))
-            .ForMember(dest => dest.InReplyTo, opt => opt.MapFrom(src => src.InReplyTo))
+            .ForMember(dest => dest.Creators,
+                opt => opt.MapFrom<ProfileResolver, LinkableList<ASObject>>(src => src.AttributedTo))
+            .ForMember(dest => dest.InReplyTo,
+                opt => opt.MapFrom<PostResolver, LinkableList<ASObject>?>(src => src.InReplyTo))
             .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary))
-            .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.Summary))
+            .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.Published))
             .ForMember(dest => dest.AddressedTo, opt => opt.ConvertUsing<MentionsConverter, ASObject>())
             .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Generator))
-            .ForMember(dest => dest.LikesCollection, opt => opt.MapFrom(src => src.Likes))
+            .ForMember(dest => dest.LikesCollection,
+                opt => opt.MapFrom<ProfileResolver, Linkable<ASCollection>?>(src => src.Likes))
             .ForMember(dest => dest.Likes, opt => opt.MapFrom(src => src.Likes))
-            .ForMember(dest => dest.SharesCollection, opt => opt.MapFrom(src => src.Shares))
+            .ForMember(dest => dest.SharesCollection,
+                opt => opt.MapFrom<ProfileResolver, Linkable<ASCollection>?>(src => src.Shares))
             .ForMember(dest => dest.Shares, opt => opt.MapFrom(src => src.Shares))
             .ForMember(dest => dest.ContentRootIdUri, opt => opt.Ignore())
             .ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Thread,
                 opt => opt.MapFrom<PostContextConverter, LinkableList<ASObject>?>(src => src.InReplyTo))
-            .ForMember(dest => dest.RepliesCollection, opt => opt.MapFrom(src => src.Replies))
+            .ForMember(dest => dest.RepliesCollection,
+                opt => opt.MapFrom<PostResolver, ASCollection?>(src => src.Replies))
             .ForMember(dest => dest.Replies, opt => opt.MapFrom(src => src.Replies))
-            .ForMember(dest => dest.Audience, opt => opt.MapFrom<AudienceResolver, LinkableList<ASObject>>(src => src.Audience));
+            .ForMember(dest => dest.Audience,
+                opt => opt.MapFrom<AudienceResolver, LinkableList<ASObject>>(src => src.Audience));
     }
 
     private static void ConfigureBaseTypes(IMapperConfigurationExpression cfg)
     {
-        // cfg.CreateMap<Linkable<ASObject>, Post>()
-        // .ConvertUsing<LinkableConverter>();
-
-        cfg.CreateMap<Linkable<ASObject>, Uri>()
-            .ConvertUsing<LinkableConverter>();
-
         cfg.CreateMap<LinkableList<ASObject>, Note>()
             .ConvertUsing<LinkableListPostConverter>();
 
         cfg.CreateMap<ASLink, Uri>()
-            .ConvertUsing<ASLinkConverter>();
+            .ConvertUsing<IdConverter>();
+
+        cfg.CreateMap<ASObject?, Uri?>()
+            .ConvertUsing<IdConverter>();
+
+        cfg.CreateMap<Linkable<ASObject>?, Uri?>()
+            .ConvertUsing<IdConverter>();
+
+        cfg.CreateMap<Linkable<ASCollection>?, Uri?>()
+            .ConvertUsing<IdConverter>();
 
         cfg.CreateMap<string, ReadOnlyMemory<byte>>()
             .ConvertUsing<PublicKeyConverter>();
@@ -100,9 +108,88 @@ public static class AstMapper
 }
 
 [UsedImplicitly]
+internal class ProfileResolver :
+    IMemberValueResolver<NoteObject, Post, LinkableList<ASObject>, ICollection<Models.Profile>>,
+    IMemberValueResolver<NoteObject, Post, Linkable<ASCollection>?, IList<Models.Profile>>
+{
+    public ICollection<Models.Profile> Resolve(NoteObject source, Post destination, LinkableList<ASObject> sourceMember,
+        ICollection<Models.Profile> destMember,
+        ResolutionContext context)
+    {
+        foreach (var id in sourceMember.ValueItems.SelectIds())
+        {
+            var profile = Models.Profile.CreateEmpty(id);
+            destMember.Add(profile);
+        }
+
+        foreach (var id in sourceMember.LinkItems.SelectIds())
+        {
+            var profile = Models.Profile.CreateEmpty(id);
+            destMember.Add(profile);
+        }
+
+        return destMember;
+    }
+
+    public IList<Models.Profile> Resolve(NoteObject source, Post destination, Linkable<ASCollection>? sourceMember,
+        IList<Models.Profile> destMember, ResolutionContext context)
+    {
+        if (sourceMember is null) return destMember;
+        if (sourceMember.Value is not { } value) return destMember;
+        foreach (var profile in context.Mapper.Map<ICollection<Models.Profile>>(value.Items))
+        {
+            destMember.Add(profile);
+        }
+
+        return destMember;
+    }
+}
+
+[UsedImplicitly]
+internal class PostResolver :
+    IMemberValueResolver<ASObject, Post, LinkableList<ASObject>?, Post?>,
+    IMemberValueResolver<NoteObject, Post, ASCollection?, IList<Post>>
+{
+    public Post? Resolve(ASObject source, Post destination, LinkableList<ASObject>? sourceMember, Post? destMember,
+        ResolutionContext context)
+    {
+        if (sourceMember is null) return default;
+        if (!sourceMember.First().TryGetId(out var id)) return default;
+
+        return new Post
+        {
+            FediId = id,
+            Thread = destination.Thread
+        };
+    }
+
+    public IList<Post> Resolve(NoteObject source, Post destination, ASCollection? sourceMember, IList<Post> destMember,
+        ResolutionContext context)
+    {
+        if (sourceMember is null) return destMember;
+        if (sourceMember.Items is null) return destMember;
+
+        foreach (var id in sourceMember.Items.ValueItems.SelectIds())
+        {
+            var post = new Post(fediId: id, thread: destination.Thread);
+            destMember.Add(post);
+        }
+
+        foreach (var id in sourceMember.Items.LinkItems.SelectIds())
+        {
+            var post = new Post(fediId: id, thread: destination.Thread);
+            destMember.Add(post);
+        }
+
+        return destMember;
+    }
+}
+
+[UsedImplicitly]
 internal class AudienceResolver : IMemberValueResolver<NoteObject, Post, LinkableList<ASObject>, ICollection<Audience>>
 {
-    public ICollection<Audience> Resolve(NoteObject src, Post post, LinkableList<ASObject> srcAudience, ICollection<Audience> postAudience,
+    public ICollection<Audience> Resolve(NoteObject src, Post post, LinkableList<ASObject> srcAudience,
+        ICollection<Audience> postAudience,
         ResolutionContext mappingContext)
     {
         AddToAudience(srcAudience);
@@ -254,20 +341,13 @@ internal class LinkableListPostConverter : ITypeConverter<LinkableList<ASObject>
 
 [UsedImplicitly]
 internal class LinkableConverter :
-    ITypeConverter<Linkable<ASObject>, Post>,
-    ITypeConverter<Linkable<ASObject>, Uri>
+    ITypeConverter<Linkable<ASObject>, Post>
 {
     Post ITypeConverter<Linkable<ASObject>, Post>
         .Convert(Linkable<ASObject> source, Post destination, ResolutionContext context)
     {
         throw new NotImplementedException();
         // return source.HasLink ? new Note(source.Link) : context.Mapper.Map<Note>(source.Value);
-    }
-
-    Uri ITypeConverter<Linkable<ASObject>, Uri>
-        .Convert(Linkable<ASObject> source, Uri destination, ResolutionContext context)
-    {
-        throw new NotImplementedException();
     }
 }
 
@@ -281,11 +361,29 @@ internal class MentionsConverter : IValueConverter<ASObject, ICollection<Mention
 }
 
 [UsedImplicitly]
-internal class ASLinkConverter : ITypeConverter<ASLink, Uri>
+internal class IdConverter : ITypeConverter<ASLink, Uri>,
+    ITypeConverter<ASObject?, Uri?>,
+    ITypeConverter<Linkable<ASObject>?, Uri?>,
+    ITypeConverter<Linkable<ASCollection>?, Uri?>
 {
     public Uri Convert(ASLink source, Uri destination, ResolutionContext context)
     {
         return source.HRef;
+    }
+
+    public Uri? Convert(ASObject? source, Uri? destination, ResolutionContext context)
+    {
+        return source?.Id != null ? new Uri(source.Id) : default;
+    }
+
+    public Uri? Convert(Linkable<ASObject>? source, Uri? destination, ResolutionContext context)
+    {
+        return source?.TryGetId(out var id) == true ? id : default;
+    }
+
+    public Uri? Convert(Linkable<ASCollection>? source, Uri? destination, ResolutionContext context)
+    {
+        return source?.TryGetId(out var id) == true ? id : default;
     }
 }
 
