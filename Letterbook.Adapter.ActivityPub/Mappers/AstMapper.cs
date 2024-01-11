@@ -66,7 +66,14 @@ public static class AstMapper
                 opt => opt.MapFrom<PostResolver, LinkableList<ASObject>?>(src => src.InReplyTo))
             .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.Published))
-            .ForMember(dest => dest.AddressedTo, opt => opt.ConvertUsing<MentionsConverter, ASObject>())
+            .ForMember(dest => dest.AddressedTo,
+                opt => opt.MapFrom<MentionsResolver<To>, LinkableList<ASObject>>(src => src.To))
+            .ForMember(dest => dest.AddressedTo,
+                opt => opt.MapFrom<MentionsResolver<Cc>, LinkableList<ASObject>>(src => src.CC))
+            .ForMember(dest => dest.AddressedTo,
+                opt => opt.MapFrom<MentionsResolver<BTo>, LinkableList<ASObject>>(src => src.BTo))
+            .ForMember(dest => dest.AddressedTo,
+                opt => opt.MapFrom<MentionsResolver<Bcc>, LinkableList<ASObject>>(src => src.BCC))
             .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Generator))
             .ForMember(dest => dest.LikesCollection,
                 opt => opt.MapFrom<ProfileResolver, Linkable<ASCollection>?>(src => src.Likes))
@@ -289,8 +296,6 @@ internal class PostContextConverter : IMemberValueResolver<ASObject, Post, Linka
         if (src.Context?.TryGetLink(out var link) == true && link.Is<ASLink>(out var ctxLink))
             heuristic.Root = ctxLink.HRef;
 
-        string? s = null;
-        Extensions.NotNull(s);
         return new ThreadContext
         {
             FediId = new Uri(Extensions.NotNull(src.Replies?.Id, src.Context?.Value?.Id,
@@ -351,12 +356,43 @@ internal class LinkableConverter :
     }
 }
 
-[UsedImplicitly]
-internal class MentionsConverter : IValueConverter<ASObject, ICollection<Mention>>
+internal interface IMentionDiscriminator
 {
-    public ICollection<Mention> Convert(ASObject sourceMember, ResolutionContext context)
+    public MentionVisibility Value();
+}
+internal class To : IMentionDiscriminator
+{
+    public MentionVisibility Value() => MentionVisibility.To;
+}
+internal class Cc : IMentionDiscriminator
+{
+    public MentionVisibility Value() => MentionVisibility.Cc;
+}
+internal class BTo : IMentionDiscriminator
+{
+    public MentionVisibility Value() => MentionVisibility.Bto;
+}
+internal class Bcc : IMentionDiscriminator
+{
+    public MentionVisibility Value() => MentionVisibility.Bcc;
+}
+
+
+[UsedImplicitly]
+internal class MentionsResolver<T> : IMemberValueResolver<ASObject, Post, LinkableList<ASObject>, ICollection<Mention>>
+    where T : class, IMentionDiscriminator
+{
+    private readonly T _visibility = Activator.CreateInstance<T>();
+
+    public ICollection<Mention> Resolve(ASObject src, Post dest, LinkableList<ASObject> srcMember,
+        ICollection<Mention> destMember, ResolutionContext context)
     {
-        throw new NotImplementedException();
+        foreach (var id in srcMember.ValueItems.SelectIds().Concat(srcMember.LinkItems.SelectIds()))
+        {
+            destMember.Add(new Mention(Models.Profile.CreateEmpty(id), _visibility.Value()));
+        }
+
+        return destMember;
     }
 }
 

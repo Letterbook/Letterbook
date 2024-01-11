@@ -16,7 +16,7 @@ public class Note : Content
         // Something like first paragraph or x words/characters
         // Also, probably a good idea to generate from the source text, not the rendered content
         // (that means we would need to implement a source text)
-        return Content.Substring(0, 100);
+        return Content.Substring(0, Math.Min(Content.Length, 100));
     }
 
     public override void Sanitize()

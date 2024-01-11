@@ -7,6 +7,7 @@ using AutoMapper;
 using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Fixtures;
+using Medo;
 using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.ActivityPub.Test;
@@ -149,9 +150,13 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
         [Fact]
         public void CanMapSimpleNote()
         {
-            var mapped = AstMapper.Map<Models.Post>(_simpleNote);
+            var actual = AstMapper.Map<Models.Post>(_simpleNote);
 
-            Assert.NotNull(mapped);
+            Assert.NotEqual(actual.Id, Uuid7.Empty);
+            Assert.Single(actual.Contents);
+            Assert.All(actual.Contents, content => Assert.Equal(actual.Id, content.Post.Id));
+            Assert.Equal(actual.Id, actual.Contents.First().Post.Id);
+            Assert.Equal(actual.ContentRootIdUri, actual.Contents.First().FediId);
         }
 
         [Fact]
