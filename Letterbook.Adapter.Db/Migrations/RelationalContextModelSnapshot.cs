@@ -137,7 +137,7 @@ namespace Letterbook.Adapter.Db.Migrations
                         .HasMaxLength(8)
                         .HasColumnType("character varying(8)");
 
-                    b.Property<string>("IdUri")
+                    b.Property<string>("FediId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -155,7 +155,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdUri");
+                    b.HasIndex("FediId");
 
                     b.HasIndex("PostId");
 
@@ -258,7 +258,7 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("IdUri")
+                    b.Property<string>("FediId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -290,7 +290,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasIndex("ContentRootId");
 
-                    b.HasIndex("IdUri");
+                    b.HasIndex("FediId");
 
                     b.HasIndex("InReplyToId");
 

@@ -30,7 +30,7 @@ namespace Letterbook.Adapter.Db.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    IdUri = table.Column<string>(type: "text", nullable: false),
+                    FediId = table.Column<string>(type: "text", nullable: false),
                     RootId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -50,9 +50,9 @@ namespace Letterbook.Adapter.Db.Migrations
                 column: "ThreadId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ThreadContext_IdUri",
+                name: "IX_ThreadContext_FediId",
                 table: "ThreadContext",
-                column: "IdUri");
+                column: "FediId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ThreadContext_RootId",
