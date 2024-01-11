@@ -55,52 +55,10 @@ public class Post
     public Uri? Shares { get; set; }
     public IList<Profile> SharesCollection { get; set; } = new List<Profile>();
 
-    // TODO: Post Factory
-    public static Post Create<T>(Profile creator, T content) where T : Content
-    {
-        throw new NotImplementedException();
-    }
-
-    public static Post Create<T>(Profile creator, Uri id, string? summary = null, string? preview = null,
-        Uri? source = null) where T : Content => Create<T>(new List<Profile> { creator }, id, summary, preview, source);
-
-    public static Post Create<T>(IEnumerable<Profile> creators, Uri id, string? summary = null, string? preview = null,
-        Uri? source = null) where T : Content
-    {
-        var post = new Post
-        {
-            FediId = id,
-            ContentRootIdUri = id,
-        };
-        (post.Creators as HashSet<Profile>)!.UnionWith(creators);
-        post.Contents.Add(NewContent<T>(id, summary, preview, source));
-        return post;
-    }
-
-    public T AddContent<T>(Uri canonicalUri, string? summary = null, string? preview = null, Uri? source = null)
-        where T : Content
-    {
-        var t = NewContent<T>(canonicalUri, summary, preview, source);
-        return AddContent(t);
-    }
-
     public T AddContent<T>(T content) where T : Content
     {
         if (Contents.Count == 0) ContentRootIdUri = content.FediId;
         Contents.Add(content);
         return content;
-    }
-
-    private static T NewContent<T>(Uri canonicalUri, string? summary = null, string? preview = null, Uri? source = null)
-        where T : class, IContent
-    {
-        if (Activator.CreateInstance(typeof(T), true) is not T t) 
-            throw CoreException.InternalError($"Can't create Content type {typeof(T)}");
-        t.FediId = canonicalUri;
-        t.Summary = summary;
-        t.Preview = preview;
-        t.Source = source;
-
-        return t;
     }
 }

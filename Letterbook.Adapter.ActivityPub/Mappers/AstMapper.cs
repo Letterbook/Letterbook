@@ -94,9 +94,6 @@ public static class AstMapper
 
     private static void ConfigureBaseTypes(IMapperConfigurationExpression cfg)
     {
-        cfg.CreateMap<LinkableList<ASObject>, Note>()
-            .ConvertUsing<LinkableListPostConverter>();
-
         cfg.CreateMap<ASLink, Uri>()
             .ConvertUsing<IdConverter>();
 
@@ -225,32 +222,9 @@ internal class AudienceResolver : IMemberValueResolver<NoteObject, Post, Linkabl
 [UsedImplicitly]
 internal class PostContextConverter : IMemberValueResolver<ASObject, Post, LinkableList<ASObject>?, ThreadContext>
 {
-    /***
-     * We want to track a thread context. This has several benefits.
-     * 1. We can index and query on it. That's pretty great, actually.
-     * 2. We can use it to facilitate some reply-control. Actually doing reply-control is a problem for later, of course.
-     *
-     * There are several possibilities for a valid context collection
-     *
-     * src.InReplyTo is empty                       a top level post, we need to create a thread context bound to the container collection
-     * - src.Context is a Collection                <= use src.Context
-     * - src.Context is a link
-     * --- src.Context links to src.Replies         <= use src.Replies
-     * --- src.Context links to something else      ??
-     * - src.Context is another object              ??
-     * - src.Target is a collection                 <= use src.Target ??
-     * else                                         <= use src.Replies
-     *
-     * src.InReplyTo is not empty                   a reply, we need to collect heuristics to find the right context
-     * - src.Context is a Collection                <= probably right; need to walk up thread to confirm
-     * - src.Context is a link
-     * --- links to src.Target                      <= might be right; need to walk up thread to confirm
-     * --- links to something in src.InReplyTo      probably the OP
-     ***/
     public ThreadContext Resolve(ASObject src, Post post, LinkableList<ASObject>? inReplyTo, ThreadContext thread,
         ResolutionContext mappingContext)
     {
-        // TODO: add checks for src.Target (needs APSharp update to add Target to Object)
         return inReplyTo?.Any() == false
             ? NewThread(src, post)
             : NewReply(src, post, mappingContext);
@@ -319,8 +293,7 @@ internal class
         {
             FediId = id,
             Post = post,
-            // TODO: empty content
-            // also, multiple languages
+            // TODO: multiple languages
             // or even just single languages, but with knowledge of what language is specified
             Content = sourceContent?.DefaultValue ?? ""
         };
@@ -331,28 +304,6 @@ internal class
         post.AddContent(note);
 
         return post.Contents;
-    }
-}
-
-// The idea with this is to map from received activities to posts
-// but, that choice might honestly be better handled outside mapper logic
-internal class LinkableListPostConverter : ITypeConverter<LinkableList<ASObject>, Note>
-{
-    public Note Convert(LinkableList<ASObject> source, Note destination, ResolutionContext context)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-[UsedImplicitly]
-internal class LinkableConverter :
-    ITypeConverter<Linkable<ASObject>, Post>
-{
-    Post ITypeConverter<Linkable<ASObject>, Post>
-        .Convert(Linkable<ASObject> source, Post destination, ResolutionContext context)
-    {
-        throw new NotImplementedException();
-        // return source.HasLink ? new Note(source.Link) : context.Mapper.Map<Note>(source.Value);
     }
 }
 

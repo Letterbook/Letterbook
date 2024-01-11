@@ -1,8 +1,7 @@
 ﻿namespace Letterbook.Core.Models;
 
 /// <summary>
-/// A Mention is when some kind of object (usually a Note, sometimes an Image, theoretically others) is addressed to 
-/// another individual Actor at any level of visibility.
+/// A Mention is when a Post is addressed to another individual Profile at any level of visibility.
 /// </summary>
 public class Mention : IEquatable<Mention>
 {
