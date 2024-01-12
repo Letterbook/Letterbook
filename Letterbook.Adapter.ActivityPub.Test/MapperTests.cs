@@ -1,8 +1,10 @@
 using System.Reflection;
 using ActivityPub.Types.AS;
+using ActivityPub.Types.AS.Collection;
 using ActivityPub.Types.AS.Extended.Actor;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Conversion;
+using ActivityPub.Types.Util;
 using AutoMapper;
 using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Core.Tests.Fakes;
@@ -158,13 +160,35 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
             Assert.Equal(actual.Id, actual.Contents.First().Post.Id);
             Assert.Equal(actual.ContentRootIdUri, actual.Contents.First().FediId);
         }
-
+        
         [Fact]
-        public void NoItDoesnt()
+        public void CanMapThreadFromContext()
         {
-            string? s = null;
-            Assert.Throws<ArgumentOutOfRangeException>(() => Extensions.NotNull(s));
-            Assert.Throws<ArgumentOutOfRangeException>(() => Extensions.NotNull());
+            var expected = "https://note.example/note/1/thread/";
+            _simpleNote.Context = new Linkable<ASObject>(new ASLink() { HRef = expected });
+            var actual = AstMapper.Map<Models.Post>(_simpleNote);
+
+            Assert.Equal(expected, actual.Thread.FediId.ToString());
+        }
+        
+        [Fact]
+        public void CanMapThreadFromReplies()
+        {
+            var expected = "https://note.example/note/1/thread/";
+            _simpleNote.Replies = new ASCollection { Id = expected };
+            var actual = AstMapper.Map<Models.Post>(_simpleNote);
+
+            Assert.Equal(expected, actual.Thread.FediId.ToString());
+        }
+        [Fact]
+        public void CanMapThreadPreferContext()
+        {
+            var expected = "https://note.example/note/1/thread/";
+            _simpleNote.Replies = new ASCollection { Id = expected };
+            _simpleNote.Context = new Linkable<ASObject>(new ASLink() { HRef = "https://note.example/note/3" });
+            var actual = AstMapper.Map<Models.Post>(_simpleNote);
+
+            Assert.Equal(expected, actual.Thread.FediId.ToString());
         }
     }
 }
