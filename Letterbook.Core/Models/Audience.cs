@@ -14,11 +14,10 @@ public class Audience : IEquatable<Audience>, IObjectRef
     private Audience()
     {
         Id = default!;
-        Source = default!;
     }
     
     public Uri Id { get; set; }
-    public Profile Source { get; set; }
+    public Profile? Source { get; set; }
     // LocalId isn't a meaningful concept for Audience, but it's required by IObjectRef
     public Guid? LocalId { get; set; }
     public string Authority => Id.Authority;
@@ -30,7 +29,7 @@ public class Audience : IEquatable<Audience>, IObjectRef
     /// public objects. So Letterbook infers the followers audience in this case.
     /// </summary>
     public static Audience Public => _public;
-    public static Audience FromUri(Uri id, Profile source) => new () { Id = id, Source = source};
+    public static Audience FromUri(Uri id, Profile? source = null) => new () { Id = id, Source = source};
     public static Audience Followers(Profile creator) => FromUri(creator.Followers, creator);
 
     public static Audience Subscribers(Profile creator)

@@ -1,4 +1,5 @@
-﻿using Letterbook.Core.Exceptions;
+﻿using System.Diagnostics.CodeAnalysis;
+using Letterbook.Core.Exceptions;
 using Medo;
 
 namespace Letterbook.Core.Models;
@@ -8,13 +9,20 @@ public class Post
     public Post()
     {
         Id = Uuid7.NewGuid();
-        ContentRootId = Uuid7.Empty!;
+        ContentRootIdUri = default!;
         FediId = default!;
         Thread = default!;
     }
-    
+
+    [SetsRequiredMembers]
+    public Post(Uri fediId, ThreadContext thread) : this()
+    {
+        FediId = fediId;
+        Thread = thread;
+    }
+
     public Uuid7 Id { get; set; }
-    public required Uuid7 ContentRootId { get; set; }
+    public Uri ContentRootIdUri { get; set; }
     public required Uri FediId { get; set; }
     public ThreadContext Thread { get; set; }
     public string? Summary { get; set; }
@@ -47,43 +55,10 @@ public class Post
     public Uri? Shares { get; set; }
     public IList<Profile> SharesCollection { get; set; } = new List<Profile>();
 
-    // TODO: Post Factory
-    public static Post Create<T>(Profile creator, T content) where T : Content
-    {
-        throw new NotImplementedException();
-    }
-
-    public static Post Create<T>(Profile creator, string? summary = null, string? preview = null, Uri? source = null)
-        where T : Content
-    {
-        // TODO: Canonical
-        var canonicalUri = new Uri("");
-        return Create(creator, NewContent<T>(canonicalUri, summary, preview, source));
-    }
-
-    public T AddContent<T>(Uri canonicalUri, string? summary = null, string? preview = null, Uri? source = null)
-        where T : Content
-    {
-        var t = NewContent<T>(canonicalUri, summary, preview, source);
-        return AddContent(t);
-    }
-
     public T AddContent<T>(T content) where T : Content
     {
+        if (Contents.Count == 0) ContentRootIdUri = content.FediId;
         Contents.Add(content);
         return content;
-    }
-
-    private static T NewContent<T>(Uri canonicalUri, string? summary = null, string? preview = null, Uri? source = null)
-        where T : class, IContent
-    {
-        if (Activator.CreateInstance(typeof(T), true) is not T t) 
-            throw CoreException.InternalError($"Can't create Content type {typeof(T)}");
-        t.FediId = canonicalUri;
-        t.Summary = summary;
-        t.Preview = preview;
-        t.Source = source;
-
-        return t;
     }
 }
