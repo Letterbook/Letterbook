@@ -81,24 +81,20 @@ public class UserAccountController : ControllerBase
     }
     
     [HttpPost]
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public async Task<IActionResult> Register([FromBody]RegistrationRequest registrationRequest)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+    public async Task<IActionResult> Register([FromBody]RegistrationRequest registration)
     {
-        var controller = nameof(Register);
-        _logger.LogInformation("{Controller}", controller);
-
         try
         {
-            var account = _accountService.RegisterAccount(registrationRequest.Email, registrationRequest.Handle, "password");
-            
-            // account created, now what?
+            var account = await _accountService
+                .RegisterAccount(registration.Email, registration.Handle, registration.Password);
+
+            if (account is null) return Forbid();
+
+            return await Login(new LoginRequest { Email = registration.Email, Password = registration.Password });
         }
         catch (Exception e)
         {
             return BadRequest(e);
         }
-
-        throw new NotImplementedException();
     }
 }

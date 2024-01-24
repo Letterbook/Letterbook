@@ -26,9 +26,13 @@ public interface IAccountProfileAdapter : IDisposable
     public IAsyncEnumerable<Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0);
 
     public void Add(Profile profile);
+    public void Add(Account account);
     public void AddRange(IEnumerable<Profile> profile);
+    public void AddRange(IEnumerable<Account> account);
     public void Update(Profile profile);
+    public void Update(Account account);
     public void UpdateRange(IEnumerable<Profile> profile);
+    public void UpdateRange(IEnumerable<Account> account);
     public void Delete(object record);
 
     public Task Cancel();

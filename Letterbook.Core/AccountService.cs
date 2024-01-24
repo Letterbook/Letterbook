@@ -45,6 +45,8 @@ public class AccountService : IAccountService, IDisposable
             case PasswordVerificationResult.SuccessRehashNeeded:
                 await _identityManager.ResetAccessFailedCountAsync(accountAuth);
                 accountAuth.PasswordHash = _identityManager.PasswordHasher.HashPassword(accountAuth, password);
+                _accountAdapter.Update(accountAuth);
+                await _accountAdapter.Commit();
                 return await _identityManager.GetClaimsAsync(accountAuth);
             case PasswordVerificationResult.Success:
                 await _identityManager.ResetAccessFailedCountAsync(accountAuth);
@@ -57,7 +59,7 @@ public class AccountService : IAccountService, IDisposable
         }
     }
 
-    public async Task<Account?> RegisterAccount(string email, string handle, string password)
+    public async Task<IdentityResult?> RegisterAccount(string email, string handle, string password)
     {
         var baseUri = _opts.BaseUri();
         var account = Account.CreateAccount(baseUri, email, handle);
@@ -73,7 +75,7 @@ public class AccountService : IAccountService, IDisposable
             await _accountAdapter.Commit();
             _logger.LogInformation("Created new account {AccountId}", account.Id);
             _eventService.Created(account);
-            return account;
+            return created;
         }
         
         _logger.LogWarning("Could not create new account for {Email}", account.Email);
@@ -83,13 +85,6 @@ public class AccountService : IAccountService, IDisposable
     public async Task<Account?> LookupAccount(Guid id)
     {
         return await _accountAdapter.LookupAccount(id);
-    }
-
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public async Task<Profile> LookupProfile(string queryTarget)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-    {
-        throw new NotImplementedException();
     }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
