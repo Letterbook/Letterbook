@@ -59,27 +59,22 @@ public class AccountService : IAccountService, IDisposable
         }
     }
 
-    public async Task<IdentityResult?> RegisterAccount(string email, string handle, string password)
+    public async Task<IdentityResult> RegisterAccount(string email, string handle, string password)
     {
         var baseUri = _opts.BaseUri();
         var account = Account.CreateAccount(baseUri, email, handle);
         var created = await _identityManager.CreateAsync(account, password);
+        if (!created.Succeeded) return created;
         
-        if (created.Succeeded && _accountAdapter.RecordAccount(account))
+        await _identityManager.AddClaimsAsync(account, new []
         {
-            await _identityManager.AddClaimsAsync(account, new []
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, handle),
-                new Claim(JwtRegisteredClaimNames.Email, email)
-            });
-            await _accountAdapter.Commit();
-            _logger.LogInformation("Created new account {AccountId}", account.Id);
-            _eventService.Created(account);
-            return created;
-        }
-        
-        _logger.LogWarning("Could not create new account for {Email}", account.Email);
-        return default;
+            new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, email)
+        });
+        await _accountAdapter.Commit();
+        _logger.LogInformation("Created new account {AccountId}", account.Id);
+        _eventService.Created(account);
+        return created;
     }
 
     public async Task<Account?> LookupAccount(Guid id)

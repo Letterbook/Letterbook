@@ -5,7 +5,6 @@ using Letterbook.Api.Dto;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -37,6 +36,7 @@ public class UserAccountController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> Login([FromBody]LoginRequest loginRequest)
     {
         try
@@ -81,14 +81,16 @@ public class UserAccountController : ControllerBase
     }
     
     [HttpPost]
+    [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> Register([FromBody]RegistrationRequest registration)
     {
         try
         {
-            var account = await _accountService
+            var registerAccount = await _accountService
                 .RegisterAccount(registration.Email, registration.Handle, registration.Password);
 
-            if (account is null) return Forbid();
+            if (registerAccount is null) return Forbid();
+            if (!registerAccount.Succeeded) return BadRequest(registerAccount.Errors);
 
             return await Login(new LoginRequest { Email = registration.Email, Password = registration.Password });
         }
