@@ -131,7 +131,7 @@ public class AccountService : IAccountService, IDisposable
         if (profileLink is null || accountLink is null)
         {
             _logger.LogWarning("Account {Account} and Profile {Profile} have mismatched permission links", account.Id,
-                profile.Id);
+                profile.FediId);
             return false;
         }
 

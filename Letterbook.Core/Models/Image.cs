@@ -1,4 +1,5 @@
 ﻿using System.Net.Mime;
+using Medo;
 
 namespace Letterbook.Core.Models;
 
@@ -6,7 +7,7 @@ public class Image : IExpiring, IContentRef
 {
     private Image()
     {
-        Id = default!;
+        FediId = default!;
         Creators = default!;
         Visibility = default!;
         CreatedDate = default!;
@@ -17,16 +18,16 @@ public class Image : IExpiring, IContentRef
 
     public Image(Uri id)
     {
-        Id = id;
+        FediId = id;
         CreatedDate = default;
         MimeType = default!;
         FileLocation = default!;
         Expiration = DateTime.MaxValue;
     }
     
-    public Uri Id { get; set; }
-    public Guid? LocalId { get; set; }
-    public string Authority => Id.Authority;
+    public Uri FediId { get; set; }
+    public Uuid7 Id { get; set; }
+    public string Authority => FediId.Authority;
     public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
     public DateTime CreatedDate { get; set; }
     public ActivityObjectType Type => ActivityObjectType.Image;

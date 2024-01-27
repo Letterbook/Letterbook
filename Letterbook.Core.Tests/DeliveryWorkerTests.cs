@@ -45,12 +45,12 @@ public class DeliveryWorkerTests : WithMocks, IClassFixture<JsonLdSerializerFixt
         _event =  new CloudEvent
         {
             Id = Guid.NewGuid().ToString(),
-            Data = $$"""{"type": "Test", "attributedTo": "{{_profile.Id}}"}""",
+            Data = $$"""{"type": "Test", "attributedTo": "{{_profile.FediId}}"}""",
             Type = "TestActivity",
             Subject = "TestActivity",
             Time = DateTimeOffset.UtcNow,
             [IActivityMessageService.DestinationKey] = _targetProfile.Inbox.ToString(),
-            [IActivityMessageService.ProfileKey] =  _profile.LocalId!.Value.ToShortId(),
+            [IActivityMessageService.ProfileKey] =  _profile.Id.ToId25String(),
         };
     }
 
@@ -68,7 +68,7 @@ public class DeliveryWorkerTests : WithMocks, IClassFixture<JsonLdSerializerFixt
 
         _observer.OnNext(_event);
         
-        ActivityPubAuthClientMock.Verify(m => m.SendDocument(It.IsAny<Uri>(), It.Is<string>(s => s.Contains(_profile.Id.ToString()))));
+        ActivityPubAuthClientMock.Verify(m => m.SendDocument(It.IsAny<Uri>(), It.Is<string>(s => s.Contains(_profile.FediId.ToString()))));
     }
     
     [Fact(DisplayName = "Should warn if the channel closes")]

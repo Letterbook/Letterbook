@@ -4,6 +4,7 @@ using Bogus;
 using Bogus.DataSets;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Medo;
 
 namespace Letterbook.Core.Tests.Fakes;
 
@@ -42,12 +43,12 @@ public sealed class FakeProfile : Faker<Profile>
     
     public FakeProfile() : this(new Uri(new Faker().Internet.UrlWithPath()))
     {
-        RuleFor(p => p.LocalId, f => f.Random.Guid());
+        RuleFor(profile => profile.Id, faker => Uuid7.FromGuid(faker.Random.Guid()));
     }
 
     public FakeProfile(string authority) : this(new Uri($"http://{authority}/{new Faker().Internet.UserName()}"))
     {
-        RuleFor(p => p.LocalId, f => f.Random.Guid());
+        RuleFor(profile => profile.Id, faker => Uuid7.FromGuid(faker.Random.Guid()));
     }
 
     public FakeProfile(Uri uri)
@@ -71,8 +72,8 @@ public sealed class FakeProfile : Faker<Profile>
             var following = builder.Uri;
             var profile = Profile.CreateEmpty(id);
             {
-                profile.LocalId = localId;
-                profile.Id = id;
+                profile.Id = localId;
+                profile.FediId = id;
                 profile.Handle = f.Internet.UserName();
                 profile.Inbox = inbox;
                 profile.Outbox = outbox;
@@ -101,8 +102,8 @@ public sealed class FakeProfile : Faker<Profile>
                     Created = f.Date.Past(1, DateTime.Parse("2020-01-01").ToUniversalTime()),
                     Expires = DateTimeOffset.MaxValue,
                     Family = SigningKey.KeyFamily.Rsa,
-                    LocalId = f.Random.Guid(),
-                    Id = new Uri(uri, $"actor/{profile.LocalId!.Value.ToShortId()}/public_keys/0"),
+                    Id = Uuid7.FromGuid(f.Random.Guid()),
+                    FediId = new Uri(uri, $"actor/{profile.Id.ToId25String()}/public_keys/0"),
                     PrivateKey = rsa.ExportPkcs8PrivateKey(),
                     PublicKey = rsa.ExportSubjectPublicKeyInfo(),
                     KeyOrder = 0,

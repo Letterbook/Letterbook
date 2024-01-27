@@ -51,7 +51,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
         {
             var actual = ModelMapper.Map<PersonActorExtension>(_profile);
 
-            Assert.Equal(_profile.Id.ToString(), actual.Id);
+            Assert.Equal(_profile.FediId.ToString(), actual.Id);
             Assert.Equal(_profile.Inbox.ToString(), actual.Inbox.Id);
             Assert.Equal(_profile.Outbox.ToString(), actual.Outbox.Id);
             Assert.Equal(_profile.Following.ToString(), actual.Following?.Id);
@@ -66,8 +66,8 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
             var actual = ModelMapper.Map<PersonActorExtension>(_profile);
 
             Assert.Equal(actual?.PublicKey?.PublicKeyPem, expected);
-            Assert.Equal(actual?.PublicKey?.Owner?.Value?.Id, _profile.Id.ToString());
-            Assert.Equal(actual?.PublicKey?.Id, _profile.Keys.First().Id.ToString());
+            Assert.Equal(actual?.PublicKey?.Owner?.Value?.Id, _profile.FediId.ToString());
+            Assert.Equal(actual?.PublicKey?.Id, _profile.Keys.First().FediId.ToString());
         }
 
         [Fact(Skip = "Need ModelMapper")]
@@ -75,7 +75,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
         {
             var actual = ModelMapper.Map<PersonActorExtension>(_profile);
 
-            Assert.Equal(_profile.Id.ToString(), actual.Id);
+            Assert.Equal(_profile.FediId.ToString(), actual.Id);
             Assert.Equal(_profile.Inbox.ToString(), actual.Inbox.HRef);
             Assert.Equal(_profile.Outbox.ToString(), actual.Outbox.HRef);
             Assert.Equal(_profile.Following.ToString(), actual.Following?.HRef!);
@@ -92,7 +92,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
             var actual = ModelMapper.Map<PersonActorExtension>(_profile);
 
             Assert.Equal(expectedPem, actual.PublicKey?.PublicKeyPem);
-            Assert.Equal(expectedKey.Id.ToString(), actual.PublicKey?.Id);
+            Assert.Equal(expectedKey.FediId.ToString(), actual.PublicKey?.Id);
         }
     }
 

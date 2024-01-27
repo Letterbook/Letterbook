@@ -43,7 +43,7 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
         foreach (var parsed in components)
         {
             if (!Uri.TryCreate(parsed.keyId, UriKind.Absolute, out Uri? keyId)) continue;
-            if (keyId != verificationKey.Id) continue;
+            if (keyId != verificationKey.FediId) continue;
             if (VerifySignature(parsed, verificationKey, builder)) return VerificationResult.SuccessfullyVerified;
             result = VerificationResult.SignatureMismatch;
         }

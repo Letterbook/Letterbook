@@ -16,7 +16,7 @@ public class FeedsAdapter : IFeedsAdapter
         _feedsContext = feedsContext;
         // _canceled = false;
     }
-
+    
     public async Task<int> AddToTimeline<T>(T subject, Models.Audience audience, Models.Profile? boostedBy = default)
         where T : Models.IContentRef
     {
@@ -24,12 +24,12 @@ public class FeedsAdapter : IFeedsAdapter
         var line = new Models.TimelineEntry()
         {
             Type = subject.Type,
-            EntityId = subject.Id.ToString(),
-            AudienceKey = audience.Id.ToString(),
+            EntityId = subject.FediId.ToString(),
+            AudienceKey = audience.FediId.ToString(),
             AudienceName = null,
-            CreatedBy = subject.Creators.Select(c => c.Id.ToString()).ToArray(),
+            CreatedBy = subject.Creators.Select(c => c.FediId.ToString()).ToArray(),
             Authority = subject.Authority,
-            BoostedBy = boostedBy?.Id.ToString(),
+            BoostedBy = boostedBy?.FediId.ToString(),
             CreatedDate = subject.CreatedDate
         };
 
@@ -93,7 +93,7 @@ public class FeedsAdapter : IFeedsAdapter
         return await _feedsContext.Database.ExecuteSqlAsync(
             $"""
             DELETE FROM "Feeds"
-            WHERE "EntityId" = {subject.Id.ToString()};
+            WHERE "EntityId" = {subject.FediId.ToString()};
             """);
     }
 
@@ -105,7 +105,7 @@ public class FeedsAdapter : IFeedsAdapter
     public async Task<int> RemoveFromTimelines<T>(T subject, ICollection<Models.Audience> audiences) where T : Models.IContentRef
     {
         Start();
-        var keys = audiences.Select(a => $"{a.Id}" as object);
+        var keys = audiences.Select(a => $"{a.FediId}" as object);
         var builder = new StringBuilder(
             """
             DELETE FROM "Feeds"
@@ -114,7 +114,7 @@ public class FeedsAdapter : IFeedsAdapter
             """);
         builder.AppendJoin(',', Enumerable.Range(1, audiences.Count).Select(i => $"{{{i}}}"));
         builder.Append(");");
-        var sql = FormattableStringFactory.Create(builder.ToString(), keys.Prepend(subject.Id.ToString()).ToArray());
+        var sql = FormattableStringFactory.Create(builder.ToString(), keys.Prepend(subject.FediId.ToString()).ToArray());
         
         return await _feedsContext.Database.ExecuteSqlAsync(sql);
     }
@@ -134,7 +134,7 @@ public class FeedsAdapter : IFeedsAdapter
     public IQueryable<Models.TimelineEntry> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime before,
         int limit, bool includeBoosts = true)
     {
-        var keys = audiences.Select(a => a.Id.ToString());
+        var keys = audiences.Select(a => a.FediId.ToString());
         return _feedsContext.Feeds
             .AsNoTracking()
             .Where(t => t.Time <= before)

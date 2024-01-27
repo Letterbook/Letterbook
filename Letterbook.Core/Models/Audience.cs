@@ -1,4 +1,6 @@
-﻿namespace Letterbook.Core.Models;
+﻿using Medo;
+
+namespace Letterbook.Core.Models;
 
 /// <summary>
 /// Audience is the collection or category of profiles that can view some content
@@ -8,19 +10,19 @@
 /// Audience targeting is used internally to build feeds and notifications. It's also used externally to imply
 /// visibility controls for federated content.
 /// </summary>
-public class Audience : IEquatable<Audience>, IObjectRef
+public class Audience : IEquatable<Audience>//, IObjectRef
 {
     private static Audience _public = FromUri(new Uri(Constants.ActivityPubPublicCollection), Profile.CreateEmpty(new Uri(Constants.ActivityPubPublicCollection)));
     private Audience()
     {
-        Id = default!;
+        FediId = default!;
     }
     
-    public Uri Id { get; set; }
+    public Uri FediId { get; set; }
     public Profile? Source { get; set; }
     // LocalId isn't a meaningful concept for Audience, but it's required by IObjectRef
-    public Guid? LocalId { get; set; }
-    public string Authority => Id.Authority;
+    public Uuid7 Id { get; set; }
+    public string Authority => FediId.Authority;
     public List<Profile> Members { get; set; } = new();
 
     /// <summary>
@@ -29,7 +31,7 @@ public class Audience : IEquatable<Audience>, IObjectRef
     /// public objects. So Letterbook infers the followers audience in this case.
     /// </summary>
     public static Audience Public => _public;
-    public static Audience FromUri(Uri id, Profile? source = null) => new () { Id = id, Source = source};
+    public static Audience FromUri(Uri id, Profile? source = null) => new () { FediId = id, Source = source};
     public static Audience Followers(Profile creator) => FromUri(creator.Followers, creator);
 
     public static Audience Subscribers(Profile creator)
@@ -45,13 +47,13 @@ public class Audience : IEquatable<Audience>, IObjectRef
         builder.Fragment += "boosts";
         return FromUri(builder.Uri, creator);
     }
-    public static Audience FromMention(Profile subject) => FromUri(subject.Id, subject);
+    public static Audience FromMention(Profile subject) => FromUri(subject.FediId, subject);
 
     public bool Equals(Audience? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Id.ToString().Equals(other.Id.ToString());
+        return FediId.ToString().Equals(other.FediId.ToString());
     }
 
     public override bool Equals(object? obj)
@@ -64,7 +66,7 @@ public class Audience : IEquatable<Audience>, IObjectRef
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Id.ToString());
+        return HashCode.Combine(FediId.ToString());
     }
 
     public static bool operator ==(Audience? left, Audience? right)

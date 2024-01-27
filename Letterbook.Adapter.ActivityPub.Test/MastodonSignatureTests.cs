@@ -90,9 +90,9 @@ public class MastodonSignatureTests
             Created = DateTimeOffset.UnixEpoch,
             Expires = DateTimeOffset.MaxValue,
             Family = Models.SigningKey.KeyFamily.Rsa,
-            LocalId = faker.Random.Guid(),
+            Id = faker.Random.Guid(),
             KeyOrder = 0,
-            Id = new Uri("http://letterbook.example/test/key#0"),
+            FediId = new Uri("http://letterbook.example/test/key#0"),
             Label = "Test key",
             PrivateKey = _rsa.ExportPkcs8PrivateKey(),
             PublicKey = _rsa.ExportSubjectPublicKeyInfo()
@@ -169,9 +169,9 @@ public class MastodonSignatureTests
             Created = _signingKey.Created,
             Expires = _signingKey.Expires,
             Family = _signingKey.Family,
-            LocalId = _signingKey.LocalId,
+            Id = _signingKey.Id,
             KeyOrder = _signingKey.KeyOrder,
-            Id = new Uri(keyId),
+            FediId = new Uri(keyId),
             Label = _signingKey.Label,
             PrivateKey = _signingKey.PrivateKey,
             PublicKey = _signingKey.PublicKey
