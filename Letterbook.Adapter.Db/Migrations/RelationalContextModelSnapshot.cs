@@ -103,6 +103,10 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email");
+
+                    b.HasIndex("UserName");
+
                     b.ToTable("Accounts");
                 });
 
