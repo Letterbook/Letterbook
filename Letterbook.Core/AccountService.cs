@@ -37,7 +37,7 @@ public class AccountService : IAccountService, IDisposable
         {
             throw new RateLimitException("Too many failed attempts", accountAuth.LockoutEnd.GetValueOrDefault());
         }
-
+        
         var match = _identityManager.PasswordHasher.VerifyHashedPassword(accountAuth,
             accountAuth.PasswordHash ?? string.Empty, password);
         switch (match)
@@ -45,6 +45,8 @@ public class AccountService : IAccountService, IDisposable
             case PasswordVerificationResult.SuccessRehashNeeded:
                 await _identityManager.ResetAccessFailedCountAsync(accountAuth);
                 accountAuth.PasswordHash = _identityManager.PasswordHasher.HashPassword(accountAuth, password);
+                _accountAdapter.Update(accountAuth);
+                await _accountAdapter.Commit();
                 return await _identityManager.GetClaimsAsync(accountAuth);
             case PasswordVerificationResult.Success:
                 await _identityManager.ResetAccessFailedCountAsync(accountAuth);
@@ -57,39 +59,50 @@ public class AccountService : IAccountService, IDisposable
         }
     }
 
-    public async Task<Account?> RegisterAccount(string email, string handle, string password)
+    public async Task<IdentityResult> RegisterAccount(string email, string handle, string password)
     {
         var baseUri = _opts.BaseUri();
+        // TODO: write our own unified query for this
+        if (await _identityManager.FindByNameAsync(handle) is not null)
+            return IdentityResult.Failed(new IdentityError
+            {
+                Code = "Duplicate",
+                Description = "An account with that username already exists"
+            });
+        if (await _identityManager.FindByEmailAsync(email) is not null)
+            return IdentityResult.Failed(new IdentityError
+            {
+                Code = "Duplicate",
+                Description = "An account is already registered using that email"
+            });
         var account = Account.CreateAccount(baseUri, email, handle);
-        var created = await _identityManager.CreateAsync(account, password);
-        
-        if (created.Succeeded && _accountAdapter.RecordAccount(account))
+
+        IdentityResult created;
+        try
         {
+            created = await _identityManager.CreateAsync(account, password);
+            if (!created.Succeeded) return created;
+            
             await _identityManager.AddClaimsAsync(account, new []
             {
-                new Claim(JwtRegisteredClaimNames.Sub, handle),
+                new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, email)
             });
-            await _accountAdapter.Commit();
-            _logger.LogInformation("Created new account {AccountId}", account.Id);
-            _eventService.Created(account);
-            return account;
+        }
+        catch (Exception ex)
+        {
+            throw CoreException.InvalidRequest(ex.Message, innerEx: ex);
         }
         
-        _logger.LogWarning("Could not create new account for {Email}", account.Email);
-        return default;
+        await _accountAdapter.Commit();
+        _logger.LogInformation("Created new account {AccountId}", account.Id);
+        _eventService.Created(account);
+        return created;
     }
 
     public async Task<Account?> LookupAccount(Guid id)
     {
         return await _accountAdapter.LookupAccount(id);
-    }
-
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public async Task<Profile> LookupProfile(string queryTarget)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-    {
-        throw new NotImplementedException();
     }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously

@@ -41,6 +41,8 @@ public class Program
         var coreOptions = coreSection.Get<CoreOptions>()
                           ?? throw new ArgumentException("Invalid configuration", nameof(CoreOptions));
 
+        if (!builder.Environment.IsProduction())
+            builder.Configuration.AddUserSecrets<Program>();
         // Register Serilog - Serialized Logging (configured in appsettings.json)
         builder.Host.UseSerilog((context, services, configuration) => configuration
             .ReadFrom.Configuration(context.Configuration)

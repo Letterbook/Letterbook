@@ -5,7 +5,6 @@ using Letterbook.Api.Dto;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -37,6 +36,7 @@ public class UserAccountController : ControllerBase
     }
 
     [HttpPost]
+    [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
     public async Task<IActionResult> Login([FromBody]LoginRequest loginRequest)
     {
         try
@@ -81,24 +81,22 @@ public class UserAccountController : ControllerBase
     }
     
     [HttpPost]
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public async Task<IActionResult> Register([FromBody]RegistrationRequest registrationRequest)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+    [ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> Register([FromBody]RegistrationRequest registration)
     {
-        var controller = nameof(Register);
-        _logger.LogInformation("{Controller}", controller);
-
         try
         {
-            var account = _accountService.RegisterAccount(registrationRequest.Email, registrationRequest.Handle, "password");
-            
-            // account created, now what?
+            var registerAccount = await _accountService
+                .RegisterAccount(registration.Email, registration.Handle, registration.Password);
+
+            if (registerAccount is null) return Forbid();
+            if (!registerAccount.Succeeded) return BadRequest(registerAccount.Errors);
+
+            return await Login(new LoginRequest { Email = registration.Email, Password = registration.Password });
         }
         catch (Exception e)
         {
             return BadRequest(e);
         }
-
-        throw new NotImplementedException();
     }
 }

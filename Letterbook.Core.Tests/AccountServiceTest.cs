@@ -1,6 +1,7 @@
 ﻿using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -42,7 +43,8 @@ public class AccountServiceTest : WithMocks
 
         var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password");
 
-        Assert.IsType<Account>(actual);
+        Assert.NotNull(actual);
+        Assert.True(actual.Succeeded);
     }
 
     [Fact(DisplayName = "Should publish new accounts")]
@@ -58,11 +60,12 @@ public class AccountServiceTest : WithMocks
     [Fact(DisplayName = "Should do nothing when registration fails")]
     public async Task RegisterAccountFail()
     {
-        AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(false);
+        _mockIdentityManager.UserStore.Setup(m => m.CreateAsync(It.IsAny<Account>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(IdentityResult.Failed());
 
         var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password");
 
-        Assert.Null(actual);
+        Assert.False(actual.Succeeded);
         AccountEventServiceMock.VerifyNoOtherCalls();
     }
 
