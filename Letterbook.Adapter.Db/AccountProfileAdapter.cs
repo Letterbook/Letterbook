@@ -100,9 +100,19 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         _context.Profiles.Add(profile);
     }
 
+    public void Add(Models.Account account)
+    {
+        _context.Accounts.Add(account);
+    }
+
     public void AddRange(IEnumerable<Models.Profile> profile)
     {
         _context.Profiles.AddRange(profile);
+    }
+
+    public void AddRange(IEnumerable<Models.Account> account)
+    {
+        _context.Accounts.AddRange(account);
     }
 
     public void Update(Models.Profile profile)
@@ -110,9 +120,19 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         _context.Profiles.Update(profile);
     }
 
+    public void Update(Models.Account account)
+    {
+        _context.Accounts.Update(account);
+    }
+
     public void UpdateRange(IEnumerable<Models.Profile> profile)
     {
         _context.Profiles.UpdateRange(profile);
+    }
+
+    public void UpdateRange(IEnumerable<Models.Account> account)
+    {
+        _context.Accounts.UpdateRange(account);
     }
 
     public void Delete(object record)
