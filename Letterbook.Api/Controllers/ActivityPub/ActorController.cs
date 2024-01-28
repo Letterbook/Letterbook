@@ -8,8 +8,8 @@ using Letterbook.Api.Dto;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
+using Medo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -47,10 +47,10 @@ public class ActorController : ControllerBase
     [Route("{id}")]
     public async Task<IActionResult> GetActor(string id)
     {
-        Guid localId;
+        Uuid7 localId;
         try
         {
-            localId = ShortId.ToGuid(id);
+            localId = Uuid7.FromId25String(id);
         }
         catch (Exception)
         {
@@ -109,7 +109,7 @@ public class ActorController : ControllerBase
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> PostInbox(string id, ASType activity)
     {
-        var localId = ShortId.ToGuid(id);
+        var localId = Uuid7.FromId25String(id);
         try
         {
             if (activity.Is<AcceptActivity>(out var accept))
