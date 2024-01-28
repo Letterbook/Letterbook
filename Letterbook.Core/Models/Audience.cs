@@ -22,7 +22,6 @@ public class Audience : IEquatable<Audience>//, IObjectRef
     public Profile? Source { get; set; }
     // LocalId isn't a meaningful concept for Audience, but it's required by IObjectRef
     public Uuid7 Id { get; set; }
-    public string Authority => FediId.Authority;
     public List<Profile> Members { get; set; } = new();
 
     /// <summary>
