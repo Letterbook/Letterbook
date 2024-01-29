@@ -11,12 +11,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Divergic.Logging.Xunit" Version="4.3.0" />
         <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="ILogger.Moq" Version="1.1.10" />
-        <PackageReference Include="Meziantou.Extensions.Logging.Xunit" Version="1.0.7" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.8.0">
             <PrivateAssets>all</PrivateAssets>

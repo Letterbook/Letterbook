@@ -1,12 +1,10 @@
-﻿using ActivityPub.Types.Conversion;
-using CloudNative.CloudEvents;
+﻿using CloudNative.CloudEvents;
+using Divergic.Logging.Xunit;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Fixtures;
 using Letterbook.Core.Workers;
-using Meziantou.Extensions.Logging.Xunit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -14,11 +12,9 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Core.Tests;
 
-public class DeliveryWorkerTests : WithMocks, IClassFixture<JsonLdSerializerFixture>,
-    IClassFixture<TestOutputLoggerFixture>
+public class DeliveryWorkerTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 {
     private readonly ITestOutputHelper _output;
-    private readonly TestOutputLoggerFixture _outputLogger;
     private readonly Mock<DeliveryWorker> _mockWorker;
     private readonly Mock<ILogger<DeliveryObserver>> _observerLoggerMock;
     private readonly DeliveryWorker _worker;
@@ -26,18 +22,18 @@ public class DeliveryWorkerTests : WithMocks, IClassFixture<JsonLdSerializerFixt
     private readonly Profile _targetProfile;
     private readonly CloudEvent _event;
     private readonly DeliveryObserver _observer;
+    private readonly ICacheLogger<DeliveryObserver> _observerLogger;
 
-    public DeliveryWorkerTests(ITestOutputHelper output, JsonLdSerializerFixture serializer,
-        TestOutputLoggerFixture outputLogger)
+    public DeliveryWorkerTests(ITestOutputHelper output, JsonLdSerializerFixture serializer)
     {
         _output = output;
-        _outputLogger = outputLogger;
         _output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 
-        _mockWorker = new Mock<DeliveryWorker>(outputLogger.CreateLogger<DeliveryWorker>(output),
+        _mockWorker = new Mock<DeliveryWorker>(output.BuildLoggerFor<DeliveryWorker>(),
             AccountProfileMock.Object, ActivityPubClientMock.Object);
         _mockWorker.CallBase = true;
         _worker = _mockWorker.Object;
+        _observerLogger = _output.BuildLoggerFor<DeliveryObserver>();
         _observerLoggerMock = new Mock<ILogger<DeliveryObserver>>();
 
         MockedServiceCollection.AddScoped<DeliveryWorker>(_ => _mockWorker.Object);
@@ -69,7 +65,7 @@ public class DeliveryWorkerTests : WithMocks, IClassFixture<JsonLdSerializerFixt
     [Fact(DisplayName = "Should send the AP document")]
     public void ShouldSend()
     {
-        var l = _outputLogger.CreateLogger<DeliveryObserver>(_output);
+        var l = _output.BuildLoggerFor<DeliveryObserver>();
         MockedServiceCollection.AddScoped<DeliveryWorker>(_ => _mockWorker.Object);
         var observer = new DeliveryObserver(l, MockedServiceCollection.BuildServiceProvider());
         AccountProfileMock.Setup(m => m.LookupProfile(It.IsAny<Guid>())).ReturnsAsync(_profile);
