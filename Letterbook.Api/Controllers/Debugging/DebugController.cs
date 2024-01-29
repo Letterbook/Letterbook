@@ -1,5 +1,6 @@
 ﻿using Letterbook.Core;
 using Letterbook.Core.Extensions;
+using Medo;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Letterbook.Api.Controllers.Debugging;
@@ -20,10 +21,10 @@ public class DebugController : ControllerBase
     [Route("{selfId}/follow/")]
     public async Task<IActionResult> DoFollow(string selfId, [FromBody]FollowRequest target)
     {
-        Guid localId;
+        Uuid7 localId;
         try
         {
-            localId = ShortId.ToGuid(selfId);
+            localId = Uuid7.FromId25String(selfId);
         }
         catch (Exception)
         {

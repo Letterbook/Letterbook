@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    [Migration("20240127050502_ResetMigrations")]
+    [Migration("20240128071840_ResetMigrations")]
     partial class ResetMigrations
     {
         /// <inheritdoc />
@@ -28,30 +28,30 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("AudienceProfileMembers", b =>
                 {
-                    b.Property<string>("AudiencesId")
+                    b.Property<Guid>("AudiencesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("MembersFediId")
                         .HasColumnType("text");
 
-                    b.Property<string>("MembersId")
-                        .HasColumnType("text");
+                    b.HasKey("AudiencesId", "MembersFediId");
 
-                    b.HasKey("AudiencesId", "MembersId");
-
-                    b.HasIndex("MembersId");
+                    b.HasIndex("MembersFediId");
 
                     b.ToTable("AudienceProfileMembers");
                 });
 
             modelBuilder.Entity("ImagesCreatedByProfile", b =>
                 {
-                    b.Property<string>("CreatedImagesId")
+                    b.Property<Guid>("CreatedImagesId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CreatorsFediId")
                         .HasColumnType("text");
 
-                    b.Property<string>("CreatorsId")
-                        .HasColumnType("text");
+                    b.HasKey("CreatedImagesId", "CreatorsFediId");
 
-                    b.HasKey("CreatedImagesId", "CreatorsId");
-
-                    b.HasIndex("CreatorsId");
+                    b.HasIndex("CreatorsFediId");
 
                     b.ToTable("ImagesCreatedByProfile");
                 });
@@ -115,20 +115,26 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("Letterbook.Core.Models.Audience", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FediId")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ImageId")
-                        .HasColumnType("text");
+                    b.Property<Guid?>("ImageId")
+                        .HasColumnType("uuid");
 
-                    b.Property<string>("SourceId")
+                    b.Property<string>("SourceFediId")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FediId");
+
                     b.HasIndex("ImageId");
 
-                    b.HasIndex("SourceId");
+                    b.HasIndex("SourceFediId");
 
                     b.ToTable("Audience");
                 });
@@ -180,11 +186,11 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FollowerId")
+                    b.Property<string>("FollowerFediId")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("FollowsId")
+                    b.Property<string>("FollowsFediId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -195,17 +201,17 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasIndex("Date");
 
-                    b.HasIndex("FollowerId");
+                    b.HasIndex("FollowerFediId");
 
-                    b.HasIndex("FollowsId");
+                    b.HasIndex("FollowsFediId");
 
                     b.ToTable("FollowerRelation");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.Image", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -216,12 +222,13 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<DateTime>("Expiration")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FileLocation")
+                    b.Property<string>("FediId")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("LocalId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("FileLocation")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("MimeType")
                         .IsRequired()
@@ -237,15 +244,19 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ProfileId")
-                        .HasColumnType("text");
+                    b.Property<Guid>("ProfileId")
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("Permission")
                         .HasColumnType("numeric(20,0)");
 
+                    b.Property<string>("ProfileFediId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("AccountId", "ProfileId");
 
-                    b.HasIndex("ProfileId");
+                    b.HasIndex("ProfileFediId");
 
                     b.ToTable("LinkedProfile");
                 });
@@ -308,7 +319,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("Letterbook.Core.Models.Profile", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<string>("FediId")
                         .HasColumnType("text");
 
                     b.Property<CustomField[]>("CustomFields")
@@ -335,12 +346,12 @@ namespace Letterbook.Adapter.Db.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Inbox")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<Guid?>("LocalId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Outbox")
                         .IsRequired()
@@ -358,9 +369,9 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<DateTime>("Updated")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Id");
+                    b.HasKey("FediId");
 
-                    b.HasIndex("LocalId");
+                    b.HasIndex("Id");
 
                     b.HasIndex("OwnedById");
 
@@ -369,8 +380,8 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("Letterbook.Core.Models.SigningKey", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("Created")
                         .HasColumnType("timestamp with time zone");
@@ -381,19 +392,20 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<int>("Family")
                         .HasColumnType("integer");
 
+                    b.Property<string>("FediId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("KeyOrder")
                         .HasColumnType("integer");
 
                     b.Property<string>("Label")
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("LocalId")
-                        .HasColumnType("uuid");
-
                     b.Property<byte[]>("PrivateKey")
                         .HasColumnType("bytea");
 
-                    b.Property<string>("ProfileId")
+                    b.Property<string>("ProfileFediId")
                         .HasColumnType("text");
 
                     b.Property<byte[]>("PublicKey")
@@ -402,7 +414,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProfileId");
+                    b.HasIndex("ProfileFediId");
 
                     b.ToTable("SigningKey");
                 });
@@ -563,12 +575,12 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<Guid>("CreatedPostsId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("CreatorsId")
+                    b.Property<string>("CreatorsFediId")
                         .HasColumnType("text");
 
-                    b.HasKey("CreatedPostsId", "CreatorsId");
+                    b.HasKey("CreatedPostsId", "CreatorsFediId");
 
-                    b.HasIndex("CreatorsId");
+                    b.HasIndex("CreatorsFediId");
 
                     b.ToTable("PostsCreatedByProfile");
                 });
@@ -578,12 +590,12 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<Guid>("LikedPostsId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("LikesCollectionId")
+                    b.Property<string>("LikesCollectionFediId")
                         .HasColumnType("text");
 
-                    b.HasKey("LikedPostsId", "LikesCollectionId");
+                    b.HasKey("LikedPostsId", "LikesCollectionFediId");
 
-                    b.HasIndex("LikesCollectionId");
+                    b.HasIndex("LikesCollectionFediId");
 
                     b.ToTable("PostsLikedByProfile");
                 });
@@ -593,20 +605,20 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<Guid>("SharedPostsId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("SharesCollectionId")
+                    b.Property<string>("SharesCollectionFediId")
                         .HasColumnType("text");
 
-                    b.HasKey("SharedPostsId", "SharesCollectionId");
+                    b.HasKey("SharedPostsId", "SharesCollectionFediId");
 
-                    b.HasIndex("SharesCollectionId");
+                    b.HasIndex("SharesCollectionFediId");
 
                     b.ToTable("PostsSharedByProfile");
                 });
 
             modelBuilder.Entity("PostsToAudience", b =>
                 {
-                    b.Property<string>("AudienceId")
-                        .HasColumnType("text");
+                    b.Property<Guid>("AudienceId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
@@ -639,7 +651,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasOne("Letterbook.Core.Models.Profile", null)
                         .WithMany()
-                        .HasForeignKey("MembersId")
+                        .HasForeignKey("MembersFediId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -654,7 +666,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasOne("Letterbook.Core.Models.Profile", null)
                         .WithMany()
-                        .HasForeignKey("CreatorsId")
+                        .HasForeignKey("CreatorsFediId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -667,7 +679,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasOne("Letterbook.Core.Models.Profile", "Source")
                         .WithMany()
-                        .HasForeignKey("SourceId");
+                        .HasForeignKey("SourceFediId");
 
                     b.Navigation("Source");
                 });
@@ -687,13 +699,13 @@ namespace Letterbook.Adapter.Db.Migrations
                 {
                     b.HasOne("Letterbook.Core.Models.Profile", "Follower")
                         .WithMany("FollowingCollection")
-                        .HasForeignKey("FollowerId")
+                        .HasForeignKey("FollowerFediId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Letterbook.Core.Models.Profile", "Follows")
                         .WithMany("FollowersCollection")
-                        .HasForeignKey("FollowsId")
+                        .HasForeignKey("FollowsFediId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -706,14 +718,14 @@ namespace Letterbook.Adapter.Db.Migrations
                 {
                     b.OwnsMany("Letterbook.Core.Models.Mention", "Mentions", b1 =>
                         {
-                            b1.Property<string>("ImageId")
-                                .HasColumnType("text");
+                            b1.Property<Guid>("ImageId")
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Id")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("uuid");
 
-                            b1.Property<string>("SubjectId")
+                            b1.Property<string>("SubjectFediId")
                                 .IsRequired()
                                 .HasColumnType("text");
 
@@ -722,7 +734,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                             b1.HasKey("ImageId", "Id");
 
-                            b1.HasIndex("SubjectId");
+                            b1.HasIndex("SubjectFediId");
 
                             b1.ToTable("Images_Mentions");
 
@@ -731,7 +743,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                             b1.HasOne("Letterbook.Core.Models.Profile", "Subject")
                                 .WithMany()
-                                .HasForeignKey("SubjectId")
+                                .HasForeignKey("SubjectFediId")
                                 .OnDelete(DeleteBehavior.Cascade)
                                 .IsRequired();
 
@@ -751,7 +763,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasOne("Letterbook.Core.Models.Profile", "Profile")
                         .WithMany("RelatedAccounts")
-                        .HasForeignKey("ProfileId")
+                        .HasForeignKey("ProfileFediId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -779,7 +791,7 @@ namespace Letterbook.Adapter.Db.Migrations
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("uuid");
 
-                            b1.Property<string>("SubjectId")
+                            b1.Property<string>("SubjectFediId")
                                 .IsRequired()
                                 .HasColumnType("text");
 
@@ -788,7 +800,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                             b1.HasKey("PostId", "Id");
 
-                            b1.HasIndex("SubjectId");
+                            b1.HasIndex("SubjectFediId");
 
                             b1.ToTable("Post_AddressedTo");
 
@@ -797,7 +809,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                             b1.HasOne("Letterbook.Core.Models.Profile", "Subject")
                                 .WithMany()
-                                .HasForeignKey("SubjectId")
+                                .HasForeignKey("SubjectFediId")
                                 .OnDelete(DeleteBehavior.Cascade)
                                 .IsRequired();
 
@@ -824,7 +836,7 @@ namespace Letterbook.Adapter.Db.Migrations
                 {
                     b.HasOne("Letterbook.Core.Models.Profile", null)
                         .WithMany("Keys")
-                        .HasForeignKey("ProfileId");
+                        .HasForeignKey("ProfileFediId");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.ThreadContext", b =>
@@ -890,7 +902,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasOne("Letterbook.Core.Models.Profile", null)
                         .WithMany()
-                        .HasForeignKey("CreatorsId")
+                        .HasForeignKey("CreatorsFediId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -905,7 +917,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasOne("Letterbook.Core.Models.Profile", null)
                         .WithMany()
-                        .HasForeignKey("LikesCollectionId")
+                        .HasForeignKey("LikesCollectionFediId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -920,7 +932,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasOne("Letterbook.Core.Models.Profile", null)
                         .WithMany()
-                        .HasForeignKey("SharesCollectionId")
+                        .HasForeignKey("SharesCollectionFediId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

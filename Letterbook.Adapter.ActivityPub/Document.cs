@@ -19,7 +19,7 @@ public class Document : IActivityPubDocument
         throw new NotImplementedException();
     }
 
-    public AnnounceActivity Announce(Models.Profile actor, Models.IContentRef content)
+    public AnnounceActivity Announce(Models.Profile actor, Models.Post content)
     {
         throw new NotImplementedException();
     }
@@ -29,17 +29,17 @@ public class Document : IActivityPubDocument
         throw new NotImplementedException();
     }
 
-    public CreateActivity Create(Models.Profile actor, Models.IContentRef content)
+    public CreateActivity Create(Models.Profile actor, Models.Post content)
     {
         throw new NotImplementedException();
     }
 
-    public DeleteActivity Delete(Models.Profile actor, Models.IContentRef content)
+    public DeleteActivity Delete(Models.Profile actor, Models.Post content)
     {
         throw new NotImplementedException();
     }
 
-    public DislikeActivity Dislike(Models.Profile actor, Models.IContentRef content)
+    public DislikeActivity Dislike(Models.Profile actor, Models.Post content)
     {
         throw new NotImplementedException();
     }
@@ -52,7 +52,7 @@ public class Document : IActivityPubDocument
         return doc;
     }
 
-    public LikeActivity Like(Models.Profile actor, Models.IContentRef content)
+    public LikeActivity Like(Models.Profile actor, Models.Post content)
     {
         throw new NotImplementedException();
     }
@@ -83,16 +83,16 @@ public class Document : IActivityPubDocument
         throw new NotImplementedException();
     }
 
-    public UpdateActivity Update(Models.Profile actor, Models.IContentRef content)
+    public UpdateActivity Update(Models.Profile actor, Models.Post content)
     {
         throw new NotImplementedException();
     }
 
-    private ASLink ActorLink(Models.IObjectRef contentRef)
+    private ASLink ActorLink(Models.IFederated contentRef)
     {
         return new ASLink()
         {
-            HRef = contentRef.Id
+            HRef = contentRef.FediId
         };
     }
 

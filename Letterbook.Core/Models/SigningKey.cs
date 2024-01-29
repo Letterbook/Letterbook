@@ -1,10 +1,11 @@
 ﻿using System.Security.Cryptography;
+using Medo;
 
 namespace Letterbook.Core.Models;
 
 public class SigningKey
 {
-    public Guid? LocalId { get; set; }
+    public Uuid7 Id { get; set; }
     public int KeyOrder { get; set; }
     public string? Label { get; set; }
     public KeyFamily Family { get; set; }
@@ -12,14 +13,14 @@ public class SigningKey
     public ReadOnlyMemory<byte>? PrivateKey { get; set; }
     public DateTimeOffset Created { get; set; }
     public DateTimeOffset Expires { get; set; }
-    public required Uri Id { get; set; }
+    public required Uri FediId { get; set; }
 
     public static SigningKey Rsa(int keyOrder, Uri keyUri, string label = "System generated key")
     {
         using RSA keyPair = RSA.Create();
         return new SigningKey()
         {
-            LocalId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             KeyOrder = keyOrder,
             Label = label,
             Family = KeyFamily.Rsa,
@@ -27,7 +28,7 @@ public class SigningKey
             PrivateKey = keyPair.ExportPkcs8PrivateKey(),
             Created = DateTimeOffset.UtcNow,
             Expires = DateTimeOffset.MaxValue,
-            Id = keyUri
+            FediId = keyUri
         };
     }
     
@@ -36,7 +37,7 @@ public class SigningKey
         using DSA keyPair = DSA.Create();
         return new SigningKey()
         {
-            LocalId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             KeyOrder = keyOrder,
             Label = label,
             Family = KeyFamily.Dsa,
@@ -44,7 +45,7 @@ public class SigningKey
             PrivateKey = keyPair.ExportPkcs8PrivateKey(),
             Created = DateTimeOffset.UtcNow,
             Expires = DateTimeOffset.MaxValue,
-            Id = keyUri
+            FediId = keyUri
         };
     }
     
@@ -53,7 +54,7 @@ public class SigningKey
         using ECDsa keyPair = ECDsa.Create();
         return new SigningKey()
         {
-            LocalId = Guid.NewGuid(),
+            Id = Guid.NewGuid(),
             KeyOrder = keyOrder,
             Label = label,
             Family = KeyFamily.EcDsa,
@@ -61,7 +62,7 @@ public class SigningKey
             PrivateKey = keyPair.ExportPkcs8PrivateKey(),
             Created = DateTimeOffset.UtcNow,
             Expires = DateTimeOffset.MaxValue,
-            Id = keyUri
+            FediId = keyUri
         };
     }
     
