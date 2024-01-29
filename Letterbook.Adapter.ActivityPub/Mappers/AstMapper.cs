@@ -66,6 +66,9 @@ public static class AstMapper
                 opt => opt.MapFrom<PostResolver, LinkableList<ASObject>?>(src => src.InReplyTo))
             .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.Published))
+            .ForMember(dest => dest.PublishedDate, opt => opt.MapFrom(src => src.Published))
+            .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => src.Updated))
+            .ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
             .ForMember(dest => dest.AddressedTo,
                 opt => opt.MapFrom<MentionsResolver<To>, LinkableList<ASObject>>(src => src.To))
             .ForMember(dest => dest.AddressedTo,

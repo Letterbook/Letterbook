@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Letterbook.Core.Exceptions;
+using Letterbook.Core.Extensions;
 using Medo;
 
 namespace Letterbook.Core.Models;
 
-public class Post : IFederated
+public class Post
 {
     public Post()
     {
@@ -14,6 +14,11 @@ public class Post : IFederated
         Thread = default!;
     }
 
+    /// <summary>
+    /// Construct a new post with a known or presumed ThreadContext
+    /// </summary>
+    /// <param name="fediId">FediId</param>
+    /// <param name="thread">Thread</param>
     [SetsRequiredMembers]
     public Post(Uri fediId, ThreadContext thread) : this()
     {
@@ -21,9 +26,51 @@ public class Post : IFederated
         Thread = thread;
     }
 
+    /// <summary>
+    /// Construct a new local reply post in an existing thread
+    /// </summary>
+    /// <param name="opts"></param>
+    /// <param name="parent">Post </param>
+    [SetsRequiredMembers]
+    protected Post(CoreOptions opts, Post parent)
+    {
+        ContentRootIdUri = default!;
+        Id = Uuid7.NewGuid();
+
+        FediId = new Uri(opts.BaseUri(), $"post/{Id.ToId25String()}");
+        InReplyTo = parent;
+        
+        Thread = parent.Thread;
+        Thread.Posts.Add(this);
+        parent.RepliesCollection.Add(this);
+    }
+
+    /// <summary>
+    /// Construct a new local top level Post
+    /// </summary>
+    /// <param name="opts"></param>
+    [SetsRequiredMembers]
+    public Post(CoreOptions opts)
+    {
+        var builder = new UriBuilder(opts.BaseUri());
+        Id = Uuid7.NewGuid();
+        ContentRootIdUri = default!;
+
+        builder.Path += $"post/{Id.ToId25String()}";
+        FediId = builder.Uri;
+        
+        builder.Path += "/replies";
+        Thread = new ThreadContext
+        {
+            FediId = builder.Uri,
+            Root = this,
+        };
+        Thread.Posts.Add(this);
+    }
+
     public Uuid7 Id { get; set; }
-    public Uri ContentRootIdUri { get; set; }
-    public required Uri FediId { get; set; }
+    public Uri? ContentRootIdUri { get; set; }
+    public Uri FediId { get; set; }
     public ThreadContext Thread { get; set; }
     public string? Summary { get; set; }
     public string? Preview { get; set; }
@@ -42,7 +89,10 @@ public class Post : IFederated
             ? string.Join('.', FediId.Host.Split('.').Reverse())
             : string.Join('.', FediId.Host.Split('.').Reverse()) + FediId.Port;
     public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset? PublishedDate { get; set; }
+    public DateTimeOffset? UpdatedDate { get; set; }
+    public DateTimeOffset? DeletedDate { get; set; }
     public ICollection<Content> Contents { get; set; } = new HashSet<Content>();
     public ICollection<Audience> Audience { get; set; } = new HashSet<Audience>();
     public ICollection<Mention> AddressedTo { get; set; } = new HashSet<Mention>();
@@ -57,8 +107,14 @@ public class Post : IFederated
 
     public T AddContent<T>(T content) where T : Content
     {
-        if (Contents.Count == 0) ContentRootIdUri = content.FediId;
+        if (Contents.Count == 0) SetRootContent(content);
         Contents.Add(content);
         return content;
+    }
+
+    public void SetRootContent(Content content)
+    {
+        ContentRootIdUri = content.FediId;
+        FediId = content.FediId;
     }
 }

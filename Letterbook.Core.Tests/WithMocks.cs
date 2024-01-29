@@ -1,7 +1,6 @@
 ﻿using ActivityPub.Types;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
-using Letterbook.Core.Workers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Moq;
