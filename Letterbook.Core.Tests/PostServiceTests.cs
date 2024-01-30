@@ -1,5 +1,6 @@
 ﻿using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
+using Medo;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -16,7 +17,8 @@ public class PostServiceTests : WithMocks
     {
         _output = output;
         _output.WriteLine($"Bogus seed: {Init.WithSeed()}");
-        _service = new PostService(Mock.Of<ILogger<PostService>>(), CoreOptionsMock);
+        _service = new PostService(Mock.Of<ILogger<PostService>>(), CoreOptionsMock, AccountProfileMock.Object,
+            PostAdapterMock.Object);
         _profile = new FakeProfile("letterbook.example").Generate();
     }
 
@@ -29,7 +31,10 @@ public class PostServiceTests : WithMocks
     [Fact(DisplayName = "Should create unpublished draft notes")]
     public async Task CanDraftNote()
     {
-        var actual = await _service.DraftNote(_profile, "Test content");
+        AccountProfileMock.Setup(m => m.LookupProfile(It.IsAny<Guid>()))
+            .ReturnsAsync(_profile);
+        
+        var actual = await _service.DraftNote(_profile.Id, "Test content");
 
         var expected = DateTimeOffset.Now;
         Assert.NotNull(actual);
@@ -37,5 +42,6 @@ public class PostServiceTests : WithMocks
         Assert.Equal("Test content", actual.Contents.First().Preview);
         Assert.True((actual.CreatedDate - expected).Duration() <= TimeSpan.FromSeconds(1));
         Assert.Null(actual.PublishedDate);
+        Assert.Empty(actual.Audience);
     }
 }
