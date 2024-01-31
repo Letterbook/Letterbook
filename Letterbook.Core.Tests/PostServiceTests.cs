@@ -12,6 +12,7 @@ public class PostServiceTests : WithMocks
     private readonly ITestOutputHelper _output;
     private readonly PostService _service;
     private readonly Profile _profile;
+    private readonly Post _post;
 
     public PostServiceTests(ITestOutputHelper output)
     {
@@ -20,6 +21,7 @@ public class PostServiceTests : WithMocks
         _service = new PostService(Mock.Of<ILogger<PostService>>(), CoreOptionsMock, AccountProfileMock.Object,
             PostAdapterMock.Object);
         _profile = new FakeProfile("letterbook.example").Generate();
+        _post = new FakePost(_profile);
     }
 
     [Fact]
@@ -43,5 +45,17 @@ public class PostServiceTests : WithMocks
         Assert.True((actual.CreatedDate - expected).Duration() <= TimeSpan.FromSeconds(1));
         Assert.Null(actual.PublishedDate);
         Assert.Empty(actual.Audience);
+    }
+    
+    [Fact(DisplayName = "Should create unpublished reply posts")]
+    public async Task CanDraftReply()
+    {
+        PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.IsAny<Guid>()))
+            .ReturnsAsync(_profile);
+        
+        var actual = await _service.DraftNote(_profile.Id, "Test content", _post.Id);
+
+        Assert.Equal(_post.Id, actual.InReplyTo?.Id);
     }
 }
