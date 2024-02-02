@@ -5,7 +5,7 @@ namespace Letterbook.Core;
 
 public interface IPostService
 {
-    public Task<Post> LookupPost(Uuid7 id);
+    public Task<Post?> LookupPost(Uuid7 id);
     public Task<Post> DraftNote(Uuid7 authorId, string contentSource, Uuid7? inReplyToId = default);
     public Task<Post> Draft(Post post, Uuid7? inReplyToId = default);
     public Task<Post> Update(Post post);

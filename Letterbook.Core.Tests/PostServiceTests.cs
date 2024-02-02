@@ -1,4 +1,5 @@
-﻿using Letterbook.Core.Models;
+﻿using System.Security.Cryptography;
+using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Medo;
 using Microsoft.Extensions.Logging;
@@ -57,5 +58,34 @@ public class PostServiceTests : WithMocks
         var actual = await _service.DraftNote(_profile.Id, "Test content", _post.Id);
 
         Assert.Equal(_post.Id, actual.InReplyTo?.Id);
+    }
+
+    [Fact(DisplayName = "Should update post")]
+    public async Task CanUpdate()
+    {
+        PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+        var update = new FakePost(_profile).Generate();
+        update.Id = _post.Id;
+        update.Audience.Add(Audience.Public);
+
+        var actual = await _service.Update(update);
+        Assert.Contains(Audience.Public, actual.Audience);
+    }
+    
+    [Fact(DisplayName = "Should not update sensitive fields")]
+    public async Task NoUpdateCreators()
+    {
+        var evilProfile = new FakeProfile("letterbook.example").Generate();
+        var evilDomain = new UriBuilder(_post.FediId);
+        evilDomain.Host = "letterbook.evil";
+        PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+        var update = new FakePost(evilProfile).Generate();
+        update.Id = _post.Id;
+        update.FediId = evilDomain.Uri;
+
+        var actual = await _service.Update(update);
+        Assert.DoesNotContain(evilProfile, actual.Creators);
+        Assert.NotEqual(update.FediId, actual.FediId);
+        Assert.NotEqual(update.Authority, actual.Authority);
     }
 }

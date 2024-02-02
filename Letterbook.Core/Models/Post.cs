@@ -77,6 +77,7 @@ public class Post
     public string? Source { get; set; }
     public string Hostname => FediId.Host;
 
+    private string? _authority;
     /// <summary>
     /// Authority is preprocessed this way for easy instance level moderation. It puts the host in reverse dns order.
     /// This would permit us to do fast prefix matches when filtering whole domains.
@@ -84,10 +85,14 @@ public class Post
     /// blocking social.truth.*
     /// easily covers truth.social, and also block-evasion.truth.social, and truth.social:8443
     /// </summary>
-    public string Authority =>
-        FediId.IsDefaultPort
-            ? string.Join('.', FediId.Host.Split('.').Reverse())
-            : string.Join('.', FediId.Host.Split('.').Reverse()) + FediId.Port;
+    public string Authority
+    {
+        get =>
+            _authority ??= FediId.IsDefaultPort
+                ? string.Join('.', FediId.Host.Split('.').Reverse())
+                : string.Join('.', FediId.Host.Split('.').Reverse()) + FediId.Port;
+        set => _authority = value;
+    }
     public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
     public DateTimeOffset CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTimeOffset? PublishedDate { get; set; }

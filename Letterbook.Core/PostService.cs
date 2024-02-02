@@ -1,6 +1,5 @@
 ﻿using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Medo;
 using Microsoft.Extensions.Logging;
@@ -20,7 +19,8 @@ public class PostService : IPostService
     private readonly IAccountProfileAdapter _profiles;
     private readonly IPostAdapter _posts;
 
-    public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options, IAccountProfileAdapter profiles, IPostAdapter posts)
+    public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options, IAccountProfileAdapter profiles,
+        IPostAdapter posts)
     {
         _logger = logger;
         _profiles = profiles;
@@ -28,9 +28,9 @@ public class PostService : IPostService
         _options = options.Value;
     }
 
-    public async Task<Post> LookupPost(Uuid7 id)
+    public async Task<Post?> LookupPost(Uuid7 id)
     {
-        throw new NotImplementedException();
+        return await _posts.LookupPost(id);
     }
 
     public async Task<Post> DraftNote(Uuid7 authorId, string contentSource, Uuid7? inReplyToId = default)
@@ -56,9 +56,9 @@ public class PostService : IPostService
     {
         if (inReplyToId is { } parentId)
         {
-            var parent = await _posts.LookupPost(parentId); 
-            if (parent is null) 
-                throw CoreException.MissingData($"Couldn't find post {parentId} to reply to", typeof(Post), parentId);
+            var parent = await _posts.LookupPost(parentId)
+                         ?? throw CoreException.MissingData($"Couldn't find post {parentId} to reply to", typeof(Post),
+                             parentId);
             post.InReplyTo = parent;
             post.Thread = parent.Thread;
             post.Thread.Posts.Add(post);
@@ -72,7 +72,29 @@ public class PostService : IPostService
 
     public async Task<Post> Update(Post post)
     {
-        throw new NotImplementedException();
+        // TODO: authz
+        // I think authz can be conveyed around the app with just a list of claims, as long as one of the claims is
+        // a profile, right?
+        var previous = await _posts.LookupPost(post.Id)
+                       ?? throw CoreException.MissingData($"Could not find existing post {post.Id} to update",
+                           typeof(Post), post.Id);
+        
+        // We should only update some properties, otherwise, people can just take over each other's posts or w
+        previous.Client = post.Client;
+        previous.InReplyTo = post.InReplyTo;
+        previous.Audience = post.Audience;
+        var published = previous.PublishedDate != null;
+        if(published)
+        {
+            previous.UpdatedDate = DateTimeOffset.Now;
+            // publish again, tbd
+        }
+        else previous.CreatedDate = DateTimeOffset.Now;
+
+        _posts.Update(previous);
+        await _posts.Commit();
+
+        return previous;
     }
 
     public async Task Delete(Uuid7 id)
