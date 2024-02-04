@@ -79,17 +79,23 @@ public class PostService : IPostService
                        ?? throw CoreException.MissingData($"Could not find existing post {post.Id} to update",
                            typeof(Post), post.Id);
         
-        // We should only update some properties, otherwise, people can just take over each other's posts or w
-        previous.Client = post.Client;
+        previous.Client = post.Client; // probably should come from an authz claim
         previous.InReplyTo = post.InReplyTo;
         previous.Audience = post.Audience;
+        
+        // remove all the removed contents, and add/update everything else
+        var removed = previous.Contents.Except(post.Contents).ToArray();
+        _posts.RemoveRange(removed);
+        previous.Contents = post.Contents;
+        
         var published = previous.PublishedDate != null;
-        if(published)
+        if (published)
         {
             previous.UpdatedDate = DateTimeOffset.Now;
             // publish again, tbd
         }
         else previous.CreatedDate = DateTimeOffset.Now;
+
 
         _posts.Update(previous);
         await _posts.Commit();

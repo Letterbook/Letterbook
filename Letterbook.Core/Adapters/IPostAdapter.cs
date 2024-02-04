@@ -3,7 +3,6 @@ using Medo;
 
 namespace Letterbook.Core.Adapters;
 
-#pragma warning disable CS1998
 public interface IPostAdapter
 {
     public Task<Post?> LookupPost(Uuid7 postId);
@@ -11,6 +10,10 @@ public interface IPostAdapter
     public void AddRange(IEnumerable<Post> posts);
     public void Update(Post post);
     public void UpdateRange(IEnumerable<Post> post);
+    public void Remove(Post post);
+    public void Remove(Content content);
+    public void RemoveRange(IEnumerable<Post> posts);
+    public void RemoveRange(IEnumerable<Content> contents);
     
     public Task Cancel();
     public Task Commit();
