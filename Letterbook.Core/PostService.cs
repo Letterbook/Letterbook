@@ -28,9 +28,34 @@ public class PostService : IPostService
         _options = options.Value;
     }
 
-    public async Task<Post?> LookupPost(Uuid7 id)
+    public async Task<IEnumerable<Post>> LookupPost(Uuid7 id, bool withThread = true)
     {
-        return await _posts.LookupPost(id);
+        if (withThread)
+            return await _posts.LookupThreadForPost(id);
+        var post = await _posts.LookupPost(id);
+        return post is not null
+            ? new List<Post>() { post }
+            : Enumerable.Empty<Post>();
+    }
+
+    public async Task<IEnumerable<Post>> LookupPost(Uri fediId, bool withThread = true)
+    {
+        if (withThread)
+            return await _posts.LookupThreadForPost(fediId);
+        var post = await _posts.LookupPost(fediId);
+        return post is not null
+            ? new List<Post>() { post }
+            : Enumerable.Empty<Post>();
+    }
+
+    public async Task<IEnumerable<Post>> LookupThread(Uuid7 threadId)
+    {
+        return await _posts.LookupThread(threadId);
+    }
+
+    public async Task<IEnumerable<Post>> LookupThread(Uri threadId)
+    {
+        return await _posts.LookupThread(threadId);
     }
 
     public async Task<Post> DraftNote(Uuid7 authorId, string contentSource, Uuid7? inReplyToId = default)

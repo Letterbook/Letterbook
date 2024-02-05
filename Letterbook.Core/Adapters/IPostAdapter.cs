@@ -6,6 +6,11 @@ namespace Letterbook.Core.Adapters;
 public interface IPostAdapter
 {
     public Task<Post?> LookupPost(Uuid7 postId);
+    public Task<Post?> LookupPost(Uri fediId);
+    public Task<IEnumerable<Post>> LookupThread(Uri threadId);
+    public Task<IEnumerable<Post>> LookupThread(Uuid7 threadId);
+    public Task<IEnumerable<Post>> LookupThreadForPost(Uuid7 postId);
+    public Task<IEnumerable<Post>> LookupThreadForPost(Uri postId);
     public void Add(Post post);
     public void AddRange(IEnumerable<Post> posts);
     public void Update(Post post);
