@@ -18,13 +18,15 @@ public class PostService : IPostService
     private readonly CoreOptions _options;
     private readonly IAccountProfileAdapter _profiles;
     private readonly IPostAdapter _posts;
+    private readonly IPostEventService _postEvents;
 
     public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options, IAccountProfileAdapter profiles,
-        IPostAdapter posts)
+        IPostAdapter posts, IPostEventService postEvents)
     {
         _logger = logger;
         _profiles = profiles;
         _posts = posts;
+        _postEvents = postEvents;
         _options = options.Value;
     }
 
@@ -91,7 +93,8 @@ public class PostService : IPostService
 
         _posts.Add(post);
         await _posts.Commit();
-
+        _postEvents.Created(post);
+        
         return post;
     }
 
@@ -124,16 +127,38 @@ public class PostService : IPostService
 
         _posts.Update(previous);
         await _posts.Commit();
+        _postEvents.Updated(previous);
 
         return previous;
     }
 
     public async Task Delete(Uuid7 id)
     {
-        throw new NotImplementedException();
+        var post = await _posts.LookupPost(id);
+        if (post is null) return;
+        // TODO: authz and thread root
+        post.DeletedDate = DateTimeOffset.Now;
+        _posts.Remove(post);
+        await _posts.Commit();
+        _postEvents.Deleted(post);
     }
 
     public async Task<Post> Publish(Uuid7 id, bool localOnly = false)
+    {
+        var post = await _posts.LookupPost(id);
+        if (post is null) throw CoreException.MissingData($"Can't find post {id} to publish", typeof(Post), id);
+        if (post.PublishedDate is not null)
+            throw CoreException.Duplicate($"Tried to publish post {id} that is already published", id);
+        post.PublishedDate = DateTimeOffset.Now;
+        post.CreatedDate = DateTimeOffset.Now;
+        
+        _posts.Update(post);
+        await _posts.Commit();
+        _postEvents.Published(post);
+        return post;
+    }
+
+    public async Task<Post> Receive(Post post)
     {
         throw new NotImplementedException();
     }

@@ -1,7 +1,5 @@
-﻿using System.Security.Cryptography;
-using Letterbook.Core.Models;
+﻿using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
-using Medo;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -21,7 +19,7 @@ public class PostServiceTests : WithMocks
         _output = output;
         _output.WriteLine($"Bogus seed: {Init.WithSeed()}");
         _service = new PostService(Mock.Of<ILogger<PostService>>(), CoreOptionsMock, AccountProfileMock.Object,
-            PostAdapterMock.Object);
+            PostAdapterMock.Object, PostEventServiceMock.Object);
         _fakeProfile = new FakeProfile("letterbook.example");
         _profile = _fakeProfile.Generate();
         _post = new FakePost(_profile);

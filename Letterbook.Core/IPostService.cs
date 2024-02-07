@@ -13,7 +13,26 @@ public interface IPostService
     public Task<Post> Draft(Post post, Uuid7? inReplyToId = default);
     public Task<Post> Update(Post post);
     public Task Delete(Uuid7 id);
+    /// <summary>
+    /// Publish a draft post
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="localOnly"></param>
+    /// <returns></returns>
     public Task<Post> Publish(Uuid7 id, bool localOnly = false);
+    
+    /// <summary>
+    /// Handle an inbound federated post
+    /// </summary>
+    /// <param name="post"></param>
+    /// <returns></returns>
+    public Task<Post> Receive(Post post);
+    
+    /// <summary>
+    /// Boost, reblog, repost, etc. Share a post with a new audience
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public Task Share(Uuid7 id);
     public Task Like(Uuid7 id);
     public Task<Post> AddContent(Uuid7 postId, IContent content);
