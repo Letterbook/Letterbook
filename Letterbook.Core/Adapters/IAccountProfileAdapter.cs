@@ -1,4 +1,5 @@
 ﻿using Letterbook.Core.Models;
+using Medo;
 
 namespace Letterbook.Core.Adapters;
 
@@ -12,16 +13,16 @@ public interface IAccountProfileAdapter : IDisposable
 
     public bool RecordAccount(Account account);
     public Task<bool> RecordAccounts(IEnumerable<Account> accounts);
-    public Task<Account?> LookupAccount(Guid id);
+    public Task<Account?> LookupAccount(Uuid7 id);
     public IQueryable<Account> SearchAccounts();
 
     public Task<bool> AnyProfile(string handle);
-    public Task<Profile?> LookupProfile(Guid localId);
+    public Task<Profile?> LookupProfile(Uuid7 localId);
     public Task<Profile?> LookupProfile(Uri id);
     
     // Lookup Profile including relations to another profile
     public Task<Profile?> LookupProfileWithRelation(Uri id, Uri relationId);
-    public Task<Profile?> LookupProfileWithRelation(Guid localId, Uri relationId);
+    public Task<Profile?> LookupProfileWithRelation(Uuid7 localId, Uri relationId);
     
     public IAsyncEnumerable<Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0);
 

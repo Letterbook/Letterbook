@@ -11,9 +11,13 @@ public interface IPostAdapter
     public Task<IEnumerable<Post>> LookupThread(Uuid7 threadId);
     public Task<IEnumerable<Post>> LookupThreadForPost(Uuid7 postId);
     public Task<IEnumerable<Post>> LookupThreadForPost(Uri postId);
+    public Task<Profile?> LookupProfile(Uuid7 profileId);
+    public Task<Profile?> LookupProfile(Uri profileId);
     public void Add(Post post);
+    public void Add(Profile profile);
     public void AddRange(IEnumerable<Post> posts);
     public void Update(Post post);
+    public void Update(Profile profile);
     public void UpdateRange(IEnumerable<Post> post);
     public void Remove(Post post);
     public void Remove(Content content);

@@ -5,6 +5,7 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Fixtures;
 using Letterbook.Core.Workers;
+using Medo;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -68,7 +69,7 @@ public class DeliveryWorkerTests : WithMocks, IClassFixture<JsonLdSerializerFixt
         var l = _output.BuildLoggerFor<DeliveryObserver>();
         MockedServiceCollection.AddScoped<DeliveryWorker>(_ => _mockWorker.Object);
         var observer = new DeliveryObserver(l, MockedServiceCollection.BuildServiceProvider());
-        AccountProfileMock.Setup(m => m.LookupProfile(It.IsAny<Guid>())).ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.IsAny<Uuid7>())).ReturnsAsync(_profile);
         
         observer.OnNext(_event);
 
@@ -79,7 +80,7 @@ public class DeliveryWorkerTests : WithMocks, IClassFixture<JsonLdSerializerFixt
     [Fact(DisplayName = "Should warn if the channel closes")]
     public void ShouldLogComplete()
     {
-        AccountProfileMock.Setup(m => m.LookupProfile(It.IsAny<Guid>())).ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.IsAny<Uuid7>())).ReturnsAsync(_profile);
 
         _observer.OnCompleted();
 
@@ -89,7 +90,7 @@ public class DeliveryWorkerTests : WithMocks, IClassFixture<JsonLdSerializerFixt
     [Fact(DisplayName = "Should log error if the channel has an error")]
     public void ShouldLogError()
     {
-        AccountProfileMock.Setup(m => m.LookupProfile(It.IsAny<Guid>())).ReturnsAsync(_profile);
+        AccountProfileMock.Setup(m => m.LookupProfile(It.IsAny<Uuid7>())).ReturnsAsync(_profile);
 
         _observer.OnError(new Exception("Test exception"));
 

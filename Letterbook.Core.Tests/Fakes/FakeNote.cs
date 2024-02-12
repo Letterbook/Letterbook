@@ -14,7 +14,7 @@ public class FakeNote : Faker<Note>
         RuleFor(note => note.Post, () => _post);
         RuleFor(note => note.Id, faker => faker.Random.Uuid7());
         RuleFor(note => note.FediId, faker => faker.FediId(_post.FediId.Authority, "note"));
-        RuleFor(note => note.Content, faker => faker.Lorem.Paragraph());
+        RuleFor(note => note.Text, faker => faker.Lorem.Paragraph());
         FinishWith((faker, note) => note.GeneratePreview());
     }
 }

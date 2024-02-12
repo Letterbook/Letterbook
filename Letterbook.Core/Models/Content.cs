@@ -1,10 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Letterbook.Core.Extensions;
+﻿using Letterbook.Core.Extensions;
 using Medo;
 
 namespace Letterbook.Core.Models;
 
-public abstract class Content : IContent
+public abstract class Content : IContent, IEquatable<Content>
 {
     protected Content()
     {
@@ -31,5 +30,38 @@ public abstract class Content : IContent
     public void SetLocalFediId(CoreOptions opts)
     {
         FediId = LocalId(this, opts);
+    }
+
+    public bool Equals(Content? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Id.Equals(other.Id) && FediId.Equals(other.FediId);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((Content)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        var hashCode = new HashCode();
+        hashCode.Add(Id);
+        hashCode.Add(FediId);
+        return hashCode.ToHashCode();
+    }
+
+    public static bool operator ==(Content? left, Content? right)
+    {
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(Content? left, Content? right)
+    {
+        return !Equals(left, right);
     }
 }

@@ -4,7 +4,7 @@ using Medo;
 
 namespace Letterbook.Core.Models;
 
-public class Post
+public class Post : IFederated
 {
     public Post()
     {
@@ -98,6 +98,7 @@ public class Post
     public DateTimeOffset? PublishedDate { get; set; }
     public DateTimeOffset? UpdatedDate { get; set; }
     public DateTimeOffset? DeletedDate { get; set; }
+    public DateTimeOffset LastSeenDate { get; set; } = DateTimeOffset.Now;
     public ICollection<Content> Contents { get; set; } = new HashSet<Content>();
     public ICollection<Audience> Audience { get; set; } = new HashSet<Audience>();
     public ICollection<Mention> AddressedTo { get; set; } = new HashSet<Mention>();

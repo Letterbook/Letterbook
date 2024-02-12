@@ -6,14 +6,14 @@
 /// </summary>
 public class Note : Content
 {
-    public required string Content { get; set; }
+    public required string Text { get; set; }
     public override string Type => "Note";
 
     public override string? GeneratePreview()
     {
         // TODO: implement this in a less naive way
         // Something like first paragraph or x words/characters
-        Preview = Content[..Math.Min(Content.Length, 100)];
+        Preview = Text[..Math.Min(Text.Length, 100)];
         return Preview;
     }
 

@@ -145,6 +145,13 @@ public class CoreException : Exception
         return ex;
     }
 
+    public static CoreException MissingData<T>(string message, object? id, Exception? innerEx = null,
+        [CallerMemberName] string name = "",
+        [CallerFilePath] string path = "",
+        // ReSharper disable ExplicitCallerInfoArgument
+        [CallerLineNumber] int line = -1) => MissingData(message, typeof(T), id, innerEx, name, path, line);
+        // ReSharper restore ExplicitCallerInfoArgument
+
     public static CoreException InternalError(string message, Exception? innerEx = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
