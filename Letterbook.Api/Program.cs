@@ -1,8 +1,6 @@
 using System.Net;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
-using ActivityPub.Types.Conversion;
-using DarkLink.Web.WebFinger.Server;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
@@ -10,6 +8,7 @@ using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Authorization;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Workers;
@@ -119,6 +118,7 @@ public class Program
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
         builder.Services.AddScoped<IActivityMessageService, ActivityMessageService>();
+        builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
         // Register Workers
         builder.Services.AddScoped<SeedAdminWorker>();
