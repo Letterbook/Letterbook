@@ -27,6 +27,8 @@ public class RelationalContext : DbContext
     public DbSet<Image> Images { get; set; }
     public DbSet<Profile> Profiles { get; set; }
     public DbSet<Account> Accounts { get; set; }
+    public DbSet<Post> Posts { get; set; }
+    public DbSet<ThreadContext> Threads { get; set; }
 
     // Called by the designer to create and run migrations
     internal RelationalContext(DbContextOptions<RelationalContext> context) : base(context)

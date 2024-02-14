@@ -1,8 +1,6 @@
 using System.Net;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
-using ActivityPub.Types.Conversion;
-using DarkLink.Web.WebFinger.Server;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
@@ -129,6 +127,7 @@ public class Program
 
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
+        builder.Services.AddScoped<IPostAdapter, PostAdapter>();
         builder.Services.AddRxMessageBus();
         builder.Services.AddSingleton<IActivityPubDocument, Document>();
         builder.Services.AddDbContext<RelationalContext>();
