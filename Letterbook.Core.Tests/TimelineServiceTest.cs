@@ -353,6 +353,7 @@ public class TimelineServiceTest : WithMocks
     [Fact(DisplayName = "HandleDelete should remove the deleted post from all feeds", Skip = "Broken")]
     public void RemoveFromFeedsOnDelete()
     {
+
         _timeline.HandleDelete(TestPost);
 
         _feeds.Verify(m => m.RemoveFromTimelines(TestPost), Times.Once);

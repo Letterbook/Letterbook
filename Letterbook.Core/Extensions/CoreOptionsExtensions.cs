@@ -4,6 +4,9 @@ namespace Letterbook.Core.Extensions;
 
 public static class CoreOptionsExtensions
 {
+    public static bool HasLocalAuthority(this Uri id, CoreOptions core) =>
+        core.BaseUri().Authority == id.Authority;
+    
     public static bool HasLocalAuthority(this IFederated subject, CoreOptions core) =>
         core.BaseUri().Authority == subject.Authority;
 

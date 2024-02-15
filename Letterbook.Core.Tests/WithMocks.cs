@@ -1,7 +1,6 @@
 ﻿using ActivityPub.Types;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
-using Letterbook.Core.Workers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -11,6 +10,7 @@ namespace Letterbook.Core.Tests;
 public abstract class WithMocks
 {
     protected Mock<IActivityAdapter> ActivityAdapterMock;
+    protected Mock<IPostAdapter> PostAdapterMock;
     protected Mock<IAccountProfileAdapter> AccountProfileMock;
     protected Mock<IMessageBusAdapter> MessageBusAdapterMock;
     protected Mock<IAccountEventService> AccountEventServiceMock;
@@ -20,17 +20,20 @@ public abstract class WithMocks
     protected IOptions<CoreOptions> CoreOptionsMock;
     protected Mock<HttpMessageHandler> HttpMessageHandlerMock;
     protected ServiceCollection MockedServiceCollection;
+    protected Mock<IPostEventService> PostEventServiceMock;
 
     protected WithMocks()
     {
         HttpMessageHandlerMock = new Mock<HttpMessageHandler>();
         ActivityAdapterMock = new Mock<IActivityAdapter>();
+        PostAdapterMock = new Mock<IPostAdapter>();
         AccountProfileMock = new Mock<IAccountProfileAdapter>();
         MessageBusAdapterMock = new Mock<IMessageBusAdapter>();
         AccountEventServiceMock = new Mock<IAccountEventService>();
         ActivityPubClientMock = new Mock<IActivityPubClient>();
         ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
         ProfileServiceMock = new Mock<IProfileService>();
+        PostEventServiceMock = new Mock<IPostEventService>();
         
         ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
         var mockOptions = new CoreOptions
