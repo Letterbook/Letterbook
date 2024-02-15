@@ -26,7 +26,16 @@ public class CoreException : Exception
         return ((ErrorCodes)HResult & code) == code;
     }
 
-    // Indicates creating a new resource would conflict with an existing resource
+    /// <summary>
+    /// A new resource would conflict with an existing resource
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="id"></param>
+    /// <param name="innerEx"></param>
+    /// <param name="name"></param>
+    /// <param name="path"></param>
+    /// <param name="line"></param>
+    /// <returns></returns>
     public static CoreException Duplicate(string message, object id, Exception? innerEx = null,
         [CallerMemberName] string name="",
         [CallerFilePath] string path="",
@@ -42,7 +51,16 @@ public class CoreException : Exception
         return ex;
     }
 
-    // Indicates that the request is not semantically valid or violates some application constraint
+    /// <summary>
+    /// The request is not semantically valid or has violated an application constraint 
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="details"></param>
+    /// <param name="innerEx"></param>
+    /// <param name="name"></param>
+    /// <param name="path"></param>
+    /// <param name="line"></param>
+    /// <returns></returns>
     public static CoreException InvalidRequest(string message, IDictionary<string, object>? details = null, Exception? innerEx = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
@@ -74,7 +92,17 @@ public class CoreException : Exception
         return InvalidRequest(message, details, innerEx, name, path, line);
     }
 
-    // Indicates the server has been asked to modify an object it does not control
+    /// <summary>
+    /// The server has been asked to modify an object it does not control
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="target"></param>
+    /// <param name="source"></param>
+    /// <param name="innerEx"></param>
+    /// <param name="name"></param>
+    /// <param name="path"></param>
+    /// <param name="line"></param>
+    /// <returns></returns>
     public static CoreException WrongAuthority(string message, Uri target, Uri? source = null, Exception? innerEx = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
@@ -91,7 +119,17 @@ public class CoreException : Exception
         return ex;
     }
     
-    // Indicates some required data could not be found
+    /// <summary>
+    /// Required data was not available
+    /// </summary>
+    /// <param name="message"></param>
+    /// <param name="type"></param>
+    /// <param name="id"></param>
+    /// <param name="innerEx"></param>
+    /// <param name="name"></param>
+    /// <param name="path"></param>
+    /// <param name="line"></param>
+    /// <returns></returns>
     public static CoreException MissingData(string message, Type type, object? id, Exception? innerEx = null,
         [CallerMemberName] string name = "",
         [CallerFilePath] string path = "",
@@ -106,6 +144,13 @@ public class CoreException : Exception
 
         return ex;
     }
+
+    public static CoreException MissingData<T>(string message, object? id, Exception? innerEx = null,
+        [CallerMemberName] string name = "",
+        [CallerFilePath] string path = "",
+        // ReSharper disable ExplicitCallerInfoArgument
+        [CallerLineNumber] int line = -1) => MissingData(message, typeof(T), id, innerEx, name, path, line);
+        // ReSharper restore ExplicitCallerInfoArgument
 
     public static CoreException InternalError(string message, Exception? innerEx = null,
         [CallerMemberName] string name = "",

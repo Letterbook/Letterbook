@@ -1,4 +1,5 @@
 ﻿using Letterbook.Core.Adapters;
+using Medo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
@@ -28,7 +29,7 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         throw new NotImplementedException();
     }
 
-    public Task<Models.Account?> LookupAccount(Guid id)
+    public Task<Models.Account?> LookupAccount(Uuid7 id)
     {
         throw new NotImplementedException();
     }
@@ -48,7 +49,7 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         return _context.Profiles.AnyAsync(profile => profile.FediId == id);
     }
 
-    public Task<Models.Profile?> LookupProfile(Guid localId)
+    public Task<Models.Profile?> LookupProfile(Uuid7 localId)
     {
         return _context.Profiles
             .Include(profile => profile.Keys)
@@ -78,7 +79,7 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         return WithRelation(_context.Profiles.Where(profile => profile.FediId == id), relationId);
     }
 
-    public Task<Models.Profile?> LookupProfileWithRelation(Guid localId, Uri relationId)
+    public Task<Models.Profile?> LookupProfileWithRelation(Uuid7 localId, Uri relationId)
     {
         return WithRelation(_context.Profiles.Where(profile => profile.Id == localId), relationId);
     }
