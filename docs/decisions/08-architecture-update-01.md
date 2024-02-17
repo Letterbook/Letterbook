@@ -127,6 +127,7 @@ There are some obvious categorical feature gaps that will require new services t
 * notifications
 * moderation
 * web and streaming
+* chat
 * likely other things I'm forgetting at the moment
 
 ## Discussion
