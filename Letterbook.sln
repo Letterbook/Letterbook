@@ -47,6 +47,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Decisions", "Decisions", "{
 		docs\decisions\05-integration-tests.md = docs\decisions\05-integration-tests.md
 		docs\decisions\06-code-review.md = docs\decisions\06-code-review.md
 		docs\decisions\07-posts-data-model.md = docs\decisions\07-posts-data-model.md
+		docs\decisions\08-architecture-update-01.md = docs\decisions\08-architecture-update-01.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.RxMessageBus", "Letterbook.Adapter.RxMessageBus\Letterbook.Adapter.RxMessageBus.csproj", "{FD68DA55-DCCF-4F8B-AFBB-C1383E9C58A0}"
