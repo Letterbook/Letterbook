@@ -122,7 +122,12 @@ In practice, ActivityPub requires some asynchronous message exchanges, often in 
 
 ## Future Services
 
-There are some obvious categorical feature gaps that will require new services to cover. We have no handling for any kind of multimedia, or any kind of files whatsoever. We'll need file and media services; services to handle notifications; moderation services; and web and streaming. There's likely other things I'm forgetting at the moment. Which is to say, the software architecture is going to grow a lot over time. Hopefully a short time, at that.
+There are some obvious categorical feature gaps that will require new services to cover. Which is to say, the software architecture is going to grow a lot over time. Hopefully a short time, at that. For example, we'll need
+* file and media services
+* notifications
+* moderation
+* web and streaming
+* likely other things I'm forgetting at the moment
 
 ## Discussion
 
