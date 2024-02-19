@@ -136,4 +136,9 @@ There are some obvious categorical feature gaps that will require new services t
 
 Sometimes a feature could reasonably be provided by more than one service. For instance, Accounts and Profiles are closely related concepts. Posts and Profiles will both be very closely tied with moderation. It's reasonable to expect that some features at the boundaries of these services might not clearly belong to one service or the other. Resolving that ambiguity is more art than science. It may be tempting to have services depend on each other. That's usually good software engineering practice. But, there's some risk that could introduce redundant queries or API calls, so it's something that should be done with care. If possible, it's likely better to just choose one or the other of the services to perform that behavior. If that's not possible, then you should condsider refactoring the shared behavior into a dedicated class with minimal dependencies, and allow both services to use it from there.
 
+### PR Comments
+
+[See the original PR][pr-170] for some additional context and tangential discussion
+
 [adr-02]: ./02-architecture-design-patterns.md
+[pr-170]: https://github.com/Letterbook/Letterbook/pull/170
