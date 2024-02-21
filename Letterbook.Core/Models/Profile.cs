@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
+using Medo;
 
 namespace Letterbook.Core.Models;
 
@@ -28,9 +29,9 @@ public class Profile : IObjectRef, IEquatable<Profile>
     }
     
     // Constructor for local profiles
-    private Profile(Uri baseUri, Guid id) : this()
+    private Profile(Uri baseUri, Uuid7 id) : this()
     {
-        Id = new Uri(baseUri, $"/actor/{id.ToShortId()}");
+        Id = new Uri(baseUri, $"/actor/{id.ToId25String()}");
         Handle = string.Empty;
         DisplayName = string.Empty;
         Description = string.Empty;
@@ -68,7 +69,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
     public Uri? SharedInbox { get; set; }
     public Uri Followers { get; set; }
     public Uri Following { get; set; }
-    public Guid? LocalId { get; set; }
+    public Uuid7 LocalId { get; set; }
     public string Authority => Id.Authority;
     public string Handle { get; set; }
     public string DisplayName { get; set; }
@@ -167,7 +168,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
     // The only use case I'm imagining for a service is to represent the server itself
     public static Profile CreateIndividual(Uri baseUri, string handle)
     {
-        var localId = Guid.NewGuid();
+        var localId = Uuid7.NewUuid7();
         var profile = new Profile(baseUri, localId)
         {
             Type = ActivityActorType.Person,

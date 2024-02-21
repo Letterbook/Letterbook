@@ -1,4 +1,6 @@
-﻿namespace Letterbook.Core.Models;
+﻿using Medo;
+
+namespace Letterbook.Core.Models;
 
 /// <summary>
 /// IObjectRef is the set of identifiers that we need to locate anything that could be an ActivityPub Object
@@ -9,6 +11,6 @@
 public interface IObjectRef
 {
     public Uri Id { get; set; }
-    public Guid? LocalId { get; set; }
+    public Uuid7 LocalId { get; set; }
     public string Authority { get; }
 }

@@ -52,7 +52,7 @@ public class ActivityMessageService : IActivityMessageService
             Subject = subject,
             Time = DateTimeOffset.UtcNow,
             [IActivityMessageService.DestinationKey] = inbox.ToString(),
-            [IActivityMessageService.ProfileKey] = onBehalfOf?.LocalId?.ToShortId() ?? "",
+            [IActivityMessageService.ProfileKey] = onBehalfOf?.LocalId.ToId25String(),
             ["ltrauth"] = "",
         };
     }

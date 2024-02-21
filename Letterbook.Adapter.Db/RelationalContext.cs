@@ -24,7 +24,6 @@ public class RelationalContext : DbContext
 {
     private readonly DbOptions _config;
     public DbSet<Note> Notes { get; set; }
-    public DbSet<Image> Images { get; set; }
     public DbSet<Profile> Profiles { get; set; }
     public DbSet<Account> Accounts { get; set; }
 

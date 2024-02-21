@@ -1,10 +1,11 @@
 ﻿using System.Security.Cryptography;
+using Medo;
 
 namespace Letterbook.Core.Models;
 
 public class SigningKey
 {
-    public Guid? LocalId { get; set; }
+    public Uuid7 LocalId { get; set; }
     public int KeyOrder { get; set; }
     public string? Label { get; set; }
     public KeyFamily Family { get; set; }
@@ -19,7 +20,7 @@ public class SigningKey
         using RSA keyPair = RSA.Create();
         return new SigningKey()
         {
-            LocalId = Guid.NewGuid(),
+            LocalId = Uuid7.NewUuid7(),
             KeyOrder = keyOrder,
             Label = label,
             Family = KeyFamily.Rsa,
@@ -36,7 +37,7 @@ public class SigningKey
         using DSA keyPair = DSA.Create();
         return new SigningKey()
         {
-            LocalId = Guid.NewGuid(),
+            LocalId = Uuid7.NewUuid7(),
             KeyOrder = keyOrder,
             Label = label,
             Family = KeyFamily.Dsa,
@@ -53,7 +54,7 @@ public class SigningKey
         using ECDsa keyPair = ECDsa.Create();
         return new SigningKey()
         {
-            LocalId = Guid.NewGuid(),
+            LocalId = Uuid7.NewUuid7(),
             KeyOrder = keyOrder,
             Label = label,
             Family = KeyFamily.EcDsa,

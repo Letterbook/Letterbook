@@ -1,4 +1,6 @@
-﻿namespace Letterbook.Core.Models;
+﻿using Medo;
+
+namespace Letterbook.Core.Models;
 
 /// <summary>
 /// Audience is the collection or category of profiles that can view some content
@@ -19,7 +21,7 @@ public class Audience : IEquatable<Audience>, IObjectRef
     public Uri Id { get; set; }
     public Profile? Source { get; set; }
     // LocalId isn't a meaningful concept for Audience, but it's required by IObjectRef
-    public Guid? LocalId { get; set; }
+    public Uuid7 LocalId { get; set; }
     public string Authority => Id.Authority;
     public List<Profile> Members { get; set; } = new();
 

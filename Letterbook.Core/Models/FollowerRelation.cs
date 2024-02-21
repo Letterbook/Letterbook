@@ -1,4 +1,5 @@
 ﻿using Letterbook.Core.Values;
+using Medo;
 
 namespace Letterbook.Core.Models;
 
@@ -39,7 +40,7 @@ public class FollowerRelation : IObjectRef
         get => Follower.Id;
         set => Follower.Id = value;
     }
-    Guid? IObjectRef.LocalId
+    Uuid7 IObjectRef.LocalId
     {
         get => Follower.LocalId;
         set => Follower.LocalId = value;

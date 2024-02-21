@@ -1,7 +1,5 @@
-﻿using System.Security.Cryptography;
-using Letterbook.Adapter.Db.IntegrationTests.Fixtures;
+﻿using Letterbook.Adapter.Db.IntegrationTests.Fixtures;
 using Letterbook.Core.Models;
-using Letterbook.Core.Tests.Fakes;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -84,7 +82,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "Should find a profile by LocalId")]
     public async Task LookupProfileTestLocalId()
     {
-        var actual = await _adapter.LookupProfile(_profiles[0].LocalId!.Value);
+        var actual = await _adapter.LookupProfile(_profiles[0].LocalId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
@@ -94,7 +92,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "Should find related profiles by LocalId")]
     public async Task LookupProfileForFollowingTestLocalId()
     {
-        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].LocalId!.Value, _profiles[4].Id);
+        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].LocalId, _profiles[4].Id);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
@@ -118,7 +116,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "LookupProfileWithRelation should not permit additional lazy loading")]
     public async Task LookupProfileForFollowingNoLazyLoad()
     {
-        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].LocalId!.Value, _profiles[4].Id);
+        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].LocalId, _profiles[4].Id);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
