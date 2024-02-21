@@ -52,13 +52,13 @@ public class ActorControllerTests : WithMocks
     public async Task TestFollowAccept()
     {
         var activity = _document.Follow(_remoteProfile, _profile);
-        activity.Object.Add(_profile.FediId);
+        activity.Object.Add(_profile.Id);
 
         ProfileServiceMock.Setup(service =>
-                service.ReceiveFollowRequest(_profile.Id, _remoteProfile.FediId, It.IsAny<Uri?>()))
+                service.ReceiveFollowRequest(_profile.LocalId!.Value, _remoteProfile.Id, It.IsAny<Uri?>()))
             .ReturnsAsync(BuildRelation(FollowState.Accepted));
 
-        var response = await _controller.PostInbox(_profile.Id.ToId25String(), activity);
+        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
 
         Assert.IsType<AcceptedResult>(response);
     }
@@ -67,13 +67,13 @@ public class ActorControllerTests : WithMocks
     public async Task TestFollowTentativeAccept()
     {
         var activity = _document.Follow(_remoteProfile, _profile);
-        activity.Object.Add(_profile.FediId);
+        activity.Object.Add(_profile.Id);
 
         ProfileServiceMock.Setup(service =>
-                service.ReceiveFollowRequest(_profile.Id, _remoteProfile.FediId, It.IsAny<Uri?>()))
+                service.ReceiveFollowRequest(_profile.LocalId!.Value, _remoteProfile.Id, It.IsAny<Uri?>()))
             .ReturnsAsync(BuildRelation(FollowState.Pending));
 
-        var response = await _controller.PostInbox(_profile.Id.ToId25String(), activity);
+        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
 
         Assert.IsType<AcceptedResult>(response);
     }
@@ -82,13 +82,13 @@ public class ActorControllerTests : WithMocks
     public async Task TestFollowReject()
     {
         var activity = _document.Follow(_remoteProfile, _profile);
-        activity.Object.Add(_profile.FediId);
+        activity.Object.Add(_profile.Id);
 
         ProfileServiceMock.Setup(service =>
-                service.ReceiveFollowRequest(_profile.Id, _remoteProfile.FediId, null))
+                service.ReceiveFollowRequest(_profile.LocalId!.Value, _remoteProfile.Id, null))
             .ReturnsAsync(BuildRelation(FollowState.Rejected));
 
-        var response = await _controller.PostInbox(_profile.Id.ToId25String(), activity);
+        var response = await _controller.PostInbox(_profile.LocalId!.Value.ToShortId(), activity);
 
         Assert.IsType<AcceptedResult>(response);
     }

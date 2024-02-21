@@ -1,26 +1,24 @@
-﻿using Medo;
-
-namespace Letterbook.Core.Models;
+﻿namespace Letterbook.Core.Models;
 
 /// <summary>
 /// Useful in cases where we only need the Id, and otherwise don't care what an Object actually is
 /// </summary>
-public abstract class ObjectRef : IFederated
+public abstract class ObjectRef : IObjectRef
 {
-    public Uri FediId { get; set; }
-    public Uuid7 Id { get; set; }
+    public Uri Id { get; set; }
+    public Guid? LocalId { get; set; }
     public string Authority
     {
-        get => FediId.Authority;
+        get => Id.Authority;
     }
 
     protected ObjectRef(Uri id)
     {
-        FediId = id;
+        Id = id;
     }
 
     protected ObjectRef(Uri id, Guid localId) : this(id)
     {
-        Id = localId;
+        LocalId = localId;
     }
 }

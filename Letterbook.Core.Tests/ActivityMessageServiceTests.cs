@@ -32,7 +32,7 @@ public class ActivityMessageServiceTests : WithMocks, IClassFixture<JsonLdSerial
         _profile = faker.Generate();
         _inbox = new Uri("https://peer.example/actor/someactor/inbox");
         _activity = new AnnounceActivity();
-        _activity.Actor.Add(_profile.FediId);
+        _activity.Actor.Add(_profile.Id);
         _activity.Object.Add(new Uri("https://peer.example/object/12345"));
         _subject = new Subject<CloudEvent>();
         MessageBusAdapterMock.Setup(m => m.OpenChannel<It.IsAnyType>(It.IsAny<string?>()))

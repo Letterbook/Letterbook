@@ -37,7 +37,7 @@ public class WebfingerTests : WithMocks
 
         Assert.NotNull(actual);
         Assert.Single(actual.Links);
-        Assert.Equal(_profile.FediId.ToString(), actual.Links.First().Href?.ToString());
+        Assert.Equal(_profile.Id.ToString(), actual.Links.First().Href?.ToString());
     }
 
     [Fact(DisplayName = "Should not return a descriptor when no profiles are found")]

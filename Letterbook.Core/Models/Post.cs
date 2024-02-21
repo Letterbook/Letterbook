@@ -4,11 +4,11 @@ using Medo;
 
 namespace Letterbook.Core.Models;
 
-public class Post : IFederated
+public class Post
 {
     public Post()
     {
-        Id = Uuid7.NewUuid7();
+        Id = Uuid7.NewGuid();
         ContentRootIdUri = default!;
         FediId = default!;
         Thread = default!;

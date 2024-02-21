@@ -1,11 +1,10 @@
 ﻿using Letterbook.Core.Values;
-using Medo;
 
 namespace Letterbook.Core.Models;
 
-public class FollowerRelation
+public class FollowerRelation : IObjectRef
 {
-    public Uuid7 Id { get; set; }
+    public Guid Id { get; set; }
     /// <summary>
     /// This Profile is following another
     /// </summary>
@@ -34,4 +33,16 @@ public class FollowerRelation
         State = state;
         Date = DateTime.UtcNow;
     }
+
+    Uri IObjectRef.Id
+    {
+        get => Follower.Id;
+        set => Follower.Id = value;
+    }
+    Guid? IObjectRef.LocalId
+    {
+        get => Follower.LocalId;
+        set => Follower.LocalId = value;
+    }
+    string IObjectRef.Authority => Follower.Authority;
 }

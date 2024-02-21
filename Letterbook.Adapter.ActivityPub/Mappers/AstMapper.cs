@@ -26,9 +26,9 @@ public static class AstMapper
     private static void FromActor(IMapperConfigurationExpression cfg)
     {
         cfg.CreateMap<PersonActorExtension, Models.Profile>(MemberList.Destination)
-            .ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Authority, opt => opt.Ignore())
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.LocalId, opt => opt.Ignore())
             .ForMember(dest => dest.Type, opt => opt.Ignore())
             .ForMember(dest => dest.SharedInbox, opt => opt.Ignore())
             .ForMember(dest => dest.OwnedBy, opt => opt.Ignore())
@@ -36,7 +36,7 @@ public static class AstMapper
             .ForMember(dest => dest.RelatedAccounts, opt => opt.Ignore())
             .ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
             .ForMember(dest => dest.FollowingCollection, opt => opt.Ignore())
-            .ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Summary))
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name))
             .ForMember(dest => dest.Handle, opt => opt.MapFrom(src => src.PreferredUsername))
@@ -400,9 +400,9 @@ internal class PublicKeyConverter :
             _ => SigningKey.KeyFamily.Unknown
         };
 
-        destination ??= new SigningKey() { FediId = new Uri(source.Id) };
+        destination ??= new SigningKey() { Id = new Uri(source.Id) };
 
-        destination.FediId = new Uri(source.Id);
+        destination.Id = new Uri(source.Id);
         destination.Label = "From federation peer";
         destination.PublicKey = context.Mapper.Map<ReadOnlyMemory<byte>>(source.PublicKeyPem);
         destination.Family = alg;

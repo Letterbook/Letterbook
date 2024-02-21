@@ -1,5 +1,6 @@
-﻿using Letterbook.Core.Values;
-using Medo;
+﻿using System.Collections;
+using Letterbook.Core.Extensions;
+using Letterbook.Core.Values;
 
 namespace Letterbook.Core.Models;
 
@@ -10,11 +11,11 @@ namespace Letterbook.Core.Models;
 /// Remote profiles have no associated Accounts, and can only be created or modified by federated changes to the remote
 /// Actor.
 /// </summary>
-public class Profile : IFederated, IEquatable<Profile>
+public class Profile : IObjectRef, IEquatable<Profile>
 {
     private Profile()
     {
-        FediId = default!;
+        Id = default!;
         Inbox = default!;
         Outbox = default!;
         Followers = default!;
@@ -27,17 +28,17 @@ public class Profile : IFederated, IEquatable<Profile>
     }
     
     // Constructor for local profiles
-    private Profile(Uri baseUri, Uuid7 id) : this()
+    private Profile(Uri baseUri, Guid id) : this()
     {
-        FediId = new Uri(baseUri, $"/actor/{id.ToId25String()}");
+        Id = new Uri(baseUri, $"/actor/{id.ToShortId()}");
         Handle = string.Empty;
         DisplayName = string.Empty;
         Description = string.Empty;
         CustomFields = Array.Empty<CustomField>();
         
-        var builder = new UriBuilder(FediId);
+        var builder = new UriBuilder(Id);
         var basePath = builder.Path;
-        Id = id;
+        LocalId = id;
 
         builder.Path = basePath + "/inbox";
         Inbox = builder.Uri;
@@ -61,14 +62,14 @@ public class Profile : IFederated, IEquatable<Profile>
         Keys.Add(SigningKey.EcDsa(1, builder.Uri));
     }
 
-    public Uri FediId { get; set; }
+    public Uri Id { get; set; }
     public Uri Inbox { get; set; }
     public Uri Outbox { get; set; }
     public Uri? SharedInbox { get; set; }
     public Uri Followers { get; set; }
     public Uri Following { get; set; }
-    public Uuid7 Id { get; set; }
-    public string Authority => FediId.Authority;
+    public Guid? LocalId { get; set; }
+    public string Authority => Id.Authority;
     public string Handle { get; set; }
     public string DisplayName { get; set; }
     public string Description { get; set; }
@@ -166,7 +167,7 @@ public class Profile : IFederated, IEquatable<Profile>
     // The only use case I'm imagining for a service is to represent the server itself
     public static Profile CreateIndividual(Uri baseUri, string handle)
     {
-        var localId = Uuid7.NewGuid();
+        var localId = Guid.NewGuid();
         var profile = new Profile(baseUri, localId)
         {
             Type = ActivityActorType.Person,
@@ -183,7 +184,7 @@ public class Profile : IFederated, IEquatable<Profile>
     {
         return new Profile()
         {
-            FediId = id
+            Id = id
         };
     }
 
@@ -191,7 +192,7 @@ public class Profile : IFederated, IEquatable<Profile>
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return FediId.ToString().Equals(other.FediId.ToString());
+        return Id.ToString().Equals(other.Id.ToString());
     }
 
     public override bool Equals(object? obj)
@@ -204,7 +205,7 @@ public class Profile : IFederated, IEquatable<Profile>
 
     public override int GetHashCode()
     {
-        return FediId.GetHashCode();
+        return Id.GetHashCode();
     }
 
     public static bool operator ==(Profile? left, Profile? right)

@@ -117,7 +117,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         var httpRequestOptionsKey = new HttpRequestOptionsKey<IEnumerable<SigningKey>>(IClientSigner.SigningKeysOptionsId);
         var httpRequestOptionsProfile = new HttpRequestOptionsKey<Uri>(IClientSigner.ProfileOptionsId);
         message.Options.Set(httpRequestOptionsKey, _profile.Keys);
-        message.Options.Set(httpRequestOptionsProfile, _profile.FediId);
+        message.Options.Set(httpRequestOptionsProfile, _profile.Id);
 
         return message;
     }
@@ -125,7 +125,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     public async Task<ClientResponse<FollowState>> SendFollow(Uri inbox, Models.Profile target)
     {
         var doc = _document.Follow(_profile!, target);
-        doc.Id = $"{_profile!.FediId}#follow/{target.FediId}";
+        doc.Id = $"{_profile!.Id}#follow/{target.Id}";
         var response = await Send(inbox, doc);
         
         // To my knowledge, there are no existing fedi services that can actually respond in-band,
@@ -139,37 +139,37 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         };
     }
 
-    public async Task<ClientResponse<object>> SendCreate(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendCreate(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendUpdate(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendUpdate(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendDelete(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendDelete(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendBlock(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendBlock(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendBoost(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendBoost(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendLike(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendLike(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendDislike(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendDislike(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
@@ -197,7 +197,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         var accept = _document.Accept(_profile, acceptObject);
 
         acceptObject.Actor.Add(requestorId);
-        acceptObject.Object.Add(_profile.FediId);
+        acceptObject.Object.Add(_profile.Id);
         
         return await SendAccept(inbox, accept);
     }
@@ -217,22 +217,22 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         };
     }
 
-    public async Task<ClientResponse<object>> SendReject(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendReject(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendPending(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendPending(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendAdd(Uri inbox, IFederated content, Uri collection)
+    public async Task<ClientResponse<object>> SendAdd(Uri inbox, IContentRef content, Uri collection)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendRemove(Uri inbox, IFederated content, Uri collection)
+    public async Task<ClientResponse<object>> SendRemove(Uri inbox, IContentRef content, Uri collection)
     {
         throw new NotImplementedException();
     }
@@ -275,7 +275,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         };
     }
 
-    public async Task<T> Fetch<T>(Uri id) where T : IFederated
+    public async Task<T> Fetch<T>(Uri id) where T : IObjectRef
     {
         var response = await _httpClient.SendAsync(SignedRequest(HttpMethod.Get, id));
         var stream = await ReadResponse(response);
@@ -283,11 +283,11 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
         var ast = await _jsonLdSerializer.DeserializeAsync<ASType>(stream);
         var mapped = DefaultMapper.Map<T>(ast);
-        if (mapped.FediId == id) return mapped;
+        if (mapped.Id == id) return mapped;
         
-        _logger.LogError("Remote fetch for Object {Id} returned {ObjectId}", id, mapped.FediId);
+        _logger.LogError("Remote fetch for Object {Id} returned {ObjectId}", id, mapped.Id);
         _logger.LogDebug("Tried to map {ASType} to {ModelType}", ast?.Type, typeof(T));
-        throw ClientException.RemoteObjectError(mapped.FediId, "Peer provided object is not the same as requested");
+        throw ClientException.RemoteObjectError(mapped.Id, "Peer provided object is not the same as requested");
     }
 
     public void Dispose()

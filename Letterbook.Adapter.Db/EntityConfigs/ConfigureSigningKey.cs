@@ -16,7 +16,7 @@ public class ConfigureSigningKey : IEntityTypeConfiguration<Models.SigningKey>
             memory => memory.ToArray(),
             bytes => new ReadOnlyMemory<byte>(bytes)
         );
-        builder.Property(key => key.FediId).HasConversion(
+        builder.Property(key => key.Id).HasConversion(
             uri => uri.ToString(),
             str => new Uri(str),
             new ValueComparer<Uri>(

@@ -247,7 +247,7 @@ public class ProfileService : IProfileService
     public async Task<FollowState> Follow(Guid selfId, Guid targetId)
     {
         var target = await RequireProfile(targetId);
-        var self = await RequireProfile(selfId, target.FediId);
+        var self = await RequireProfile(selfId, target.Id);
         return await Follow(self, target, false);
     }
 
@@ -293,7 +293,7 @@ public class ProfileService : IProfileService
             throw CoreException.WrongAuthority($"Cannot update Profile {selfId} because it has a different origin server", selfId);
         }
         var profile = await _profiles.LookupProfileWithRelation(selfId, targetId) ?? throw CoreException.MissingData($"Cannot update Profile {selfId} because it could not be found", typeof(Profile), selfId);
-        var relation = profile.FollowingCollection.FirstOrDefault(r => r.Follows.FediId == targetId) ?? throw CoreException.MissingData($"Cannot update following relationship for {selfId} concerning {targetId} because it could not be found", typeof(FollowerRelation), targetId);
+        var relation = profile.FollowingCollection.FirstOrDefault(r => r.Follows.Id == targetId) ?? throw CoreException.MissingData($"Cannot update following relationship for {selfId} concerning {targetId} because it could not be found", typeof(FollowerRelation), targetId);
         switch (response)
         {
             case FollowState.Accepted:

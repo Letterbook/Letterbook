@@ -158,7 +158,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
             .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.Accepted });
 
         await _client.As(_profile).SendAccept(_targetProfile.Inbox, Models.ActivityType.Follow,
-            _targetProfile.FediId, _profile.FediId);
+            _targetProfile.Id, _profile.Id);
 
         Assert.NotNull(message?.Content);
 
@@ -168,13 +168,13 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
         // Assert on the outer Accept activity
         Assert.NotNull(actualAccept);
         Assert.Equal("Accept", actualAccept["type"]!.GetValue<string>());
-        Assert.Equal(_profile.FediId.ToString(), actualAccept["actor"]!.GetValue<string>());
+        Assert.Equal(_profile.Id.ToString(), actualAccept["actor"]!.GetValue<string>());
 
         // Assert on the inner Follow activity
         var actualFollow = actualAccept["object"];
         Assert.NotNull(actualFollow);
         Assert.Equal("Follow", actualFollow["type"]!.GetValue<string>());
-        Assert.Equal(_targetProfile.FediId.ToString(), actualFollow["actor"]!.GetValue<string>());
-        Assert.Equal(_profile.FediId.ToString(), actualFollow["object"]!.GetValue<string>());
+        Assert.Equal(_targetProfile.Id.ToString(), actualFollow["actor"]!.GetValue<string>());
+        Assert.Equal(_profile.Id.ToString(), actualFollow["object"]!.GetValue<string>());
     }
 }

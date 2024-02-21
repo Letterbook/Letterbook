@@ -50,7 +50,7 @@ public class WebfingerProvider : IResourceDescriptorProvider
                     DarkLink.Web.WebFinger.Shared.Link.Create("self") with
                     {
                         Type = Constants.ActivityPubAccept,
-                        Href = subject.FediId,
+                        Href = subject.Id,
                     }),
             };
 
