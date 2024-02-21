@@ -8,7 +8,7 @@ public class Post : IFederated
 {
     public Post()
     {
-        Id = Uuid7.NewGuid();
+        Id = Uuid7.NewUuid7();
         ContentRootIdUri = default!;
         FediId = default!;
         Thread = default!;
