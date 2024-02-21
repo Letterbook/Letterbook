@@ -70,8 +70,6 @@ public class HostMocks : WithMocks
 
     public new IOptions<CoreOptions> CoreOptionsMock => base.CoreOptionsMock;
 
-    public new Mock<IActivityService> ActivityServiceMock => base.ActivityServiceMock;
-
     public new Mock<IProfileService> ProfileServiceMock => base.ProfileServiceMock;
 
     public new Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock => base.ActivityPubAuthClientMock;

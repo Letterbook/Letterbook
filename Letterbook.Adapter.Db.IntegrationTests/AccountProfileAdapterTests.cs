@@ -98,8 +98,8 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
-        Assert.Contains(_profiles[4], actual.Following.Select(r => r.Follows));
-        Assert.Contains(_profiles[4], actual.Followers.Select(r => r.Follower));
+        Assert.Contains(_profiles[4], actual.FollowingCollection.Select(r => r.Follows));
+        Assert.Contains(_profiles[4], actual.FollowersCollection.Select(r => r.Follower));
     }
     
     [Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
@@ -110,8 +110,8 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
-        Assert.Contains(_profiles[4], actual.Following.Select(r => r.Follows));
-        Assert.Contains(_profiles[4], actual.Followers.Select(r => r.Follower));
+        Assert.Contains(_profiles[4], actual.FollowingCollection.Select(r => r.Follows));
+        Assert.Contains(_profiles[4], actual.FollowersCollection.Select(r => r.Follower));
     }
     
     [Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
@@ -122,7 +122,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
-        Assert.Single(actual.Following.AsEnumerable());
+        Assert.Single(actual.FollowingCollection.AsEnumerable());
     }
     
     [Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
@@ -133,7 +133,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
-        Assert.Single(actual.Following.AsEnumerable());
+        Assert.Single(actual.FollowingCollection.AsEnumerable());
     }
 
     [Trait("AccountProfileAdapter", "FindProfilesByHandle")]
