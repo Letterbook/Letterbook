@@ -42,12 +42,12 @@ public sealed class FakeProfile : Faker<Profile>
     
     public FakeProfile() : this(new Uri(new Faker().Internet.UrlWithPath()))
     {
-        RuleFor(p => p.LocalId, f => f.Random.Uuid7());
+        RuleFor(p => p.Id, f => f.Random.Uuid7());
     }
 
     public FakeProfile(string authority) : this(new Uri($"http://{authority}/{new Faker().Internet.UserName()}"))
     {
-        RuleFor(p => p.LocalId, f => f.Random.Uuid7());
+        RuleFor(p => p.Id, f => f.Random.Uuid7());
     }
 
     public FakeProfile(Uri uri)
@@ -71,8 +71,8 @@ public sealed class FakeProfile : Faker<Profile>
             var following = builder.Uri;
             var profile = Profile.CreateEmpty(id);
             {
-                profile.LocalId = localId;
-                profile.Id = id;
+                profile.Id = localId;
+                profile.FediId = id;
                 profile.Handle = f.Internet.UserName();
                 profile.Inbox = inbox;
                 profile.Outbox = outbox;
@@ -102,7 +102,7 @@ public sealed class FakeProfile : Faker<Profile>
                     Expires = DateTimeOffset.MaxValue,
                     Family = SigningKey.KeyFamily.Rsa,
                     LocalId = f.Random.Guid(),
-                    Id = new Uri(uri, $"actor/{profile.LocalId.ToId25String()}/public_keys/0"),
+                    Id = new Uri(uri, $"actor/{profile.Id.ToId25String()}/public_keys/0"),
                     PrivateKey = rsa.ExportPkcs8PrivateKey(),
                     PublicKey = rsa.ExportSubjectPublicKeyInfo(),
                     KeyOrder = 0,

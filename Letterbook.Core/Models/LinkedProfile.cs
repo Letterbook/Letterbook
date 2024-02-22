@@ -1,7 +1,10 @@
-﻿namespace Letterbook.Core.Models;
+﻿using Medo;
+
+namespace Letterbook.Core.Models;
 
 public class LinkedProfile : IEquatable<LinkedProfile>
 {
+    public Uuid7 Id { get; set; } = Uuid7.NewUuid7();
     public Account Account { get; set; }
     public Profile Profile { get; set; }
     public ProfilePermission Permission { get; set; }

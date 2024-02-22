@@ -3,9 +3,10 @@ using Medo;
 
 namespace Letterbook.Core.Models;
 
-public class FollowerRelation : IObjectRef
+public class FollowerRelation
 {
-    public Guid Id { get; set; }
+    public Uuid7 Id { get; set; } = Uuid7.NewUuid7();
+
     /// <summary>
     /// This Profile is following another
     /// </summary>
@@ -19,7 +20,6 @@ public class FollowerRelation : IObjectRef
 
     private FollowerRelation()
     {
-        Id = Guid.Empty;
         Follower = default!;
         Follows = default!;
         State = default;
@@ -28,22 +28,9 @@ public class FollowerRelation : IObjectRef
 
     public FollowerRelation(Profile follower, Profile follows, FollowState state)
     {
-        Id = Guid.NewGuid();
         Follower = follower;
         Follows = follows;
         State = state;
         Date = DateTime.UtcNow;
     }
-
-    Uri IObjectRef.Id
-    {
-        get => Follower.Id;
-        set => Follower.Id = value;
-    }
-    Uuid7 IObjectRef.LocalId
-    {
-        get => Follower.LocalId;
-        set => Follower.LocalId = value;
-    }
-    string IObjectRef.Authority => Follower.Authority;
 }

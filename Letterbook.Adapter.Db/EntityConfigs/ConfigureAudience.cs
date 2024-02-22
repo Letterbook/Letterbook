@@ -7,7 +7,7 @@ public class ConfigureAudience : IEntityTypeConfiguration<Models.Audience>
 {
     public void Configure(EntityTypeBuilder<Models.Audience> builder)
     {
-        builder.Ignore(e => e.LocalId);
+        builder.HasIndex(audience => audience.FediId);
         builder.HasMany<Models.Profile>(audience => audience.Members)
             .WithMany(profile => profile.Audiences)
             .UsingEntity("AudienceProfileMembers");

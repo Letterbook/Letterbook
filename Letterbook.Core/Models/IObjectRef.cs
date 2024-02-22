@@ -10,7 +10,7 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public interface IObjectRef
 {
-    public Uri Id { get; set; }
-    public Uuid7 LocalId { get; set; }
+    public Uri FediId { get; set; }
+    public Uuid7 Id { get; set; }
     public string Authority { get; }
 }

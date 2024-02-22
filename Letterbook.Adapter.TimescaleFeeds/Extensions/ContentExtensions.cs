@@ -20,12 +20,12 @@ public static class ContentExtensions
         {
             DateTime.UtcNow, // Time
             subject.Type,  // Type
-            subject.Id.ToString(),  // EntityId
-            audience.Id.ToString(),  // AudienceKey
+            subject.FediId.ToString(),  // EntityId
+            audience.FediId.ToString(),  // AudienceKey
             null,  // AudienceName
-            subject.Creators.Select(c => c.Id.ToString()).ToArray(),  // CreatedBy
+            subject.Creators.Select(c => c.FediId.ToString()).ToArray(),  // CreatedBy
             subject.Authority,  // Authority
-            boostedBy?.Id.ToString(),  // BoostedBy
+            boostedBy?.FediId.ToString(),  // BoostedBy
             subject.CreatedDate,  // CreatedDate
         };
     }

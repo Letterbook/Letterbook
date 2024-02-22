@@ -16,7 +16,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
 {
     private Profile()
     {
-        Id = default!;
+        FediId = default!;
         Inbox = default!;
         Outbox = default!;
         Followers = default!;
@@ -31,15 +31,15 @@ public class Profile : IObjectRef, IEquatable<Profile>
     // Constructor for local profiles
     private Profile(Uri baseUri, Uuid7 id) : this()
     {
-        Id = new Uri(baseUri, $"/actor/{id.ToId25String()}");
+        FediId = new Uri(baseUri, $"/actor/{id.ToId25String()}");
         Handle = string.Empty;
         DisplayName = string.Empty;
         Description = string.Empty;
         CustomFields = Array.Empty<CustomField>();
         
-        var builder = new UriBuilder(Id);
+        var builder = new UriBuilder(FediId);
         var basePath = builder.Path;
-        LocalId = id;
+        Id = id;
 
         builder.Path = basePath + "/inbox";
         Inbox = builder.Uri;
@@ -63,14 +63,14 @@ public class Profile : IObjectRef, IEquatable<Profile>
         Keys.Add(SigningKey.EcDsa(1, builder.Uri));
     }
 
-    public Uri Id { get; set; }
+    public Uri FediId { get; set; }
     public Uri Inbox { get; set; }
     public Uri Outbox { get; set; }
     public Uri? SharedInbox { get; set; }
     public Uri Followers { get; set; }
     public Uri Following { get; set; }
-    public Uuid7 LocalId { get; set; }
-    public string Authority => Id.Authority;
+    public Uuid7 Id { get; set; }
+    public string Authority => FediId.Authority;
     public string Handle { get; set; }
     public string DisplayName { get; set; }
     public string Description { get; set; }
@@ -185,7 +185,8 @@ public class Profile : IObjectRef, IEquatable<Profile>
     {
         return new Profile()
         {
-            Id = id
+            FediId = id
+            
         };
     }
 
@@ -193,7 +194,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Id.ToString().Equals(other.Id.ToString());
+        return Id.Equals(other.Id);
     }
 
     public override bool Equals(object? obj)

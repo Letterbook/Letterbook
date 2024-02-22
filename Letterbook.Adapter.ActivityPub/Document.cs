@@ -92,7 +92,7 @@ public class Document : IActivityPubDocument
     {
         return new ASLink()
         {
-            HRef = contentRef.Id
+            HRef = contentRef.FediId
         };
     }
 

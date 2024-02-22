@@ -117,7 +117,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         var httpRequestOptionsKey = new HttpRequestOptionsKey<IEnumerable<SigningKey>>(IClientSigner.SigningKeysOptionsId);
         var httpRequestOptionsProfile = new HttpRequestOptionsKey<Uri>(IClientSigner.ProfileOptionsId);
         message.Options.Set(httpRequestOptionsKey, _profile.Keys);
-        message.Options.Set(httpRequestOptionsProfile, _profile.Id);
+        message.Options.Set(httpRequestOptionsProfile, _profile.FediId);
 
         return message;
     }
@@ -125,7 +125,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
     public async Task<ClientResponse<FollowState>> SendFollow(Uri inbox, Models.Profile target)
     {
         var doc = _document.Follow(_profile!, target);
-        doc.Id = $"{_profile!.Id}#follow/{target.Id}";
+        doc.Id = $"{_profile!.FediId}#follow/{target.FediId}";
         var response = await Send(inbox, doc);
         
         // To my knowledge, there are no existing fedi services that can actually respond in-band,
@@ -197,7 +197,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         var accept = _document.Accept(_profile, acceptObject);
 
         acceptObject.Actor.Add(requestorId);
-        acceptObject.Object.Add(_profile.Id);
+        acceptObject.Object.Add(_profile.FediId);
         
         return await SendAccept(inbox, accept);
     }
@@ -283,11 +283,11 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
         var ast = await _jsonLdSerializer.DeserializeAsync<ASType>(stream);
         var mapped = DefaultMapper.Map<T>(ast);
-        if (mapped.Id == id) return mapped;
+        if (mapped.FediId == id) return mapped;
         
-        _logger.LogError("Remote fetch for Object {Id} returned {ObjectId}", id, mapped.Id);
+        _logger.LogError("Remote fetch for Object {Id} returned {ObjectId}", id, mapped.FediId);
         _logger.LogDebug("Tried to map {ASType} to {ModelType}", ast?.Type, typeof(T));
-        throw ClientException.RemoteObjectError(mapped.Id, "Peer provided object is not the same as requested");
+        throw ClientException.RemoteObjectError(mapped.FediId, "Peer provided object is not the same as requested");
     }
 
     public void Dispose()

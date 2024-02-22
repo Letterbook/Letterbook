@@ -36,7 +36,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "Should indicate ID is in use")]
     public async Task AnyProfileTest()
     {
-        var actual = await _adapter.AnyProfile(_profiles[0].Id);
+        var actual = await _adapter.AnyProfile(_profiles[0].FediId);
         
         Assert.True(actual);
     }
@@ -72,7 +72,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "Should find a profile by Id")]
     public async Task LookupProfileTestId()
     {
-        var actual = await _adapter.LookupProfile(_profiles[0].Id);
+        var actual = await _adapter.LookupProfile(_profiles[0].FediId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
@@ -82,7 +82,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "Should find a profile by LocalId")]
     public async Task LookupProfileTestLocalId()
     {
-        var actual = await _adapter.LookupProfile(_profiles[0].LocalId);
+        var actual = await _adapter.LookupProfile(_profiles[0].Id);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
@@ -92,7 +92,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "Should find related profiles by LocalId")]
     public async Task LookupProfileForFollowingTestLocalId()
     {
-        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].LocalId, _profiles[4].Id);
+        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].Id, _profiles[4].FediId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
@@ -104,7 +104,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "Should find related profiles by Id")]
     public async Task LookupProfileForFollowingTestId()
     {
-        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].Id, _profiles[4].Id);
+        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].FediId, _profiles[4].FediId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
@@ -116,7 +116,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "LookupProfileWithRelation should not permit additional lazy loading")]
     public async Task LookupProfileForFollowingNoLazyLoad()
     {
-        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].LocalId, _profiles[4].Id);
+        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].Id, _profiles[4].FediId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
@@ -127,7 +127,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "LookupProfileWithRelation by Id should not permit additional lazy loading")]
     public async Task LookupProfileForFollowingNoLazyLoadById()
     {
-        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].Id, _profiles[4].Id);
+        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].FediId, _profiles[4].FediId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
