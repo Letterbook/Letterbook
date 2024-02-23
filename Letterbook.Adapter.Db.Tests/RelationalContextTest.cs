@@ -1,4 +1,5 @@
 using Letterbook.Core.Tests.Fakes;
+using Medo;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Adapter.Db.Tests;
@@ -24,6 +25,8 @@ public class RelationalContextTest
     public void CanAddEntity()
     {
         var account = new FakeAccount().Generate();
-        _context.Accounts.Add(account);
+        // _context.Add(account);
+        _context.Add(account);
     }
+
 }

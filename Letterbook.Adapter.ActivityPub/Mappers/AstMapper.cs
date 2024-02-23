@@ -32,8 +32,8 @@ public static class AstMapper
             .ForMember(dest => dest.Type, opt => opt.Ignore())
             .ForMember(dest => dest.SharedInbox, opt => opt.Ignore())
             .ForMember(dest => dest.OwnedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.Accessors, opt => opt.Ignore())
             .ForMember(dest => dest.Audiences, opt => opt.Ignore())
-            .ForMember(dest => dest.RelatedAccounts, opt => opt.Ignore())
             .ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
             .ForMember(dest => dest.FollowingCollection, opt => opt.Ignore())
             .ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
@@ -400,9 +400,9 @@ internal class PublicKeyConverter :
             _ => SigningKey.KeyFamily.Unknown
         };
 
-        destination ??= new SigningKey() { Id = new Uri(source.Id) };
+        destination ??= new SigningKey() { FediId = new Uri(source.Id) };
 
-        destination.Id = new Uri(source.Id);
+        destination.FediId = new Uri(source.Id);
         destination.Label = "From federation peer";
         destination.PublicKey = context.Mapper.Map<ReadOnlyMemory<byte>>(source.PublicKeyPem);
         destination.Family = alg;

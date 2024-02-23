@@ -5,11 +5,11 @@ namespace Letterbook.Core.Models;
 
 public class Account : IdentityUser<Guid>
 {
-    public ICollection<LinkedProfile> LinkedProfiles { get; set; } = new HashSet<LinkedProfile>();
+    public ICollection<ProfileAccess> LinkedProfiles { get; set; } = new HashSet<ProfileAccess>();
 
     public Account()
     {
-        base.Id = Uuid7.NewUuid7();
+        base.Id = Guid.NewGuid();
     }
     
     // In the future, Account might tie in to things like organizations or billing accounts
@@ -24,7 +24,7 @@ public class Account : IdentityUser<Guid>
             UserName = handle
         };
         profile.OwnedBy = account;
-        account.LinkedProfiles.Add(new LinkedProfile(account, profile, ProfilePermission.All));
+        account.LinkedProfiles.Add(new ProfileAccess(account, profile, ProfilePermission.All));
         
         return account;
     }

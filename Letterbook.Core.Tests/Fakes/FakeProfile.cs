@@ -42,12 +42,12 @@ public sealed class FakeProfile : Faker<Profile>
     
     public FakeProfile() : this(new Uri(new Faker().Internet.UrlWithPath()))
     {
-        RuleFor(p => p.Id, f => f.Random.Uuid7());
+        RuleFor(p => p.Id, f => f.Random.Guid());
     }
 
     public FakeProfile(string authority) : this(new Uri($"http://{authority}/{new Faker().Internet.UserName()}"))
     {
-        RuleFor(p => p.Id, f => f.Random.Uuid7());
+        RuleFor(p => p.Id, f => f.Random.Guid());
     }
 
     public FakeProfile(Uri uri)
@@ -101,8 +101,8 @@ public sealed class FakeProfile : Faker<Profile>
                     Created = f.Date.Past(1, DateTime.Parse("2020-01-01").ToUniversalTime()),
                     Expires = DateTimeOffset.MaxValue,
                     Family = SigningKey.KeyFamily.Rsa,
-                    LocalId = f.Random.Guid(),
-                    Id = new Uri(uri, $"actor/{profile.Id.ToId25String()}/public_keys/0"),
+                    Id = f.Random.Guid(),
+                    FediId = new Uri(uri, $"actor/{profile.GetId25()}/public_keys/0"),
                     PrivateKey = rsa.ExportPkcs8PrivateKey(),
                     PublicKey = rsa.ExportSubjectPublicKeyInfo(),
                     KeyOrder = 0,
@@ -117,7 +117,6 @@ public sealed class FakeProfile : Faker<Profile>
         {
             var profile = Profile.CreateIndividual(uri, $"{f.Hacker.Noun()}_{f.Random.Hexadecimal(4)}");
             profile.OwnedBy = owner;
-            profile.RelatedAccounts.Add(new LinkedProfile(owner, profile, ProfilePermission.All));
             return profile;
         });
     }

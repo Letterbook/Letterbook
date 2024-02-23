@@ -7,6 +7,8 @@ public class ConfigureProfile : IEntityTypeConfiguration<Models.Profile>
 {
     public void Configure(EntityTypeBuilder<Models.Profile> builder)
     {
+        builder.Property(profile => profile.Id)
+            .ValueGeneratedNever();
         builder.HasIndex(profile => profile.FediId);
         builder.HasOne<Models.Account>(profile => profile.OwnedBy);
         builder.Property(profile => profile.CustomFields).HasColumnType("jsonb");

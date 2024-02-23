@@ -11,6 +11,9 @@ namespace Letterbook.Core.Models;
 public interface IObjectRef
 {
     public Uri FediId { get; set; }
-    public Uuid7 Id { get; set; }
+    public Guid Id { get; set; }
     public string Authority { get; }
+
+    public Uuid7 GetId();
+    public string GetId25();
 }

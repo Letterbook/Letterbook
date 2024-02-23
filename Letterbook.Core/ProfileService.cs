@@ -51,7 +51,7 @@ public class ProfileService : IProfileService
 
         var profile = Profile.CreateIndividual(_coreConfig.BaseUri(), handle);
         profile.OwnedBy = account;
-        account.LinkedProfiles.Add(new LinkedProfile(account, profile, ProfilePermission.All));
+        account.LinkedProfiles.Add(new ProfileAccess(account, profile, ProfilePermission.All));
         _profiles.RecordAccount(account);
         await _profiles.Commit();
         _profileEvents.Created(profile);

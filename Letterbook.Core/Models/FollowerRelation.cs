@@ -5,7 +5,13 @@ namespace Letterbook.Core.Models;
 
 public class FollowerRelation
 {
-    public Uuid7 Id { get; set; } = Uuid7.NewUuid7();
+    private Uuid7 _id = Uuid7.NewUuid7();
+
+    public Guid Id
+    {
+        get => _id.ToGuid();
+        set => Uuid7.FromGuid(value);
+    }
 
     /// <summary>
     /// This Profile is following another
@@ -17,7 +23,7 @@ public class FollowerRelation
     public Profile Follows { get; set; }
     public FollowState State { get; set; }
     public DateTime Date { get; set; }
-
+    
     private FollowerRelation()
     {
         Follower = default!;
@@ -33,4 +39,7 @@ public class FollowerRelation
         State = state;
         Date = DateTime.UtcNow;
     }
+    
+    public Uuid7 GetId() => _id;
+    public string GetId25() => _id.ToId25String();
 }

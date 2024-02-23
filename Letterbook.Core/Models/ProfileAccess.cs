@@ -2,28 +2,40 @@
 
 namespace Letterbook.Core.Models;
 
-public class LinkedProfile : IEquatable<LinkedProfile>
+public class ProfileAccess : IEquatable<ProfileAccess>
 {
-    public Uuid7 Id { get; set; } = Uuid7.NewUuid7();
-    public Account Account { get; set; }
+    private Uuid7 _id;
+
+    public Guid Id
+    {
+        get => _id.ToGuid();
+        set => _id = Uuid7.FromGuid(value);
+    }
+
     public Profile Profile { get; set; }
+    public Account Account { get; set; }
     public ProfilePermission Permission { get; set; }
 
-    private LinkedProfile()
+    private ProfileAccess()
     {
-        Account = default!;
+        Id = Uuid7.NewUuid7();
         Profile = default!;
+        Account = default!;
         Permission = default!;
     }
 
-    public LinkedProfile(Account account, Profile profile, ProfilePermission permission)
+    public ProfileAccess(Account account, Profile profile, ProfilePermission permission)
     {
+        Id = Uuid7.NewUuid7();
         Account = account;
         Profile = profile;
         Permission = permission;
     }
+    
+    public Uuid7 GetId() => _id;
+    public string GetId25() => _id.ToId25String();
 
-    public bool Equals(LinkedProfile? other)
+    public bool Equals(ProfileAccess? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
@@ -35,20 +47,20 @@ public class LinkedProfile : IEquatable<LinkedProfile>
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
         if (obj.GetType() != this.GetType()) return false;
-        return Equals((LinkedProfile)obj);
+        return Equals((ProfileAccess)obj);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Account, Profile);
+        return Id.GetHashCode();
     }
 
-    public static bool operator ==(LinkedProfile? left, LinkedProfile? right)
+    public static bool operator ==(ProfileAccess? left, ProfileAccess? right)
     {
         return Equals(left, right);
     }
 
-    public static bool operator !=(LinkedProfile? left, LinkedProfile? right)
+    public static bool operator !=(ProfileAccess? left, ProfileAccess? right)
     {
         return !Equals(left, right);
     }

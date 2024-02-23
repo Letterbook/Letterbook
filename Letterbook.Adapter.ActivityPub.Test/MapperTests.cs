@@ -67,7 +67,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 
             Assert.Equal(actual?.PublicKey?.PublicKeyPem, expected);
             Assert.Equal(actual?.PublicKey?.Owner?.Value?.Id, _profile.FediId.ToString());
-            Assert.Equal(actual?.PublicKey?.Id, _profile.Keys.First().Id.ToString());
+            Assert.Equal(actual?.PublicKey?.Id, _profile.Keys.First().FediId.ToString());
         }
 
         [Fact(Skip = "Need ModelMapper")]
@@ -92,7 +92,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
             var actual = ModelMapper.Map<PersonActorExtension>(_profile);
 
             Assert.Equal(expectedPem, actual.PublicKey?.PublicKeyPem);
-            Assert.Equal(expectedKey.Id.ToString(), actual.PublicKey?.Id);
+            Assert.Equal(expectedKey.FediId.ToString(), actual.PublicKey?.Id);
         }
     }
 
@@ -154,7 +154,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
         {
             var actual = AstMapper.Map<Models.Post>(_simpleNote);
 
-            Assert.NotEqual(actual.Id, Uuid7.Empty);
+            Assert.NotEqual(actual.Id, Guid.Empty);
             Assert.Single(actual.Contents);
             Assert.All(actual.Contents, content => Assert.Equal(actual.Id, content.Post.Id));
             Assert.Equal(actual.Id, actual.Contents.First().Post.Id);

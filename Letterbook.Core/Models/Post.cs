@@ -6,9 +6,11 @@ namespace Letterbook.Core.Models;
 
 public class Post
 {
+    private Uuid7 _id;
+
     public Post()
     {
-        Id = Uuid7.NewUuid7();
+        _id = Uuid7.NewUuid7();
         ContentRootIdUri = default!;
         FediId = default!;
         Thread = default!;
@@ -35,9 +37,9 @@ public class Post
     protected Post(CoreOptions opts, Post parent)
     {
         ContentRootIdUri = default!;
-        Id = Uuid7.NewGuid();
+        _id = Uuid7.NewUuid7();
 
-        FediId = new Uri(opts.BaseUri(), $"post/{Id.ToId25String()}");
+        FediId = new Uri(opts.BaseUri(), $"post/{_id.ToId25String()}");
         InReplyTo = parent;
         
         Thread = parent.Thread;
@@ -53,10 +55,10 @@ public class Post
     public Post(CoreOptions opts)
     {
         var builder = new UriBuilder(opts.BaseUri());
-        Id = Uuid7.NewGuid();
+        _id = Uuid7.NewUuid7();
         ContentRootIdUri = default!;
 
-        builder.Path += $"post/{Id.ToId25String()}";
+        builder.Path += $"post/{_id.ToId25String()}";
         FediId = builder.Uri;
         
         builder.Path += "/replies";
@@ -68,7 +70,12 @@ public class Post
         Thread.Posts.Add(this);
     }
 
-    public Uuid7 Id { get; set; }
+    public Guid Id
+    {
+        get => _id.ToGuid();
+        set => _id = Uuid7.FromGuid(value);
+    }
+
     public Uri? ContentRootIdUri { get; set; }
     public Uri FediId { get; set; }
     public ThreadContext Thread { get; set; }
@@ -111,6 +118,9 @@ public class Post
     public Uri? Shares { get; set; }
     public IList<Profile> SharesCollection { get; set; } = new List<Profile>();
 
+    public Uuid7 GetId() => _id;
+    public string GetId25() => _id.ToId25String();
+    
     public T AddContent<T>(T content) where T : Content
     {
         if (Contents.Count == 0) SetRootContent(content);
