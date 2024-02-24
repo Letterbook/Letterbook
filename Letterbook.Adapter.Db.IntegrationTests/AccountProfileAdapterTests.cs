@@ -1,5 +1,6 @@
 ﻿using Letterbook.Adapter.Db.IntegrationTests.Fixtures;
 using Letterbook.Core.Models;
+using Medo;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -121,17 +122,23 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
         Assert.Single(actual.FollowingCollection.AsEnumerable());
+        Assert.Single(actual.FollowersCollection.AsEnumerable());
     }
     
     [Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
-    [Fact(DisplayName = "LookupProfileWithRelation by Id should not permit additional lazy loading")]
-    public async Task LookupProfileForFollowingNoLazyLoadById()
+    [Fact(DisplayName = "LookupProfileWithRelation by FediId should not permit additional lazy loading")]
+    public async Task LookupProfileForFollowingNoLazyLoadByFediId()
     {
         var actual = await _adapter.LookupProfileWithRelation(_profiles[0].FediId, _profiles[4].FediId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
+        
+        var actualSet = actual.FollowersCollection.Select(r => r.GetId()).ToHashSet();
+        var expectedSet = _profiles.SelectMany(p => p.FollowersCollection).Select(r => r.GetId()).ToHashSet();
+        Assert.ProperSubset(expectedSet, actualSet);
         Assert.Single(actual.FollowingCollection.AsEnumerable());
+        Assert.Single(actual.FollowersCollection.AsEnumerable());
     }
 
     [Trait("AccountProfileAdapter", "FindProfilesByHandle")]

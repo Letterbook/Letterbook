@@ -119,6 +119,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
     {
         var relation = new FollowerRelation(follower, this, state);
         FollowersCollection.Add(relation);
+        follower.FollowingCollection.Add(relation);
         return relation;
     }
     
@@ -137,6 +138,7 @@ public class Profile : IObjectRef, IEquatable<Profile>
     {
         var relation = new FollowerRelation(this, following, state);
         FollowingCollection.Add(relation);
+        following.FollowersCollection.Add(relation);
         return relation;
     }
 

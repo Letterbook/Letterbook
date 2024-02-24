@@ -3,14 +3,14 @@ using Medo;
 
 namespace Letterbook.Core.Models;
 
-public class FollowerRelation
+public class FollowerRelation : IEquatable<FollowerRelation>
 {
-    private Uuid7 _id = Uuid7.NewUuid7();
+    private Uuid7 _id;
 
     public Guid Id
     {
         get => _id.ToGuid();
-        set => Uuid7.FromGuid(value);
+        set => _id = Uuid7.FromGuid(value);
     }
 
     /// <summary>
@@ -26,6 +26,7 @@ public class FollowerRelation
     
     private FollowerRelation()
     {
+        _id = Uuid7.NewUuid7();
         Follower = default!;
         Follows = default!;
         State = default;
@@ -34,6 +35,7 @@ public class FollowerRelation
 
     public FollowerRelation(Profile follower, Profile follows, FollowState state)
     {
+        _id = Uuid7.NewUuid7();
         Follower = follower;
         Follows = follows;
         State = state;
@@ -42,4 +44,34 @@ public class FollowerRelation
     
     public Uuid7 GetId() => _id;
     public string GetId25() => _id.ToId25String();
+
+    public bool Equals(FollowerRelation? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Follower.Equals(other.Follower) && Follows.Equals(other.Follows);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((FollowerRelation)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Follower, Follows);
+    }
+
+    public static bool operator ==(FollowerRelation? left, FollowerRelation? right)
+    {
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(FollowerRelation? left, FollowerRelation? right)
+    {
+        return !Equals(left, right);
+    }
 }
