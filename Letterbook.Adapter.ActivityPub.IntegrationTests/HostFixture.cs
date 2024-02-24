@@ -36,7 +36,7 @@ public class HostFixture : WebApplicationFactory<Program>
     /// <param name="builder"></param>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Integration");
+        builder.UseEnvironment("Sandcastle");
         builder.ConfigureTestServices(services =>
         {
             if (services.SingleOrDefault(descriptor => descriptor.ServiceType == typeof(IAccountProfileAdapter)) is { } adapter)
