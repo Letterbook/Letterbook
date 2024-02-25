@@ -193,8 +193,8 @@ public class Profile : IFederated, IEquatable<Profile>
     {
         return new Profile()
         {
+            _id = Uuid7.NewUuid7(),
             FediId = id
-            
         };
     }
 

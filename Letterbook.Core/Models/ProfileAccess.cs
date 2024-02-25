@@ -12,8 +12,8 @@ public class ProfileAccess : IEquatable<ProfileAccess>
         set => _id = Uuid7.FromGuid(value);
     }
 
-    public Profile Profile { get; set; }
-    public Account Account { get; set; }
+    public Profile Profile { get; init; }
+    public Account Account { get; init; }
     public ProfilePermission Permission { get; set; }
 
     private ProfileAccess()
@@ -52,7 +52,7 @@ public class ProfileAccess : IEquatable<ProfileAccess>
 
     public override int GetHashCode()
     {
-        return Id.GetHashCode();
+        return HashCode.Combine(Account.GetHashCode(), Profile.GetHashCode());
     }
 
     public static bool operator ==(ProfileAccess? left, ProfileAccess? right)

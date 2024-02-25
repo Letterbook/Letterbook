@@ -304,9 +304,9 @@ public class ProfileService : IProfileService
             case FollowState.None:
             case FollowState.Rejected:
             default:
-                profile.Unfollow(Profile.CreateEmpty(targetId));
-                profile.LeaveAudience(Profile.CreateEmpty(targetId));
-                // _profiles.Delete(relation);
+                profile.Unfollow(relation.Follows);
+                profile.LeaveAudience(relation.Follows);
+                _profiles.Delete(relation);
                 await _profiles.Commit();
                 return FollowState.None;
         }
@@ -318,8 +318,11 @@ public class ProfileService : IProfileService
                    ?? throw CoreException.MissingData(
                        $"Failed to update local profile {selfId} because it could not be found", typeof(Profile),
                        selfId);
+        var follower = self.FollowersCollection
+            .FirstOrDefault(p => p.Follower.FediId.OriginalString == followerId.OriginalString)?.Follower;
 
-        self.RemoveFollower(Profile.CreateEmpty(followerId));
+        if (follower is null) return;
+        self.RemoveFollower(follower);
         await _profiles.Commit();
     }
     
@@ -329,8 +332,11 @@ public class ProfileService : IProfileService
                    ?? throw CoreException.MissingData(
                        $"Failed to update local profile {selfId} because it could not be found", typeof(Profile),
                        selfId);
+        var follows = self.FollowingCollection
+            .FirstOrDefault(p => p.Follows.FediId.OriginalString == followerId.OriginalString)?.Follows;
 
-        self.Unfollow(Profile.CreateEmpty(followerId));
+        if (follows is null) return;
+        self.Unfollow(follows);
         await _profiles.Commit();
     }
 

@@ -70,7 +70,7 @@ public class ActorControllerTests : WithMocks
         activity.Object.Add(_profile.FediId);
 
         ProfileServiceMock.Setup(service =>
-                service.ReceiveFollowRequest(_profile.FediId, _remoteProfile.FediId, It.IsAny<Uri?>()))
+                service.ReceiveFollowRequest(_profile.GetId(), _remoteProfile.FediId, It.IsAny<Uri?>()))
             .ReturnsAsync(BuildRelation(FollowState.Pending));
 
         var response = await _controller.PostInbox(_profile.GetId25(), activity);
