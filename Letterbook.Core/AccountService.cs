@@ -126,8 +126,7 @@ public class AccountService : IAccountService, IDisposable
         var account = await _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
         var count = account.LinkedProfiles.Count;
-        var link = new LinkedProfile(account, profile, permission);
-        profile.RelatedAccounts.Add(link);
+        var link = new ProfileAccess(account, profile, permission);
         account.LinkedProfiles.Add(link);
         await _accountAdapter.Commit();
         
@@ -138,20 +137,17 @@ public class AccountService : IAccountService, IDisposable
     {
         var account = await _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
-        var model = new LinkedProfile(account, profile, ProfilePermission.None);
-        var profileLink = profile.RelatedAccounts.SingleOrDefault(p => p.Equals(model));
-        var accountLink = account.LinkedProfiles.SingleOrDefault(p => p.Equals(model));
-        if (profileLink is null || accountLink is null)
+        var model = new ProfileAccess(account, profile, ProfilePermission.None);
+        var link = account.LinkedProfiles.SingleOrDefault(p => p.Equals(model));
+        if (link is null)
         {
-            _logger.LogWarning("Account {Account} and Profile {Profile} have mismatched permission links", account.Id,
-                profile.FediId);
+            _logger.LogWarning("Account {Account} has no link to Profile {Profile}", account.Id, profile.FediId);
             return false;
         }
 
-        if (profileLink.Permission == permission || accountLink.Permission == permission) return false;
+        if (link.Permission == permission) return false;
 
-        profileLink.Permission = permission;
-        accountLink.Permission = permission;
+        link.Permission = permission;
 
         await _accountAdapter.Commit();
         return true;
@@ -162,9 +158,9 @@ public class AccountService : IAccountService, IDisposable
         var account = await _accountAdapter.LookupAccount(accountId);
         if (account is null) return false;
 
-        var link = new LinkedProfile(account, profile, ProfilePermission.None);
+        var link = new ProfileAccess(account, profile, ProfilePermission.None);
 
-        var result = profile.RelatedAccounts.Remove(link) && account.LinkedProfiles.Remove(link);
+        var result = account.LinkedProfiles.Remove(link);
         if (result) await _accountAdapter.Commit();
         return result;
     }

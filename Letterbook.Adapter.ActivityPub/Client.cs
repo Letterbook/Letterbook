@@ -139,37 +139,37 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         };
     }
 
-    public async Task<ClientResponse<object>> SendCreate(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendCreate(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendUpdate(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendUpdate(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendDelete(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendDelete(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendBlock(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendBlock(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendBoost(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendBoost(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendLike(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendLike(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendDislike(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendDislike(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
@@ -217,22 +217,22 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         };
     }
 
-    public async Task<ClientResponse<object>> SendReject(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendReject(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendPending(Uri inbox, IFederated content)
+    public async Task<ClientResponse<object>> SendPending(Uri inbox, IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendAdd(Uri inbox, IFederated content, Uri collection)
+    public async Task<ClientResponse<object>> SendAdd(Uri inbox, IContentRef content, Uri collection)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<ClientResponse<object>> SendRemove(Uri inbox, IFederated content, Uri collection)
+    public async Task<ClientResponse<object>> SendRemove(Uri inbox, IContentRef content, Uri collection)
     {
         throw new NotImplementedException();
     }

@@ -28,7 +28,7 @@ public class PostgresFixture
         {
             if (_databaseInitialized) return;
 
-            Accounts.AddRange(new FakeAccount(true).Generate(2));
+            Accounts.AddRange(new FakeAccount(false).Generate(2));
             Profiles.AddRange(new FakeProfile("letterbook.example", Accounts[0]).Generate(3));
             Profiles.Add(new FakeProfile("letterbook.example", Accounts[1]).Generate());
             Profiles.AddRange(new FakeProfile().Generate(3));

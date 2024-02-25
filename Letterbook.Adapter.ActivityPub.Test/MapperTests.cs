@@ -154,7 +154,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
         {
             var actual = AstMapper.Map<Models.Post>(_simpleNote);
 
-            Assert.NotEqual(actual.Id, Uuid7.Empty);
+            Assert.NotEqual(actual.Id, Guid.Empty);
             Assert.Single(actual.Contents);
             Assert.All(actual.Contents, content => Assert.Equal(actual.Id, content.Post.Id));
             Assert.Equal(actual.Id, actual.Contents.First().Post.Id);

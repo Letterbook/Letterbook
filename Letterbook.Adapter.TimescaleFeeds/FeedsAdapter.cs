@@ -16,7 +16,7 @@ public class FeedsAdapter : IFeedsAdapter
         _feedsContext = feedsContext;
         // _canceled = false;
     }
-    
+
     public async Task<int> AddToTimeline<T>(T subject, Models.Audience audience, Models.Profile? boostedBy = default)
         where T : Models.IContentRef
     {

@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ActivityPub.Types" Version="0.1.0-snapshot.2023-12-29.15-35-53" />
+      <PackageReference Include="ActivityPub.Types" Version="0.1.0-snapshot.2024-01-08.18-02-38" />
       <PackageReference Include="CloudNative.CloudEvents" Version="2.7.1" />
       <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3">
         <PrivateAssets>all</PrivateAssets>

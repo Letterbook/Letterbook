@@ -52,7 +52,7 @@ public class DeliveryWorkerTests : WithMocks, IClassFixture<JsonLdSerializerFixt
             Subject = "TestActivity",
             Time = DateTimeOffset.UtcNow,
             [IActivityMessageService.DestinationKey] = _targetProfile.Inbox.ToString(),
-            [IActivityMessageService.ProfileKey] = _profile.Id.ToId25String(),
+            [IActivityMessageService.ProfileKey] = _profile.GetId25(),
         };
     }
 

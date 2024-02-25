@@ -1,4 +1,6 @@
-﻿using Letterbook.Core.Values;
+﻿using System.Collections;
+using Letterbook.Core.Extensions;
+using Letterbook.Core.Values;
 using Medo;
 
 namespace Letterbook.Core.Models;
@@ -12,6 +14,8 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public class Profile : IFederated, IEquatable<Profile>
 {
+    private Uuid7 _id;
+
     private Profile()
     {
         FediId = default!;
@@ -27,9 +31,10 @@ public class Profile : IFederated, IEquatable<Profile>
     }
     
     // Constructor for local profiles
-    private Profile(Uri baseUri, Uuid7 id) : this()
+    private Profile(Uri baseUri) : this()
     {
-        FediId = new Uri(baseUri, $"/actor/{id.ToId25String()}");
+        _id = Uuid7.NewUuid7();
+        FediId = new Uri(baseUri, $"/actor/{_id.ToId25String()}");
         Handle = string.Empty;
         DisplayName = string.Empty;
         Description = string.Empty;
@@ -37,7 +42,6 @@ public class Profile : IFederated, IEquatable<Profile>
         
         var builder = new UriBuilder(FediId);
         var basePath = builder.Path;
-        Id = id;
 
         builder.Path = basePath + "/inbox";
         Inbox = builder.Uri;
@@ -61,29 +65,34 @@ public class Profile : IFederated, IEquatable<Profile>
         Keys.Add(SigningKey.EcDsa(1, builder.Uri));
     }
 
+    public Guid Id
+    {
+        get => _id.ToGuid();
+        set => _id = Uuid7.FromGuid(value);
+    }
+    
     public Uri FediId { get; set; }
     public Uri Inbox { get; set; }
     public Uri Outbox { get; set; }
     public Uri? SharedInbox { get; set; }
     public Uri Followers { get; set; }
     public Uri Following { get; set; }
-    public Uuid7 Id { get; set; }
     public string Authority => FediId.Authority;
     public string Handle { get; set; }
     public string DisplayName { get; set; }
     public string Description { get; set; }
     public CustomField[] CustomFields { get; set; }
     public DateTime Updated { get; set; } = DateTime.UtcNow;
-
-    // Local profiles should all have an owner, but remote ones do not.
-    // Could remote profiles be claimed through an account transfer?
     public Account? OwnedBy { get; set; }
+    public ICollection<ProfileAccess> Accessors { get; set; } = new HashSet<ProfileAccess>();
     public ActivityActorType Type { get; set; }
     public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
-    public ICollection<LinkedProfile> RelatedAccounts { get; set; } = new HashSet<LinkedProfile>();
     public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
     public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
     public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
+
+    public Uuid7 GetId() => _id;
+    public string GetId25() => _id.ToId25String();
 
     public Profile ShallowClone() => (Profile)MemberwiseClone();
 
@@ -110,6 +119,7 @@ public class Profile : IFederated, IEquatable<Profile>
     {
         var relation = new FollowerRelation(follower, this, state);
         FollowersCollection.Add(relation);
+        follower.FollowingCollection.Add(relation);
         return relation;
     }
     
@@ -128,6 +138,7 @@ public class Profile : IFederated, IEquatable<Profile>
     {
         var relation = new FollowerRelation(this, following, state);
         FollowingCollection.Add(relation);
+        following.FollowersCollection.Add(relation);
         return relation;
     }
 
@@ -166,8 +177,7 @@ public class Profile : IFederated, IEquatable<Profile>
     // The only use case I'm imagining for a service is to represent the server itself
     public static Profile CreateIndividual(Uri baseUri, string handle)
     {
-        var localId = Uuid7.NewGuid();
-        var profile = new Profile(baseUri, localId)
+        var profile = new Profile(baseUri)
         {
             Type = ActivityActorType.Person,
             Handle = handle,
@@ -183,6 +193,7 @@ public class Profile : IFederated, IEquatable<Profile>
     {
         return new Profile()
         {
+            _id = Uuid7.NewUuid7(),
             FediId = id
         };
     }
@@ -191,7 +202,7 @@ public class Profile : IFederated, IEquatable<Profile>
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return FediId.ToString().Equals(other.FediId.ToString());
+        return Id.Equals(other.Id);
     }
 
     public override bool Equals(object? obj)
@@ -204,7 +215,7 @@ public class Profile : IFederated, IEquatable<Profile>
 
     public override int GetHashCode()
     {
-        return FediId.GetHashCode();
+        return Id.GetHashCode();
     }
 
     public static bool operator ==(Profile? left, Profile? right)

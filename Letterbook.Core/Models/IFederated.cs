@@ -9,4 +9,7 @@ public interface IFederated
 {
     public Uri FediId { get; set; }
     public string Authority { get; }
+    
+    public Uuid7 GetId();
+    public string GetId25();
 }
