@@ -54,7 +54,7 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
         return _context.Profiles
             .Include(profile => profile.Keys)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(profile => profile.Id == localId);
+            .FirstOrDefaultAsync(profile => profile.Id == localId.ToGuid());
     }
 
     public Task<Models.Profile?> LookupProfile(Uri id)
@@ -81,7 +81,7 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 
     public Task<Models.Profile?> LookupProfileWithRelation(Uuid7 localId, Uri relationId)
     {
-        return WithRelation(_context.Profiles.Where(profile => profile.Id == localId), relationId);
+        return WithRelation(_context.Profiles.Where(profile => profile.Id == localId.ToGuid()), relationId);
     }
 
     public IAsyncEnumerable<Models.Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0)
