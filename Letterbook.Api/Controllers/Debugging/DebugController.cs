@@ -1,5 +1,6 @@
 ﻿using Letterbook.Core;
 using Letterbook.Core.Extensions;
+using Medo;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Letterbook.Api.Controllers.Debugging;
@@ -23,7 +24,7 @@ public class DebugController : ControllerBase
         Guid localId;
         try
         {
-            localId = ShortId.ToGuid(selfId);
+            localId = Uuid7.FromId25String(selfId);
         }
         catch (Exception)
         {

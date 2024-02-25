@@ -56,7 +56,7 @@ public sealed class FakeProfile : Faker<Profile>
         {
             var localId = f.Random.Uuid7();
             var builder = new UriBuilder(uri.Authority);
-            builder.Path += $"actor/{ShortId.ToShortId(localId)}";
+            builder.Path += $"actor/{localId.ToId22String()}";
             var id = builder.Uri;
             var basePath = builder.Path;
             builder.Path = basePath + "/inbox";

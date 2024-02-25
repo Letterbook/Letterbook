@@ -1,6 +1,7 @@
 ﻿using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
+using Medo;
 using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Core.Workers;
@@ -29,7 +30,7 @@ public class DeliveryWorker
             return;
         }
 
-        var profile = await _profiles.LookupProfile(ShortId.ToGuid(shortId));
+        var profile = await _profiles.LookupProfile(Uuid7.FromId25String(shortId));
 
         var response = await _client.As(profile).SendDocument(new Uri(destination), document);
         _logger.LogDebug("Handled message {Type}, got response {Response}", value.Type, response);
