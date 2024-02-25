@@ -88,7 +88,7 @@ public class Document : IActivityPubDocument
         throw new NotImplementedException();
     }
 
-    private ASLink ActorLink(Models.IObjectRef contentRef)
+    private ASLink ActorLink(Models.IFederated contentRef)
     {
         return new ASLink()
         {

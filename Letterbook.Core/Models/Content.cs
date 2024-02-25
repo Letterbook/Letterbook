@@ -5,14 +5,21 @@ namespace Letterbook.Core.Models;
 
 public abstract class Content : IContent, IEquatable<Content>
 {
+    private Uuid7 _id;
+
     protected Content()
     {
-        Id = Uuid7.NewUuid7();
+        _id = Uuid7.NewUuid7();
         FediId = default!;
         Post = default!;
     }
 
-    public Uuid7 Id { get; set; }
+    public Guid Id
+    {
+        get => _id;
+        set => _id = value;
+    }
+
     public required Uri FediId { get; set; }
     public required Post Post { get; set; }
     public string? Summary { get; set; }
@@ -21,10 +28,11 @@ public abstract class Content : IContent, IEquatable<Content>
     public abstract string Type { get; }
     
     public static Uri LocalId(IContent content, CoreOptions opts) =>
-        new(opts.BaseUri(), $"{content.Type}/{content.Id.ToId25String()}");
+        new(opts.BaseUri(), $"{content.Type}/{content.GetId25()}");
     
+    public Uuid7 GetId() => _id;
+    public string GetId25() => _id.ToId25String();
     public abstract string? GeneratePreview();
-
     public abstract void Sanitize();
 
     public void SetLocalFediId(CoreOptions opts)

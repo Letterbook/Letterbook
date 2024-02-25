@@ -4,7 +4,7 @@ using Medo;
 
 namespace Letterbook.Core.Models;
 
-public class Post
+public class Post : IFederated
 {
     private Uuid7 _id;
 

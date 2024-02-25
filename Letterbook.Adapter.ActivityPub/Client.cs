@@ -275,7 +275,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
         };
     }
 
-    public async Task<T> Fetch<T>(Uri id) where T : IObjectRef
+    public async Task<T> Fetch<T>(Uri id) where T : IFederated
     {
         var response = await _httpClient.SendAsync(SignedRequest(HttpMethod.Get, id));
         var stream = await ReadResponse(response);

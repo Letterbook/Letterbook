@@ -12,7 +12,7 @@ namespace Letterbook.Core.Models;
 /// Remote profiles have no associated Accounts, and can only be created or modified by federated changes to the remote
 /// Actor.
 /// </summary>
-public class Profile : IObjectRef, IEquatable<Profile>
+public class Profile : IFederated, IEquatable<Profile>
 {
     private Uuid7 _id;
 
