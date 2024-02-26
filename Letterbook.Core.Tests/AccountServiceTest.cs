@@ -1,6 +1,7 @@
 ﻿using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
+using Medo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -73,7 +74,7 @@ public class AccountServiceTest : WithMocks
     public async Task LookupTest()
     {
         var expected = _fakeAccount.Generate();
-        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).ReturnsAsync(expected);
+        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Uuid7>())).ReturnsAsync(expected);
 
         var actual = await _accountService.LookupAccount(expected.Id);
 
@@ -84,7 +85,7 @@ public class AccountServiceTest : WithMocks
     public async Task LookupTestNoResult()
     {
         var expected = _fakeAccount.Generate();
-        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).ReturnsAsync(default(Account));
+        AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Uuid7>())).ReturnsAsync(default(Account));
 
         var actual = await _accountService.LookupAccount(expected.Id);
 
@@ -108,13 +109,12 @@ public class AccountServiceTest : WithMocks
     {
         var account = _fakeAccount.Generate();
         var profile = _fakeProfile.Generate();
-        var expected = new LinkedProfile(account, profile, ProfilePermission.All);
+        var expected = new ProfileAccess(account, profile, ProfilePermission.All);
         AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
         await _accountService.AddLinkedProfile(account.Id, profile, ProfilePermission.All);
         
         Assert.Contains(account.LinkedProfiles, linkedProfile => linkedProfile == expected);
-        Assert.Contains(profile.RelatedAccounts, linkedProfile => linkedProfile == expected);
     }
     
     [Fact(DisplayName = "Should remove linked profiles")]
@@ -122,15 +122,13 @@ public class AccountServiceTest : WithMocks
     {
         var account = _fakeAccount.Generate();
         var profile = _fakeProfile.Generate();
-        var expected = new LinkedProfile(account, profile, ProfilePermission.All);
+        var expected = new ProfileAccess(account, profile, ProfilePermission.All);
         account.LinkedProfiles.Add(expected);
-        profile.RelatedAccounts.Add(expected);
         AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
         await _accountService.RemoveLinkedProfile(account.Id, profile);
         
         Assert.DoesNotContain(account.LinkedProfiles, linkedProfile => linkedProfile == expected);
-        Assert.DoesNotContain(profile.RelatedAccounts, linkedProfile => linkedProfile == expected);
     }
     
     [Fact(DisplayName = "Should update profile permissions")]
@@ -138,16 +136,13 @@ public class AccountServiceTest : WithMocks
     {
         var account = _fakeAccount.Generate();
         var profile = _fakeProfile.Generate();
-        var expected = new LinkedProfile(account, profile, ProfilePermission.All);
+        var expected = new ProfileAccess(account, profile, ProfilePermission.All);
         account.LinkedProfiles.Add(expected);
-        profile.RelatedAccounts.Add(expected);
         AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
         await _accountService.UpdateLinkedProfile(account.Id, profile, ProfilePermission.None);
         
-        var profileLink = profile.RelatedAccounts.SingleOrDefault(p => p.Equals(expected));
         var accountLink = account.LinkedProfiles.SingleOrDefault(p => p.Equals(expected));
-        Assert.Equal(profileLink?.Permission, ProfilePermission.None);
         Assert.Equal(accountLink?.Permission, ProfilePermission.None);
     }
 }

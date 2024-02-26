@@ -19,7 +19,7 @@ public class Document : IActivityPubDocument
         throw new NotImplementedException();
     }
 
-    public AnnounceActivity Announce(Models.Profile actor, Models.Post content)
+    public AnnounceActivity Announce(Models.Profile actor, Models.IContentRef content)
     {
         throw new NotImplementedException();
     }
@@ -29,17 +29,17 @@ public class Document : IActivityPubDocument
         throw new NotImplementedException();
     }
 
-    public CreateActivity Create(Models.Profile actor, Models.Post content)
+    public CreateActivity Create(Models.Profile actor, Models.IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public DeleteActivity Delete(Models.Profile actor, Models.Post content)
+    public DeleteActivity Delete(Models.Profile actor, Models.IContentRef content)
     {
         throw new NotImplementedException();
     }
 
-    public DislikeActivity Dislike(Models.Profile actor, Models.Post content)
+    public DislikeActivity Dislike(Models.Profile actor, Models.IContentRef content)
     {
         throw new NotImplementedException();
     }
@@ -52,7 +52,7 @@ public class Document : IActivityPubDocument
         return doc;
     }
 
-    public LikeActivity Like(Models.Profile actor, Models.Post content)
+    public LikeActivity Like(Models.Profile actor, Models.IContentRef content)
     {
         throw new NotImplementedException();
     }
@@ -83,7 +83,7 @@ public class Document : IActivityPubDocument
         throw new NotImplementedException();
     }
 
-    public UpdateActivity Update(Models.Profile actor, Models.Post content)
+    public UpdateActivity Update(Models.Profile actor, Models.IContentRef content)
     {
         throw new NotImplementedException();
     }

@@ -32,8 +32,8 @@ public static class AstMapper
             .ForMember(dest => dest.Type, opt => opt.Ignore())
             .ForMember(dest => dest.SharedInbox, opt => opt.Ignore())
             .ForMember(dest => dest.OwnedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.Accessors, opt => opt.Ignore())
             .ForMember(dest => dest.Audiences, opt => opt.Ignore())
-            .ForMember(dest => dest.RelatedAccounts, opt => opt.Ignore())
             .ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
             .ForMember(dest => dest.FollowingCollection, opt => opt.Ignore())
             .ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
@@ -58,6 +58,7 @@ public static class AstMapper
     {
         cfg.CreateMap<NoteObject, Post>(MemberList.Destination)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Authority, opt => opt.Ignore())
             .ForMember(dest => dest.Contents,
                 opt => opt.MapFrom<NoteContentResolver, NaturalLanguageString?>(src => src.Content))
             .ForMember(dest => dest.Creators,
@@ -66,6 +67,10 @@ public static class AstMapper
                 opt => opt.MapFrom<PostResolver, LinkableList<ASObject>?>(src => src.InReplyTo))
             .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary))
             .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => src.Published))
+            .ForMember(dest => dest.PublishedDate, opt => opt.MapFrom(src => src.Published))
+            .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => src.Updated))
+            .ForMember(dest => dest.LastSeenDate, opt => opt.Ignore())
+            .ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
             .ForMember(dest => dest.AddressedTo,
                 opt => opt.MapFrom<MentionsResolver<To>, LinkableList<ASObject>>(src => src.To))
             .ForMember(dest => dest.AddressedTo,
@@ -295,7 +300,7 @@ internal class
             Post = post,
             // TODO: multiple languages
             // or even just single languages, but with knowledge of what language is specified
-            Content = sourceContent?.DefaultValue ?? ""
+            Text = sourceContent?.DefaultValue ?? ""
         };
         if (source.Preview?.TryGetValue(out var value) == true)
             note.Preview = context.Mapper.Map<string>(value);

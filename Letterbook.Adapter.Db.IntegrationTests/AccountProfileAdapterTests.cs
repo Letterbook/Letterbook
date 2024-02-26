@@ -1,7 +1,6 @@
-﻿using System.Security.Cryptography;
-using Letterbook.Adapter.Db.IntegrationTests.Fixtures;
+﻿using Letterbook.Adapter.Db.IntegrationTests.Fixtures;
 using Letterbook.Core.Models;
-using Letterbook.Core.Tests.Fakes;
+using Medo;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -38,7 +37,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "Should indicate ID is in use")]
     public async Task AnyProfileTest()
     {
-        var actual = await _adapter.AnyProfile(_profiles[0].Id);
+        var actual = await _adapter.AnyProfile(_profiles[0].FediId);
         
         Assert.True(actual);
     }
@@ -74,7 +73,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "Should find a profile by Id")]
     public async Task LookupProfileTestId()
     {
-        var actual = await _adapter.LookupProfile(_profiles[0].Id);
+        var actual = await _adapter.LookupProfile(_profiles[0].FediId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
@@ -84,7 +83,7 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "Should find a profile by LocalId")]
     public async Task LookupProfileTestLocalId()
     {
-        var actual = await _adapter.LookupProfile(_profiles[0].LocalId!.Value);
+        var actual = await _adapter.LookupProfile(_profiles[0].GetId());
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
@@ -94,46 +93,52 @@ public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
     [Fact(DisplayName = "Should find related profiles by LocalId")]
     public async Task LookupProfileForFollowingTestLocalId()
     {
-        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].LocalId!.Value, _profiles[4].Id);
+        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].GetId(), _profiles[4].FediId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
-        Assert.Contains(_profiles[4], actual.Following.Select(r => r.Follows));
-        Assert.Contains(_profiles[4], actual.Followers.Select(r => r.Follower));
+        Assert.Contains(_profiles[4], actual.FollowingCollection.Select(r => r.Follows));
+        Assert.Contains(_profiles[4], actual.FollowersCollection.Select(r => r.Follower));
     }
     
     [Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
     [Fact(DisplayName = "Should find related profiles by Id")]
     public async Task LookupProfileForFollowingTestId()
     {
-        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].Id, _profiles[4].Id);
+        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].FediId, _profiles[4].FediId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
-        Assert.Contains(_profiles[4], actual.Following.Select(r => r.Follows));
-        Assert.Contains(_profiles[4], actual.Followers.Select(r => r.Follower));
+        Assert.Contains(_profiles[4], actual.FollowingCollection.Select(r => r.Follows));
+        Assert.Contains(_profiles[4], actual.FollowersCollection.Select(r => r.Follower));
     }
     
     [Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
     [Fact(DisplayName = "LookupProfileWithRelation should not permit additional lazy loading")]
     public async Task LookupProfileForFollowingNoLazyLoad()
     {
-        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].LocalId!.Value, _profiles[4].Id);
+        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].GetId(), _profiles[4].FediId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
-        Assert.Single(actual.Following.AsEnumerable());
+        Assert.Single(actual.FollowingCollection.AsEnumerable());
+        Assert.Single(actual.FollowersCollection.AsEnumerable());
     }
     
     [Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
-    [Fact(DisplayName = "LookupProfileWithRelation by Id should not permit additional lazy loading")]
-    public async Task LookupProfileForFollowingNoLazyLoadById()
+    [Fact(DisplayName = "LookupProfileWithRelation by FediId should not permit additional lazy loading")]
+    public async Task LookupProfileForFollowingNoLazyLoadByFediId()
     {
-        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].Id, _profiles[4].Id);
+        var actual = await _adapter.LookupProfileWithRelation(_profiles[0].FediId, _profiles[4].FediId);
         
         Assert.NotNull(actual);
         Assert.Equal(_profiles[0], actual);
-        Assert.Single(actual.Following.AsEnumerable());
+        
+        var actualSet = actual.FollowersCollection.Select(r => r.GetId()).ToHashSet();
+        var expectedSet = _profiles.SelectMany(p => p.FollowersCollection).Select(r => r.GetId()).ToHashSet();
+        Assert.ProperSubset(expectedSet, actualSet);
+        Assert.Single(actual.FollowingCollection.AsEnumerable());
+        Assert.Single(actual.FollowersCollection.AsEnumerable());
     }
 
     [Trait("AccountProfileAdapter", "FindProfilesByHandle")]

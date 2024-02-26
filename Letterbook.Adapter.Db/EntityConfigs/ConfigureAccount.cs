@@ -7,7 +7,7 @@ public class ConfigureAccount : IEntityTypeConfiguration<Models.Account>
 {
     public void Configure(EntityTypeBuilder<Models.Account> builder)
     {
-        builder.HasIndex(account => account.Email);
-        builder.HasIndex(account => account.UserName);
+        builder.Property(account => account.Id)
+            .ValueGeneratedNever();
     }
 }

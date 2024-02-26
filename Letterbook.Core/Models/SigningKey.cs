@@ -5,7 +5,14 @@ namespace Letterbook.Core.Models;
 
 public class SigningKey
 {
-    public Uuid7 Id { get; set; }
+    private Uuid7 _id;
+
+    public Guid Id
+    {
+        get => _id.ToGuid();
+        set => _id = Uuid7.FromGuid(value);
+    }
+
     public int KeyOrder { get; set; }
     public string? Label { get; set; }
     public KeyFamily Family { get; set; }
@@ -20,7 +27,7 @@ public class SigningKey
         using RSA keyPair = RSA.Create();
         return new SigningKey()
         {
-            Id = Guid.NewGuid(),
+            _id = Uuid7.NewUuid7(),
             KeyOrder = keyOrder,
             Label = label,
             Family = KeyFamily.Rsa,
@@ -37,7 +44,7 @@ public class SigningKey
         using DSA keyPair = DSA.Create();
         return new SigningKey()
         {
-            Id = Guid.NewGuid(),
+            _id = Uuid7.NewUuid7(),
             KeyOrder = keyOrder,
             Label = label,
             Family = KeyFamily.Dsa,
@@ -54,7 +61,7 @@ public class SigningKey
         using ECDsa keyPair = ECDsa.Create();
         return new SigningKey()
         {
-            Id = Guid.NewGuid(),
+            _id = Uuid7.NewUuid7(),
             KeyOrder = keyOrder,
             Label = label,
             Family = KeyFamily.EcDsa,

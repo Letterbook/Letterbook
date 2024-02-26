@@ -36,7 +36,7 @@ public class HostFixture : WebApplicationFactory<Program>
     /// <param name="builder"></param>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Integration");
+        builder.UseEnvironment("Sandcastle");
         builder.ConfigureTestServices(services =>
         {
             if (services.SingleOrDefault(descriptor => descriptor.ServiceType == typeof(IAccountProfileAdapter)) is { } adapter)
@@ -69,8 +69,6 @@ public class HostMocks : WithMocks
     public new Mock<HttpMessageHandler> HttpMessageHandlerMock => base.HttpMessageHandlerMock;
 
     public new IOptions<CoreOptions> CoreOptionsMock => base.CoreOptionsMock;
-
-    public new Mock<IActivityService> ActivityServiceMock => base.ActivityServiceMock;
 
     public new Mock<IProfileService> ProfileServiceMock => base.ProfileServiceMock;
 

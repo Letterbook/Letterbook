@@ -1,5 +1,8 @@
 ﻿using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Bogus;
+using Bogus.DataSets;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 
 namespace Letterbook.Core.Tests.Fakes;
@@ -39,10 +42,12 @@ public sealed class FakeProfile : Faker<Profile>
     
     public FakeProfile() : this(new Uri(new Faker().Internet.UrlWithPath()))
     {
+        RuleFor(p => p.Id, f => f.Random.Guid());
     }
 
     public FakeProfile(string authority) : this(new Uri($"http://{authority}/{new Faker().Internet.UserName()}"))
     {
+        RuleFor(p => p.Id, f => f.Random.Guid());
     }
 
     public FakeProfile(Uri uri)
@@ -51,7 +56,7 @@ public sealed class FakeProfile : Faker<Profile>
         {
             var localId = f.Random.Uuid7();
             var builder = new UriBuilder(uri.Authority);
-            builder.Path += $"actor/{localId.ToId25String()}";
+            builder.Path += $"actor/{localId.ToId22String()}";
             var id = builder.Uri;
             var basePath = builder.Path;
             builder.Path = basePath + "/inbox";
@@ -74,6 +79,8 @@ public sealed class FakeProfile : Faker<Profile>
                 profile.SharedInbox = sharedInbox;
                 profile.Followers = followers;
                 profile.Following = following;
+                // profile.FollowersCollection = ObjectCollection<FollowerRelation>.Followers(id);
+                // profile.FollowingCollection = ObjectCollection<FollowerRelation>.Following(id);
             }
             return profile;
         });
@@ -94,8 +101,8 @@ public sealed class FakeProfile : Faker<Profile>
                     Created = f.Date.Past(1, DateTime.Parse("2020-01-01").ToUniversalTime()),
                     Expires = DateTimeOffset.MaxValue,
                     Family = SigningKey.KeyFamily.Rsa,
-                    Id = f.Random.Uuid7(),
-                    FediId = new Uri(uri, $"actor/{profile.Id.ToId25String()}/public_keys/0"),
+                    Id = f.Random.Guid(),
+                    FediId = new Uri(uri, $"actor/{profile.GetId25()}/public_keys/0"),
                     PrivateKey = rsa.ExportPkcs8PrivateKey(),
                     PublicKey = rsa.ExportSubjectPublicKeyInfo(),
                     KeyOrder = 0,
@@ -110,7 +117,6 @@ public sealed class FakeProfile : Faker<Profile>
         {
             var profile = Profile.CreateIndividual(uri, $"{f.Hacker.Noun()}_{f.Random.Hexadecimal(4)}");
             profile.OwnedBy = owner;
-            profile.RelatedAccounts.Add(new LinkedProfile(owner, profile, ProfilePermission.All));
             return profile;
         });
     }
