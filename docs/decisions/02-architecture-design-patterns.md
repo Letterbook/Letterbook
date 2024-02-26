@@ -7,7 +7,7 @@ Using a hexagonal architecture for the overall application. And using query obje
 - [x] Decided (2023-07-04)
 - [ ] Decided Against
 - [ ] Deferred
-- [ ] Superseded
+- [x] Superseded ([2024-02-16][adr-08])
 
 # Decision
 
@@ -18,7 +18,7 @@ The application should generally follow a hexagonal architecture. There are a nu
 This is facilitated through dependency injection. Left side adapters are generally thought of as action drivers. User action or other real world events are received by those adapters. They invoke core modules, which process and act on that input. Those core modules define interfaces for the capabilities they need, such as to query and record application data. Right side adapters implement those interfaces, and are registered in the DI system. The core modules depend on the interfaces they've defined, and dependency injection provides the implementations.
 
 This box-and-arrow diagram gives an idea what this would look like for a partial set of Letterbook modules. These haven't been implemented yet and will likely change but I hope this conveys the idea.
-![hexagonal-architecture.png](hexagonal-architecture.png)
+![hexagonal-architecture.png](assets/hexagonal-architecture.png)
 
 There are several major benefits to this pattern. I think the biggest may be that it enforces loose coupling. Despite the best intentions, it can often happen that UI, domain, and database code all get tightly linked through transitive dependencies. In this design, those kind of transitive dependencies are very difficult to even create, let alone abuse. Another major benefit is that the core application logic can relatively easily define whatever structure and models make sense for the domain, independently of the APIs and etc that will make use of that core application.
 
@@ -49,3 +49,5 @@ Beyond that, I think it's important to have *some* pattern. Having an establishe
 ## Discussion
 
 Hexagons are the bestagons.
+
+[adr-08]: ./08-architecture-update-01.md
