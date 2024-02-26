@@ -41,8 +41,4 @@
     <ProjectReference Include="..\Letterbook.Core.Tests\Letterbook.Core.Tests.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Fakes\" />
-  </ItemGroup>
-
 </Project>
