@@ -43,6 +43,4 @@
         <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
     </ItemGroup>
 
-
-
 </Project>
