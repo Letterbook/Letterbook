@@ -73,23 +73,6 @@ namespace Letterbook.Adapter.Db.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Images",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FediId = table.Column<string>(type: "text", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    MimeType = table.Column<string>(type: "text", nullable: false),
-                    FileLocation = table.Column<string>(type: "text", nullable: false),
-                    Expiration = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Images", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetUserLogins",
                 schema: "AspnetIdentity",
                 columns: table => new
@@ -135,13 +118,13 @@ namespace Letterbook.Adapter.Db.Migrations
                 name: "Profiles",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     FediId = table.Column<string>(type: "text", nullable: false),
                     Inbox = table.Column<string>(type: "text", nullable: false),
                     Outbox = table.Column<string>(type: "text", nullable: false),
                     SharedInbox = table.Column<string>(type: "text", nullable: true),
                     Followers = table.Column<string>(type: "text", nullable: false),
                     Following = table.Column<string>(type: "text", nullable: false),
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Handle = table.Column<string>(type: "text", nullable: false),
                     DisplayName = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
@@ -152,7 +135,7 @@ namespace Letterbook.Adapter.Db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Profiles", x => x.FediId);
+                    table.PrimaryKey("PK_Profiles", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Profiles_Accounts_OwnedById",
                         column: x => x.OwnedById,
@@ -215,22 +198,16 @@ namespace Letterbook.Adapter.Db.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     FediId = table.Column<string>(type: "text", nullable: false),
-                    SourceFediId = table.Column<string>(type: "text", nullable: true),
-                    ImageId = table.Column<Guid>(type: "uuid", nullable: true)
+                    SourceId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Audience", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Audience_Images_ImageId",
-                        column: x => x.ImageId,
-                        principalTable: "Images",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Audience_Profiles_SourceFediId",
-                        column: x => x.SourceFediId,
+                        name: "FK_Audience_Profiles_SourceId",
+                        column: x => x.SourceId,
                         principalTable: "Profiles",
-                        principalColumn: "FediId");
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -238,8 +215,8 @@ namespace Letterbook.Adapter.Db.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FollowerFediId = table.Column<string>(type: "text", nullable: false),
-                    FollowsFediId = table.Column<string>(type: "text", nullable: false),
+                    FollowerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FollowsId = table.Column<Guid>(type: "uuid", nullable: false),
                     State = table.Column<int>(type: "integer", nullable: false),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
@@ -247,92 +224,42 @@ namespace Letterbook.Adapter.Db.Migrations
                 {
                     table.PrimaryKey("PK_FollowerRelation", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_FollowerRelation_Profiles_FollowerFediId",
-                        column: x => x.FollowerFediId,
+                        name: "FK_FollowerRelation_Profiles_FollowerId",
+                        column: x => x.FollowerId,
                         principalTable: "Profiles",
-                        principalColumn: "FediId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_FollowerRelation_Profiles_FollowsFediId",
-                        column: x => x.FollowsFediId,
+                        name: "FK_FollowerRelation_Profiles_FollowsId",
+                        column: x => x.FollowsId,
                         principalTable: "Profiles",
-                        principalColumn: "FediId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Images_Mentions",
+                name: "ProfileAccess",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ImageId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SubjectFediId = table.Column<string>(type: "text", nullable: false),
-                    Visibility = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Images_Mentions", x => new { x.ImageId, x.Id });
-                    table.ForeignKey(
-                        name: "FK_Images_Mentions_Images_ImageId",
-                        column: x => x.ImageId,
-                        principalTable: "Images",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Images_Mentions_Profiles_SubjectFediId",
-                        column: x => x.SubjectFediId,
-                        principalTable: "Profiles",
-                        principalColumn: "FediId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ImagesCreatedByProfile",
-                columns: table => new
-                {
-                    CreatedImagesId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatorsFediId = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ImagesCreatedByProfile", x => new { x.CreatedImagesId, x.CreatorsFediId });
-                    table.ForeignKey(
-                        name: "FK_ImagesCreatedByProfile_Images_CreatedImagesId",
-                        column: x => x.CreatedImagesId,
-                        principalTable: "Images",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ImagesCreatedByProfile_Profiles_CreatorsFediId",
-                        column: x => x.CreatorsFediId,
-                        principalTable: "Profiles",
-                        principalColumn: "FediId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "LinkedProfile",
-                columns: table => new
-                {
-                    AccountId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProfileId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ProfileFediId = table.Column<string>(type: "text", nullable: false),
+                    AccountId = table.Column<Guid>(type: "uuid", nullable: false),
                     Permission = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LinkedProfile", x => new { x.AccountId, x.ProfileId });
+                    table.PrimaryKey("PK_ProfileAccess", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LinkedProfile_Accounts_AccountId",
+                        name: "FK_ProfileAccess_Accounts_AccountId",
                         column: x => x.AccountId,
                         principalTable: "Accounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LinkedProfile_Profiles_ProfileFediId",
-                        column: x => x.ProfileFediId,
+                        name: "FK_ProfileAccess_Profiles_ProfileId",
+                        column: x => x.ProfileId,
                         principalTable: "Profiles",
-                        principalColumn: "FediId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -349,16 +276,16 @@ namespace Letterbook.Adapter.Db.Migrations
                     Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Expires = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     FediId = table.Column<string>(type: "text", nullable: false),
-                    ProfileFediId = table.Column<string>(type: "text", nullable: true)
+                    ProfileId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SigningKey", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SigningKey_Profiles_ProfileFediId",
-                        column: x => x.ProfileFediId,
+                        name: "FK_SigningKey_Profiles_ProfileId",
+                        column: x => x.ProfileId,
                         principalTable: "Profiles",
-                        principalColumn: "FediId");
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -366,11 +293,11 @@ namespace Letterbook.Adapter.Db.Migrations
                 columns: table => new
                 {
                     AudiencesId = table.Column<Guid>(type: "uuid", nullable: false),
-                    MembersFediId = table.Column<string>(type: "text", nullable: false)
+                    MembersId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AudienceProfileMembers", x => new { x.AudiencesId, x.MembersFediId });
+                    table.PrimaryKey("PK_AudienceProfileMembers", x => new { x.AudiencesId, x.MembersId });
                     table.ForeignKey(
                         name: "FK_AudienceProfileMembers_Audience_AudiencesId",
                         column: x => x.AudiencesId,
@@ -378,10 +305,10 @@ namespace Letterbook.Adapter.Db.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AudienceProfileMembers_Profiles_MembersFediId",
-                        column: x => x.MembersFediId,
+                        name: "FK_AudienceProfileMembers_Profiles_MembersId",
+                        column: x => x.MembersId,
                         principalTable: "Profiles",
-                        principalColumn: "FediId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -396,7 +323,7 @@ namespace Letterbook.Adapter.Db.Migrations
                     Preview = table.Column<string>(type: "text", nullable: true),
                     Source = table.Column<string>(type: "text", nullable: true),
                     Discriminator = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: true)
+                    Text = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -404,17 +331,42 @@ namespace Letterbook.Adapter.Db.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Mention",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PostId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SubjectId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Visibility = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Mention", x => new { x.PostId, x.Id });
+                    table.ForeignKey(
+                        name: "FK_Mention_Profiles_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Post",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ContentRootIdUri = table.Column<string>(type: "text", nullable: false),
+                    ContentRootIdUri = table.Column<string>(type: "text", nullable: true),
                     FediId = table.Column<string>(type: "text", nullable: false),
                     ThreadId = table.Column<Guid>(type: "uuid", nullable: true),
                     Summary = table.Column<string>(type: "text", nullable: true),
                     Preview = table.Column<string>(type: "text", nullable: true),
                     Source = table.Column<string>(type: "text", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Authority = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    PublishedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    LastSeenDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Client = table.Column<string>(type: "text", nullable: true),
                     InReplyToId = table.Column<Guid>(type: "uuid", nullable: true),
                     Replies = table.Column<string>(type: "text", nullable: true),
@@ -432,41 +384,15 @@ namespace Letterbook.Adapter.Db.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Post_AddressedTo",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PostId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SubjectFediId = table.Column<string>(type: "text", nullable: false),
-                    Visibility = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Post_AddressedTo", x => new { x.PostId, x.Id });
-                    table.ForeignKey(
-                        name: "FK_Post_AddressedTo_Post_PostId",
-                        column: x => x.PostId,
-                        principalTable: "Post",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Post_AddressedTo_Profiles_SubjectFediId",
-                        column: x => x.SubjectFediId,
-                        principalTable: "Profiles",
-                        principalColumn: "FediId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PostsCreatedByProfile",
                 columns: table => new
                 {
                     CreatedPostsId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatorsFediId = table.Column<string>(type: "text", nullable: false)
+                    CreatorsId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PostsCreatedByProfile", x => new { x.CreatedPostsId, x.CreatorsFediId });
+                    table.PrimaryKey("PK_PostsCreatedByProfile", x => new { x.CreatedPostsId, x.CreatorsId });
                     table.ForeignKey(
                         name: "FK_PostsCreatedByProfile_Post_CreatedPostsId",
                         column: x => x.CreatedPostsId,
@@ -474,10 +400,10 @@ namespace Letterbook.Adapter.Db.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PostsCreatedByProfile_Profiles_CreatorsFediId",
-                        column: x => x.CreatorsFediId,
+                        name: "FK_PostsCreatedByProfile_Profiles_CreatorsId",
+                        column: x => x.CreatorsId,
                         principalTable: "Profiles",
-                        principalColumn: "FediId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -486,11 +412,11 @@ namespace Letterbook.Adapter.Db.Migrations
                 columns: table => new
                 {
                     LikedPostsId = table.Column<Guid>(type: "uuid", nullable: false),
-                    LikesCollectionFediId = table.Column<string>(type: "text", nullable: false)
+                    LikesCollectionId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PostsLikedByProfile", x => new { x.LikedPostsId, x.LikesCollectionFediId });
+                    table.PrimaryKey("PK_PostsLikedByProfile", x => new { x.LikedPostsId, x.LikesCollectionId });
                     table.ForeignKey(
                         name: "FK_PostsLikedByProfile_Post_LikedPostsId",
                         column: x => x.LikedPostsId,
@@ -498,10 +424,10 @@ namespace Letterbook.Adapter.Db.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PostsLikedByProfile_Profiles_LikesCollectionFediId",
-                        column: x => x.LikesCollectionFediId,
+                        name: "FK_PostsLikedByProfile_Profiles_LikesCollectionId",
+                        column: x => x.LikesCollectionId,
                         principalTable: "Profiles",
-                        principalColumn: "FediId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -510,11 +436,11 @@ namespace Letterbook.Adapter.Db.Migrations
                 columns: table => new
                 {
                     SharedPostsId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SharesCollectionFediId = table.Column<string>(type: "text", nullable: false)
+                    SharesCollectionId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PostsSharedByProfile", x => new { x.SharedPostsId, x.SharesCollectionFediId });
+                    table.PrimaryKey("PK_PostsSharedByProfile", x => new { x.SharedPostsId, x.SharesCollectionId });
                     table.ForeignKey(
                         name: "FK_PostsSharedByProfile_Post_SharedPostsId",
                         column: x => x.SharedPostsId,
@@ -522,10 +448,10 @@ namespace Letterbook.Adapter.Db.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PostsSharedByProfile_Profiles_SharesCollectionFediId",
-                        column: x => x.SharesCollectionFediId,
+                        name: "FK_PostsSharedByProfile_Profiles_SharesCollectionId",
+                        column: x => x.SharesCollectionId,
                         principalTable: "Profiles",
-                        principalColumn: "FediId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -573,16 +499,6 @@ namespace Letterbook.Adapter.Db.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Accounts_Email",
-                table: "Accounts",
-                column: "Email");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Accounts_UserName",
-                table: "Accounts",
-                column: "UserName");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 schema: "AspnetIdentity",
                 table: "AspNetRoleClaims",
@@ -619,19 +535,14 @@ namespace Letterbook.Adapter.Db.Migrations
                 column: "FediId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Audience_ImageId",
+                name: "IX_Audience_SourceId",
                 table: "Audience",
-                column: "ImageId");
+                column: "SourceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Audience_SourceFediId",
-                table: "Audience",
-                column: "SourceFediId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AudienceProfileMembers_MembersFediId",
+                name: "IX_AudienceProfileMembers_MembersId",
                 table: "AudienceProfileMembers",
-                column: "MembersFediId");
+                column: "MembersId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Content_FediId",
@@ -649,29 +560,19 @@ namespace Letterbook.Adapter.Db.Migrations
                 column: "Date");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FollowerRelation_FollowerFediId",
+                name: "IX_FollowerRelation_FollowerId",
                 table: "FollowerRelation",
-                column: "FollowerFediId");
+                column: "FollowerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FollowerRelation_FollowsFediId",
+                name: "IX_FollowerRelation_FollowsId",
                 table: "FollowerRelation",
-                column: "FollowsFediId");
+                column: "FollowsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Images_Mentions_SubjectFediId",
-                table: "Images_Mentions",
-                column: "SubjectFediId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ImagesCreatedByProfile_CreatorsFediId",
-                table: "ImagesCreatedByProfile",
-                column: "CreatorsFediId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LinkedProfile_ProfileFediId",
-                table: "LinkedProfile",
-                column: "ProfileFediId");
+                name: "IX_Mention_SubjectId",
+                table: "Mention",
+                column: "SubjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Post_ContentRootIdUri",
@@ -694,24 +595,19 @@ namespace Letterbook.Adapter.Db.Migrations
                 column: "ThreadId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Post_AddressedTo_SubjectFediId",
-                table: "Post_AddressedTo",
-                column: "SubjectFediId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PostsCreatedByProfile_CreatorsFediId",
+                name: "IX_PostsCreatedByProfile_CreatorsId",
                 table: "PostsCreatedByProfile",
-                column: "CreatorsFediId");
+                column: "CreatorsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PostsLikedByProfile_LikesCollectionFediId",
+                name: "IX_PostsLikedByProfile_LikesCollectionId",
                 table: "PostsLikedByProfile",
-                column: "LikesCollectionFediId");
+                column: "LikesCollectionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PostsSharedByProfile_SharesCollectionFediId",
+                name: "IX_PostsSharedByProfile_SharesCollectionId",
                 table: "PostsSharedByProfile",
-                column: "SharesCollectionFediId");
+                column: "SharesCollectionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PostsToAudience_PostId",
@@ -719,9 +615,19 @@ namespace Letterbook.Adapter.Db.Migrations
                 column: "PostId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Profiles_Id",
+                name: "IX_ProfileAccess_AccountId",
+                table: "ProfileAccess",
+                column: "AccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProfileAccess_ProfileId",
+                table: "ProfileAccess",
+                column: "ProfileId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Profiles_FediId",
                 table: "Profiles",
-                column: "Id");
+                column: "FediId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Profiles_OwnedById",
@@ -729,9 +635,9 @@ namespace Letterbook.Adapter.Db.Migrations
                 column: "OwnedById");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SigningKey_ProfileFediId",
+                name: "IX_SigningKey_ProfileId",
                 table: "SigningKey",
-                column: "ProfileFediId");
+                column: "ProfileId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ThreadContext_FediId",
@@ -746,6 +652,14 @@ namespace Letterbook.Adapter.Db.Migrations
             migrationBuilder.AddForeignKey(
                 name: "FK_Content_Post_PostId",
                 table: "Content",
+                column: "PostId",
+                principalTable: "Post",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Mention_Post_PostId",
+                table: "Mention",
                 column: "PostId",
                 principalTable: "Post",
                 principalColumn: "Id",
@@ -796,16 +710,7 @@ namespace Letterbook.Adapter.Db.Migrations
                 name: "FollowerRelation");
 
             migrationBuilder.DropTable(
-                name: "Images_Mentions");
-
-            migrationBuilder.DropTable(
-                name: "ImagesCreatedByProfile");
-
-            migrationBuilder.DropTable(
-                name: "LinkedProfile");
-
-            migrationBuilder.DropTable(
-                name: "Post_AddressedTo");
+                name: "Mention");
 
             migrationBuilder.DropTable(
                 name: "PostsCreatedByProfile");
@@ -820,6 +725,9 @@ namespace Letterbook.Adapter.Db.Migrations
                 name: "PostsToAudience");
 
             migrationBuilder.DropTable(
+                name: "ProfileAccess");
+
+            migrationBuilder.DropTable(
                 name: "SigningKey");
 
             migrationBuilder.DropTable(
@@ -828,9 +736,6 @@ namespace Letterbook.Adapter.Db.Migrations
 
             migrationBuilder.DropTable(
                 name: "Audience");
-
-            migrationBuilder.DropTable(
-                name: "Images");
 
             migrationBuilder.DropTable(
                 name: "Profiles");

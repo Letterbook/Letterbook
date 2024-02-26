@@ -47,7 +47,7 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
         var remote = new Uri("http://localhost:3080/users/user");
         var profile = _fakeProfile.Generate();
         var target = new FakeProfile(remote).Generate();
-        HostFixture.Mocks.AccountProfileMock.Setup(m => m.LookupProfile((Guid)profile.LocalId!))
+        HostFixture.Mocks.AccountProfileMock.Setup(m => m.LookupProfile((Guid)profile.Id!))
             .ReturnsAsync(profile);
         // HostFixture.Mocks.AccountProfileMock.Setup(m => m.LookupProfile(remote))
             // .ReturnsAsync(target);
@@ -56,6 +56,6 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
         
         var profileService = scope.ServiceProvider.GetRequiredService<IProfileService>();
 
-        var result = await profileService.Follow((Guid)profile.LocalId!, remote);
+        var result = await profileService.Follow((Guid)profile.Id!, remote);
     }
 }

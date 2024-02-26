@@ -4,11 +4,21 @@ namespace Letterbook.Core.Models;
 
 public class ThreadContext
 {
-    public Uuid7 Id { get; set; } = Uuid7.NewUuid7();
+    private Uuid7 _id = Uuid7.NewUuid7();
+
+    public Guid Id
+    {
+        get => _id;
+        set => _id = value;
+    }
+
     public required Uri FediId { get; set; }
     public ICollection<Post> Posts { get; set; } = new HashSet<Post>();
     public required Post Root { get; set; }
     public Heuristics? Heuristics { get; init; }
+    
+    public Uuid7 GetId() => _id;
+    public string GetId25() => _id.ToId25String();
 }
 
 /// <summary>

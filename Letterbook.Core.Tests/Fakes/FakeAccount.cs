@@ -5,27 +5,24 @@ namespace Letterbook.Core.Tests.Fakes;
 
 public class FakeAccount : Faker<Account>
 {
-    public FakeAccount()
+    public FakeAccount(bool withProfile = true)
     {
-        CustomInstantiator(faker =>
+        base.CustomInstantiator(faker =>
         {
             var uri = faker.Internet.Url();
-            var profile = new FakeProfile(uri).Generate();
             var account = new Account()
             {
                 Email = faker.Internet.Email(),
                 UserName = faker.Internet.UserName()
             };
+            if (!withProfile) return account;
+            
+            var profile = new FakeProfile(uri).Generate();
             profile.OwnedBy = account;
-            account.LinkedProfiles.Add(new LinkedProfile(account, profile, ProfilePermission.All));
+            var link = new ProfileAccess(account, profile, ProfilePermission.All);
+            account.LinkedProfiles.Add(link);
+            profile.Accessors.Add(link);
             return account;
         });
-    }
-
-    public FakeAccount(bool empty = true)
-    {
-        
-        RuleFor(a => a.Email, faker => faker.Internet.Email());
-        RuleFor(a => a.UserName, faker => faker.Internet.UserName());
     }
 }

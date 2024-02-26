@@ -4,7 +4,7 @@ namespace Letterbook.Core.Models;
 
 public interface IContent
 {
-    Uuid7 Id { get; set; }
+    Guid Id { get; set; }
     Uri FediId { get; set; }
     Post Post { get; set; }
     string? Summary { get; set; }
@@ -12,6 +12,8 @@ public interface IContent
     Uri? Source { get; set; }
     string Type { get; }
 
+    public Uuid7 GetId();
+    public string GetId25();
     public string? GeneratePreview();
     public void Sanitize();
 }

@@ -8,6 +8,7 @@ using Letterbook.Api.Dto;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
@@ -47,7 +48,7 @@ public class ActorController : ControllerBase
     [Route("{id}")]
     public async Task<IActionResult> GetActor(string id)
     {
-        Uuid7 localId;
+        Guid localId;
         try
         {
             localId = Uuid7.FromId25String(id);

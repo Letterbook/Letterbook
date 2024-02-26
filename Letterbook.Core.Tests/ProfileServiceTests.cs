@@ -398,10 +398,10 @@ public class ProfileServiceTests : WithMocks
     {
         var follower = new FakeProfile().Generate();
         _profile.AddFollower(follower, FollowState.Accepted);
-        AccountProfileMock.Setup(m => m.LookupProfileWithRelation((Uuid7)_profile.Id!, follower.FediId))
+        AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), follower.FediId))
             .ReturnsAsync(_profile);
 
-        await _service.RemoveFollower(_profile.Id, follower.FediId);
+        await _service.RemoveFollower(_profile.GetId(), follower.FediId);
 
         Assert.DoesNotContain(follower, _profile.FollowersCollection.Select(r => r.Follower));
     }
@@ -411,10 +411,10 @@ public class ProfileServiceTests : WithMocks
     {
         var follower = new FakeProfile().Generate();
         _profile.Follow(follower, FollowState.Accepted);
-        AccountProfileMock.Setup(m => m.LookupProfileWithRelation((Uuid7)_profile.Id!, follower.FediId))
+        AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), follower.FediId))
             .ReturnsAsync(_profile);
 
-        await _service.Unfollow(_profile.Id, follower.FediId);
+        await _service.Unfollow(_profile.GetId(), follower.FediId);
 
         Assert.DoesNotContain(follower, _profile.FollowingCollection.Select(r => r.Follows));
     }

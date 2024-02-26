@@ -1,4 +1,6 @@
-﻿namespace Letterbook.Core.Models;
+﻿using Medo;
+
+namespace Letterbook.Core.Models;
 
 /// <summary>
 /// A Mention is when a Post is addressed to another individual Profile at any level of visibility.
@@ -19,7 +21,14 @@ public class Mention : IEquatable<Mention>
         Visibility = MentionVisibility.Cc
     };
 
-    public Guid Id { get; set; }
+    private Uuid7 _id;
+
+    public Guid Id
+    {
+        get => _id.ToGuid();
+        set => _id = Uuid7.FromGuid(value);
+    }
+
     public Profile Subject { get; set; }
     public MentionVisibility Visibility { get; set; }
 
@@ -32,13 +41,12 @@ public class Mention : IEquatable<Mention>
 
     private Mention()
     {
-        Id = Guid.Empty;
         Subject = default!;
     }
     
     public Mention(Profile subject, MentionVisibility visibility)
     {
-        Id = Guid.NewGuid();
+        _id = Uuid7.NewUuid7();
         Subject = subject;
         Visibility = visibility;
     }
@@ -77,7 +85,7 @@ public class Mention : IEquatable<Mention>
     {
         return new Mention()
         {
-            Id = Guid.NewGuid(),
+            _id = Uuid7.NewUuid7(),
             Subject = subject,
             Visibility = visibility
         };

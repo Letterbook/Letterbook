@@ -10,9 +10,11 @@ namespace Letterbook.Core.Models;
 /// Audience targeting is used internally to build feeds and notifications. It's also used externally to imply
 /// visibility controls for federated content.
 /// </summary>
-public class Audience : IEquatable<Audience>//, IObjectRef
+public class Audience : IEquatable<Audience>, IFederated
 {
-    private static Audience _public = FromUri(new Uri(Constants.ActivityPubPublicCollection), Profile.CreateEmpty(new Uri(Constants.ActivityPubPublicCollection)));
+    private static Audience _public = FromUri(new Uri(Constants.ActivityPubPublicCollection));
+    private Uuid7 _id = Uuid7.NewUuid7();
+
     private Audience()
     {
         FediId = default!;
@@ -20,8 +22,15 @@ public class Audience : IEquatable<Audience>//, IObjectRef
     
     public Uri FediId { get; set; }
     public Profile? Source { get; set; }
-    // LocalId isn't a meaningful concept for Audience, but it's required by IObjectRef
-    public Uuid7 Id { get; set; }
+
+    // LocalId isn't a meaningful concept for Audience, but it's required by IFederated
+    public Guid Id
+    {
+        get => _id.ToGuid();
+        set => _id = Uuid7.FromGuid(value);
+    }
+
+    public string Authority => FediId.Authority;
     public List<Profile> Members { get; set; } = new();
 
     /// <summary>
@@ -33,6 +42,8 @@ public class Audience : IEquatable<Audience>//, IObjectRef
     public static Audience FromUri(Uri id, Profile? source = null) => new () { FediId = id, Source = source};
     public static Audience Followers(Profile creator) => FromUri(creator.Followers, creator);
 
+    public Uuid7 GetId() => _id;
+    public string GetId25() => _id.ToId25String();
     public static Audience Subscribers(Profile creator)
     {
         var builder = new UriBuilder(creator.Followers);
