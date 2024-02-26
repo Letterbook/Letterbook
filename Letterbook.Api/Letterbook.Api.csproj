@@ -52,12 +52,4 @@
     <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Mappers\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Controllers\WebFingerController.cs" />
-  </ItemGroup>
-
 </Project>
