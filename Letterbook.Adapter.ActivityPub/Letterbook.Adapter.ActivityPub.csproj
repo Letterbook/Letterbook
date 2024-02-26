@@ -16,7 +16,6 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="10.9.0" />
       <PackageReference Include="NSign.Abstractions" Version="0.19.1" />
       <PackageReference Include="NSign.Client" Version="0.19.1" />
       <PackageReference Include="NSign.SignatureProviders" Version="0.19.1" />
