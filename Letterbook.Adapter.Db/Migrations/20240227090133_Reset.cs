@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     /// <inheritdoc />
-    public partial class ResetMigrations : Migration
+    public partial class Reset : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -70,6 +70,19 @@ namespace Letterbook.Adapter.Db.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Threads",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    RootId = table.Column<Guid>(type: "uuid", nullable: false),
+                    FediId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Threads", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -193,6 +206,46 @@ namespace Letterbook.Adapter.Db.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Posts",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ContentRootIdUri = table.Column<string>(type: "text", nullable: true),
+                    FediId = table.Column<string>(type: "text", nullable: false),
+                    ThreadId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Summary = table.Column<string>(type: "text", nullable: true),
+                    Preview = table.Column<string>(type: "text", nullable: true),
+                    Source = table.Column<string>(type: "text", nullable: true),
+                    Hostname = table.Column<string>(type: "text", nullable: false),
+                    Authority = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    PublishedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    UpdatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    LastSeenDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Client = table.Column<string>(type: "text", nullable: true),
+                    InReplyToId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Replies = table.Column<string>(type: "text", nullable: true),
+                    Likes = table.Column<string>(type: "text", nullable: true),
+                    Shares = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Posts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Posts_Posts_InReplyToId",
+                        column: x => x.InReplyToId,
+                        principalTable: "Posts",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Posts_Threads_ThreadId",
+                        column: x => x.ThreadId,
+                        principalTable: "Threads",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Audience",
                 columns: table => new
                 {
@@ -289,6 +342,128 @@ namespace Letterbook.Adapter.Db.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Content",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    FediId = table.Column<string>(type: "text", nullable: false),
+                    PostId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Summary = table.Column<string>(type: "text", nullable: true),
+                    Preview = table.Column<string>(type: "text", nullable: true),
+                    Source = table.Column<string>(type: "text", nullable: true),
+                    Discriminator = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
+                    Text = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Content", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Content_Posts_PostId",
+                        column: x => x.PostId,
+                        principalTable: "Posts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Mention",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PostId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SubjectId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Visibility = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Mention", x => new { x.PostId, x.Id });
+                    table.ForeignKey(
+                        name: "FK_Mention_Posts_PostId",
+                        column: x => x.PostId,
+                        principalTable: "Posts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Mention_Profiles_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PostsCreatedByProfile",
+                columns: table => new
+                {
+                    CreatedPostsId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CreatorsId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PostsCreatedByProfile", x => new { x.CreatedPostsId, x.CreatorsId });
+                    table.ForeignKey(
+                        name: "FK_PostsCreatedByProfile_Posts_CreatedPostsId",
+                        column: x => x.CreatedPostsId,
+                        principalTable: "Posts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PostsCreatedByProfile_Profiles_CreatorsId",
+                        column: x => x.CreatorsId,
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PostsLikedByProfile",
+                columns: table => new
+                {
+                    LikedPostsId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LikesCollectionId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PostsLikedByProfile", x => new { x.LikedPostsId, x.LikesCollectionId });
+                    table.ForeignKey(
+                        name: "FK_PostsLikedByProfile_Posts_LikedPostsId",
+                        column: x => x.LikedPostsId,
+                        principalTable: "Posts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PostsLikedByProfile_Profiles_LikesCollectionId",
+                        column: x => x.LikesCollectionId,
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PostsSharedByProfile",
+                columns: table => new
+                {
+                    SharedPostsId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SharesCollectionId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PostsSharedByProfile", x => new { x.SharedPostsId, x.SharesCollectionId });
+                    table.ForeignKey(
+                        name: "FK_PostsSharedByProfile_Posts_SharedPostsId",
+                        column: x => x.SharedPostsId,
+                        principalTable: "Posts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PostsSharedByProfile_Profiles_SharesCollectionId",
+                        column: x => x.SharesCollectionId,
+                        principalTable: "Profiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AudienceProfileMembers",
                 columns: table => new
                 {
@@ -313,149 +488,6 @@ namespace Letterbook.Adapter.Db.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Content",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FediId = table.Column<string>(type: "text", nullable: false),
-                    PostId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Summary = table.Column<string>(type: "text", nullable: true),
-                    Preview = table.Column<string>(type: "text", nullable: true),
-                    Source = table.Column<string>(type: "text", nullable: true),
-                    Discriminator = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Content", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Mention",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PostId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SubjectId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Visibility = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Mention", x => new { x.PostId, x.Id });
-                    table.ForeignKey(
-                        name: "FK_Mention_Profiles_SubjectId",
-                        column: x => x.SubjectId,
-                        principalTable: "Profiles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Post",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ContentRootIdUri = table.Column<string>(type: "text", nullable: true),
-                    FediId = table.Column<string>(type: "text", nullable: false),
-                    ThreadId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Summary = table.Column<string>(type: "text", nullable: true),
-                    Preview = table.Column<string>(type: "text", nullable: true),
-                    Source = table.Column<string>(type: "text", nullable: true),
-                    Authority = table.Column<string>(type: "text", nullable: false),
-                    CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    PublishedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    UpdatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    DeletedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    LastSeenDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Client = table.Column<string>(type: "text", nullable: true),
-                    InReplyToId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Replies = table.Column<string>(type: "text", nullable: true),
-                    Likes = table.Column<string>(type: "text", nullable: true),
-                    Shares = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Post", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Post_Post_InReplyToId",
-                        column: x => x.InReplyToId,
-                        principalTable: "Post",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PostsCreatedByProfile",
-                columns: table => new
-                {
-                    CreatedPostsId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatorsId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PostsCreatedByProfile", x => new { x.CreatedPostsId, x.CreatorsId });
-                    table.ForeignKey(
-                        name: "FK_PostsCreatedByProfile_Post_CreatedPostsId",
-                        column: x => x.CreatedPostsId,
-                        principalTable: "Post",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PostsCreatedByProfile_Profiles_CreatorsId",
-                        column: x => x.CreatorsId,
-                        principalTable: "Profiles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PostsLikedByProfile",
-                columns: table => new
-                {
-                    LikedPostsId = table.Column<Guid>(type: "uuid", nullable: false),
-                    LikesCollectionId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PostsLikedByProfile", x => new { x.LikedPostsId, x.LikesCollectionId });
-                    table.ForeignKey(
-                        name: "FK_PostsLikedByProfile_Post_LikedPostsId",
-                        column: x => x.LikedPostsId,
-                        principalTable: "Post",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PostsLikedByProfile_Profiles_LikesCollectionId",
-                        column: x => x.LikesCollectionId,
-                        principalTable: "Profiles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PostsSharedByProfile",
-                columns: table => new
-                {
-                    SharedPostsId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SharesCollectionId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PostsSharedByProfile", x => new { x.SharedPostsId, x.SharesCollectionId });
-                    table.ForeignKey(
-                        name: "FK_PostsSharedByProfile_Post_SharedPostsId",
-                        column: x => x.SharedPostsId,
-                        principalTable: "Post",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_PostsSharedByProfile_Profiles_SharesCollectionId",
-                        column: x => x.SharesCollectionId,
-                        principalTable: "Profiles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PostsToAudience",
                 columns: table => new
                 {
@@ -472,28 +504,9 @@ namespace Letterbook.Adapter.Db.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PostsToAudience_Post_PostId",
+                        name: "FK_PostsToAudience_Posts_PostId",
                         column: x => x.PostId,
-                        principalTable: "Post",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ThreadContext",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FediId = table.Column<string>(type: "text", nullable: false),
-                    RootId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ThreadContext", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ThreadContext_Post_RootId",
-                        column: x => x.RootId,
-                        principalTable: "Post",
+                        principalTable: "Posts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -575,23 +588,23 @@ namespace Letterbook.Adapter.Db.Migrations
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Post_ContentRootIdUri",
-                table: "Post",
+                name: "IX_Posts_ContentRootIdUri",
+                table: "Posts",
                 column: "ContentRootIdUri");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Post_FediId",
-                table: "Post",
+                name: "IX_Posts_FediId",
+                table: "Posts",
                 column: "FediId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Post_InReplyToId",
-                table: "Post",
+                name: "IX_Posts_InReplyToId",
+                table: "Posts",
                 column: "InReplyToId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Post_ThreadId",
-                table: "Post",
+                name: "IX_Posts_ThreadId",
+                table: "Posts",
                 column: "ThreadId");
 
             migrationBuilder.CreateIndex(
@@ -640,46 +653,19 @@ namespace Letterbook.Adapter.Db.Migrations
                 column: "ProfileId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ThreadContext_FediId",
-                table: "ThreadContext",
+                name: "IX_Threads_FediId",
+                table: "Threads",
                 column: "FediId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ThreadContext_RootId",
-                table: "ThreadContext",
+                name: "IX_Threads_RootId",
+                table: "Threads",
                 column: "RootId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Content_Post_PostId",
-                table: "Content",
-                column: "PostId",
-                principalTable: "Post",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Mention_Post_PostId",
-                table: "Mention",
-                column: "PostId",
-                principalTable: "Post",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Post_ThreadContext_ThreadId",
-                table: "Post",
-                column: "ThreadId",
-                principalTable: "ThreadContext",
-                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ThreadContext_Post_RootId",
-                table: "ThreadContext");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims",
                 schema: "AspnetIdentity");
@@ -738,16 +724,16 @@ namespace Letterbook.Adapter.Db.Migrations
                 name: "Audience");
 
             migrationBuilder.DropTable(
+                name: "Posts");
+
+            migrationBuilder.DropTable(
                 name: "Profiles");
 
             migrationBuilder.DropTable(
+                name: "Threads");
+
+            migrationBuilder.DropTable(
                 name: "Accounts");
-
-            migrationBuilder.DropTable(
-                name: "Post");
-
-            migrationBuilder.DropTable(
-                name: "ThreadContext");
         }
     }
 }

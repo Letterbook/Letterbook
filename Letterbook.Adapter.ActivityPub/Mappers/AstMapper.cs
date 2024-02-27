@@ -165,11 +165,7 @@ internal class PostResolver :
         if (sourceMember is null) return default;
         if (!sourceMember.First().TryGetId(out var id)) return default;
 
-        return new Post
-        {
-            FediId = id,
-            Thread = destination.Thread
-        };
+        return new Post(id, destination.Thread);
     }
 
     public IList<Post> Resolve(NoteObject source, Post destination, ASCollection? sourceMember, IList<Post> destMember,
@@ -251,7 +247,7 @@ internal class PostContextConverter : IMemberValueResolver<ASObject, Post, Linka
             var result = new ThreadContext
             {
                 FediId = id,
-                Root = post,
+                RootId = post.Id,
                 Heuristics = new Heuristics
                 {
                     NewThread = true
@@ -279,7 +275,7 @@ internal class PostContextConverter : IMemberValueResolver<ASObject, Post, Linka
         {
             FediId = new Uri(Extensions.NotNull(src.Replies?.Id, src.Context?.Value?.Id,
                 src.Context?.Link?.HRef.ToString(), src.Id)),
-            Root = post,
+            RootId = post.Id,
             Heuristics = heuristic
         };
     }

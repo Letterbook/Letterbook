@@ -42,12 +42,12 @@ public sealed class FakeProfile : Faker<Profile>
     
     public FakeProfile() : this(new Uri(new Faker().Internet.UrlWithPath()))
     {
-        RuleFor(p => p.Id, f => f.Random.Guid());
+        // RuleFor(p => p.Id, f => f.Random.Guid());
     }
 
     public FakeProfile(string authority) : this(new Uri($"http://{authority}/{new Faker().Internet.UserName()}"))
     {
-        RuleFor(p => p.Id, f => f.Random.Guid());
+        // RuleFor(p => p.Id, f => f.Random.Guid());
     }
 
     public FakeProfile(Uri uri)

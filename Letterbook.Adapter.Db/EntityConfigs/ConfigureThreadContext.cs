@@ -8,8 +8,9 @@ public class ConfigureThreadContext : IEntityTypeConfiguration<Models.ThreadCont
     public void Configure(EntityTypeBuilder<Models.ThreadContext> builder)
     {
         builder.HasIndex(conversation => conversation.FediId);
+        builder.Property(thread => thread.RootId).IsRequired();
+        builder.HasIndex(thread => thread.RootId);
 
-        builder.HasOne<Models.Post>(conversation => conversation.Root);
         builder.HasMany<Models.Post>(conversation => conversation.Posts)
             .WithOne(post => post.Thread);
 
