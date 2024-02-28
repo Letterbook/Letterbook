@@ -59,6 +59,7 @@ public static class AstMapper
         cfg.CreateMap<NoteObject, Post>(MemberList.Destination)
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.Authority, opt => opt.Ignore())
+            .ForMember(dest => dest.Hostname, opt => opt.Ignore())
             .ForMember(dest => dest.Contents,
                 opt => opt.MapFrom<NoteContentResolver, NaturalLanguageString?>(src => src.Content))
             .ForMember(dest => dest.Creators,
