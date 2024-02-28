@@ -15,43 +15,49 @@ public class PostAdapter : IPostAdapter, IAsyncDisposable
         _logger = logger;
         _context = context;
     }
+    
+    private static IQueryable<Models.Post> WithDefaults(IQueryable<Models.Post> query) => 
+        query.Include(p => p.Creators).Include(p => p.Contents);
+
+    private static IQueryable<Models.Post> WithThread(IQueryable<Models.Post> query) => WithDefaults(query)
+        .Include(post => post.Thread).ThenInclude(thread => thread.Posts).ThenInclude(p => p.Creators)
+        .Include(post => post.Thread).ThenInclude(thread => thread.Posts).ThenInclude(p => p.Contents)
+        .AsSplitQuery();
 
     public async Task<Models.Post?> LookupPost(Uuid7 postId)
     {
-        return await _context.Posts.FirstOrDefaultAsync(post => post.Id == postId);
+        return await WithDefaults(_context.Posts).FirstOrDefaultAsync(post => post.Id == postId.ToGuid());
     }
 
     public async Task<Models.Post?> LookupPost(Uri fediId)
     {
-        return await _context.Posts.FirstAsync(post => post.FediId.OriginalString == fediId.OriginalString);
+        return await WithDefaults(_context.Posts).FirstOrDefaultAsync(post => post.FediId == fediId);
     }
 
     public async Task<Models.ThreadContext?> LookupThread(Uri threadId)
     {
         return await _context.Threads
             .Include(thread => thread.Posts)
-            .FirstOrDefaultAsync(thread => thread.FediId.OriginalString == threadId.OriginalString);
+            .FirstOrDefaultAsync(thread => thread.FediId == threadId);
     }
 
     public async Task<Models.ThreadContext?> LookupThread(Uuid7 threadId)
     {
         return await _context.Threads
             .Include(thread => thread.Posts)
-            .FirstOrDefaultAsync(thread => thread.Id == threadId);
+            .FirstOrDefaultAsync(thread => thread.Id == threadId.ToGuid());
     }
 
     public async Task<Models.Post?> LookupPostWithThread(Uuid7 postId)
     {
-        return await _context.Posts
-            .Include(post => post.Thread).ThenInclude(thread => thread.Posts)
-            .FirstOrDefaultAsync(post => post.Id == postId);
+        return await WithThread(_context.Posts)
+            .FirstOrDefaultAsync(post => post.Id == postId.ToGuid());
     }
 
     public async Task<Models.Post?> LookupPostWithThread(Uri postId)
     {
-        return await _context.Posts
-            .Include(post => post.Thread).ThenInclude(thread => thread.Posts)
-            .FirstOrDefaultAsync(post => post.FediId.OriginalString == postId.OriginalString);
+        return await WithThread(_context.Posts)
+            .FirstOrDefaultAsync(post => post.FediId == postId);
     }
 
     public async Task<Models.Profile?> LookupProfile(Uuid7 profileId)
@@ -63,7 +69,7 @@ public class PostAdapter : IPostAdapter, IAsyncDisposable
     public async Task<Models.Profile?> LookupProfile(Uri profileId)
     {
         return await _context.Profiles
-            .FirstOrDefaultAsync(profile => profile.FediId.OriginalString == profileId.OriginalString);
+            .FirstOrDefaultAsync(profile => profile.FediId == profileId);
     }
 
     public void Add(Models.Post post) => _context.Posts.Add(post);

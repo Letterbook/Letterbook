@@ -125,4 +125,9 @@ public class Post : IFederated
         ContentRootIdUri = content.FediId;
         FediId = content.FediId;
     }
+
+    public override int GetHashCode()
+    {
+        return FediId.GetHashCode();
+    }
 }
