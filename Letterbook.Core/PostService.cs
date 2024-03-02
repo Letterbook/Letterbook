@@ -32,32 +32,26 @@ public class PostService : IPostService
         _options = options.Value;
     }
 
-    public async Task<IEnumerable<Post>> LookupPost(Uuid7 id, bool withThread = true)
+    public async Task<Post?> LookupPost(Uuid7 id, bool withThread = true)
     {
-        if (withThread)
-            return await _posts.LookupThreadForPost(id);
-        var post = await _posts.LookupPost(id);
-        return post is not null
-            ? new List<Post>() { post }
-            : Enumerable.Empty<Post>();
+        return withThread
+            ? await _posts.LookupPostWithThread(id)
+            : await _posts.LookupPost(id);
     }
 
-    public async Task<IEnumerable<Post>> LookupPost(Uri fediId, bool withThread = true)
+    public async Task<Post?> LookupPost(Uri fediId, bool withThread = true)
     {
-        if (withThread)
-            return await _posts.LookupThreadForPost(fediId);
-        var post = await _posts.LookupPost(fediId);
-        return post is not null
-            ? new List<Post>() { post }
-            : Enumerable.Empty<Post>();
+        return withThread
+            ? await _posts.LookupPostWithThread(fediId)
+            : await _posts.LookupPost(fediId);
     }
 
-    public async Task<IEnumerable<Post>> LookupThread(Uuid7 threadId)
+    public async Task<ThreadContext?> LookupThread(Uuid7 threadId)
     {
         return await _posts.LookupThread(threadId);
     }
 
-    public async Task<IEnumerable<Post>> LookupThread(Uri threadId)
+    public async Task<ThreadContext?> LookupThread(Uri threadId)
     {
         return await _posts.LookupThread(threadId);
     }

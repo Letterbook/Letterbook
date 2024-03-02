@@ -20,6 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development"
 		Http\JSON-LD.http = Http\JSON-LD.http
 		docker-compose.mastodon.yml = docker-compose.mastodon.yml
 		Endpoints.http = Endpoints.http
+		volumes\postgresql.conf = volumes\postgresql.conf
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Core", "Letterbook.Core\Letterbook.Core.csproj", "{808895B8-D5F6-4DE3-AFF6-91C19E75B78C}"

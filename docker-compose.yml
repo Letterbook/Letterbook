@@ -26,6 +26,7 @@ services:
       - "5432:5432"
     volumes:
       - letterbook_db_data:/var/lib/postgresql/data
+      - ./volumes/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
     restart: always
 
   # Optional Dashboarding and Observability Services 

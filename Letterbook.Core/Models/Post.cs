@@ -14,10 +14,12 @@ public class Post : IFederated
         ContentRootIdUri = default!;
         FediId = default!;
         Thread = default!;
+        Authority = default!;
+        Hostname = default!;
     }
 
     /// <summary>
-    /// Construct a new post with a known or presumed ThreadContext
+    /// Construct a new federated post with a known or presumed ThreadContext
     /// </summary>
     /// <param name="fediId">FediId</param>
     /// <param name="thread">Thread</param>
@@ -26,6 +28,8 @@ public class Post : IFederated
     {
         FediId = fediId;
         Thread = thread;
+        Authority = fediId.GetAuthority();
+        Hostname = fediId.Host;
     }
 
     /// <summary>
@@ -40,6 +44,8 @@ public class Post : IFederated
         _id = Uuid7.NewUuid7();
 
         FediId = new Uri(opts.BaseUri(), $"post/{_id.ToId25String()}");
+        Authority = FediId.GetAuthority();
+        Hostname = FediId.Host;
         InReplyTo = parent;
         
         Thread = parent.Thread;
@@ -65,9 +71,11 @@ public class Post : IFederated
         Thread = new ThreadContext
         {
             FediId = builder.Uri,
-            Root = this,
+            RootId = Id,
         };
         Thread.Posts.Add(this);
+        Authority = FediId.GetAuthority();
+        Hostname = FediId.Host;
     }
 
     public Guid Id
@@ -82,30 +90,14 @@ public class Post : IFederated
     public string? Summary { get; set; }
     public string? Preview { get; set; }
     public string? Source { get; set; }
-    public string Hostname => FediId.Host;
-
-    private string? _authority;
-    /// <summary>
-    /// Authority is preprocessed this way for easy instance level moderation. It puts the host in reverse dns order.
-    /// This would permit us to do fast prefix matches when filtering whole domains.
-    /// Ex:
-    /// blocking social.truth.*
-    /// easily covers truth.social, and also block-evasion.truth.social, and truth.social:8443
-    /// </summary>
-    public string Authority
-    {
-        get =>
-            _authority ??= FediId.IsDefaultPort
-                ? string.Join('.', FediId.Host.Split('.').Reverse())
-                : string.Join('.', FediId.Host.Split('.').Reverse()) + FediId.Port;
-        set => _authority = value;
-    }
+    public string Hostname { get; private set; }
+    public string Authority { get; private set; }
     public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
-    public DateTimeOffset CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? PublishedDate { get; set; }
     public DateTimeOffset? UpdatedDate { get; set; }
     public DateTimeOffset? DeletedDate { get; set; }
-    public DateTimeOffset LastSeenDate { get; set; } = DateTimeOffset.Now;
+    public DateTimeOffset LastSeenDate { get; set; } = DateTimeOffset.UtcNow;
     public ICollection<Content> Contents { get; set; } = new HashSet<Content>();
     public ICollection<Audience> Audience { get; set; } = new HashSet<Audience>();
     public ICollection<Mention> AddressedTo { get; set; } = new HashSet<Mention>();
@@ -132,5 +124,10 @@ public class Post : IFederated
     {
         ContentRootIdUri = content.FediId;
         FediId = content.FediId;
+    }
+
+    public override int GetHashCode()
+    {
+        return FediId.GetHashCode();
     }
 }

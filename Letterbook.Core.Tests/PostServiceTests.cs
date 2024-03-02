@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Medo;
@@ -133,7 +134,7 @@ public class PostServiceTests : WithMocks
         var actual = await _service.Update(update);
         Assert.DoesNotContain(evilProfile, actual.Creators);
         Assert.NotEqual(update.FediId, actual.FediId);
-        Assert.NotEqual(update.Authority, actual.Authority);
+        Assert.Equal("example.letterbook", actual.Authority);
     }
 
     [Fact(DisplayName = "Should delete posts")]

@@ -7,10 +7,10 @@ public interface IPostAdapter
 {
     public Task<Post?> LookupPost(Uuid7 postId);
     public Task<Post?> LookupPost(Uri fediId);
-    public Task<IEnumerable<Post>> LookupThread(Uri threadId);
-    public Task<IEnumerable<Post>> LookupThread(Uuid7 threadId);
-    public Task<IEnumerable<Post>> LookupThreadForPost(Uuid7 postId);
-    public Task<IEnumerable<Post>> LookupThreadForPost(Uri postId);
+    public Task<ThreadContext?> LookupThread(Uri threadId);
+    public Task<ThreadContext?> LookupThread(Uuid7 threadId);
+    public Task<Post?> LookupPostWithThread(Uuid7 postId);
+    public Task<Post?> LookupPostWithThread(Uri postId);
     public Task<Profile?> LookupProfile(Uuid7 profileId);
     public Task<Profile?> LookupProfile(Uri profileId);
     public void Add(Post post);

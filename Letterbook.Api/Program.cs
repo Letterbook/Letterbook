@@ -129,6 +129,7 @@ public class Program
 
         // Register Adapters
         builder.Services.AddScoped<IActivityAdapter, ActivityAdapter>();
+        builder.Services.AddScoped<IPostAdapter, PostAdapter>();
         builder.Services.AddRxMessageBus();
         builder.Services.AddSingleton<IActivityPubDocument, Document>();
         builder.Services.AddDbContext<RelationalContext>();

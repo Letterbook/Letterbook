@@ -5,10 +5,10 @@ namespace Letterbook.Core;
 
 public interface IPostService
 {
-    public Task<IEnumerable<Post>> LookupPost(Uuid7 id, bool withThread = true);
-    public Task<IEnumerable<Post>> LookupPost(Uri id, bool withThread = true);
-    public Task<IEnumerable<Post>> LookupThread(Uuid7 id);
-    public Task<IEnumerable<Post>> LookupThread(Uri id);
+    public Task<Post?> LookupPost(Uuid7 id, bool withThread = true);
+    public Task<Post?> LookupPost(Uri id, bool withThread = true);
+    public Task<ThreadContext?> LookupThread(Uuid7 id);
+    public Task<ThreadContext?> LookupThread(Uri id);
     public Task<Post> DraftNote(Uuid7 authorId, string contentSource, Uuid7? inReplyToId = default);
     public Task<Post> Draft(Post post, Uuid7? inReplyToId = default);
     public Task<Post> Update(Post post);

@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    [Migration("20240225194440_ResetMigrations")]
-    partial class ResetMigrations
+    [Migration("20240227090133_Reset")]
+    partial class Reset
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -208,6 +208,10 @@ namespace Letterbook.Adapter.Db.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Hostname")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid?>("InReplyToId")
                         .HasColumnType("uuid");
 
@@ -235,7 +239,7 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<string>("Summary")
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("ThreadId")
+                    b.Property<Guid>("ThreadId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset?>("UpdatedDate")
@@ -251,7 +255,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasIndex("ThreadId");
 
-                    b.ToTable("Post");
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.Profile", b =>
@@ -401,7 +405,7 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasIndex("RootId");
 
-                    b.ToTable("ThreadContext");
+                    b.ToTable("Threads");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -667,7 +671,9 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasOne("Letterbook.Core.Models.ThreadContext", "Thread")
                         .WithMany("Posts")
-                        .HasForeignKey("ThreadId");
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.OwnsMany("Letterbook.Core.Models.Mention", "AddressedTo", b1 =>
                         {
@@ -742,17 +748,6 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.HasOne("Letterbook.Core.Models.Profile", null)
                         .WithMany("Keys")
                         .HasForeignKey("ProfileId");
-                });
-
-            modelBuilder.Entity("Letterbook.Core.Models.ThreadContext", b =>
-                {
-                    b.HasOne("Letterbook.Core.Models.Post", "Root")
-                        .WithMany()
-                        .HasForeignKey("RootId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Root");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
