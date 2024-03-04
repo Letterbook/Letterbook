@@ -1,6 +1,17 @@
 # Formatting
 
-We want to lean into existing tools to take the argument and thought out of applying formatting. It can happen automatically, avoiding nitpicking.
+Establishing some minimal style enforcement
+
+## Status
+
+- [ ] Decided
+- [ ] Decided Against
+- [ ] Deferred
+- [ ] Superseded
+
+# Decision
+
+We want to lean into existing tools to take the argument and personal tastes out of applying formatting. This helps to avoid nitpicking, especially if it happens automatically.
 
 ## EditorConfig
 
