@@ -11,7 +11,8 @@ Establishing some minimal style enforcement
 
 # Decision
 
-We want to lean into existing tools to take the argument and personal tastes out of applying formatting. This helps to avoid nitpicking, especially if it happens automatically.
+We want to lean into existing tools to take the argument and personal tastes out of applying formatting. 
+This helps to avoid nitpicking of PRs, especially if it happens automatically and consistently, before the PR is raised.
 
 ## EditorConfig
 
@@ -30,9 +31,18 @@ We have an `.editorconfig` file to control basic spacing settings. The initial r
 
 Visual Studio or JetBrains Rider apply these settings on new code automatically. [Visual Studio Code has support via a plug-in](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig).
 
+If this is set up correctly, it should happen as you edit.
+
 `dotnet format` will also follow `.editorconfig` rules.
 
-We may look into more use of these tools later, in 2 directions
+## Pull Request review
 
-* There are [many dotnet code-style rule options](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/code-style-rule-options) that are supported by some dotnet tools.
-* Cover other file types that are used in the repo. `.md`, `.csproj` and `.yml` are currently used.
+We do not intent to enforce formatting as part of PR review at present. It will happen automatically beforehand, or afterwards as part of a tidy-up.
+
+## Future steps
+
+We may look into more use of these tools later, in these directions
+
+- There are [many dotnet code-style rule options](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/code-style-rule-options) that are supported by some dotnet tools.
+- Cover other file types that are used in the repo. `.md`, `.csproj` and `.yml` are currently used.
+- We may look into automate formatting or style check steps as part of a PR process.
