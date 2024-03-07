@@ -25,11 +25,12 @@ public abstract class Content : IContent, IEquatable<Content>
     public string? Summary { get; set; }
     public string? Preview { get; set; }
     public Uri? Source { get; set; }
+    public int? SortKey { get; set; } = 0;
     public abstract string Type { get; }
-    
+
     public static Uri LocalId(IContent content, CoreOptions opts) =>
         new(opts.BaseUri(), $"{content.Type}/{content.GetId25()}");
-    
+
     public Uuid7 GetId() => _id;
     public string GetId25() => _id.ToId25String();
     public abstract string? GeneratePreview();
