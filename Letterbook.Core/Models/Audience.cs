@@ -19,19 +19,20 @@ public class Audience : IEquatable<Audience>, IFederated
     {
         FediId = default!;
     }
-    
+
     public Uri FediId { get; set; }
     public Profile? Source { get; set; }
-
-    // LocalId isn't a meaningful concept for Audience, but it's required by IFederated
     public Guid Id
     {
         get => _id.ToGuid();
         set => _id = Uuid7.FromGuid(value);
     }
-
     public string Authority => FediId.Authority;
     public List<Profile> Members { get; set; } = new();
+
+    // TODO: This needs access controls (i.e., you can't target someone else's followers)
+    // Might also need group access control (like a public group)
+    // And needs searchable labels
 
     /// <summary>
     /// No one is actually a member of the public audience. Rather, Letterbook uses it as a signal to build more
@@ -50,7 +51,7 @@ public class Audience : IEquatable<Audience>, IFederated
         builder.Fragment += "subscribe";
         return FromUri(builder.Uri, creator);
     }
-    
+
     public static Audience Boosts(Profile creator)
     {
         var builder = new UriBuilder(creator.Followers);

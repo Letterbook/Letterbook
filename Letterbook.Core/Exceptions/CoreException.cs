@@ -20,7 +20,7 @@ public class CoreException : Exception
     {
         HResult = 0;
     }
-    
+
     public bool Flagged(ErrorCodes code)
     {
         return ((ErrorCodes)HResult & code) == code;
@@ -52,7 +52,7 @@ public class CoreException : Exception
     }
 
     /// <summary>
-    /// The request is not semantically valid or has violated an application constraint 
+    /// The request is not semantically valid or has violated an application constraint
     /// </summary>
     /// <param name="message"></param>
     /// <param name="details"></param>
@@ -72,7 +72,7 @@ public class CoreException : Exception
         };
         ex.HResult |= (int)ErrorCodes.InvalidRequest;
         if (details == null) return ex;
-        
+
         foreach (var detail in details)
         {
             ex.Data.Add(detail.Key, detail.Value);
@@ -118,7 +118,7 @@ public class CoreException : Exception
 
         return ex;
     }
-    
+
     /// <summary>
     /// Required data was not available
     /// </summary>
@@ -162,6 +162,21 @@ public class CoreException : Exception
             Source = FormatSource(path, name, line),
         };
         ex.HResult |= (int)ErrorCodes.InternalError;
+
+        return ex;
+    }
+
+    public static CoreException Unauthorized(Authorization.Decision? decision, string? message = null, Exception? innerEx = null,
+        [CallerMemberName] string name = "",
+        [CallerFilePath] string path = "",
+        [CallerLineNumber] int line = -1)
+    {
+        var ex = new CoreException(decision?.Reason ?? message, innerEx)
+        {
+            Source = FormatSource(path, name, line),
+        };
+        ex.HResult |= (int)ErrorCodes.PermissionDenied;
+        ex.Data["decision"] = decision;
 
         return ex;
     }

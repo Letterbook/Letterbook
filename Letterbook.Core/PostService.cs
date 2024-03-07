@@ -90,7 +90,7 @@ public class PostService : IPostService
         _posts.Add(post);
         await _posts.Commit();
         _postEvents.Created(post);
-        
+
         return post;
     }
 
@@ -102,16 +102,16 @@ public class PostService : IPostService
         var previous = await _posts.LookupPost(post.Id)
                        ?? throw CoreException.MissingData($"Could not find existing post {post.Id} to update",
                            typeof(Post), post.Id);
-        
+
         previous.Client = post.Client; // probably should come from an authz claim
         previous.InReplyTo = post.InReplyTo;
         previous.Audience = post.Audience;
-        
+
         // remove all the removed contents, and add/update everything else
         var removed = previous.Contents.Except(post.Contents).ToArray();
         _posts.RemoveRange(removed);
         previous.Contents = post.Contents;
-        
+
         var published = previous.PublishedDate != null;
         if (published)
         {
@@ -147,7 +147,7 @@ public class PostService : IPostService
             throw CoreException.Duplicate($"Tried to publish post {id} that is already published", id);
         post.PublishedDate = DateTimeOffset.Now;
         post.CreatedDate = DateTimeOffset.Now;
-        
+
         _posts.Update(post);
         await _posts.Commit();
         _postEvents.Published(post);
@@ -156,18 +156,19 @@ public class PostService : IPostService
 
     public async Task<Post> AddContent(Uuid7 postId, Content content)
     {
-        var post = await _posts.LookupPost(postId) 
+        var post = await _posts.LookupPost(postId)
                    ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
         if (!post.FediId.HasLocalAuthority(_options))
             throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
+        content.SortKey ??= (post.Contents.Select(c => c.SortKey).Max() ?? -1) + 1;
         post.Contents.Add(content);
-        
+
         if (post.PublishedDate is not null)
         {
             post.UpdatedDate = DateTimeOffset.Now;
             _postEvents.Published(post);
         }
-        
+
         _posts.Update(post);
         await _posts.Commit();
         _postEvents.Updated(post);
@@ -176,7 +177,7 @@ public class PostService : IPostService
 
     public async Task<Post> RemoveContent(Uuid7 postId, Uuid7 contentId)
     {
-        var post = await _posts.LookupPost(postId) 
+        var post = await _posts.LookupPost(postId)
                    ?? throw CoreException.MissingData<Post>("Can't find existing post to remove content", postId);
         if (!post.FediId.HasLocalAuthority(_options))
             throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
@@ -188,13 +189,13 @@ public class PostService : IPostService
         }
 
         post.Contents.Remove(content);
-        
+
         if (post.PublishedDate is not null)
         {
             post.UpdatedDate = DateTimeOffset.Now;
             _postEvents.Published(post);
         }
-        
+
         _posts.Remove(content);
         _posts.Update(post);
         await _posts.Commit();
@@ -204,25 +205,25 @@ public class PostService : IPostService
 
     public async Task<Post> UpdateContent(Uuid7 postId, Content content)
     {
-        var post = await _posts.LookupPost(postId) 
+        var post = await _posts.LookupPost(postId)
                    ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
         if (!post.FediId.HasLocalAuthority(_options))
             throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
         post.Contents.Remove(content);
         post.Contents.Add(content);
-        
+
         if (post.PublishedDate is not null)
         {
             post.UpdatedDate = DateTimeOffset.Now;
             _postEvents.Published(post);
         }
-        
+
         _posts.Update(post);
         await _posts.Commit();
         _postEvents.Updated(post);
         return post;
     }
-    
+
     public async Task<Post> ReceiveCreate(Post post)
     {
         throw new NotImplementedException();
@@ -277,7 +278,7 @@ public class PostService : IPostService
     {
         throw new NotImplementedException();
     }
-    
+
     private async Task<Profile?> ResolveProfile(Uri profileId,
         Profile? onBehalfOf = null,
         [CallerMemberName] string name = "",
@@ -309,10 +310,10 @@ public class PostService : IPostService
         {
             _logger.LogError(ex, "Cannot resolve Profile {ProfileId}", profileId);
         }
-        
+
         return profile;
     }
-    
+
     private async Task<Post?> ResolvePost(Uri postId,
         Profile? onBehalfOf = null,
         [CallerMemberName] string name = "",

@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using OpenTelemetry.Metrics;
 using Serilog;
 using Serilog.Events;
@@ -93,16 +92,6 @@ public class Program
                 metrics.AddPrometheusExporter();
             });
 
-        // Configure Http Signatures
-        // Note: Starting to move DI config out into adapter as much as possible.
-        // I want to reduce how tightly coupled the process hosting component is from the project that handles API
-        // routes and controllers. Partly because it feels cleaner.
-        // Mostly because high-availability and/or horizontally scaled deployments
-        // will have more than one process, likely on more than one host.
-        //
-        // Workers (ex: SeedAdminWorker and future queue or maintenance workers) should be able to scale independently
-        // of the API, and shouldn't need a whole AspNetCore service just to host them.
-        // This helps with that.
         builder.Services.AddActivityPubClient(coreOptions.DomainName);
 
         // Register options
@@ -138,43 +127,13 @@ public class Program
             .AddEntityFrameworkStores<RelationalContext>();
         builder.Services.TryAddTypesModule();
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(options =>
-        {
-            options.AddSecurityDefinition(name: "Bearer", securityScheme: new OpenApiSecurityScheme
-            {
-                Name = "Authorization",
-                Description = "Enter the Authorization header, including the Bearer scheme, like so: `Bearer <JWT>`",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement()
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        },
-                        Scheme = "oauth2",
-                        Name = "Bearer",
-                        In = ParameterLocation.Header,
-                    },
-                    new List<string>()
-                }
-            });
-            options.OperationFilter<RequiredHeaders>();
-        });
+        builder.Services.ConfigureSwagger();
 
         builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
         var app = builder.Build();
         // Configure the HTTP request pipeline.
 
-        // Configure development niceties
+        // Add development niceties
         if (!app.Environment.IsProduction())
         {
             app.Use((context, next) =>
@@ -182,9 +141,7 @@ public class Program
                 context.Request.EnableBuffering();
                 return next();
             });
-            app.UseSwagger();
-            app.UseSwaggerUI();
-            // app.Services.GetService<JwtBearerHandler>()
+            app.UseSwaggerConfig();
         }
 
         app.UseHttpsRedirection();
