@@ -4,7 +4,7 @@ Establishing some minimal style enforcement
 
 ## Status
 
-- [ ] Decided
+- [x] Decided (2024-03-07)
 - [ ] Decided Against
 - [ ] Deferred
 - [ ] Superseded
