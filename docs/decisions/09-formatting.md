@@ -46,3 +46,9 @@ We may look into more use of these tools later, in these directions
 - There are [many dotnet code-style rule options](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/code-style-rule-options) that are supported by some dotnet tools.
 - Cover other file types that are used in the repo. `.md`, `.csproj` and `.yml` are currently used.
 - We may look into automate formatting or style check steps as part of a PR process.
+
+## Discussion
+
+See the [original PR](https://github.com/Letterbook/Letterbook/pull/180) for some additional context.
+
+And see the [preceding PR](https://github.com/Letterbook/Letterbook/pull/179) that prompted this decision.
