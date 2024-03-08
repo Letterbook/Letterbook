@@ -5,10 +5,10 @@ using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Api.Dto;
+using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +20,7 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 /// Provides the endpoints specified for Actors in the ActivityPub spec
 /// https://www.w3.org/TR/activitypub/#actors
 /// </summary>
+[ApiExplorerSettings(GroupName = Docs.ActivityPubV1)]
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/ld+json",

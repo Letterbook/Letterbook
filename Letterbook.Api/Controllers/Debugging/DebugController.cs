@@ -1,4 +1,5 @@
-﻿using Letterbook.Core;
+﻿using Letterbook.Api.Swagger;
+using Letterbook.Core;
 using Letterbook.Core.Extensions;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace Letterbook.Api.Controllers.Debugging;
 /// <summary>
 /// A temporary controller to make it easier to trigger the actions we want to test
 /// </summary>
+[ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 public class DebugController : ControllerBase
 {
     private readonly IProfileService _profileService;

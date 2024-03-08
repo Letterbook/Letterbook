@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using Letterbook.Api.Dto;
+using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
@@ -12,7 +13,8 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Letterbook.Api.Controllers;
 
-[Route("/api/v1/[controller]/[action]")]
+[ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
+[Route("/lb/v1/[controller]/[action]")]
 public class UserAccountController : ControllerBase
 {
     private readonly ILogger<UserAccountController> _logger;
