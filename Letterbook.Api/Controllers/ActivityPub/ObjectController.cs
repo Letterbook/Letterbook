@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Letterbook.Api.Swagger;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
 
@@ -6,6 +7,7 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 /// Provides the Collection endpoints specified for all objects in the ActivityPub spec
 /// https://www.w3.org/TR/activitypub/#collections
 /// </summary>
+[ApiExplorerSettings(GroupName = Docs.ActivityPubV1)]
 [ApiController]
 [Route("[controller]/{type}")]
 public class ObjectController
