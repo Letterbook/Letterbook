@@ -43,13 +43,16 @@ public class Mention : IEquatable<Mention>
     {
         Subject = default!;
     }
-    
+
     public Mention(Profile subject, MentionVisibility visibility)
     {
         _id = Uuid7.NewUuid7();
         Subject = subject;
         Visibility = visibility;
     }
+
+    public Uuid7 GetId() => _id;
+    public string GetId25() => _id.ToId25String();
 
     public bool Equals(Mention? other)
     {

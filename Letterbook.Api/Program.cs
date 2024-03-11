@@ -5,6 +5,7 @@ using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
+using Letterbook.Api.Mappers;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
@@ -54,6 +55,10 @@ public class Program
                 options.OutputFormatters.Insert(0, new JsonLdOutputFormatter());
                 options.InputFormatters.Insert(0, new JsonLdInputFormatter());
             })
+            .AddJsonOptions(options =>
+            {
+	            options.JsonSerializerOptions.Converters.Add(new Json.Uuid7JsonConverter());
+            })
             .Services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.InvalidModelStateResponseFactory = context =>
@@ -99,6 +104,10 @@ public class Program
         builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptions.ConfigKey));
         builder.Services.Configure<DbOptions>(builder.Configuration.GetSection(DbOptions.ConfigKey));
 
+        // Register Mapping Configs
+        builder.Services.AddSingleton<MappingConfigProvider>();
+        builder.Services.AddSingleton<BaseMappings>();
+
         // Register Services
         builder.Services.AddScoped<IActivityEventService, ActivityEventService>();
         builder.Services.AddScoped<IProfileEventService, ProfileEventService>();
@@ -107,6 +116,8 @@ public class Program
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
         builder.Services.AddScoped<IActivityMessageService, ActivityMessageService>();
+        builder.Services.AddScoped<IPostService, PostService>();
+        builder.Services.AddScoped<IPostEventService, PostEventService>();
         builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
         // Register Workers

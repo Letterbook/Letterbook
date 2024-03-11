@@ -38,16 +38,10 @@ public class Post : IFederated
     /// <param name="opts"></param>
     /// <param name="parent">Post </param>
     [SetsRequiredMembers]
-    protected Post(CoreOptions opts, Post parent)
+    public Post(CoreOptions opts, Post parent) : this(opts)
     {
-        ContentRootIdUri = default!;
-        _id = Uuid7.NewUuid7();
-
-        FediId = new Uri(opts.BaseUri(), $"post/{_id.ToId25String()}");
-        Authority = FediId.GetAuthority();
-        Hostname = FediId.Host;
         InReplyTo = parent;
-        
+
         Thread = parent.Thread;
         Thread.Posts.Add(this);
         parent.RepliesCollection.Add(this);
@@ -66,7 +60,7 @@ public class Post : IFederated
 
         builder.Path += $"post/{_id.ToId25String()}";
         FediId = builder.Uri;
-        
+
         builder.Path += "/replies";
         Thread = new ThreadContext
         {
@@ -112,7 +106,7 @@ public class Post : IFederated
 
     public Uuid7 GetId() => _id;
     public string GetId25() => _id.ToId25String();
-    
+
     public T AddContent<T>(T content) where T : Content
     {
         if (Contents.Count == 0) SetRootContent(content);

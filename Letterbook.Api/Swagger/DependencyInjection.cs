@@ -39,12 +39,6 @@ public static class DependencyInjection
                     Contact = new() { Url = new Uri("https://www.w3.org/TR/activitypub/") }
                 });
             options.MapType<Uuid7>(() => new OpenApiSchema{Type = "string", Format = "uuid"});
-            options.MapType<Id25>(() => new OpenApiSchema
-            {
-                Type = "string",
-                Pattern = "[0-9a-z]{25}",
-                Example = new OpenApiString(Uuid7.NewUuid7().ToId25String())
-            });
             options.AddSecurityDefinition(name: "Bearer", securityScheme: new OpenApiSecurityScheme
             {
                 Name = "Authorization",
