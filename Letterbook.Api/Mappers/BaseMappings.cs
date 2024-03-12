@@ -13,7 +13,7 @@ public class BaseMappings : AutoMapper.Profile
 	public BaseMappings(IOptions<CoreOptions> options)
 	{
 		CreateMap<MentionDto, Mention>(MemberList.Source)
-			.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Mentioned));
+			.ForMember(dest => dest.Subject, opt => opt.MapFrom(src => src.Mentioned));
 		CreateMap<AudienceDto, Audience>(MemberList.Source)
 			.ForSourceMember(dto => dto.SourceType, opt => opt.DoNotValidate())
 			.ForSourceMember(dto => dto.SourceId, opt => opt.DoNotValidate());
@@ -33,6 +33,10 @@ public class BaseMappings : AutoMapper.Profile
 		CreateMap<Guid, Uuid7>().ConstructUsing(guid => Uuid7.FromGuid(guid));
 		CreateMap<Uuid7, string>().ConstructUsing(uuid => uuid.ToId25String());
 		CreateMap<string?, Uuid7>().ConstructUsing(str => str == null ? Uuid7.NewUuid7() : Uuid7.FromId25String(str));
+		CreateMap<string?, Guid>().ConstructUsing(str => str == null ? Uuid7.NewUuid7().ToGuid() : Uuid7.FromId25String(str).ToGuid());
+		CreateMap<string, Models.Profile>(MemberList.None)
+			.ConstructUsing(s => Models.Profile.CreateEmpty(Uuid7.FromId25String(s)));
+
 		CreateMap<ThreadContext, ThreadDto>(MemberList.Destination);
 		CreateMap<ThreadDto, ThreadContext>(MemberList.Source);
 
@@ -59,6 +63,8 @@ public class BaseMappings : AutoMapper.Profile
 			.ConstructUsing(_ => NewPost(options.Value))
 			.ForMember(post => post.Thread, opt => opt.Ignore())
 			.ForMember(post => post.InReplyTo, opt => opt.Ignore())
+			.ForMember(post => post.Id, opt => opt.PreCondition(dto => dto.Id != null))
+			.ForMember(post => post.Id, opt => opt.MapFrom(dto => dto.Id))
 			.ForSourceMember(src => src.InReplyTo, opt => opt.DoNotValidate())
 			.ForSourceMember(src => src.Thread, opt => opt.DoNotValidate());
 
@@ -66,6 +72,5 @@ public class BaseMappings : AutoMapper.Profile
 		CreateMap<MiniProfileDto, Models.Profile>(MemberList.Source);
 	}
 
-	private static Post NewPost(CoreOptions options) => new (options);
-
+	private static Post NewPost(CoreOptions options) => new(options);
 }
