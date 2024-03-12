@@ -10,6 +10,6 @@ public class ContentDto
     public int? SortKey { get; set; } = 0;
     public required string Type { get; set; }
 
-    // Required for Notes
+    /// <summary>Required for Notes. The text of the Note.</summary>
     public string? Text { get; set; }
 }

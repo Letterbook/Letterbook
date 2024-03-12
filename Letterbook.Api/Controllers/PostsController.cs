@@ -51,7 +51,7 @@ public class PostsController(
 
         try
         {
-            var result = await _post.Draft(post);
+            var result = await _post.Draft(post, post.InReplyTo?.GetId());
             return Ok(_mapper.Map<PostDto>(result));
         }
         catch (CoreException e)
