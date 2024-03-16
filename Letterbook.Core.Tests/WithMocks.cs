@@ -21,6 +21,8 @@ public abstract class WithMocks
     protected Mock<HttpMessageHandler> HttpMessageHandlerMock;
     protected ServiceCollection MockedServiceCollection;
     protected Mock<IPostEventService> PostEventServiceMock;
+    protected Mock<IPostService> PostServiceMock;
+    protected Mock<IAuthorizationService> AuthorizationServiceMock;
 
     protected WithMocks()
     {
@@ -34,7 +36,9 @@ public abstract class WithMocks
         ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
         ProfileServiceMock = new Mock<IProfileService>();
         PostEventServiceMock = new Mock<IPostEventService>();
-        
+        PostServiceMock = new Mock<IPostService>();
+        AuthorizationServiceMock = new Mock<IAuthorizationService>();
+
         ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
         var mockOptions = new CoreOptions
         {

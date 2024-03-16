@@ -19,7 +19,6 @@ namespace Letterbook.Api.Controllers;
 public class PostsController(
     ILogger<PostsController> logger,
     IOptions<CoreOptions> options,
-    IOptions<ApiOptions> apiOptions,
     IPostService post,
     IProfileService profile,
     IAuthorizationService authz,
@@ -28,7 +27,6 @@ public class PostsController(
 {
     private readonly ILogger<PostsController> _logger = logger;
     private readonly CoreOptions _options = options.Value;
-    private readonly ApiOptions _apiOptions = apiOptions.Value;
     private readonly IPostService _post = post;
     private readonly IProfileService _profile = profile;
     private readonly IAuthorizationService _authz = authz;
@@ -39,7 +37,7 @@ public class PostsController(
     [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
     public async Task<IActionResult> Draft(string profileId, [FromBody]PostDto dto)
     {
-	    await LogBody(HttpContext.Request.Body, _logger);
+	    await LogBody(HttpContext?.Request?.Body, _logger);
         if (!Id.TryAsUuid7(profileId, out var id))
             return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {nameof(profileId)}"));
         if (_mapper.Map<Post>(dto) is not { } post)
@@ -67,8 +65,9 @@ public class PostsController(
         }
     }
 
-    private async ValueTask LogBody(Stream body, ILogger logger)
+    private async ValueTask LogBody(Stream? body, ILogger logger)
     {
+	    if (body is null) return;
 	    if (!logger.IsEnabled(LogLevel.Debug) || !body.CanRead) return;
 
 	    try

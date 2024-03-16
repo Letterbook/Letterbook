@@ -9,6 +9,7 @@ using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,7 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/ld+json",
-    "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"", 
+    "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
     "application/activity+json")]
 public class ActorController : ControllerBase
 {
@@ -49,17 +50,10 @@ public class ActorController : ControllerBase
     [Route("{id}")]
     public async Task<IActionResult> GetActor(string id)
     {
-        Guid localId;
-        try
-        {
-            localId = Uuid7.FromId25String(id);
-        }
-        catch (Exception)
-        {
+	    if (!Id.TryAsUuid7(id, out var uuid))
             return BadRequest();
-        }
 
-        var profile = await _profileService.LookupProfile(localId);
+        var profile = await _profileService.LookupProfile(uuid);
         if (profile == null) return NotFound();
         var actor = ActorMapper.Map<PersonActorExtension>(profile);
 
@@ -120,7 +114,7 @@ public class ActorController : ControllerBase
                 return await InboxFollow(localId, follow);
             if (activity.Is<UndoActivity>(out var undo))
                 return await InboxUndo(localId, undo);
-            
+
             _logger.LogWarning("Ignored unknown activity {ActivityType}", activity.GetType());
             _logger.LogDebug("Ignored unknown activity details {@Activity}", activity);
             return Accepted();
@@ -161,7 +155,7 @@ public class ActorController : ControllerBase
     {
         throw new NotImplementedException();
     }
-    
+
     /* * * * * * * * * * * * *
      * Support methods       *
      * * * * * * * * * * * * */
@@ -172,11 +166,11 @@ public class ActorController : ControllerBase
     {
         throw new NotImplementedException();
     }
-    
+
     private async Task<IActionResult> InboxUndo(Guid id, ASActivity activity)
     {
         if (activity.Object.SingleOrDefault()?.Value is not ASActivity activityObject)
-            return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics, 
+            return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
                 "Object of an Undo must have exactly one value, which must be another Activity"));
         if (activityObject.Is<AnnounceActivity>(out var announceActivity))
             throw new NotImplementedException();
@@ -195,7 +189,7 @@ public class ActorController : ControllerBase
         }
         if (activityObject.Is<LikeActivity>(out var likeActivity))
             throw new NotImplementedException();
-        
+
         _logger.LogInformation("Ignored unknown Undo target {ActivityType}", activityObject.TypeMap.ASTypes);
         return new AcceptedResult();
     }
@@ -209,7 +203,7 @@ public class ActorController : ControllerBase
 
         followRequest.TryGetId(out var activityId);
         var relation = await _profileService.ReceiveFollowRequest(localId, actorId, activityId);
-                    
+
         ASType resultActivity = relation.State switch
         {
             FollowState.Accepted => _apDoc.Accept(relation.Follows, followRequest),
