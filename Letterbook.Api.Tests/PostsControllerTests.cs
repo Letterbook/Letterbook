@@ -27,6 +27,7 @@ public class PostsControllerTests : WithMockContext
 				HttpContext = MockHttpContext.Object
 			}
 		};
+		MockAuthorizeAllowAll();
 		_dto = new PostDto();
 		_profileFakes = new FakeProfile("letterbook.example");
 		_profile = _profileFakes.Generate();

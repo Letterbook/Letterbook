@@ -1,6 +1,9 @@
-﻿using ActivityPub.Types;
+﻿using System.Security.Claims;
+using ActivityPub.Types;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Authorization;
 using Letterbook.Core.Models;
+using Medo;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -57,4 +60,25 @@ public abstract class WithMocks
         MockedServiceCollection.AddScoped<IProfileService>(_ => ProfileServiceMock.Object);
         MockedServiceCollection.TryAddTypesModule();
     }
+
+    public void MockAuthorizeAllowAll()
+    {
+	    // TODO: reflect over the Decision methods instead of individual setups
+	    AuthorizationServiceMock.Setup(s => s.View(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    AuthorizationServiceMock.Setup(s => s.Create(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    AuthorizationServiceMock.Setup(s => s.Delete(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    AuthorizationServiceMock.Setup(s => s.Publish(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    AuthorizationServiceMock.Setup(s => s.Update(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    AuthorizationServiceMock.Setup(s => s.Report(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    return;
+
+	    Decision Allow(IEnumerable<Claim> claims) => Decision.Allow("Mock", claims);
+    }
+
 }
