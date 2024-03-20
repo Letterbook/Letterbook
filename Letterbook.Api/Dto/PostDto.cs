@@ -4,8 +4,7 @@ namespace Letterbook.Api.Dto;
 
 public class PostDto
 {
-	/// <example>0672016s27hx3fjxmn5ic1hzq</example>
-    public string? Id { get; set; }
+	public Uuid7? Id { get; set; } = Uuid7.NewUuid7();
     public Uri? FediId { get; set; }
     public ThreadDto? Thread { get; set; }
     public string? Summary { get; set; }

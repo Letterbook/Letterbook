@@ -8,8 +8,10 @@ using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Medo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.Annotations;
 using IAuthorizationService = Letterbook.Core.IAuthorizationService;
 
 namespace Letterbook.Api.Controllers;
@@ -35,27 +37,32 @@ public class PostsController(
     // [Authorize(JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost("{profileId}/post")]
     [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
-    public async Task<IActionResult> Draft(string profileId, [FromBody]PostDto dto)
+    [SwaggerOperation("Post", "Draft a new post, and optionally publish it")]
+    public async Task<IActionResult> Post(Uuid7 profileId, [FromBody]PostDto dto, [FromQuery]bool draft = false)
     {
-	    await LogBody(HttpContext?.Request?.Body, _logger);
-        if (!Id.TryAsUuid7(profileId, out var id))
-            return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {nameof(profileId)}"));
+	    if (!ModelState.IsValid)
+		    return BadRequest(ModelState);
+        // if (!Id.TryAsUuid7(profileId, out var profileUuid))
+            // return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {nameof(profileId)}"));
         if (_mapper.Map<Post>(dto) is not { } post)
             return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
 
-        var decision = _authz.Create(User.Claims, post, id);
+        var decision = _authz.Create(User.Claims, post, profileId);
         if (!decision.Allowed)
             return Unauthorized(decision);
+        var pubDecision = _authz.Publish(User.Claims, post, profileId);
+        if (!draft && !pubDecision.Allowed)
+	        return Unauthorized(pubDecision);
 
         try
         {
-            var result = await _post.Draft(post, post.InReplyTo?.GetId());
+            var result = await _post.Draft(post, post.InReplyTo?.GetId(), !draft);
             return Ok(_mapper.Map<PostDto>(result));
         }
         catch (CoreException e)
         {
             var message = new ErrorMessage(e);
-            _logger.LogDebug(e, "Error {Code} while posting draft from {Id}", message.ErrorCode, id);
+            _logger.LogDebug(e, "Error {Code} while posting for profile {Profile}", message.ErrorCode, profileId);
 
             if (e.Flagged(ErrorCodes.InternalError))
                 return base.StatusCode((int)HttpStatusCode.InternalServerError, message);
@@ -65,28 +72,107 @@ public class PostsController(
         }
     }
 
-    private async ValueTask LogBody(Stream? body, ILogger logger)
+    [HttpPut("{profileId}/post/{postId}")]
+    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+    [SwaggerOperation("Publish", "Publish an existing draft post")]
+    public async Task<IActionResult> Publish(Uuid7 profileId, Uuid7 postId)
     {
-	    if (body is null) return;
-	    if (!logger.IsEnabled(LogLevel.Debug) || !body.CanRead) return;
+	    if (!ModelState.IsValid)
+		    return BadRequest(ModelState);
+	    if (await _post.LookupPost(postId, false) is not { } post)
+		    return NotFound(new ErrorMessage(ErrorCodes.MissingData, $"{postId.ToId25String()} not found"));
+
+	    var decision = _authz.Publish(User.Claims, post, profileId);
+	    if (!decision.Allowed)
+		    return Unauthorized(decision);
 
 	    try
 	    {
-		    body.Seek(0, SeekOrigin.Begin);
-		    var buffer = new byte[body.Length];
-		    var read = await body.ReadAsync(buffer, 0, (int)body.Length);
-
-		    if (read > 0)
-		    {
-			    logger.LogDebug("Raw body {Json}", Encoding.UTF8.GetString(buffer));
-		    }
-		    else logger.LogDebug("Couldn't reread the request body");
+		    var result = await _post.Publish(postId);
+		    return Ok(_mapper.Map<PostDto>(result));
 	    }
-	    catch (Exception e)
+	    catch (CoreException e)
 	    {
-		    logger.LogError(e, "Error logging raw body {Error}", e.Message);
+		    var message = new ErrorMessage(e);
+		    _logger.LogDebug(e, "Error {Code} while publishing {Post} for profile {Profile}", message.ErrorCode, postId, profileId);
+
+		    if (e.Flagged(ErrorCodes.InternalError))
+			    return base.StatusCode((int)HttpStatusCode.InternalServerError, message);
+		    if (e.Flagged(ErrorCodes.PermissionDenied))
+			    return Unauthorized(message);
+		    return BadRequest(message);
 	    }
     }
+
+
+    [HttpPost("{profileId}/post/{postId}/content")]
+    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+    [SwaggerOperation("Attach", "Attach additional content to a post")]
+    public async Task<IActionResult> Attach(Uuid7 profileId, Uuid7 postId, [FromBody]ContentDto dto)
+    {
+	    if (!ModelState.IsValid)
+		    return BadRequest(ModelState);
+	    if (_mapper.Map<Content>(dto) is not { } content)
+		    return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
+	    if (await _post.LookupPost(postId, false) is not { } post)
+		    return NotFound(new ErrorMessage(ErrorCodes.MissingData, $"{postId.ToId25String()} not found"));
+
+	    var decision = _authz.Update(User.Claims, post, profileId);
+	    if (!decision.Allowed)
+		    return Unauthorized(decision);
+
+	    try
+	    {
+		    var result = await _post.AddContent(postId, content);
+		    return Ok(_mapper.Map<PostDto>(result));
+	    }
+	    catch (CoreException e)
+	    {
+		    var message = new ErrorMessage(e);
+		    _logger.LogDebug(e, "Error {Code} while updating {Post} for profile {Profile}", message.ErrorCode, postId, profileId);
+
+		    if (e.Flagged(ErrorCodes.InternalError))
+			    return base.StatusCode((int)HttpStatusCode.InternalServerError, message);
+		    if (e.Flagged(ErrorCodes.PermissionDenied))
+			    return Unauthorized(message);
+		    return BadRequest(message);
+	    }
+    }
+
+    [HttpPut("{profileId}/post/{postId}/content/{contentId}")]
+    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+    [SwaggerOperation("Edit", "Edit the content of a post")]
+    public async Task<IActionResult> Edit(Uuid7 profileId, Uuid7 postId, [FromBody]ContentDto dto)
+    {
+	    if (!ModelState.IsValid)
+		    return BadRequest(ModelState);
+	    if (_mapper.Map<Content>(dto) is not { } content)
+		    return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
+	    if (await _post.LookupPost(postId, false) is not { } post)
+		    return NotFound(new ErrorMessage(ErrorCodes.MissingData, $"{postId.ToId25String()} not found"));
+
+	    var decision = _authz.Update(User.Claims, post, profileId);
+	    if (!decision.Allowed)
+		    return Unauthorized(decision);
+
+	    try
+	    {
+		    var result = await _post.UpdateContent(postId, content);
+		    return Ok(_mapper.Map<PostDto>(result));
+	    }
+	    catch (CoreException e)
+	    {
+		    var message = new ErrorMessage(e);
+		    _logger.LogDebug(e, "Error {Code} while updating {Post} for profile {Profile}", message.ErrorCode, postId, profileId);
+
+		    if (e.Flagged(ErrorCodes.InternalError))
+			    return base.StatusCode((int)HttpStatusCode.InternalServerError, message);
+		    if (e.Flagged(ErrorCodes.PermissionDenied))
+			    return Unauthorized(message);
+		    return BadRequest(message);
+	    }
+    }
+
     // draft
     // publish
     //

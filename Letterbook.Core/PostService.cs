@@ -75,7 +75,7 @@ public class PostService : IPostService
         return await Draft(post, inReplyToId);
     }
 
-    public async Task<Post> Draft(Post post, Uuid7? inReplyToId = default)
+    public async Task<Post> Draft(Post post, Uuid7? inReplyToId = default, bool publish = false)
     {
         if (inReplyToId is { } parentId)
         {
@@ -87,9 +87,11 @@ public class PostService : IPostService
             post.Thread.Posts.Add(post);
         }
 
+        if (publish) post.PublishedDate = DateTimeOffset.Now;
         _posts.Add(post);
         await _posts.Commit();
         _postEvents.Created(post);
+        if (publish) _postEvents.Published(post);
 
         return post;
     }

@@ -1,9 +1,11 @@
-﻿namespace Letterbook.Api.Dto;
+﻿using Medo;
+
+namespace Letterbook.Api.Dto;
 
 public class ContentDto
 {
 	/// <example>0672016s27hx3fjxmn5ic1hzq</example>
-	public string? Id { get; set; }
+	public Uuid7? Id { get; set; } = Uuid7.NewUuid7();
     public string? Summary { get; set; }
     public string? Preview { get; set; }
     public Uri? Source { get; set; }

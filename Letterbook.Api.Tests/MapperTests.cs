@@ -54,7 +54,7 @@ public class MapperTests : WithMocks
 	public void MapPostId()
 	{
 		var expected = Uuid7.NewUuid7();
-		_postDto.Id = expected.ToId25String();
+		_postDto.Id = expected;
 		var actual = _postMapper.Map<Models.Post>(_postDto);
 
 		Assert.Equal(expected, actual.GetId());
@@ -91,7 +91,7 @@ public class MapperTests : WithMocks
 		var uuid = Uuid7.NewUuid7();
 		var expected = new PostDto()
 		{
-			Id = uuid.ToId25String(),
+			Id = uuid,
 			FediId = FediId(uuid)
 		};
 		_postDto.InReplyTo = expected;
@@ -108,7 +108,7 @@ public class MapperTests : WithMocks
 		var uuid = Uuid7.NewUuid7();
 		var expected = new ThreadDto
 		{
-			Id = uuid.ToId25String(),
+			Id = uuid,
 			FediId = FediId(uuid)
 		};
 		_postDto.Thread = expected;
@@ -124,7 +124,7 @@ public class MapperTests : WithMocks
 		var uuid = Uuid7.NewUuid7();
 		var expected = new AudienceDto
 		{
-			Id = uuid.ToId25String(),
+			Id = uuid,
 			FediId = FediId(uuid)
 		};
 		_postDto.Audience.Add(expected);

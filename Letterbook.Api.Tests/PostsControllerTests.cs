@@ -3,9 +3,11 @@ using Letterbook.Api.Dto;
 using Letterbook.Api.Mappers;
 using Letterbook.Core.Authorization;
 using Letterbook.Core.Tests.Fakes;
+using Medo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Xunit.Abstractions;
 
 namespace Letterbook.Api.Tests;
 
@@ -15,10 +17,13 @@ public class PostsControllerTests : WithMockContext
 	private readonly PostDto _dto;
 	private readonly FakeProfile _profileFakes;
 	private readonly Models.Profile _profile;
+	private readonly FakePost _postFakes;
+	private readonly Models.Post _post;
 
 
-	public PostsControllerTests()
+	public PostsControllerTests(ITestOutputHelper output)
 	{
+		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 		_controller = new PostsController(Mock.Of<ILogger<PostsController>>(), CoreOptionsMock, PostServiceMock.Object,
 			ProfileServiceMock.Object, AuthorizationServiceMock.Object, new MappingConfigProvider(new BaseMappings(CoreOptionsMock)))
 		{
@@ -31,6 +36,8 @@ public class PostsControllerTests : WithMockContext
 		_dto = new PostDto();
 		_profileFakes = new FakeProfile("letterbook.example");
 		_profile = _profileFakes.Generate();
+		_postFakes = new FakePost(_profile);
+		_post = _postFakes.Generate();
 	}
 
 	[Fact]
@@ -42,7 +49,11 @@ public class PostsControllerTests : WithMockContext
 	[Fact(DisplayName = "Should accept a draft post for a note")]
 	public async Task CanDraftNote()
 	{
-		var result = await _controller.Draft(_profile.GetId25(), _dto);
+
+		PostServiceMock.Setup(m => m.Draft(It.IsAny<Models.Post>(), It.IsAny<Uuid7?>(), It.IsAny<bool>()))
+			.ReturnsAsync(_post);
+
+		var result = await _controller.Post(_profile.GetId(), _dto);
 
 		var response = Assert.IsType<OkObjectResult>(result);
 		var actual = Assert.IsType<PostDto>(response.Value);

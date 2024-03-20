@@ -78,7 +78,7 @@ public abstract class WithMocks
 		    .Returns(Allow);
 	    return;
 
-	    Decision Allow(IEnumerable<Claim> claims) => Decision.Allow("Mock", claims);
+	    Decision Allow(IEnumerable<Claim> claims, IFederated _, Uuid7 __) => Decision.Allow("Mock", claims);
     }
 
 }

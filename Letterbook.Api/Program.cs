@@ -5,6 +5,7 @@ using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
+using Letterbook.Api.Dto;
 using Letterbook.Api.Mappers;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
@@ -51,6 +52,7 @@ public class Program
         builder.Services
             .AddControllers(options =>
             {
+	            options.ModelBinderProviders.Insert(0, new Uuid7BinderProvider());
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
                 options.OutputFormatters.Insert(0, new JsonLdOutputFormatter());
                 options.InputFormatters.Insert(0, new JsonLdInputFormatter());
