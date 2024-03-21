@@ -1,12 +1,10 @@
 ﻿using System.Net;
-using System.Text;
 using AutoMapper;
 using Letterbook.Api.Dto;
 using Letterbook.Api.Mappers;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
@@ -18,21 +16,29 @@ namespace Letterbook.Api.Controllers;
 
 [ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 [Route("lb/v1/[controller]")]
-public class PostsController(
-    ILogger<PostsController> logger,
-    IOptions<CoreOptions> options,
-    IPostService postSvc,
-    IProfileService profile,
-    IAuthorizationService authz,
-    MappingConfigProvider mappingConfig)
-    : ControllerBase
+public class PostsController : ControllerBase
 {
-    private readonly ILogger<PostsController> _logger = logger;
-    private readonly CoreOptions _options = options.Value;
-    private readonly IPostService _post = postSvc;
-    private readonly IProfileService _profile = profile;
-    private readonly IAuthorizationService _authz = authz;
-    private readonly IMapper _mapper = new Mapper(mappingConfig.Posts);
+    private readonly ILogger<PostsController> _logger;
+    private readonly CoreOptions _options;
+    private readonly IPostService _post;
+    private readonly IProfileService _profile;
+    private readonly IAuthorizationService _authz;
+    private readonly IMapper _mapper;
+
+    public PostsController(ILogger<PostsController> logger,
+	    IOptions<CoreOptions> options,
+	    IPostService postSvc,
+	    IProfileService profile,
+	    IAuthorizationService authz,
+	    MappingConfigProvider mappingConfig)
+    {
+	    _logger = logger;
+	    _options = options.Value;
+	    _post = postSvc;
+	    _profile = profile;
+	    _authz = authz;
+	    _mapper = new Mapper(mappingConfig.Posts);
+    }
 
     // [Authorize(JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost("{profileId}/post")]
