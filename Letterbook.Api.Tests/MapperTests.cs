@@ -18,7 +18,7 @@ public class MapperTests : WithMocks
 	{
 		_builder = new UriBuilder();
 		_builder.Host = CoreOptionsMock.Value.DomainName;
-		_mappingConfig = new MappingConfigProvider(new BaseMappings(CoreOptionsMock));
+		_mappingConfig = new MappingConfigProvider(new InstanceMappings(CoreOptionsMock));
 		_postMapper = new Mapper(_mappingConfig.Posts);
 	}
 

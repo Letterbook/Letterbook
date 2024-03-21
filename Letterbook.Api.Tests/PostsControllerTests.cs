@@ -25,7 +25,7 @@ public class PostsControllerTests : WithMockContext
 	{
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 		_controller = new PostsController(Mock.Of<ILogger<PostsController>>(), CoreOptionsMock, PostServiceMock.Object,
-			ProfileServiceMock.Object, AuthorizationServiceMock.Object, new MappingConfigProvider(new BaseMappings(CoreOptionsMock)))
+			ProfileServiceMock.Object, AuthorizationServiceMock.Object, new MappingConfigProvider(new InstanceMappings(CoreOptionsMock)))
 		{
 			ControllerContext = new ControllerContext()
 			{
@@ -49,7 +49,7 @@ public class PostsControllerTests : WithMockContext
 	[Fact(DisplayName = "Should accept a draft post for a note")]
 	public async Task CanDraftNote()
 	{
-
+		_dto.Id = _post.GetId();
 		PostServiceMock.Setup(m => m.Draft(It.IsAny<Models.Post>(), It.IsAny<Uuid7?>(), It.IsAny<bool>()))
 			.ReturnsAsync(_post);
 
@@ -59,5 +59,6 @@ public class PostsControllerTests : WithMockContext
 		var actual = Assert.IsType<PostDto>(response.Value);
 		Assert.NotNull(actual.FediId);
 		Assert.NotNull(actual.Id);
+		Assert.NotEqual(_dto.Id, actual.Id);
 	}
 }

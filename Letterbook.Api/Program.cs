@@ -108,7 +108,7 @@ public class Program
 
         // Register Mapping Configs
         builder.Services.AddSingleton<MappingConfigProvider>();
-        builder.Services.AddSingleton<BaseMappings>();
+        builder.Services.AddSingleton<InstanceMappings>();
 
         // Register Services
         builder.Services.AddScoped<IActivityEventService, ActivityEventService>();

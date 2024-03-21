@@ -21,7 +21,7 @@ namespace Letterbook.Api.Controllers;
 public class PostsController(
     ILogger<PostsController> logger,
     IOptions<CoreOptions> options,
-    IPostService post,
+    IPostService postSvc,
     IProfileService profile,
     IAuthorizationService authz,
     MappingConfigProvider mappingConfig)
@@ -29,7 +29,7 @@ public class PostsController(
 {
     private readonly ILogger<PostsController> _logger = logger;
     private readonly CoreOptions _options = options.Value;
-    private readonly IPostService _post = post;
+    private readonly IPostService _post = postSvc;
     private readonly IProfileService _profile = profile;
     private readonly IAuthorizationService _authz = authz;
     private readonly IMapper _mapper = new Mapper(mappingConfig.Posts);
@@ -42,8 +42,7 @@ public class PostsController(
     {
 	    if (!ModelState.IsValid)
 		    return BadRequest(ModelState);
-        // if (!Id.TryAsUuid7(profileId, out var profileUuid))
-            // return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {nameof(profileId)}"));
+	    dto.Id = Uuid7.NewUuid7();
         if (_mapper.Map<Post>(dto) is not { } post)
             return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
 
@@ -112,6 +111,7 @@ public class PostsController(
     {
 	    if (!ModelState.IsValid)
 		    return BadRequest(ModelState);
+	    dto.Id = Uuid7.NewUuid7();
 	    if (_mapper.Map<Content>(dto) is not { } content)
 		    return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
 	    if (await _post.LookupPost(postId, false) is not { } post)

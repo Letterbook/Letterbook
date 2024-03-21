@@ -8,9 +8,9 @@ using Models = Letterbook.Core.Models;
 
 namespace Letterbook.Api.Mappers;
 
-public class BaseMappings : AutoMapper.Profile
+public class InstanceMappings : AutoMapper.Profile
 {
-	public BaseMappings(IOptions<CoreOptions> options)
+	public InstanceMappings(IOptions<CoreOptions> options)
 	{
 		CreateMap<MentionDto, Mention>(MemberList.Source)
 			.ForMember(dest => dest.Subject, opt => opt.MapFrom(src => src.Mentioned));
@@ -73,4 +73,12 @@ public class BaseMappings : AutoMapper.Profile
 	}
 
 	private static Post NewPost(CoreOptions options) => new(options);
+}
+
+public class BaseTypeMappings : AutoMapper.Profile
+{
+	public BaseTypeMappings()
+	{
+
+	}
 }

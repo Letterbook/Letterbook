@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Medo;
 
 namespace Letterbook.Api.Mappers;
 
@@ -14,11 +15,11 @@ public class MappingConfigProvider
 {
 	private readonly MapperConfiguration _posts;
 
-	public MappingConfigProvider(BaseMappings baseMappings)
+	public MappingConfigProvider(InstanceMappings instanceMappings)
 	{
 		_posts = new MapperConfiguration(cfg =>
 		{
-			cfg.AddProfile(baseMappings);
+			cfg.AddProfile(instanceMappings);
 		});
 	}
 
