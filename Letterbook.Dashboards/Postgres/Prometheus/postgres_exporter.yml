@@ -1,0 +1,16 @@
+# These probably shouldn't have privileges to administrate the DB in the future.
+auth_modules:
+  letterbook_db:
+    type: userpass
+    userpass:
+      username: letterbook
+      password: letterbookpw
+    options:
+      sslmode: disable
+  timescale_db:
+    type: userpass
+    userpass:
+      username: letterbook
+      password: letterbookpw
+    options:
+      sslmode: disable
