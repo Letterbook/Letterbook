@@ -1,11 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Letterbook.Core.Extensions;
+﻿using Letterbook.Core.Extensions;
 using Medo;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
-namespace Letterbook.Api.Dto;
+namespace Letterbook.Api;
 
 public class Uuid7Binder : IModelBinder
 {
