@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Security.Claims;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
@@ -14,13 +15,15 @@ namespace Letterbook.Core;
 /// <summary>
 /// The PostService is how you Post™
 /// </summary>
-public class PostService : IPostService
+public class PostService : IAuthzPostService, IPostService
 {
     private readonly ILogger<PostService> _logger;
     private readonly CoreOptions _options;
     private readonly IPostAdapter _posts;
     private readonly IPostEventService _postEvents;
     private readonly IActivityPubClient _apClient;
+    private Uuid7 _profileId;
+    private IEnumerable<Claim> _claims = null!;
 
     public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options,
         IPostAdapter posts, IPostEventService postEvents, IActivityPubClient apClient)
@@ -96,15 +99,18 @@ public class PostService : IPostService
         return post;
     }
 
-    public async Task<Post> Update(Post post)
+    public async Task<Post> Update(Uuid7 postId, Post post)
     {
         // TODO: authz
         // I think authz can be conveyed around the app with just a list of claims, as long as one of the claims is
         // a profile, right?
-        var previous = await _posts.LookupPost(post.Id)
+        var previous = await _posts.LookupPost(postId)
                        ?? throw CoreException.MissingData($"Could not find existing post {post.Id} to update",
-                           typeof(Post), post.Id);
+                           typeof(Post), postId);
 
+        if (!(previous as IFederated).StrictEqual(post))
+	        throw CoreException.InvalidRequest("Input IDs don't match", $"{postId.ToId25String()}", post);
+        // var decision = _authz.Update(Enumerable.Empty<Claim>(), previous) // TODO: authz
         previous.Client = post.Client; // probably should come from an authz claim
         previous.InReplyTo = post.InReplyTo;
         previous.Audience = post.Audience;
@@ -349,5 +355,13 @@ public class PostService : IPostService
             _logger.LogWarning(e, "Cannot resolve post {Post}", postId);
             return default;
         }
+    }
+
+    public IAuthzPostService As(Uuid7 profileId, IEnumerable<Claim> claims)
+    {
+	    _profileId = profileId;
+	    _claims = claims;
+
+	    return this;
     }
 }

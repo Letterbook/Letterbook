@@ -118,7 +118,7 @@ public class Program
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
         builder.Services.AddScoped<IActivityMessageService, ActivityMessageService>();
-        builder.Services.AddScoped<IPostService, PostService>();
+        builder.Services.AddScoped<IAuthzPostService, PostService>();
         builder.Services.AddScoped<IPostEventService, PostEventService>();
         builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();
 

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Letterbook.Core.Extensions;
 
 namespace Letterbook.Core.Exceptions;
 
@@ -24,6 +25,11 @@ public class CoreException : Exception
     public bool Flagged(ErrorCodes code)
     {
         return ((ErrorCodes)HResult & code) == code;
+    }
+
+    public bool Flagged(params ErrorCodes[] codes)
+    {
+	    return codes.Any(Flagged);
     }
 
     /// <summary>

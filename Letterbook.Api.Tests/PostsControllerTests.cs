@@ -50,7 +50,7 @@ public class PostsControllerTests : WithMockContext
 	public async Task CanDraftNote()
 	{
 		_dto.Id = _post.GetId();
-		PostServiceMock.Setup(m => m.Draft(It.IsAny<Models.Post>(), It.IsAny<Uuid7?>(), It.IsAny<bool>()))
+		PostServiceAuthMock.Setup(m => m.Draft(It.IsAny<Models.Post>(), It.IsAny<Uuid7?>(), It.IsAny<bool>()))
 			.ReturnsAsync(_post);
 
 		var result = await _controller.Post(_profile.GetId(), _dto);

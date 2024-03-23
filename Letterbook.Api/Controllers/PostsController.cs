@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Annotations;
 using IAuthorizationService = Letterbook.Core.IAuthorizationService;
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace Letterbook.Api.Controllers;
 
@@ -59,90 +60,66 @@ public class PostsController : ControllerBase
         if (!draft && !pubDecision.Allowed)
 	        return Unauthorized(pubDecision);
 
-        try
-        {
-            var result = await _post.Draft(post, post.InReplyTo?.GetId(), !draft);
-            return Ok(_mapper.Map<PostDto>(result));
-        }
-        catch (CoreException e)
-        {
-            var message = new ErrorMessage(e);
-            _logger.LogDebug(e, "Error {Code} while posting for profile {Profile}", message.ErrorCode, profileId);
-
-            if (e.Flagged(ErrorCodes.InternalError))
-                return base.StatusCode((int)HttpStatusCode.InternalServerError, message);
-            if (e.Flagged(ErrorCodes.PermissionDenied))
-                return Unauthorized(message);
-            return BadRequest(message);
-        }
+        var result = await _post.As(profileId, User.Claims).Draft(post, post.InReplyTo?.GetId(), !draft);
+        return Ok(_mapper.Map<PostDto>(result));
     }
 
-    [HttpPut("{profileId}/post/{postId}")]
+    [HttpPost("{profileId}/post/{postId}")]
     [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
     [SwaggerOperation("Publish", "Publish an existing draft post")]
     public async Task<IActionResult> Publish(Uuid7 profileId, Uuid7 postId)
     {
 	    if (!ModelState.IsValid)
 		    return BadRequest(ModelState);
-	    if (await _post.LookupPost(postId, false) is not { } post)
+	    if (await _post.As(profileId, User.Claims).LookupPost(postId, false) is not { } post)
 		    return NotFound(new ErrorMessage(ErrorCodes.MissingData, $"{postId.ToId25String()} not found"));
 
 	    var decision = _authz.Publish(User.Claims, post, profileId);
 	    if (!decision.Allowed)
 		    return Unauthorized(decision);
 
-	    try
-	    {
-		    var result = await _post.Publish(postId);
-		    return Ok(_mapper.Map<PostDto>(result));
-	    }
-	    catch (CoreException e)
-	    {
-		    var message = new ErrorMessage(e);
-		    _logger.LogDebug(e, "Error {Code} while publishing {Post} for profile {Profile}", message.ErrorCode, postId, profileId);
-
-		    if (e.Flagged(ErrorCodes.InternalError))
-			    return base.StatusCode((int)HttpStatusCode.InternalServerError, message);
-		    if (e.Flagged(ErrorCodes.PermissionDenied))
-			    return Unauthorized(message);
-		    return BadRequest(message);
-	    }
+		var result = await _post.As(profileId, User.Claims).Publish(postId);
+		return Ok(_mapper.Map<PostDto>(result));
     }
 
+    [HttpPut("{profileId}/post/{postId}")]
+    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+    [SwaggerOperation("Update", "Update an entire post, including all contents")]
+    public async Task<IActionResult> Update(Uuid7 profileId, Uuid7 postId, [FromBody]PostDto dto)
+    {
+	    if (!ModelState.IsValid)
+		    return BadRequest(ModelState);
+	    if (_mapper.Map<Post>(dto) is not { } post)
+		    return BadRequest();
+
+	    var decision = _authz.Publish(User.Claims, post, profileId);
+	    if (!decision.Allowed)
+		    return Unauthorized(decision);
+
+		var result = await _post.As(profileId, User.Claims).Update(postId, post);
+		return Ok(_mapper.Map<PostDto>(result));
+    }
 
     [HttpPost("{profileId}/post/{postId}/content")]
     [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
     [SwaggerOperation("Attach", "Attach additional content to a post")]
     public async Task<IActionResult> Attach(Uuid7 profileId, Uuid7 postId, [FromBody]ContentDto dto)
     {
+	    var svc = _post.As(profileId, User.Claims);
 	    if (!ModelState.IsValid)
 		    return BadRequest(ModelState);
 	    dto.Id = Uuid7.NewUuid7();
 	    if (_mapper.Map<Content>(dto) is not { } content)
 		    return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
-	    if (await _post.LookupPost(postId, false) is not { } post)
+	    if (await svc.LookupPost(postId, false) is not { } post)
 		    return NotFound(new ErrorMessage(ErrorCodes.MissingData, $"{postId.ToId25String()} not found"));
 
 	    var decision = _authz.Update(User.Claims, post, profileId);
 	    if (!decision.Allowed)
 		    return Unauthorized(decision);
 
-	    try
-	    {
-		    var result = await _post.AddContent(postId, content);
-		    return Ok(_mapper.Map<PostDto>(result));
-	    }
-	    catch (CoreException e)
-	    {
-		    var message = new ErrorMessage(e);
-		    _logger.LogDebug(e, "Error {Code} while updating {Post} for profile {Profile}", message.ErrorCode, postId, profileId);
-
-		    if (e.Flagged(ErrorCodes.InternalError))
-			    return base.StatusCode((int)HttpStatusCode.InternalServerError, message);
-		    if (e.Flagged(ErrorCodes.PermissionDenied))
-			    return Unauthorized(message);
-		    return BadRequest(message);
-	    }
+		var result = await svc.AddContent(postId, content);
+		return Ok(_mapper.Map<PostDto>(result));
     }
 
     [HttpPut("{profileId}/post/{postId}/content/{contentId}")]
@@ -150,36 +127,67 @@ public class PostsController : ControllerBase
     [SwaggerOperation("Edit", "Edit the content of a post")]
     public async Task<IActionResult> Edit(Uuid7 profileId, Uuid7 postId, [FromBody]ContentDto dto)
     {
+	    var svc = _post.As(profileId, User.Claims);
 	    if (!ModelState.IsValid)
 		    return BadRequest(ModelState);
 	    if (_mapper.Map<Content>(dto) is not { } content)
 		    return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
-	    if (await _post.LookupPost(postId, false) is not { } post)
+	    if (await svc.LookupPost(postId, false) is not { } post)
 		    return NotFound(new ErrorMessage(ErrorCodes.MissingData, $"{postId.ToId25String()} not found"));
 
 	    var decision = _authz.Update(User.Claims, post, profileId);
 	    if (!decision.Allowed)
 		    return Unauthorized(decision);
 
-	    try
-	    {
-		    var result = await _post.UpdateContent(postId, content);
-		    return Ok(_mapper.Map<PostDto>(result));
-	    }
-	    catch (CoreException e)
-	    {
-		    var message = new ErrorMessage(e);
-		    _logger.LogDebug(e, "Error {Code} while updating {Post} for profile {Profile}", message.ErrorCode, postId, profileId);
-
-		    if (e.Flagged(ErrorCodes.InternalError))
-			    return base.StatusCode((int)HttpStatusCode.InternalServerError, message);
-		    if (e.Flagged(ErrorCodes.PermissionDenied))
-			    return Unauthorized(message);
-		    return BadRequest(message);
-	    }
+		var result = await svc.UpdateContent(postId, content);
+		return Ok(_mapper.Map<PostDto>(result));
     }
 
-    // draft
-    // publish
-    //
+    [HttpDelete("{profileId}/post/{postId}/content/{contentId}")]
+    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+    [SwaggerOperation("Remove", "Remove content from a post")]
+    public async Task<IActionResult> Remove(Uuid7 profileId, Uuid7 postId)
+    {
+	    throw new NotImplementedException();
+    }
+
+    [HttpDelete("{profileId}/post/{postId}")]
+    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+    [SwaggerOperation("Delete", "Delete a post")]
+    public async Task<IActionResult> Delete(Uuid7 profileId, Uuid7 postId)
+    {
+	    throw new NotImplementedException();
+    }
+
+    [HttpGet("{profileId}/post/{postId}")]
+    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+    [SwaggerOperation("Get", "Get a post")]
+    public async Task<IActionResult> Get(Uuid7 profileId, Uuid7 postId, [FromQuery]bool withThread = false)
+    {
+	    throw CoreException.InvalidRequest("test", "testKey", new {});
+    }
+
+    [HttpGet("{profileId}/post/drafts")]
+    [ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
+    [SwaggerOperation("Drafts", "Get unpublished drafts")]
+    public async Task<IActionResult> GetDrafts(Uuid7 profileId, Uuid7 postId, [FromQuery]bool withThread = false)
+    {
+	    throw CoreException.InvalidRequest("test", "testKey", new {});
+    }
+
+    [HttpGet("{profileId}/post/{postId}/replies")]
+    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+    [SwaggerOperation("Replies", "Get replies to a post")]
+    public async Task<IActionResult> GetReplies(Uuid7 profileId, Uuid7 postId, [FromQuery]bool withThread = false)
+    {
+	    throw new NotImplementedException();
+    }
+
+    [HttpGet("{profileId}/thread/{threadId}")]
+    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+    [SwaggerOperation("Edit", "Edit the content of a post")]
+    public async Task<IActionResult> GetThread(Uuid7 profileId, Uuid7 threadId)
+    {
+	    throw new NotImplementedException();
+    }
 }

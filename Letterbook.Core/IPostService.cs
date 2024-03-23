@@ -1,9 +1,15 @@
-﻿using Letterbook.Core.Models;
+﻿using System.Security.Claims;
+using Letterbook.Core.Models;
 using Medo;
 
 namespace Letterbook.Core;
 
 public interface IPostService
+{
+	public IAuthzPostService As(Uuid7 profileId, IEnumerable<Claim> claims);
+}
+
+public interface IAuthzPostService
 {
     public Task<Post?> LookupPost(Uuid7 id, bool withThread = true);
     public Task<Post?> LookupPost(Uri id, bool withThread = true);
@@ -11,7 +17,7 @@ public interface IPostService
     public Task<ThreadContext?> LookupThread(Uri id);
     public Task<Post> DraftNote(Uuid7 authorId, string contentSource, Uuid7? inReplyToId = default);
     public Task<Post> Draft(Post post, Uuid7? inReplyToId = default, bool publish = false);
-    public Task<Post> Update(Post post);
+    public Task<Post> Update(Uuid7 postId, Post post);
     public Task Delete(Uuid7 id);
     /// <summary>
     /// Boost, reblog, repost, etc. Share a post with a new audience

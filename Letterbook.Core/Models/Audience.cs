@@ -45,6 +45,7 @@ public class Audience : IEquatable<Audience>, IFederated
 
     public Uuid7 GetId() => _id;
     public string GetId25() => _id.ToId25String();
+
     public static Audience Subscribers(Profile creator)
     {
         var builder = new UriBuilder(creator.Followers);

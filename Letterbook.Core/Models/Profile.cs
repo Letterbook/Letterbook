@@ -93,7 +93,6 @@ public class Profile : IFederated, IEquatable<Profile>
 
     public Uuid7 GetId() => _id;
     public string GetId25() => _id.ToId25String();
-
     public Profile ShallowClone() => (Profile)MemberwiseClone();
 
     public Profile ShallowCopy(Profile? copyFrom)
