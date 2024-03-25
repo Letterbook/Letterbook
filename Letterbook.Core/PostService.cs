@@ -357,7 +357,7 @@ public class PostService : IAuthzPostService, IPostService
         }
     }
 
-    public IAuthzPostService As(Uuid7 profileId, IEnumerable<Claim> claims)
+    public IAuthzPostService As(IEnumerable<Claim> claims, Uuid7 profileId)
     {
 	    _profileId = profileId;
 	    _claims = claims;

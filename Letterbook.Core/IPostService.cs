@@ -6,7 +6,7 @@ namespace Letterbook.Core;
 
 public interface IPostService
 {
-	public IAuthzPostService As(Uuid7 profileId, IEnumerable<Claim> claims);
+	public IAuthzPostService As(IEnumerable<Claim> claims, Uuid7 profileId);
 }
 
 public interface IAuthzPostService

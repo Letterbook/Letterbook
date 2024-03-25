@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Annotations;
 using IAuthorizationService = Letterbook.Core.IAuthorizationService;
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace Letterbook.Api.Controllers;
 
@@ -60,7 +59,7 @@ public class PostsController : ControllerBase
         if (!draft && !pubDecision.Allowed)
 	        return Unauthorized(pubDecision);
 
-        var result = await _post.As(profileId, User.Claims).Draft(post, post.InReplyTo?.GetId(), !draft);
+        var result = await _post.As(User.Claims, profileId).Draft(post, post.InReplyTo?.GetId(), !draft);
         return Ok(_mapper.Map<PostDto>(result));
     }
 
@@ -71,14 +70,8 @@ public class PostsController : ControllerBase
     {
 	    if (!ModelState.IsValid)
 		    return BadRequest(ModelState);
-	    if (await _post.As(profileId, User.Claims).LookupPost(postId, false) is not { } post)
-		    return NotFound(new ErrorMessage(ErrorCodes.MissingData, $"{postId.ToId25String()} not found"));
 
-	    var decision = _authz.Publish(User.Claims, post, profileId);
-	    if (!decision.Allowed)
-		    return Unauthorized(decision);
-
-		var result = await _post.As(profileId, User.Claims).Publish(postId);
+		var result = await _post.As(User.Claims, profileId).Publish(postId);
 		return Ok(_mapper.Map<PostDto>(result));
     }
 
@@ -96,7 +89,7 @@ public class PostsController : ControllerBase
 	    if (!decision.Allowed)
 		    return Unauthorized(decision);
 
-		var result = await _post.As(profileId, User.Claims).Update(postId, post);
+		var result = await _post.As(User.Claims, profileId).Update(postId, post);
 		return Ok(_mapper.Map<PostDto>(result));
     }
 
@@ -105,20 +98,13 @@ public class PostsController : ControllerBase
     [SwaggerOperation("Attach", "Attach additional content to a post")]
     public async Task<IActionResult> Attach(Uuid7 profileId, Uuid7 postId, [FromBody]ContentDto dto)
     {
-	    var svc = _post.As(profileId, User.Claims);
 	    if (!ModelState.IsValid)
 		    return BadRequest(ModelState);
 	    dto.Id = Uuid7.NewUuid7();
 	    if (_mapper.Map<Content>(dto) is not { } content)
 		    return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
-	    if (await svc.LookupPost(postId, false) is not { } post)
-		    return NotFound(new ErrorMessage(ErrorCodes.MissingData, $"{postId.ToId25String()} not found"));
 
-	    var decision = _authz.Update(User.Claims, post, profileId);
-	    if (!decision.Allowed)
-		    return Unauthorized(decision);
-
-		var result = await svc.AddContent(postId, content);
+		var result = await _post.As(User.Claims, profileId).AddContent(postId, content);
 		return Ok(_mapper.Map<PostDto>(result));
     }
 
@@ -127,36 +113,37 @@ public class PostsController : ControllerBase
     [SwaggerOperation("Edit", "Edit the content of a post")]
     public async Task<IActionResult> Edit(Uuid7 profileId, Uuid7 postId, [FromBody]ContentDto dto)
     {
-	    var svc = _post.As(profileId, User.Claims);
 	    if (!ModelState.IsValid)
 		    return BadRequest(ModelState);
 	    if (_mapper.Map<Content>(dto) is not { } content)
 		    return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
-	    if (await svc.LookupPost(postId, false) is not { } post)
-		    return NotFound(new ErrorMessage(ErrorCodes.MissingData, $"{postId.ToId25String()} not found"));
 
-	    var decision = _authz.Update(User.Claims, post, profileId);
-	    if (!decision.Allowed)
-		    return Unauthorized(decision);
-
-		var result = await svc.UpdateContent(postId, content);
+		var result = await _post.As(User.Claims, profileId).UpdateContent(postId, content);
 		return Ok(_mapper.Map<PostDto>(result));
     }
 
     [HttpDelete("{profileId}/post/{postId}/content/{contentId}")]
     [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
     [SwaggerOperation("Remove", "Remove content from a post")]
-    public async Task<IActionResult> Remove(Uuid7 profileId, Uuid7 postId)
+    public async Task<IActionResult> Remove(Uuid7 profileId, Uuid7 postId, Uuid7 contentId)
     {
-	    throw new NotImplementedException();
+	    if (!ModelState.IsValid)
+		    return BadRequest(ModelState);
+
+	    var result = await _post.As(User.Claims, profileId).RemoveContent(postId, contentId);
+	    return Ok(_mapper.Map<PostDto>(result));
     }
 
     [HttpDelete("{profileId}/post/{postId}")]
-    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [SwaggerOperation("Delete", "Delete a post")]
     public async Task<IActionResult> Delete(Uuid7 profileId, Uuid7 postId)
     {
-	    throw new NotImplementedException();
+	    if (!ModelState.IsValid)
+		    return BadRequest(ModelState);
+
+	    await _post.As(User.Claims, profileId).Delete(postId);
+	    return Ok();
     }
 
     [HttpGet("{profileId}/post/{postId}")]
@@ -164,30 +151,50 @@ public class PostsController : ControllerBase
     [SwaggerOperation("Get", "Get a post")]
     public async Task<IActionResult> Get(Uuid7 profileId, Uuid7 postId, [FromQuery]bool withThread = false)
     {
-	    throw CoreException.InvalidRequest("test", "testKey", new {});
+	    if (!ModelState.IsValid)
+		    return BadRequest(ModelState);
+
+	    var result = await _post.As(User.Claims, profileId).LookupPost(postId, withThread);
+	    return Ok(_mapper.Map<PostDto>(result));
     }
 
     [HttpGet("{profileId}/post/drafts")]
     [ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
     [SwaggerOperation("Drafts", "Get unpublished drafts")]
-    public async Task<IActionResult> GetDrafts(Uuid7 profileId, Uuid7 postId, [FromQuery]bool withThread = false)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+    public async Task<IActionResult> GetDrafts(Uuid7 profileId)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
-	    throw CoreException.InvalidRequest("test", "testKey", new {});
+	    if (!ModelState.IsValid)
+		    return BadRequest(ModelState);
+
+	    throw new NotImplementedException();
     }
 
     [HttpGet("{profileId}/post/{postId}/replies")]
-    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
     [SwaggerOperation("Replies", "Get replies to a post")]
-    public async Task<IActionResult> GetReplies(Uuid7 profileId, Uuid7 postId, [FromQuery]bool withThread = false)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+    public async Task<IActionResult> GetReplies(Uuid7 profileId, Uuid7 postId)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
+	    if (!ModelState.IsValid)
+		    return BadRequest(ModelState);
+
 	    throw new NotImplementedException();
     }
 
     [HttpGet("{profileId}/thread/{threadId}")]
-    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
-    [SwaggerOperation("Edit", "Edit the content of a post")]
+    [ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
+    [SwaggerOperation("Thread", "Get a thread by id")]
     public async Task<IActionResult> GetThread(Uuid7 profileId, Uuid7 threadId)
     {
-	    throw new NotImplementedException();
+	    if (!ModelState.IsValid)
+		    return BadRequest(ModelState);
+
+	    var result = await _post.As(User.Claims, profileId).LookupThread(threadId);
+	    if (result is not null && result.Posts.Count != 0)
+			return Ok(_mapper.Map<IEnumerable<PostDto>>(result.Posts));
+	    return NotFound();
     }
 }

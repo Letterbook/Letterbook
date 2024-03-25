@@ -45,7 +45,7 @@ public abstract class WithMocks
         AuthorizationServiceMock = new Mock<IAuthorizationService>();
 
         ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
-        PostServiceMock.Setup(m => m.As(It.IsAny<Uuid7>(), It.IsAny<IEnumerable<Claim>>())).Returns(PostServiceAuthMock.Object);
+        PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>(), It.IsAny<Uuid7>())).Returns(PostServiceAuthMock.Object);
         var mockOptions = new CoreOptions
         {
             DomainName = "letterbook.example",
