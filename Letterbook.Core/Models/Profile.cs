@@ -29,7 +29,7 @@ public class Profile : IFederated, IEquatable<Profile>
         CustomFields = default!;
         Description = default!;
     }
-    
+
     // Constructor for local profiles
     private Profile(Uri baseUri) : this()
     {
@@ -39,7 +39,7 @@ public class Profile : IFederated, IEquatable<Profile>
         DisplayName = string.Empty;
         Description = string.Empty;
         CustomFields = Array.Empty<CustomField>();
-        
+
         var builder = new UriBuilder(FediId);
         var basePath = builder.Path;
 
@@ -51,13 +51,13 @@ public class Profile : IFederated, IEquatable<Profile>
 
         builder.Path = basePath + "/followers";
         Followers = builder.Uri;
-        
+
         builder.Path = basePath + "/following";
         Following = builder.Uri;
 
         builder.Path = "/actor/shared_inbox";
         SharedInbox = builder.Uri;
-        
+
         builder.Path = basePath;
         builder.Fragment = "public_keys/0";
         Keys.Add(SigningKey.Rsa(0, builder.Uri));
@@ -70,7 +70,7 @@ public class Profile : IFederated, IEquatable<Profile>
         get => _id.ToGuid();
         set => _id = Uuid7.FromGuid(value);
     }
-    
+
     public Uri FediId { get; set; }
     public Uri Inbox { get; set; }
     public Uri Outbox { get; set; }
@@ -93,14 +93,13 @@ public class Profile : IFederated, IEquatable<Profile>
 
     public Uuid7 GetId() => _id;
     public string GetId25() => _id.ToId25String();
-
     public Profile ShallowClone() => (Profile)MemberwiseClone();
 
     public Profile ShallowCopy(Profile? copyFrom)
     {
         if (copyFrom is null) return this;
         if (!Equals(copyFrom)) return this;
-        
+
         Inbox = copyFrom.Inbox ?? Inbox;
         Outbox = copyFrom.Outbox ?? Outbox;
         SharedInbox = copyFrom.SharedInbox ?? SharedInbox;
@@ -122,7 +121,7 @@ public class Profile : IFederated, IEquatable<Profile>
         follower.FollowingCollection.Add(relation);
         return relation;
     }
-    
+
     public int RemoveFollower(Profile follower)
     {
         var matches = FollowersCollection.Where(relation => relation.Follower == follower).ToList();
@@ -154,14 +153,14 @@ public class Profile : IFederated, IEquatable<Profile>
 
         return count;
     }
-    
+
     public int LeaveAudience(Profile following)
     {
         if (Audiences is HashSet<Audience> memberships)
         {
             return memberships.RemoveWhere(m => m.Source == following);
         }
-        
+
         var count = 0;
         var targets = Audiences.Where(m => m.Source == following);
         foreach (var target in targets)
@@ -172,7 +171,7 @@ public class Profile : IFederated, IEquatable<Profile>
 
         return count;
     }
-    
+
     // Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?
     // The only use case I'm imagining for a service is to represent the server itself
     public static Profile CreateIndividual(Uri baseUri, string handle)
@@ -197,6 +196,9 @@ public class Profile : IFederated, IEquatable<Profile>
             FediId = id
         };
     }
+
+    public static Profile CreateEmpty(Uuid7 id) => new() { _id = id };
+    public static Profile CreateEmpty(Uuid7 id, Uri fediId) => new() { _id = id, FediId = fediId };
 
     public bool Equals(Profile? other)
     {

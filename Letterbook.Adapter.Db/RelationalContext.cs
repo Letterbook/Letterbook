@@ -4,6 +4,7 @@ using Letterbook.Core.Models;
 using Medo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
@@ -15,7 +16,7 @@ namespace Letterbook.Adapter.Db;
 /// <summary>
 /// This is the DbContext for most of the application. The actual data records (like the contents of profiles and
 /// posts) will be managed here.
-/// 
+///
 /// Feeds/timelines will likely be managed separately from this, likely using a timeseries db, probably timescale.
 /// Maybe notifications, too.
 /// There may be a need for search and/or graph databases in the future, and those would also be separate from this.
@@ -47,6 +48,11 @@ public class RelationalContext : DbContext
         var builder = new NpgsqlDataSourceBuilder(_config.GetConnectionString());
         builder.EnableDynamicJson();
         options.UseNpgsql(builder.Build());
+        options.ConfigureWarnings(configurationBuilder =>
+        {
+	        // temporary
+	        configurationBuilder.Log(CoreEventId.ManyServiceProvidersCreatedWarning);
+        });
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -54,7 +60,7 @@ public class RelationalContext : DbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
-    
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Properties<Uri>().HaveConversion<UriIdConverter, UriIdComparer>();

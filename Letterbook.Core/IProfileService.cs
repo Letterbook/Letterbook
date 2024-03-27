@@ -1,5 +1,6 @@
 ﻿using Letterbook.Core.Models;
 using Letterbook.Core.Values;
+using Medo;
 
 namespace Letterbook.Core;
 
@@ -13,7 +14,7 @@ public interface IProfileService
     Task<UpdateResponse<Profile>> RemoveCustomField(Guid localId, int index);
     Task<UpdateResponse<Profile>> UpdateCustomField(Guid localId, int index, string key, string value);
     Task<UpdateResponse<Profile>> UpdateProfile(Profile profile);
-    Task<Profile?> LookupProfile(Guid localId);
+    Task<Profile?> LookupProfile(Uuid7 localId);
     Task<Profile?> LookupProfile(Uri id);
     Task<IEnumerable<Profile>> FindProfiles(string handle);
     Task<FollowState> Follow(Guid selfId, Uri targetId);
@@ -24,7 +25,7 @@ public interface IProfileService
     Task RemoveFollower(Guid selfId, Uri followerId);
     Task Unfollow(Guid selfId, Uri followerId);
     Task ReportProfile(Guid selfId, Uri profileId);
-    
+
     // - [ ] receive report
     // - [ ] block
     // - [ ] mute

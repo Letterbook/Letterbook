@@ -1,0 +1,34 @@
+﻿POST http://{{host}}/lb/v1/posts/{{profileId}}/post
+Content-Type: application/json
+
+{
+  "id": "06bvza4gmu61ojpq0a2oam4cz",
+  "summary": "string",
+  "preview": "string",
+  "source": "string",
+  "creators": [
+    {
+      "id": "06bvza4gmu61ojpq0a2oam4cz"
+    }
+  ],
+  "createdDate": "2024-03-20T02:59:28.042Z",
+  "publishedDate": "2024-03-20T02:59:28.042Z",
+  "updatedDate": "2024-03-20T02:59:28.042Z",
+  "contents": [
+    {
+      "summary": "string",
+      "preview": "string",
+      "source": "string",
+      "sortKey": 0,
+      "type": "Note",
+      "text": "string"
+    }
+  ],
+  "audience": [],
+  "addressedTo": [],
+  "repliesCollection": [],
+  "likesCollection": [],
+  "sharesCollection": []
+}
+
+###

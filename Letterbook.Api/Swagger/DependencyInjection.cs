@@ -14,6 +14,7 @@ public static class DependencyInjection
         return services.AddEndpointsApiExplorer()
             .AddSwaggerGen(options =>
         {
+	        options.EnableAnnotations();
             options.SwaggerDoc(Docs.LetterbookV1Desc.Name,
                 new OpenApiInfo
                 {
@@ -38,12 +39,15 @@ public static class DependencyInjection
                     Description = "ActivityPub objects and specified endpoints",
                     Contact = new() { Url = new Uri("https://www.w3.org/TR/activitypub/") }
                 });
-            options.MapType<Uuid7>(() => new OpenApiSchema{Type = "string", Format = "uuid"});
-            options.MapType<Id25>(() => new OpenApiSchema
-            {
-                Type = "string",
-                Pattern = "[0-9a-z]{25}",
-                Example = new OpenApiString(Uuid7.NewUuid7().ToId25String())
+            options.MapType<Uuid7>(() => new OpenApiSchema{
+	            Type = "string",
+	            Pattern = "[0-9a-z]{25}",
+	            Example = new OpenApiString(Uuid7.NewUuid7().ToId25String())
+            });
+            options.MapType<Uri>(() => new OpenApiSchema{
+	            Type = "string",
+	            Pattern = @"https://\w+\.\w+/\w*",
+	            Example = new OpenApiString($"https://example.com/{Uuid7.NewUuid7().ToId25String()}")
             });
             options.AddSecurityDefinition(name: "Bearer", securityScheme: new OpenApiSecurityScheme
             {
