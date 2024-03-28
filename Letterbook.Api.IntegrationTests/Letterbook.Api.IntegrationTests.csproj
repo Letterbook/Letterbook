@@ -28,5 +28,5 @@
       <ProjectReference Include="..\Letterbook.Api\Letterbook.Api.csproj" />
       <ProjectReference Include="..\Letterbook.Core.Tests\Letterbook.Core.Tests.csproj" />
     </ItemGroup>
-
+    
 </Project>

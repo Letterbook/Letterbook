@@ -133,6 +133,7 @@ public class Program
         builder.Services.AddRxMessageBus();
         builder.Services.AddSingleton<IActivityPubDocument, Document>();
         builder.Services.AddDbContext<RelationalContext>();
+        builder.Services.AddDbAdapter(builder.Configuration.GetSection(DbOptions.ConfigKey));
         builder.Services.AddDbContext<FeedsContext>();
         builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
             .AddEntityFrameworkStores<RelationalContext>();
