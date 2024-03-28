@@ -18,10 +18,6 @@ services:
   letterbook_db:
     container_name: postgres
     image: postgres:15-alpine
-    command:
-      - postgres
-      - -c
-      - config_file=/etc/postgresql/postgresql.conf
     environment:
       - POSTGRES_USER=letterbook
       - POSTGRES_PASSWORD=letterbookpw
@@ -30,7 +26,7 @@ services:
       - "5432:5432"
     volumes:
       - letterbook_db_data:/var/lib/postgresql/data
-      - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./volumes/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
     restart: always
 
   # Optional Dashboarding and Observability Services 
