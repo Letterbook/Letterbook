@@ -4,7 +4,6 @@ using Letterbook.Core.Models;
 using Medo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
@@ -23,7 +22,6 @@ namespace Letterbook.Adapter.Db;
 /// </summary>
 public class RelationalContext : DbContext
 {
-    private readonly DbOptions _config;
     public DbSet<Note> Notes { get; set; }
     public DbSet<Profile> Profiles { get; set; }
     public DbSet<Account> Accounts { get; set; }
@@ -33,26 +31,11 @@ public class RelationalContext : DbContext
     // Called by the designer to create and run migrations
     internal RelationalContext(DbContextOptions<RelationalContext> context) : base(context)
     {
-        _config = new DesignDbOptions();
     }
 
     // Called by DI for normal use
-    public RelationalContext(IOptions<DbOptions> config)
+    public RelationalContext()
     {
-        _config = config.Value;
-    }
-
-
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-    {
-        var builder = new NpgsqlDataSourceBuilder(_config.GetConnectionString());
-        builder.EnableDynamicJson();
-        options.UseNpgsql(builder.Build());
-        options.ConfigureWarnings(configurationBuilder =>
-        {
-	        // temporary
-	        configurationBuilder.Log(CoreEventId.ManyServiceProvidersCreatedWarning);
-        });
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
