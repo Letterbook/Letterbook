@@ -8,6 +8,7 @@ using Letterbook.Api.Json;
 using Letterbook.Api.Mappers;
 using Letterbook.Api.Tests.Fakes;
 using Letterbook.Core.Extensions;
+using Letterbook.Core.Models;
 using Medo;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,7 @@ public class PostsTests : IClassFixture<HostFixture>
 	private readonly FakePostDto _postDto;
 	private readonly Mapper _mapper;
 	private readonly JsonSerializerOptions _json;
+	private readonly Dictionary<Profile, List<Post>> _posts;
 
 
 	public PostsTests(HostFixture host)
@@ -36,6 +38,7 @@ public class PostsTests : IClassFixture<HostFixture>
 				BaseAddress = _host.Options.BaseUri()
 			});
 		_profiles = _host.Profiles;
+		_posts = _host.Posts;
 		_postDto = new FakePostDto(_profiles[0]);
 		var postMappings = _host.Services.GetRequiredService<MappingConfigProvider>().Posts;
 		_mapper = new Mapper(postMappings);
@@ -67,7 +70,19 @@ public class PostsTests : IClassFixture<HostFixture>
 		Assert.NotNull(body.Id);
 		Assert.NotEqual(Uuid7.Empty, body.Id);
 		Assert.Equal(dto.Contents.First(), body.Contents.FirstOrDefault(), ContentComparer);
-		// Assert.True(response.IsSuccessStatusCode);
 	}
 
+	[Fact(DisplayName = "Should publish a draft")]
+	public async Task CanPublishDraft()
+	{
+		var profile = _profiles[2];
+		var post = _posts[profile][1];
+		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}", new StringContent(""));
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var body = Assert.IsType<PostDto>(await response.Content.ReadFromJsonAsync<PostDto>(_json));
+		Assert.Equal(post.GetId(), body.Id);
+		Assert.NotNull(body.PublishedDate);
+	}
 }

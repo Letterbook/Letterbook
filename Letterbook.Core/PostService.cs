@@ -128,10 +128,10 @@ public class PostService : IAuthzPostService, IPostService
         var published = previous.PublishedDate != null;
         if (published)
         {
-            previous.UpdatedDate = DateTimeOffset.Now;
+            previous.UpdatedDate = DateTimeOffset.UtcNow;
             // publish again, tbd
         }
-        else previous.CreatedDate = DateTimeOffset.Now;
+        else previous.CreatedDate = DateTimeOffset.UtcNow;
 
 
         _posts.Update(previous);
@@ -146,7 +146,7 @@ public class PostService : IAuthzPostService, IPostService
         var post = await _posts.LookupPost(id);
         if (post is null) return;
         // TODO: authz and thread root
-        post.DeletedDate = DateTimeOffset.Now;
+        post.DeletedDate = DateTimeOffset.UtcNow;
         _posts.Remove(post);
         await _posts.Commit();
         _postEvents.Deleted(post);
@@ -158,8 +158,8 @@ public class PostService : IAuthzPostService, IPostService
         if (post is null) throw CoreException.MissingData<Post>($"Can't find post {id} to publish", id);
         if (post.PublishedDate is not null)
             throw CoreException.Duplicate($"Tried to publish post {id} that is already published", id);
-        post.PublishedDate = DateTimeOffset.Now;
-        post.CreatedDate = DateTimeOffset.Now;
+        post.PublishedDate = DateTimeOffset.UtcNow;
+        post.CreatedDate = DateTimeOffset.UtcNow;
 
         _posts.Update(post);
         await _posts.Commit();
@@ -178,7 +178,7 @@ public class PostService : IAuthzPostService, IPostService
 
         if (post.PublishedDate is not null)
         {
-            post.UpdatedDate = DateTimeOffset.Now;
+            post.UpdatedDate = DateTimeOffset.UtcNow;
             _postEvents.Published(post);
         }
 
@@ -205,7 +205,7 @@ public class PostService : IAuthzPostService, IPostService
 
         if (post.PublishedDate is not null)
         {
-            post.UpdatedDate = DateTimeOffset.Now;
+            post.UpdatedDate = DateTimeOffset.UtcNow;
             _postEvents.Published(post);
         }
 
@@ -227,7 +227,7 @@ public class PostService : IAuthzPostService, IPostService
 
         if (post.PublishedDate is not null)
         {
-            post.UpdatedDate = DateTimeOffset.Now;
+            post.UpdatedDate = DateTimeOffset.UtcNow;
             _postEvents.Published(post);
         }
 
@@ -338,7 +338,7 @@ public class PostService : IAuthzPostService, IPostService
         if (await _posts.LookupPost(postId) is { } post)
         {
             if (post.HasLocalAuthority(_options)) return post;
-            if (post.LastSeenDate >= DateTimeOffset.Now - TimeSpan.FromMinutes(10)) return post;
+            if (post.LastSeenDate >= DateTimeOffset.UtcNow - TimeSpan.FromMinutes(10)) return post;
             knownPost = true;
         }
 
