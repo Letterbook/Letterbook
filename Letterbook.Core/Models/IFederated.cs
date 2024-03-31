@@ -1,4 +1,4 @@
-﻿using Medo;
+using Medo;
 
 namespace Letterbook.Core.Models;
 
@@ -7,14 +7,14 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public interface IFederated
 {
-    public Uri FediId { get; set; }
-    public string Authority { get; }
+	public Uri FediId { get; set; }
+	public string Authority { get; }
 
-    public Uuid7 GetId();
-    public string GetId25();
+	public Uuid7 GetId();
+	public string GetId25();
 
-    public bool StrictEqual(IFederated other)
-    {
-	    return GetType() == other.GetType() && GetId() == other.GetId() && FediId == other.FediId;
-    }
+	public bool StrictEqual(IFederated other)
+	{
+		return GetType() == other.GetType() && GetId() == other.GetId() && FediId == other.FediId;
+	}
 }

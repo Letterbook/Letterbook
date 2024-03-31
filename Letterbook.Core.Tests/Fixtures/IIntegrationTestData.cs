@@ -1,4 +1,4 @@
-﻿using Letterbook.Core.Models;
+using Letterbook.Core.Models;
 
 namespace Letterbook.Core.Tests.Fixtures;
 

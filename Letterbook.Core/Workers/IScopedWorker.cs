@@ -1,6 +1,6 @@
-﻿namespace Letterbook.Core.Workers;
+namespace Letterbook.Core.Workers;
 
 public interface IScopedWorker
 {
-    Task DoWork(CancellationToken cancellationToken);
+	Task DoWork(CancellationToken cancellationToken);
 }

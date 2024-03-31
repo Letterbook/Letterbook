@@ -1,4 +1,4 @@
-﻿using System.Xml;
+using System.Xml;
 using Letterbook.Api.Controllers;
 using Letterbook.Api.Dto;
 using Letterbook.Api.Mappers;

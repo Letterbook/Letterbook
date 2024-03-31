@@ -1,4 +1,4 @@
-﻿using Letterbook.Core.Extensions;
+using Letterbook.Core.Extensions;
 using Medo;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;

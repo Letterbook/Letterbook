@@ -1,4 +1,4 @@
-﻿using Letterbook.Adapter.Db;
+using Letterbook.Adapter.Db;
 using Letterbook.Core;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;

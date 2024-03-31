@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Letterbook.Adapter.Db.EntityConfigs;
 using Letterbook.Core.Models;
 using Medo;
@@ -21,24 +21,24 @@ namespace Letterbook.Adapter.Db;
 /// </summary>
 public class RelationalContext : DbContext
 {
-    public DbSet<Note> Notes { get; set; }
-    public DbSet<Profile> Profiles { get; set; }
-    public DbSet<Account> Accounts { get; set; }
-    public DbSet<Post> Posts { get; set; }
-    public DbSet<ThreadContext> Threads { get; set; }
+	public DbSet<Note> Notes { get; set; }
+	public DbSet<Profile> Profiles { get; set; }
+	public DbSet<Account> Accounts { get; set; }
+	public DbSet<Post> Posts { get; set; }
+	public DbSet<ThreadContext> Threads { get; set; }
 
-    public RelationalContext(DbContextOptions<RelationalContext> context) : base(context)
-    {
-    }
+	public RelationalContext(DbContextOptions<RelationalContext> context) : base(context)
+	{
+	}
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-    }
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
+		base.OnModelCreating(modelBuilder);
+		modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+	}
 
-    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-    {
-        configurationBuilder.Properties<Uri>().HaveConversion<UriIdConverter, UriIdComparer>();
-    }
+	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+	{
+		configurationBuilder.Properties<Uri>().HaveConversion<UriIdConverter, UriIdComparer>();
+	}
 }

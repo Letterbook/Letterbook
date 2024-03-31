@@ -1,4 +1,4 @@
-﻿using ActivityPub.Types.AS;
+using ActivityPub.Types.AS;
 using Letterbook.Core.Models;
 
 namespace Letterbook.Core.Adapters;
@@ -10,8 +10,8 @@ namespace Letterbook.Core.Adapters;
 /// </summary>
 public interface IActivityMessageService
 {
-    public const string DestinationKey = "destination";
-    public const string ProfileKey = "profile";
-    public const string ActivityTypesKey = "activity";
-    public void Deliver(Uri inbox, ASType activity, Profile? onBehalfOf);
+	public const string DestinationKey = "destination";
+	public const string ProfileKey = "profile";
+	public const string ActivityTypesKey = "activity";
+	public void Deliver(Uri inbox, ASType activity, Profile? onBehalfOf);
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace Letterbook.Core.Workers;
@@ -11,23 +11,23 @@ namespace Letterbook.Core.Workers;
 /// <typeparam name="T">A class encapsulating the worker</typeparam>
 public class WorkerScope<T> : IHostedService where T : class, IScopedWorker
 {
-    private readonly IServiceProvider _serviceProvider;
+	private readonly IServiceProvider _serviceProvider;
 
-    public WorkerScope(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
+	public WorkerScope(IServiceProvider serviceProvider)
+	{
+		_serviceProvider = serviceProvider;
+	}
 
-    public async Task StartAsync(CancellationToken cancellationToken)
-    {
-        using var scope = _serviceProvider.CreateScope();
-        var worker = scope.ServiceProvider.GetRequiredService<T>();
+	public async Task StartAsync(CancellationToken cancellationToken)
+	{
+		using var scope = _serviceProvider.CreateScope();
+		var worker = scope.ServiceProvider.GetRequiredService<T>();
 
-        await worker.DoWork(cancellationToken);
-    }
+		await worker.DoWork(cancellationToken);
+	}
 
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
+	public Task StopAsync(CancellationToken cancellationToken)
+	{
+		return Task.CompletedTask;
+	}
 }

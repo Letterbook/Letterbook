@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Letterbook.Api.Dto;
 using Letterbook.Api.Mappers;
 using Letterbook.Core.Tests;

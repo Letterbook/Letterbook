@@ -1,4 +1,4 @@
-﻿namespace Letterbook.Core.Models;
+namespace Letterbook.Core.Models;
 
 /// <summary>
 /// IContentRef extends the minimal set of identifiers to also include authorship information, which is common across
@@ -6,7 +6,7 @@
 /// </summary>
 public interface IContentRef : IFederated
 {
-    public ICollection<Profile> Creators { get; set; }
-    public DateTime CreatedDate { get; set; }
-    public ActivityObjectType Type { get; }
+	public ICollection<Profile> Creators { get; set; }
+	public DateTime CreatedDate { get; set; }
+	public ActivityObjectType Type { get; }
 }

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Medo;
 
 namespace Letterbook.Api.Mappers;

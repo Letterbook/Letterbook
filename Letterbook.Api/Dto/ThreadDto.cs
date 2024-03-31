@@ -1,4 +1,4 @@
-﻿using Medo;
+using Medo;
 
 namespace Letterbook.Api.Dto;
 

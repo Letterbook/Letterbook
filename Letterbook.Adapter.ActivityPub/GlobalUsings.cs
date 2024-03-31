@@ -1,1 +1,1 @@
-﻿global using Models = Letterbook.Core.Models;
+global using Models = Letterbook.Core.Models;
