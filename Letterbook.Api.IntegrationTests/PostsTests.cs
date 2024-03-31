@@ -211,6 +211,23 @@ public class PostsTests : IClassFixture<HostFixture>
 			Assert.Equal(post.Thread.Posts.DistinctBy(p => p.Id).Count(), actual.Thread?.Posts.Count());
 	}
 
+	[Fact(DisplayName = "Should lookup a thread of posts by Id")]
+	public async Task CanGetThread()
+	{
+		var profile = _profiles[0];
+		var post = _posts[profile][2];
+
+		var response = await _client
+			.GetAsync($"/lb/v1/posts/{profile.GetId25()}/thread/{post.Thread.GetId25()}");
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert
+			.IsAssignableFrom<IEnumerable<PostDto>>(await response.Content.ReadFromJsonAsync<IEnumerable<PostDto>>(_json));
+
+		Assert.Equal(post.Thread.Posts.DistinctBy(p => p.Id).Count(), actual.Count());
+	}
+
 }
 
 public class ContentTextComparer : IEqualityComparer<ContentDto>
