@@ -66,7 +66,7 @@ public class MapperTests : WithMocks
 		var uuid = Uuid7.NewUuid7();
 		var expected = new MiniProfileDto
 		{
-			Id = uuid.ToId25String(),
+			Id = uuid,
 			FediId = FediId(uuid),
 			DisplayName = "Test",
 			Handle = "TestHandle"

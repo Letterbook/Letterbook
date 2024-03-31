@@ -16,7 +16,7 @@ public class FakePostDto : Faker<PostDto>
 	{
 		RuleFor(d => d.Creators, () => new List<MiniProfileDto>() { new()
 			{
-				Id = profile.GetId25(),
+				Id = profile.GetId(),
 				DisplayName = profile.DisplayName,
 				FediId = profile.FediId,
 				Handle = profile.Handle

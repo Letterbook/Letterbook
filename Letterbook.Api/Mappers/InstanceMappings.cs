@@ -43,7 +43,9 @@ public class InstanceMappings : AutoMapper.Profile
 		CreateMap<Mention, MentionDto>(MemberList.Destination)
 			.ForMember(dest => dest.Mentioned, opt => opt.MapFrom(src => src.GetId25()));
 
-		CreateMap<Note, ContentDto>(MemberList.Destination);
+		CreateMap<Note, ContentDto>(MemberList.Destination)
+			.IncludeBase<Content, ContentDto>()
+			.ForMember(dto => dto.Text, opt => opt.MapFrom(src => src.Text));
 		CreateMap<Content, ContentDto>(MemberList.Destination)
 			.ForMember(dest => dest.Text, opt => opt.Ignore());
 		CreateMap<ContentDto, Note>(MemberList.Source)
