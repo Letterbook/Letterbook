@@ -1,4 +1,4 @@
-﻿using Bogus;
+using Bogus;
 using Letterbook.Api.Dto;
 using Letterbook.Core;
 

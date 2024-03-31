@@ -1,4 +1,4 @@
-﻿using Letterbook.Core.Extensions;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 

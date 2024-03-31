@@ -1,4 +1,4 @@
-﻿using Letterbook.Api.Swagger;
+using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Extensions;
 using Medo;
@@ -12,34 +12,34 @@ namespace Letterbook.Api.Controllers.Debugging;
 [ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 public class DebugController : ControllerBase
 {
-    private readonly IProfileService _profileService;
+	private readonly IProfileService _profileService;
 
-    public DebugController(IProfileService profileService)
-    {
-        _profileService = profileService;
-    }
-    
-    [HttpPost]
-    [Route("{selfId}/follow/")]
-    public async Task<IActionResult> DoFollow(string selfId, [FromBody]FollowRequest target)
-    {
-        Guid localId;
-        try
-        {
-            localId = Uuid7.FromId25String(selfId);
-        }
-        catch (Exception)
-        {
-            return BadRequest();
-        }
+	public DebugController(IProfileService profileService)
+	{
+		_profileService = profileService;
+	}
 
-        var result = await _profileService.Follow(localId, new Uri(target.TargetId));
+	[HttpPost]
+	[Route("{selfId}/follow/")]
+	public async Task<IActionResult> DoFollow(string selfId, [FromBody] FollowRequest target)
+	{
+		Guid localId;
+		try
+		{
+			localId = Uuid7.FromId25String(selfId);
+		}
+		catch (Exception)
+		{
+			return BadRequest();
+		}
 
-        return Ok(result);
-    }
+		var result = await _profileService.Follow(localId, new Uri(target.TargetId));
+
+		return Ok(result);
+	}
 }
 
 public class FollowRequest
 {
-    public required string TargetId { get; set; }
+	public required string TargetId { get; set; }
 }

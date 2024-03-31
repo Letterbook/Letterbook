@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace Letterbook.Adapter.TimescaleFeeds;
@@ -8,10 +8,10 @@ namespace Letterbook.Adapter.TimescaleFeeds;
 /// </summary>
 public class FeedsContextFactory : IDesignTimeDbContextFactory<FeedsContext>
 {
-    public FeedsContext CreateDbContext(string[] args)
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<FeedsContext>();
+	public FeedsContext CreateDbContext(string[] args)
+	{
+		var optionsBuilder = new DbContextOptionsBuilder<FeedsContext>();
 
-        return new FeedsContext(optionsBuilder.Options);
-    }
+		return new FeedsContext(optionsBuilder.Options);
+	}
 }

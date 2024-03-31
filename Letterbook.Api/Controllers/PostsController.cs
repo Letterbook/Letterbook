@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using AutoMapper;
 using Letterbook.Api.Dto;
 using Letterbook.Api.Mappers;
@@ -18,188 +18,188 @@ namespace Letterbook.Api.Controllers;
 [Route("lb/v1/[controller]")]
 public class PostsController : ControllerBase
 {
-    private readonly ILogger<PostsController> _logger;
-    private readonly CoreOptions _options;
-    private readonly IPostService _post;
-    private readonly IProfileService _profile;
-    private readonly IAuthorizationService _authz;
-    private readonly IMapper _mapper;
+	private readonly ILogger<PostsController> _logger;
+	private readonly CoreOptions _options;
+	private readonly IPostService _post;
+	private readonly IProfileService _profile;
+	private readonly IAuthorizationService _authz;
+	private readonly IMapper _mapper;
 
-    public PostsController(ILogger<PostsController> logger,
-	    IOptions<CoreOptions> options,
-	    IPostService postSvc,
-	    IProfileService profile,
-	    IAuthorizationService authz,
-	    MappingConfigProvider mappingConfig)
-    {
-	    _logger = logger;
-	    _options = options.Value;
-	    _post = postSvc;
-	    _profile = profile;
-	    _authz = authz;
-	    _mapper = new Mapper(mappingConfig.Posts);
-    }
+	public PostsController(ILogger<PostsController> logger,
+		IOptions<CoreOptions> options,
+		IPostService postSvc,
+		IProfileService profile,
+		IAuthorizationService authz,
+		MappingConfigProvider mappingConfig)
+	{
+		_logger = logger;
+		_options = options.Value;
+		_post = postSvc;
+		_profile = profile;
+		_authz = authz;
+		_mapper = new Mapper(mappingConfig.Posts);
+	}
 
-    // [Authorize(JwtBearerDefaults.AuthenticationScheme)]
-    [HttpPost("{profileId}/post")]
-    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
-    [SwaggerOperation("Post", "Draft a new post, and optionally publish it")]
-    public async Task<IActionResult> Post(Uuid7 profileId, [FromBody]PostDto dto, [FromQuery]bool draft = false)
-    {
-	    if (!ModelState.IsValid)
-		    return BadRequest(ModelState);
-	    dto.Id = Uuid7.NewUuid7();
-        if (_mapper.Map<Post>(dto) is not { } post)
-            return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
-        foreach (var content in post.Contents)
-        {
-	        content.Id = Uuid7.NewGuid();
-	        content.SetLocalFediId(_options);
-        }
+	// [Authorize(JwtBearerDefaults.AuthenticationScheme)]
+	[HttpPost("{profileId}/post")]
+	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Post", "Draft a new post, and optionally publish it")]
+	public async Task<IActionResult> Post(Uuid7 profileId, [FromBody] PostDto dto, [FromQuery] bool draft = false)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+		dto.Id = Uuid7.NewUuid7();
+		if (_mapper.Map<Post>(dto) is not { } post)
+			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
+		foreach (var content in post.Contents)
+		{
+			content.Id = Uuid7.NewGuid();
+			content.SetLocalFediId(_options);
+		}
 
-        var decision = _authz.Create(User.Claims, post, profileId);
-        if (!decision.Allowed)
-            return Unauthorized(decision);
-        var pubDecision = _authz.Publish(User.Claims, post, profileId);
-        if (!draft && !pubDecision.Allowed)
-	        return Unauthorized(pubDecision);
+		var decision = _authz.Create(User.Claims, post, profileId);
+		if (!decision.Allowed)
+			return Unauthorized(decision);
+		var pubDecision = _authz.Publish(User.Claims, post, profileId);
+		if (!draft && !pubDecision.Allowed)
+			return Unauthorized(pubDecision);
 
-        var result = await _post.As(User.Claims, profileId).Draft(post, post.InReplyTo?.GetId(), !draft);
-        return Ok(_mapper.Map<PostDto>(result));
-    }
+		var result = await _post.As(User.Claims, profileId).Draft(post, post.InReplyTo?.GetId(), !draft);
+		return Ok(_mapper.Map<PostDto>(result));
+	}
 
-    [HttpPost("{profileId}/post/{postId}")]
-    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
-    [SwaggerOperation("Publish", "Publish an existing draft post")]
-    public async Task<IActionResult> Publish(Uuid7 profileId, Uuid7 postId)
-    {
-	    if (!ModelState.IsValid)
-		    return BadRequest(ModelState);
+	[HttpPost("{profileId}/post/{postId}")]
+	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Publish", "Publish an existing draft post")]
+	public async Task<IActionResult> Publish(Uuid7 profileId, Uuid7 postId)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
 
 		var result = await _post.As(User.Claims, profileId).Publish(postId);
 		return Ok(_mapper.Map<PostDto>(result));
-    }
+	}
 
-    [HttpPut("{profileId}/post/{postId}")]
-    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
-    [SwaggerOperation("Update", "Update an entire post, including all contents")]
-    public async Task<IActionResult> Update(Uuid7 profileId, Uuid7 postId, [FromBody]PostDto dto)
-    {
-	    if (!ModelState.IsValid)
-		    return BadRequest(ModelState);
-	    if (_mapper.Map<Post>(dto) is not { } post)
-		    return BadRequest();
+	[HttpPut("{profileId}/post/{postId}")]
+	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Update", "Update an entire post, including all contents")]
+	public async Task<IActionResult> Update(Uuid7 profileId, Uuid7 postId, [FromBody] PostDto dto)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+		if (_mapper.Map<Post>(dto) is not { } post)
+			return BadRequest();
 
-	    var decision = _authz.Publish(User.Claims, post, profileId);
-	    if (!decision.Allowed)
-		    return Unauthorized(decision);
+		var decision = _authz.Publish(User.Claims, post, profileId);
+		if (!decision.Allowed)
+			return Unauthorized(decision);
 
 		var result = await _post.As(User.Claims, profileId).Update(postId, post);
 		return Ok(_mapper.Map<PostDto>(result));
-    }
+	}
 
-    [HttpPost("{profileId}/post/{postId}/content")]
-    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
-    [SwaggerOperation("Attach", "Attach additional content to a post")]
-    public async Task<IActionResult> Attach(Uuid7 profileId, Uuid7 postId, [FromBody]ContentDto dto)
-    {
-	    if (!ModelState.IsValid)
-		    return BadRequest(ModelState);
-	    dto.Id = Uuid7.NewUuid7();
-	    if (_mapper.Map<Content>(dto) is not { } content)
-		    return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
+	[HttpPost("{profileId}/post/{postId}/content")]
+	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Attach", "Attach additional content to a post")]
+	public async Task<IActionResult> Attach(Uuid7 profileId, Uuid7 postId, [FromBody] ContentDto dto)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+		dto.Id = Uuid7.NewUuid7();
+		if (_mapper.Map<Content>(dto) is not { } content)
+			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
 
 		var result = await _post.As(User.Claims, profileId).AddContent(postId, content);
 		return Ok(_mapper.Map<PostDto>(result));
-    }
+	}
 
-    [HttpPut("{profileId}/post/{postId}/content/{contentId}")]
-    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
-    [SwaggerOperation("Edit", "Edit the content of a post")]
-    public async Task<IActionResult> Edit(Uuid7 profileId, Uuid7 postId, Uuid7 contentId, [FromBody]ContentDto dto)
-    {
-	    if (!ModelState.IsValid)
-		    return BadRequest(ModelState);
-	    if (_mapper.Map<Content>(dto) is not { } content)
-		    return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
+	[HttpPut("{profileId}/post/{postId}/content/{contentId}")]
+	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Edit", "Edit the content of a post")]
+	public async Task<IActionResult> Edit(Uuid7 profileId, Uuid7 postId, Uuid7 contentId, [FromBody] ContentDto dto)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+		if (_mapper.Map<Content>(dto) is not { } content)
+			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
 
 		var result = await _post.As(User.Claims, profileId).UpdateContent(postId, contentId, content);
 		return Ok(_mapper.Map<PostDto>(result));
-    }
+	}
 
-    [HttpDelete("{profileId}/post/{postId}/content/{contentId}")]
-    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
-    [SwaggerOperation("Remove", "Remove content from a post")]
-    public async Task<IActionResult> Remove(Uuid7 profileId, Uuid7 postId, Uuid7 contentId)
-    {
-	    if (!ModelState.IsValid)
-		    return BadRequest(ModelState);
+	[HttpDelete("{profileId}/post/{postId}/content/{contentId}")]
+	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Remove", "Remove content from a post")]
+	public async Task<IActionResult> Remove(Uuid7 profileId, Uuid7 postId, Uuid7 contentId)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
 
-	    var result = await _post.As(User.Claims, profileId).RemoveContent(postId, contentId);
-	    return Ok(_mapper.Map<PostDto>(result));
-    }
+		var result = await _post.As(User.Claims, profileId).RemoveContent(postId, contentId);
+		return Ok(_mapper.Map<PostDto>(result));
+	}
 
-    [HttpDelete("{profileId}/post/{postId}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [SwaggerOperation("Delete", "Delete a post")]
-    public async Task<IActionResult> Delete(Uuid7 profileId, Uuid7 postId)
-    {
-	    if (!ModelState.IsValid)
-		    return BadRequest(ModelState);
+	[HttpDelete("{profileId}/post/{postId}")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[SwaggerOperation("Delete", "Delete a post")]
+	public async Task<IActionResult> Delete(Uuid7 profileId, Uuid7 postId)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
 
-	    await _post.As(User.Claims, profileId).Delete(postId);
-	    return Ok();
-    }
+		await _post.As(User.Claims, profileId).Delete(postId);
+		return Ok();
+	}
 
-    [HttpGet("{profileId}/post/{postId}")]
-    [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
-    [SwaggerOperation("Get", "Get a post")]
-    public async Task<IActionResult> Get(Uuid7 profileId, Uuid7 postId, [FromQuery]bool withThread = false)
-    {
-	    if (!ModelState.IsValid)
-		    return BadRequest(ModelState);
+	[HttpGet("{profileId}/post/{postId}")]
+	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Get", "Get a post")]
+	public async Task<IActionResult> Get(Uuid7 profileId, Uuid7 postId, [FromQuery] bool withThread = false)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
 
-	    var result = await _post.As(User.Claims, profileId).LookupPost(postId, withThread);
-	    return Ok(_mapper.Map<PostDto>(result));
-    }
+		var result = await _post.As(User.Claims, profileId).LookupPost(postId, withThread);
+		return Ok(_mapper.Map<PostDto>(result));
+	}
 
-    [HttpGet("{profileId}/post/drafts")]
-    [ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
-    [SwaggerOperation("Drafts", "Get unpublished drafts")]
+	[HttpGet("{profileId}/post/drafts")]
+	[ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Drafts", "Get unpublished drafts")]
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public async Task<IActionResult> GetDrafts(Uuid7 profileId)
+	public async Task<IActionResult> GetDrafts(Uuid7 profileId)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-    {
-	    if (!ModelState.IsValid)
-		    return BadRequest(ModelState);
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
 
-	    throw new NotImplementedException();
-    }
+		throw new NotImplementedException();
+	}
 
-    [HttpGet("{profileId}/post/{postId}/replies")]
-    [ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
-    [SwaggerOperation("Replies", "Get replies to a post")]
+	[HttpGet("{profileId}/post/{postId}/replies")]
+	[ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Replies", "Get replies to a post")]
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public async Task<IActionResult> GetReplies(Uuid7 profileId, Uuid7 postId)
+	public async Task<IActionResult> GetReplies(Uuid7 profileId, Uuid7 postId)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-    {
-	    if (!ModelState.IsValid)
-		    return BadRequest(ModelState);
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
 
-	    throw new NotImplementedException();
-    }
+		throw new NotImplementedException();
+	}
 
-    [HttpGet("{profileId}/thread/{threadId}")]
-    [ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
-    [SwaggerOperation("Thread", "Get a thread by id")]
-    public async Task<IActionResult> GetThread(Uuid7 profileId, Uuid7 threadId)
-    {
-	    if (!ModelState.IsValid)
-		    return BadRequest(ModelState);
+	[HttpGet("{profileId}/thread/{threadId}")]
+	[ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Thread", "Get a thread by id")]
+	public async Task<IActionResult> GetThread(Uuid7 profileId, Uuid7 threadId)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
 
-	    var result = await _post.As(User.Claims, profileId).LookupThread(threadId);
-	    if (result is not null && result.Posts.Count != 0)
+		var result = await _post.As(User.Claims, profileId).LookupThread(threadId);
+		if (result is not null && result.Posts.Count != 0)
 			return Ok(_mapper.Map<IEnumerable<PostDto>>(result.Posts));
-	    return NotFound();
-    }
+		return NotFound();
+	}
 }

@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Security.Principal;
 using Letterbook.Core.Tests;
 using Microsoft.AspNetCore.Http;

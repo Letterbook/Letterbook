@@ -1,3 +1,3 @@
-﻿// Global using directives
+// Global using directives
 
 global using Models = Letterbook.Core.Models;
