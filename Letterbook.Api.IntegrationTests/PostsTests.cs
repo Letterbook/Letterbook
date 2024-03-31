@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using AutoMapper;
 using Letterbook.Api.Dto;
 using Letterbook.Api.IntegrationTests.Fixtures;
@@ -44,7 +45,8 @@ public class PostsTests : IClassFixture<HostFixture>
 		_mapper = new Mapper(postMappings);
 		_json = new JsonSerializerOptions(JsonSerializerDefaults.Web)
 		{
-			Converters = { new Uuid7JsonConverter() }
+			Converters = { new Uuid7JsonConverter() },
+			ReferenceHandler = ReferenceHandler.IgnoreCycles
 		};
 	}
 
@@ -158,6 +160,57 @@ public class PostsTests : IClassFixture<HostFixture>
 		Assert.Equal(dto.Text, actual.Contents.First().Preview);
 		Assert.Equal(dto.Summary, actual.Contents.First().Summary);
 	}
+
+	[Fact(DisplayName = "Should remove content in an existing post")]
+	public async Task CanRemoveContent()
+	{
+		var profile = _profiles[1];
+		var post = _posts[profile][1];
+		var content = post.Contents.First();
+
+		var response = await _client
+			.DeleteAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}/content/{content.GetId25()}");
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert.IsType<PostDto>(await response.Content.ReadFromJsonAsync<PostDto>(_json));
+
+		Assert.Empty(actual.Contents);
+	}
+
+	[Fact(DisplayName = "Should delete an existing post")]
+	public async Task CanDeletePost()
+	{
+		var profile = _profiles[1];
+		var post = _posts[profile][2];
+
+		var response = await _client
+			.DeleteAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}");
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+	}
+
+	[Theory(DisplayName = "Should lookup a post by Id")]
+	[InlineData([true])]
+	[InlineData([false])]
+	public async Task CanGetPost(bool withThread)
+	{
+		var profile = _profiles[0];
+		var post = _posts[profile][2];
+
+		var response = await _client
+			.GetAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}?withThread={withThread}");
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert.IsType<PostDto>(await response.Content.ReadFromJsonAsync<PostDto>(_json));
+
+		Assert.Equal(post.GetId(), actual.Id);
+		if (withThread)
+			Assert.Equal(post.Thread.Posts.DistinctBy(p => p.Id).Count(), actual.Thread?.Posts.Count());
+	}
+
 }
 
 public class ContentTextComparer : IEqualityComparer<ContentDto>

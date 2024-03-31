@@ -79,6 +79,12 @@ public class InstanceMappings : AutoMapper.Profile
 			.ForSourceMember(src => src.InReplyTo, opt => opt.DoNotValidate())
 			.ForSourceMember(src => src.Thread, opt => opt.DoNotValidate());
 
+		CreateMap<Post, MiniPostDto>()
+			.IncludeBase<Post, PostDto>()
+			.ForMember(dto => dto.Thread, opt => opt.Ignore())
+			.ForMember(dto => dto.RepliesCollection, opt => opt.Ignore())
+			.ForMember(dto => dto.InReplyTo, opt => opt.Ignore());
+
 		CreateMap<Models.Profile, MiniProfileDto>(MemberList.Destination);
 		CreateMap<MiniProfileDto, Models.Profile>(MemberList.Source);
 

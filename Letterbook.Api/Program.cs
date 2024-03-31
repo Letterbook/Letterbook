@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json.Serialization;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using Letterbook.Adapter.ActivityPub;
@@ -60,6 +61,7 @@ public class Program
             .AddJsonOptions(options =>
             {
 	            options.JsonSerializerOptions.Converters.Add(new Json.Uuid7JsonConverter());
+	            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             })
             .Services.Configure<ApiBehaviorOptions>(options =>
             {
