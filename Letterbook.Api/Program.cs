@@ -1,10 +1,13 @@
 using System.Net;
+using System.Text.Json.Serialization;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
+using Letterbook.Api.Dto;
+using Letterbook.Api.Mappers;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
@@ -17,7 +20,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using OpenTelemetry.Metrics;
 using Serilog;
 using Serilog.Events;
@@ -51,9 +53,15 @@ public class Program
         builder.Services
             .AddControllers(options =>
             {
+	            options.ModelBinderProviders.Insert(0, new Uuid7BinderProvider());
                 options.Conventions.Add(new RouteTokenTransformerConvention(new SnakeCaseRouteTransformer()));
                 options.OutputFormatters.Insert(0, new JsonLdOutputFormatter());
                 options.InputFormatters.Insert(0, new JsonLdInputFormatter());
+            })
+            .AddJsonOptions(options =>
+            {
+	            options.JsonSerializerOptions.Converters.Add(new Json.Uuid7JsonConverter());
+	            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             })
             .Services.Configure<ApiBehaviorOptions>(options =>
             {
@@ -93,16 +101,6 @@ public class Program
                 metrics.AddPrometheusExporter();
             });
 
-        // Configure Http Signatures
-        // Note: Starting to move DI config out into adapter as much as possible.
-        // I want to reduce how tightly coupled the process hosting component is from the project that handles API
-        // routes and controllers. Partly because it feels cleaner.
-        // Mostly because high-availability and/or horizontally scaled deployments
-        // will have more than one process, likely on more than one host.
-        //
-        // Workers (ex: SeedAdminWorker and future queue or maintenance workers) should be able to scale independently
-        // of the API, and shouldn't need a whole AspNetCore service just to host them.
-        // This helps with that.
         builder.Services.AddActivityPubClient(coreOptions.DomainName);
 
         // Register options
@@ -110,14 +108,21 @@ public class Program
         builder.Services.Configure<ApiOptions>(builder.Configuration.GetSection(ApiOptions.ConfigKey));
         builder.Services.Configure<DbOptions>(builder.Configuration.GetSection(DbOptions.ConfigKey));
 
+        // Register Mapping Configs
+        builder.Services.AddSingleton<MappingConfigProvider>();
+        builder.Services.AddSingleton<InstanceMappings>();
+
         // Register Services
         builder.Services.AddScoped<IActivityEventService, ActivityEventService>();
         builder.Services.AddScoped<IProfileEventService, ProfileEventService>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IProfileService, ProfileService>();
+        builder.Services.AddScoped<IPostService, PostService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
         builder.Services.AddScoped<IActivityMessageService, ActivityMessageService>();
+        builder.Services.AddScoped<IAuthzPostService, PostService>();
+        builder.Services.AddScoped<IPostEventService, PostEventService>();
         builder.Services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
         // Register Workers
@@ -132,50 +137,19 @@ public class Program
         builder.Services.AddScoped<IPostAdapter, PostAdapter>();
         builder.Services.AddRxMessageBus();
         builder.Services.AddSingleton<IActivityPubDocument, Document>();
-        builder.Services.AddDbContext<RelationalContext>();
         builder.Services.AddDbAdapter(builder.Configuration.GetSection(DbOptions.ConfigKey));
         builder.Services.AddDbContext<FeedsContext>();
         builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
             .AddEntityFrameworkStores<RelationalContext>();
         builder.Services.TryAddTypesModule();
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(options =>
-        {
-            options.AddSecurityDefinition(name: "Bearer", securityScheme: new OpenApiSecurityScheme
-            {
-                Name = "Authorization",
-                Description = "Enter the Authorization header, including the Bearer scheme, like so: `Bearer <JWT>`",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement()
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        },
-                        Scheme = "oauth2",
-                        Name = "Bearer",
-                        In = ParameterLocation.Header,
-                    },
-                    new List<string>()
-                }
-            });
-            options.OperationFilter<RequiredHeaders>();
-        });
+        builder.Services.ConfigureSwagger();
 
         builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
         var app = builder.Build();
         // Configure the HTTP request pipeline.
 
-        // Configure development niceties
+        // Add development niceties
         if (!app.Environment.IsProduction())
         {
             app.Use((context, next) =>
@@ -183,9 +157,7 @@ public class Program
                 context.Request.EnableBuffering();
                 return next();
             });
-            app.UseSwagger();
-            app.UseSwaggerUI();
-            // app.Services.GetService<JwtBearerHandler>()
+            app.UseSwaggerConfig();
         }
 
         app.UseHttpsRedirection();

@@ -1,6 +1,9 @@
-﻿using ActivityPub.Types;
+﻿using System.Security.Claims;
+using ActivityPub.Types;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Authorization;
 using Letterbook.Core.Models;
+using Medo;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -21,6 +24,9 @@ public abstract class WithMocks
     protected Mock<HttpMessageHandler> HttpMessageHandlerMock;
     protected ServiceCollection MockedServiceCollection;
     protected Mock<IPostEventService> PostEventServiceMock;
+    protected Mock<IPostService> PostServiceMock;
+    protected Mock<IAuthzPostService> PostServiceAuthMock;
+    protected Mock<IAuthorizationService> AuthorizationServiceMock;
 
     protected WithMocks()
     {
@@ -34,8 +40,12 @@ public abstract class WithMocks
         ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
         ProfileServiceMock = new Mock<IProfileService>();
         PostEventServiceMock = new Mock<IPostEventService>();
-        
+        PostServiceMock = new Mock<IPostService>();
+        PostServiceAuthMock = new Mock<IAuthzPostService>();
+        AuthorizationServiceMock = new Mock<IAuthorizationService>();
+
         ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
+        PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>(), It.IsAny<Uuid7>())).Returns(PostServiceAuthMock.Object);
         var mockOptions = new CoreOptions
         {
             DomainName = "letterbook.example",
@@ -53,4 +63,25 @@ public abstract class WithMocks
         MockedServiceCollection.AddScoped<IProfileService>(_ => ProfileServiceMock.Object);
         MockedServiceCollection.TryAddTypesModule();
     }
+
+    public void MockAuthorizeAllowAll()
+    {
+	    // TODO: reflect over the Decision methods instead of individual setups
+	    AuthorizationServiceMock.Setup(s => s.View(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    AuthorizationServiceMock.Setup(s => s.Create(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    AuthorizationServiceMock.Setup(s => s.Delete(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    AuthorizationServiceMock.Setup(s => s.Publish(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    AuthorizationServiceMock.Setup(s => s.Update(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    AuthorizationServiceMock.Setup(s => s.Report(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		    .Returns(Allow);
+	    return;
+
+	    Decision Allow(IEnumerable<Claim> claims, IFederated _, Uuid7 __) => Decision.Allow("Mock", claims);
+    }
+
 }

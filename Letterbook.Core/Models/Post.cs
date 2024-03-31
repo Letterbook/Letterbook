@@ -4,7 +4,7 @@ using Medo;
 
 namespace Letterbook.Core.Models;
 
-public class Post : IFederated
+public class Post : IFederated, IEquatable<Post>
 {
     private Uuid7 _id;
 
@@ -38,16 +38,10 @@ public class Post : IFederated
     /// <param name="opts"></param>
     /// <param name="parent">Post </param>
     [SetsRequiredMembers]
-    protected Post(CoreOptions opts, Post parent)
+    public Post(CoreOptions opts, Post parent) : this(opts)
     {
-        ContentRootIdUri = default!;
-        _id = Uuid7.NewUuid7();
-
-        FediId = new Uri(opts.BaseUri(), $"post/{_id.ToId25String()}");
-        Authority = FediId.GetAuthority();
-        Hostname = FediId.Host;
         InReplyTo = parent;
-        
+
         Thread = parent.Thread;
         Thread.Posts.Add(this);
         parent.RepliesCollection.Add(this);
@@ -66,7 +60,7 @@ public class Post : IFederated
 
         builder.Path += $"post/{_id.ToId25String()}";
         FediId = builder.Uri;
-        
+
         builder.Path += "/replies";
         Thread = new ThreadContext
         {
@@ -112,11 +106,12 @@ public class Post : IFederated
 
     public Uuid7 GetId() => _id;
     public string GetId25() => _id.ToId25String();
-    
+
     public T AddContent<T>(T content) where T : Content
     {
         if (Contents.Count == 0) SetRootContent(content);
         Contents.Add(content);
+        content.Post = this;
         return content;
     }
 
@@ -129,5 +124,30 @@ public class Post : IFederated
     public override int GetHashCode()
     {
         return FediId.GetHashCode();
+    }
+
+    public bool Equals(Post? other)
+    {
+	    if (ReferenceEquals(null, other)) return false;
+	    if (ReferenceEquals(this, other)) return true;
+	    return _id.Equals(other._id);
+    }
+
+    public override bool Equals(object? obj)
+    {
+	    if (ReferenceEquals(null, obj)) return false;
+	    if (ReferenceEquals(this, obj)) return true;
+	    if (obj.GetType() != this.GetType()) return false;
+	    return Equals((Post)obj);
+    }
+
+    public static bool operator ==(Post? left, Post? right)
+    {
+	    return Equals(left, right);
+    }
+
+    public static bool operator !=(Post? left, Post? right)
+    {
+	    return !Equals(left, right);
     }
 }

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace Letterbook.Core.Workers;
 
 /// <summary>
-/// A hosted service that will 
+/// A hosted service for message observers that will manage the observer's subscription on a specific channel
 /// </summary>
 /// <typeparam name="TObserver">A class encapsulating the observer, which must manage a scope for each observation emitted by
 /// the Observable</typeparam>
@@ -34,9 +34,9 @@ public class MessageWorkerHost<TObserver, TChannel> : BackgroundService where TO
     {
         var observer = _provider.GetRequiredService<TObserver>();
         observer.SetCancellationToken(stoppingToken);
-        
+
         _subscription = _observable.Subscribe(observer);
-        
+
         stoppingToken.Register(() =>
         {
             _subscription.Dispose();

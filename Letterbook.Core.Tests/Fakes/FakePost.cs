@@ -9,14 +9,19 @@ public class FakePost : Faker<Post>
 {
     private IEnumerable<Profile> _creators;
     private string _authority;
-    
+
     public FakePost(string authority) : this(new FakeProfile(authority).Generate())
     { }
-    
-    public FakePost(Profile creator) : this(new List<Profile>{creator}, 1)
-    { }
-    
-    public FakePost(IEnumerable<Profile> creators, int contents)
+
+    public FakePost(Profile creator, bool draft = false, CoreOptions? opts = null) : this(new List<Profile> { creator }, 1, opts)
+    {
+	    if (draft)
+	    {
+		    RuleFor(p => p.PublishedDate, (_, _) => null);
+	    }
+    }
+
+    public FakePost(IEnumerable<Profile> creators, int contents, CoreOptions? opts)
     {
         _creators = creators;
         _authority = _creators.First().Authority;
@@ -33,14 +38,16 @@ public class FakePost : Faker<Post>
         });
         RuleFor(p => p.Authority, (_, post) => post.FediId.GetAuthority());
         RuleFor(p => p.Hostname, (_, post) => post.FediId.Host);
-        
+
         FinishWith((_, post) =>
         {
-            var note = new FakeNote(post);
+            var note = new FakeNote(post, opts);
             foreach (var n in note.Generate(contents))
             {
                 post.AddContent(n);
             }
+            post.Thread.Posts.Add(post);
+            post.Thread.RootId = post.Id;
         });
     }
 
@@ -55,8 +62,9 @@ public class FakePost : Faker<Post>
                 post.AddressedTo.Add(Mention.To(c));
             }
             post.Thread.Posts.Add(post);
-            
-            post.AddContent(new FakeNote(post).Generate());
+
+            post.AddContent(new FakeNote(post, null).Generate());
         });
     }
+
 }

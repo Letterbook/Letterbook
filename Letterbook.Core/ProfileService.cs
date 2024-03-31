@@ -5,6 +5,7 @@ using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Values;
+using Medo;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -60,7 +61,7 @@ public class ProfileService : IProfileService
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="localId"></param>
     /// <param name="displayName"></param>
@@ -181,7 +182,7 @@ public class ProfileService : IProfileService
         throw new NotImplementedException();
     }
 
-    public async Task<Profile?> LookupProfile(Guid localId)
+    public async Task<Profile?> LookupProfile(Uuid7 localId)
     {
         return await _profiles.LookupProfile(localId);
     }
@@ -217,7 +218,7 @@ public class ProfileService : IProfileService
             await _profiles.Commit();
             return relation.State;
         }
-        
+
         // TODO(moderation): Check for blocks
         // TODO(moderation): Check for requiresApproval
         var followState = await _client.As(self).SendFollow(target.Inbox, target);
@@ -258,7 +259,7 @@ public class ProfileService : IProfileService
             _logger.LogWarning("Profile {FollowerId} tried to follow {TargetId}, but this is not the origin server", followerId, targetId);
             throw CoreException.WrongAuthority($"Cannot follow Profile {targetId} because it has a different origin server", targetId);
         }
-        
+
         var target = await ResolveProfile(targetId);
         var follower = await ResolveProfile(followerId);
 
@@ -278,7 +279,7 @@ public class ProfileService : IProfileService
         var relation = target.AddFollower(follower, FollowState.Accepted);
         await _profiles.Commit();
         // if (relation.State == FollowState.Rejected) return relation;
-        
+
         // Todo: punt more AP responses to a delivery queue
         // Todo: also, implement that delivery queue
         // await _client.As(target).SendAccept(follower.Inbox, ActivityType.Follow, follower.Id, requestId);
@@ -311,7 +312,7 @@ public class ProfileService : IProfileService
                 return FollowState.None;
         }
     }
-    
+
     public async Task RemoveFollower(Guid selfId, Uri followerId)
     {
         var self = await _profiles.LookupProfileWithRelation(selfId, followerId)
@@ -325,7 +326,7 @@ public class ProfileService : IProfileService
         self.RemoveFollower(follower);
         await _profiles.Commit();
     }
-    
+
     public async Task Unfollow(Guid selfId, Uri followerId)
     {
         var self = await _profiles.LookupProfileWithRelation(selfId, followerId)
@@ -356,7 +357,7 @@ public class ProfileService : IProfileService
         [CallerFilePath] string path = "",
         [CallerLineNumber] int line = -1)
     {
-        var profile = relationId != null 
+        var profile = relationId != null
             ? await _profiles.LookupProfileWithRelation(localId, relationId)
             : await _profiles.LookupProfile(localId);
         if (profile != null) return profile;
@@ -366,7 +367,7 @@ public class ProfileService : IProfileService
         throw CoreException.MissingData("Failed to update Profile because it could not be found", typeof(Profile), localId,
             null, name, path, line);
     }
-    
+
     private async Task<Profile> ResolveProfile(Uri profileId,
         Profile? onBehalfOf = null,
         [CallerMemberName] string name = "",
@@ -402,6 +403,6 @@ public class ProfileService : IProfileService
         }
         _logger.LogInformation("Fetched Profile {ProfileId} from origin", profileId);
         return profile;
-        
+
     }
 }

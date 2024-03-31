@@ -23,7 +23,7 @@ public interface IPostAdapter
     public void Remove(Content content);
     public void RemoveRange(IEnumerable<Post> posts);
     public void RemoveRange(IEnumerable<Content> contents);
-    
+
     public Task Cancel();
     public Task Commit();
 }

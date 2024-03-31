@@ -23,11 +23,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development"
 		docker-compose.mastodon.yml = docker-compose.mastodon.yml
 		Endpoints.http = Endpoints.http
 		http-client.env.json = http-client.env.json
+		Http\Api.http = Http\Api.http
+		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D5E41A46-D753-4214-AF70-1839E56B4A14}"
 	ProjectSection(SolutionItems) = preProject
-		docs\decisions\hexagonal-architecture.png = docs\decisions\hexagonal-architecture.png
 		docs\timeline.md = docs\timeline.md
 		docs\IntegrationTests.Readme.md = docs\IntegrationTests.Readme.md
 	EndProjectSection
@@ -42,7 +43,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Decisions", "Decisions", "{
 		docs\decisions\00-template.md = docs\decisions\00-template.md
 		docs\decisions\01-system-design-guidance.md = docs\decisions\01-system-design-guidance.md
 		docs\decisions\02-architecture-design-patterns.md = docs\decisions\02-architecture-design-patterns.md
-		docs\decisions\hexagonal-architecture.png = docs\decisions\hexagonal-architecture.png
 		docs\decisions\03-accounts-profiles-actors.md = docs\decisions\03-accounts-profiles-actors.md
 		docs\decisions\05-integration-tests.md = docs\decisions\05-integration-tests.md
 		docs\decisions\06-code-review.md = docs\decisions\06-code-review.md

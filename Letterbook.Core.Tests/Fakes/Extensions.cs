@@ -11,4 +11,7 @@ public static class Extensions
 
     public static Uri FediId(this Faker f, string domain, string path) =>
         new(f.Internet.UrlWithPath("https", domain, $"{path}/{f.Random.Int(1000, 9999)}"));
+
+    public static Uri FediId(this Faker f, string domain, string type, Uuid7 id) =>
+	    new($"https://{domain}/{type}/{id.ToId25String()}");
 }

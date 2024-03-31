@@ -8,6 +8,7 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.Db.IntegrationTests;
 
+[Collection("Integration")]
 public class PostAdapterTests : IClassFixture<PostgresFixture>
 {
     private readonly ITestOutputHelper _output;
@@ -34,7 +35,7 @@ public class PostAdapterTests : IClassFixture<PostgresFixture>
     static PostAdapterTests()
     {
         _cmp = new ValueComparer<Post>(
-            (l, r) => r != null && l != null && l.FediId == r.FediId, 
+            (l, r) => r != null && l != null && l.FediId == r.FediId,
             p => p.FediId.GetHashCode());
     }
 
@@ -49,21 +50,21 @@ public class PostAdapterTests : IClassFixture<PostgresFixture>
     {
         var expected = _posts[_profiles[0]][0];
         var actual = await _adapter.LookupPost(expected.GetId());
-        
+
         Assert.True(expected.GetId() == actual?.GetId());
         Assert.Equal(expected, actual, _cmp);
     }
-    
+
     [Fact(DisplayName = "Should lookup posts by FediID")]
     public async Task CanLookupByFediId()
     {
         var expected = _posts[_profiles[0]][0];
         var actual = await _adapter.LookupPost(expected.FediId);
-        
+
         Assert.True(expected.GetId() == actual?.GetId());
         Assert.Equal(expected, actual, _cmp);
     }
-    
+
     [Fact(DisplayName = "Should lookup posts with Content and Creators")]
     public async Task CanLookupWithNavigations()
     {
@@ -74,15 +75,15 @@ public class PostAdapterTests : IClassFixture<PostgresFixture>
         Assert.NotEmpty(actual.Contents);
         Assert.NotEmpty(actual.Creators);
     }
-    
+
     [Fact(DisplayName = "Should not lookup non-existent posts")]
     public async Task CanLookupMissing()
     {
         var actual = await _adapter.LookupPost(Uuid7.NewUuid7());
-        
+
         Assert.Null(actual);
     }
-    
+
     [Fact(DisplayName = "Should lookup threads")]
     public async Task CanLookupThread()
     {
@@ -93,7 +94,7 @@ public class PostAdapterTests : IClassFixture<PostgresFixture>
         Assert.Equal(expected.GetId(), actual.GetId());
         Assert.Equal(expected.FediId, actual.FediId);
     }
-    
+
     [Fact(DisplayName = "Should lookup threads by FediID")]
     public async Task CanLookupThreadByFediId()
     {
@@ -104,7 +105,7 @@ public class PostAdapterTests : IClassFixture<PostgresFixture>
         Assert.Equal(expected.GetId(), actual.GetId());
         Assert.Equal(expected.FediId, actual.FediId);
     }
-    
+
     [Fact(DisplayName = "Should lookup threads with posts")]
     public async Task CanLookupThreadAndPosts()
     {
@@ -117,7 +118,7 @@ public class PostAdapterTests : IClassFixture<PostgresFixture>
         Assert.Contains(_posts[_profiles[0]][2], actual.Posts, _cmp);
         Assert.Contains(_posts[_profiles[4]][0], actual.Posts, _cmp);
     }
-    
+
     [Fact(DisplayName = "Should lookup a post with its thread")]
     public async Task CanLookupPostAndThread()
     {
@@ -130,12 +131,12 @@ public class PostAdapterTests : IClassFixture<PostgresFixture>
         Assert.Contains(_posts[_profiles[0]][2], actual.Thread.Posts, _cmp);
         Assert.Contains(_posts[_profiles[4]][0], actual.Thread.Posts, _cmp);
     }
-    
+
     [Fact(DisplayName = "Should not lookup non-existent threads")]
     public async Task CanLookupMissingThread()
     {
         var actual = await _adapter.LookupThread(Uuid7.NewUuid7());
-        
+
         Assert.Null(actual);
     }
 }
