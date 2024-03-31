@@ -21,7 +21,6 @@ public class Uuid7Binder : IModelBinder
 
 		if (!Id.TryAsUuid7(value, out var uuid))
 		{
-			// Non-integer arguments result in model state errors
 			bindingContext.ModelState.TryAddModelError(
 				modelName, "value is not an Id25 string");
 

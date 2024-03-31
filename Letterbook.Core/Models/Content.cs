@@ -44,11 +44,6 @@ public abstract class Content : IContent, IEquatable<Content>
 	    GeneratePreview();
     }
 
-    protected void BaseUpdate(Content content)
-    {
-
-    }
-
     public void SetLocalFediId(CoreOptions opts)
     {
         FediId = LocalId(this, opts);
