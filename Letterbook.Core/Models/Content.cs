@@ -36,6 +36,19 @@ public abstract class Content : IContent, IEquatable<Content>
     public abstract string? GeneratePreview();
     public abstract void Sanitize();
 
+    public virtual void UpdateFrom(Content content)
+    {
+	    Summary = content.Summary;
+	    Source = content.Source;
+	    SortKey = content.SortKey;
+	    GeneratePreview();
+    }
+
+    protected void BaseUpdate(Content content)
+    {
+
+    }
+
     public void SetLocalFediId(CoreOptions opts)
     {
         FediId = LocalId(this, opts);

@@ -20,16 +20,19 @@ public static class IntegrationTestExtensions
 		data.Profiles[0].Follow(data.Profiles[5], FollowState.Accepted);
 		data.Profiles[0].AddFollower(data.Profiles[4], FollowState.Accepted);
 
+		// Local profiles
 		// P0 creates posts 0-2
 		data.Posts.Add(data.Profiles[0], new FakePost(data.Profiles[0]).Generate(3));
 		// P0 creates post 3, as reply to 2
 		data.Posts[data.Profiles[0]].Add(new FakePost(data.Profiles[0], data.Posts[data.Profiles[0]][2]).Generate());
+		// P1 creates posts 0-7
+		data.Posts.Add(data.Profiles[1], new FakePost(data.Profiles[0], opts: options).Generate(8));
 		// P2 creates post 0, and draft 1
 		data.Posts.Add(data.Profiles[2], new FakePost(data.Profiles[2]).Generate(1));
-		var unpublished = new FakePost(data.Profiles[2]).Generate();
-		unpublished.PublishedDate = null;
-		data.Posts[data.Profiles[2]].Add(unpublished);
-		// P4 creates post 0, as reply to P0:3
+		data.Posts[data.Profiles[2]].Add(new FakePost(data.Profiles[2], draft: true).Generate());
+
+		// Remote profiles
+		// P4 creates post 0, as reply to post P0:3
 		data.Posts.Add(data.Profiles[4], new FakePost(data.Profiles[3], data.Posts[data.Profiles[0]][3]).Generate(1));
 	}
 }

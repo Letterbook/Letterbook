@@ -182,7 +182,7 @@ public class PostServiceTests : WithMocks
         note.GeneratePreview();
         PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
-        var result = await _service.UpdateContent(_post.Id, note);
+        var result = await _service.UpdateContent(_post.Id, note.Id, note);
 
         var actual = Assert.IsType<Note>(result.Contents.FirstOrDefault());
         Assert.Equal(expected, actual.Text);

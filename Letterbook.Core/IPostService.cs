@@ -28,7 +28,7 @@ public interface IAuthzPostService
     public Task Like(Uuid7 id);
     public Task<Post> AddContent(Uuid7 postId, Content content);
     public Task<Post> RemoveContent(Uuid7 postId, Uuid7 contentId);
-    public Task<Post> UpdateContent(Uuid7 postId, Content content);
+    public Task<Post> UpdateContent(Uuid7 postId, Uuid7 contentId, Content content);
 
     /// <summary>
     /// Publish a draft post

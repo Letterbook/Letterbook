@@ -13,10 +13,15 @@ public class FakePost : Faker<Post>
     public FakePost(string authority) : this(new FakeProfile(authority).Generate())
     { }
 
-    public FakePost(Profile creator) : this(new List<Profile>{creator}, 1)
-    { }
+    public FakePost(Profile creator, bool draft = false, CoreOptions? opts = null) : this(new List<Profile> { creator }, 1, opts)
+    {
+	    if (draft)
+	    {
+		    RuleFor(p => p.PublishedDate, (_, _) => null);
+	    }
+    }
 
-    public FakePost(IEnumerable<Profile> creators, int contents)
+    public FakePost(IEnumerable<Profile> creators, int contents, CoreOptions? opts)
     {
         _creators = creators;
         _authority = _creators.First().Authority;
@@ -36,7 +41,7 @@ public class FakePost : Faker<Post>
 
         FinishWith((_, post) =>
         {
-            var note = new FakeNote(post);
+            var note = new FakeNote(post, opts);
             foreach (var n in note.Generate(contents))
             {
                 post.AddContent(n);
@@ -58,7 +63,8 @@ public class FakePost : Faker<Post>
             }
             post.Thread.Posts.Add(post);
 
-            post.AddContent(new FakeNote(post).Generate());
+            post.AddContent(new FakeNote(post, null).Generate());
         });
     }
+
 }

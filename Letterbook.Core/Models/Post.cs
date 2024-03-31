@@ -111,6 +111,7 @@ public class Post : IFederated, IEquatable<Post>
     {
         if (Contents.Count == 0) SetRootContent(content);
         Contents.Add(content);
+        content.Post = this;
         return content;
     }
 

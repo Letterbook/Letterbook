@@ -216,14 +216,27 @@ public class PostService : IAuthzPostService, IPostService
         return post;
     }
 
-    public async Task<Post> UpdateContent(Uuid7 postId, Content content)
+    public async Task<Post> UpdateContent(Uuid7 postId, Uuid7 contentId, Content content)
     {
         var post = await _posts.LookupPost(postId)
                    ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
         if (!post.FediId.HasLocalAuthority(_options))
             throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
-        post.Contents.Remove(content);
-        post.Contents.Add(content);
+        content.Id = contentId.ToGuid();
+        content.SetLocalFediId(_options);
+        if (post.Contents.FirstOrDefault(content) is not {} original)
+        {
+	        var details = new Dictionary<string, object>();
+	        details.Add("post", postId);
+	        details.Add("content", contentId);
+	        throw CoreException.InvalidRequest("Can't find content to update in post", details);
+	    }
+
+        original.UpdateFrom(content);
+        // _posts.Update(content);
+        // post.Contents.Remove(content);
+        // post.AddContent(content);
+        // post.Contents.Add(content);
 
         if (post.PublishedDate is not null)
         {

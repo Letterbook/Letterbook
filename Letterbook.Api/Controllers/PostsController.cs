@@ -116,14 +116,14 @@ public class PostsController : ControllerBase
     [HttpPut("{profileId}/post/{postId}/content/{contentId}")]
     [ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
     [SwaggerOperation("Edit", "Edit the content of a post")]
-    public async Task<IActionResult> Edit(Uuid7 profileId, Uuid7 postId, [FromBody]ContentDto dto)
+    public async Task<IActionResult> Edit(Uuid7 profileId, Uuid7 postId, Uuid7 contentId, [FromBody]ContentDto dto)
     {
 	    if (!ModelState.IsValid)
 		    return BadRequest(ModelState);
 	    if (_mapper.Map<Content>(dto) is not { } content)
 		    return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
 
-		var result = await _post.As(User.Claims, profileId).UpdateContent(postId, content);
+		var result = await _post.As(User.Claims, profileId).UpdateContent(postId, contentId, content);
 		return Ok(_mapper.Map<PostDto>(result));
     }
 

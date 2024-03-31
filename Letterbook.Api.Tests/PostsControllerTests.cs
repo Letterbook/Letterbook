@@ -126,10 +126,12 @@ public class PostsControllerTests : WithMockContext
 	public async Task CanEditContent()
 	{
 		var dto = new FakeContentDto().Generate();
-		PostServiceAuthMock.Setup(m => m.UpdateContent(_post.GetId(), It.Is<Models.Content>(c => c.GetId() == dto.Id)))
+		var id = _post.Contents.First().GetId();
+		dto.Id = id;
+		PostServiceAuthMock.Setup(m => m.UpdateContent(_post.GetId(), id, It.Is<Models.Content>(c => c.GetId() == dto.Id)))
 			.ReturnsAsync(_post);
 
-		var result = await _controller.Edit(_profile.GetId(), _post.GetId(), dto);
+		var result = await _controller.Edit(_profile.GetId(), _post.GetId(), id, dto);
 
 		var response = Assert.IsType<OkObjectResult>(result);
 		var actual = Assert.IsType<PostDto>(response.Value);

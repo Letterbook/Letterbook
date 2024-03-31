@@ -135,13 +135,35 @@ public class PostsTests : IClassFixture<HostFixture>
 		Assert.Equal(2, actual.Contents.Count);
 		Assert.Contains(dto, actual.Contents, _contentTextComparer);
 	}
+
+	[Fact(DisplayName = "Should edit content in an existing post")]
+	public async Task CanEditContent()
+	{
+		var profile = _profiles[1];
+		var post = _posts[profile][0];
+		var content = post.Contents.First();
+		var dto = _mapper.Map<ContentDto>(content);
+		dto.Summary = "This is the new summary";
+		dto.Text = $"This is the updated text {Guid.NewGuid()}";
+		var payload = JsonContent.Create(dto, options: _json);
+
+		var response = await _client
+			.PutAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}/content/{content.GetId25()}", payload);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert.IsType<PostDto>(await response.Content.ReadFromJsonAsync<PostDto>(_json));
+
+		Assert.Equal(dto.Text, actual.Contents.First().Text);
+		Assert.Equal(dto.Text, actual.Contents.First().Preview);
+		Assert.Equal(dto.Summary, actual.Contents.First().Summary);
+	}
 }
 
 public class ContentTextComparer : IEqualityComparer<ContentDto>
 {
 	public bool Equals(ContentDto x, ContentDto y)
 	{
-		if (ReferenceEquals(x, y)) return true;
 		if (ReferenceEquals(x, null)) return false;
 		if (ReferenceEquals(y, null)) return false;
 		if (x.GetType() != y.GetType()) return false;

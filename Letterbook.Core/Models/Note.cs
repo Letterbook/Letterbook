@@ -21,4 +21,13 @@ public class Note : Content
     {
         throw new NotImplementedException();
     }
+
+    public override void UpdateFrom(Content content)
+    {
+	    if (content is not Note note)
+		    throw new ArgumentException($"{content.Type} is not {Type}", nameof(content));
+
+	    Text = note.Text;
+	    base.UpdateFrom(note);
+    }
 }
