@@ -115,6 +115,7 @@ public class Program
         builder.Services.AddScoped<IProfileEventService, ProfileEventService>();
         builder.Services.AddScoped<IAccountService, AccountService>();
         builder.Services.AddScoped<IProfileService, ProfileService>();
+        builder.Services.AddScoped<IPostService, PostService>();
         builder.Services.AddScoped<IAccountEventService, AccountEventService>();
         builder.Services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
         builder.Services.AddScoped<IActivityMessageService, ActivityMessageService>();
@@ -134,7 +135,6 @@ public class Program
         builder.Services.AddScoped<IPostAdapter, PostAdapter>();
         builder.Services.AddRxMessageBus();
         builder.Services.AddSingleton<IActivityPubDocument, Document>();
-        builder.Services.AddDbContext<RelationalContext>();
         builder.Services.AddDbAdapter(builder.Configuration.GetSection(DbOptions.ConfigKey));
         builder.Services.AddDbContext<FeedsContext>();
         builder.Services.AddIdentity<Account, IdentityRole<Guid>>()

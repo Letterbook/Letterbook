@@ -56,6 +56,11 @@ public class InstanceMappings : AutoMapper.Profile
 					"Note" => ctx.Mapper.Map<Note>(dto),
 					_ => ctx.Mapper.Map<Note>(dto)
 				};
+			})
+			.AfterMap((_, ct) =>
+			{
+				ct.GeneratePreview();
+				ct.SetLocalFediId(options.Value);
 			});
 
 		CreateMap<Post, PostDto>(MemberList.Destination);
@@ -65,14 +70,55 @@ public class InstanceMappings : AutoMapper.Profile
 			.ForMember(post => post.InReplyTo, opt => opt.Ignore())
 			.ForMember(post => post.Id, opt => opt.PreCondition(dto => dto.Id != null))
 			.ForMember(post => post.Id, opt => opt.MapFrom(dto => dto.Id))
+			.ForMember(post => post.FediId, opt => opt.PreCondition(dto => dto.FediId != null))
+			.ForMember(post => post.CreatedDate, opt => opt.ConvertUsing<DateTimeOffsetMapper, DateTimeOffset?>())
+			.ForMember(post => post.PublishedDate, opt => opt.ConvertUsing<DateTimeOffsetMapper, DateTimeOffset?>())
+			.ForMember(post => post.UpdatedDate, opt => opt.ConvertUsing<DateTimeOffsetMapper, DateTimeOffset?>())
 			.ForSourceMember(src => src.InReplyTo, opt => opt.DoNotValidate())
 			.ForSourceMember(src => src.Thread, opt => opt.DoNotValidate());
 
 		CreateMap<Models.Profile, MiniProfileDto>(MemberList.Destination);
 		CreateMap<MiniProfileDto, Models.Profile>(MemberList.Source);
+
+		CreateMap<DateTimeOffset?, DateTimeOffset?>()
+			.ConvertUsing<DateTimeOffsetMapper>();
+		CreateMap<DateTimeOffset, DateTimeOffset?>()
+			.ConvertUsing<DateTimeOffsetMapper>();
+		CreateMap<DateTimeOffset?, DateTimeOffset>()
+			.ConvertUsing<DateTimeOffsetMapper>();
+		CreateMap<DateTimeOffset, DateTimeOffset>()
+			.ConvertUsing<DateTimeOffsetMapper>();
 	}
 
 	private static Post NewPost(CoreOptions options) => new(options);
+}
+
+public class DateTimeOffsetMapper : IValueConverter<DateTimeOffset?, DateTimeOffset>,
+	IValueConverter<DateTimeOffset?, DateTimeOffset?>,
+	ITypeConverter<DateTimeOffset, DateTimeOffset>,
+	ITypeConverter<DateTimeOffset?, DateTimeOffset?>,
+	ITypeConverter<DateTimeOffset, DateTimeOffset?>,
+	ITypeConverter<DateTimeOffset?, DateTimeOffset>
+{
+	private DateTimeOffset ToUtc(DateTimeOffset? source) => source?.ToUniversalTime() ?? DateTimeOffset.UtcNow;
+	private DateTimeOffset? ToNullable(DateTimeOffset? source) => source == null ? null : ToUtc(source);
+
+	public DateTimeOffset Convert(DateTimeOffset? sourceMember, ResolutionContext context) => ToUtc(sourceMember);
+
+	DateTimeOffset? IValueConverter<DateTimeOffset?, DateTimeOffset?>.Convert(DateTimeOffset? sourceMember, ResolutionContext context)
+		=> ToNullable(sourceMember);
+
+	public DateTimeOffset Convert(DateTimeOffset source, DateTimeOffset destination, ResolutionContext context)
+		=> ToUtc(source);
+
+	public DateTimeOffset? Convert(DateTimeOffset? source, DateTimeOffset? destination, ResolutionContext context)
+		=> ToNullable(source);
+
+	public DateTimeOffset? Convert(DateTimeOffset source, DateTimeOffset? destination, ResolutionContext context)
+		=> ToNullable(source);
+
+	public DateTimeOffset Convert(DateTimeOffset? source, DateTimeOffset destination, ResolutionContext context)
+		=> ToUtc(source);
 }
 
 public class BaseTypeMappings : AutoMapper.Profile

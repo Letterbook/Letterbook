@@ -15,8 +15,8 @@ public class PostAdapter : IPostAdapter, IAsyncDisposable
         _logger = logger;
         _context = context;
     }
-    
-    private static IQueryable<Models.Post> WithDefaults(IQueryable<Models.Post> query) => 
+
+    private static IQueryable<Models.Post> WithDefaults(IQueryable<Models.Post> query) =>
         query.Include(p => p.Creators).Include(p => p.Contents);
 
     private static IQueryable<Models.Post> WithThread(IQueryable<Models.Post> query) => WithDefaults(query)
@@ -63,7 +63,7 @@ public class PostAdapter : IPostAdapter, IAsyncDisposable
     public async Task<Models.Profile?> LookupProfile(Uuid7 profileId)
     {
         return await _context.Profiles
-            .FirstOrDefaultAsync(profile => profile.Id == profileId);
+            .FirstOrDefaultAsync(profile => profile.Id == profileId.ToGuid());
     }
 
     public async Task<Models.Profile?> LookupProfile(Uri profileId)
@@ -98,10 +98,10 @@ public class PostAdapter : IPostAdapter, IAsyncDisposable
         {
             return _context.Database.RollbackTransactionAsync();
         }
-        
+
         return Task.CompletedTask;
     }
-    
+
     public Task Commit()
     {
         if (_context.Database.CurrentTransaction is not null)

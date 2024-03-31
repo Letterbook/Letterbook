@@ -1,15 +1,17 @@
-﻿using Letterbook.Core.Tests.Fakes;
+﻿using Letterbook.Core.Extensions;
+using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 
 namespace Letterbook.Core.Tests.Fixtures;
 
 public static class IntegrationTestExtensions
 {
-	public static void InitTestData(this IIntegrationTestData data)
+	public static void InitTestData(this IIntegrationTestData data, CoreOptions? options = null)
 	{
+		var authority = options?.BaseUri().Authority ?? "letterbook.example";
 		data.Accounts.AddRange(new FakeAccount(false).Generate(2));
-		data.Profiles.AddRange(new FakeProfile("letterbook.example", data.Accounts[0]).Generate(3));
-		data.Profiles.Add(new FakeProfile("letterbook.example", data.Accounts[1]).Generate());
+		data.Profiles.AddRange(new FakeProfile(authority, data.Accounts[0]).Generate(3));
+		data.Profiles.Add(new FakeProfile(authority, data.Accounts[1]).Generate());
 		data.Profiles.AddRange(new FakeProfile().Generate(3));
 
 		// P0 follows P4 and P5

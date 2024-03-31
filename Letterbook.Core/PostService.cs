@@ -90,7 +90,12 @@ public class PostService : IAuthzPostService, IPostService
             post.Thread.Posts.Add(post);
         }
 
-        if (publish) post.PublishedDate = DateTimeOffset.Now;
+        if (await _posts.LookupProfile(_profileId) is not { } author)
+	        throw CoreException.MissingData<Profile>($"Couldn't find profile {_profileId}", _profileId);
+        post.Creators.Clear();
+        post.Creators.Add(author);
+
+        if (publish) post.PublishedDate = DateTimeOffset.UtcNow;
         _posts.Add(post);
         await _posts.Commit();
         _postEvents.Created(post);

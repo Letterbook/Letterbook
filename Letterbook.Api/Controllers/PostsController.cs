@@ -51,6 +51,11 @@ public class PostsController : ControllerBase
 	    dto.Id = Uuid7.NewUuid7();
         if (_mapper.Map<Post>(dto) is not { } post)
             return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
+        foreach (var content in post.Contents)
+        {
+	        content.Id = Uuid7.NewGuid();
+	        content.SetLocalFediId(_options);
+        }
 
         var decision = _authz.Create(User.Claims, post, profileId);
         if (!decision.Allowed)
