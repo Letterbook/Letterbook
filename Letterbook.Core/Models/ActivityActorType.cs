@@ -1,11 +1,11 @@
-﻿namespace Letterbook.Core.Models;
+namespace Letterbook.Core.Models;
 
 public enum ActivityActorType
 {
-    Unknown,
-    Application,
-    Group,
-    Organization,
-    Person,
-    Service,
+	Unknown,
+	Application,
+	Group,
+	Organization,
+	Person,
+	Service,
 }

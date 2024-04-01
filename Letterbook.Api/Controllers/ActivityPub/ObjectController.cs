@@ -1,4 +1,4 @@
-﻿using Letterbook.Api.Swagger;
+using Letterbook.Api.Swagger;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
@@ -12,17 +12,17 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [Route("[controller]/{type}")]
 public class ObjectController
 {
-    [HttpGet]
-    [Route("{id}/collections/[action]")]
-    public IActionResult Likes(int id, string type)
-    {
-        throw new NotImplementedException();
-    }
-    
-    [HttpGet]
-    [Route("{id}/collections/[action]")]
-    public IActionResult Shares(int id, string type)
-    {
-        throw new NotImplementedException();
-    }
+	[HttpGet]
+	[Route("{id}/collections/[action]")]
+	public IActionResult Likes(int id, string type)
+	{
+		throw new NotImplementedException();
+	}
+
+	[HttpGet]
+	[Route("{id}/collections/[action]")]
+	public IActionResult Shares(int id, string type)
+	{
+		throw new NotImplementedException();
+	}
 }

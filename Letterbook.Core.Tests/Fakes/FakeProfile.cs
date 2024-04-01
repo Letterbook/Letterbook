@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Bogus;
 using Bogus.DataSets;
@@ -9,8 +9,8 @@ namespace Letterbook.Core.Tests.Fakes;
 
 public sealed class FakeProfile : Faker<Profile>
 {
-    private const string TestKeyRsaPrivate =
-        """
+	private const string TestKeyRsaPrivate =
+		"""
         -----BEGIN RSA PRIVATE KEY-----
         MIIEpAIBAAKCAQEAzf5EIIQ6LHWujJzGlNA2txC5174T6WIXQBTsu/n02/dEqL6k
         EZIV+/0QthIqRowdbuQTHfgE8qmooeSL6H6teNeaUOTsyJWnMxDsFarUDVZmZHzJ
@@ -39,88 +39,88 @@ public sealed class FakeProfile : Faker<Profile>
         f0EeAt13B99rqdgXE5DLGf7PppP2q/Z3zmR1w/tQv8x2HgJPkVHeXw==
         -----END RSA PRIVATE KEY-----
         """;
-    
-    public FakeProfile() : this(new Uri(new Faker().Internet.UrlWithPath()))
-    {
-        // RuleFor(p => p.Id, f => f.Random.Guid());
-    }
 
-    public FakeProfile(string authority) : this(new Uri($"http://{authority}/{new Faker().Internet.UserName()}"))
-    {
-        // RuleFor(p => p.Id, f => f.Random.Guid());
-    }
+	public FakeProfile() : this(new Uri(new Faker().Internet.UrlWithPath()))
+	{
+		// RuleFor(p => p.Id, f => f.Random.Guid());
+	}
 
-    public FakeProfile(Uri uri)
-    {
-        CustomInstantiator(f =>
-        {
-            var localId = f.Random.Uuid7();
-            var builder = new UriBuilder(uri.Authority);
-            builder.Path += $"actor/{localId.ToId22String()}";
-            var id = builder.Uri;
-            var basePath = builder.Path;
-            builder.Path = basePath + "/inbox";
-            var inbox = builder.Uri;
-            builder.Path = basePath + "/outbox";
-            var outbox = builder.Uri;
-            builder.Path = "actor/shared_inbox";
-            var sharedInbox = builder.Uri;
-            builder.Path = basePath + "/followers";
-            var followers = builder.Uri;
-            builder.Path = basePath + "/following";
-            var following = builder.Uri;
-            var profile = Profile.CreateEmpty(id);
-            {
-                profile.Id = localId;
-                profile.FediId = id;
-                profile.Handle = f.Internet.UserName();
-                profile.Inbox = inbox;
-                profile.Outbox = outbox;
-                profile.SharedInbox = sharedInbox;
-                profile.Followers = followers;
-                profile.Following = following;
-                // profile.FollowersCollection = ObjectCollection<FollowerRelation>.Followers(id);
-                // profile.FollowingCollection = ObjectCollection<FollowerRelation>.Following(id);
-            }
-            return profile;
-        });
+	public FakeProfile(string authority) : this(new Uri($"http://{authority}/{new Faker().Internet.UserName()}"))
+	{
+		// RuleFor(p => p.Id, f => f.Random.Guid());
+	}
 
-        RSA rsa = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();
-        rsa.ImportFromPem(TestKeyRsaPrivate);
-        
-        RuleFor(p => p.DisplayName, (f) => f.Internet.UserName());
-        RuleFor(p => p.Handle, (f, p) => p.Handle ?? $"@{f.Internet.UserName()}@{uri.Authority}");
-        RuleFor(p => p.Description, (f) => f.Lorem.Paragraph());
-        RuleFor(p => p.CustomFields,
-            (f) => new CustomField[] { new() { Label = "UUID", Value = $"{f.Random.Guid()}" } });
-        RuleFor(p => p.Keys,
-            (f, profile) => new List<SigningKey>()
-            {
-                new SigningKey()
-                {
-                    Created = f.Date.Past(1, DateTime.Parse("2020-01-01").ToUniversalTime()),
-                    Expires = DateTimeOffset.MaxValue,
-                    Family = SigningKey.KeyFamily.Rsa,
-                    Id = f.Random.Guid(),
-                    FediId = new Uri(uri, $"actor/{profile.GetId25()}/public_keys/0"),
-                    PrivateKey = rsa.ExportPkcs8PrivateKey(),
-                    PublicKey = rsa.ExportSubjectPublicKeyInfo(),
-                    KeyOrder = 0,
-                    Label = "Static test key"
-                }
-            });
-    }
+	public FakeProfile(Uri uri)
+	{
+		CustomInstantiator(f =>
+		{
+			var localId = f.Random.Uuid7();
+			var builder = new UriBuilder(uri.Authority);
+			builder.Path += $"actor/{localId.ToId22String()}";
+			var id = builder.Uri;
+			var basePath = builder.Path;
+			builder.Path = basePath + "/inbox";
+			var inbox = builder.Uri;
+			builder.Path = basePath + "/outbox";
+			var outbox = builder.Uri;
+			builder.Path = "actor/shared_inbox";
+			var sharedInbox = builder.Uri;
+			builder.Path = basePath + "/followers";
+			var followers = builder.Uri;
+			builder.Path = basePath + "/following";
+			var following = builder.Uri;
+			var profile = Profile.CreateEmpty(id);
+			{
+				profile.Id = localId;
+				profile.FediId = id;
+				profile.Handle = f.Internet.UserName();
+				profile.Inbox = inbox;
+				profile.Outbox = outbox;
+				profile.SharedInbox = sharedInbox;
+				profile.Followers = followers;
+				profile.Following = following;
+				// profile.FollowersCollection = ObjectCollection<FollowerRelation>.Followers(id);
+				// profile.FollowingCollection = ObjectCollection<FollowerRelation>.Following(id);
+			}
+			return profile;
+		});
 
-    public FakeProfile(Uri uri, Account owner) : this(uri)
-    {
-        CustomInstantiator(f =>
-        {
-            var profile = Profile.CreateIndividual(uri, $"{f.Hacker.Noun()}_{f.Random.Hexadecimal(4)}");
-            profile.OwnedBy = owner;
-            return profile;
-        });
-    }
-    
-    public FakeProfile(string authority, Account owner) : this(new Uri($"https://{authority}"), owner)
-    {}
+		RSA rsa = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();
+		rsa.ImportFromPem(TestKeyRsaPrivate);
+
+		RuleFor(p => p.DisplayName, (f) => f.Internet.UserName());
+		RuleFor(p => p.Handle, (f, p) => p.Handle ?? $"@{f.Internet.UserName()}@{uri.Authority}");
+		RuleFor(p => p.Description, (f) => f.Lorem.Paragraph());
+		RuleFor(p => p.CustomFields,
+			(f) => new CustomField[] { new() { Label = "UUID", Value = $"{f.Random.Guid()}" } });
+		RuleFor(p => p.Keys,
+			(f, profile) => new List<SigningKey>()
+			{
+				new SigningKey()
+				{
+					Created = f.Date.Past(1, DateTime.Parse("2020-01-01").ToUniversalTime()),
+					Expires = DateTimeOffset.MaxValue,
+					Family = SigningKey.KeyFamily.Rsa,
+					Id = f.Random.Guid(),
+					FediId = new Uri(uri, $"actor/{profile.GetId25()}/public_keys/0"),
+					PrivateKey = rsa.ExportPkcs8PrivateKey(),
+					PublicKey = rsa.ExportSubjectPublicKeyInfo(),
+					KeyOrder = 0,
+					Label = "Static test key"
+				}
+			});
+	}
+
+	public FakeProfile(Uri uri, Account owner) : this(uri)
+	{
+		CustomInstantiator(f =>
+		{
+			var profile = Profile.CreateIndividual(uri, $"{f.Hacker.Noun()}_{f.Random.Hexadecimal(4)}");
+			profile.OwnedBy = owner;
+			return profile;
+		});
+	}
+
+	public FakeProfile(string authority, Account owner) : this(new Uri($"https://{authority}"), owner)
+	{ }
 }

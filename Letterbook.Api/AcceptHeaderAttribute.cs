@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ActionConstraints;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
 
@@ -14,56 +14,56 @@ namespace Letterbook.Api;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
 public class AcceptHeaderAttribute : Attribute, IActionConstraint
 {
-    public int Order => 0;
-    public MediaTypeCollection? ContentTypes { get; set; }
-    
-    public AcceptHeaderAttribute(string contentType, params string[] otherContentTypes)
-    {            
-        if (contentType == null)
-            throw new ArgumentNullException(nameof(contentType));
+	public int Order => 0;
+	public MediaTypeCollection? ContentTypes { get; set; }
 
-        // We want to ensure that the given provided content types are valid values, so
-        // we validate them using the semantics of MediaTypeHeaderValue.
-        MediaTypeHeaderValue.Parse(contentType);
+	public AcceptHeaderAttribute(string contentType, params string[] otherContentTypes)
+	{
+		if (contentType == null)
+			throw new ArgumentNullException(nameof(contentType));
 
-        for (var i = 0; i < otherContentTypes.Length; i++)
-        {
-            MediaTypeHeaderValue.Parse(otherContentTypes[i]);
-        }
+		// We want to ensure that the given provided content types are valid values, so
+		// we validate them using the semantics of MediaTypeHeaderValue.
+		MediaTypeHeaderValue.Parse(contentType);
 
-        ContentTypes = GetContentTypes(contentType, otherContentTypes);
-    }
+		for (var i = 0; i < otherContentTypes.Length; i++)
+		{
+			MediaTypeHeaderValue.Parse(otherContentTypes[i]);
+		}
 
-    
-    public bool Accept(ActionConstraintContext context)
-    {
-        var acceptHeader = context.RouteContext.HttpContext.Request.Headers[HeaderNames.Accept];
-        var contentHeader = context.RouteContext.HttpContext.Request.Headers[HeaderNames.ContentType];
+		ContentTypes = GetContentTypes(contentType, otherContentTypes);
+	}
 
-        return IsMatch(acceptHeader) || IsMatch(contentHeader);
-    }
 
-    public bool IsMatch(string? acceptHeader)
-    {
-        if (string.IsNullOrEmpty(acceptHeader)) return false;
-        var acceptTypes = acceptHeader.Split(",").Select(each => new MediaType(each));
-        return acceptTypes.Aggregate(false,
-            (result, acceptType) => ContentTypes != null && (result || ContentTypes.Aggregate(false,
-                (contentResult, contentType) => contentResult || acceptType.IsSubsetOf(new MediaType(contentType)))));
-    }
-    
-    private MediaTypeCollection GetContentTypes(string firstArg, string[] args)
-    {
-        var completeArgs = new List<string>();
-        completeArgs.Add(firstArg);
-        completeArgs.AddRange(args);
+	public bool Accept(ActionConstraintContext context)
+	{
+		var acceptHeader = context.RouteContext.HttpContext.Request.Headers[HeaderNames.Accept];
+		var contentHeader = context.RouteContext.HttpContext.Request.Headers[HeaderNames.ContentType];
 
-        var contentTypes = new MediaTypeCollection();
-        foreach (var arg in completeArgs)
-        {
-            contentTypes.Add(arg);
-        }
+		return IsMatch(acceptHeader) || IsMatch(contentHeader);
+	}
 
-        return contentTypes;
-    }
+	public bool IsMatch(string? acceptHeader)
+	{
+		if (string.IsNullOrEmpty(acceptHeader)) return false;
+		var acceptTypes = acceptHeader.Split(",").Select(each => new MediaType(each));
+		return acceptTypes.Aggregate(false,
+			(result, acceptType) => ContentTypes != null && (result || ContentTypes.Aggregate(false,
+				(contentResult, contentType) => contentResult || acceptType.IsSubsetOf(new MediaType(contentType)))));
+	}
+
+	private MediaTypeCollection GetContentTypes(string firstArg, string[] args)
+	{
+		var completeArgs = new List<string>();
+		completeArgs.Add(firstArg);
+		completeArgs.AddRange(args);
+
+		var contentTypes = new MediaTypeCollection();
+		foreach (var arg in completeArgs)
+		{
+			contentTypes.Add(arg);
+		}
+
+		return contentTypes;
+	}
 }

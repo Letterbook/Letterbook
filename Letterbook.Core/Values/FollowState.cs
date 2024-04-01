@@ -1,9 +1,9 @@
-﻿namespace Letterbook.Core.Values;
+namespace Letterbook.Core.Values;
 
 public enum FollowState : int
 {
-    None,
-    Accepted,
-    Pending,
-    Rejected
+	None,
+	Accepted,
+	Pending,
+	Rejected
 }

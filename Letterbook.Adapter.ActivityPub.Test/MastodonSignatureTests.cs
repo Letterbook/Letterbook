@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Headers;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using Bogus;
 using Letterbook.Adapter.ActivityPub.Signatures;
@@ -17,19 +17,19 @@ namespace Letterbook.Adapter.ActivityPub.Test;
 
 public class MastodonSignatureTests
 {
-    private readonly ITestOutputHelper _output;
-    private readonly ServiceCollection _serviceCollection;
-    private readonly ILogger<MastodonSigner> _logger;
-    private readonly ILogger<MastodonVerifier> _verifierLogger;
-    private RSA _rsa;
-    private Models.SigningKey _signingKey;
-    
-    #region TestKeys
+	private readonly ITestOutputHelper _output;
+	private readonly ServiceCollection _serviceCollection;
+	private readonly ILogger<MastodonSigner> _logger;
+	private readonly ILogger<MastodonVerifier> _verifierLogger;
+	private RSA _rsa;
+	private Models.SigningKey _signingKey;
+
+	#region TestKeys
 
 #pragma warning disable CS0414 // Field is assigned but its value is never used
-    private string _testKeyRsaPublic =
+	private string _testKeyRsaPublic =
 #pragma warning restore CS0414 // Field is assigned but its value is never used
-        """
+		"""
         -----BEGIN RSA PUBLIC KEY-----
         MIIBCgKCAQEAzf5EIIQ6LHWujJzGlNA2txC5174T6WIXQBTsu/n02/dEqL6kEZIV
         +/0QthIqRowdbuQTHfgE8qmooeSL6H6teNeaUOTsyJWnMxDsFarUDVZmZHzJy1Nf
@@ -40,8 +40,8 @@ public class MastodonSignatureTests
         -----END RSA PUBLIC KEY-----
         """;
 
-    private string _testKeyRsaPrivate =
-        """
+	private string _testKeyRsaPrivate =
+		"""
         -----BEGIN RSA PRIVATE KEY-----
         MIIEpAIBAAKCAQEAzf5EIIQ6LHWujJzGlNA2txC5174T6WIXQBTsu/n02/dEqL6k
         EZIV+/0QthIqRowdbuQTHfgE8qmooeSL6H6teNeaUOTsyJWnMxDsFarUDVZmZHzJ
@@ -70,171 +70,171 @@ public class MastodonSignatureTests
         f0EeAt13B99rqdgXE5DLGf7PppP2q/Z3zmR1w/tQv8x2HgJPkVHeXw==
         -----END RSA PRIVATE KEY-----
         """;
-    
-    #endregion
-    
-    public MastodonSignatureTests(ITestOutputHelper output)
-    {
-        _output = output;
-        _serviceCollection = new ServiceCollection();
-        _logger = Mock.Of<ILogger<MastodonSigner>>();
-        _verifierLogger = Mock.Of<ILogger<MastodonVerifier>>();
-        _output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
-        var faker = new Faker();
 
-        _rsa = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();
-        _rsa.ImportFromPem(_testKeyRsaPrivate);
+	#endregion
 
-        _signingKey = new Models.SigningKey()
-        {
-            Created = DateTimeOffset.UnixEpoch,
-            Expires = DateTimeOffset.MaxValue,
-            Family = Models.SigningKey.KeyFamily.Rsa,
-            Id = faker.Random.Guid(),
-            KeyOrder = 0,
-            FediId = new Uri("http://letterbook.example/test/key#0"),
-            Label = "Test key",
-            PrivateKey = _rsa.ExportPkcs8PrivateKey(),
-            PublicKey = _rsa.ExportSubjectPublicKeyInfo()
-        };
-    }
-    
-    [Fact(DisplayName = "Should sign a request")]
-    public void TestSign()
-    {
-        _serviceCollection.AddOptions<MessageSigningOptions>()
-            .Configure(options =>
-            {
-                options.WithMandatoryComponent(SignatureComponent.RequestTarget);
-            });
-        var provider = _serviceCollection.BuildServiceProvider();
-        
-        var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
-        var actual = signer.SignRequest(new HttpRequestMessage(HttpMethod.Get, "http://example.com"), _signingKey);
-        
-        Assert.True(actual.Headers.Contains("Signature"));
-        Assert.True(actual.Headers.Contains("Signature-Input"));
-    }
+	public MastodonSignatureTests(ITestOutputHelper output)
+	{
+		_output = output;
+		_serviceCollection = new ServiceCollection();
+		_logger = Mock.Of<ILogger<MastodonSigner>>();
+		_verifierLogger = Mock.Of<ILogger<MastodonVerifier>>();
+		_output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
+		var faker = new Faker();
 
-    [Fact(DisplayName = "Should verify own signatures")]
-    public void TestSignAndVerify()
-    {
-        _serviceCollection.AddOptions<MessageSigningOptions>()
-            .Configure(options =>
-            {
-                options.WithMandatoryComponent(SignatureComponent.RequestTarget);
-            });
-        var provider = _serviceCollection.BuildServiceProvider();
-        
-        var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
-        var actual = signer.SignRequest(new HttpRequestMessage(HttpMethod.Get, "http://example.com"), _signingKey);
+		_rsa = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();
+		_rsa.ImportFromPem(_testKeyRsaPrivate);
 
-        var verifier = new MastodonVerifier(_verifierLogger);
-        Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
-    }
-    
-    [Fact(DisplayName = "Should handle host/@authority")]
-    public void TestSignAndVerifyHost()
-    {
-        _serviceCollection.AddOptions<MessageSigningOptions>()
-            .Configure(options =>
-            {
-                options.WithMandatoryComponent(SignatureComponent.RequestTarget);
-                options.WithMandatoryComponent(SignatureComponent.Authority);
-            });
-        var provider = _serviceCollection.BuildServiceProvider();
-        
-        var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
-        var actual = signer.SignRequest(new HttpRequestMessage(HttpMethod.Get, "http://example.com"), _signingKey);
+		_signingKey = new Models.SigningKey()
+		{
+			Created = DateTimeOffset.UnixEpoch,
+			Expires = DateTimeOffset.MaxValue,
+			Family = Models.SigningKey.KeyFamily.Rsa,
+			Id = faker.Random.Guid(),
+			KeyOrder = 0,
+			FediId = new Uri("http://letterbook.example/test/key#0"),
+			Label = "Test key",
+			PrivateKey = _rsa.ExportPkcs8PrivateKey(),
+			PublicKey = _rsa.ExportSubjectPublicKeyInfo()
+		};
+	}
 
-        var verifier = new MastodonVerifier(_verifierLogger);
-        Assert.Equal("mastodon=(request-target) host", actual.Headers.GetValues("Signature-Input").First());
-        Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
-    }
+	[Fact(DisplayName = "Should sign a request")]
+	public void TestSign()
+	{
+		_serviceCollection.AddOptions<MessageSigningOptions>()
+			.Configure(options =>
+			{
+				options.WithMandatoryComponent(SignatureComponent.RequestTarget);
+			});
+		var provider = _serviceCollection.BuildServiceProvider();
 
-    [Theory(DisplayName = "Should allow root-URI key ID with and without trailing slash")]
-    [InlineData("http://letterbook.example#0")]
-    [InlineData("http://letterbook.example/#0")]
-    public void TestTrailingSlash(string keyId)
-    {
-        _serviceCollection.AddOptions<MessageSigningOptions>()
-            .Configure(options =>
-            {
-                options.WithMandatoryComponent(SignatureComponent.RequestTarget);
-            });
-        var provider = _serviceCollection.BuildServiceProvider();
+		var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
+		var actual = signer.SignRequest(new HttpRequestMessage(HttpMethod.Get, "http://example.com"), _signingKey);
 
-        var signingKey = new Models.SigningKey()
-        {
-            Created = _signingKey.Created,
-            Expires = _signingKey.Expires,
-            Family = _signingKey.Family,
-            Id = _signingKey.Id,
-            KeyOrder = _signingKey.KeyOrder,
-            FediId = new Uri(keyId),
-            Label = _signingKey.Label,
-            PrivateKey = _signingKey.PrivateKey,
-            PublicKey = _signingKey.PublicKey
-        };
+		Assert.True(actual.Headers.Contains("Signature"));
+		Assert.True(actual.Headers.Contains("Signature-Input"));
+	}
 
-        var actual = new HttpRequestMessage(HttpMethod.Get, "http://example.com");
-        actual.Headers.Add(Headers.SignatureInput, "mastodon=(request-target)");
-        actual.Headers.Add(Headers.Signature, $"keyId=\"{keyId}\",headers=\"(request-target)\",signature=\"HyB9GWpVPsGH1IhoEXYvFMaFT7lPv/kmgMwR4XDCuekUcP9bDEtlMX02sACtibD7vT8K+548bnsQcxVvJcFhJiEjINX4C10vl8f6PGEdzFNh6vDe851Ro5kmEVj70IRdqmD3UoxL9H5d9GSkaMZGVH6O4OcwYnT244K3SkaUUorVlkNVDr0TrKRqDx509J6Dj0eR/zGPuYeqFb4G7iYxITxDZ50BZ/cm83ar9zEL3U4hnuR/dgeh4UZGD6RmEKbKUflt/o8fcoanosQuG4YT684lbWamryJ+DXh1rjgNRV/bKehFM9l+6Mf9CpSSFTOmD0ATet4cUQqtH0G4XSKcSA==\"");
+	[Fact(DisplayName = "Should verify own signatures")]
+	public void TestSignAndVerify()
+	{
+		_serviceCollection.AddOptions<MessageSigningOptions>()
+			.Configure(options =>
+			{
+				options.WithMandatoryComponent(SignatureComponent.RequestTarget);
+			});
+		var provider = _serviceCollection.BuildServiceProvider();
 
-        var verifier = new MastodonVerifier(_verifierLogger);
-        Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, signingKey));
-    }
+		var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
+		var actual = signer.SignRequest(new HttpRequestMessage(HttpMethod.Get, "http://example.com"), _signingKey);
 
-    [Theory(DisplayName = "Should ignore other derived components")]
-    [InlineData(DerivedComponents.Method)]
-    [InlineData(DerivedComponents.Scheme)]
-    [InlineData(DerivedComponents.Path)]
-    [InlineData(DerivedComponents.Query)]
-    public void TestComponents(string name)
-    {
-        _serviceCollection.AddOptions<MessageSigningOptions>()
-            .Configure(options =>
-            {
-                options.WithMandatoryComponent(SignatureComponent.RequestTarget);
-                options.WithMandatoryComponent(new DerivedComponent(name));
-            });
-        var provider = _serviceCollection.BuildServiceProvider();
-        
-        var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
-        var actual = signer.SignRequest(new HttpRequestMessage(HttpMethod.Get, "http://example.com"), _signingKey);
-        Assert.Equal("mastodon=(request-target)", actual.Headers.GetValues("Signature-Input").First());
+		var verifier = new MastodonVerifier(_verifierLogger);
+		Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
+	}
 
-        var verifier = new MastodonVerifier(_verifierLogger);
-        Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
-    }
-    
-    [Theory(DisplayName = "Should include headers")]
-    [InlineData(Headers.ContentLength)]
-    [InlineData(Headers.ContentType)]
-    [InlineData("date")]
-    public void TestHeaders(string name)
-    {
-        _serviceCollection.AddOptions<MessageSigningOptions>()
-            .Configure(options =>
-            {
-                options.WithMandatoryComponent(SignatureComponent.RequestTarget);
-                options.WithMandatoryComponent(new HttpHeaderComponent(name));
-            });
-        var provider = _serviceCollection.BuildServiceProvider();
+	[Fact(DisplayName = "Should handle host/@authority")]
+	public void TestSignAndVerifyHost()
+	{
+		_serviceCollection.AddOptions<MessageSigningOptions>()
+			.Configure(options =>
+			{
+				options.WithMandatoryComponent(SignatureComponent.RequestTarget);
+				options.WithMandatoryComponent(SignatureComponent.Authority);
+			});
+		var provider = _serviceCollection.BuildServiceProvider();
 
-        var content = new StringContent("hello, world");
-        var message = new HttpRequestMessage(HttpMethod.Post, "http://example.com")
-        {
-            Content = content,
-        };
-        message.Headers.Date = DateTimeOffset.UnixEpoch;
-        message.Content.Headers.ContentLength = 100;
-        message.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("text/plain");
-        var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
-        var actual = signer.SignRequest(message, _signingKey);
-        Assert.Equal($"mastodon=(request-target) {name}", actual.Headers.GetValues("Signature-Input").First());
+		var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
+		var actual = signer.SignRequest(new HttpRequestMessage(HttpMethod.Get, "http://example.com"), _signingKey);
 
-        var verifier = new MastodonVerifier(_verifierLogger);
-        Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
-    }
+		var verifier = new MastodonVerifier(_verifierLogger);
+		Assert.Equal("mastodon=(request-target) host", actual.Headers.GetValues("Signature-Input").First());
+		Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
+	}
+
+	[Theory(DisplayName = "Should allow root-URI key ID with and without trailing slash")]
+	[InlineData("http://letterbook.example#0")]
+	[InlineData("http://letterbook.example/#0")]
+	public void TestTrailingSlash(string keyId)
+	{
+		_serviceCollection.AddOptions<MessageSigningOptions>()
+			.Configure(options =>
+			{
+				options.WithMandatoryComponent(SignatureComponent.RequestTarget);
+			});
+		var provider = _serviceCollection.BuildServiceProvider();
+
+		var signingKey = new Models.SigningKey()
+		{
+			Created = _signingKey.Created,
+			Expires = _signingKey.Expires,
+			Family = _signingKey.Family,
+			Id = _signingKey.Id,
+			KeyOrder = _signingKey.KeyOrder,
+			FediId = new Uri(keyId),
+			Label = _signingKey.Label,
+			PrivateKey = _signingKey.PrivateKey,
+			PublicKey = _signingKey.PublicKey
+		};
+
+		var actual = new HttpRequestMessage(HttpMethod.Get, "http://example.com");
+		actual.Headers.Add(Headers.SignatureInput, "mastodon=(request-target)");
+		actual.Headers.Add(Headers.Signature, $"keyId=\"{keyId}\",headers=\"(request-target)\",signature=\"HyB9GWpVPsGH1IhoEXYvFMaFT7lPv/kmgMwR4XDCuekUcP9bDEtlMX02sACtibD7vT8K+548bnsQcxVvJcFhJiEjINX4C10vl8f6PGEdzFNh6vDe851Ro5kmEVj70IRdqmD3UoxL9H5d9GSkaMZGVH6O4OcwYnT244K3SkaUUorVlkNVDr0TrKRqDx509J6Dj0eR/zGPuYeqFb4G7iYxITxDZ50BZ/cm83ar9zEL3U4hnuR/dgeh4UZGD6RmEKbKUflt/o8fcoanosQuG4YT684lbWamryJ+DXh1rjgNRV/bKehFM9l+6Mf9CpSSFTOmD0ATet4cUQqtH0G4XSKcSA==\"");
+
+		var verifier = new MastodonVerifier(_verifierLogger);
+		Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, signingKey));
+	}
+
+	[Theory(DisplayName = "Should ignore other derived components")]
+	[InlineData(DerivedComponents.Method)]
+	[InlineData(DerivedComponents.Scheme)]
+	[InlineData(DerivedComponents.Path)]
+	[InlineData(DerivedComponents.Query)]
+	public void TestComponents(string name)
+	{
+		_serviceCollection.AddOptions<MessageSigningOptions>()
+			.Configure(options =>
+			{
+				options.WithMandatoryComponent(SignatureComponent.RequestTarget);
+				options.WithMandatoryComponent(new DerivedComponent(name));
+			});
+		var provider = _serviceCollection.BuildServiceProvider();
+
+		var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
+		var actual = signer.SignRequest(new HttpRequestMessage(HttpMethod.Get, "http://example.com"), _signingKey);
+		Assert.Equal("mastodon=(request-target)", actual.Headers.GetValues("Signature-Input").First());
+
+		var verifier = new MastodonVerifier(_verifierLogger);
+		Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
+	}
+
+	[Theory(DisplayName = "Should include headers")]
+	[InlineData(Headers.ContentLength)]
+	[InlineData(Headers.ContentType)]
+	[InlineData("date")]
+	public void TestHeaders(string name)
+	{
+		_serviceCollection.AddOptions<MessageSigningOptions>()
+			.Configure(options =>
+			{
+				options.WithMandatoryComponent(SignatureComponent.RequestTarget);
+				options.WithMandatoryComponent(new HttpHeaderComponent(name));
+			});
+		var provider = _serviceCollection.BuildServiceProvider();
+
+		var content = new StringContent("hello, world");
+		var message = new HttpRequestMessage(HttpMethod.Post, "http://example.com")
+		{
+			Content = content,
+		};
+		message.Headers.Date = DateTimeOffset.UnixEpoch;
+		message.Content.Headers.ContentLength = 100;
+		message.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("text/plain");
+		var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
+		var actual = signer.SignRequest(message, _signingKey);
+		Assert.Equal($"mastodon=(request-target) {name}", actual.Headers.GetValues("Signature-Input").First());
+
+		var verifier = new MastodonVerifier(_verifierLogger);
+		Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
+	}
 }

@@ -1,1 +1,1 @@
-﻿// Global using directives
+// Global using directives
