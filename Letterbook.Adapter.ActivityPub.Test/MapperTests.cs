@@ -12,6 +12,8 @@ using Letterbook.Core.Tests.Fixtures;
 using Medo;
 using Xunit.Abstractions;
 
+using static Letterbook.Adapter.ActivityPub.Test.TestDataHelpers;
+
 namespace Letterbook.Adapter.ActivityPub.Test;
 
 /// <summary>
@@ -20,8 +22,6 @@ namespace Letterbook.Adapter.ActivityPub.Test;
 /// </summary>
 public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 {
-	private static string DataDir => Path.Join(
-		Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Data");
 
 	public class MapFromModelTests : IClassFixture<JsonLdSerializerFixture>
 	{
@@ -132,7 +132,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		[Fact]
 		public void CanMapLetterbookActor()
 		{
-			using var fs = new FileStream(Path.Join(DataDir, "LetterbookActor.json"), FileMode.Open);
+			using var fs = ReadTestData("LetterbookActor.json");
 			var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
 			var mapped = AstMapper.Map<Models.Profile>(actor);
 
@@ -142,7 +142,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		[Fact]
 		public void CanMapMastodonActor()
 		{
-			using var fs = new FileStream(Path.Join(DataDir, "Actor.json"), FileMode.Open);
+			using var fs = ReadTestData("Actor.json");
 			var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
 			var mapped = AstMapper.Map<Models.Profile>(actor);
 

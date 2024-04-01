@@ -10,8 +10,9 @@ using Letterbook.Core.Tests.Mocks;
 using Letterbook.Core.Values;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Moq.Protected;
 using Xunit.Abstractions;
+
+using static Letterbook.Adapter.ActivityPub.Test.TestDataHelpers;
 
 namespace Letterbook.Adapter.ActivityPub.Test;
 
@@ -143,29 +144,19 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 	[Fact(DisplayName = "Should fetch a profile and successfully deserialize it")]
 	public async Task FetchProfile()
 	{
-		HttpRequestMessage? message = default;
 		HttpMessageHandlerMock
-			.SetupResponse(HttpStatusCode.Accepted)
-			.Callback((HttpRequestMessage m, CancellationToken _) => message = m);
+			.SetupResponse(r =>
+			{
+				r.StatusCode = HttpStatusCode.OK;
+				r.Content = new StreamContent(ReadTestData("Actor.json"))
+				{
+					Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
+				};
+			});
 
-		await _client.As(_profile).SendAccept(_targetProfile.Inbox, Models.ActivityType.Follow,
-			_targetProfile.FediId, _profile.FediId);
+		var profile = await _client.As(_profile).Fetch<Models.Profile>(_targetProfile.FediId);
 
-		Assert.NotNull(message?.Content);
-
-		var payload = await message.Content.ReadAsStringAsync();
-		var actualAccept = JsonNode.Parse(payload);
-
-		// Assert on the outer Accept activity
-		Assert.NotNull(actualAccept);
-		Assert.Equal("Accept", actualAccept["type"]!.GetValue<string>());
-		Assert.Equal(_profile.FediId.ToString(), actualAccept["actor"]!.GetValue<string>());
-
-		// Assert on the inner Follow activity
-		var actualFollow = actualAccept["object"];
-		Assert.NotNull(actualFollow);
-		Assert.Equal("Follow", actualFollow["type"]!.GetValue<string>());
-		Assert.Equal(_targetProfile.FediId.ToString(), actualFollow["actor"]!.GetValue<string>());
-		Assert.Equal(_profile.FediId.ToString(), actualFollow["object"]!.GetValue<string>());
+		Assert.NotNull(profile);
+		Assert.Equal("user", profile.Handle);
 	}
 }
