@@ -154,7 +154,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 				};
 			});
 
-		var profile = await _client.As(_profile).Fetch<Models.Profile>(_targetProfile.FediId);
+		var profile = await _client.As(_profile).Fetch<Models.Profile>(new Uri("http://localhost:3080/users/user"));
 
 		Assert.NotNull(profile);
 		Assert.Equal("user", profile.Handle);

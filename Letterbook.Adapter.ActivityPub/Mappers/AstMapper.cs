@@ -1,3 +1,4 @@
+using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
 using ActivityPub.Types.AS.Extended.Object;
@@ -21,6 +22,7 @@ public static class AstMapper
 		ConfigureBaseTypes(cfg);
 		FromActor(cfg);
 		FromNote(cfg);
+		FromASType(cfg);
 	});
 
 	private static void FromActor(IMapperConfigurationExpression cfg)
@@ -97,6 +99,12 @@ public static class AstMapper
 			.ForMember(dest => dest.Audience,
 				opt => opt.MapFrom<AudienceResolver, LinkableList<ASObject>>(src => src.Audience));
 	}
+
+    private static void FromASType(IMapperConfigurationExpression cfg)
+    {
+	    cfg.CreateMap<ASType, Models.Profile>()
+		    .ConvertUsing<ASTypeConverter>();
+    }
 
 	private static void ConfigureBaseTypes(IMapperConfigurationExpression cfg)
 	{
@@ -445,5 +453,34 @@ public class NaturalLanguageStringConverter
 		}
 
 		return source.DefaultValue;
+	}
+}
+
+[UsedImplicitly]
+internal class ASTypeConverter :
+	ITypeConverter<ASType, Models.Profile>
+{
+	public Models.Profile Convert(ASType source, Models.Profile destination, ResolutionContext context)
+		=> Convert<PersonActorExtension, Models.Profile>(source, destination, context);
+
+	private TFederated Convert<TASType, TFederated>(ASType source, TFederated destination, ResolutionContext context)
+		where TASType : ASType, IASModel<TASType>
+		where TFederated : IFederated
+	{
+		if (!source.Is<TASType>(out var specificType))
+		{
+			string sourceTypeName = string.Join(", ", source.Type);
+			throw new AutoMapperMappingException(
+				$"Object with type [{sourceTypeName}] can not be converted to {typeof(TFederated).FullName}.");
+		}
+
+		if (destination is null)
+		{
+			return context.Mapper.Map<TFederated>(specificType);
+		}
+
+		context.Mapper.Map(specificType, destination);
+
+		return destination;
 	}
 }
