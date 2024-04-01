@@ -460,14 +460,14 @@ public class NaturalLanguageStringConverter
 internal class ASTypeConverter :
 	ITypeConverter<ASType, Models.Profile>
 {
-	public Models.Profile Convert(ASType source, Models.Profile destination, ResolutionContext context)
+	public Models.Profile Convert(ASType source, Models.Profile? destination, ResolutionContext context)
 		=> Convert<PersonActorExtension, Models.Profile>(source, destination, context);
 
-	private TFederated Convert<TASType, TFederated>(ASType source, TFederated destination, ResolutionContext context)
+	private TFederated Convert<TASType, TFederated>(ASType source, TFederated? destination, ResolutionContext context)
 		where TASType : ASType, IASModel<TASType>
 		where TFederated : IFederated
 	{
-		if (!source.Is<TASType>(out var specificType))
+		if (!source.Is<TASType>(out var typedSource))
 		{
 			string sourceTypeName = string.Join(", ", source.Type);
 			throw new AutoMapperMappingException(
@@ -476,10 +476,10 @@ internal class ASTypeConverter :
 
 		if (destination is null)
 		{
-			return context.Mapper.Map<TFederated>(specificType);
+			return context.Mapper.Map<TFederated>(typedSource);
 		}
 
-		context.Mapper.Map(specificType, destination);
+		context.Mapper.Map(typedSource, destination);
 
 		return destination;
 	}
