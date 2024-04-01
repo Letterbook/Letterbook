@@ -44,7 +44,7 @@ public static class HttpHandlerMockExtensions
 				It.IsAny<CancellationToken>()
 			))
 			: mock.Setup(m => m.SendMessageAsync(
-				It.IsAny<HttpRequestMessage>(),
+				It.Is<HttpRequestMessage>(msg => predicate(msg)),
 				It.IsAny<CancellationToken>()
 			));
 
