@@ -147,6 +147,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			var mapped = AstMapper.Map<Models.Profile>(actor);
 
 			Assert.NotNull(mapped);
+			Assert.Equal("user", mapped.Handle);
 		}
 
 		[Fact]

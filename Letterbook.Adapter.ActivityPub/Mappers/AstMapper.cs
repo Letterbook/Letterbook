@@ -12,7 +12,7 @@ using Org.BouncyCastle.OpenSsl;
 namespace Letterbook.Adapter.ActivityPub.Mappers;
 
 /// <summary>
-/// Map ActivityPubSharp objects to Model types 
+/// Map ActivityPubSharp objects to Model types
 /// </summary>
 public static class AstMapper
 {
@@ -114,6 +114,9 @@ public static class AstMapper
 
 		cfg.CreateMap<string, ReadOnlyMemory<byte>>()
 			.ConvertUsing<PublicKeyConverter>();
+
+		cfg.CreateMap<NaturalLanguageString?, string?>()
+			.ConvertUsing<NaturalLanguageStringConverter>();
 	}
 }
 
@@ -427,5 +430,20 @@ internal class PublicKeyConverter :
 				.Skip(1)
 				.SkipLast(1));
 		return System.Convert.FromBase64String(b64);
+	}
+}
+
+[UsedImplicitly]
+public class NaturalLanguageStringConverter
+	: ITypeConverter<NaturalLanguageString?, string?>
+{
+	public string? Convert(NaturalLanguageString? source, string? destination, ResolutionContext context)
+	{
+		if (source == null)
+		{
+			return null;
+		}
+
+		return source.DefaultValue;
 	}
 }
