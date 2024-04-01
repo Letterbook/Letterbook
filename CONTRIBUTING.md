@@ -16,6 +16,7 @@
   - [Dependencies](#dependencies)
   - [Database](#database)
   - [Peers](#peers)
+  - [MacOS OpenSSL](#macos-openssl)
 - [License](#license)
 
 
@@ -141,6 +142,32 @@ This processes is documented in [Letterbook.Adapter.Db](Letterbook.Adapter.Db/re
 ### Peers
 
 In addition to Letterbook's own dependencies, you may find it useful to have a 3rd party system to exercise federation. The [Letterbook Sandcastles project][sandcastles] provides pre-configured instances of some other fediverse software. We encourage you to make use of that, and to contribute configurations for any other federated peers you're familiar with.
+
+### MacOS OpenSSL
+
+Letterbook uses OpenSSL for its RSA implementation. If you are running on MacOS, you are likely to run into an exception:
+
+```
+System.PlatformNotSupportedException: OpenSSL is required for algorithm 'RSAOpenSsl' but could not be found
+```
+
+You can fix this by installing OpenSSL via [Homebrew](https://brew.sh) and providing its library path to the dotnet 
+runtime. This is done by setting the environment variable `DYLD_LIBRARY_PATH`. The correct value might vary by version,
+but it's likely to be `/opt/homebrew/opt/openssl@3/lib`.
+
+If your run dotnet from the command line, you can add the environment variable to your shell's startup script.
+
+If you use JetBrains Rider as your IDE, things are a bit more complicated. Rider doesn't launch via a shell, and MacOS
+doesn't currently seem to provide a way to set global environment variables. You can work around this by either adding the
+environment variable in the [launch settings file](Letterbook.Api/Properties/launchSettings.json) or creating a
+local launch configuration in Rider and configuring the environment variable there:
+
+![Screenshot of an example Rider launch configuration that specifies the library path](docs/rider-macos-openssl-launch-config.png)
+
+For test runs, you can set the path in Rider settings: 
+Settings -> Build, Execution, Deployment -> Unit Testing -> Test Runner
+
+![Screenshot of an example Rider test runner configuration that specifies the library path](docs/rider-macos-openssl-test-runner.png)
 
 ## License
 
