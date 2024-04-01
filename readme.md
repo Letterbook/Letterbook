@@ -103,7 +103,7 @@ timeline
         ActivityPub & friends       : ActivityStreams types : ActivityPub APIs : Data models and persistance : Webfinger API : HTTP Signatures : Message queue
     section Single user preview 👤
         Posting 🟢                  : Data models ☑️ : Core logic ☑️ : Db Schema ☑️ : APIs ☑️ : Federation : 3rd party APIs 
-        Account management 🟢       : Data models ☑️ : Db schema ☑️ : APIs : Contact management : Password management : Email verification : 3rd party APIs 
+        Account management 🟢       : Data models ☑️ : Db schema ☑️ : Account creation ☑️ : APIs : Contact management : Password management : Email verification : 3rd party APIs 
         Authn/Authz 🟢              : Data models ☑️ : Password verification ☑️ : Token creation/verification ☑️ : Login/logout/challenge : Claims scheme : OIDC support 
         Feeds 🔴                    : Data models ☑️ : Db schema : APIs : Populate data : 3rd party APIs 
         Moderation 🔴               : Data models : Db schema : APIs : Block : Mute : Suspend : Report : Federation limits : 3rd party APIs 
