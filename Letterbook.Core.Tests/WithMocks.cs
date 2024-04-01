@@ -3,6 +3,7 @@ using ActivityPub.Types;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Authorization;
 using Letterbook.Core.Models;
+using Letterbook.Core.Tests.Mocks;
 using Medo;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -21,7 +22,7 @@ public abstract class WithMocks
 	protected Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock;
 	protected Mock<IProfileService> ProfileServiceMock;
 	protected IOptions<CoreOptions> CoreOptionsMock;
-	protected Mock<HttpMessageHandler> HttpMessageHandlerMock;
+	protected Mock<MockableMessageHandler> HttpMessageHandlerMock;
 	protected ServiceCollection MockedServiceCollection;
 	protected Mock<IPostEventService> PostEventServiceMock;
 	protected Mock<IPostService> PostServiceMock;
@@ -30,7 +31,7 @@ public abstract class WithMocks
 
 	protected WithMocks()
 	{
-		HttpMessageHandlerMock = new Mock<HttpMessageHandler>();
+		HttpMessageHandlerMock = new Mock<MockableMessageHandler>();
 		ActivityAdapterMock = new Mock<IActivityAdapter>();
 		PostAdapterMock = new Mock<IPostAdapter>();
 		AccountProfileMock = new Mock<IAccountProfileAdapter>();
@@ -83,5 +84,4 @@ public abstract class WithMocks
 
 		Decision Allow(IEnumerable<Claim> claims, IFederated _, Uuid7 __) => Decision.Allow("Mock", claims);
 	}
-
 }
