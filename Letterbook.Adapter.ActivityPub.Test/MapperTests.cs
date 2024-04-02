@@ -12,8 +12,6 @@ using Letterbook.Core.Tests.Fixtures;
 using Medo;
 using Xunit.Abstractions;
 
-using static Letterbook.Adapter.ActivityPub.Test.TestDataHelpers;
-
 namespace Letterbook.Adapter.ActivityPub.Test;
 
 /// <summary>
@@ -132,7 +130,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		[Fact]
 		public void CanMapLetterbookActor()
 		{
-			using var fs = ReadTestData("LetterbookActor.json");
+			using var fs = TestData.Read("LetterbookActor.json");
 			var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
 			var mapped = AstMapper.Map<Models.Profile>(actor);
 
@@ -142,7 +140,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		[Fact]
 		public void CanMapMastodonActor()
 		{
-			using var fs = ReadTestData("Actor.json");
+			using var fs = TestData.Read("Actor.json");
 			var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
 			var mapped = AstMapper.Map<Models.Profile>(actor);
 

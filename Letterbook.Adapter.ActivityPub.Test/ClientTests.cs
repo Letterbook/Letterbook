@@ -12,8 +12,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
 
-using static Letterbook.Adapter.ActivityPub.Test.TestDataHelpers;
-
 namespace Letterbook.Adapter.ActivityPub.Test;
 
 public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
@@ -148,7 +146,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 			.SetupResponse(r =>
 			{
 				r.StatusCode = HttpStatusCode.OK;
-				r.Content = new StreamContent(ReadTestData("Actor.json"))
+				r.Content = new StreamContent(TestData.Read("Actor.json"))
 				{
 					Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
 				};
