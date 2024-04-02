@@ -20,7 +20,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Enrichers.Span;
@@ -33,12 +35,12 @@ public class Program
 	public static void Main(string[] args)
 	{
 		// Pre initialize Serilog
-		// Log.Logger = new LoggerConfiguration()
-			// .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-			// .Enrich.FromLogContext()
-			// .Enrich.WithSpan()
-			// .WriteTo.Console()
-			// .CreateBootstrapLogger();
+		Log.Logger = new LoggerConfiguration()
+			.MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+			.Enrich.FromLogContext()
+			.Enrich.WithSpan()
+			.WriteTo.Console()
+			.CreateBootstrapLogger();
 
 		var builder = WebApplication.CreateBuilder(args);
 		var coreSection = builder.Configuration.GetSection(CoreOptions.ConfigKey);
@@ -101,14 +103,22 @@ public class Program
 
 		// Register Open Telemetry
 		builder.Services.AddOpenTelemetry()
+			.ConfigureResource(resource =>
+			{
+				resource.AddService("Letterbook");
+			})
 			.WithMetrics(metrics =>
 			{
 				metrics.AddAspNetCoreInstrumentation();
+				metrics.AddHttpClientInstrumentation();
+				metrics.AddMeter("Npgsql");
 				metrics.AddPrometheusExporter();
 			})
 			.WithTracing(tracing =>
 			{
 				tracing.AddAspNetCoreInstrumentation();
+				tracing.AddHttpClientInstrumentation();
+				tracing.AddNpgsql();
 				tracing.AddOtlpExporter();
 			});
 		builder.Services.AddHealthChecks();

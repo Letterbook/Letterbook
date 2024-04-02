@@ -78,12 +78,8 @@ services:
       - ./Letterbook.Dashboards/Tempo/tempo.yaml:/etc/tempo.yaml
       - letterbook_tempo_data:/tmp/tempo
     ports:
-      - "14268:14268"  # jaeger ingest
-      - "3200:3200"   # tempo
       - "9095:9095" # tempo grpc
       - "4317:4317"  # otlp grpc
-      - "4318:4318"  # otlp http
-      - "9411:9411"   # zipkin
     restart: unless-stopped
 
   db_metrics_exporter:
