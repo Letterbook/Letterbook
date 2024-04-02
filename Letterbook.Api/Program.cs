@@ -20,8 +20,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
+using Serilog.Enrichers.Span;
 using Serilog.Events;
 
 namespace Letterbook.Api;
@@ -34,6 +38,7 @@ public class Program
 		Log.Logger = new LoggerConfiguration()
 			.MinimumLevel.Override("Microsoft", LogEventLevel.Information)
 			.Enrich.FromLogContext()
+			.Enrich.WithSpan()
 			.WriteTo.Console()
 			.CreateBootstrapLogger();
 
@@ -46,8 +51,11 @@ public class Program
 			builder.Configuration.AddUserSecrets<Program>();
 		// Register Serilog - Serialized Logging (configured in appsettings.json)
 		builder.Host.UseSerilog((context, services, configuration) => configuration
+			.Enrich.FromLogContext()
+			.Enrich.WithSpan()
 			.ReadFrom.Configuration(context.Configuration)
-			.ReadFrom.Services(services));
+			.ReadFrom.Services(services)
+		);
 
 		// Register controllers
 		builder.Services
@@ -95,11 +103,25 @@ public class Program
 
 		// Register Open Telemetry
 		builder.Services.AddOpenTelemetry()
+			.ConfigureResource(resource =>
+			{
+				resource.AddService("Letterbook");
+			})
 			.WithMetrics(metrics =>
 			{
 				metrics.AddAspNetCoreInstrumentation();
+				metrics.AddHttpClientInstrumentation();
+				metrics.AddMeter("Npgsql");
 				metrics.AddPrometheusExporter();
+			})
+			.WithTracing(tracing =>
+			{
+				tracing.AddAspNetCoreInstrumentation();
+				tracing.AddHttpClientInstrumentation();
+				tracing.AddNpgsql();
+				tracing.AddOtlpExporter();
 			});
+		builder.Services.AddHealthChecks();
 
 		builder.Services.AddActivityPubClient(coreOptions.DomainName);
 
@@ -164,6 +186,8 @@ public class Program
 
 		app.UseAuthentication();
 		app.UseAuthorization();
+
+		app.UseHealthChecks("/healthz");
 
 		app.UseWebFingerScoped();
 
