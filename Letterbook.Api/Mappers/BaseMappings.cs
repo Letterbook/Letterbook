@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Letterbook.Api.Dto;
+using Letterbook.Api.Mappers.Converters;
 using Models = Letterbook.Core.Models;
 using Medo;
 
