@@ -1,3 +1,4 @@
+using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
 using ActivityPub.Types.AS.Extended.Object;
@@ -12,7 +13,7 @@ using Org.BouncyCastle.OpenSsl;
 namespace Letterbook.Adapter.ActivityPub.Mappers;
 
 /// <summary>
-/// Map ActivityPubSharp objects to Model types 
+/// Map ActivityPubSharp objects to Model types
 /// </summary>
 public static class AstMapper
 {
@@ -21,6 +22,7 @@ public static class AstMapper
 		ConfigureBaseTypes(cfg);
 		FromActor(cfg);
 		FromNote(cfg);
+		FromASType(cfg);
 	});
 
 	private static void FromActor(IMapperConfigurationExpression cfg)
@@ -98,6 +100,12 @@ public static class AstMapper
 				opt => opt.MapFrom<AudienceResolver, LinkableList<ASObject>>(src => src.Audience));
 	}
 
+    private static void FromASType(IMapperConfigurationExpression cfg)
+    {
+	    cfg.CreateMap<ASType, Models.Profile>()
+		    .ConvertUsing<ASTypeConverter>();
+    }
+
 	private static void ConfigureBaseTypes(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<ASLink, Uri>()
@@ -114,6 +122,9 @@ public static class AstMapper
 
 		cfg.CreateMap<string, ReadOnlyMemory<byte>>()
 			.ConvertUsing<PublicKeyConverter>();
+
+		cfg.CreateMap<NaturalLanguageString?, string?>()
+			.ConvertUsing<NaturalLanguageStringConverter>();
 	}
 }
 
@@ -427,5 +438,49 @@ internal class PublicKeyConverter :
 				.Skip(1)
 				.SkipLast(1));
 		return System.Convert.FromBase64String(b64);
+	}
+}
+
+[UsedImplicitly]
+public class NaturalLanguageStringConverter
+	: ITypeConverter<NaturalLanguageString?, string?>
+{
+	public string? Convert(NaturalLanguageString? source, string? destination, ResolutionContext context)
+	{
+		if (source == null)
+		{
+			return null;
+		}
+
+		return source.DefaultValue;
+	}
+}
+
+[UsedImplicitly]
+internal class ASTypeConverter :
+	ITypeConverter<ASType, Models.Profile>
+{
+	public Models.Profile Convert(ASType source, Models.Profile? destination, ResolutionContext context)
+		=> Convert<PersonActorExtension, Models.Profile>(source, destination, context);
+
+	private TFederated Convert<TASType, TFederated>(ASType source, TFederated? destination, ResolutionContext context)
+		where TASType : ASType, IASModel<TASType>
+		where TFederated : IFederated
+	{
+		if (!source.Is<TASType>(out var typedSource))
+		{
+			string sourceTypeName = string.Join(", ", source.Type);
+			throw new AutoMapperMappingException(
+				$"Object with type [{sourceTypeName}] can not be converted to {typeof(TFederated).FullName}.");
+		}
+
+		if (destination is null)
+		{
+			return context.Mapper.Map<TFederated>(typedSource);
+		}
+
+		context.Mapper.Map(typedSource, destination);
+
+		return destination;
 	}
 }
