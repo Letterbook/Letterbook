@@ -206,4 +206,18 @@ public class MapperTests : WithMocks
 		Assert.Equal(expected.Description, actual.Description);
 		Assert.Equal(expected.Type, actual.Type);
 	}
+
+	[Fact(DisplayName = "Should map SigningKeys")]
+	public void CanMapPublicKey()
+	{
+		var expected = new FakeProfile("letterbook.example").Generate().Keys.First();
+
+		var actual = _profileMapper.Map<PublicKeyDto>(expected);
+
+		Assert.NotNull(actual);
+		Assert.Equal(expected.FediId, actual.FediId);
+		Assert.Equal(expected.Label, actual.Label);
+		Assert.Equal(expected.GetRsa().ExportSubjectPublicKeyInfoPem(), actual.PublicKeyPem);
+		Assert.Equal(expected.Family.ToString(), actual.Family);
+	}
 }
