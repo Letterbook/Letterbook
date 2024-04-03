@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 
 namespace Letterbook.Adapter.ActivityPub.Mappers;
 

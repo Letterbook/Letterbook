@@ -132,6 +132,9 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<string>("Preview")
                         .HasColumnType("text");
 
+                    b.Property<int?>("SortKey")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Source")
                         .HasColumnType("text");
 

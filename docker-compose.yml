@@ -18,6 +18,10 @@ services:
   letterbook_db:
     container_name: postgres
     image: postgres:15-alpine
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
     environment:
       - POSTGRES_USER=letterbook
       - POSTGRES_PASSWORD=letterbookpw
@@ -26,7 +30,7 @@ services:
       - "5432:5432"
     volumes:
       - letterbook_db_data:/var/lib/postgresql/data
-      - ./volumes/postgresql.conf:/var/lib/postgresql/data/postgresql.conf
+      - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf
     restart: always
 
   # Optional Dashboarding and Observability Services 
@@ -48,6 +52,7 @@ services:
     depends_on:
       - loki
       - prometheus
+      - tempo
     container_name: grafana
     image: grafana/grafana-oss:10.2.0
     ports:
@@ -65,8 +70,34 @@ services:
       - "./Letterbook.Dashboards/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
     restart: unless-stopped
     
+  tempo:
+    container_name: tempo
+    image: grafana/tempo:2.4.1
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./Letterbook.Dashboards/Tempo/tempo.yaml:/etc/tempo.yaml
+      - letterbook_tempo_data:/tmp/tempo
+    ports:
+      - "9095:9095" # tempo grpc
+      - "4317:4317"  # otlp grpc
+    restart: unless-stopped
+
+  db_metrics_exporter:
+    container_name: metrics_exporter
+    image: prometheuscommunity/postgres-exporter
+    depends_on:
+      - timescale
+      - letterbook_db
+    ports:
+      - 9187:9187
+    volumes:
+      - "./Letterbook.Dashboards/Postgres/Prometheus/postgres_exporter.yml:/postgres_exporter.yml"
+    restart: unless-stopped
+
 volumes:
   letterbook_db_data:
     driver: local
   letterbook_ts_data:
+    driver: local
+  letterbook_tempo_data:
     driver: local

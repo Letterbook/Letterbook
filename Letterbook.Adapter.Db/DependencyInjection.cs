@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -17,7 +17,10 @@ public static class DependencyInjection
 
 	internal static NpgsqlDataSource DataSource(DbOptions dbOptions)
 	{
-		var dataSource = new NpgsqlDataSourceBuilder(dbOptions.GetConnectionString());
+		var dataSource = new NpgsqlDataSourceBuilder(dbOptions.GetConnectionString())
+		{
+			Name = dbOptions.Database ?? "letterbook"
+		};
 		dataSource.EnableDynamicJson();
 
 		return dataSource.Build();

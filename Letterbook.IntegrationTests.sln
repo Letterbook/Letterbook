@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Activity
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Db.Tests", "Letterbook.Adapter.Db.Tests\Letterbook.Adapter.Db.Tests.csproj", "{A477521D-7BF1-4BED-8578-8EAAF0C0EB69}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Api.Tests", "Letterbook.Api.Tests\Letterbook.Api.Tests.csproj", "{DA5D0ACF-AE26-43EE-B38F-E02965BB42FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,5 +100,9 @@ Global
 		{A477521D-7BF1-4BED-8578-8EAAF0C0EB69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A477521D-7BF1-4BED-8578-8EAAF0C0EB69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A477521D-7BF1-4BED-8578-8EAAF0C0EB69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA5D0ACF-AE26-43EE-B38F-E02965BB42FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA5D0ACF-AE26-43EE-B38F-E02965BB42FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA5D0ACF-AE26-43EE-B38F-E02965BB42FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA5D0ACF-AE26-43EE-B38F-E02965BB42FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

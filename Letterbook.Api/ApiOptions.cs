@@ -1,6 +1,6 @@
-﻿namespace Letterbook.Api;
+namespace Letterbook.Api;
 
 public class ApiOptions
 {
-    public const string ConfigKey = "Letterbook.Api";
+	public const string ConfigKey = "Letterbook.Api";
 }
