@@ -8,34 +8,12 @@ using Models = Letterbook.Core.Models;
 
 namespace Letterbook.Api.Mappers;
 
-public class InstanceMappings : AutoMapper.Profile
+public class PostMappings : AutoMapper.Profile
 {
-	public InstanceMappings(IOptions<CoreOptions> options)
+	public PostMappings(IOptions<CoreOptions> options)
 	{
 		CreateMap<MentionDto, Mention>(MemberList.Source)
 			.ForMember(dest => dest.Subject, opt => opt.MapFrom(src => src.Mentioned));
-		CreateMap<AudienceDto, Audience>(MemberList.Source)
-			.ForSourceMember(dto => dto.SourceType, opt => opt.DoNotValidate())
-			.ForSourceMember(dto => dto.SourceId, opt => opt.DoNotValidate());
-		CreateMap<Audience, AudienceDto>(MemberList.Destination)
-			.ForMember(dto => dto.SourceType, opt => opt.Ignore())
-			.ForMember(dto => dto.SourceId, opt => opt.Ignore());
-		CreateMap<IFederated, Uuid7>()
-			.ConvertUsing<IdUuid7Converter>();
-		CreateMap<Mention, Uuid7>()
-			.ConvertUsing<IdUuid7Converter>();
-		CreateMap<ThreadContext, Uuid7>()
-			.ConvertUsing<IdUuid7Converter>();
-		CreateMap<Uuid7, Models.Profile>(MemberList.None)
-			.ConstructUsing(uuid7 => Models.Profile.CreateEmpty(uuid7));
-		CreateMap<Uuid7, Post>(MemberList.None);
-		CreateMap<Uuid7, Guid>().ConstructUsing(uuid7 => uuid7.ToGuid());
-		CreateMap<Guid, Uuid7>().ConstructUsing(guid => Uuid7.FromGuid(guid));
-		CreateMap<Uuid7, string>().ConstructUsing(uuid => uuid.ToId25String());
-		CreateMap<string?, Uuid7>().ConstructUsing(str => str == null ? Uuid7.NewUuid7() : Uuid7.FromId25String(str));
-		CreateMap<string?, Guid>().ConstructUsing(str => str == null ? Uuid7.NewUuid7().ToGuid() : Uuid7.FromId25String(str).ToGuid());
-		CreateMap<string, Models.Profile>(MemberList.None)
-			.ConstructUsing(s => Models.Profile.CreateEmpty(Uuid7.FromId25String(s)));
 
 		CreateMap<ThreadContext, ThreadDto>(MemberList.Destination);
 		CreateMap<ThreadDto, ThreadContext>(MemberList.Source);
@@ -81,18 +59,23 @@ public class InstanceMappings : AutoMapper.Profile
 
 		CreateMap<Models.Profile, MiniProfileDto>(MemberList.Destination);
 		CreateMap<MiniProfileDto, Models.Profile>(MemberList.Source);
-
-		CreateMap<DateTimeOffset?, DateTimeOffset?>()
-			.ConvertUsing<DateTimeOffsetMapper>();
-		CreateMap<DateTimeOffset, DateTimeOffset?>()
-			.ConvertUsing<DateTimeOffsetMapper>();
-		CreateMap<DateTimeOffset?, DateTimeOffset>()
-			.ConvertUsing<DateTimeOffsetMapper>();
-		CreateMap<DateTimeOffset, DateTimeOffset>()
-			.ConvertUsing<DateTimeOffsetMapper>();
 	}
 
 	private static Post NewPost(CoreOptions options) => new(options);
+}
+
+public class PublicKeyPemConverter : IValueResolver<SigningKey, PublicKeyDto, string>
+{
+	public string Resolve(SigningKey source, PublicKeyDto destination, string destMember, ResolutionContext context)
+	{
+		return source.Family switch
+		{
+			SigningKey.KeyFamily.Rsa => source.GetRsa().ExportSubjectPublicKeyInfoPem(),
+			SigningKey.KeyFamily.Dsa => source.GetDsa().ExportSubjectPublicKeyInfoPem(),
+			SigningKey.KeyFamily.EcDsa => source.GetEcDsa().ExportSubjectPublicKeyInfoPem(),
+			_ => null!,
+		};
+	}
 }
 
 public class DateTimeOffsetMapper : IValueConverter<DateTimeOffset?, DateTimeOffset>,

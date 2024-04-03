@@ -2,6 +2,7 @@ using AutoMapper;
 using Letterbook.Api.Dto;
 using Letterbook.Api.Mappers;
 using Letterbook.Core.Tests;
+using Letterbook.Core.Tests.Fakes;
 using Medo;
 
 namespace Letterbook.Api.Tests;
@@ -12,14 +13,16 @@ public class MapperTests : WithMocks
 
 	private MappingConfigProvider _mappingConfig;
 	private readonly Mapper _postMapper;
+	private readonly Mapper _profileMapper;
 	private readonly UriBuilder _builder;
 
 	public MapperTests()
 	{
 		_builder = new UriBuilder();
 		_builder.Host = CoreOptionsMock.Value.DomainName;
-		_mappingConfig = new MappingConfigProvider(new InstanceMappings(CoreOptionsMock));
+		_mappingConfig = new MappingConfigProvider(CoreOptionsMock);
 		_postMapper = new Mapper(_mappingConfig.Posts);
+		_profileMapper = new Mapper(_mappingConfig.Profiles);
 	}
 
 	private Uri FediId(Uuid7 id)
@@ -32,6 +35,12 @@ public class MapperTests : WithMocks
 	public void ValidPosts()
 	{
 		_mappingConfig.Posts.AssertConfigurationIsValid();
+	}
+
+	[Fact(DisplayName = "Profiles config is valid")]
+	public void ValidProfiles()
+	{
+		_mappingConfig.Profiles.AssertConfigurationIsValid();
 	}
 
 	[Fact(DisplayName = "Should map PostDto")]
@@ -154,5 +163,47 @@ public class MapperTests : WithMocks
 		Assert.NotNull(actual);
 		Assert.Equal(actual.Subject.GetId(), uuid);
 		Assert.Equal(actual.Visibility, expected.Visibility);
+	}
+
+	[Fact(DisplayName = "Should map ProfileDto")]
+	public void CanMapProfileDto()
+	{
+		var uuid = Uuid7.NewUuid7();
+		var expected = new FullProfileDto
+		{
+			Id = uuid,
+			FediId = new Uri($"https://letterbook.example/actor/{uuid.ToId25String()}"),
+			Handle = "Handle",
+			DisplayName = "DisplayName",
+			Description = "Description",
+			CustomFields = [],
+			Type = Models.ActivityActorType.Person,
+		};
+
+		var actual = _profileMapper.Map<Models.Profile>(expected);
+
+		Assert.NotNull(actual);
+		Assert.Equal(expected.Id, actual.GetId());
+		Assert.Equal(expected.FediId, actual.FediId);
+		Assert.Equal(expected.Handle, actual.Handle);
+		Assert.Equal(expected.DisplayName, actual.DisplayName);
+		Assert.Equal(expected.Description, actual.Description);
+		Assert.Equal(expected.Type, actual.Type);
+	}
+
+	[Fact(DisplayName = "Should map Profile")]
+	public void CanMapProfile()
+	{
+		var expected = new FakeProfile("letterbook.example").Generate();
+
+		var actual = _profileMapper.Map<FullProfileDto>(expected);
+
+		Assert.NotNull(actual);
+		Assert.Equal(expected.GetId(), actual.Id);
+		Assert.Equal(expected.FediId, actual.FediId);
+		Assert.Equal(expected.Handle, actual.Handle);
+		Assert.Equal(expected.DisplayName, actual.DisplayName);
+		Assert.Equal(expected.Description, actual.Description);
+		Assert.Equal(expected.Type, actual.Type);
 	}
 }
