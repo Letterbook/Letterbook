@@ -56,7 +56,7 @@
       "indexable": "toot:indexable"
     }
   ],
-  "id": "http://localhost:3080/users/user",
+  "id": "http://mastodon.example/users/user",
   "type": "Person",
   "following": "http://localhost:3080/users/user/following",
   "followers": "http://localhost:3080/users/user/followers",
