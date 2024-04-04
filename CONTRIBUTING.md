@@ -8,15 +8,16 @@
 - [Documentation](#documentation)
   - [Useful links](#useful-links)
 - [Development](#development)
-  - [Build and Run](#build-and-run)
-    - [Using the `dotnet` CLI](#using-the-dotnet-cli)
-    - [Using VS Code](#using-vs-code)
-    - [Using Jetbrains Rider and VisualStudio](#using-jetbrains-rider-and-visualstudio)
-  - [Secrets](#secrets)
+  - [Quick Start](#quick-start)
+  - [Running tests](#running-tests)
+  - [Using VS Code](#using-vs-code)
+  - [Using Jetbrains Rider and VisualStudio](#using-jetbrains-rider-and-visualstudio)
   - [Dependencies](#dependencies)
-  - [Database](#database)
-  - [Peers](#peers)
+    - [~~Docker~~](#docker)
+    - [Postgresql](#postgresql)
+    - [Host secrets](#host-secrets)
   - [MacOS OpenSSL](#macos-openssl)
+  - [Debugging Federation](#debugging-federation)
 - [License](#license)
 
 
@@ -68,46 +69,77 @@ We've tried to make the process to get up and running as easy as possible. But i
 
 Most things are not implemented, but some of it has been stubbed out to provide some structure to the project. Letterbook is still in the very early stages. So if something looks broken, it probably is; it's not just you.
 
-### Build and Run
+### Quick Start
 
-In all cases, you will need to have the dotnet 8.0 sdk installed on your system. [Microsoft publishes][dotnet] instructions to download it on every platform they support (Windows, MacOS, and several common linux distros).
+This will get you up an running quickly. You can skip ahead for some discussion of our dependencies if you like.
 
-To confirm it's available and working, do:
+0. [Install the dotnet 8 SDK][dotnet] and a docker runtime with docker compose (either [docker desktop][docker] or [podman][podman] should work)
 
+1. Start up the database
 ```shell
-dotnet --version
+docker-compose up -d
 ```
 
-#### Using the `dotnet` CLI
-
-Before continuing to run the project, you'll need to setup [Dependencies][#Dependencies].
-
+2. Migrate the database
 ```shell
+dotnet tool retore
+dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj
+```
+
+3. Add an application host secret
+```shell
+dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook.Api
+```
+
+4. Run Letterbook (in watch mode)
+```shell
+dotnet restore Letterbook.sln
 dotnet watch run --project Letterbook.Api
 ```
-Then [open Swagger][swagger]
 
-To run unit tests:
+5. Open swagger http://localhost:5127/swagger/index.html
 
+### Running tests
+
+Unit tests are included in the main solution. They should run in a few seconds and have zero dependencies.
 ```shell
-dotnet test
+dotnet test Letterbook.sln
 ```
 
-#### Using VS Code
+Integration tests are located in a separate solution, because they depend on a real database, and take longer to run. First, start your Postgres instance, then you can run the tests.
+```shell
+dotnet test Letterbook.IntegrationTests.sln
+```
+
+### Using VS Code
 
 There are recommended extensions and `launch.json` targets configured in the repo. Install the extensions and then run the `Letterbook.Api` configuration.
 
 Tests can be run from the suggested test explorer extension.
 
-#### Using Jetbrains Rider and VisualStudio
+### Using Jetbrains Rider and VisualStudio
 
 There are `launchSettings.json` targets configured in the repo. Open Letterbook.sln and then run the `Letterbook.Api: http` configuration.
 
 Tests can be run from the built-in test runner.
 
-### Secrets
+### Dependencies
 
-The app needs to access some secrets. As a matter of good security practice, those are not, and will never be, committed to source control. Not even fake or sample values. That means you have to provide your own. There are multiple options, but the easiest way will be to use Dotnet User Secrets. You can add your own with this command.
+#### ~~Docker~~
+Docker is _not_ actually a dependency for Letterbook. We use docker as a convenient way to manage our other dependencies in development, but you can use other methods if you prefer. To do that, you should read on to the following sections. We don't plan to ever introduce a real dependency on Docker, although we will likely (eventually) publish a docker container image for admins who prefer that option.
+
+#### Postgresql
+Letterbook depends on a Postgres database, and it attempts to seed an initial administrator account on startup, so you must have the database available in order to run the app. Letterbook depends on the database for essentially everything, so even if we didn't require it on start up, we would require it for any API call you could make.
+
+If it's your first time setting up the database you will need to apply the Database migrations by running the entity framework tools.
+
+This processes is documented in more detail at [Letterbook.Adapter.Db](Letterbook.Adapter.Db/readme.md).
+
+#### Host secrets
+Letterbook depends on a host secret which comes from a secret provider in order to mint and validate authentication tokens. In development, you can use Dotnet user secrets. (We don't have a production solution, yet 😅). In the interest of developing good security practice, this is not something we can provide in the repository. You have to generate your own secret.
+
+> [!NOTE]
+> We should really do this with the database password/connection string, too
 
 ```shell
 dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook.Api
@@ -115,37 +147,9 @@ dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Lett
 
 The actual value isn't important as long as you're just running and debugging locally. So if you don't have openssl you can use any string of 32 characters. But using cryptographically secure secrets is a good habit to build.
 
-### Dependencies
-
-You may need to run some external services to accomplish much during development. This will likely become more true over time. These are provided as a docker-compose spec. You will need a docker-compose compatible runtime. Docker desktop, and podman + the docker-compose CLI both work.
-
-This includes
-
-* Postgres
-* Minio (not implemented yet)
-* RabbitMQ (not implemented yet)
-
-To run these dependencies, simply do 
-
-```shell
-docker-compose up
-```
-
-Note that if you already have Postgres running locally on its default port, docker cannot override the default port and provide its postgresql instance instead. You'll need to either shutdown your local postgres instance or change the port mappings in `docker-compose.yml` and `/Letterbook.Api/appsettings.Development.json`.
-
-### Database
-
-If it's your first time setting up the database you will need to apply the Database migrations by running the entity framework tools.
-
-This processes is documented in [Letterbook.Adapter.Db](Letterbook.Adapter.Db/readme.md).
-
-### Peers
-
-In addition to Letterbook's own dependencies, you may find it useful to have a 3rd party system to exercise federation. The [Letterbook Sandcastles project][sandcastles] provides pre-configured instances of some other fediverse software. We encourage you to make use of that, and to contribute configurations for any other federated peers you're familiar with.
-
 ### MacOS OpenSSL
 
-Letterbook uses OpenSSL for its RSA implementation. If you are running on MacOS, you are likely to run into an exception:
+At the moment, Letterbook uses `System.Security.Cryptography` for its RSA implementation. On Linux and MacOS, this is backed by the system's OpenSSL library. If you are running on MacOS, you are likely to run into an exception:
 
 ```
 System.PlatformNotSupportedException: OpenSSL is required for algorithm 'RSAOpenSsl' but could not be found
@@ -169,11 +173,20 @@ Settings -> Build, Execution, Deployment -> Unit Testing -> Test Runner
 
 ![Screenshot of an example Rider test runner configuration that specifies the library path](docs/rider-macos-openssl-test-runner.png)
 
+
+### Debugging Federation
+
+In addition to Letterbook's own dependencies, you may find it useful to have a 3rd party system to exercise federation. The [Letterbook Sandcastles project][sandcastles] provides pre-configured instances of some other fediverse software. We encourage you to make use of that, and to contribute configurations for any other federated peers you're familiar with.
+
+There is a `Letterbook.Api: sandcastle` launch setting that is preconfigured to work well with the Sandcastle project. The configured host name will be `https://host.docker.castle` when using that option. Peer services running in Sandcastles should be able to connect to Letterbook using that domain.
+
 ## License
 
 Letterbook is licensed under the [AGPL, version 3.0][license]. The maintainers may, at our discretion, change the license to any future version. Anyone who contributes to the project must do so under the same terms. That is, you are licensing your work to the project and the other contributors under that same license and any future version as becomes necessary.
 
 [dotnet]: https://dotnet.microsoft.com/en-us/download
+[docker]: https://www.docker.com/products/docker-desktop/
+[podman]: https://podman.io/
 [swagger]: http://localhost:5127/swagger/index.html
 [coc]: https://github.com/Letterbook/Letterbook/blob/main/CODE_OF_CONDUCT.md
 [preview-board]: https://github.com/orgs/Letterbook/projects/5/views/4

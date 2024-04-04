@@ -92,6 +92,9 @@ Be sure to look over the [Contributing Guide](./CONTRIBUTING.md), and please rea
 6. Project management
 7. Technical communication
 
+> [!NOTE]
+> To get started developing, see the Quckstart section in the [Contributing Guide](./CONTRIBUTING.md)
+
 ## History
 
 It might help to put all this in context of what has and hasn't been done already. [Jenniferplusplus shared a timeline graphic](https://hachyderm.io/@jenniferplusplus/111342566946755633) very similar to this on mastodon, and you might have seen it there. So, it seems to be fitting to try to situate this project in that timeline. At this point, we've essentially climbed the first mountain, and now we're surveying all of the other mountains we still have ahead of us. Right now is a great time to join the project. There's so much that needs to be done, and also a solid foundation to work from.
