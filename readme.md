@@ -82,6 +82,7 @@ All of this is just the beginning of what we have planned for Letterbook. We're 
 > [!NOTE]
 > To get started developing, see the Quckstart section in the [Contributing Guide](./CONTRIBUTING.md)
 
+
 Please reach out to let us know you're interested in the project! There are many ways to contribute, it's a lot more than just code. Experience in these areas would be particularly helpful, right now. And this list will only grow over time.
 
 1. User experience research
@@ -96,27 +97,31 @@ Please reach out to let us know you're interested in the project! There are many
 > We use projects to organize the backlog  
 > Our current project is the [Single User Preview](https://github.com/orgs/Letterbook/projects/5/views/4)
 
-## History
+## Roadmap
 
-It might help to put all this in context of what has and hasn't been done already. [Jenniferplusplus shared a timeline graphic](https://hachyderm.io/@jenniferplusplus/111342566946755633) very similar to this on mastodon, and you might have seen it there. So, it seems to be fitting to try to situate this project in that timeline. At this point, we've essentially climbed the first mountain, and now we're surveying all of the other mountains we still have ahead of us. Right now is a great time to join the project. There's so much that needs to be done, and also a solid foundation to work from.
+It might help to put all this in context of what has and hasn't been done already. At this point, we've essentially climbed one mountain, and now we're surveying all of the other mountains we still have ahead of us. The plan is to move toward a product that could be responsibly run in production for a single user, with the goal of supporting large multi-user deployments in the future. We'll learn more from the experience of supporting live workloads, and build more robust tools, features, and performance based on that experience. Right now is a great time to join the project. There's so much that needs to be done, and also a solid foundation to work from.
 
 ```mermaid
 %%{init: { 'theme': 'default' } }%%
 timeline
-    title Zero to Federated
-    section Ramp up 🏔️
-        ActivityStreams             : Serialize : Deserialize : Polymorphic Types : No schemas : Extensions : W3ID sec vocabulary
-        ActivityPub                 : API : Actors : Objects : Inbox : Outbox : GET : POST
-        Persistance Layer           : Unique IDs -> absolute HTTP(s) URIs : Store & retrieve AP documents
-        Webfinger API               : Depends on Persistance : Strictly required for Mastodon interop : Helpful for everyone else : Retrieve AP Actors, at least
-        Federated Authentication    : Store & retrieve signing keys : Depends on ActivityStreams extensions : Depends on Persistance : Http-signatures : But, like, 20 draft revisions old
-        Defered work queue          : Strictly required for interop : Not part of any spec 🙃 : You can now start testing
-    section We are here! 🎉
-        Your App                    : Basic features : User management : Unique features : All the things you started the project to do
+    section Zero to Federated 🏔️
+        ActivityPub & friends       : ActivityStreams types : ActivityPub APIs : Data models and persistance : Webfinger API : HTTP Signatures : Message queue
+    section Single user preview 👤
+        Posting 🟢                  : Data models ☑️ : Core logic ☑️ : Db Schema ☑️ : APIs ☑️ : Federation : 3rd party APIs 
+        Account management 🟢       : Data models ☑️ : Db schema ☑️ : Account creation ☑️ : APIs : Contact management : Password management : Email verification : 3rd party APIs 
+        Authn/Authz 🟢              : Data models ☑️ : Password verification ☑️ : Token creation/verification ☑️ : Login/logout/challenge : Claims scheme : OIDC support 
+        Feeds 🔴                    : Data models ☑️ : Db schema : APIs : Populate data : 3rd party APIs 
+        Moderation 🔴               : Data models : Db schema : APIs : Block : Mute : Suspend : Report : Federation limits : 3rd party APIs 
+        Media 🔴                    : Data models : Db schema : 3rd party APIs 
 ```
+
+Please note that this roadmap is only updated ocassionally. The project's Github issues, and specifically the [Single User Preview board][sup-board] is the best way to keep track of what's planned, in-progress, and completed.
 
 ## Maintainers
 
 * [@jenniferplusplus@hachyderm.io](https://hachyderm.io/@jenniferplusplus)
 * [@runewake2@hachyderm.io](https://hachyderm.io/@runewake2)
 * [@hazel@koehlercode.dev](https://hachyderm.io/@hazel@koehlercode.dev)
+
+
+[sup-board]: https://github.com/orgs/Letterbook/projects/5/views/4
