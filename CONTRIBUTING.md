@@ -16,7 +16,7 @@
     - [~~Docker~~](#docker)
     - [Postgresql](#postgresql)
     - [Host secrets](#host-secrets)
-  - [MacOS OpenSSL](#macos-openssl)
+    - [MacOS OpenSSL](#macos-openssl)
   - [Debugging Federation](#debugging-federation)
 - [License](#license)
 
@@ -129,7 +129,7 @@ Tests can be run from the built-in test runner.
 Docker is _not_ actually a dependency for Letterbook. We use docker as a convenient way to manage our other dependencies in development, but you can use other methods if you prefer. To do that, you should read on to the following sections. We don't plan to ever introduce a real dependency on Docker, although we will likely (eventually) publish a docker container image for admins who prefer that option.
 
 #### Postgresql
-Letterbook depends on a Postgres database, and it attempts to seed an initial administrator account on startup, so you must have the database available in order to run the app. Letterbook depends on the database for essentially everything, so even if we didn't require it on start up, we would require it for any API call you could make.
+Letterbook depends on a Postgres database. It attempts to seed an initial administrator account on startup, so you must have the database available in order to run the app. Letterbook depends on the database for essentially everything, so even if we didn't require it on start up, we would require it for any API call you could make.
 
 If it's your first time setting up the database you will need to apply the Database migrations by running the entity framework tools.
 
@@ -147,7 +147,7 @@ dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Lett
 
 The actual value isn't important as long as you're just running and debugging locally. So if you don't have openssl you can use any string of 32 characters. But using cryptographically secure secrets is a good habit to build.
 
-### MacOS OpenSSL
+#### MacOS OpenSSL
 
 At the moment, Letterbook uses `System.Security.Cryptography` for its RSA implementation. On Linux and MacOS, this is backed by the system's OpenSSL library. If you are running on MacOS, you are likely to run into an exception:
 
@@ -182,7 +182,7 @@ There is a `Letterbook.Api: sandcastle` launch setting that is preconfigured to 
 
 ## License
 
-Letterbook is licensed under the [AGPL, version 3.0][license]. The maintainers may, at our discretion, change the license to any future version. Anyone who contributes to the project must do so under the same terms. That is, you are licensing your work to the project and the other contributors under that same license and any future version as becomes necessary.
+Letterbook is licensed under the [AGPL, version 3.0][license]. The maintainers may, at our discretion, update to any future version of that license. Anyone who contributes to the project must do so under the same terms. That is, you are licensing your work to the project and the other contributors under that same license and any future version as becomes necessary.
 
 [dotnet]: https://dotnet.microsoft.com/en-us/download
 [docker]: https://www.docker.com/products/docker-desktop/
