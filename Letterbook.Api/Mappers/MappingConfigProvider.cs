@@ -1,5 +1,7 @@
 using AutoMapper;
+using Letterbook.Core;
 using Medo;
+using Microsoft.Extensions.Options;
 
 namespace Letterbook.Api.Mappers;
 
@@ -15,13 +17,23 @@ public class MappingConfigProvider
 {
 	private readonly MapperConfiguration _posts;
 
-	public MappingConfigProvider(InstanceMappings instanceMappings)
+	private readonly MapperConfiguration _profiles;
+
+	public MappingConfigProvider(IOptions<CoreOptions> options)
 	{
 		_posts = new MapperConfiguration(cfg =>
 		{
-			cfg.AddProfile(instanceMappings);
+			cfg.AddProfile<BaseMappings>();
+			cfg.AddProfile(new PostMappings(options));
+		});
+
+		_profiles = new MapperConfiguration(cfg =>
+		{
+			cfg.AddProfile<BaseMappings>();
+			cfg.AddProfile<ProfileMappings>();
 		});
 	}
 
 	public MapperConfiguration Posts => _posts;
+	public MapperConfiguration Profiles => _profiles;
 }
