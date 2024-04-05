@@ -1,6 +1,7 @@
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
+using ActivityPub.Types.AS.Extended.Actor;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Util;
 using AutoMapper;
@@ -51,6 +52,14 @@ public static class AstMapper
 			.ForMember(dest => dest.Following, opt => opt.MapFrom(src => src.Following))
 			.ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!))
 			.AfterMap((_, profile) => { profile.Type = ActivityActorType.Person; });
+
+		cfg.CreateMap<ApplicationActorExtension, Application>(MemberList.Destination)
+			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
+			.ForMember(dest => dest.Authority, opt => opt.Ignore())
+			.ForMember(dest => dest.Inbox, opt => opt.MapFrom(src => src.Inbox))
+			.ForMember(dest => dest.Outbox, opt => opt.MapFrom(src => src.Outbox))
+			.ForMember(dest => dest.Handle, opt => opt.MapFrom(src => src.PreferredUsername))
+			.ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!));
 
 		cfg.CreateMap<PublicKey?, SigningKey?>()
 			.ConvertUsing<PublicKeyConverter>();
@@ -103,6 +112,8 @@ public static class AstMapper
     private static void FromASType(IMapperConfigurationExpression cfg)
     {
 	    cfg.CreateMap<ASType, Models.Profile>()
+		    .ConvertUsing<ASTypeConverter>();
+	    cfg.CreateMap<ASType, Models.Application>()
 		    .ConvertUsing<ASTypeConverter>();
     }
 
@@ -391,6 +402,7 @@ internal class IdConverter : ITypeConverter<ASLink, Uri>,
 internal class PublicKeyConverter :
 	ITypeConverter<PublicKey?, SigningKey?>,
 	IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>,
+	IMemberValueResolver<ApplicationActorExtension, Models.Application, PublicKey?, IList<SigningKey>>,
 	ITypeConverter<string, ReadOnlyMemory<byte>>
 {
 	public SigningKey? Convert(PublicKey? source, SigningKey? destination, ResolutionContext context)
@@ -430,6 +442,17 @@ internal class PublicKeyConverter :
 		return destMember;
 	}
 
+	IList<SigningKey> IMemberValueResolver<ApplicationActorExtension, Models.Application, PublicKey?, IList<SigningKey>>
+		.Resolve(ApplicationActorExtension source, Models.Application destination, PublicKey? sourceMember,
+			IList<SigningKey>? destMember, ResolutionContext context)
+	{
+		var key = context.Mapper.Map<SigningKey>(sourceMember);
+		destMember ??= new List<SigningKey>();
+		if (key is not null) destMember.Add(key);
+
+		return destMember;
+	}
+
 	ReadOnlyMemory<byte> ITypeConverter<string, ReadOnlyMemory<byte>>
 		.Convert(string source, ReadOnlyMemory<byte> destination, ResolutionContext context)
 	{
@@ -458,10 +481,14 @@ public class NaturalLanguageStringConverter
 
 [UsedImplicitly]
 internal class ASTypeConverter :
-	ITypeConverter<ASType, Models.Profile>
+	ITypeConverter<ASType, Models.Profile>,
+	ITypeConverter<ASType, Models.Application>
 {
 	public Models.Profile Convert(ASType source, Models.Profile? destination, ResolutionContext context)
 		=> Convert<PersonActorExtension, Models.Profile>(source, destination, context);
+
+	public Models.Application Convert(ASType source, Models.Application? destination, ResolutionContext context)
+		=> Convert<ApplicationActorExtension, Models.Application>(source, destination, context);
 
 	private TFederated Convert<TASType, TFederated>(ASType source, TFederated? destination, ResolutionContext context)
 		where TASType : ASType, IASModel<TASType>

@@ -125,7 +125,7 @@ public static class DependencyInjectionExtensions
 		services.TryAddTypesModule();
 
 		// Register HTTP signature authentication services
-		services.AddScoped<IKeyMaterialProvider, HttpClientKeyMaterialProvider>();
+		services.AddScoped<IKeyMaterialProvider, ActivityPubClientKeyMaterialProvider>();
 		services.AddScoped<IFederatedActorHttpSignatureVerifier, FederatedActorHttpSignatureVerifier>();
 
 		return services;
