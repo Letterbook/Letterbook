@@ -6,7 +6,7 @@ namespace Letterbook.Adapter.ActivityPub.Signatures;
 
 public interface IKeyMaterialProvider
 {
-	Task<X509Certificate2?> GetKeyByIdAsync(string keyId, CancellationToken cancellationToken = default);
+	Task<Models.SigningKey?> GetKeyByIdAsync(string keyId, CancellationToken cancellationToken = default);
 }
 
 public class ActivityPubClientKeyMaterialProvider : IKeyMaterialProvider
@@ -18,24 +18,11 @@ public class ActivityPubClientKeyMaterialProvider : IKeyMaterialProvider
 		_apClient = apClient;
 	}
 
-	public async Task<X509Certificate2?> GetKeyByIdAsync(string keyId, CancellationToken cancellationToken = default)
+	public async Task<Models.SigningKey?> GetKeyByIdAsync(string keyId, CancellationToken cancellationToken = default)
 	{
 		var keyIdUri = new Uri(keyId);
 
 		var application = await _apClient.Fetch<Models.Application>(new Uri(keyId));
-		var matchingKey = application.Keys.FirstOrDefault(k => k.FediId == keyIdUri);
-		if (matchingKey == null)
-		{
-			return null;
-		}
-
-		return ReadKey(matchingKey);
-	}
-
-	private static X509Certificate2? ReadKey(Models.SigningKey matchingKey)
-	{
-		var keyChars = MemoryMarshal.Cast<byte, char>(matchingKey.PublicKey.Span);
-
-		return X509Certificate2.CreateFromPem(keyChars);
+		return application.Keys.FirstOrDefault(k => k.FediId == keyIdUri);
 	}
 }

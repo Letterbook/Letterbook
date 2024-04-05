@@ -1,7 +1,10 @@
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using JetBrains.Annotations;
 using Letterbook.Adapter.ActivityPub.Exceptions;
 using Letterbook.Adapter.ActivityPub.Signatures;
+using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
@@ -15,7 +18,7 @@ namespace Letterbook.Api.Authentication.HttpSignature;
 
 public interface IFederatedActorHttpSignatureVerifier
 {
-	Task<bool> VerifyAsync(
+	IAsyncEnumerable<Uri> VerifyAsync(
 		HttpContext context,
 		CancellationToken cancellationToken);
 }
@@ -29,56 +32,61 @@ public class FederatedActorHttpSignatureVerifier(
 
 	private readonly ILogger _logger = loggerFactory.CreateLogger<FederatedActorHttpSignatureVerifier>();
 
-	public async Task<bool> VerifyAsync(
+	public async IAsyncEnumerable<Uri> VerifyAsync(
 		HttpContext context,
-		CancellationToken cancellationToken)
+		[EnumeratorCancellation] CancellationToken cancellationToken)
 	{
-		try
-		{
 			var signingContext = new HttpMessageSigningContext(_logger, HttpFieldOptions, context);
 			if (signingContext.HasSignaturesForVerification)
 			{
-				return await VerifyRfcSignature(signingContext, cancellationToken);
+				await foreach (var specVerified in VerifyRfcSignature(signingContext, cancellationToken))
+				{
+					yield return specVerified;
+				}
 			}
-
-			return await VerifyMastodonSignature(context.Request, cancellationToken);
-		}
-		catch (SignatureVerificationException)
-		{
-			return false;
-		}
+			else
+			{
+				await foreach (var mastodonVerified in VerifyMastodonSignature(context.Request, cancellationToken))
+				{
+					yield return mastodonVerified;
+				}
+			}
 	}
 
-	private async Task<bool> VerifyMastodonSignature(HttpRequest request, CancellationToken cancellationToken)
+	private async IAsyncEnumerable<Uri> VerifyMastodonSignature(HttpRequest request, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
-		try
+		var mastodonVerifier = new MastodonVerifier(loggerFactory.CreateLogger<MastodonVerifier>());
+		var signatureComponents = mastodonVerifier
+			.ParseMastodonSignatureComponents(request)
+			.ToList();
+		if (!signatureComponents.Any())
 		{
-			var mastodonVerifier = new MastodonVerifier(loggerFactory.CreateLogger<MastodonVerifier>());
-			var signatureComponents = mastodonVerifier
-				.ParseMastodonSignatureComponents(request)
-				.ToList();
-			if (!signatureComponents.Any())
-			{
-				return false;
-			}
-
-			foreach (var signatureComponent in signatureComponents)
-			{
-				var key = await GetKey(signatureComponent.KeyId, cancellationToken);
-
-			}
-
-			return true;
+			yield break;
 		}
-		catch (VerifierException)
+
+		foreach (var signatureComponent in signatureComponents)
 		{
-			// TODO: I didn't want to mess with the verifier interface too much yet, but we don't want to throw exceptions
-			// for every unsigned request.
-			return false;
+			var key = await GetKey(signatureComponent.KeyId, cancellationToken);
+			if (key == null)
+			{
+				continue;
+			}
+
+			try
+			{
+				mastodonVerifier.VerifyRequestSignature(request, key);
+			}
+			catch (VerifierException)
+			{
+				// TODO: I didn't want to mess with the verifier interface too much yet, but we don't want to throw exceptions
+				// for every unsigned request.
+			}
+
+			yield return key.FediId;
 		}
 	}
 
-	private async Task<bool> VerifyRfcSignature(HttpMessageSigningContext signingContext, CancellationToken cancellationToken)
+	private async IAsyncEnumerable<Uri> VerifyRfcSignature(HttpMessageSigningContext signingContext, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		foreach (var signatureContext in signingContext.SignaturesForVerification)
 		{
@@ -93,37 +101,32 @@ public class FederatedActorHttpSignatureVerifier(
 				signatureContext.Signature,
 				cancellationToken);
 
-			if (verificationResult is not VerificationResult.SuccessfullyVerified)
+			if (verificationResult is VerificationResult.SuccessfullyVerified)
 			{
-				_logger.LogWarning("HTTP request signature validation failed");
-				return false;
+				_logger.LogInformation("HTTP request signature validation succeeded");
+				yield return key.FediId;
 			}
 		}
-
-		_logger.LogInformation("HTTP request signature validation succeeded");
-		return true;
 	}
 
-	private async Task<X509Certificate2> GetKey(string? keyId, CancellationToken cancellationToken)
+	private async Task<SigningKey?> GetKey(string? keyId, CancellationToken cancellationToken)
 	{
 		var key = await keyMaterialProvider.GetKeyByIdAsync(keyId, cancellationToken);
 		if (key == null)
 		{
-			throw new SignatureVerificationException(
-				$"Unable to verify signature: key with ID {keyId} was not found");
+			_logger.LogWarning($"Unable to verify signature: key with ID {keyId} was not found");
 		}
 		return key;
 	}
 
-	private IVerifier GetVerifier(string? algorithm, string? keyId, X509Certificate2 key)
+	private IVerifier GetVerifier(string? algorithm, string? keyId, SigningKey? key)
 	{
-		var publicKey = key.GetRSAPublicKey();
-		if (publicKey == null)
+		if (key == null)
 		{
 			throw new SignatureVerificationException($"No RSA public key for {keyId}");
 		}
 
-		return new RsaPssSha512SignatureProvider(null, publicKey, keyId);
+		return new RsaPssSha512SignatureProvider(null, key.GetRsa(), keyId);
 	}
 }
 

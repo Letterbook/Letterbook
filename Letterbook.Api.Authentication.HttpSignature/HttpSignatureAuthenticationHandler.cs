@@ -1,4 +1,5 @@
-﻿using System.Text.Encodings.Web;
+﻿using System.Security.Claims;
+using System.Text.Encodings.Web;
 using Letterbook.Adapter.ActivityPub.Signatures;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -23,9 +24,26 @@ public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSign
 
 	protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
 	{
-		var isValid = await _signatureVerifier.VerifyAsync(Context, Context.RequestAborted);
+		var principal = new ClaimsPrincipal();
+		await foreach (var verifiedIdentity in _signatureVerifier.VerifyAsync(Context, Context.RequestAborted))
+		{
+			var identity = new ClaimsIdentity(new[]
+			{
+				new Claim(ClaimTypes.Name, verifiedIdentity.ToString()) { }
+			}, HttpSignatureAuthenticationDefaults.Scheme);
 
-		return AuthenticateResult.NoResult();
+			principal.AddIdentity(identity);
+		}
+
+		if (principal.Identities.Any())
+		{
+			return AuthenticateResult.Success(
+				new AuthenticationTicket(
+					principal,
+					HttpSignatureAuthenticationDefaults.Scheme));
+		}
+
+		return AuthenticateResult.Fail("No valid HTTP signatures found");
 	}
 }
 
