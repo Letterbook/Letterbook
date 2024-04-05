@@ -78,11 +78,12 @@ We plan to provide a real direct message experience by implementing an XMPP serv
 All of this is just the beginning of what we have planned for Letterbook. We're very excited about the future, and we get to build it together. If you'd like to know  more about the thought process that went into starting the project, [you can read the blog post](https://jenniferplusplus.com/letterbook/).
 
 ## Contributing
-> [!NOTE]
-> We use projects to organize the backlog  
-> Our current project is the [Single User Preview][sup-board]
 
-Be sure to look over the [Contributing Guide](./CONTRIBUTING.md), and please reach out to let us know you're interested in the project. There are many ways to contribute, it's a lot more than just code. Experience in these areas would be particularly helpful, right now. And this list will only grow over time.
+> [!NOTE]
+> To get started developing, see the Quckstart section in the [Contributing Guide](./CONTRIBUTING.md)
+
+
+Please reach out to let us know you're interested in the project! There are many ways to contribute, it's a lot more than just code. Experience in these areas would be particularly helpful, right now. And this list will only grow over time.
 
 1. User experience research
 2. Trust and safety advice
@@ -91,6 +92,10 @@ Be sure to look over the [Contributing Guide](./CONTRIBUTING.md), and please rea
 5. Backend C# code
 6. Project management
 7. Technical communication
+
+> [!NOTE]
+> We use projects to organize the backlog  
+> Our current project is the [Single User Preview](https://github.com/orgs/Letterbook/projects/5/views/4)
 
 ## Roadmap
 
