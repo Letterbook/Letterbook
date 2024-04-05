@@ -29,7 +29,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "integration": {
+    "sandcastle": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
