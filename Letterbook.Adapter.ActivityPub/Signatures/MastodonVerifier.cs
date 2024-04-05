@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Letterbook.Adapter.ActivityPub.Exceptions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using NSign;
 using static NSign.Constants;
@@ -11,7 +13,7 @@ namespace Letterbook.Adapter.ActivityPub.Signatures;
 
 public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 {
-	private HashSet<string> DerivedComponents = new()
+	private readonly HashSet<string> DerivedComponents = new()
 	{
 		NSign.Constants.DerivedComponents.Authority,
 		NSign.Constants.DerivedComponents.Status,
@@ -37,12 +39,21 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 
 	public VerificationResult VerifyRequestSignature(HttpRequestMessage message, Models.SigningKey verificationKey)
 	{
-		var builder = new MastodonComponentBuilder(message);
-		var components = ParseMastodonSignatureComponents(message);
+		return VerifyRequestSignature(new HttpRequestMessageComponentProvider(message), verificationKey);
+	}
+	public VerificationResult VerifyRequestSignature(HttpRequest request, Models.SigningKey verificationKey)
+	{
+		return VerifyRequestSignature(new HttpRequestComponentProvider(request), verificationKey);
+	}
+
+	private VerificationResult VerifyRequestSignature(RequestComponentProvider componentProvider, Models.SigningKey verificationKey)
+	{
+		var builder = new MastodonComponentBuilder(componentProvider);
+		var components = ParseMastodonSignatureComponents(componentProvider);
 		var result = VerificationResult.NoMatchingVerifierFound;
 		foreach (var parsed in components)
 		{
-			if (!Uri.TryCreate(parsed.keyId, UriKind.Absolute, out Uri? keyId)) continue;
+			if (!Uri.TryCreate(parsed.KeyId, UriKind.Absolute, out Uri? keyId)) continue;
 			if (keyId != verificationKey.FediId) continue;
 			if (VerifySignature(parsed, verificationKey, builder)) return VerificationResult.SuccessfullyVerified;
 			result = VerificationResult.SignatureMismatch;
@@ -52,18 +63,28 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 	}
 
 	public IEnumerable<SignatureInputSpec> ParseRequestSignature(HttpRequestMessage message) =>
-		ParseMastodonSignatureComponents(message).Select(v => v.spec);
+		ParseMastodonSignatureComponents(message).Select(v => v.Spec);
 
-	public IEnumerable<MastodonSignatureComponents> ParseMastodonSignatureComponents(HttpRequestMessage message)
+	public IEnumerable<MastodonSignatureComponents> ParseMastodonSignatureComponents(HttpRequestMessage requestMessage)
 	{
-		if (!message.Headers.TryGetValues(Headers.Signature, out var values))
+		return ParseMastodonSignatureComponents(new HttpRequestMessageComponentProvider(requestMessage));
+	}
+
+	public IEnumerable<MastodonSignatureComponents> ParseMastodonSignatureComponents(HttpRequest request)
+	{
+		return ParseMastodonSignatureComponents(new HttpRequestComponentProvider(request));
+	}
+
+	private IEnumerable<MastodonSignatureComponents> ParseMastodonSignatureComponents(RequestComponentProvider componentProvider)
+	{
+		if (!componentProvider.TryGetHeaderValues(Headers.Signature, out var values))
 			throw VerifierException.NoSignatures();
 
-		var mastodonSignatures = values
+		var mastodonSignatures = values!
 			.Select(header => header.Split(',', StringSplitOptions.RemoveEmptyEntries))
 			.Where(parts => parts.Length > 1);
 
-		if (!mastodonSignatures.Any()) throw VerifierException.NoValidSignatures(message.Headers);
+		if (!mastodonSignatures.Any()) throw VerifierException.NoValidSignatures(componentProvider);
 
 		return mastodonSignatures.Select(ParseSignatureValue);
 	}
@@ -77,13 +98,13 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 			switch (pair.Key)
 			{
 				case "keyId":
-					components.keyId = pair.Value.Trim('"');
+					components.KeyId = pair.Value.Trim('"');
 					break;
 				case "signature":
-					components.signature = pair.Value.Trim('"');
+					components.Signature = pair.Value.Trim('"');
 					break;
 				case "headers":
-					components.spec = ParseSpec(pair.Value);
+					components.Spec = ParseSpec(pair.Value);
 					break;
 				default:
 					_logger.LogWarning(
@@ -137,17 +158,22 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 	private bool VerifySignature(MastodonSignatureComponents components, Models.SigningKey verificationKey,
 		MastodonComponentBuilder builder)
 	{
+		if (components.Signature == null)
+		{
+			return false;
+		}
+
 		var algorithm = verificationKey.GetRsa();
-		builder.Visit(components.spec.SignatureParameters);
+		builder.Visit(components.Spec.SignatureParameters);
 		return algorithm.VerifyData(Encoding.ASCII.GetBytes(builder.SigningDocument),
-			Convert.FromBase64String(components.signature), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+			Convert.FromBase64String(components.Signature), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 	}
 
-	public struct MastodonSignatureComponents
+	public class MastodonSignatureComponents
 	{
-		internal SignatureInputSpec spec;
-		internal string keyId;
-		internal string signature;
+		public SignatureInputSpec Spec { get; set; }
+		public string? KeyId { get; set; }
+		public string? Signature { get; set; }
 	}
 }
 
