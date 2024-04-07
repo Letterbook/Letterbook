@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Extensions;
@@ -33,7 +34,7 @@ public class DebugController : ControllerBase
 			return BadRequest();
 		}
 
-		var result = await _profileService.Follow(localId, new Uri(target.TargetId));
+		var result = await _profileService.As(Enumerable.Empty<Claim>()).Follow(localId, new Uri(target.TargetId));
 
 		return Ok(result);
 	}

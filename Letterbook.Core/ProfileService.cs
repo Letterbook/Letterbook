@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
@@ -11,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-public class ProfileService : IProfileService
+public class ProfileService : IProfileService, IAuthzProfileService
 {
 	private ILogger<ProfileService> _logger;
 	private CoreOptions _coreConfig;
@@ -404,5 +405,10 @@ public class ProfileService : IProfileService
 		_logger.LogInformation("Fetched Profile {ProfileId} from origin", profileId);
 		return profile;
 
+	}
+
+	public IAuthzProfileService As(IEnumerable<Claim> claims)
+	{
+		return this;
 	}
 }

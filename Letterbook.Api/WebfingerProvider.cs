@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 using DarkLink.Web.WebFinger.Server;
 using DarkLink.Web.WebFinger.Shared;
@@ -40,7 +41,7 @@ public class WebfingerProvider : IResourceDescriptorProvider
 		var handle = match.Value.Split('@', 2,
 			StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
 		if (handle == null) return default;
-		var profiles = await _profiles.FindProfiles(handle);
+		var profiles = await _profiles.As(Enumerable.Empty<Claim>()).FindProfiles(handle);
 		if (profiles.FirstOrDefault() is { } subject)
 		{
 			var descriptor = JsonResourceDescriptor.Empty with
