@@ -142,14 +142,16 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 	[Fact(DisplayName = "Should fetch a profile and successfully deserialize it")]
 	public async Task FetchProfile()
 	{
+		await using var fs = TestData.Read("Actor.json");
+		var sc = new StreamContent(fs)
+		{
+			Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
+		};
 		HttpMessageHandlerMock
 			.SetupResponse(r =>
 			{
 				r.StatusCode = HttpStatusCode.OK;
-				r.Content = new StreamContent(TestData.Read("Actor.json"))
-				{
-					Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
-				};
+				r.Content = sc;
 			});
 
 		var profile = await _client.As(_profile).Fetch<Models.Profile>(new Uri("http://mastodon.example/users/user"));
