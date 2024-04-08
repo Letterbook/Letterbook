@@ -12,6 +12,7 @@ public class FullProfileDto
 	public required string Description { get; set; }
 	public CustomField[]? CustomFields { get; set; }
 	public DateTimeOffset? Updated { get; set; }
+	public DateTimeOffset? Created { get; set; }
 	public ActivityActorType? Type { get; set; }
 	public ICollection<AudienceDto>? Audiences { get; set; } = new HashSet<AudienceDto>();
 	public IList<PublicKeyDto>? Keys { get; set; } = new List<PublicKeyDto>();
