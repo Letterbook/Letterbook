@@ -9,6 +9,6 @@ public static class TestData
 
 	public static Stream Read(string fileName)
 	{
-		return new FileStream(Path.Join(DataDir, fileName), FileMode.Open);
+		return new FileStream(Path.Join(DataDir, fileName), FileMode.Open, FileAccess.Read, FileShare.Read);
 	}
 }
