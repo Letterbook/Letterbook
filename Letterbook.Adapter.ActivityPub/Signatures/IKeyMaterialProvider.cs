@@ -22,7 +22,8 @@ public class ActivityPubClientKeyMaterialProvider : IKeyMaterialProvider
 	{
 		var keyIdUri = new Uri(keyId);
 
-		var application = await _apClient.Fetch<Models.Application>(new Uri(keyId));
+		var application = await _apClient.Fetch<Models.IFederatedActor>(keyIdUri);
+
 		return application.Keys.FirstOrDefault(k => k.FediId == keyIdUri);
 	}
 }

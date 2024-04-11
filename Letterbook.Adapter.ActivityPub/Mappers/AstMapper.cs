@@ -53,12 +53,10 @@ public static class AstMapper
 			.ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!))
 			.AfterMap((_, profile) => { profile.Type = ActivityActorType.Person; });
 
-		cfg.CreateMap<ApplicationActorExtension, Application>(MemberList.Destination)
+		cfg.CreateMap<ApplicationActorExtension, InstanceActor>(MemberList.Destination)
+			.ForMember(dest => dest.Id, opt => opt.Ignore())
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
 			.ForMember(dest => dest.Authority, opt => opt.Ignore())
-			.ForMember(dest => dest.Inbox, opt => opt.MapFrom(src => src.Inbox))
-			.ForMember(dest => dest.Outbox, opt => opt.MapFrom(src => src.Outbox))
-			.ForMember(dest => dest.Handle, opt => opt.MapFrom(src => src.PreferredUsername))
 			.ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!));
 
 		cfg.CreateMap<PublicKey?, SigningKey?>()
@@ -113,7 +111,9 @@ public static class AstMapper
     {
 	    cfg.CreateMap<ASType, Models.Profile>()
 		    .ConvertUsing<ASTypeConverter>();
-	    cfg.CreateMap<ASType, Models.Application>()
+	    cfg.CreateMap<ASType, Models.InstanceActor>()
+		    .ConvertUsing<ASTypeConverter>();
+	    cfg.CreateMap<ASType, Models.IFederatedActor>()
 		    .ConvertUsing<ASTypeConverter>();
     }
 
@@ -402,7 +402,7 @@ internal class IdConverter : ITypeConverter<ASLink, Uri>,
 internal class PublicKeyConverter :
 	ITypeConverter<PublicKey?, SigningKey?>,
 	IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>,
-	IMemberValueResolver<ApplicationActorExtension, Models.Application, PublicKey?, IList<SigningKey>>,
+	IMemberValueResolver<ApplicationActorExtension, Models.InstanceActor, PublicKey?, IList<SigningKey>>,
 	ITypeConverter<string, ReadOnlyMemory<byte>>
 {
 	public SigningKey? Convert(PublicKey? source, SigningKey? destination, ResolutionContext context)
@@ -442,8 +442,8 @@ internal class PublicKeyConverter :
 		return destMember;
 	}
 
-	IList<SigningKey> IMemberValueResolver<ApplicationActorExtension, Models.Application, PublicKey?, IList<SigningKey>>
-		.Resolve(ApplicationActorExtension source, Models.Application destination, PublicKey? sourceMember,
+	IList<SigningKey> IMemberValueResolver<ApplicationActorExtension, Models.InstanceActor, PublicKey?, IList<SigningKey>>
+		.Resolve(ApplicationActorExtension source, Models.InstanceActor destination, PublicKey? sourceMember,
 			IList<SigningKey>? destMember, ResolutionContext context)
 	{
 		var key = context.Mapper.Map<SigningKey>(sourceMember);
@@ -482,13 +482,46 @@ public class NaturalLanguageStringConverter
 [UsedImplicitly]
 internal class ASTypeConverter :
 	ITypeConverter<ASType, Models.Profile>,
-	ITypeConverter<ASType, Models.Application>
+	ITypeConverter<ASType, Models.InstanceActor>,
+	ITypeConverter<ASType, Models.IFederatedActor>
 {
 	public Models.Profile Convert(ASType source, Models.Profile? destination, ResolutionContext context)
 		=> Convert<PersonActorExtension, Models.Profile>(source, destination, context);
 
-	public Models.Application Convert(ASType source, Models.Application? destination, ResolutionContext context)
-		=> Convert<ApplicationActorExtension, Models.Application>(source, destination, context);
+	public Models.InstanceActor Convert(ASType source, Models.InstanceActor? destination, ResolutionContext context)
+		=> Convert<ApplicationActorExtension, Models.InstanceActor>(source, destination, context);
+
+	/// <summary>
+	/// This implementation allows <see cref="Client.Fetch{T}"/> to be called with IFederatedActor as the type. It will
+	/// map to any known actor type and return it as an <see cref="IFederatedActor"/>.
+	/// </summary>
+	public Models.IFederatedActor Convert(ASType source, Models.IFederatedActor? destination, ResolutionContext context)
+	{
+		IFederatedActor? result = null;
+		if (source.Is<ApplicationActorExtension>())
+		{
+			result = Convert<ApplicationActorExtension, InstanceActor>(source, null, context);
+		}
+		else if (source.Is<PersonActorExtension>())
+		{
+			result = Convert<PersonActorExtension, Models.Profile>(source, null, context);
+		}
+
+		if (result is null)
+		{
+			return null!;
+		}
+
+		if (destination is null)
+		{
+			return result;
+		}
+
+		destination.FediId = result.FediId;
+		destination.Keys = result.Keys;
+
+		return destination;
+	}
 
 	private TFederated Convert<TASType, TFederated>(ASType source, TFederated? destination, ResolutionContext context)
 		where TASType : ASType, IASModel<TASType>

@@ -1,10 +1,9 @@
 using Letterbook.Core.Models;
-using Letterbook.Core.Values;
 
 namespace Letterbook.Core.Adapters;
 
 public interface IActivityPubClient
 {
-	IActivityPubAuthenticatedClient As(Profile? onBehalfOf);
+	IActivityPubAuthenticatedClient As(IFederatedActor? onBehalfOf);
 	Task<T> Fetch<T>(Uri id) where T : IFederated;
 }
