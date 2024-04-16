@@ -4,10 +4,32 @@
 @{
     ViewData["Title"] = Model.Handle;
 }
-<div class="text-center">
-    <h1 class="display-4">@Model.Handle Profile Page</h1>
+
+<div>
+    <h1>
+        <span>@Model.DisplayName</span>
+        <span>@@@Model.Handle</span>
+    </h1>
+    
+    <div>
+        <div>@Html.Raw(@Model.Description)</div>
+        
+        <dl>
+            @foreach (var field in @Model.CustomFields) {
+                <dt>@field.Label</dt>
+                <dd>@field.Value</dd>
+            }
+        </dl>
+        
+        <div>
+            <div>
+                @Model.GetFollowerCount Followers
+            </div>
+            <div>
+                @Model.GetFollowingCount Following
+            </div>
+        </div>
+        
+    </div>
+    
 </div>
-<article>
-    <p class="content">ID: @Model.Prof.GetId25()</p>
-    <code>@Model.Json</code>
-</article>
