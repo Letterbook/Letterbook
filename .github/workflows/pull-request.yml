@@ -33,7 +33,11 @@ jobs:
         run: dotnet build Letterbook.sln --configuration Release
         
       - name: Install Playwright Browsers
-        run: ls Letterbook.Web.Tests.E2E/bin/Release/net8.0/
+        run: |
+          ls Letterbook.Web.Tests.E2E
+          ls Letterbook.Web.Tests.E2E/bin
+          ls Letterbook.Web.Tests.E2E/bin/Release
+          ls Letterbook.Web.Tests.E2E/bin/Release/net8.0
       
       - name: Test
         run: dotnet test Letterbook.sln --configuration Release --logger GitHubActions --blame-crash --no-build
