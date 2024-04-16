@@ -1,0 +1,13 @@
+﻿@page "/@{handle}"
+@model Letterbook.Web.Pages.Profile
+
+@{
+    ViewData["Title"] = Model.Handle;
+}
+<div class="text-center">
+    <h1 class="display-4">@Model.Handle Profile Page</h1>
+</div>
+<article>
+    <p class="content">ID: @Model.Prof.GetId25()</p>
+    <code>@Model.Json</code>
+</article>
