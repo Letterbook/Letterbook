@@ -2,17 +2,17 @@
 @model Letterbook.Web.Pages.Profile
 
 @{
-    ViewData["Title"] = Model.Handle;
+    ViewData["Title"] = $"{Model.DisplayName} ({Model.Handle})";
 }
 
 <div>
     <h1>
         <span>@Model.DisplayName</span>
-        <span>@@@Model.Handle</span>
+        <span>@Model.Handle</span>
     </h1>
     
     <div>
-        <div>@Html.Raw(@Model.Description)</div>
+        <div>@Model.Description</div>
         
         <dl>
             @foreach (var field in @Model.CustomFields) {
@@ -23,10 +23,10 @@
         
         <div>
             <div>
-                @Model.GetFollowerCount Followers
+                @Model.GetFollowerCount() Followers
             </div>
             <div>
-                @Model.GetFollowingCount Following
+                @Model.GetFollowingCount() Following
             </div>
         </div>
         
