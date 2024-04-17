@@ -1,28 +1,32 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using AutoMapper;
-using Letterbook.Api.Dto;
-using Letterbook.Api.Mappers;
-using Letterbook.Core;
+﻿using Letterbook.Core;
 using Models = Letterbook.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Html;
+using Microsoft.Extensions.Options;
 
 namespace Letterbook.Web.Pages;
 
 public class Profile : PageModel
 {
 	private readonly IProfileService _profiles;
-	private readonly Mapper _mapper;
-
+	private readonly CoreOptions _options;
+	
 	public required string Handle { get; set; }
-	public required Models.Profile Prof { get; set; }
-	public required string Json { get; set; }
+	public required string DisplayName { get; set; }
+	public required HtmlString Description { get; set; }
+	public required Models.CustomField[] CustomFields { get; set; }
+	
+	private protected Models.Profile? Prof { get; set; }
+	
+	public int GetFollowerCount() => Prof!.FollowersCollection.Count;
+	public int GetFollowingCount() => Prof!.FollowingCollection.Count;
 
-	public Profile(IProfileService profiles, MappingConfigProvider mappingConfigs)
+
+	public Profile(IProfileService profiles, IOptions<CoreOptions> options)
 	{
 		_profiles = profiles;
-		_mapper = new Mapper(mappingConfigs.Profiles);
+		_options = options.Value;
 	}
 
 	public async Task<IActionResult> OnGet(string handle)
@@ -31,10 +35,12 @@ public class Profile : PageModel
 		if (found.FirstOrDefault() is not { } profile)
 			return NotFound();
 		Prof = profile;
-		Handle = handle;
+		
+		Handle = $"@{handle}@{_options.DomainName}";
+		DisplayName = profile.DisplayName;
+		Description = new HtmlString(profile.Description);
+		CustomFields = profile.CustomFields;
 
-		var options = new JsonSerializerOptions { WriteIndented = true };
-		Json = JsonSerializer.Serialize(_mapper.Map<FullProfileDto>(Prof), options);
 
 		return Page();
 	}
