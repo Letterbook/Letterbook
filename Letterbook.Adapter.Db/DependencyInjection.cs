@@ -11,8 +11,9 @@ public static class DependencyInjection
 	{
 
 		var dbOptions = config.Get<DbOptions>() ?? throw new ArgumentNullException(DbOptions.ConfigKey);
+		var dataSource = DataSource(dbOptions);
 
-		return services.AddDbContext<RelationalContext>(options => options.UseNpgsql(DataSource(dbOptions)));
+		return services.AddDbContext<RelationalContext>(options => options.UseNpgsql(dataSource));
 	}
 
 	internal static NpgsqlDataSource DataSource(DbOptions dbOptions)

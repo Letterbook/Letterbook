@@ -71,6 +71,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Http", "Http", "{1D8F2C94-1
 		Http\readme.md = Http\readme.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Web", "Letterbook.Web\Letterbook.Web.csproj", "{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -132,6 +134,10 @@ Global
 		{3C206372-06A4-4C8B-8BE3-F9A8C1EB5F0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C206372-06A4-4C8B-8BE3-F9A8C1EB5F0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C206372-06A4-4C8B-8BE3-F9A8C1EB5F0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
