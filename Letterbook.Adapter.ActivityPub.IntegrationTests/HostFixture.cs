@@ -4,6 +4,7 @@ using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.Core.Tests.Mocks;
 using Letterbook.Core.Workers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -66,7 +67,7 @@ public class HostFixture : WebApplicationFactory<Program>
 
 public class HostMocks : WithMocks
 {
-	public new Mock<HttpMessageHandler> HttpMessageHandlerMock => base.HttpMessageHandlerMock;
+	public new Mock<MockableMessageHandler> HttpMessageHandlerMock => base.HttpMessageHandlerMock;
 
 	public new IOptions<CoreOptions> CoreOptionsMock => base.CoreOptionsMock;
 
