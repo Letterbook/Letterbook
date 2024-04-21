@@ -14,7 +14,9 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public class Profile : IFederatedActor, IEquatable<Profile>
 {
-	private Uuid7 _id;
+	// An uninitialized Uuid7 will throw exceptions, so it needs to be
+	// new'd up instead
+	private Uuid7 _id = new();
 
 	private Profile()
 	{
@@ -26,7 +28,6 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		Type = default;
 		Handle = default!;
 		DisplayName = default!;
-		CustomFields = default!;
 		Description = default!;
 	}
 
@@ -38,7 +39,6 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		Handle = string.Empty;
 		DisplayName = string.Empty;
 		Description = string.Empty;
-		CustomFields = Array.Empty<CustomField>();
 
 		var builder = new UriBuilder(FediId);
 		var basePath = builder.Path;
@@ -81,7 +81,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public string Handle { get; set; }
 	public string DisplayName { get; set; }
 	public string Description { get; set; }
-	public CustomField[] CustomFields { get; set; }
+	public CustomField[] CustomFields { get; set; } = [];
 	public DateTime Updated { get; set; } = DateTime.UtcNow;
 	public Account? OwnedBy { get; set; }
 	public ICollection<ProfileAccess> Accessors { get; set; } = new HashSet<ProfileAccess>();

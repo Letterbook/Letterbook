@@ -427,7 +427,7 @@ internal class PublicKeyConverter :
 		destination.Label = "From federation peer";
 		destination.PublicKey = context.Mapper.Map<ReadOnlyMemory<byte>>(source.PublicKeyPem);
 		destination.Family = alg;
-		destination.Created = DateTimeOffset.Now;
+		destination.Created = DateTimeOffset.UtcNow;
 
 		return destination;
 	}

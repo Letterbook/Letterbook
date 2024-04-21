@@ -134,6 +134,10 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
 			var mapped = AstMapper.Map<Models.Profile>(actor);
 
+			// Reading an uninitialized Uuid7 causes an exception, this verifies
+			// that it doesn't happen here
+			_ = mapped.Id;
+
 			Assert.NotNull(mapped);
 		}
 
@@ -188,6 +192,23 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			var actual = AstMapper.Map<Models.Post>(_simpleNote);
 
 			Assert.Equal(expected, actual.Thread.FediId.ToString());
+		}
+
+		[Fact]
+		public void CanMapSigningKey()
+		{
+			using var fs = TestData.Read("Actor.json");
+			var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
+			var mapped = AstMapper.Map<Models.Profile>(actor);
+
+			var key = mapped.Keys[0];
+			// Reading an uninitialized Uuid7 causes an exception, this verifies
+			// that it doesn't happen here
+			_ = key.Id;
+
+			Assert.Equal(TimeSpan.Zero, key.Created.Offset);
+
+			Assert.NotNull(mapped);
 		}
 	}
 }
