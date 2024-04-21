@@ -26,7 +26,7 @@ public interface IFederatedActorHttpSignatureVerifier
 [UsedImplicitly]
 public class FederatedActorHttpSignatureVerifier(
 	ILoggerFactory loggerFactory,
-	IKeyMaterialProvider keyMaterialProvider) : IFederatedActorHttpSignatureVerifier
+	IVerificationKeyProvider verificationKeyProvider) : IFederatedActorHttpSignatureVerifier
 {
 	private static readonly HttpFieldOptions HttpFieldOptions = new();
 
@@ -36,29 +36,27 @@ public class FederatedActorHttpSignatureVerifier(
 		HttpContext context,
 		[EnumeratorCancellation] CancellationToken cancellationToken)
 	{
-			var signingContext = new HttpMessageSigningContext(_logger, HttpFieldOptions, context);
-			if (signingContext.HasSignaturesForVerification)
+		var signingContext = new HttpMessageSigningContext(_logger, HttpFieldOptions, context);
+		if (signingContext.HasSignaturesForVerification)
+		{
+			await foreach (var specVerified in VerifyRfcSignature(signingContext, cancellationToken))
 			{
-				await foreach (var specVerified in VerifyRfcSignature(signingContext, cancellationToken))
-				{
-					yield return specVerified;
-				}
+				yield return specVerified;
 			}
-			else
+		}
+		else
+		{
+			await foreach (var mastodonVerified in VerifyMastodonSignature(context.Request, cancellationToken))
 			{
-				await foreach (var mastodonVerified in VerifyMastodonSignature(context.Request, cancellationToken))
-				{
-					yield return mastodonVerified;
-				}
+				yield return mastodonVerified;
 			}
+		}
 	}
 
 	private async IAsyncEnumerable<Uri> VerifyMastodonSignature(HttpRequest request, [EnumeratorCancellation] CancellationToken cancellationToken)
 	{
 		var mastodonVerifier = new MastodonVerifier(loggerFactory.CreateLogger<MastodonVerifier>());
-		var signatureComponents = mastodonVerifier
-			.ParseMastodonSignatureComponents(request)
-			.ToList();
+		var signatureComponents = GetMastodonSignatureComponents();
 		if (!signatureComponents.Any())
 		{
 			yield break;
@@ -83,6 +81,25 @@ public class FederatedActorHttpSignatureVerifier(
 			}
 
 			yield return key.FediId;
+		}
+
+		IList<MastodonVerifier.MastodonSignatureComponents> GetMastodonSignatureComponents()
+		{
+			try
+			{
+				var mastodonSignatureComponentsList = mastodonVerifier
+					.ParseMastodonSignatureComponents(request)
+					.ToList();
+				return mastodonSignatureComponentsList;
+			}
+			catch (VerifierException)
+			{
+				// TODO: This exception is thrown if no Mastodon signature headers are found.
+				// This will be the case for any unsigned request, so we can expect to see quite many of them.
+				// Might want to revisit the parsing code for a way to avoid that cost on this path.
+			}
+
+			return Array.Empty<MastodonVerifier.MastodonSignatureComponents>();
 		}
 	}
 
@@ -111,7 +128,7 @@ public class FederatedActorHttpSignatureVerifier(
 
 	private async Task<SigningKey?> GetKey(string? keyId, CancellationToken cancellationToken)
 	{
-		var key = await keyMaterialProvider.GetKeyByIdAsync(keyId, cancellationToken);
+		var key = await verificationKeyProvider.GetKeyByIdAsync(keyId, cancellationToken);
 		if (key == null)
 		{
 			_logger.LogWarning($"Unable to verify signature: key with ID {keyId} was not found");
