@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Tracing;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
@@ -27,6 +29,16 @@ public class ApplicationActorExtension : ApplicationActor, IASModel<ApplicationA
 	{
 		get => Entity.PublicKey;
 		set => Entity.PublicKey = value;
+	}
+
+	static bool? IASModel<ApplicationActorExtension>.ShouldConvertFrom(JsonElement inputJson, TypeMap typeMap)
+	{
+		if (inputJson.TryGetProperty("type", out var typeProperty))
+		{
+			return string.Equals("Application", typeProperty.GetString());
+		}
+
+		return false;
 	}
 }
 
