@@ -51,7 +51,8 @@ public static class AstMapper
 			.ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers))
 			.ForMember(dest => dest.Following, opt => opt.MapFrom(src => src.Following))
 			.ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!))
-			.AfterMap((_, profile) => { profile.Type = ActivityActorType.Person; });
+			.AfterMap((_, profile) => { profile.Type = ActivityActorType.Person; })
+			.ReverseMap();
 
 		cfg.CreateMap<ApplicationActorExtension, InstanceActor>(MemberList.Destination)
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
