@@ -1,15 +1,13 @@
-using System.Reflection;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
-using ActivityPub.Types.AS.Extended.Actor;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Conversion;
 using ActivityPub.Types.Util;
 using AutoMapper;
 using Letterbook.Adapter.ActivityPub.Types;
+using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Fixtures;
-using Medo;
 using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.ActivityPub.Test;
