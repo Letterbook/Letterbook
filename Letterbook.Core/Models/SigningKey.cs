@@ -5,7 +5,9 @@ namespace Letterbook.Core.Models;
 
 public class SigningKey
 {
-	private Uuid7 _id;
+	// An uninitialized Uuid7 will throw exceptions, so it needs to be
+	// new'd up instead
+	private Uuid7 _id = new();
 
 	public Guid Id
 	{
