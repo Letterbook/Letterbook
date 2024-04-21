@@ -111,16 +111,22 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
 	private HttpRequestMessage SignedRequest(HttpMethod method, Uri uri)
 	{
+		return SignedRequest(method, uri, _actor?.Keys, _actor?.FediId);
+	}
+
+	private HttpRequestMessage SignedRequest(HttpMethod method, Uri uri, IEnumerable<SigningKey>? keys, Uri? actorId)
+	{
 		var message = new HttpRequestMessage(method, uri);
-		if (_actor == null) return message;
+		if (keys is null || actorId is null) return message;
 
 		var httpRequestOptionsKey = new HttpRequestOptionsKey<IEnumerable<SigningKey>>(IClientSigner.SigningKeysOptionsId);
 		var httpRequestOptionsProfile = new HttpRequestOptionsKey<Uri>(IClientSigner.ProfileOptionsId);
-		message.Options.Set(httpRequestOptionsKey, _actor.Keys);
-		message.Options.Set(httpRequestOptionsProfile, _actor.FediId);
+		message.Options.Set(httpRequestOptionsKey, keys);
+		message.Options.Set(httpRequestOptionsProfile, actorId);
 
 		return message;
 	}
+
 
 	public async Task<ClientResponse<FollowState>> SendFollow(Uri inbox, Models.Profile target)
 	{
@@ -281,15 +287,22 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 		};
 	}
 
-	public async Task<T> Fetch<T>(Uri id) where T : IFederated
+	public async Task<T> Fetch<T>(Uri id) where T : IFederated => await SendFetch<T>(id, SignedRequest(HttpMethod.Get, id));
+	public async Task<T> Fetch<T>(Uri id, SigningKey actorSigningKey) where T : IFederated
+		=> await SendFetch<T>(id, SignedRequest(HttpMethod.Get, id, new []{ actorSigningKey }, actorSigningKey.FediId));
+
+	private async Task<T> SendFetch<T>(Uri id, HttpRequestMessage httpRequestMessage) where T : IFederated
 	{
-		var response = await _httpClient.SendAsync(SignedRequest(HttpMethod.Get, id));
+		var response = await _httpClient.SendAsync(httpRequestMessage);
 		var stream = await ReadResponse(response);
 		if (stream is null) throw ClientException.RemoteObjectError(id, "Peer provided no response");
 
 		var ast = await _jsonLdSerializer.DeserializeAsync<ASType>(stream);
 		var mapped = DefaultMapper.Map<T>(ast);
-		if (mapped.FediId == id) return mapped;
+		if (mapped.FediId == id)
+		{
+			return mapped;
+		}
 
 		_logger.LogError("Remote fetch for Object {Id} returned {ObjectId}", id, mapped.FediId);
 		_logger.LogDebug("Tried to map {ASType} to {ModelType}", ast?.Type, typeof(T));

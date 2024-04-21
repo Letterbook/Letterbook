@@ -11,36 +11,45 @@ namespace Letterbook.Api.Authentication.HttpSignature;
 public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSignatureAuthenticationOptions>
 {
 	private readonly IFederatedActorHttpSignatureVerifier _signatureVerifier;
+	private readonly ILogger<HttpSignatureAuthenticationHandler> _logger;
 
 	public HttpSignatureAuthenticationHandler(
 		IOptionsMonitor<HttpSignatureAuthenticationOptions> options,
-		ILoggerFactory logger,
+		ILoggerFactory loggerFactory,
 		IFederatedActorHttpSignatureVerifier signatureVerifier,
 		UrlEncoder encoder)
-		: base(options, logger, encoder)
+		: base(options, loggerFactory, encoder)
 	{
 		_signatureVerifier = signatureVerifier;
+		_logger = loggerFactory.CreateLogger<HttpSignatureAuthenticationHandler>();
 	}
 
 	protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
 	{
-		var principal = new ClaimsPrincipal();
-		await foreach (var verifiedIdentity in _signatureVerifier.VerifyAsync(Context, Context.RequestAborted))
+		try
 		{
-			var identity = new ClaimsIdentity(new[]
+			var principal = new ClaimsPrincipal();
+			await foreach (var verifiedIdentity in _signatureVerifier.VerifyAsync(Context, Context.RequestAborted))
 			{
-				new Claim(ClaimTypes.Name, verifiedIdentity.ToString()) { }
-			}, HttpSignatureAuthenticationDefaults.Scheme);
+				var identity = new ClaimsIdentity(new[]
+				{
+					new Claim(ClaimTypes.Name, verifiedIdentity.ToString()) { }
+				}, HttpSignatureAuthenticationDefaults.Scheme);
 
-			principal.AddIdentity(identity);
+				principal.AddIdentity(identity);
+			}
+
+			if (principal.Identities.Any())
+			{
+				return AuthenticateResult.Success(
+					new AuthenticationTicket(
+						principal,
+						HttpSignatureAuthenticationDefaults.Scheme));
+			}
 		}
-
-		if (principal.Identities.Any())
+		catch (Exception ex)
 		{
-			return AuthenticateResult.Success(
-				new AuthenticationTicket(
-					principal,
-					HttpSignatureAuthenticationDefaults.Scheme));
+			_logger.LogError("Unhandled exception during request signature authentication: {Exception}", ex);
 		}
 
 		return AuthenticateResult.Fail("No valid HTTP signatures found");
