@@ -208,5 +208,27 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 
 			Assert.NotNull(mapped);
 		}
+
+		[Fact]
+		public void CanMapInstanceActor()
+		{
+			using var fs = TestData.Read("InstanceActor.json");
+			var actor = _serializer.Deserialize<ASType>(fs)!;
+
+			var mapped = AstMapper.Map<Models.IFederatedActor>(actor);
+
+			Assert.NotNull(mapped);
+		}
+
+		[Fact]
+		public void CanMapPersonActor()
+		{
+			using var fs = TestData.Read("Actor.json");
+			var actor = _serializer.Deserialize<ASType>(fs)!;
+
+			var mapped = AstMapper.Map<Models.IFederatedActor>(actor);
+
+			Assert.NotNull(mapped);
+		}
 	}
 }

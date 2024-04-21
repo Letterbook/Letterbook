@@ -41,6 +41,7 @@ public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSign
 
 			if (principal.Identities.Any())
 			{
+				_logger.LogInformation("Successfully authenticated: {IdentityList}", string.Join(", ", principal.Identities.Select(i => i.Name)));
 				return AuthenticateResult.Success(
 					new AuthenticationTicket(
 						principal,
