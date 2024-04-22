@@ -17,10 +17,9 @@ using Profile = Letterbook.Core.Models.Profile;
 
 namespace Letterbook.Api.IntegrationTests;
 
-[Collection("Integration")]
-public class PostsTests : IClassFixture<HostFixture>
+public class PostsTests : IClassFixture<HostFixture<PostsTests>>
 {
-	private readonly HostFixture _host;
+	private readonly HostFixture<PostsTests> _host;
 	private readonly HttpClient _client;
 	private readonly List<Profile> _profiles;
 	private readonly FakePostDto _postDto;
@@ -29,7 +28,7 @@ public class PostsTests : IClassFixture<HostFixture>
 	private readonly Dictionary<Profile, List<Post>> _posts;
 	private readonly ContentTextComparer _contentTextComparer = new ContentTextComparer();
 
-	public PostsTests(HostFixture host)
+	public PostsTests(HostFixture<PostsTests> host)
 	{
 		_host = host;
 		_client = _host.Options == null
