@@ -131,4 +131,20 @@ public class ProfileTests : IClassFixture<HostFixture<ProfileTests>>
 		var actual = Assert.IsType<FullProfileDto>(await response.Content.ReadFromJsonAsync<FullProfileDto>(_json));
 		Assert.Equal(expected, actual.CustomFields?[0], CustomFieldComparer);
 	}
+
+	[Fact(DisplayName = "Should update a whole profile", Skip = "not implemented")]
+	public async Task CanUpdateEdit()
+	{
+		var profile = _profiles[3];
+		var dto = _mapper.Map<FullProfileDto>(profile);
+		dto.Description = "updated description";
+		dto.DisplayName = "updated displayname";
+		dto.CustomFields = [];
+		var response = await _client.PutAsJsonAsync($"/lb/v1/profiles/{_profiles[0].GetId25()}", dto, _json);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert.IsType<FullProfileDto>(await response.Content.ReadFromJsonAsync<FullProfileDto>(_json));
+		Assert.Equal(dto, actual);
+	}
 }
