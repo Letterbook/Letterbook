@@ -8,6 +8,7 @@ using AutoMapper;
 using JetBrains.Annotations;
 using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Core.Models;
+using Medo;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
 
@@ -29,6 +30,7 @@ public static class AstMapper
 	private static void FromActor(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<PersonActorExtension, Models.Profile>(MemberList.Destination)
+			.ConstructUsing(_ => Models.Profile.CreateEmpty(Uuid7.NewUuid7()))
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
 			.ForMember(dest => dest.Authority, opt => opt.Ignore())
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -421,7 +423,7 @@ internal class PublicKeyConverter :
 			_ => SigningKey.KeyFamily.Unknown
 		};
 
-		destination ??= new SigningKey() { FediId = new Uri(source.Id) };
+		destination ??= SigningKey.CreateEmpty(Uuid7.NewUuid7(), new Uri(source.Id));
 
 		destination.FediId = new Uri(source.Id);
 		destination.Label = "From federation peer";

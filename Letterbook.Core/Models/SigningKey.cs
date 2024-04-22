@@ -5,9 +5,7 @@ namespace Letterbook.Core.Models;
 
 public class SigningKey
 {
-	// An uninitialized Uuid7 will throw exceptions, so it needs to be
-	// new'd up instead
-	private Uuid7 _id = new();
+	private Uuid7 _id;
 
 	public Guid Id
 	{
@@ -72,6 +70,15 @@ public class SigningKey
 			Created = DateTimeOffset.UtcNow,
 			Expires = DateTimeOffset.MaxValue,
 			FediId = keyUri
+		};
+	}
+
+	public static SigningKey CreateEmpty(Uuid7 id, Uri fediId)
+	{
+		return new SigningKey()
+		{
+			_id = id,
+			FediId = fediId
 		};
 	}
 
