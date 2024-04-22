@@ -26,3 +26,6 @@ This is to summarize and record a decision that's already made. Importantly, tha
 ## Discussion
 
 Before choosing Razor pages, we discussed using Blazor instead. Blazor requires active websocket sessions and continuous server-side evaluation. The concern is this makes Blazor more resource intensive, and simultaneously more complicated to run and scale. And Blazor WASM has a very large download size which can be a problem on mobile networks.
+
+- Initial PR adding the web project [#204](https://github.com/Letterbook/Letterbook/pull/204)
+- PR discussing this ADR [#213](https://github.com/Letterbook/Letterbook/pull/213)
