@@ -52,9 +52,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		}
 
 		var profile = Profile.CreateIndividual(_coreConfig.BaseUri(), handle);
+		_profiles.Add(profile);
 		profile.OwnedBy = account;
 		account.LinkedProfiles.Add(new ProfileAccess(account, profile, ProfilePermission.All));
-		_profiles.RecordAccount(account);
 		await _profiles.Commit();
 		_profileEvents.Created(profile);
 
