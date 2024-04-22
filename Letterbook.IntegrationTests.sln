@@ -43,6 +43,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Db.Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Api.Tests", "Letterbook.Api.Tests\Letterbook.Api.Tests.csproj", "{DA5D0ACF-AE26-43EE-B38F-E02965BB42FD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADRs", "ADRs", "{7CFB2A5A-DC89-4C9E-87DE-C7B4E518E77C}"
+	ProjectSection(SolutionItems) = preProject
+		docs\decisions\00-template.md = docs\decisions\00-template.md
+		docs\decisions\01-system-design-guidance.md = docs\decisions\01-system-design-guidance.md
+		docs\decisions\02-architecture-design-patterns.md = docs\decisions\02-architecture-design-patterns.md
+		docs\decisions\03-accounts-profiles-actors.md = docs\decisions\03-accounts-profiles-actors.md
+		docs\decisions\04-error-reporting.md = docs\decisions\04-error-reporting.md
+		docs\decisions\05-integration-tests.md = docs\decisions\05-integration-tests.md
+		docs\decisions\06-code-review.md = docs\decisions\06-code-review.md
+		docs\decisions\07-posts-data-model.md = docs\decisions\07-posts-data-model.md
+		docs\decisions\08-architecture-update-01.md = docs\decisions\08-architecture-update-01.md
+		docs\decisions\09-formatting.md = docs\decisions\09-formatting.md
+		docs\decisions\10-web.md = docs\decisions\10-web.md
+		docs\decisions\assets\architecture-update-01.svg = docs\decisions\assets\architecture-update-01.svg
+		docs\decisions\assets\hexagonal-architecture.png = docs\decisions\assets\hexagonal-architecture.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,5 +121,8 @@ Global
 		{DA5D0ACF-AE26-43EE-B38F-E02965BB42FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA5D0ACF-AE26-43EE-B38F-E02965BB42FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA5D0ACF-AE26-43EE-B38F-E02965BB42FD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7CFB2A5A-DC89-4C9E-87DE-C7B4E518E77C} = {D2ADB5E5-5A1E-414D-9DA1-7888E17AAB8F}
 	EndGlobalSection
 EndGlobal
