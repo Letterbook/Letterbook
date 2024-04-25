@@ -64,5 +64,18 @@
       <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
       <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Update="wwwroot\css\font\InclusiveSans-Regular.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="wwwroot\css\font\InclusiveSans-Regular.woff">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
 
 </Project>

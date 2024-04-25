@@ -7,6 +7,7 @@ using Letterbook.Core.Extensions;
 using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
@@ -66,6 +67,13 @@ public class Program
 			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
 			.AddDefaultUI();
 		builder.Services.AddRazorPages();
+		builder.Services.AddResponseCompression(options =>
+		{
+			options.EnableForHttps = true;
+			options.MimeTypes =
+				ResponseCompressionDefaults.MimeTypes.Concat(
+					new[] { "image/svg+xml" });
+		});
 
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 
@@ -87,6 +95,7 @@ public class Program
 			});
 		}
 
+		app.UseResponseCompression();
 		app.UseStaticFiles();
 
 		app.UseHealthChecks("/healthz");

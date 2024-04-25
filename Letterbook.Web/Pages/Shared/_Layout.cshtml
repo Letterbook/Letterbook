@@ -3,16 +3,17 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>@ViewData["Title"] - Letterbook.Web</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <title>@ViewData["Title"] - Letterbook</title>
+    <link rel="stylesheet" href="~/lib/picocss/css/pico.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/Letterbook.Web.styles.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/font.css" asp-append-version="true"/>
 </head>
 <body>
 <header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
         <div class="container">
-            <a class="navbar-brand" asp-area="" asp-page="/Index">Letterbook.Web</a>
+            <h1><a class="letterbook-brand" asp-area="" asp-page="/Index">letterbook</a></h1>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -39,7 +40,7 @@
 
 <footer class="border-top footer text-muted">
     <div class="container">
-        &copy; 2024 - Letterbook.Web - <a asp-area="" asp-page="/Privacy">Privacy</a>
+        &copy; 2024 - Letterbook project - <a asp-area="" asp-page="/Privacy">Privacy</a>
     </div>
 </footer>
 
