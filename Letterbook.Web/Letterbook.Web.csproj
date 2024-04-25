@@ -10,4 +10,19 @@
       <ProjectReference Include="..\Letterbook.Api\Letterbook.Api.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="wwwroot\css\font\ClearSans-Regular-webfont.woff">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="wwwroot\css\font\Cousine-Regular.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="wwwroot\css\font\InclusiveSans-Regular.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="wwwroot\css\font\InclusiveSans-Regular.woff">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

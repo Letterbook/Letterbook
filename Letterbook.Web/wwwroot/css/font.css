@@ -1,0 +1,50 @@
+﻿/* Font used for user content (except monospaced) */
+@font-face {
+    font-family: inclusve_sans;
+    src: url("font/InclusiveSans-Regular.woff") format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Our UI chrome font */
+@font-face {
+    font-family: clear_sans;
+    src: url("font/ClearSans-Regular-webfont.woff") format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Our monospace font */
+@font-face {
+    font-family: cousine_mono;
+    src: url("font/Cousine-Regular.ttf");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* The wordmark font */
+@font-face {
+    font-family: oxanium;
+    src: url("font/Oxanium-Light.woff2") format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: clear_sans, sans-serif;
+    
+    article {
+        a, li, p {
+            font-family: inclusve_sans, sans-serif;
+        }
+
+        pre code {
+            font-family: cousine_mono, monospace;
+        }
+    }
+    
+    h1 {
+        font-family: oxanium, clear_sans, sans-serif;
+    }
+}
+

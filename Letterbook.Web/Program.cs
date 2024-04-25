@@ -4,6 +4,7 @@ using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Microsoft.AspNetCore.ResponseCompression;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
@@ -42,6 +43,13 @@ public class Program
 		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
 		builder.Services.AddRazorPages();
+		builder.Services.AddResponseCompression(options =>
+		{
+			options.EnableForHttps = true;
+			options.MimeTypes =
+				ResponseCompressionDefaults.MimeTypes.Concat(
+					new[] { "image/svg+xml" });
+		});
 
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 
@@ -64,6 +72,7 @@ public class Program
 			app.UseSwaggerConfig();
 		}
 
+		app.UseResponseCompression();
 		app.UseStaticFiles();
 
 		app.UseHealthChecks("/healthz");
