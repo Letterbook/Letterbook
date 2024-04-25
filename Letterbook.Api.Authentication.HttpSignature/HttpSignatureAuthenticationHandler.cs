@@ -2,7 +2,9 @@
 using System.Text.Encodings.Web;
 using Letterbook.Adapter.ActivityPub.Signatures;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -10,17 +12,14 @@ namespace Letterbook.Api.Authentication.HttpSignature;
 
 public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSignatureAuthenticationOptions>
 {
-	private readonly IFederatedActorHttpSignatureVerifier _signatureVerifier;
 	private readonly ILogger<HttpSignatureAuthenticationHandler> _logger;
 
 	public HttpSignatureAuthenticationHandler(
 		IOptionsMonitor<HttpSignatureAuthenticationOptions> options,
 		ILoggerFactory loggerFactory,
-		IFederatedActorHttpSignatureVerifier signatureVerifier,
 		UrlEncoder encoder)
 		: base(options, loggerFactory, encoder)
 	{
-		_signatureVerifier = signatureVerifier;
 		_logger = loggerFactory.CreateLogger<HttpSignatureAuthenticationHandler>();
 	}
 
@@ -28,17 +27,23 @@ public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSign
 	{
 		try
 		{
-			var principal = new ClaimsPrincipal();
-			await foreach (var verifiedIdentity in _signatureVerifier.VerifyAsync(Context, Context.RequestAborted))
+			var signatureFeature = Context.Features.Get<HttpSignatureFeature>();
+			if (signatureFeature == null)
 			{
-				var identity = new ClaimsIdentity(new[]
-				{
-					new Claim(ClaimTypes.Name, verifiedIdentity.ToString()) { }
-				}, HttpSignatureAuthenticationDefaults.Scheme);
-
-				principal.AddIdentity(identity);
+				return AuthenticateResult.Fail(
+					$"HTTP Signature feature is not available in the request context. Ensure that {nameof(HttpSignatureVerificationMiddleware)} is added to the pipeline before authentication.");
 			}
 
+			var identities = signatureFeature
+				.GetValidatedSignatures()
+				.Select(i =>
+					new ClaimsIdentity(new[]
+					{
+						new Claim(ClaimTypes.Name, i.ToString())
+					}, HttpSignatureAuthenticationDefaults.Scheme)
+				);
+
+			var principal = new ClaimsPrincipal(identities);
 			if (principal.Identities.Any())
 			{
 				_logger.LogInformation("Successfully authenticated: {IdentityList}", string.Join(", ", principal.Identities.Select(i => i.Name)));
@@ -70,11 +75,20 @@ public static class HttpSignatureAuthenticationExtensions
 {
 	public static AuthenticationBuilder AddHttpSignature(this AuthenticationBuilder builder)
 	{
+
+		builder.Services.AddScoped<IFederatedActorHttpSignatureVerifier, FederatedActorHttpSignatureVerifier>();
+		builder.Services.AddScoped<HttpSignatureVerificationMiddleware>();
+
 		return builder.AddScheme<HttpSignatureAuthenticationOptions, HttpSignatureAuthenticationHandler>(
 			HttpSignatureAuthenticationDefaults.Scheme,
 			static _ =>
 			{
 
 			});
+	}
+
+	public static IApplicationBuilder UseHttpSignatureVerification(this IApplicationBuilder builder)
+	{
+		return builder.UseMiddleware<HttpSignatureVerificationMiddleware>();
 	}
 }
