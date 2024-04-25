@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "defaultProvider": "jsdelivr",
+  "libraries": [
+    {
+      "library": "@picocss/pico@2.0.6",
+      "destination": "wwwroot/lib/picocss",
+      "files": [
+        "css/pico.min.css",
+        "LICENSE.md"
+      ]
+    }
+  ]
+}
