@@ -1,5 +1,6 @@
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Api.Authentication.HttpSignature;
+using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;

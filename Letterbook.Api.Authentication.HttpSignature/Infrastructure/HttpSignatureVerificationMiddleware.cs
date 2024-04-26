@@ -1,10 +1,22 @@
+using Letterbook.Api.Authentication.HttpSignature.Verification;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSign;
 
-namespace Letterbook.Api.Authentication.HttpSignature;
+namespace Letterbook.Api.Authentication.HttpSignature.Infrastructure;
 
+/// <summary>
+/// Implements HTTP signature verification.
+///
+/// If no signature header is present, the request is allowed to proceed.
+///
+/// If a signature header is present, the signature is validated.
+///
+/// If validation succeeds, the validated actor ID URIs are stored using <see cref="HttpSignatureFeature"/>.
+///
+/// If validation fails, the request terminates with HTTP 400 Bad Request.
+/// </summary>
 public class HttpSignatureVerificationMiddleware : IMiddleware
 {
 	private readonly ILogger<HttpSignatureVerificationMiddleware> _logger;

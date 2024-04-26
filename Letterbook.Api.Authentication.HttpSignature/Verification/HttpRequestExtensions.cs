@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Http;
 using NSign;
 using NSign.Signatures;
 
-namespace Letterbook.Api.Authentication.HttpSignature;
+namespace Letterbook.Api.Authentication.HttpSignature.Verification;
 
 /// <summary>
 /// Helper methods for <see cref="AspNetCoreMessageSigningContext"/>. This code is copied and adapted from the NSign implementation

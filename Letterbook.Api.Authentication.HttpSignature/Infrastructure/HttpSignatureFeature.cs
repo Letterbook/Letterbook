@@ -1,4 +1,4 @@
-namespace Letterbook.Api.Authentication.HttpSignature;
+namespace Letterbook.Api.Authentication.HttpSignature.Infrastructure;
 
 public class HttpSignatureFeature
 {

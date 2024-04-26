@@ -1,4 +1,4 @@
-namespace Letterbook.Api.Authentication.HttpSignature;
+namespace Letterbook.Api.Authentication.HttpSignature.Handler;
 
 public static class HttpSignatureAuthenticationDefaults
 {

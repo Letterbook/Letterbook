@@ -9,7 +9,7 @@ using NSign;
 using NSign.Http;
 using NSign.Providers;
 
-namespace Letterbook.Api.Authentication.HttpSignature;
+namespace Letterbook.Api.Authentication.HttpSignature.Verification;
 
 [UsedImplicitly]
 public class FederatedActorHttpSignatureVerifier(

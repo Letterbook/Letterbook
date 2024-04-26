@@ -1,10 +1,11 @@
 ﻿using System.Security.Claims;
 using System.Text.Encodings.Web;
+using Letterbook.Api.Authentication.HttpSignature.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Letterbook.Api.Authentication.HttpSignature;
+namespace Letterbook.Api.Authentication.HttpSignature.Handler;
 
 public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSignatureAuthenticationOptions>
 {

@@ -6,7 +6,7 @@ using NSign;
 using NSign.Http;
 using NSign.Signatures;
 
-namespace Letterbook.Api.Authentication.HttpSignature;
+namespace Letterbook.Api.Authentication.HttpSignature.Verification;
 
 /// <summary>
 /// A message signing context that allows verification of signatures in a <see cref="HttpRequest"/>. This class is copied and

@@ -1,4 +1,4 @@
-namespace Letterbook.Adapter.ActivityPub.Signatures;
+namespace Letterbook.Api.Authentication.HttpSignature.Verification;
 
 public class SignatureVerificationException : Exception
 {

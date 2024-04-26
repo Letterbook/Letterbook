@@ -12,6 +12,8 @@ using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Api.Authentication.HttpSignature;
+using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
+using Letterbook.Api.Authentication.HttpSignature.Handler;
 using Letterbook.Api.Mappers;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace Letterbook.Api.Authentication.HttpSignature;
+namespace Letterbook.Api.Authentication.HttpSignature.Verification;
 
 public interface IFederatedActorHttpSignatureVerifier
 {

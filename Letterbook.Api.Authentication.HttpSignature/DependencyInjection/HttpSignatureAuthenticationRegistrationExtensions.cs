@@ -1,10 +1,13 @@
+using Letterbook.Api.Authentication.HttpSignature.Handler;
+using Letterbook.Api.Authentication.HttpSignature.Infrastructure;
+using Letterbook.Api.Authentication.HttpSignature.Verification;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Letterbook.Api.Authentication.HttpSignature;
+namespace Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
 
-public static class HttpSignatureAuthenticationExtensions
+public static class HttpSignatureAuthenticationRegistrationExtensions
 {
 	public static AuthenticationBuilder AddHttpSignature(this AuthenticationBuilder builder)
 	{
