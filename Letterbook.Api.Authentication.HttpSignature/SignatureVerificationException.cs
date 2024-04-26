@@ -1,6 +1,3 @@
-using System.Runtime.Serialization;
-using System.Security.Cryptography;
-
 namespace Letterbook.Adapter.ActivityPub.Signatures;
 
 public class SignatureVerificationException : Exception

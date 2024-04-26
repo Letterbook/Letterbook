@@ -1,10 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Text.Encodings.Web;
-using Letterbook.Adapter.ActivityPub.Signatures;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -59,36 +55,5 @@ public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSign
 		}
 
 		return AuthenticateResult.Fail("No valid HTTP signatures found");
-	}
-}
-
-public class HttpSignatureAuthenticationOptions : AuthenticationSchemeOptions
-{
-}
-
-public static class HttpSignatureAuthenticationDefaults
-{
-	public static readonly string Scheme = "HttpSignature";
-}
-
-public static class HttpSignatureAuthenticationExtensions
-{
-	public static AuthenticationBuilder AddHttpSignature(this AuthenticationBuilder builder)
-	{
-
-		builder.Services.AddScoped<IFederatedActorHttpSignatureVerifier, FederatedActorHttpSignatureVerifier>();
-		builder.Services.AddScoped<HttpSignatureVerificationMiddleware>();
-
-		return builder.AddScheme<HttpSignatureAuthenticationOptions, HttpSignatureAuthenticationHandler>(
-			HttpSignatureAuthenticationDefaults.Scheme,
-			static _ =>
-			{
-
-			});
-	}
-
-	public static IApplicationBuilder UseHttpSignatureVerification(this IApplicationBuilder builder)
-	{
-		return builder.UseMiddleware<HttpSignatureVerificationMiddleware>();
 	}
 }
