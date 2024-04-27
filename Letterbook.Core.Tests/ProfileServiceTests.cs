@@ -29,7 +29,7 @@ public class ProfileServiceTests : WithMocks
 		CoreOptionsMock.Value.MaxCustomFields = 2;
 
 		_service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object,
-			Mock.Of<IProfileEventService>(), ActivityPubClientMock.Object);
+			Mock.Of<IProfileEventService>(), ActivityPubClientMock.Object, Mock.Of<IHostSigningKeyProvider>());
 		_profile = _fakeProfile.Generate();
 	}
 

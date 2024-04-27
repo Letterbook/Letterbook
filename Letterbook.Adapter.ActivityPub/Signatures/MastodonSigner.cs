@@ -30,7 +30,7 @@ public class MastodonSigner : IClientSigner
 		}
 
 		var checkInput = new InputCheckingVisitor(message);
-		var builder = new MastodonComponentBuilder(message);
+		var builder = new MastodonComponentBuilder(new HttpRequestMessageComponentProvider(message));
 		var inputSpec = new SignatureInputSpec("mastodon");
 		foreach (var spec in _options.ComponentsToInclude)
 		{

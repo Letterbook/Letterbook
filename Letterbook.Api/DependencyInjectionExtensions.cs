@@ -7,9 +7,13 @@ using ActivityPub.Types.AS;
 using DarkLink.Web.WebFinger.Server;
 using DarkLink.Web.WebFinger.Shared;
 using Letterbook.Adapter.ActivityPub;
+using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
+using Letterbook.Api.Authentication.HttpSignature;
+using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
+using Letterbook.Api.Authentication.HttpSignature.Handler;
 using Letterbook.Api.Mappers;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
@@ -122,6 +126,10 @@ public static class DependencyInjectionExtensions
 			.AddEntityFrameworkStores<RelationalContext>();
 		services.TryAddTypesModule();
 
+		// Register HTTP signature authentication services
+		services.AddSingleton<IHostSigningKeyProvider, DevelopmentHostSigningKeyProvider>();
+		services.AddScoped<IVerificationKeyProvider, ActivityPubClientVerificationKeyProvider>();
+
 		return services;
 	}
 
@@ -191,7 +199,18 @@ public static class DependencyInjectionExtensions
 				};
 				// TODO(Security): Figure out how to do this only in Development
 				options.RequireHttpsMetadata = false;
+			})
+			.AddHttpSignature();
+
+		services.AddAuthorization(opts =>
+		{
+			opts.AddPolicy("ActivityPub", static policy =>
+			{
+				policy.RequireAuthenticatedUser();
+				policy.AddAuthenticationSchemes(HttpSignatureAuthenticationDefaults.Scheme);
 			});
+		});
+
 		return services;
 	}
 

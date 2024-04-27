@@ -1,4 +1,5 @@
 using Letterbook.Api.Swagger;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
@@ -10,6 +11,7 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [ApiExplorerSettings(GroupName = Docs.ActivityPubV1)]
 [ApiController]
 [Route("[controller]/{type}")]
+[Authorize(policy: "ActivityPub")]
 public class ObjectController
 {
 	[HttpGet]

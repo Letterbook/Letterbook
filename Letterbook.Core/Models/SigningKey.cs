@@ -73,6 +73,15 @@ public class SigningKey
 		};
 	}
 
+	public static SigningKey CreateEmpty(Uuid7 id, Uri fediId)
+	{
+		return new SigningKey()
+		{
+			_id = id,
+			FediId = fediId
+		};
+	}
+
 	public RSA GetRsa()
 	{
 		RSA alg = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();

@@ -73,6 +73,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Http", "Http", "{1D8F2C94-1
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Web", "Letterbook.Web\Letterbook.Web.csproj", "{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Api.Authentication.HttpSignature", "Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj", "{C2B3F054-B9F8-4EE8-847C-A290E7588F12}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -138,6 +140,10 @@ Global
 		{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2B3F054-B9F8-4EE8-847C-A290E7588F12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2B3F054-B9F8-4EE8-847C-A290E7588F12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2B3F054-B9F8-4EE8-847C-A290E7588F12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2B3F054-B9F8-4EE8-847C-A290E7588F12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
