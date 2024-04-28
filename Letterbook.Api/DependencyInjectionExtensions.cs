@@ -83,6 +83,16 @@ public static class DependencyInjectionExtensions
 			}));
 	}
 
+	public static IdentityBuilder AddIdentity(this IServiceCollection services)
+	{
+		return services.AddIdentity<Account, IdentityRole<Guid>>(options =>
+			{
+				
+			})
+			.AddEntityFrameworkStores<RelationalContext>()
+			.AddDefaultTokenProviders();
+	}
+
 	public static IServiceCollection AddServices(this IServiceCollection services, ConfigurationManager configuration)
 	{
 		// Register options
@@ -120,8 +130,6 @@ public static class DependencyInjectionExtensions
 		services.AddSingleton<IActivityPubDocument, Document>();
 		services.AddDbAdapter(configuration.GetSection(DbOptions.ConfigKey));
 		services.AddDbContext<FeedsContext>();
-		services.AddIdentity<Account, IdentityRole<Guid>>()
-			.AddEntityFrameworkStores<RelationalContext>();
 		services.TryAddTypesModule();
 
 		// Register HTTP signature authentication services
