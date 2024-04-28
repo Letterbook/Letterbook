@@ -29,9 +29,9 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 		throw new NotImplementedException();
 	}
 
-	public Task<Models.Account?> LookupAccount(Uuid7 id)
+	public Task<Models.Account?> LookupAccount(Guid id)
 	{
-		throw new NotImplementedException();
+		return _context.Accounts.FirstOrDefaultAsync(account => account.Id == id);
 	}
 
 	public IQueryable<Models.Account> SearchAccounts()

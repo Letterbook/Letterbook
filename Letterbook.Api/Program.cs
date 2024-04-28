@@ -1,4 +1,6 @@
 using Letterbook.Adapter.ActivityPub;
+using Letterbook.Api.Authentication.HttpSignature;
+using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
@@ -13,15 +15,17 @@ public class Program
 {
 	public static void Main(string[] args)
 	{
-		// Pre initialize Serilog
-		Log.Logger = new LoggerConfiguration()
-			.MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-			.Enrich.FromLogContext()
-			.Enrich.WithSpan()
-			.WriteTo.Console()
-			.CreateBootstrapLogger();
-
 		var builder = WebApplication.CreateBuilder(args);
+
+		// Pre initialize Serilog boostrap logger
+		if(builder.Environment.IsProduction())
+			Log.Logger = new LoggerConfiguration()
+				.MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+				.Enrich.FromLogContext()
+				.Enrich.WithSpan()
+				.WriteTo.Console()
+				.CreateBootstrapLogger();
+
 		var coreOptions = builder.Configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
 		                  ?? throw new ConfigException(nameof(CoreOptions));
 
@@ -65,6 +69,7 @@ public class Program
 		app.MapPrometheusScrapingEndpoint();
 		app.UseWebFingerScoped();
 
+		app.UseHttpSignatureVerification();
 		app.UseAuthentication();
 		app.UseAuthorization();
 

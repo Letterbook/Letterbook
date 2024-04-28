@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
@@ -8,8 +10,12 @@ using AutoMapper;
 using JetBrains.Annotations;
 using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Core.Models;
+using Medo;
+using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Utilities.IO.Pem;
+using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
+using PemWriter = Org.BouncyCastle.OpenSsl.PemWriter;
 
 namespace Letterbook.Adapter.ActivityPub.Mappers;
 
@@ -29,6 +35,7 @@ public static class AstMapper
 	private static void FromActor(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<PersonActorExtension, Models.Profile>(MemberList.Destination)
+			.ConstructUsing(_ => Models.Profile.CreateEmpty(Uuid7.NewUuid7()))
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
 			.ForMember(dest => dest.Authority, opt => opt.Ignore())
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -52,7 +59,10 @@ public static class AstMapper
 			.ForMember(dest => dest.Following, opt => opt.MapFrom(src => src.Following))
 			.ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!))
 			.AfterMap((_, profile) => { profile.Type = ActivityActorType.Person; })
-			.ReverseMap();
+			.ReverseMap()
+			.ForMember(
+				dest => dest.PublicKey,
+				opt => opt.MapFrom<PublicKeyConverter, SigningKey?>(src => src.Keys.FirstOrDefault()));
 
 		cfg.CreateMap<ApplicationActorExtension, InstanceActor>(MemberList.Destination)
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -61,6 +71,8 @@ public static class AstMapper
 			.ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!));
 
 		cfg.CreateMap<PublicKey?, SigningKey?>()
+			.ConvertUsing<PublicKeyConverter>();
+		cfg.CreateMap<SigningKey?, PublicKey?>()
 			.ConvertUsing<PublicKeyConverter>();
 	}
 
@@ -402,9 +414,10 @@ internal class IdConverter : ITypeConverter<ASLink, Uri>,
 [UsedImplicitly]
 internal class PublicKeyConverter :
 	ITypeConverter<PublicKey?, SigningKey?>,
+	ITypeConverter<SigningKey?, PublicKey?>,
 	IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>,
 	IMemberValueResolver<ApplicationActorExtension, Models.InstanceActor, PublicKey?, IList<SigningKey>>,
-	ITypeConverter<string, ReadOnlyMemory<byte>>
+	ITypeConverter<string, ReadOnlyMemory<byte>>, IMemberValueResolver<Models.Profile, PersonActorExtension, SigningKey?, PublicKey?>
 {
 	public SigningKey? Convert(PublicKey? source, SigningKey? destination, ResolutionContext context)
 	{
@@ -421,13 +434,35 @@ internal class PublicKeyConverter :
 			_ => SigningKey.KeyFamily.Unknown
 		};
 
-		destination ??= new SigningKey() { FediId = new Uri(source.Id) };
+		destination ??= SigningKey.CreateEmpty(Uuid7.NewUuid7(), new Uri(source.Id));
 
 		destination.FediId = new Uri(source.Id);
 		destination.Label = "From federation peer";
 		destination.PublicKey = context.Mapper.Map<ReadOnlyMemory<byte>>(source.PublicKeyPem);
 		destination.Family = alg;
 		destination.Created = DateTimeOffset.UtcNow;
+
+		return destination;
+	}
+
+	public PublicKey? Convert(SigningKey? source, PublicKey? destination, ResolutionContext context)
+	{
+		if (source is null) return default;
+
+		AsymmetricAlgorithm? algo = source.Family switch
+		{
+			SigningKey.KeyFamily.Rsa => source.GetRsa(),
+			SigningKey.KeyFamily.Dsa => source.GetDsa(),
+			SigningKey.KeyFamily.EcDsa => source.GetEcDsa(),
+			_ => null
+		};
+
+		destination ??= new PublicKey()
+		{
+			Id = source.FediId.ToString(),
+			Owner = default!,
+			PublicKeyPem = algo?.ExportSubjectPublicKeyInfoPem() ?? ""
+		};
 
 		return destination;
 	}
@@ -462,6 +497,18 @@ internal class PublicKeyConverter :
 				.Skip(1)
 				.SkipLast(1));
 		return System.Convert.FromBase64String(b64);
+	}
+
+	public PublicKey Resolve(Models.Profile source, PersonActorExtension destination, SigningKey? sourceMember, PublicKey? destMember,
+		ResolutionContext context)
+	{
+		if (destMember != null)
+		{
+			context.Mapper.Map(sourceMember, destMember);
+			return destMember;
+		}
+
+		return context.Mapper.Map<PublicKey>(sourceMember);
 	}
 }
 

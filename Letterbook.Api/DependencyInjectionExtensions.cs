@@ -12,6 +12,8 @@ using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Api.Authentication.HttpSignature;
+using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
+using Letterbook.Api.Authentication.HttpSignature.Handler;
 using Letterbook.Api.Mappers;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
@@ -87,7 +89,7 @@ public static class DependencyInjectionExtensions
 	{
 		return services.AddIdentity<Account, IdentityRole<Guid>>(options =>
 			{
-				
+
 			})
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders();
@@ -135,7 +137,6 @@ public static class DependencyInjectionExtensions
 		// Register HTTP signature authentication services
 		services.AddSingleton<IHostSigningKeyProvider, DevelopmentHostSigningKeyProvider>();
 		services.AddScoped<IVerificationKeyProvider, ActivityPubClientVerificationKeyProvider>();
-		services.AddScoped<IFederatedActorHttpSignatureVerifier, FederatedActorHttpSignatureVerifier>();
 
 		return services;
 	}

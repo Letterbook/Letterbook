@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
@@ -69,7 +70,7 @@ public class DevelopmentHostSigningKeyProvider : IHostSigningKeyProvider
 	private async Task<SigningKey> GenerateDevelopmentKey(string keyFilePath)
 	{
 		_logger.LogDebug("Generating new development host signing key");
-		var key = SigningKey.Rsa(0, _coreOptions.Value.GetInstanceUri());
+		var key = SigningKey.Rsa(0, _coreOptions.Value.BaseUri());
 		try
 		{
 			using var fileStream = File.OpenWrite(keyFilePath);

@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace Letterbook.Adapter.ActivityPub.Test;
+namespace Letterbook.Core.Tests;
 
 public static class TestData
 {
