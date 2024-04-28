@@ -45,6 +45,7 @@ public class Program
 		builder.Services.AddHealthChecks();
 		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
+		builder.Services.AddIdentity();
 
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 
