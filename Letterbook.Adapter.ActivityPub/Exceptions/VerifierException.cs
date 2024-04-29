@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
+using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using static NSign.Constants;
@@ -30,7 +31,7 @@ public class VerifierException : CoreException
 		return ex;
 	}
 
-	public static VerifierException NoValidSignatures(HttpRequestHeaders headers, Exception? innerEx = null,
+	public static VerifierException NoValidSignatures(RequestComponentProvider components, Exception? innerEx = null,
 		[CallerMemberName] string name = "",
 		[CallerFilePath] string path = "",
 		[CallerLineNumber] int line = -1)
@@ -40,11 +41,11 @@ public class VerifierException : CoreException
 			Source = FormatSource(path, name, line),
 		};
 		ex.HResult |= (int)ErrorCodes.PermissionDenied.With(ErrorCodes.InvalidRequest);
-		if (headers.TryGetValues(Headers.Signature, out var signatures))
+		if (components.TryGetHeaderValues(Headers.Signature, out var signatures))
 			ex.Data["Signature Header"] = signatures;
-		if (headers.TryGetValues(Headers.SignatureInput, out var inputs))
+		if (components.TryGetHeaderValues(Headers.SignatureInput, out var inputs))
 			ex.Data["Signature-Input Header"] = inputs;
-		if (headers.TryGetValues("User-Agent", out var userAgent))
+		if (components.TryGetHeaderValues("User-Agent", out var userAgent))
 			ex.Data["User-Agent Header"] = userAgent;
 
 		return ex;

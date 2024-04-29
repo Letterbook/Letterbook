@@ -33,10 +33,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Data\Actor.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Data\LetterbookActor.json">
+      <None Update="Data\*.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
