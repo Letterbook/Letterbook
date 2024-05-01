@@ -30,33 +30,33 @@ public class AccountService : IAccountService, IDisposable
 		_identityManager = identityManager;
 	}
 
-	public async Task<IList<Claim>> AuthenticatePassword(string email, string password)
+	public async Task<AccountIdentity> AuthenticatePassword(string email, string password)
 	{
-		var accountAuth = await _identityManager.FindByEmailAsync(email);
-		if (accountAuth == null) return Array.Empty<Claim>();
-		if (accountAuth.LockoutEnd >= DateTime.UtcNow)
+		var account = await _accountAdapter.FindAccountByEmail(_identityManager.NormalizeEmail(email));
+		if (account == null) return AccountIdentity.Fail(false);
+		if (account.LockoutEnd >= DateTime.UtcNow)
 		{
-			throw new RateLimitException("Too many failed attempts", accountAuth.LockoutEnd.GetValueOrDefault());
+			throw new RateLimitException("Too many failed attempts", account.LockoutEnd.GetValueOrDefault());
 		}
 
-		var match = _identityManager.PasswordHasher.VerifyHashedPassword(accountAuth,
-			accountAuth.PasswordHash ?? string.Empty, password);
+		var match = _identityManager.PasswordHasher.VerifyHashedPassword(account,
+			account.PasswordHash ?? string.Empty, password);
 		switch (match)
 		{
 			case PasswordVerificationResult.SuccessRehashNeeded:
-				await _identityManager.ResetAccessFailedCountAsync(accountAuth);
-				accountAuth.PasswordHash = _identityManager.PasswordHasher.HashPassword(accountAuth, password);
-				_accountAdapter.Update(accountAuth);
+				await _identityManager.ResetAccessFailedCountAsync(account);
+				account.PasswordHash = _identityManager.PasswordHasher.HashPassword(account, password);
+				_accountAdapter.Update(account);
 				await _accountAdapter.Commit();
-				return await _identityManager.GetClaimsAsync(accountAuth);
+				return AccountIdentity.Succeed(account.TwoFactorEnabled, account);
 			case PasswordVerificationResult.Success:
-				await _identityManager.ResetAccessFailedCountAsync(accountAuth);
-				return await _identityManager.GetClaimsAsync(accountAuth);
+				await _identityManager.ResetAccessFailedCountAsync(account);
+				return AccountIdentity.Succeed(account.TwoFactorEnabled, account);
 			case PasswordVerificationResult.Failed:
 			default:
-				await _identityManager.AccessFailedAsync(accountAuth);
-				_logger.LogInformation("Password Authentication failed for {AccountId}", accountAuth.Id);
-				return Array.Empty<Claim>();
+				await _identityManager.AccessFailedAsync(account);
+				_logger.LogInformation("Password Authentication failed for {AccountId}", account.Id);
+				return AccountIdentity.Fail(account.LockoutEnd > DateTimeOffset.UtcNow);
 		}
 	}
 
@@ -122,23 +122,23 @@ public class AccountService : IAccountService, IDisposable
 		return true;
 	}
 
-	public async Task<bool> AddLinkedProfile(Guid accountId, Profile profile, ProfilePermission permission)
+	public async Task<bool> AddLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims)
 	{
 		var account = await _accountAdapter.LookupAccount(accountId);
 		if (account is null) return false;
 		var count = account.LinkedProfiles.Count;
-		var link = new ProfileAccess(account, profile, permission);
+		var link = new ProfileClaims(account, profile, claims);
 		account.LinkedProfiles.Add(link);
 		await _accountAdapter.Commit();
 
 		return count == account.LinkedProfiles.Count;
 	}
 
-	public async Task<bool> UpdateLinkedProfile(Guid accountId, Profile profile, ProfilePermission permission)
+	public async Task<bool> UpdateLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims)
 	{
 		var account = await _accountAdapter.LookupAccount(accountId);
 		if (account is null) return false;
-		var model = new ProfileAccess(account, profile, ProfilePermission.None);
+		var model = new ProfileClaims(account, profile, [ProfileClaim.None]);
 		var link = account.LinkedProfiles.SingleOrDefault(p => p.Equals(model));
 		if (link is null)
 		{
@@ -146,9 +146,7 @@ public class AccountService : IAccountService, IDisposable
 			return false;
 		}
 
-		if (link.Permission == permission) return false;
-
-		link.Permission = permission;
+		link.Claims = claims.ToList();
 
 		await _accountAdapter.Commit();
 		return true;
@@ -159,7 +157,7 @@ public class AccountService : IAccountService, IDisposable
 		var account = await _accountAdapter.LookupAccount(accountId);
 		if (account is null) return false;
 
-		var link = new ProfileAccess(account, profile, ProfilePermission.None);
+		var link = new ProfileClaims(account, profile, [ProfileClaim.None]);
 
 		var result = account.LinkedProfiles.Remove(link);
 		if (result) await _accountAdapter.Commit();

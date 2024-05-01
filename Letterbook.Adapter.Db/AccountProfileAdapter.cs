@@ -34,6 +34,13 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 		return _context.Accounts.FirstOrDefaultAsync(account => account.Id == id);
 	}
 
+	public Task<Models.Account?> FindAccountByEmail(string email)
+	{
+		return _context.Accounts
+			.Include(account => account.LinkedProfiles)
+			.FirstOrDefaultAsync(account => account.NormalizedEmail == email);
+	}
+
 	public IQueryable<Models.Account> SearchAccounts()
 	{
 		return _context.Accounts.AsQueryable();

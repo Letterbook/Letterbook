@@ -109,10 +109,10 @@ public class AccountServiceTest : WithMocks
 	{
 		var account = _fakeAccount.Generate();
 		var profile = _fakeProfile.Generate();
-		var expected = new ProfileAccess(account, profile, ProfilePermission.All);
+		var expected = new ProfileClaims(account, profile, [ProfileClaim.Owner]);
 		AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
-		await _accountService.AddLinkedProfile(account.Id, profile, ProfilePermission.All);
+		await _accountService.AddLinkedProfile(account.Id, profile, [ProfileClaim.Owner]);
 
 		Assert.Contains(account.LinkedProfiles, linkedProfile => linkedProfile == expected);
 	}
@@ -122,7 +122,7 @@ public class AccountServiceTest : WithMocks
 	{
 		var account = _fakeAccount.Generate();
 		var profile = _fakeProfile.Generate();
-		var expected = new ProfileAccess(account, profile, ProfilePermission.All);
+		var expected = new ProfileClaims(account, profile, [ProfileClaim.Owner]);
 		account.LinkedProfiles.Add(expected);
 		AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
@@ -136,13 +136,13 @@ public class AccountServiceTest : WithMocks
 	{
 		var account = _fakeAccount.Generate();
 		var profile = _fakeProfile.Generate();
-		var expected = new ProfileAccess(account, profile, ProfilePermission.All);
+		var expected = new ProfileClaims(account, profile, [ProfileClaim.Owner]);
 		account.LinkedProfiles.Add(expected);
 		AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
-		await _accountService.UpdateLinkedProfile(account.Id, profile, ProfilePermission.None);
+		await _accountService.UpdateLinkedProfile(account.Id, profile, [ProfileClaim.None]);
 
 		var accountLink = account.LinkedProfiles.SingleOrDefault(p => p.Equals(expected));
-		Assert.Equal(accountLink?.Permission, ProfilePermission.None);
+		Assert.Equal(accountLink?.Claims, [ProfileClaim.None]);
 	}
 }

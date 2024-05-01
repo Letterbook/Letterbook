@@ -5,6 +5,7 @@ using Letterbook.Adapter.Db;
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -13,26 +14,28 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    partial class RelationalContextModelSnapshot : ModelSnapshot
+    [Migration("20240501052253_ProfileClaims")]
+    partial class ProfileClaims
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("AudienceProfileMembers", b =>
                 {
-                    b.Property<string>("AudiencesFediId")
-                        .HasColumnType("text");
+                    b.Property<Guid>("AudiencesId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("MembersId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("AudiencesFediId", "MembersId");
+                    b.HasKey("AudiencesId", "MembersId");
 
                     b.HasIndex("MembersId");
 
@@ -93,13 +96,19 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("Letterbook.Core.Models.Audience", b =>
                 {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("FediId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid?>("SourceId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("FediId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("FediId");
 
                     b.HasIndex("SourceId");
 
@@ -580,13 +589,13 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("PostsToAudience", b =>
                 {
-                    b.Property<string>("AudienceFediId")
-                        .HasColumnType("text");
+                    b.Property<Guid>("AudienceId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("AudienceFediId", "PostId");
+                    b.HasKey("AudienceId", "PostId");
 
                     b.HasIndex("PostId");
 
@@ -608,7 +617,7 @@ namespace Letterbook.Adapter.Db.Migrations
                 {
                     b.HasOne("Letterbook.Core.Models.Audience", null)
                         .WithMany()
-                        .HasForeignKey("AudiencesFediId")
+                        .HasForeignKey("AudiencesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -836,7 +845,7 @@ namespace Letterbook.Adapter.Db.Migrations
                 {
                     b.HasOne("Letterbook.Core.Models.Audience", null)
                         .WithMany()
-                        .HasForeignKey("AudienceFediId")
+                        .HasForeignKey("AudienceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

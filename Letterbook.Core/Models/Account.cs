@@ -1,11 +1,20 @@
+using System.Security.Principal;
 using Medo;
 using Microsoft.AspNetCore.Identity;
 
 namespace Letterbook.Core.Models;
 
-public class Account : IdentityUser<Guid>
+public class Account : IdentityUser<Guid>, IIdentity
 {
-	public ICollection<ProfileAccess> LinkedProfiles { get; set; } = new HashSet<ProfileAccess>();
+	private string? _authenticationType = null;
+	private bool _isAuthenticated = false;
+
+	public string? AuthenticationType => _authenticationType;
+
+	public bool IsAuthenticated => _isAuthenticated;
+
+	public string? Name => UserName;
+	public ICollection<ProfileClaims> LinkedProfiles { get; set; } = new HashSet<ProfileClaims>();
 
 	public Account()
 	{
@@ -24,10 +33,16 @@ public class Account : IdentityUser<Guid>
 			UserName = handle
 		};
 		profile.OwnedBy = account;
-		account.LinkedProfiles.Add(new ProfileAccess(account, profile, ProfilePermission.All));
+		account.LinkedProfiles.Add(new ProfileClaims(account, profile, [ProfileClaim.Owner]));
 
 		return account;
 	}
 
 	public Account ShallowClone() => (Account)MemberwiseClone();
+
+	public void Authenticate(string type)
+	{
+		_isAuthenticated = true;
+		_authenticationType = type;
+	}
 }

@@ -14,6 +14,7 @@ public interface IAccountProfileAdapter : IDisposable
 	public bool RecordAccount(Account account);
 	public Task<bool> RecordAccounts(IEnumerable<Account> accounts);
 	public Task<Account?> LookupAccount(Guid id);
+	public Task<Account?> FindAccountByEmail(string email);
 	public IQueryable<Account> SearchAccounts();
 
 	public Task<bool> AnyProfile(string handle);
