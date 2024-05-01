@@ -19,7 +19,7 @@ public class FakeAccount : Faker<Account>
 
 			var profile = new FakeProfile(uri).Generate();
 			profile.OwnedBy = account;
-			var link = new ProfileAccess(account, profile, ProfilePermission.All);
+			var link = new ProfileClaims(account, profile, [ProfileClaim.Owner]);
 			account.LinkedProfiles.Add(link);
 			profile.Accessors.Add(link);
 			return account;
