@@ -1,5 +1,4 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using Letterbook.Api.Dto;
 using Letterbook.Api.Swagger;
@@ -51,7 +50,7 @@ public class UserAccountController : ControllerBase
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_hostSecret));
 			var tokenDescriptor = new SecurityTokenDescriptor
 			{
-				Subject = new ClaimsIdentity(identity),
+				Subject = identity,
 				Issuer = _coreOptions.BaseUri().ToString(),
 				Audience = _coreOptions.BaseUri().ToString(),
 				NotBefore = DateTime.UtcNow,

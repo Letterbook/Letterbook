@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Letterbook.Core.Models;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Letterbook.Core;
 
@@ -16,14 +17,14 @@ public class AccountIdentity : ClaimsIdentity
 		TwoFactorRequired = false;
 	}
 
-	public AccountIdentity(Account account, bool twoFactorRequired)
+	public AccountIdentity(Account account, bool twoFactorRequired) : base(account)
 	{
 		Authenticated = true;
 		LockedOut = false;
 		TwoFactorRequired = twoFactorRequired;
 
-		base.AddClaim(new Claim("sub", account.Id.ToString()));
-		base.AddClaim(new Claim("email", account.Email ?? ""));
+		base.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()));
+		base.AddClaim(new Claim(JwtRegisteredClaimNames.Email, account.Email ?? ""));
 		base.AddClaim(new Claim("email_confirmed", account.EmailConfirmed.ToString()));
 		base.AddClaims(account.LinkedProfiles.Select(link => new Claim($"profile:{link.Profile.GetId25()}", string.Join(',', link.Claims))));
 	}
