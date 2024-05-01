@@ -43,14 +43,15 @@ public class UserAccountController : ControllerBase
 	{
 		try
 		{
-			var claims = await _accountService.AuthenticatePassword(loginRequest.Email, loginRequest.Password);
-			if (!claims.Any()) return Unauthorized();
+			var identity = await _accountService.AuthenticatePassword(loginRequest.Email, loginRequest.Password);
+			if (!identity.Authenticated) return Unauthorized();
+			// TODO: 2FA
 
 			// TODO: asymmetric signing key
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_hostSecret));
 			var tokenDescriptor = new SecurityTokenDescriptor
 			{
-				Subject = new ClaimsIdentity(claims),
+				Subject = new ClaimsIdentity(identity),
 				Issuer = _coreOptions.BaseUri().ToString(),
 				Audience = _coreOptions.BaseUri().ToString(),
 				NotBefore = DateTime.UtcNow,
