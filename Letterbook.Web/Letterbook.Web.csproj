@@ -70,10 +70,16 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Update="wwwroot\css\font\InclusiveSans-Regular.ttf">
+      <Content Update="wwwroot\css\font\InclusiveSans-Regular.woff">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
-      <Content Update="wwwroot\css\font\InclusiveSans-Regular.woff">
+      <Content Update="wwwroot\css\font\InclusiveSans.OFL.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="wwwroot\css\font\ShareTechMono-Regular.woff2">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="wwwroot\css\font\ShareTechMono.OFL.txt">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

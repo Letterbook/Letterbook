@@ -1,4 +1,4 @@
-﻿/* Font used for user content (except monospaced) */
+/* Font used for user content (except monospaced) */
 @font-face {
     font-family: inclusve_sans;
     src: url("font/InclusiveSans-Regular.woff") format('woff');
@@ -24,7 +24,7 @@ body {
     }
     
     .letterbook-brand {
-        font-family: "Share Tech Mono", inclusve_sans, sans-serif;
+        font-family: "Share Tech Mono", monospace;
     }
 }
 
