@@ -4,6 +4,7 @@ using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
@@ -41,6 +42,14 @@ public class Program
 		builder.Services.AddHealthChecks();
 		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
+		builder.Services.AddIdentity()
+			// Aspnet Core Identity includes a default UI, which provides basic account management.
+			// This includes register, login, logout, and maintenance views.
+			// However, it only seems to work well for fairly simple (single project) apps.  It also looks extremely Microsoft.
+			// We likely don't want to use it long term, but it's nice for the moment.
+			//
+			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
+			.AddDefaultUI();
 		builder.Services.AddRazorPages();
 
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());

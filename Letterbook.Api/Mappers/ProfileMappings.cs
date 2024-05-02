@@ -9,9 +9,11 @@ public class ProfileMappings : AutoMapper.Profile
 {
 	public ProfileMappings()
 	{
-		CreateMap<Models.Profile, FullProfileDto>(MemberList.Destination);
+		CreateMap<Models.Profile, FullProfileDto>(MemberList.Destination)
+			.ForMember(dto => dto.Created, opt => opt.Ignore());
 		CreateMap<FullProfileDto, Models.Profile>(MemberList.Source)
 			.ForSourceMember(dto => dto.Updated, opt => opt.DoNotValidate())
+			.ForSourceMember(dto => dto.Created, opt => opt.DoNotValidate())
 			.ForSourceMember(dto => dto.Keys, opt => opt.DoNotValidate())
 			.ForMember(profile => profile.Updated, opt => opt.Ignore())
 			.ForMember(profile => profile.Keys, opt => opt.Ignore());

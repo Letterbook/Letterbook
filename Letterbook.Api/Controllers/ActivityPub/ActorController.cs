@@ -12,6 +12,7 @@ using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Medo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -27,6 +28,7 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [Consumes("application/ld+json",
 	"application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
 	"application/activity+json")]
+[Authorize(policy: "ActivityPub")]
 public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;

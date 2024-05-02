@@ -1,4 +1,6 @@
 using Letterbook.Adapter.ActivityPub;
+using Letterbook.Api.Authentication.HttpSignature;
+using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
@@ -43,6 +45,7 @@ public class Program
 		builder.Services.AddHealthChecks();
 		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
+		builder.Services.AddIdentity();
 
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 
@@ -66,6 +69,7 @@ public class Program
 		app.MapPrometheusScrapingEndpoint();
 		app.UseWebFingerScoped();
 
+		app.UseHttpSignatureVerification();
 		app.UseAuthentication();
 		app.UseAuthorization();
 

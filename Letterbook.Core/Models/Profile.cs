@@ -12,7 +12,7 @@ namespace Letterbook.Core.Models;
 /// Remote profiles have no associated Accounts, and can only be created or modified by federated changes to the remote
 /// Actor.
 /// </summary>
-public class Profile : IFederated, IEquatable<Profile>
+public class Profile : IFederatedActor, IEquatable<Profile>
 {
 	private Uuid7 _id;
 
@@ -26,7 +26,6 @@ public class Profile : IFederated, IEquatable<Profile>
 		Type = default;
 		Handle = default!;
 		DisplayName = default!;
-		CustomFields = default!;
 		Description = default!;
 	}
 
@@ -38,7 +37,6 @@ public class Profile : IFederated, IEquatable<Profile>
 		Handle = string.Empty;
 		DisplayName = string.Empty;
 		Description = string.Empty;
-		CustomFields = Array.Empty<CustomField>();
 
 		var builder = new UriBuilder(FediId);
 		var basePath = builder.Path;
@@ -81,7 +79,7 @@ public class Profile : IFederated, IEquatable<Profile>
 	public string Handle { get; set; }
 	public string DisplayName { get; set; }
 	public string Description { get; set; }
-	public CustomField[] CustomFields { get; set; }
+	public CustomField[] CustomFields { get; set; } = [];
 	public DateTime Updated { get; set; } = DateTime.UtcNow;
 	public Account? OwnedBy { get; set; }
 	public ICollection<ProfileAccess> Accessors { get; set; } = new HashSet<ProfileAccess>();
