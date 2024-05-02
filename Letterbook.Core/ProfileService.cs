@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
@@ -11,22 +12,24 @@ using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-public class ProfileService : IProfileService
+public class ProfileService : IProfileService, IAuthzProfileService
 {
 	private ILogger<ProfileService> _logger;
 	private CoreOptions _coreConfig;
 	private IAccountProfileAdapter _profiles;
 	private IProfileEventService _profileEvents;
 	private readonly IActivityPubClient _client;
+	private readonly IHostSigningKeyProvider _hostSigningKeyProvider;
 
 	public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options,
-		IAccountProfileAdapter profiles, IProfileEventService profileEvents, IActivityPubClient client)
+		IAccountProfileAdapter profiles, IProfileEventService profileEvents, IActivityPubClient client, IHostSigningKeyProvider hostSigningKeyProvider)
 	{
 		_logger = logger;
 		_coreConfig = options.Value;
 		_profiles = profiles;
 		_profileEvents = profileEvents;
 		_client = client;
+		_hostSigningKeyProvider = hostSigningKeyProvider;
 	}
 
 	public Task<Profile> CreateProfile(Profile profile)
@@ -51,9 +54,9 @@ public class ProfileService : IProfileService
 		}
 
 		var profile = Profile.CreateIndividual(_coreConfig.BaseUri(), handle);
+		_profiles.Add(profile);
 		profile.OwnedBy = account;
 		account.LinkedProfiles.Add(new ProfileAccess(account, profile, ProfilePermission.All));
-		_profiles.RecordAccount(account);
 		await _profiles.Commit();
 		_profileEvents.Created(profile);
 
@@ -383,13 +386,13 @@ public class ProfileService : IProfileService
 		{
 			if (profile != null)
 			{
-				var fetched = await _client.As(onBehalfOf).Fetch<Profile>(profileId);
+				var fetched = await Fetch<Profile>(profileId, onBehalfOf);
 				profile.ShallowCopy(fetched);
 				_profiles.Update(profile);
 			}
 			else
 			{
-				profile = await _client.As(onBehalfOf).Fetch<Profile>(profileId);
+				profile = await Fetch<Profile>(profileId, onBehalfOf);
 				_profiles.Add(profile);
 			}
 
@@ -404,5 +407,21 @@ public class ProfileService : IProfileService
 		_logger.LogInformation("Fetched Profile {ProfileId} from origin", profileId);
 		return profile;
 
+	}
+
+	private async Task<TResult> Fetch<TResult>(Uri id, Profile? onBehalfOf) where TResult : IFederated
+	{
+		if (onBehalfOf != null)
+		{
+			return await _client.As(onBehalfOf).Fetch<TResult>(id);
+		}
+
+		var key = await _hostSigningKeyProvider.GetSigningKey();
+		return await _client.Fetch<TResult>(id, key);
+	}
+
+	public IAuthzProfileService As(IEnumerable<Claim> claims)
+	{
+		return this;
 	}
 }

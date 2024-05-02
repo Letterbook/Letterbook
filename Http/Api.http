@@ -1,27 +1,22 @@
-﻿POST http://{{host}}/lb/v1/posts/{{profileId}}/post
+﻿# REST templates for Letterbook's first-party APIs
+
+### Draft and publish
+POST http://{{host}}/lb/v1/posts/{{profileId}}/post
 Content-Type: application/json
 
 {
-  "id": "06bvza4gmu61ojpq0a2oam4cz",
-  "summary": "string",
-  "preview": "string",
-  "source": "string",
+  "id": "{{profileId}}",
+  "summary": "Draft and publish",
   "creators": [
     {
-      "id": "06bvza4gmu61ojpq0a2oam4cz"
+      "id": "{{profileId}}"
     }
   ],
-  "createdDate": "2024-03-20T02:59:28.042Z",
-  "publishedDate": "2024-03-20T02:59:28.042Z",
-  "updatedDate": "2024-03-20T02:59:28.042Z",
   "contents": [
     {
-      "summary": "string",
-      "preview": "string",
-      "source": "string",
       "sortKey": 0,
       "type": "Note",
-      "text": "string"
+      "text": "Simple text post from Api.http"
     }
   ],
   "audience": [],

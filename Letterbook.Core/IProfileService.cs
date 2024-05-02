@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Medo;
@@ -5,6 +6,11 @@ using Medo;
 namespace Letterbook.Core;
 
 public interface IProfileService
+{
+	IAuthzProfileService As(IEnumerable<Claim> claims);
+}
+
+public interface IAuthzProfileService
 {
 	Task<Profile> CreateProfile(Profile profile);
 	Task<Profile> CreateProfile(Guid ownerId, string handle);

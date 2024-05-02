@@ -12,6 +12,7 @@ using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Medo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -27,6 +28,7 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [Consumes("application/ld+json",
 	"application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
 	"application/activity+json")]
+[Authorize(policy: "ActivityPub")]
 public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;
@@ -53,7 +55,7 @@ public class ActorController : ControllerBase
 		if (!Id.TryAsUuid7(id, out var uuid))
 			return BadRequest();
 
-		var profile = await _profileService.LookupProfile(uuid);
+		var profile = await _profileService.As(User.Claims).LookupProfile(uuid);
 		if (profile == null) return NotFound();
 		var actor = ActorMapper.Map<PersonActorExtension>(profile);
 
@@ -184,7 +186,7 @@ public class ActorController : ControllerBase
 			if (!actor.TryGetId(out var actorId))
 				return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.InvalidRequest,
 					"Actor ID is required to Undo:Follow"));
-			await _profileService.RemoveFollower(id, actorId);
+			await _profileService.As(User.Claims).RemoveFollower(id, actorId);
 			return new OkResult();
 		}
 		if (activityObject.Is<LikeActivity>(out var likeActivity))
@@ -202,7 +204,7 @@ public class ActorController : ControllerBase
 			return BadRequest(new ErrorMessage(ErrorCodes.None, "Actor ID is required for follower"));
 
 		followRequest.TryGetId(out var activityId);
-		var relation = await _profileService.ReceiveFollowRequest(localId, actorId, activityId);
+		var relation = await _profileService.As(User.Claims).ReceiveFollowRequest(localId, actorId, activityId);
 
 		ASType resultActivity = relation.State switch
 		{

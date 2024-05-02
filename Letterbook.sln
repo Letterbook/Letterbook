@@ -21,9 +21,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development"
 		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
 		CONTRIBUTING.md = CONTRIBUTING.md
 		docker-compose.mastodon.yml = docker-compose.mastodon.yml
-		Endpoints.http = Endpoints.http
-		http-client.env.json = http-client.env.json
-		Http\Api.http = Http\Api.http
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
@@ -63,6 +60,20 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.RxMessageBus.Tests", "Letterbook.Adapter.RxMessageBus.Tests\Letterbook.Adapter.RxMessageBus.Tests.csproj", "{5172FA38-78CF-4E36-A302-8242C96E9087}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Db.Tests", "Letterbook.Adapter.Db.Tests\Letterbook.Adapter.Db.Tests.csproj", "{3C206372-06A4-4C8B-8BE3-F9A8C1EB5F0B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Http", "Http", "{1D8F2C94-1796-48A0-B9D7-172E645607F5}"
+	ProjectSection(SolutionItems) = preProject
+		Http\Api.http = Http\Api.http
+		Http\Endpoints.http = Http\Endpoints.http
+		Http\http-client.env.json = Http\http-client.env.json
+		Http\http-client.private.env.json = Http\http-client.private.env.json
+		Http\JSON-LD.http = Http\JSON-LD.http
+		Http\readme.md = Http\readme.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Web", "Letterbook.Web\Letterbook.Web.csproj", "{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Api.Authentication.HttpSignature", "Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj", "{C2B3F054-B9F8-4EE8-847C-A290E7588F12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -125,9 +136,18 @@ Global
 		{3C206372-06A4-4C8B-8BE3-F9A8C1EB5F0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C206372-06A4-4C8B-8BE3-F9A8C1EB5F0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C206372-06A4-4C8B-8BE3-F9A8C1EB5F0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2B3F054-B9F8-4EE8-847C-A290E7588F12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2B3F054-B9F8-4EE8-847C-A290E7588F12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2B3F054-B9F8-4EE8-847C-A290E7588F12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2B3F054-B9F8-4EE8-847C-A290E7588F12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
 		{4FB3BADC-1EDD-482C-8D60-AD46D676A12F} = {D5E41A46-D753-4214-AF70-1839E56B4A14}
+		{1D8F2C94-1796-48A0-B9D7-172E645607F5} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
 	EndGlobalSection
 EndGlobal

@@ -3,6 +3,7 @@ using ActivityPub.Types;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Authorization;
 using Letterbook.Core.Models;
+using Letterbook.Core.Tests.Mocks;
 using Medo;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -20,8 +21,9 @@ public abstract class WithMocks
 	protected Mock<IActivityPubClient> ActivityPubClientMock;
 	protected Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock;
 	protected Mock<IProfileService> ProfileServiceMock;
+	protected Mock<IAuthzProfileService> ProfileServiceAuthMock;
 	protected IOptions<CoreOptions> CoreOptionsMock;
-	protected Mock<HttpMessageHandler> HttpMessageHandlerMock;
+	protected Mock<MockableMessageHandler> HttpMessageHandlerMock;
 	protected ServiceCollection MockedServiceCollection;
 	protected Mock<IPostEventService> PostEventServiceMock;
 	protected Mock<IPostService> PostServiceMock;
@@ -30,7 +32,7 @@ public abstract class WithMocks
 
 	protected WithMocks()
 	{
-		HttpMessageHandlerMock = new Mock<HttpMessageHandler>();
+		HttpMessageHandlerMock = new Mock<MockableMessageHandler>();
 		ActivityAdapterMock = new Mock<IActivityAdapter>();
 		PostAdapterMock = new Mock<IPostAdapter>();
 		AccountProfileMock = new Mock<IAccountProfileAdapter>();
@@ -39,6 +41,7 @@ public abstract class WithMocks
 		ActivityPubClientMock = new Mock<IActivityPubClient>();
 		ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
 		ProfileServiceMock = new Mock<IProfileService>();
+		ProfileServiceAuthMock = new Mock<IAuthzProfileService>();
 		PostEventServiceMock = new Mock<IPostEventService>();
 		PostServiceMock = new Mock<IPostService>();
 		PostServiceAuthMock = new Mock<IAuthzPostService>();
@@ -46,6 +49,7 @@ public abstract class WithMocks
 
 		ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
 		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>(), It.IsAny<Uuid7>())).Returns(PostServiceAuthMock.Object);
+		ProfileServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(ProfileServiceAuthMock.Object);
 		var mockOptions = new CoreOptions
 		{
 			DomainName = "letterbook.example",
@@ -83,5 +87,4 @@ public abstract class WithMocks
 
 		Decision Allow(IEnumerable<Claim> claims, IFederated _, Uuid7 __) => Decision.Allow("Mock", claims);
 	}
-
 }

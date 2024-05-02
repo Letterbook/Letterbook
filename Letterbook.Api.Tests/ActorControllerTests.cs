@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Api.Tests;
 
-public class ActorControllerTests : WithMocks
+public class ActorControllerTests : WithMockContext
 {
 	private ITestOutputHelper _output;
 	private ActorController _controller;
@@ -27,7 +27,13 @@ public class ActorControllerTests : WithMocks
 	{
 		_output = output;
 		_controller = new ActorController(CoreOptionsMock, Mock.Of<ILogger<ActorController>>(),
-			ProfileServiceMock.Object, Mock.Of<IActivityMessageService>(), new Document());
+			ProfileServiceMock.Object, Mock.Of<IActivityMessageService>(), new Document())
+		{
+			ControllerContext = new ControllerContext()
+			{
+				HttpContext = MockHttpContext.Object
+			}
+		};
 
 		_output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
 		_fakeProfile = new FakeProfile("http://letterbook.example");
@@ -54,7 +60,7 @@ public class ActorControllerTests : WithMocks
 		var activity = _document.Follow(_remoteProfile, _profile);
 		activity.Object.Add(_profile.FediId);
 
-		ProfileServiceMock.Setup(service =>
+		ProfileServiceAuthMock.Setup(service =>
 				service.ReceiveFollowRequest(_profile.Id, _remoteProfile.FediId, It.IsAny<Uri?>()))
 			.ReturnsAsync(BuildRelation(FollowState.Accepted));
 
@@ -69,7 +75,7 @@ public class ActorControllerTests : WithMocks
 		var activity = _document.Follow(_remoteProfile, _profile);
 		activity.Object.Add(_profile.FediId);
 
-		ProfileServiceMock.Setup(service =>
+		ProfileServiceAuthMock.Setup(service =>
 				service.ReceiveFollowRequest(_profile.GetId(), _remoteProfile.FediId, It.IsAny<Uri?>()))
 			.ReturnsAsync(BuildRelation(FollowState.Pending));
 
@@ -84,7 +90,7 @@ public class ActorControllerTests : WithMocks
 		var activity = _document.Follow(_remoteProfile, _profile);
 		activity.Object.Add(_profile.FediId);
 
-		ProfileServiceMock.Setup(service =>
+		ProfileServiceAuthMock.Setup(service =>
 				service.ReceiveFollowRequest(_profile.Id, _remoteProfile.FediId, null))
 			.ReturnsAsync(BuildRelation(FollowState.Rejected));
 

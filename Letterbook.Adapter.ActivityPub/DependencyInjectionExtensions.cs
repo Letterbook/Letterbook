@@ -2,6 +2,8 @@ using System.Net.Http.Headers;
 using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Exceptions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSign.Client;
 using NSign.Signatures;
@@ -21,8 +23,10 @@ public static class DependencyInjectionExtensions
 			.AddHttpMessageHandler<ClientHandler>();
 	}
 
-	public static IServiceCollection AddActivityPubClient(this IServiceCollection services, string domainName)
+	public static IServiceCollection AddActivityPubClient(this IServiceCollection services, ConfigurationManager configuration)
 	{
+		var coreOptions = configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
+		                  ?? throw new ConfigException(nameof(CoreOptions));
 		services
 			.Configure<AddContentDigestOptions>(options => options.WithHash(AddContentDigestOptions.Hash.Sha256))
 			.ConfigureMessageSigningOptions(options =>
@@ -46,7 +50,7 @@ public static class DependencyInjectionExtensions
 					Environment.Version.ToString(2)));
 				// TODO: get version from Product Version
 				client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("letterbook", "0.0-dev"));
-				client.DefaultRequestHeaders.UserAgent.TryParseAdd(domainName);
+				client.DefaultRequestHeaders.UserAgent.TryParseAdd(coreOptions.DomainName);
 			})
 			.AddSigningClient();
 

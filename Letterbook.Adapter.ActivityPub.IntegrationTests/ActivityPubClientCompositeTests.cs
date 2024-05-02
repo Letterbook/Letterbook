@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Letterbook.Core;
 using Letterbook.Core.Tests.Fakes;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.ActivityPub.IntegrationTests;
 
-// These tests bypass the API (which mostly doesn't exist yet), and mock the database (because managing test data is 
+// These tests bypass the API (which mostly doesn't exist yet), and mock the database (because managing test data is
 // hard). Everything else is live. So, the end result is they send real federated messages using the real core logic
 // and AP client. The test data is entirely fabricated by the test, and we don't have to worry about our own
 // authentication.
@@ -56,6 +57,6 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
 
 		var profileService = scope.ServiceProvider.GetRequiredService<IProfileService>();
 
-		var result = await profileService.Follow((Guid)profile.Id!, remote);
+		var result = await profileService.As(Enumerable.Empty<Claim>()).Follow((Guid)profile.Id!, remote);
 	}
 }

@@ -19,7 +19,7 @@ public class ClientHandler : DelegatingHandler
 
 	protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
 	{
-		request.Headers.Date ??= DateTimeOffset.Now;
+		request.Headers.Date ??= DateTimeOffset.UtcNow;
 		if (request.Content?.Headers.TryGetValues("Content-Digest", out var digest) == true)
 			request.Headers.Add("Digest", digest);
 		if (!request.Options.TryGetValue(

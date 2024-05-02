@@ -323,7 +323,6 @@ namespace Letterbook.Adapter.Db.Migrations
             modelBuilder.Entity("Letterbook.Core.Models.ProfileAccess", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("AccountId")

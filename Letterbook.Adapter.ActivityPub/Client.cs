@@ -22,7 +22,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 	private readonly HttpClient _httpClient;
 	private readonly IJsonLdSerializer _jsonLdSerializer;
 	private readonly IActivityPubDocument _document;
-	private Models.Profile? _profile = default;
+	private IFederatedActor? _actor = default;
 
 	private static readonly IMapper DefaultMapper = new Mapper(AstMapper.Default);
 
@@ -90,11 +90,11 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 		return response;
 	}
 
-	public IActivityPubAuthenticatedClient As(Models.Profile? onBehalfOf)
+	public IActivityPubAuthenticatedClient As(Models.IFederatedActor? onBehalfOf)
 	{
 		if (onBehalfOf == null) return this;
 
-		_profile = onBehalfOf;
+		_actor = onBehalfOf;
 
 		return this;
 	}
@@ -111,21 +111,33 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 
 	private HttpRequestMessage SignedRequest(HttpMethod method, Uri uri)
 	{
+		return SignedRequest(method, uri, _actor?.Keys, _actor?.FediId);
+	}
+
+	private HttpRequestMessage SignedRequest(HttpMethod method, Uri uri, IEnumerable<SigningKey>? keys, Uri? actorId)
+	{
 		var message = new HttpRequestMessage(method, uri);
-		if (_profile == null) return message;
+		if (keys is null || actorId is null) return message;
 
 		var httpRequestOptionsKey = new HttpRequestOptionsKey<IEnumerable<SigningKey>>(IClientSigner.SigningKeysOptionsId);
 		var httpRequestOptionsProfile = new HttpRequestOptionsKey<Uri>(IClientSigner.ProfileOptionsId);
-		message.Options.Set(httpRequestOptionsKey, _profile.Keys);
-		message.Options.Set(httpRequestOptionsProfile, _profile.FediId);
+		message.Options.Set(httpRequestOptionsKey, keys);
+		message.Options.Set(httpRequestOptionsProfile, actorId);
 
 		return message;
 	}
 
+
 	public async Task<ClientResponse<FollowState>> SendFollow(Uri inbox, Models.Profile target)
 	{
-		var doc = _document.Follow(_profile!, target);
-		doc.Id = $"{_profile!.FediId}#follow/{target.FediId}";
+		if (_actor is not Models.Profile profileActor)
+		{
+			// Not sure if this is the right thing to do. Can instances follow other actors?
+			throw new ClientException($"Following requires a Profile as an actor, but current actor is {_actor}");
+		}
+
+		var doc = _document.Follow(profileActor, target);
+		doc.Id = $"{_actor!.FediId}#follow/{target.FediId}";
 		var response = await Send(inbox, doc);
 
 		// To my knowledge, there are no existing fedi services that can actually respond in-band,
@@ -190,14 +202,14 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
          *     object: 'https://letterbook.example/actor/me',
          *   }
          */
-		if (_profile is null || subjectId is null)
+		if (_actor is null || subjectId is null)
 			throw CoreException.MissingData("Cannot build a semantic Accept Activity without an Actor and Object",
 				typeof(Models.Profile), null);
 		ASActivity acceptObject = _document.BuildActivity(activityToAccept);
-		var accept = _document.Accept(_profile, acceptObject);
+		var accept = _document.Accept((Models.Profile)_actor, acceptObject);
 
 		acceptObject.Actor.Add(requestorId);
-		acceptObject.Object.Add(_profile.FediId);
+		acceptObject.Object.Add(_actor.FediId);
 
 		return await SendAccept(inbox, accept);
 	}
@@ -275,15 +287,22 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 		};
 	}
 
-	public async Task<T> Fetch<T>(Uri id) where T : IFederated
+	public async Task<T> Fetch<T>(Uri id) where T : IFederated => await SendFetch<T>(id, SignedRequest(HttpMethod.Get, id));
+	public async Task<T> Fetch<T>(Uri id, SigningKey actorSigningKey) where T : IFederated
+		=> await SendFetch<T>(id, SignedRequest(HttpMethod.Get, id, new []{ actorSigningKey }, actorSigningKey.FediId));
+
+	private async Task<T> SendFetch<T>(Uri id, HttpRequestMessage httpRequestMessage) where T : IFederated
 	{
-		var response = await _httpClient.SendAsync(SignedRequest(HttpMethod.Get, id));
+		var response = await _httpClient.SendAsync(httpRequestMessage);
 		var stream = await ReadResponse(response);
 		if (stream is null) throw ClientException.RemoteObjectError(id, "Peer provided no response");
 
 		var ast = await _jsonLdSerializer.DeserializeAsync<ASType>(stream);
 		var mapped = DefaultMapper.Map<T>(ast);
-		if (mapped.FediId == id) return mapped;
+		if (mapped.FediId == id)
+		{
+			return mapped;
+		}
 
 		_logger.LogError("Remote fetch for Object {Id} returned {ObjectId}", id, mapped.FediId);
 		_logger.LogDebug("Tried to map {ASType} to {ModelType}", ast?.Type, typeof(T));

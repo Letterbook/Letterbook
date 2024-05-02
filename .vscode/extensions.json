@@ -1,5 +1,7 @@
 {
     "recommendations": [
-        "ms-dotnettools.csharp"
+        "ms-dotnettools.csharp",
+        "humao.rest-client",
+        "ms-dotnettools.csdevkit"
     ]
 }

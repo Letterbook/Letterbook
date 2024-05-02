@@ -6,10 +6,10 @@ using Letterbook.Adapter.ActivityPub.Exceptions;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Fixtures;
+using Letterbook.Core.Tests.Mocks;
 using Letterbook.Core.Values;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Moq.Protected;
 using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.ActivityPub.Test;
@@ -49,38 +49,22 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 	[Fact(DisplayName = "Should send a Follow")]
 	public async Task ShouldFollow()
 	{
-		HttpMessageHandlerMock.Protected()
-			.Setup<Task<HttpResponseMessage>>("SendAsync",
-				ItExpr.IsAny<HttpRequestMessage>(),
-				ItExpr.IsAny<CancellationToken>())
-			.ReturnsAsync(
-				new HttpResponseMessage
-				{
-					StatusCode = HttpStatusCode.OK
-				}
-			);
+		HttpMessageHandlerMock.SetupResponse(HttpStatusCode.OK);
 
 		var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
 
 		Assert.Equal(FollowState.Pending, actual.Data);
-		HttpMessageHandlerMock.Protected().Verify("SendAsync", Times.Once(),
-			ItExpr.IsAny<HttpRequestMessage>(),
-			ItExpr.IsAny<CancellationToken>());
+		HttpMessageHandlerMock.Verify(
+			h => h.SendMessageAsync(
+				It.IsAny<HttpRequestMessage>(),
+				It.IsAny<CancellationToken>()),
+			Times.Once());
 	}
 
 	[Fact(DisplayName = "Should handle unauthorized")]
 	public async Task ShouldHandle401()
 	{
-		HttpMessageHandlerMock.Protected()
-			.Setup<Task<HttpResponseMessage>>("SendAsync",
-				ItExpr.IsAny<HttpRequestMessage>(),
-				ItExpr.IsAny<CancellationToken>())
-			.ReturnsAsync(
-				new HttpResponseMessage
-				{
-					StatusCode = HttpStatusCode.Unauthorized
-				}
-			);
+		HttpMessageHandlerMock.SetupResponse(HttpStatusCode.Unauthorized);
 
 		var ex = await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
 		Assert.Matches(new Regex(@"Couldn't [\w\s]+ AP resource \(.*\)"), ex.Message);
@@ -89,16 +73,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 	[Fact(DisplayName = "Should handle forbidden")]
 	public async Task ShouldHandle403()
 	{
-		HttpMessageHandlerMock.Protected()
-			.Setup<Task<HttpResponseMessage>>("SendAsync",
-				ItExpr.IsAny<HttpRequestMessage>(),
-				ItExpr.IsAny<CancellationToken>())
-			.ReturnsAsync(
-				new HttpResponseMessage
-				{
-					StatusCode = HttpStatusCode.Forbidden
-				}
-			);
+		HttpMessageHandlerMock.SetupResponse(HttpStatusCode.Forbidden);
 
 		var ex = await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
 		Assert.Matches(new Regex(@"Couldn't [\w\s]+ AP resource \(.*\)"), ex.Message);
@@ -110,17 +85,11 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 		var response = """
                        {"Error": "This is not an ActivityPub object, so it shouldn't parse as one"}
                        """;
-		HttpMessageHandlerMock.Protected()
-			.Setup<Task<HttpResponseMessage>>("SendAsync",
-				ItExpr.IsAny<HttpRequestMessage>(),
-				ItExpr.IsAny<CancellationToken>())
-			.ReturnsAsync(
-				new HttpResponseMessage
-				{
-					StatusCode = HttpStatusCode.InternalServerError,
-					Content = new StringContent(response)
-				}
-			);
+		HttpMessageHandlerMock.SetupResponse(r =>
+			{
+				r.StatusCode = HttpStatusCode.InternalServerError;
+				r.Content = new StringContent(response);
+			});
 
 		await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
 	}
@@ -131,17 +100,11 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 		var response = """
                        {"Error": "This is not an ActivityPub object, so it shouldn't parse as one"}
                        """;
-		HttpMessageHandlerMock.Protected()
-			.Setup<Task<HttpResponseMessage>>("SendAsync",
-				ItExpr.IsAny<HttpRequestMessage>(),
-				ItExpr.IsAny<CancellationToken>())
-			.ReturnsAsync(
-				new HttpResponseMessage
-				{
-					StatusCode = HttpStatusCode.BadRequest,
-					Content = new StringContent(response)
-				}
-			);
+		HttpMessageHandlerMock.SetupResponse(r =>
+		{
+			r.StatusCode = HttpStatusCode.BadRequest;
+			r.Content = new StringContent(response);
+		});
 
 		await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
 	}
@@ -150,12 +113,10 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 	public async Task SendAcceptFollow()
 	{
 		HttpRequestMessage? message = default;
-		HttpMessageHandlerMock.Protected()
-			.Setup<Task<HttpResponseMessage>>("SendAsync",
-				ItExpr.IsAny<HttpRequestMessage>(),
-				ItExpr.IsAny<CancellationToken>())
-			.Callback((HttpRequestMessage m, CancellationToken _) => message = m)
-			.ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.Accepted });
+
+		HttpMessageHandlerMock
+			.SetupResponse(HttpStatusCode.Accepted)
+			.Callback((HttpRequestMessage m, CancellationToken _) => message = m);
 
 		await _client.As(_profile).SendAccept(_targetProfile.Inbox, Models.ActivityType.Follow,
 			_targetProfile.FediId, _profile.FediId);
@@ -176,5 +137,26 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 		Assert.Equal("Follow", actualFollow["type"]!.GetValue<string>());
 		Assert.Equal(_targetProfile.FediId.ToString(), actualFollow["actor"]!.GetValue<string>());
 		Assert.Equal(_profile.FediId.ToString(), actualFollow["object"]!.GetValue<string>());
+	}
+
+	[Fact(DisplayName = "Should fetch a profile and successfully deserialize it")]
+	public async Task FetchProfile()
+	{
+		await using var fs = TestData.Read("Actor.json");
+		var sc = new StreamContent(fs)
+		{
+			Headers = { ContentType = new MediaTypeHeaderValue("application/json") }
+		};
+		HttpMessageHandlerMock
+			.SetupResponse(r =>
+			{
+				r.StatusCode = HttpStatusCode.OK;
+				r.Content = sc;
+			});
+
+		var profile = await _client.As(_profile).Fetch<Models.Profile>(new Uri("http://mastodon.example/users/user"));
+
+		Assert.NotNull(profile);
+		Assert.Equal("user", profile.Handle);
 	}
 }

@@ -74,7 +74,7 @@ public class AccountServiceTest : WithMocks
 	public async Task LookupTest()
 	{
 		var expected = _fakeAccount.Generate();
-		AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Uuid7>())).ReturnsAsync(expected);
+		AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).ReturnsAsync(expected);
 
 		var actual = await _accountService.LookupAccount(expected.Id);
 
@@ -85,7 +85,7 @@ public class AccountServiceTest : WithMocks
 	public async Task LookupTestNoResult()
 	{
 		var expected = _fakeAccount.Generate();
-		AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Uuid7>())).ReturnsAsync(default(Account));
+		AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).ReturnsAsync(default(Account));
 
 		var actual = await _accountService.LookupAccount(expected.Id);
 

@@ -6,7 +6,7 @@ namespace Letterbook.Adapter.ActivityPub.Signatures;
 
 public class MastodonComponentBuilder : ISignatureComponentVisitor
 {
-	private readonly HttpRequestMessage _message;
+	private readonly RequestComponentProvider _requestComponentProvider;
 	private List<string> _derivedParams = new List<string>();
 	private List<string> _derivedParamsValues = new List<string>();
 	private List<string> _headerParams = new List<string>();
@@ -24,9 +24,9 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
 	public string SigningDocument => BuildSigningDocument();
 	public string? SigningDocumentSpec => BuildDocumentSpec();
 
-	public MastodonComponentBuilder(HttpRequestMessage message)
+	public MastodonComponentBuilder(RequestComponentProvider requestComponentProvider)
 	{
-		_message = message;
+		_requestComponentProvider = requestComponentProvider;
 	}
 
 	/// <summary>
@@ -41,7 +41,7 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
 	{
 		string fieldName = httpHeader.ComponentName;
 
-		if (TryGetHeaderValues(fieldName, out var values))
+		if (_requestComponentProvider.TryGetHeaderValues(fieldName, out var values))
 		{
 			// Mastodon only understands the Digest header, which is a non-standard header that was
 			// replaced with content-digest in the httpsig drafts years ago
@@ -53,7 +53,7 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
 		{
 			if (fieldName == "host")
 			{
-				AddHeader(fieldName, _message.GetDerivedComponentValue(SignatureComponent.Authority));
+				AddHeader(fieldName, _requestComponentProvider.GetDerivedComponentValue(SignatureComponent.Authority));
 			}
 		}
 	}
@@ -86,10 +86,10 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
 		{
 			case DerivedComponents.RequestTarget:
 				AddRequestTarget(
-					$"{_message.GetDerivedComponentValue(method).ToLowerInvariant()} {_message.GetDerivedComponentValue(derived)}");
+					$"{_requestComponentProvider.GetDerivedComponentValue(method).ToLowerInvariant()} {_requestComponentProvider.GetDerivedComponentValue(derived)}");
 				break;
 			case DerivedComponents.Authority:
-				AddHeader("host", _message.GetDerivedComponentValue(derived));
+				AddHeader("host", _requestComponentProvider.GetDerivedComponentValue(derived));
 				break;
 		}
 	}
@@ -97,7 +97,7 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
 	/// <summary>
 	/// This is kind of the entry point to the whole builder. SignatureParams is the definition of all the other params
 	/// that should make up the signing document. The Signer will visit the SignatureParamsComponent, and
-	/// the builder should then visit all of its constituent components. 
+	/// the builder should then visit all of its constituent components.
 	/// </summary>
 	/// <param name="signatureParamsComponent"></param>
 	public void Visit(SignatureParamsComponent signatureParamsComponent)
@@ -126,11 +126,6 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
 
 	#region Private Methods
 
-	private bool TryGetHeaderValues(string header, [NotNullWhen(true)] out IEnumerable<string>? values)
-	{
-		return _message.Headers.TryGetValues(header, out values)
-			   || (_message.Content != null && _message.Content.Headers.TryGetValues(header, out values));
-	}
 	// protected bool TryGetHeaderValues(string headerName, out IEnumerable<string> values)
 	// {
 	// return _message.Headers.TryGetValues(headerName, out values);
