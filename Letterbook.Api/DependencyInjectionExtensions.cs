@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ActivityPub.Types;
@@ -153,11 +154,14 @@ public static class DependencyInjectionExtensions
 			});
 	}
 
-	public static IServiceCollection AddApiProperties(this IServiceCollection services, ConfigurationManager configuration)
+	public static IServiceCollection AddApiProperties(this IServiceCollection services, ConfigurationManager configuration, bool isProduction)
 	{
 		var coreOptions = configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
 		                  ?? throw new ConfigException(nameof(CoreOptions));
-		// Register controllers
+		var hostSecret = configuration.GetValue<string>("HostSecret")!;
+		var issuerKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(hostSecret));
+		var issuer = coreOptions.BaseUri().ToString();
+
 		services
 			.ConfigureSwagger()
 			.AddControllers(options =>
@@ -188,17 +192,18 @@ public static class DependencyInjectionExtensions
 				};
 			})
 			.AddWebfinger()
-			// Register Authentication
 			.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 			.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 			{
-				options.Authority = coreOptions.BaseUri().ToString();
 				options.TokenValidationParameters = new TokenValidationParameters
 				{
-					ValidateAudience = false
+					ValidateAudience = false,
+					ValidateIssuer = true,
+					ValidIssuer = issuer,
+					IssuerSigningKey = issuerKey
 				};
-				// TODO(Security): Figure out how to do this only in Development
-				options.RequireHttpsMetadata = false;
+				if(!isProduction)
+					options.RequireHttpsMetadata = false;
 			})
 			.AddHttpSignature();
 
@@ -208,6 +213,11 @@ public static class DependencyInjectionExtensions
 			{
 				policy.RequireAuthenticatedUser();
 				policy.AddAuthenticationSchemes(HttpSignatureAuthenticationDefaults.Scheme);
+			});
+			opts.AddPolicy("Api", static policy =>
+			{
+				policy.RequireAuthenticatedUser();
+				policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
 			});
 		});
 

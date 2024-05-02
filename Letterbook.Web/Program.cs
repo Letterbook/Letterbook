@@ -36,7 +36,7 @@ public class Program
 			.ReadFrom.Services(services)
 		);
 
-		builder.Services.AddApiProperties(builder.Configuration);
+		builder.Services.AddApiProperties(builder.Configuration, builder.Environment.IsProduction());
 		builder.Services.AddTelemetry();
 		builder.Services.AddHealthChecks();
 		builder.Services.AddActivityPubClient(builder.Configuration);

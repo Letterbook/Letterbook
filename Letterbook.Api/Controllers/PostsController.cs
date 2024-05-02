@@ -7,6 +7,7 @@ using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Medo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Annotations;
@@ -16,6 +17,7 @@ namespace Letterbook.Api.Controllers;
 
 [ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 [Route("lb/v1/[controller]")]
+[Authorize(Policy = "Api")]
 public class PostsController : ControllerBase
 {
 	private readonly ILogger<PostsController> _logger;

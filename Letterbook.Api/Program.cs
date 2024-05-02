@@ -39,7 +39,7 @@ public class Program
 			.ReadFrom.Services(services)
 		);
 
-		builder.Services.AddApiProperties(builder.Configuration);
+		builder.Services.AddApiProperties(builder.Configuration, builder.Environment.IsProduction());
 		// Register Open Telemetry
 		builder.Services.AddTelemetry();
 		builder.Services.AddHealthChecks();

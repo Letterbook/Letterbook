@@ -5,15 +5,18 @@ using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Medo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Annotations;
+using IAuthorizationService = Letterbook.Core.IAuthorizationService;
 using Models = Letterbook.Core.Models;
 
 namespace Letterbook.Api.Controllers;
 
 [ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 [Route("/lb/v1/[controller]")]
+[Authorize(Policy = "Api")]
 public class ProfilesController : ControllerBase
 {
 	private readonly ILogger<ProfilesController> _logger;

@@ -15,16 +15,16 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Medo.Uuid7" Version="1.9.1" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.4" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.8.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.4" />
+      <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.4" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-      <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.2.0" />
+      <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.5.1" />
     </ItemGroup>
 
 </Project>
