@@ -89,7 +89,7 @@ public static class DependencyInjectionExtensions
 	{
 		return services.AddIdentity<Account, IdentityRole<Guid>>(options =>
 			{
-				
+
 			})
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders();
@@ -121,9 +121,9 @@ public static class DependencyInjectionExtensions
 		// Register Workers
 		services.AddScoped<SeedAdminWorker>();
 		services.AddScoped<DeliveryWorker>();
-		services.AddSingleton<DeliveryObserver>();
+		services.AddSingleton<IMessageObserver<DeliveryWorker>, MessageObserver<DeliveryWorker>>();
 		services.AddHostedService<WorkerScope<SeedAdminWorker>>();
-		services.AddHostedService<MessageWorkerHost<DeliveryObserver, ASType>>((DeliveryObserverFactory));
+		services.AddHostedService(DeliveryObserverFactory);
 
 		// Register Adapters
 		services.AddScoped<IActivityAdapter, ActivityAdapter>();
@@ -222,13 +222,11 @@ public static class DependencyInjectionExtensions
 		return services;
 	}
 
-	private static MessageWorkerHost<DeliveryObserver, ASType> DeliveryObserverFactory(IServiceProvider provider)
+	private static ObserverHost<ASType, DeliveryWorker> DeliveryObserverFactory(IServiceProvider provider)
 	{
 		// Set a 50ms delay on the delivery observer
 		// This is just a guess at a sufficient amount of time for peers to become ready to accept reply messages
 		// We don't want to sit on them for too long, because they'll just sitting in RAM
-		return new MessageWorkerHost<DeliveryObserver, ASType>(
-			provider.GetRequiredService<ILogger<MessageWorkerHost<DeliveryObserver, ASType>>>(), provider,
-			provider.GetRequiredService<IMessageBusClient>(), 50);
+		return new ObserverHost<ASType, DeliveryWorker>(provider, provider.GetRequiredService<IMessageBusClient>(), 50);
 	}
 }
