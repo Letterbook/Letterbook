@@ -1,7 +1,10 @@
 using Letterbook.Core.Models;
 
-namespace Letterbook.Core;
+namespace Letterbook.Core.Events;
 
+/// <summary>
+/// Events and a corresponding channel related to <see cref="Post">Posts</see>
+/// </summary>
 public interface IPostEvents : IEventChannel
 {
 	/// <summary>

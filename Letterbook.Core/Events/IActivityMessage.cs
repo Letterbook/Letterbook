@@ -1,7 +1,7 @@
 using ActivityPub.Types.AS;
 using Letterbook.Core.Models;
 
-namespace Letterbook.Core.Adapters;
+namespace Letterbook.Core.Events;
 
 /// <summary>
 /// Deliver an ActivityPub messages to its recipient out of band from the current context.

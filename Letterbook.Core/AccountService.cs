@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
@@ -15,11 +16,11 @@ public class AccountService : IAccountService, IDisposable
 	private readonly ILogger<AccountService> _logger;
 	private readonly CoreOptions _opts;
 	private readonly IAccountProfileAdapter _accountAdapter;
-	private readonly IAccountEventService _eventService;
+	private readonly IAccountEvents _eventService;
 	private readonly UserManager<Account> _identityManager;
 
 	public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options,
-		IAccountProfileAdapter accountAdapter, IAccountEventService eventService,
+		IAccountProfileAdapter accountAdapter, IAccountEvents eventService,
 		UserManager<Account> identityManager)
 	{
 		_logger = logger;

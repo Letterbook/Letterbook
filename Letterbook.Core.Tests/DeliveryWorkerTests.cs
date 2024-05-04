@@ -1,6 +1,6 @@
 using CloudNative.CloudEvents;
 using Divergic.Logging.Xunit;
-using Letterbook.Core.Adapters;
+using Letterbook.Core.Events;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Fixtures;

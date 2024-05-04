@@ -1,5 +1,6 @@
 ﻿using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Events;
 
 namespace Letterbook.Core;
 

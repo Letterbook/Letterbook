@@ -1,12 +1,13 @@
 ﻿using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Events;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-public class AccountEventService : IAccountEventService
+public class AccountEventService : IAccountEvents
 {
 	private readonly IMessageBusAdapter _messageBusAdapter;
 	private readonly IObserver<CloudEvent> _channel;

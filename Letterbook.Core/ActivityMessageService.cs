@@ -2,6 +2,7 @@ using ActivityPub.Types.AS;
 using ActivityPub.Types.Conversion;
 using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Events;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.Extensions.Logging;
