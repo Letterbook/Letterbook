@@ -2,7 +2,7 @@
 
 namespace Letterbook.Core.Workers;
 
-public interface IMessageObserver<T> : IObserver<CloudEvent> where T : IObserverWorker
+public interface IEventObserver<T> : IObserver<CloudEvent> where T : IObserverWorker
 {
 	public void SetCancellationToken(CancellationToken token);
 }

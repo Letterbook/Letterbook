@@ -4,13 +4,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Core.Workers;
 
-public class MessageObserver<T> : IMessageObserver<T> where T : IObserverWorker
+public class EventObserver<T> : IEventObserver<T> where T : IObserverWorker
 {
 	private CancellationToken? _cancellationToken;
-	private ILogger<MessageObserver<T>> _logger;
+	private ILogger<EventObserver<T>> _logger;
 	private readonly IServiceProvider _provider;
 
-	public MessageObserver(ILogger<MessageObserver<T>> logger, IServiceProvider provider)
+	public EventObserver(ILogger<EventObserver<T>> logger, IServiceProvider provider)
 	{
 		_logger = logger;
 		_provider = provider;

@@ -11,7 +11,7 @@ namespace Letterbook.Core.Workers;
 /// <typeparam name="TWorker">A class that will process Observable messages recieved by an Observer</typeparam>
 /// <typeparam name="TChannel">The Type of the channel to subscribe</typeparam>
 public class ObserverHost<TChannel, TWorker> : BackgroundService
-	where TChannel : IEventType
+	where TChannel : IEventChannel
 	where TWorker : IObserverWorker
 {
 	private readonly IServiceProvider _provider;
@@ -29,7 +29,7 @@ public class ObserverHost<TChannel, TWorker> : BackgroundService
 
 	protected override Task ExecuteAsync(CancellationToken stoppingToken)
 	{
-		var observer = _provider.GetRequiredService<IMessageObserver<TWorker>>();
+		var observer = _provider.GetRequiredService<IEventObserver<TWorker>>();
 		observer.SetCancellationToken(stoppingToken);
 
 		_subscription = _observable.Subscribe(observer);

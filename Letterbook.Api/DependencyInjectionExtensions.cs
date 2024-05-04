@@ -123,7 +123,7 @@ public static class DependencyInjectionExtensions
 
 		// Register MessageWorkers
 		services.AddScoped<DeliveryWorker>();
-		services.AddSingleton<IMessageObserver<DeliveryWorker>, MessageObserver<DeliveryWorker>>();
+		services.AddSingleton<IEventObserver<DeliveryWorker>, EventObserver<DeliveryWorker>>();
 		services.AddHostedService<ObserverHost<IActivityMessage, DeliveryWorker>>(provider =>
 			new ObserverHost<IActivityMessage, DeliveryWorker>(provider,
 				provider.GetRequiredService<IMessageBusClient>(),

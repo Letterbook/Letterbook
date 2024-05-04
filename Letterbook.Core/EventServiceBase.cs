@@ -7,7 +7,7 @@ namespace Letterbook.Core;
 /// Base type for event emitter services, which handles opening the channel on the appropriate type
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public abstract class EventServiceBase<T> where T : IEventType
+public abstract class EventServiceBase<T> where T : IEventChannel
 {
 	protected IMessageBusAdapter _messageBusAdapter;
 	protected IObserver<CloudEvent> _channel;
