@@ -115,7 +115,7 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
 		services.AddScoped<IActivityMessageService, ActivityMessageService>();
 		services.AddScoped<IAuthzPostService, PostService>();
-		services.AddScoped<IPostEventService, PostEventService>();
+		services.AddScoped<IPostEvents, PostEventService>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
 		// Register Workers

@@ -25,7 +25,7 @@ public abstract class WithMocks
 	protected IOptions<CoreOptions> CoreOptionsMock;
 	protected Mock<MockableMessageHandler> HttpMessageHandlerMock;
 	protected ServiceCollection MockedServiceCollection;
-	protected Mock<IPostEventService> PostEventServiceMock;
+	protected Mock<IPostEvents> PostEventServiceMock;
 	protected Mock<IPostService> PostServiceMock;
 	protected Mock<IAuthzPostService> PostServiceAuthMock;
 	protected Mock<IAuthorizationService> AuthorizationServiceMock;
@@ -42,7 +42,7 @@ public abstract class WithMocks
 		ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
 		ProfileServiceMock = new Mock<IProfileService>();
 		ProfileServiceAuthMock = new Mock<IAuthzProfileService>();
-		PostEventServiceMock = new Mock<IPostEventService>();
+		PostEventServiceMock = new Mock<IPostEvents>();
 		PostServiceMock = new Mock<IPostService>();
 		PostServiceAuthMock = new Mock<IAuthzPostService>();
 		AuthorizationServiceMock = new Mock<IAuthorizationService>();
