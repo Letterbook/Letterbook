@@ -4,6 +4,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Core.Workers;
 
+/// <summary>
+/// Observe events emitted by an Observable channel, and manage a scope for each event.
+/// Work to handle the event is delegate to the IObserverWorker
+/// </summary>
+/// <typeparam name="T">The IObserverWorker that will process the event. It will have access to scoped services.</typeparam>
 public class EventObserver<T> : IEventObserver<T> where T : IObserverWorker
 {
 	private CancellationToken? _cancellationToken;
