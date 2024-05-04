@@ -8,7 +8,7 @@ namespace Letterbook.Core.Adapters;
 /// Messages are placed in a work queue, for subsequent processing.
 /// This allows ActivityPub Http requests (and responses) to be processed outside the current Asp action, for example.
 /// </summary>
-public interface IActivityMessageService
+public interface IActivityMessage : IEventType
 {
 	public const string DestinationKey = "destination";
 	public const string ProfileKey = "profile";

@@ -112,17 +112,22 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IPostService, PostService>();
 		services.AddScoped<IAccountEventService, AccountEventService>();
 		services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
-		services.AddScoped<IActivityMessageService, ActivityMessageService>();
+		services.AddScoped<IActivityMessage, ActivityMessageService>();
 		services.AddScoped<IAuthzPostService, PostService>();
 		services.AddScoped<IPostEvents, PostEventService>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
-		// Register Workers
+		// Register startup workers
 		services.AddScoped<SeedAdminWorker>();
+		services.AddHostedService<WorkerScope<SeedAdminWorker>>();
+
+		// Register MessageWorkers
 		services.AddScoped<DeliveryWorker>();
 		services.AddSingleton<IMessageObserver<DeliveryWorker>, MessageObserver<DeliveryWorker>>();
-		services.AddHostedService<WorkerScope<SeedAdminWorker>>();
-		services.AddHostedService(DeliveryObserverFactory);
+		services.AddHostedService<ObserverHost<IActivityMessage, DeliveryWorker>>(provider =>
+			new ObserverHost<IActivityMessage, DeliveryWorker>(provider,
+				provider.GetRequiredService<IMessageBusClient>(),
+				50));
 
 		// Register Adapters
 		services.AddScoped<IActivityAdapter, ActivityAdapter>();
@@ -219,13 +224,5 @@ public static class DependencyInjectionExtensions
 		});
 
 		return services;
-	}
-
-	private static ObserverHost<ASType, DeliveryWorker> DeliveryObserverFactory(IServiceProvider provider)
-	{
-		// Set a 50ms delay on the delivery observer
-		// This is just a guess at a sufficient amount of time for peers to become ready to accept reply messages
-		// We don't want to sit on them for too long, because they'll just sitting in RAM
-		return new ObserverHost<ASType, DeliveryWorker>(provider, provider.GetRequiredService<IMessageBusClient>(), 50);
 	}
 }

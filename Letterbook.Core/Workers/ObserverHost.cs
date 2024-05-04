@@ -11,6 +11,7 @@ namespace Letterbook.Core.Workers;
 /// <typeparam name="TWorker">A class that will process Observable messages recieved by an Observer</typeparam>
 /// <typeparam name="TChannel">The Type of the channel to subscribe</typeparam>
 public class ObserverHost<TChannel, TWorker> : BackgroundService
+	where TChannel : IEventType
 	where TWorker : IObserverWorker
 {
 	private readonly IServiceProvider _provider;

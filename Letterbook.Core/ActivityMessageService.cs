@@ -9,22 +9,18 @@ using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-public class ActivityMessageService : IActivityMessageService
+public class ActivityMessageService : EventServiceBase<IActivityMessage>, IActivityMessage
 {
-	private readonly IMessageBusAdapter _messageBusAdapter;
 	private readonly IJsonLdSerializer _serializer;
-	private readonly IObserver<CloudEvent> _channel;
 	private readonly CoreOptions _options;
 	private readonly ILogger<ActivityMessageService> _logger;
 
 	public ActivityMessageService(ILogger<ActivityMessageService> logger, IOptions<CoreOptions> options,
-		IJsonLdSerializer serializer, IMessageBusAdapter messageBusAdapter)
+		IJsonLdSerializer serializer, IMessageBusAdapter messageBusAdapter) : base(messageBusAdapter)
 	{
-		_messageBusAdapter = messageBusAdapter;
 		_options = options.Value;
 		_serializer = serializer;
 		_logger = logger;
-		_channel = _messageBusAdapter.OpenChannel<ASType>(nameof(ActivityMessageService));
 	}
 
 	public void Deliver(Uri inbox, ASType activity, Profile? onBehalfOf)
@@ -51,8 +47,8 @@ public class ActivityMessageService : IActivityMessageService
 			Type = activity.GetType().ToString(),
 			Subject = subject,
 			Time = DateTimeOffset.UtcNow,
-			[IActivityMessageService.DestinationKey] = inbox.ToString(),
-			[IActivityMessageService.ProfileKey] = onBehalfOf?.GetId25(),
+			[IActivityMessage.DestinationKey] = inbox.ToString(),
+			[IActivityMessage.ProfileKey] = onBehalfOf?.GetId25(),
 			["ltrauth"] = "",
 		};
 	}

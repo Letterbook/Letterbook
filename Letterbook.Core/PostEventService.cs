@@ -7,17 +7,16 @@ using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-public class PostEventService : IPostEvents
+public class PostEventService : EventServiceBase<IPostEvents>, IPostEvents
 {
 	private readonly ILogger<PostEventService> _logger;
 	private readonly CoreOptions _options;
-	private IObserver<CloudEvent> _channel;
 
 	public PostEventService(ILogger<PostEventService> logger, IOptions<CoreOptions> options, IMessageBusAdapter messageBusAdapter)
+	: base(messageBusAdapter)
 	{
 		_logger = logger;
 		_options = options.Value;
-		_channel = messageBusAdapter.OpenChannel<Post>(nameof(PostEventService));
 	}
 
 	/// <inheritdoc />

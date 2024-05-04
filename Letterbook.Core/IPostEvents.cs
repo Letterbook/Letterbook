@@ -2,7 +2,7 @@ using Letterbook.Core.Models;
 
 namespace Letterbook.Core;
 
-public interface IPostEvents
+public interface IPostEvents : IEventType
 {
 	/// <summary>
 	/// the post was created

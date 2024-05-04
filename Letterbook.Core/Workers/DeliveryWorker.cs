@@ -24,9 +24,9 @@ public class DeliveryWorker : IObserverWorker
 	public async Task DoWork(CloudEvent value, CancellationToken token)
 	{
 		_logger.LogDebug("Handle message {Type}", value.Type);
-		if (value[IActivityMessageService.ProfileKey] is not string shortId ||
+		if (value[IActivityMessage.ProfileKey] is not string shortId ||
 		    value.Data is not string document ||
-		    value[IActivityMessageService.DestinationKey] is not string destination)
+		    value[IActivityMessage.DestinationKey] is not string destination)
 		{
 			_logger.LogError("Couldn't process message {@Message}", value);
 			return;
