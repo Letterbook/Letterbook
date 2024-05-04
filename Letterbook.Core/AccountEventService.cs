@@ -1,4 +1,4 @@
-using CloudNative.CloudEvents;
+﻿using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
@@ -58,7 +58,7 @@ public class AccountEventService : IAccountEventService
 			Id = Guid.NewGuid().ToString(),
 			Source = _options.BaseUri(),
 			Data = value,
-			Type = $"{nameof(ActivityEventService)}.{value.GetType()}.{action}",
+			Type = $"{nameof(AccountEventService)}.{value.GetType()}.{action}",
 			Subject = value.Id.ToString(),
 			Time = DateTimeOffset.UtcNow,
 			["ltrauth"] = "" // I'd really like events to carry authentication info
@@ -74,7 +74,7 @@ public class AccountEventService : IAccountEventService
 			Id = Guid.NewGuid().ToString(),
 			Source = _options.BaseUri(),
 			Data = values,
-			Type = $"{nameof(ActivityEventService)}.{values.updated.GetType()}.{action}",
+			Type = $"{nameof(AccountEventService)}.{values.updated.GetType()}.{action}",
 			Subject = values.updated.Id.ToString(),
 			Time = DateTimeOffset.UtcNow,
 			["ltrauth"] = ""
