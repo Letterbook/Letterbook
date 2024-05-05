@@ -1,20 +1,20 @@
 ﻿using Letterbook.Adapter.TimescaleFeeds.EntityModels;
-using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Letterbook.Adapter.TimescaleFeeds.Entities;
+namespace Letterbook.Adapter.TimescaleFeeds.EntityConfig;
 
 public class ConfigureTimelinePost : IEntityTypeConfiguration<TimelinePost>
 {
-	private static readonly HashSet<string> ProfileProps =
-	[
-		nameof(Profile.Id), nameof(Profile.FediId), nameof(Profile.DisplayName), nameof(Profile.Authority)
-	];
-
 	public void Configure(EntityTypeBuilder<TimelinePost> builder)
 	{
-		builder.HasNoKey();
+		// This key is purely for EFCore's benefit, we'll likely never (need to) query on it
+		// TODO(profiling): Evaluate the performance impact of this key, and compare with using `ExecuteSqlAsync` to do custom INSERTs
+		// If ExecuteInsert() ever happens, use that instead and drop this index
+		// https://github.com/dotnet/efcore/issues/29897
+		// Also, explore using BulkExtensions https://www.nuget.org/packages/EFCore.BulkExtensions
+		builder.HasKey(model => new { model.Time, model.PostId, model.AudienceId });
+
 		builder.HasIndex(model => model.Time);
 		// Hash indexes do what it says on the tin
 		// They're faster than BTrees for equality but support no other comparisons

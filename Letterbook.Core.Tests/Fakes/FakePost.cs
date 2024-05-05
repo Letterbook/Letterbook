@@ -11,7 +11,8 @@ public class FakePost : Faker<Post>
 	private string _authority;
 
 	public FakePost(string authority) : this(new FakeProfile(authority).Generate())
-	{ }
+	{
+	}
 
 	public FakePost(Profile creator, bool draft = false, CoreOptions? opts = null) : this(new List<Profile> { creator }, 1, opts)
 	{
@@ -38,6 +39,14 @@ public class FakePost : Faker<Post>
 		});
 		RuleFor(p => p.Authority, (_, post) => post.FediId.GetAuthority());
 		RuleFor(p => p.Hostname, (_, post) => post.FediId.Host);
+		RuleFor(p => p.Audience, (faker, post) =>
+		{
+			var audience = post.Creators.Select(Audience.Followers);
+			if (faker.Random.Bool())
+				audience = audience.Append(Audience.Public);
+
+			return audience.ToList();
+		});
 
 		FinishWith((_, post) =>
 		{
@@ -46,6 +55,7 @@ public class FakePost : Faker<Post>
 			{
 				post.AddContent(n);
 			}
+
 			post.Thread.Posts.Add(post);
 			post.Thread.RootId = post.Id;
 		});
@@ -61,10 +71,10 @@ public class FakePost : Faker<Post>
 			{
 				post.AddressedTo.Add(Mention.To(c));
 			}
+
 			post.Thread.Posts.Add(post);
 
 			post.AddContent(new FakeNote(post, null).Generate());
 		});
 	}
-
 }
