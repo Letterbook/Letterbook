@@ -1,8 +1,11 @@
 using Letterbook.Core.Models;
 
-namespace Letterbook.Core.Adapters;
+namespace Letterbook.Core.Events;
 
-public interface IAccountEventService
+/// <summary>
+/// Events and a corresponding channel related to <see cref="Account">Accounts</see>
+/// </summary>
+public interface IAccountEvents
 {
 	public void Created(Account account);
 	public void Deleted(Account account);

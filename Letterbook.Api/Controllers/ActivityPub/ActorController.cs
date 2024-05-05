@@ -8,6 +8,7 @@ using Letterbook.Api.Dto;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
@@ -33,16 +34,16 @@ public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;
 	private readonly IProfileService _profileService;
-	private readonly IActivityMessageService _messageService;
+	private readonly IActivityMessage _message;
 	private readonly IActivityPubDocument _apDoc;
 	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Default);
 
 	public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
-		IProfileService profileService, IActivityMessageService messageService, IActivityPubDocument apDoc)
+		IProfileService profileService, IActivityMessage message, IActivityPubDocument apDoc)
 	{
 		_logger = logger;
 		_profileService = profileService;
-		_messageService = messageService;
+		_message = message;
 		_apDoc = apDoc;
 		_logger.LogInformation("Loaded {Controller}", nameof(ActorController));
 	}
@@ -219,7 +220,7 @@ public class ActorController : ControllerBase
 		// But, that doesn't exist, yet. The if(false) is so we don't forget.
 		var acceptResponse = false;
 		if (acceptResponse) return Ok(resultActivity);
-		_messageService.Deliver(relation.Follower.Inbox, resultActivity, relation.Follows);
+		_message.Deliver(relation.Follower.Inbox, resultActivity, relation.Follows);
 		return Accepted();
 	}
 }

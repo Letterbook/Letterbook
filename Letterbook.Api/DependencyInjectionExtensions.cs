@@ -19,6 +19,7 @@ using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Authorization;
+using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
@@ -89,7 +90,7 @@ public static class DependencyInjectionExtensions
 	{
 		return services.AddIdentity<Account, IdentityRole<Guid>>(options =>
 			{
-				
+
 			})
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders();
@@ -106,24 +107,28 @@ public static class DependencyInjectionExtensions
 		services.AddSingleton<MappingConfigProvider>();
 
 		// Register Services
-		services.AddScoped<IActivityEventService, ActivityEventService>();
 		services.AddScoped<IProfileEventService, ProfileEventService>();
 		services.AddScoped<IAccountService, AccountService>();
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IPostService, PostService>();
-		services.AddScoped<IAccountEventService, AccountEventService>();
+		services.AddScoped<IAccountEvents, AccountEventService>();
 		services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
-		services.AddScoped<IActivityMessageService, ActivityMessageService>();
+		services.AddScoped<IActivityMessage, ActivityMessageService>();
 		services.AddScoped<IAuthzPostService, PostService>();
-		services.AddScoped<IPostEventService, PostEventService>();
+		services.AddScoped<IPostEvents, PostEventService>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
-		// Register Workers
+		// Register startup workers
 		services.AddScoped<SeedAdminWorker>();
-		services.AddScoped<DeliveryWorker>();
-		services.AddSingleton<DeliveryObserver>();
 		services.AddHostedService<WorkerScope<SeedAdminWorker>>();
-		services.AddHostedService<MessageWorkerHost<DeliveryObserver, ASType>>((DeliveryObserverFactory));
+
+		// Register MessageWorkers
+		services.AddScoped<DeliveryWorker>();
+		services.AddSingleton<IEventObserver<DeliveryWorker>, EventObserver<DeliveryWorker>>();
+		services.AddHostedService<ObserverHost<IActivityMessage, DeliveryWorker>>(provider =>
+			new ObserverHost<IActivityMessage, DeliveryWorker>(provider,
+				provider.GetRequiredService<IMessageBusClient>(),
+				50));
 
 		// Register Adapters
 		services.AddScoped<IActivityAdapter, ActivityAdapter>();
@@ -220,15 +225,5 @@ public static class DependencyInjectionExtensions
 		});
 
 		return services;
-	}
-
-	private static MessageWorkerHost<DeliveryObserver, ASType> DeliveryObserverFactory(IServiceProvider provider)
-	{
-		// Set a 50ms delay on the delivery observer
-		// This is just a guess at a sufficient amount of time for peers to become ready to accept reply messages
-		// We don't want to sit on them for too long, because they'll just sitting in RAM
-		return new MessageWorkerHost<DeliveryObserver, ASType>(
-			provider.GetRequiredService<ILogger<MessageWorkerHost<DeliveryObserver, ASType>>>(), provider,
-			provider.GetRequiredService<IMessageBusClient>(), 50);
 	}
 }

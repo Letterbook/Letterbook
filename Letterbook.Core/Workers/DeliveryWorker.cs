@@ -1,12 +1,15 @@
 using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Extensions;
+using Letterbook.Core.Events;
 using Medo;
 using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Core.Workers;
 
-public class DeliveryWorker
+/// <summary>
+/// Deliver ActivityPub messages to their destination
+/// </summary>
+public class DeliveryWorker : IObserverWorker
 {
 	private readonly ILogger<DeliveryWorker> _logger;
 	private readonly IAccountProfileAdapter _profiles;
@@ -19,12 +22,12 @@ public class DeliveryWorker
 		_client = client;
 	}
 
-	public async Task DoWork(CloudEvent value)
+	public async Task DoWork(CloudEvent value, CancellationToken token)
 	{
 		_logger.LogDebug("Handle message {Type}", value.Type);
-		if (value[IActivityMessageService.ProfileKey] is not string shortId ||
-			value.Data is not string document ||
-			value[IActivityMessageService.DestinationKey] is not string destination)
+		if (value[IActivityMessage.ProfileKey] is not string shortId ||
+		    value.Data is not string document ||
+		    value[IActivityMessage.DestinationKey] is not string destination)
 		{
 			_logger.LogError("Couldn't process message {@Message}", value);
 			return;

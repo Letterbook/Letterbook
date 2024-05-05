@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
@@ -20,13 +21,13 @@ public class PostService : IAuthzPostService, IPostService
 	private readonly ILogger<PostService> _logger;
 	private readonly CoreOptions _options;
 	private readonly IPostAdapter _posts;
-	private readonly IPostEventService _postEvents;
+	private readonly IPostEvents _postEvents;
 	private readonly IActivityPubClient _apClient;
 	private Uuid7 _profileId;
 	private IEnumerable<Claim> _claims = null!;
 
 	public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options,
-		IPostAdapter posts, IPostEventService postEvents, IActivityPubClient apClient)
+		IPostAdapter posts, IPostEvents postEvents, IActivityPubClient apClient)
 	{
 		_logger = logger;
 		_posts = posts;
