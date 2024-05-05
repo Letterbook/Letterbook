@@ -6,12 +6,22 @@ namespace Letterbook.Adapter.TimescaleFeeds.IntegrationTests.Fixtures;
 public class TimescaleFixture
 {
 	private const string ConnectionString =
-		@"Server=localhost;Port=5433;Database=letterbook_feeds;User Id=letterbook;Password=letterbookpw;SSL Mode=Disable;Search Path=public";
+		"Server=localhost;" +
+		"Port=5433;" +
+		"Database=letterbook_feeds_tests;" +
+		"User Id=letterbook;" +
+		"Password=letterbookpw;" +
+		"SSL Mode=Disable;" +
+		"Search Path=public;" +
+		"Include Error Detail=true";
 	private static readonly object _lock = new();
 	private static bool _databaseInitialized;
 
-	private IOptions<FeedsDbOptions> opts = Options.Create(new FeedsDbOptions { ConnectionString = ConnectionString });
-	public FeedsContext CreateContext() => new FeedsContext(opts);
+	private DbContextOptions<FeedsContext> _opts = new DbContextOptionsBuilder<FeedsContext>()
+		.UseNpgsql(DependencyInjection.DataSource(new FeedsDbOptions() { ConnectionString = ConnectionString }))
+		.Options;
+
+	public FeedsContext CreateContext() => new(_opts);
 
 	public TimescaleFixture()
 	{

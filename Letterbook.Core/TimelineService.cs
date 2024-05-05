@@ -86,7 +86,7 @@ public class TimelineService : ITimelineService
 
 
 	// public async Task<IEnumerable<Post>> GetFeed(Guid recipientId, DateTime begin, int limit = 40)
-	public async Task<IEnumerable<TimelineEntry>> GetFeed(Guid recipientId, DateTime begin, int limit = 40)
+	public async Task<IEnumerable<Post>> GetFeed(Guid recipientId, DateTime begin, int limit = 40)
 	{
 		// TODO(moderation): Account for moderation conditions (block, mute, etc)
 		var recipient = await _profileAdapter.LookupProfile(recipientId);

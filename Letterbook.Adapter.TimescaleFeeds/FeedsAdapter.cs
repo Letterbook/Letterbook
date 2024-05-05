@@ -40,22 +40,26 @@ public class FeedsAdapter : IFeedsAdapter
 		throw new NotImplementedException();
 	}
 
-	public IQueryable<Models.TimelineEntry> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime before,
-		int limit, bool includeBoosts = true)
+	public IQueryable<Models.Post> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime before,
+		int limit, bool includeShared = true)
 	{
-		var keys = audiences.Select(a => a.FediId.ToString());
-		return _feedsContext.Feeds
+		var keys = audiences.Select(a => a.Id);
+		return _feedsContext.Timelines
 			.AsNoTracking()
+			.OrderByDescending(t => t.Time)
 			.Where(t => t.Time <= before)
-			.Where(t => keys.Contains(t.AudienceKey))
-			.Where(t => includeBoosts || t.BoostedBy != null)
-			.GroupBy(t => t.EntityId).Select(g => g.First())
+			.Where(t => keys.Contains(t.AudienceId))
+			.Where(t => includeShared || t.SharedBy != null)
 			// Equivalent to DistinctBy, but EFCore won't translate that for some reason
+			// See https://github.com/npgsql/efcore.pg/issues/894
+			// and https://github.com/dotnet/efcore/issues/27470
 			// .DistinctBy(t => t.EntityId)
-			.Take(limit);
+			.GroupBy(t => t.PostId).Select(g => g.First())
+			.Take(limit)
+			.Select(t => (Models.Post)t);
 	}
 
-	public IQueryable<Models.TimelineEntry> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime before,
+	public IQueryable<Models.Post> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime before,
 		int limit, ICollection<Models.ActivityObjectType> types,
 		bool includeBoosts = true)
 	{

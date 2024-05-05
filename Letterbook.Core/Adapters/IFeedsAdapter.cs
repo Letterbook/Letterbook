@@ -70,10 +70,10 @@ public interface IFeedsAdapter : IDisposable
 	/// <param name="audiences"></param>
 	/// <param name="before"></param>
 	/// <param name="limit"></param>
-	/// <param name="includeBoosts"></param>
+	/// <param name="includeShared"></param>
 	/// <returns></returns>
-	public IQueryable<TimelineEntry> GetTimelineEntries(ICollection<Audience> audiences, DateTime before, int limit,
-		bool includeBoosts = true);
+	public IQueryable<Post> GetTimelineEntries(ICollection<Audience> audiences, DateTime before, int limit,
+		bool includeShared = true);
 
 	/// <summary>
 	/// Query the timeline for the given audiences, filtered by post content type.
@@ -86,7 +86,7 @@ public interface IFeedsAdapter : IDisposable
 	/// <param name="types"></param>
 	/// <param name="includeBoosts"></param>
 	/// <returns></returns>
-	public IQueryable<TimelineEntry> GetTimelineEntries(ICollection<Audience> audiences, DateTime before, int limit,
+	public IQueryable<Post> GetTimelineEntries(ICollection<Audience> audiences, DateTime before, int limit,
 		ICollection<ActivityObjectType> types, bool includeBoosts = true);
 
 	public Task Cancel();
