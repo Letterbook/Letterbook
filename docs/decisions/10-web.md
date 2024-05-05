@@ -4,7 +4,7 @@ Adding a razor web project
 
 ## Status
 
-- [x] Decided
+- [x] Decided (2024-05-05)
 - [ ] Decided Against
 - [ ] Deferred
 - [ ] Superseded
