@@ -72,8 +72,10 @@ public class TimelinePost
 		InReplyTo = p.InReplyToId != null ? new Post() { Id = p.InReplyToId.Value } : default,
 	};
 
-	public static IEnumerable<TimelinePost> ToIEnumerable(Post p, Profile? sharedBy = null) =>
-		p.Audience.Select(audience => new TimelinePost
+	public static IEnumerable<TimelinePost> Denormalize(Post p, Profile? sharedBy = null)
+	{
+		var mentions = p.AddressedTo.Select(mention => Audience.FromMention(mention.Subject));
+		return p.Audience.Concat(mentions).Select(audience => new TimelinePost
 		{
 			PostId = p.Id,
 			Preview = p.Preview ?? "PREVIEW NOT AVAILABLE", // TODO: Generate Preview
@@ -86,4 +88,8 @@ public class TimelinePost
 			AudienceId = audience.Id,
 			ThreadId = p.Thread.Id
 		});
+	}
+
+	public static IEnumerable<TimelinePost> Denormalize(IEnumerable<Post> posts) =>
+		posts.SelectMany(p => Denormalize(p));
 }

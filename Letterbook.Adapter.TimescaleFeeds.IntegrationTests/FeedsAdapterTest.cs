@@ -1,22 +1,21 @@
 using Bogus;
 using Letterbook.Adapter.TimescaleFeeds.IntegrationTests.Fixtures;
 using Letterbook.Core.Models;
-using Letterbook.Core.Tests.Fakes;
 using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.TimescaleFeeds.IntegrationTests;
 
-public class FeedsAdapterTest : IClassFixture<TimescaleFixture>
+public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterTest>>
 {
 	private ITestOutputHelper _output;
 	private FeedsAdapter _adapter;
 	private FeedsContext _context;
 	private FeedsContext _actual;
 	private Note _note;
-	private TimescaleFixture _timescale;
+	private TimescaleDataFixture<FeedsAdapterTest> _timescale;
 	private Faker _fake;
 
-	public FeedsAdapterTest(ITestOutputHelper outputHelper, TimescaleFixture timescale)
+	public FeedsAdapterTest(ITestOutputHelper outputHelper, TimescaleDataFixture<FeedsAdapterTest> timescale)
 	{
 		_timescale = timescale;
 		_output = outputHelper;
@@ -25,7 +24,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleFixture>
 		_actual = _timescale.CreateContext();
 		_adapter = new FeedsAdapter(_context);
 
-		_output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
+		_output.WriteLine($"Bogus Seed: {_timescale.Seed}");
 	}
 
 	[Fact(DisplayName = "Should exist")]

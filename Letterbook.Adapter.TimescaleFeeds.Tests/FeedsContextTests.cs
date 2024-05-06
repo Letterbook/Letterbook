@@ -38,7 +38,7 @@ public class FeedsContextTests : IClassFixture<TimescaleFixture<FeedsContextTest
 	[Fact(DisplayName = "Should track Posts")]
 	public void CanTrackPost()
 	{
-		var actual = TimelinePost.ToIEnumerable(_post);
+		var actual = TimelinePost.Denormalize(_post);
 
 		Assert.True(actual.Any());
 		_context.Timelines.AddRange(actual);
