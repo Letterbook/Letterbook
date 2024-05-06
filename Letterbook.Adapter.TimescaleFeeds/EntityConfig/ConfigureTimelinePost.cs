@@ -26,5 +26,7 @@ public class ConfigureTimelinePost : IEntityTypeConfiguration<TimelinePost>
 		// It supports comparisons for equality (=, is, in) and inequality (=>, >, <, <=)
 		builder.HasIndex(model => model.Creators).HasMethod("GIN");
 		builder.Property(model => model.Creators).HasColumnType("jsonb");
+
+		builder.Property(model => model.SharedBy).HasColumnType("jsonb");
 	}
 }
