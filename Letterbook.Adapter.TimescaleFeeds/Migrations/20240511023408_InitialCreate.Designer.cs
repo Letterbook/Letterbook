@@ -14,8 +14,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.TimescaleFeeds.Migrations
 {
     [DbContext(typeof(FeedsContext))]
-    [Migration("20240511022150_AudienceUriKey")]
-    partial class AudienceUriKey
+    [Migration("20240511023408_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

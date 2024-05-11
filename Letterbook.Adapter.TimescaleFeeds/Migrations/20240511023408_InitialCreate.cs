@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Letterbook.Adapter.TimescaleFeeds.EntityModels;
-using Letterbook.Adapter.TimescaleFeeds.Extensions;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -20,7 +19,7 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
                 {
                     Time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     PostId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AudienceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AudienceId = table.Column<string>(type: "text", nullable: false),
                     Preview = table.Column<string>(type: "text", nullable: false),
                     Authority = table.Column<string>(type: "text", nullable: false),
                     Creators = table.Column<List<TimelineProfile>>(type: "jsonb", nullable: false),
@@ -63,10 +62,6 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
                 name: "IX_Timelines_Time",
                 table: "Timelines",
                 column: "Time");
-
-            migrationBuilder.InstallTimescale();
-
-            migrationBuilder.CreateHyperTable("Timelines", "Time");
         }
 
         /// <inheritdoc />
