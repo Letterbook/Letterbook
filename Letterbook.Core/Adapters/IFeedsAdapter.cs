@@ -72,7 +72,7 @@ public interface IFeedsAdapter : IDisposable
 	/// <param name="limit"></param>
 	/// <param name="includeShared"></param>
 	/// <returns></returns>
-	public IQueryable<Post> GetTimelineEntries(ICollection<Audience> audiences, DateTime before, int limit,
+	public IQueryable<Post> GetTimelineEntries(IEnumerable<Audience> audiences, DateTimeOffset before, int limit,
 		bool includeShared = true);
 
 	/// <summary>

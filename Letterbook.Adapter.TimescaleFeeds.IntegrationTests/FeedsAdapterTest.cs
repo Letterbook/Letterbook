@@ -1,6 +1,7 @@
 using Bogus;
 using Letterbook.Adapter.TimescaleFeeds.IntegrationTests.Fixtures;
 using Letterbook.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.TimescaleFeeds.IntegrationTests;
@@ -11,7 +12,6 @@ public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterT
 	private FeedsAdapter _adapter;
 	private FeedsContext _context;
 	private FeedsContext _actual;
-	private Note _note;
 	private TimescaleDataFixture<FeedsAdapterTest> _timescale;
 	private Faker _fake;
 
@@ -32,5 +32,14 @@ public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterT
 	public void Exists()
 	{
 		Assert.NotNull(_adapter);
+	}
+
+	[Fact]
+	public async Task CanQueryAudience()
+	{
+		var audience = _timescale.Profiles.Take(5).Select(p => Audience.Followers(p));
+		var actual = await _adapter.GetTimelineEntries(audience, DateTimeOffset.UtcNow, 100).AnyAsync();
+
+		Assert.True(actual);
 	}
 }

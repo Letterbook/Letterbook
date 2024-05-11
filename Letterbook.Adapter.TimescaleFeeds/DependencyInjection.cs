@@ -21,7 +21,7 @@ public static class DependencyInjection
 		{
 			Name = dbOptions.Database ?? "letterbook_feeds"
 		};
-		// dataSource.EnableDynamicJson();
+		dataSource.EnableDynamicJson();
 
 		return dataSource.Build();
 	}

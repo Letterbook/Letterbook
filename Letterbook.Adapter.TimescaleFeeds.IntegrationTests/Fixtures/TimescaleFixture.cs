@@ -27,6 +27,7 @@ public class TimescaleDataFixture<T> : TimescaleFixture<T>
 			context.Database.EnsureDeleted();
 			context.Database.Migrate();
 
+			context.AddRange(Timeline);
 			// populate the db with test data
 			// context.AddRange();
 			context.SaveChanges();

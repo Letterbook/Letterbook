@@ -1,15 +1,17 @@
-﻿using Letterbook.Core.Models;
+﻿using System.Diagnostics;
+using Letterbook.Core.Models;
 
 namespace Letterbook.Adapter.TimescaleFeeds.EntityModels;
 
 /// <summary>
 /// A partial view of a Post, adapted for use and query performance in Timelines
 /// </summary>
+[DebuggerDisplay("PostId: {PostId}, AudienceId: {AudienceId}")]
 public class TimelinePost
 {
 	/// <summary>
 	/// Time is the timeseries key. TSDBs will time-order everything and do rapid time-indexed queries.
-	/// In our case, records should probably always have a time key of right now, because the point is when it got added to
+	/// In our case, records should generally have a time value of right now, because what we care about is when it got added to
 	/// the timeline. When it was added could and likely will be different from any of the datetime properties on Post
 	/// </summary>
 	public DateTimeOffset Time { get; set; } = DateTimeOffset.UtcNow;
@@ -49,12 +51,12 @@ public class TimelinePost
 	/// This allows us to query for specific memberships using WHERE IN (list) clauses, rather than requiring joins or
 	/// complex set intersections
 	/// </summary>
-	public required Guid AudienceId { get; set; }
+	public required Uri AudienceId { get; set; }
 
 	/// <summary>ID of the Thread to which the Post belongs</summary>
 	public required Guid ThreadId { get; set; }
 
-	public static explicit operator Post(TimelinePost p) => new Post
+	public static implicit operator Post(TimelinePost p) => new Post
 	{
 		Id = p.PostId,
 		Thread = new ThreadContext()
@@ -74,8 +76,11 @@ public class TimelinePost
 
 	public static IEnumerable<TimelinePost> Denormalize(Post p, Profile? sharedBy = null)
 	{
-		var mentions = p.AddressedTo.Select(mention => Audience.FromMention(mention.Subject));
-		return p.Audience.Concat(mentions).Select(audience => new TimelinePost
+		return p.Audience
+			.Concat(p.AddressedTo.Select(mention => Audience.FromMention(mention.Subject)))
+			// Remove the public audience, because we will never query for it.
+			.Where(a => a != Audience.Public)
+			.Select(audience => new TimelinePost
 		{
 			PostId = p.Id,
 			Preview = p.Preview ?? "PREVIEW NOT AVAILABLE", // TODO: Generate Preview
@@ -85,7 +90,7 @@ public class TimelinePost
 			UpdatedDate = p.UpdatedDate ?? p.CreatedDate,
 			InReplyToId = p.InReplyTo?.Id,
 			SharedBy = sharedBy != null ? (TimelineProfile)sharedBy : default,
-			AudienceId = audience.Id,
+			AudienceId = audience.FediId,
 			ThreadId = p.Thread.Id
 		});
 	}

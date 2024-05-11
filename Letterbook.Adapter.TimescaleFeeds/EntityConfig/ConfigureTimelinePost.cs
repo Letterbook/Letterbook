@@ -9,7 +9,8 @@ public class ConfigureTimelinePost : IEntityTypeConfiguration<TimelinePost>
 	public void Configure(EntityTypeBuilder<TimelinePost> builder)
 	{
 		// This key is purely for EFCore's benefit, we'll likely never (need to) query on it
-		// TODO(profiling): Evaluate the performance impact of this key, and compare with using `ExecuteSqlAsync` to do custom INSERTs
+		// TODO(profiling): Evaluate the performance impact of this key, and compare with the hastle of using `ExecuteSqlAsync` to do
+		// custom INSERTs
 		// If ExecuteInsert() ever happens, use that instead and drop this index
 		// https://github.com/dotnet/efcore/issues/29897
 		// Also, explore using BulkExtensions https://www.nuget.org/packages/EFCore.BulkExtensions
