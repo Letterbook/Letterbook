@@ -1,5 +1,9 @@
-﻿using MassTransit.Logging;
+﻿using Letterbook.Adapter.Db;
+using Letterbook.Core.Models;
+using MassTransit.Logging;
 using MassTransit.Monitoring;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
@@ -9,6 +13,16 @@ namespace Letterbook.Hosting;
 
 public static class DependencyInjection
 {
+	public static IdentityBuilder AddIdentity(this IServiceCollection services)
+	{
+		return services.AddIdentity<Account, IdentityRole<Guid>>(options =>
+			{
+
+			})
+			.AddEntityFrameworkStores<RelationalContext>()
+			.AddDefaultTokenProviders();
+	}
+
 	public static OpenTelemetryBuilder AddWorkerTelemetry(this OpenTelemetryBuilder builder)
 	{
 		return builder.WithMetrics(metrics =>

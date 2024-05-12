@@ -35,8 +35,6 @@ public class ActivityMessageServiceTests : WithMocks, IClassFixture<JsonLdSerial
 		_activity.Actor.Add(_profile.FediId);
 		_activity.Object.Add(new Uri("https://peer.example/object/12345"));
 		_subject = new Subject<CloudEvent>();
-		MessageBusAdapterMock.Setup(m => m.OpenChannel<It.IsAnyType>(It.IsAny<string?>()))
-			.Returns(_subject.AsObserver());
 
 		_service = new ActivityMessageService(Mock.Of<ILogger<ActivityMessageService>>(), CoreOptionsMock, _serializer, MessageBusAdapterMock.Object);
 	}

@@ -51,7 +51,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj" />
     <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj" />
-    <ProjectReference Include="..\Letterbook.Adapter.RxMessageBus\Letterbook.Adapter.RxMessageBus.csproj" />
     <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj" />
     <ProjectReference Include="..\Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj" />
     <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />

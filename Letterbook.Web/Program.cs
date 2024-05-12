@@ -4,6 +4,7 @@ using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Letterbook.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Serilog.Enrichers.Span;

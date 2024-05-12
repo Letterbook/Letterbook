@@ -3,39 +3,38 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Events;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using MassTransit;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
 public class AccountEventService : IAccountEvents
 {
-	private readonly IMessageBusAdapter _messageBusAdapter;
-	private readonly IObserver<CloudEvent> _channel;
+	private readonly IBus _bus;
 	private readonly CoreOptions _options;
 
-	public AccountEventService(IOptions<CoreOptions> options, IMessageBusAdapter messageBusAdapter)
+	public AccountEventService(IOptions<CoreOptions> options, IBus bus)
 	{
+		_bus = bus;
 		_options = options.Value;
-		_messageBusAdapter = messageBusAdapter;
-		_channel = _messageBusAdapter.OpenChannel<Account>(nameof(AccountEventService));
 	}
 
 	public void Created(Account account)
 	{
 		var message = FormatMessage(account, nameof(Created));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 	}
 
 	public void Deleted(Account account)
 	{
 		var message = FormatMessage(account, nameof(Deleted));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 	}
 
 	public void Suspended(Account account)
 	{
 		var message = FormatMessage(account, nameof(Suspended));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 	}
 
 	public void Updated(Account original, Account updated)
@@ -43,13 +42,13 @@ public class AccountEventService : IAccountEvents
 		// TODO: warn on equality
 		// if (ReferenceEquals(original, updated)) _logger.LogWarning("");
 		var message = FormatMessage((original, updated), nameof(Updated));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 	}
 
 	public void Verified(Account account)
 	{
 		var message = FormatMessage(account, nameof(Verified));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 	}
 
 	private CloudEvent FormatMessage(Account value, string action)

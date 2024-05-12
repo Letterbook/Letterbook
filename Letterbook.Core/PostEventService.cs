@@ -3,20 +3,22 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Events;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-public class PostEventService : EventServiceBase<IPostEvents>, IPostEvents
+public class PostEventService : IPostEvents
 {
 	private readonly ILogger<PostEventService> _logger;
+	private readonly IBus _bus;
 	private readonly CoreOptions _options;
 
-	public PostEventService(ILogger<PostEventService> logger, IOptions<CoreOptions> options, IMessageBusAdapter messageBusAdapter)
-	: base(messageBusAdapter)
+	public PostEventService(ILogger<PostEventService> logger, IOptions<CoreOptions> options, IBus bus)
 	{
 		_logger = logger;
+		_bus = bus;
 		_options = options.Value;
 	}
 
@@ -24,7 +26,7 @@ public class PostEventService : EventServiceBase<IPostEvents>, IPostEvents
 	public void Created(Post post)
 	{
 		var message = FormatMessageData(post, nameof(Created));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 		_logger.LogInformation("{Action} Post event {Id}", nameof(Created), message.Id);
 	}
 
@@ -32,7 +34,7 @@ public class PostEventService : EventServiceBase<IPostEvents>, IPostEvents
 	public void Deleted(Post post)
 	{
 		var message = FormatMessageData(post, nameof(Deleted));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 		_logger.LogInformation("{Action} Post event {Id}", nameof(Deleted), message.Id);
 	}
 
@@ -40,7 +42,7 @@ public class PostEventService : EventServiceBase<IPostEvents>, IPostEvents
 	public void Updated(Post post)
 	{
 		var message = FormatMessageData(post, nameof(Updated));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 		_logger.LogInformation("{Action} Post event {Id}", nameof(Updated), message.Id);
 	}
 
@@ -48,7 +50,7 @@ public class PostEventService : EventServiceBase<IPostEvents>, IPostEvents
 	public void Published(Post post)
 	{
 		var message = FormatMessageData(post, nameof(Published));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 		_logger.LogInformation("{Action} Post event {Id}", nameof(Published), message.Id);
 	}
 
@@ -56,7 +58,7 @@ public class PostEventService : EventServiceBase<IPostEvents>, IPostEvents
 	public void Received(Post post, Profile recipient)
 	{
 		var message = FormatMessageData(post, recipient.GetId25(), nameof(Received));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 		_logger.LogInformation("{Action} Post event {Id}", nameof(Received), message.Id);
 	}
 
@@ -64,7 +66,7 @@ public class PostEventService : EventServiceBase<IPostEvents>, IPostEvents
 	public void Liked(Post post, Profile likedBy)
 	{
 		var message = FormatMessageData(post, likedBy.GetId25(), nameof(Liked));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 		_logger.LogInformation("{Action} Post event {Id}", nameof(Liked), message.Id);
 	}
 
@@ -72,7 +74,7 @@ public class PostEventService : EventServiceBase<IPostEvents>, IPostEvents
 	public void Shared(Post post, Profile sharedBy)
 	{
 		var message = FormatMessageData(post, sharedBy.GetId25(), nameof(Shared));
-		_channel.OnNext(message);
+		_bus.Publish(message);
 	}
 
 	/*

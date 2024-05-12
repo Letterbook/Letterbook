@@ -5,28 +5,31 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Events;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-public class ActivityMessageService : EventServiceBase<IActivityMessage>, IActivityMessage
+public class ActivityMessageService : IActivityMessage
 {
 	private readonly IJsonLdSerializer _serializer;
+	private readonly IBus _bus;
 	private readonly CoreOptions _options;
 	private readonly ILogger<ActivityMessageService> _logger;
 
 	public ActivityMessageService(ILogger<ActivityMessageService> logger, IOptions<CoreOptions> options,
-		IJsonLdSerializer serializer, IMessageBusAdapter messageBusAdapter) : base(messageBusAdapter)
+		IJsonLdSerializer serializer, IBus bus)
 	{
 		_options = options.Value;
 		_serializer = serializer;
+		_bus = bus;
 		_logger = logger;
 	}
 
 	public void Deliver(Uri inbox, ASType activity, Profile? onBehalfOf)
 	{
-		_channel.OnNext(FormatMessage(inbox, activity, onBehalfOf));
+		_bus.Publish(FormatMessage(inbox, activity, onBehalfOf));
 		_logger.LogInformation("Scheduled message type {Activity} for delivery to {Inbox}",
 			activity.GetType(), inbox);
 		_logger.LogDebug("Scheduled message type {Activity} from ({Thread})",

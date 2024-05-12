@@ -5,6 +5,7 @@ using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Letterbook.Hosting;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;

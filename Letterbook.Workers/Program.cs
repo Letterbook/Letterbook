@@ -21,6 +21,8 @@ public class Program
 	        .AddActivityPubClient(builder.Configuration)
 	        .AddHealthChecks();
 
+        builder.Services.AddIdentity();
+
         builder.Services.AddOpenTelemetry()
 	        .ConfigureResource(resource => { resource.AddService( "Letterbook.Workers"); })
 	        .AddWorkerTelemetry()

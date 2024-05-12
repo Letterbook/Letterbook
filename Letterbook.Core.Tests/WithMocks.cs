@@ -5,6 +5,7 @@ using Letterbook.Core.Authorization;
 using Letterbook.Core.Events;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Mocks;
+using MassTransit;
 using Medo;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -17,7 +18,7 @@ public abstract class WithMocks
 	protected Mock<IActivityAdapter> ActivityAdapterMock;
 	protected Mock<IPostAdapter> PostAdapterMock;
 	protected Mock<IAccountProfileAdapter> AccountProfileMock;
-	protected Mock<IMessageBusAdapter> MessageBusAdapterMock;
+	protected Mock<IBus> MessageBusAdapterMock;
 	protected Mock<IAccountEvents> AccountEventServiceMock;
 	protected Mock<IActivityPubClient> ActivityPubClientMock;
 	protected Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock;
@@ -37,7 +38,7 @@ public abstract class WithMocks
 		ActivityAdapterMock = new Mock<IActivityAdapter>();
 		PostAdapterMock = new Mock<IPostAdapter>();
 		AccountProfileMock = new Mock<IAccountProfileAdapter>();
-		MessageBusAdapterMock = new Mock<IMessageBusAdapter>();
+		MessageBusAdapterMock = new Mock<IBus>();
 		AccountEventServiceMock = new Mock<IAccountEvents>();
 		ActivityPubClientMock = new Mock<IActivityPubClient>();
 		ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
@@ -51,6 +52,8 @@ public abstract class WithMocks
 		ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
 		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>(), It.IsAny<Uuid7>())).Returns(PostServiceAuthMock.Object);
 		ProfileServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(ProfileServiceAuthMock.Object);
+		MessageBusAdapterMock.Setup(m => m.Publish(It.IsAny<object>(), It.IsAny<CancellationToken>()))
+			.Returns(Task.CompletedTask);
 		var mockOptions = new CoreOptions
 		{
 			DomainName = "letterbook.example",
@@ -61,7 +64,7 @@ public abstract class WithMocks
 
 		MockedServiceCollection = new ServiceCollection();
 		MockedServiceCollection.AddScoped<IAccountProfileAdapter>(_ => AccountProfileMock.Object);
-		MockedServiceCollection.AddScoped<IMessageBusAdapter>(_ => MessageBusAdapterMock.Object);
+		MockedServiceCollection.AddScoped<IBus>(_ => MessageBusAdapterMock.Object);
 		MockedServiceCollection.AddScoped<IAccountEvents>(_ => AccountEventServiceMock.Object);
 		MockedServiceCollection.AddScoped<IActivityPubClient>(_ => ActivityPubClientMock.Object);
 		MockedServiceCollection.AddScoped<IActivityPubAuthenticatedClient>(_ => ActivityPubAuthClientMock.Object);
