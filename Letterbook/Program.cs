@@ -1,9 +1,9 @@
+using System.Reflection;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Api;
-using Letterbook.Core;
-using Letterbook.Core.Exceptions;
-using Letterbook.Core.Extensions;
+using Letterbook.Api.Swagger;
+using Letterbook.Core.Models;
 using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
@@ -11,7 +11,7 @@ using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 
-namespace Letterbook.Web;
+namespace Letterbook;
 
 public class Program
 {
@@ -26,8 +26,6 @@ public class Program
 			.CreateBootstrapLogger();
 
 		var builder = WebApplication.CreateBuilder(args);
-		var coreOptions = builder.Configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
-		                  ?? throw new ConfigException(nameof(CoreOptions));
 
 		if (!builder.Environment.IsProduction())
 			builder.Configuration.AddUserSecrets<Api.Program>();
@@ -44,20 +42,16 @@ public class Program
 		builder.Services.AddHealthChecks();
 		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
-		builder.Services.AddIdentity<Models.Account, IdentityRole<Guid>>()
+		builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
-			// Aspnet Core Identity includes a default UI, which provides basic account management.
-			// This includes register, login, logout, and maintenance views.
-			// However, it only seems to work well for fairly simple (single project) apps.  It also looks extremely Microsoft.
-			// We likely don't want to use it long term, but it's nice for the moment.
-			//
-			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
 			.AddDefaultUI();
-		builder.Services.AddRazorPages();
-		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration));
+		builder.Services.AddRazorPages()
+			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
+		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration)
+			.AddWorkers(builder.Configuration));
 
-		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
+		// builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 
 		var app = builder.Build();
 
@@ -75,8 +69,10 @@ public class Program
 				context.Request.EnableBuffering();
 				return next();
 			});
+			app.UseSwaggerConfig();
 		}
 
+		// app.UseHttpsRedirection();
 		app.UseStaticFiles();
 
 		app.UseHealthChecks("/healthz");
@@ -90,6 +86,7 @@ public class Program
 
 		app.MapRazorPages();
 		app.UsePathBase(new PathString("/api/v1"));
+		app.MapControllers();
 
 		app.Run("http://localhost:5127");
 	}
