@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Letterbook.Core.Contracts;
 using MassTransit;
 using MassTransit.Logging;
 using MassTransit.Monitoring;
@@ -13,6 +14,7 @@ public static class DependencyInjection
 {
 	public static IServiceCollection AddLetterbookWorkers(this IServiceCollection services, IConfigurationSection workerConfig)
 	{
+		var workerOpts = workerConfig.Get<WorkerOptions>();
 		return services.AddMassTransit(x =>
 		{
 			x.SetKebabCaseEndpointNameFormatter();
@@ -21,12 +23,17 @@ public static class DependencyInjection
 			// saga repository.
 			x.SetInMemorySagaRepositoryProvider();
 
-			var entryAssembly = Assembly.GetEntryAssembly();
+			// var entryAssembly = Assembly.GetExecutingAssembly();
+			var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+				.SelectMany(s => s.GetTypes())
+				.Where(p => typeof(IConsumer<EventBase>).IsAssignableFrom(p) && p.IsClass && !p.IsAbstract)
+				.Select(x => x.Assembly)
+				.ToArray();
 
-			x.AddConsumers(entryAssembly);
-			x.AddSagaStateMachines(entryAssembly);
-			x.AddSagas(entryAssembly);
-			x.AddActivities(entryAssembly);
+			x.AddConsumers(assemblies);
+			x.AddSagaStateMachines(assemblies);
+			x.AddSagas(assemblies);
+			x.AddActivities(assemblies);
 
 			x.UsingInMemory((context, cfg) =>
 			{
@@ -34,52 +41,4 @@ public static class DependencyInjection
 			});
 		});
 	}
-
-	// public static OpenTelemetryBuilder AddWorkerTelemetry(this OpenTelemetryBuilder builder)
-	// {
-	// 	return builder.WithMetrics(metrics =>
-	// 		{
-	// 			metrics.AddMeter(InstrumentationOptions.MeterName);
-	// 		})
-	// 		.WithTracing(tracing =>
-	// 		{
-	// 			tracing.AddSource(DiagnosticHeaders.DefaultListenerName);
-	// 		});
-	// }
-	//
-	// public static OpenTelemetryBuilder AddDbTelemetry(this OpenTelemetryBuilder builder)
-	// {
-	// 	return builder.WithMetrics(metrics =>
-	// 		{
-	// 			metrics.AddMeter("Npgsql");
-	// 		})
-	// 		.WithTracing(tracing =>
-	// 		{
-	// 			tracing.AddNpgsql();
-	// 		});
-	// }
-	//
-	// public static OpenTelemetryBuilder AddClientTelemetry(this OpenTelemetryBuilder builder)
-	// {
-	// 	return builder.WithMetrics(metrics =>
-	// 		{
-	// 			metrics.AddHttpClientInstrumentation();
-	// 		})
-	// 		.WithTracing(tracing =>
-	// 		{
-	// 			tracing.AddHttpClientInstrumentation();
-	// 		});
-	// }
-	//
-	// public static OpenTelemetryBuilder AddTelemetryExporters(this OpenTelemetryBuilder builder)
-	// {
-	// 	return builder.WithMetrics(metrics =>
-	// 		{
-	// 			metrics.AddPrometheusExporter();
-	// 		})
-	// 		.WithTracing(tracing =>
-	// 		{
-	// 			tracing.AddOtlpExporter();
-	// 		});
-	// }
 }
