@@ -1,3 +1,4 @@
+using Letterbook.Core.Adapters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,11 +10,13 @@ public static class DependencyInjection
 {
 	public static IServiceCollection AddDbAdapter(this IServiceCollection services, IConfigurationSection config)
 	{
-
 		var dbOptions = config.Get<DbOptions>() ?? throw new ArgumentNullException(DbOptions.ConfigKey);
 		var dataSource = DataSource(dbOptions);
 
-		return services.AddDbContext<RelationalContext>(options => options.UseNpgsql(dataSource));
+		return services.AddDbContext<RelationalContext>(options => options.UseNpgsql(dataSource))
+			.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>()
+			.AddScoped<IActivityAdapter, ActivityAdapter>()
+			.AddScoped<IPostAdapter, PostAdapter>();
 	}
 
 	internal static NpgsqlDataSource DataSource(DbOptions dbOptions)
