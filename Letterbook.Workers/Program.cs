@@ -1,37 +1,50 @@
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
+using Letterbook.Config;
 using Letterbook.Core;
 using Letterbook.Core.Extensions;
-using Letterbook.Hosting;
 using OpenTelemetry.Resources;
+using Serilog;
+using Serilog.Core;
+using Serilog.Enrichers.Span;
+using Serilog.Events;
 
-namespace Letterbook.Workers;
-
-public class Program
+namespace Letterbook.Workers
 {
-    public static void Main(string[] args)
-    {
-        var builder = WebApplication.CreateBuilder(args);
+	public class Program
+	{
+		public static async Task Main(string[] args)
+		{
+			var builder = Host.CreateApplicationBuilder(args);
 
-        builder.Services.AddLetterbookWorkers(builder.Configuration.GetSection(WorkerOptions.ConfigKey))
-	        .AddLetterbookCore(builder.Configuration.GetSection(CoreOptions.ConfigKey))
-	        .AddDbAdapter(builder.Configuration.GetSection(DbOptions.ConfigKey))
-	        .AddFeedsAdapter(builder.Configuration.GetSection(FeedsDbOptions.ConfigKey))
-	        .AddActivityPubClient(builder.Configuration)
-	        .AddHealthChecks();
+			Log.Logger = new LoggerConfiguration()
+				.MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+				.ReadFrom.Configuration(builder.Configuration)
+				.Enrich.FromLogContext()
+				.Enrich.WithSpan()
+				.WriteTo.Console()
+				.CreateBootstrapLogger();
 
-        builder.Services.AddIdentity();
+			builder.Logging.AddSerilog();
 
-        builder.Services.AddOpenTelemetry()
-	        .ConfigureResource(resource => { resource.AddService( "Letterbook.Workers"); })
-	        .AddWorkerTelemetry()
-	        .AddClientTelemetry()
-	        .AddDbTelemetry()
-	        .AddTelemetryExporters();
+			builder.Services.AddLetterbookWorkers(builder.Configuration)
+				.AddLetterbookCore(builder.Configuration)
+				.AddDbAdapter(builder.Configuration)
+				.AddFeedsAdapter(builder.Configuration)
+				.AddActivityPubClient(builder.Configuration);
 
-        var app = builder.Build();
 
-        app.Run();
-    }
+			builder.Services.AddIdentity();
+
+			builder.Services.AddOpenTelemetry()
+				.ConfigureResource(resource => { resource.AddService("Letterbook.Workers"); })
+				.AddWorkerTelemetry()
+				.AddClientTelemetry()
+				.AddDbTelemetry()
+				.AddTelemetryExporters();
+
+			await builder.Build().RunAsync();
+		}
+	}
 }

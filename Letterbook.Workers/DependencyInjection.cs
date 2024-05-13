@@ -1,20 +1,15 @@
 ﻿using System.Reflection;
+using Letterbook.Config;
 using Letterbook.Core.Contracts;
 using MassTransit;
-using MassTransit.Logging;
-using MassTransit.Monitoring;
-using Npgsql;
-using OpenTelemetry;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
 
 namespace Letterbook.Workers;
 
 public static class DependencyInjection
 {
-	public static IServiceCollection AddLetterbookWorkers(this IServiceCollection services, IConfigurationSection workerConfig)
+	public static IServiceCollection AddLetterbookWorkers(this IServiceCollection services, IConfigurationManager config)
 	{
-		var workerOpts = workerConfig.Get<WorkerOptions>();
+		var workerOpts = config.GetSection(WorkerOptions.ConfigKey).Get<WorkerOptions>();
 		return services.AddMassTransit(x =>
 		{
 			x.SetKebabCaseEndpointNameFormatter();
@@ -23,22 +18,18 @@ public static class DependencyInjection
 			// saga repository.
 			x.SetInMemorySagaRepositoryProvider();
 
-			// var entryAssembly = Assembly.GetExecutingAssembly();
-			var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+			var entryAssembly = Assembly.GetExecutingAssembly();
+			var consumers = AppDomain.CurrentDomain.GetAssemblies()
 				.SelectMany(s => s.GetTypes())
 				.Where(p => typeof(IConsumer<EventBase>).IsAssignableFrom(p) && p.IsClass && !p.IsAbstract)
-				.Select(x => x.Assembly)
 				.ToArray();
 
-			x.AddConsumers(assemblies);
-			x.AddSagaStateMachines(assemblies);
-			x.AddSagas(assemblies);
-			x.AddActivities(assemblies);
+			x.AddConsumers(consumers);
+			x.AddSagaStateMachines(entryAssembly);
+			x.AddSagas(entryAssembly);
+			x.AddActivities(entryAssembly);
 
-			x.UsingInMemory((context, cfg) =>
-			{
-				cfg.ConfigureEndpoints(context);
-			});
+			x.AddWorkerBus(config);
 		});
 	}
 }

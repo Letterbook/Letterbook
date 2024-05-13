@@ -1,4 +1,4 @@
-﻿namespace Letterbook.Workers;
+﻿namespace Letterbook.Config;
 
 public class WorkerOptions
 {

@@ -1,18 +1,31 @@
 ﻿using Letterbook.Adapter.Db;
 using Letterbook.Core.Models;
+using MassTransit;
 using MassTransit.Logging;
 using MassTransit.Monitoring;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
-namespace Letterbook.Hosting;
+namespace Letterbook.Config;
 
 public static class DependencyInjection
 {
+	// TODO: in-memory bus is only valid for the unified host
+	// All other configurations must use an external bus
+	// (Meaning this doesn't work for the stand alone API, web, or workers)
+	public static IBusRegistrationConfigurator AddWorkerBus(this IBusRegistrationConfigurator bus, IConfigurationManager config)
+	{
+		var workerOpts = config.GetSection(WorkerOptions.ConfigKey).Get<WorkerOptions>();
+		bus.UsingInMemory((context, configurator) => configurator.ConfigureEndpoints(context));
+
+		return bus;
+	}
+
 	public static IdentityBuilder AddIdentity(this IServiceCollection services)
 	{
 		return services.AddIdentity<Account, IdentityRole<Guid>>(options =>

@@ -8,9 +8,10 @@ namespace Letterbook.Adapter.Db;
 
 public static class DependencyInjection
 {
-	public static IServiceCollection AddDbAdapter(this IServiceCollection services, IConfigurationSection config)
+	public static IServiceCollection AddDbAdapter(this IServiceCollection services, IConfigurationManager config)
 	{
-		var dbOptions = config.Get<DbOptions>() ?? throw new ArgumentNullException(DbOptions.ConfigKey);
+		var dbOptions = config.GetSection(DbOptions.ConfigKey)
+			.Get<DbOptions>() ?? throw new ArgumentNullException(DbOptions.ConfigKey);
 		var dataSource = DataSource(dbOptions);
 
 		return services.AddDbContext<RelationalContext>(options => options.UseNpgsql(dataSource))

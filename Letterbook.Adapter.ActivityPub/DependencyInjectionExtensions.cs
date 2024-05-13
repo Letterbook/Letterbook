@@ -24,10 +24,9 @@ public static class DependencyInjectionExtensions
 			.AddHttpMessageHandler<ClientHandler>();
 	}
 
-	public static IServiceCollection AddActivityPubClient(this IServiceCollection services, ConfigurationManager configuration)
+	public static IServiceCollection AddActivityPubClient(this IServiceCollection services, IConfigurationManager configuration)
 	{
-		var coreOptions = configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
-		                  ?? throw new ConfigException(nameof(CoreOptions));
+		var coreOptions = configuration.Get<CoreOptions>() ?? throw new ConfigException(nameof(CoreOptions));
 
 		services.TryAddTypesModule();
 		services

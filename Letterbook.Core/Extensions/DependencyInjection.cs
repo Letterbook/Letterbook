@@ -10,10 +10,10 @@ namespace Letterbook.Core.Extensions;
 
 public static class DependencyInjection
 {
-	public static IServiceCollection AddLetterbookCore(this IServiceCollection services, IConfigurationSection coreConfig)
+	public static IServiceCollection AddLetterbookCore(this IServiceCollection services, IConfigurationManager config)
 	{
 		// Register options
-		services.Configure<CoreOptions>(coreConfig);
+		services.Configure<CoreOptions>(config.GetSection(CoreOptions.ConfigKey));
 
 		// Register Mapping Configs
 		// services.AddSingleton<MappingConfigProvider>();

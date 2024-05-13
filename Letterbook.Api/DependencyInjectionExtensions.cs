@@ -120,7 +120,7 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IActivityAdapter, ActivityAdapter>();
 		services.AddScoped<IPostAdapter, PostAdapter>();
 		services.AddSingleton<IActivityPubDocument, Document>();
-		services.AddDbAdapter(configuration.GetSection(DbOptions.ConfigKey));
+		services.AddDbAdapter(configuration);
 		services.AddDbContext<FeedsContext>();
 		services.TryAddTypesModule();
 
