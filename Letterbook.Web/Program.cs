@@ -4,6 +4,7 @@ using Letterbook.Config;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Serilog;

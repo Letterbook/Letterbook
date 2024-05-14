@@ -7,29 +7,47 @@ namespace Letterbook.Workers;
 
 public static class DependencyInjection
 {
-	public static IServiceCollection AddLetterbookWorkers(this IServiceCollection services, IConfigurationManager config)
+	/// <summary>
+	/// Configures the shared message bus. All host projects will likely need to do this,
+	/// because all host projects need to put messages on the bus
+	/// </summary>
+	/// <param name="bus"></param>
+	/// <param name="config"></param>
+	/// <returns></returns>
+	public static IBusRegistrationConfigurator AddWorkerBus(this IBusRegistrationConfigurator bus, IConfigurationManager config)
 	{
 		var workerOpts = config.GetSection(WorkerOptions.ConfigKey).Get<WorkerOptions>();
-		return services.AddMassTransit(x =>
-		{
-			x.SetKebabCaseEndpointNameFormatter();
+		bus.UsingInMemory((context, configurator) => configurator.ConfigureEndpoints(context));
 
-			// By default, sagas are in-memory, but should be changed to a durable
-			// saga repository.
-			x.SetInMemorySagaRepositoryProvider();
+		return bus;
+	}
 
-			var entryAssembly = Assembly.GetExecutingAssembly();
-			var consumers = AppDomain.CurrentDomain.GetAssemblies()
-				.SelectMany(s => s.GetTypes())
-				.Where(p => typeof(IConsumer<EventBase>).IsAssignableFrom(p) && p.IsClass && !p.IsAbstract)
-				.ToArray();
+	/// <summary>
+	/// Configures the workers and channels. Only projects hosting workers need to do this.
+	/// </summary>
+	/// <param name="bus"></param>
+	/// <param name="config"></param>
+	/// <returns></returns>
+	public static IBusRegistrationConfigurator AddWorkers(this IBusRegistrationConfigurator bus, IConfigurationManager config)
+	{
+		var workerOpts = config.GetSection(WorkerOptions.ConfigKey).Get<WorkerOptions>();
+		bus.SetKebabCaseEndpointNameFormatter();
 
-			x.AddConsumers(consumers);
-			x.AddSagaStateMachines(entryAssembly);
-			x.AddSagas(entryAssembly);
-			x.AddActivities(entryAssembly);
+		// By default, sagas are in-memory, but should be changed to a durable
+		// saga repository.
+		bus.SetInMemorySagaRepositoryProvider();
 
-			x.AddWorkerBus(config);
-		});
+		var entryAssembly = Assembly.GetExecutingAssembly();
+		var consumers = AppDomain.CurrentDomain.GetAssemblies()
+			.SelectMany(s => s.GetTypes())
+			.Where(p => typeof(IConsumer<EventBase>).IsAssignableFrom(p) && p.IsClass && !p.IsAbstract)
+			.ToArray();
+
+		bus.AddConsumers(consumers);
+		bus.AddSagaStateMachines(entryAssembly);
+		bus.AddSagas(entryAssembly);
+		bus.AddActivities(entryAssembly);
+
+		return bus;
 	}
 }

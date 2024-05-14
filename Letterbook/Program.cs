@@ -3,6 +3,7 @@ using Letterbook.Adapter.ActivityPub;
 using Letterbook.Api;
 using Letterbook.Api.Swagger;
 using Letterbook.Config;
+using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Serilog;
@@ -44,7 +45,8 @@ public class Program
 			.AddDefaultUI();
 		builder.Services.AddRazorPages()
 			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
-		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration));
+		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration)
+			.AddWorkers(builder.Configuration));
 
 		// builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 

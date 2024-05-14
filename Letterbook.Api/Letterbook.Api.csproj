@@ -55,6 +55,7 @@
     <ProjectReference Include="..\Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj" />
     <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
     <ProjectReference Include="..\Letterbook.Config\Letterbook.Config.csproj" />
+    <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj" />
   </ItemGroup>
 
 </Project>

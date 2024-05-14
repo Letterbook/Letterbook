@@ -3,6 +3,7 @@ using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Config;
 using Letterbook.Core.Extensions;
+using MassTransit;
 using OpenTelemetry.Resources;
 using Serilog;
 using Serilog.Enrichers.Span;
@@ -24,14 +25,12 @@ namespace Letterbook.Workers
 				.WriteTo.Console()
 				.CreateBootstrapLogger();
 
-			builder.Services.AddSerilog(configuration =>
-			{
-				configuration.Enrich.FromLogContext()
+			builder.Services
+				.AddSerilog(s => s.Enrich.FromLogContext()
 					.Enrich.WithSpan()
-					.ReadFrom.Configuration(builder.Configuration);
-			});
-
-			builder.Services.AddLetterbookWorkers(builder.Configuration)
+					.ReadFrom.Configuration(builder.Configuration))
+				.AddMassTransit(bus => bus.AddWorkers(builder.Configuration)
+					.AddWorkerBus(builder.Configuration))
 				.AddLetterbookCore(builder.Configuration)
 				.AddDbAdapter(builder.Configuration)
 				.AddFeedsAdapter(builder.Configuration)
