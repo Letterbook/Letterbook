@@ -11,6 +11,7 @@
         <PackageReference Include="MassTransit" Version="8.2.2" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
         <PackageReference Include="Serilog" Version="3.1.1" />
+        <PackageReference Include="Serilog.Enrichers.Span" Version="3.1.0" />
         <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
         <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
@@ -19,8 +20,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj" />
+      <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj" />
       <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj" />
       <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
-      <ProjectReference Include="..\Letterbook.Config\Letterbook.Config.csproj" />
     </ItemGroup>
 </Project>

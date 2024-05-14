@@ -8,7 +8,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Letterbook.Api\Letterbook.Api.csproj" />
-      <ProjectReference Include="..\Letterbook.Config\Letterbook.Config.csproj" />
     </ItemGroup>
 
 </Project>

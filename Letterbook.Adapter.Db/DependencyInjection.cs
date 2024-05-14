@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using OpenTelemetry;
 
 namespace Letterbook.Adapter.Db;
 
@@ -18,6 +19,18 @@ public static class DependencyInjection
 			.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>()
 			.AddScoped<IActivityAdapter, ActivityAdapter>()
 			.AddScoped<IPostAdapter, PostAdapter>();
+	}
+
+	public static OpenTelemetryBuilder AddDbTelemetry(this OpenTelemetryBuilder builder)
+	{
+		return builder.WithMetrics(metrics =>
+			{
+				metrics.AddMeter("Npgsql");
+			})
+			.WithTracing(tracing =>
+			{
+				tracing.AddNpgsql();
+			});
 	}
 
 	internal static NpgsqlDataSource DataSource(DbOptions dbOptions)

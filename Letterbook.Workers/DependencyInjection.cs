@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
-using Letterbook.Config;
 using Letterbook.Core.Contracts;
 using MassTransit;
+using MassTransit.Logging;
+using MassTransit.Monitoring;
+using OpenTelemetry;
 
 namespace Letterbook.Workers;
 
@@ -49,5 +51,17 @@ public static class DependencyInjection
 		bus.AddActivities(entryAssembly);
 
 		return bus;
+	}
+
+	public static OpenTelemetryBuilder AddWorkerTelemetry(this OpenTelemetryBuilder builder)
+	{
+		return builder.WithMetrics(metrics =>
+			{
+				metrics.AddMeter(InstrumentationOptions.MeterName);
+			})
+			.WithTracing(tracing =>
+			{
+				tracing.AddSource(DiagnosticHeaders.DefaultListenerName);
+			});
 	}
 }

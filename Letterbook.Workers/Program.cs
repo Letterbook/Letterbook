@@ -1,9 +1,10 @@
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
-using Letterbook.Config;
 using Letterbook.Core.Extensions;
+using Letterbook.Core.Models;
 using MassTransit;
+using Microsoft.AspNetCore.Identity;
 using OpenTelemetry.Resources;
 using Serilog;
 using Serilog.Enrichers.Span;
@@ -36,7 +37,8 @@ namespace Letterbook.Workers
 				.AddFeedsAdapter(builder.Configuration)
 				.AddActivityPubClient(builder.Configuration);
 
-			builder.Services.AddIdentity();
+			builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
+				.AddEntityFrameworkStores<RelationalContext>();
 
 			builder.Services.AddOpenTelemetry()
 				.ConfigureResource(resource => { resource.AddService("Letterbook.Workers"); })

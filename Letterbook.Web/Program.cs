@@ -1,6 +1,6 @@
 using Letterbook.Adapter.ActivityPub;
+using Letterbook.Adapter.Db;
 using Letterbook.Api;
-using Letterbook.Config;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
@@ -44,7 +44,9 @@ public class Program
 		builder.Services.AddHealthChecks();
 		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
-		builder.Services.AddIdentity()
+		builder.Services.AddIdentity<Models.Account, IdentityRole<Guid>>()
+			.AddEntityFrameworkStores<RelationalContext>()
+			.AddDefaultTokenProviders()
 			// Aspnet Core Identity includes a default UI, which provides basic account management.
 			// This includes register, login, logout, and maintenance views.
 			// However, it only seems to work well for fairly simple (single project) apps.  It also looks extremely Microsoft.

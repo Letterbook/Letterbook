@@ -1,8 +1,9 @@
 using System.Reflection;
 using Letterbook.Adapter.ActivityPub;
+using Letterbook.Adapter.Db;
 using Letterbook.Api;
 using Letterbook.Api.Swagger;
-using Letterbook.Config;
+using Letterbook.Core.Models;
 using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
@@ -41,7 +42,9 @@ public class Program
 		builder.Services.AddHealthChecks();
 		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
-		builder.Services.AddIdentity()
+		builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
+			.AddEntityFrameworkStores<RelationalContext>()
+			.AddDefaultTokenProviders()
 			.AddDefaultUI();
 		builder.Services.AddRazorPages()
 			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
