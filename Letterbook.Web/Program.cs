@@ -1,6 +1,5 @@
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Api;
-using Letterbook.Api.Swagger;
 using Letterbook.Config;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
@@ -73,7 +72,6 @@ public class Program
 				context.Request.EnableBuffering();
 				return next();
 			});
-			app.UseSwaggerConfig();
 		}
 
 		app.UseStaticFiles();
@@ -89,7 +87,6 @@ public class Program
 
 		app.MapRazorPages();
 		app.UsePathBase(new PathString("/api/v1"));
-		app.MapControllers();
 
 		app.Run("http://localhost:5127");
 	}

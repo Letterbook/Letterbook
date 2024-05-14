@@ -1,32 +1,88 @@
+using System.Reflection;
+using Letterbook.Adapter.ActivityPub;
+using Letterbook.Api;
+using Letterbook.Api.Swagger;
+using Letterbook.Config;
+using MassTransit;
+using Microsoft.AspNetCore.Identity;
+using Serilog;
+using Serilog.Enrichers.Span;
+using Serilog.Events;
+
 namespace Letterbook;
 
 public class Program
 {
 	public static void Main(string[] args)
 	{
+		// Pre initialize Serilog
+		Log.Logger = new LoggerConfiguration()
+			.MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+			.Enrich.FromLogContext()
+			.Enrich.WithSpan()
+			.WriteTo.Console()
+			.CreateBootstrapLogger();
+
 		var builder = WebApplication.CreateBuilder(args);
 
-		// TODO: Load pages from dot web
-		// https://learn.microsoft.com/en-us/aspnet/core/mvc/advanced/app-parts?view=aspnetcore-8.0
-		// Add services to the container.
-		builder.Services.AddRazorPages();
+		if (!builder.Environment.IsProduction())
+			builder.Configuration.AddUserSecrets<Api.Program>();
+		// Register Serilog - Serialized Logging (configured in appsettings.json)
+		builder.Host.UseSerilog((context, services, configuration) => configuration
+			.Enrich.FromLogContext()
+			.Enrich.WithSpan()
+			.ReadFrom.Configuration(context.Configuration)
+			.ReadFrom.Services(services)
+		);
+
+		builder.Services.AddApiProperties(builder.Configuration);
+		builder.Services.AddTelemetry();
+		builder.Services.AddHealthChecks();
+		builder.Services.AddActivityPubClient(builder.Configuration);
+		builder.Services.AddServices(builder.Configuration);
+		builder.Services.AddIdentity()
+			.AddDefaultUI();
+		builder.Services.AddRazorPages()
+			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
+		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration));
+
+		// builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 
 		var app = builder.Build();
 
 		// Configure the HTTP request pipeline.
 		if (!app.Environment.IsDevelopment())
 		{
+			// Not sure if this works, with mixed Razor/WebApi
 			app.UseExceptionHandler("/Error");
 		}
 
+		if (!app.Environment.IsProduction())
+		{
+			app.Use((context, next) =>
+			{
+				context.Request.EnableBuffering();
+				return next();
+			});
+			app.UseSwaggerConfig();
+		}
+
+		// app.UseHttpsRedirection();
 		app.UseStaticFiles();
 
-		app.UseRouting();
+		app.UseHealthChecks("/healthz");
+		app.MapPrometheusScrapingEndpoint();
+		app.UseWebFingerScoped();
 
+		app.UseAuthentication();
 		app.UseAuthorization();
 
-		app.MapRazorPages();
+		app.UseSerilogRequestLogging();
 
-		app.Run();
+		app.MapRazorPages();
+		app.UsePathBase(new PathString("/api/v1"));
+		app.MapControllers();
+
+		app.Run("http://localhost:5127");
 	}
 }
