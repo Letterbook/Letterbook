@@ -5,6 +5,9 @@ using Letterbook.Core.Events;
 using Letterbook.Core.Workers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 namespace Letterbook.Core.Extensions;
 
@@ -56,5 +59,29 @@ public static class DependencyInjection
 		// services.AddScoped<IVerificationKeyProvider, ActivityPubClientVerificationKeyProvider>();
 
 		return services;
+	}
+
+	public static OpenTelemetryBuilder AddClientTelemetry(this OpenTelemetryBuilder builder)
+	{
+		return builder.WithMetrics(metrics =>
+			{
+				metrics.AddHttpClientInstrumentation();
+			})
+			.WithTracing(tracing =>
+			{
+				tracing.AddHttpClientInstrumentation();
+			});
+	}
+
+	public static OpenTelemetryBuilder AddTelemetryExporters(this OpenTelemetryBuilder builder)
+	{
+		return builder.WithMetrics(metrics =>
+			{
+				metrics.AddPrometheusExporter();
+			})
+			.WithTracing(tracing =>
+			{
+				tracing.AddOtlpExporter();
+			});
 	}
 }
