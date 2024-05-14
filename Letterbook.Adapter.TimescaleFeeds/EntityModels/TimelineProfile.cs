@@ -5,7 +5,6 @@ namespace Letterbook.Adapter.TimescaleFeeds.EntityModels;
 
 public class TimelineProfile
 {
-	// nameof(Profile.Id), nameof(Profile.FediId), nameof(Profile.DisplayName), nameof(Profile.Authority)
 
 	public required Guid Id { get; set; }
 	public required Uri FediId { get; set; }
