@@ -26,13 +26,12 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
 
             modelBuilder.Entity("Letterbook.Adapter.TimescaleFeeds.EntityModels.TimelinePost", b =>
                 {
-                    b.Property<DateTimeOffset>("Time")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid>("PostId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("AudienceId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Authority")
@@ -44,6 +43,9 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
                         .HasColumnType("jsonb");
 
                     b.Property<Guid?>("InReplyToId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Preview")
@@ -59,10 +61,13 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
                     b.Property<Guid>("ThreadId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset>("Time")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTimeOffset>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.HasKey("Time", "PostId", "AudienceId");
+                    b.HasKey("Id");
 
                     b.HasIndex("AudienceId");
 

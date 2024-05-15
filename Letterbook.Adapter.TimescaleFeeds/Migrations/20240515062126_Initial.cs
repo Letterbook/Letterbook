@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Letterbook.Adapter.TimescaleFeeds.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,9 +17,9 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
                 name: "Timelines",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     PostId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AudienceId = table.Column<string>(type: "text", nullable: false),
                     Preview = table.Column<string>(type: "text", nullable: false),
                     Authority = table.Column<string>(type: "text", nullable: false),
                     Creators = table.Column<List<TimelineProfile>>(type: "jsonb", nullable: false),
@@ -27,11 +27,12 @@ namespace Letterbook.Adapter.TimescaleFeeds.Migrations
                     UpdatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     InReplyToId = table.Column<Guid>(type: "uuid", nullable: true),
                     SharedBy = table.Column<TimelineProfile>(type: "jsonb", nullable: true),
+                    AudienceId = table.Column<string>(type: "text", nullable: false),
                     ThreadId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Timelines", x => new { x.Time, x.PostId, x.AudienceId });
+                    table.PrimaryKey("PK_Timelines", x => x.Id);
                 });
 
             migrationBuilder.CreateIndex(
