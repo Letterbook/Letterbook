@@ -136,7 +136,7 @@ public static class DependencyInjectionExtensions
 		services.AddRxMessageBus();
 		services.AddSingleton<IActivityPubDocument, Document>();
 		services.AddDbAdapter(configuration.GetSection(DbOptions.ConfigKey));
-		services.AddDbContext<FeedsContext>();
+		services.AddFeedsAdapter(configuration.GetSection(FeedsDbOptions.ConfigKey));
 		services.TryAddTypesModule();
 
 		// Register HTTP signature authentication services

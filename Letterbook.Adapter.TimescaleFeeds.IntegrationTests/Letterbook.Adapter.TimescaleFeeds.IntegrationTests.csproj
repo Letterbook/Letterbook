@@ -27,6 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds.Tests\Letterbook.Adapter.TimescaleFeeds.Tests.csproj" />
       <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj" />
       <ProjectReference Include="..\Letterbook.Core.Tests\Letterbook.Core.Tests.csproj" />
     </ItemGroup>
