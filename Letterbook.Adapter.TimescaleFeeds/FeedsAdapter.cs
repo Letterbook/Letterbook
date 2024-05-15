@@ -67,24 +67,26 @@ public class FeedsAdapter : IFeedsAdapter
 		throw new NotImplementedException();
 	}
 
-	public Task Cancel()
+	public async Task Cancel()
 	{
 		if (_feedsContext.Database.CurrentTransaction is not null)
 		{
-			return _feedsContext.Database.RollbackTransactionAsync();
+			await _feedsContext.Database.RollbackTransactionAsync();
+			return;
 		}
 
-		return Task.CompletedTask;
+		await Task.CompletedTask;
 	}
 
-	public Task Commit()
+	public async Task Commit()
 	{
 		if (_feedsContext.Database.CurrentTransaction is not null)
 		{
-			return _feedsContext.Database.CommitTransactionAsync();
+			await _feedsContext.Database.CommitTransactionAsync();
+			return;
 		}
 
-		return _feedsContext.SaveChangesAsync();
+		await _feedsContext.SaveChangesAsync();
 	}
 
 	public void Dispose()
