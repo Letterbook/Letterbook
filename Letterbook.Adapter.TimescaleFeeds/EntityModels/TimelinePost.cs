@@ -10,6 +10,16 @@ namespace Letterbook.Adapter.TimescaleFeeds.EntityModels;
 public class TimelinePost
 {
 	/// <summary>
+	/// Exists as a primary key, just so that EFCore can track the object.
+	/// TODO(profiling): Evaluate the performance impact of this key, and compare with the hassle of using
+	/// `ExecuteSqlAsync` to do custom INSERTs
+	/// If ExecuteInsert() ever happens, use that instead and drop this index
+	///	https://github.com/dotnet/efcore/issues/29897
+	/// Also, explore using BulkExtensions https://www.nuget.org/packages/EFCore.BulkExtensions
+	/// </summary>
+	public Guid Id { get; set; } = Guid.NewGuid();
+
+	/// <summary>
 	/// Time is the timeseries key. TSDBs will time-order everything and do rapid time-indexed queries.
 	/// In our case, records should generally have a time value of right now, because what we care about is when it got added to
 	/// the timeline. When it was added could and likely will be different from any of the datetime properties on Post
