@@ -52,4 +52,16 @@ public class Heuristics
 	/// The post is likely the root of its own thread, and the context can be used as-is
 	/// </summary>
 	public bool NewThread;
+
+	/// <summary>
+	/// Origin of the ThreadContext
+	/// </summary>
+	public Origin Source;
+
+	public enum Origin
+	{
+		ActivityPub,
+		Timeline
+	}
 }
+

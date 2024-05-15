@@ -2,6 +2,7 @@ using Letterbook.Adapter.Db;
 using Letterbook.Api;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Events;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
@@ -77,7 +78,7 @@ public class HostMocks : WithMocks
 
 	public new Mock<IActivityPubClient> ActivityPubClientMock => base.ActivityPubClientMock;
 
-	public new Mock<IAccountEventService> AccountEventServiceMock => base.AccountEventServiceMock;
+	public new Mock<IAccountEvents> AccountEventServiceMock => base.AccountEventServiceMock;
 
 	public new Mock<IMessageBusAdapter> MessageBusAdapterMock => base.MessageBusAdapterMock;
 
