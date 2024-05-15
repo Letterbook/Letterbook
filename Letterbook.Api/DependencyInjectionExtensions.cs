@@ -7,6 +7,7 @@ using DarkLink.Web.WebFinger.Shared;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Adapter.Db;
+using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
 using Letterbook.Api.Authentication.HttpSignature.Handler;

@@ -1,6 +1,7 @@
 using System.Reflection;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
+using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Api;
 using Letterbook.Api.Swagger;
 using Letterbook.Core.Models;
@@ -42,6 +43,7 @@ public class Program
 		builder.Services.AddHealthChecks();
 		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
+		builder.Services.AddRxMessageBus();
 		builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
