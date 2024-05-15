@@ -84,11 +84,12 @@ docker-compose up -d
 ```shell
 dotnet tool retore
 dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj
+dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj
 ```
 
 3. Add an application host secret
 ```shell
-dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook.Api
+dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook
 ```
 
 4. Run Letterbook (in watch mode)
@@ -100,9 +101,45 @@ dotnet watch run --project Letterbook.Web
 5. Open the UI http://localhost:5127  
 There is also a Swagger UI http://localhost:5127/swagger/index.html
 
-### Running the API
+### Navigating the Codebase
 
-Letterbook is meant to be easy to set up and run. The Web host provides all the functionality of the service. However, it's also possible to run the API on its own. In development, you can run the `Letterbook.Api` project from any of the launch settings. 
+#### Start with `Letterbook.Core`
+
+Letterbook is organized in a modular fashion, which allows the service to be run in multiple different configurations. This allows the project to have a relatively simple initial setup, and also to scale up and down gracefully to (hopefully) support any expected load. However, this could make the project a little bit hard to navigate, at first. Most of the specialized application logic is contained in the Core services and data models. It's likely those will be involved when adding features or fixing bugs. Depending on what you're trying to do, you may also need to make changes in one of these projects:
+
+#### Work on the UI
+
+- `Letterbook.Web`
+
+All the web UI views and controllers are located there.
+
+#### Work on the first-party or third-party (mastodon) API
+
+- `Letterbook.Api`
+
+All the API controllers and DTOs are located there. Note the DTO (data transfer object) type mappers, as they play a large role in the function of the API.
+
+#### Work on ActivityPub handling
+
+- `Letterbook.Adapter.ActivityPub`
+- `Letterbook.Api`
+
+Most of the functionality related to ActivityPub is in one of those projects. The Api hosts the ActivityPub endpoints, notably the inbox. It also serves `activity/json` documents when they're requested by ID. The ActivityPub adapter provides a client to send and fetch AP documents. The client signs outgoing requests on behalf of the appropriate Actor, when possible. The adapter also configures extensions to the basic ActivityStreams types, and mappers to/from core domain models.
+
+#### Work on message queue workers
+
+- `Letterbook.Workers`
+
+All the workers are defined and configured in the Workers project.
+
+#### Work on other features
+
+Other adapters may of course be involved. If a change requires a new or updated db query, that would happen in the Adapters.Db project. That's also where db migrations are configured. The TimescaleFeeds project plays a critical role with timelines and notifications. Other adapters are critical when working with their respective features.
+
+
+### Running the Server
+
+Letterbook is meant to be easy to set up and run. The default `Letterbook` host project provides all the functionality of the service. However, it's also possible to run the major components on their own. In development, you can run the `Letterbook` project from any of the launch settings. 
 
 ### Running tests
 
@@ -118,13 +155,13 @@ dotnet test Letterbook.IntegrationTests.sln
 
 ### Using VS Code
 
-There are recommended extensions and `launch.json` targets configured in the repo. Install the extensions and then run the `Letterbook.Web` configuration.
+There are recommended extensions and `launch.json` targets configured in the repo. Install the extensions and then run the `Letterbook` configuration.
 
 Tests can be run from the suggested test explorer extension.
 
 ### Using Jetbrains Rider and VisualStudio
 
-There are `launchSettings.json` targets configured in the repo. Open Letterbook.sln and then run the `Letterbook.Web: http` configuration.
+There are `launchSettings.json` targets configured in the repo. Open Letterbook.sln and then run the `Letterbook: http` configuration.
 
 Tests can be run from the built-in test runner.
 
@@ -147,7 +184,7 @@ Letterbook depends on a host secret which comes from a secret provider in order 
 > We should really do this with the database password/connection string, too
 
 ```shell
-dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook.Api
+dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook
 ```
 
 The actual value isn't important as long as you're just running and debugging locally. So if you don't have openssl you can use any string of 32 characters. But using cryptographically secure secrets is a good habit to build.
