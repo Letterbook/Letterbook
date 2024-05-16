@@ -24,4 +24,8 @@
       <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj" />
       <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Timeline\Properties\" />
+    </ItemGroup>
 </Project>

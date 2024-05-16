@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Letterbook.Core.Contracts;
+using Letterbook.Workers.Contracts;
 using MassTransit;
 using MassTransit.Logging;
 using MassTransit.Monitoring;
