@@ -1,15 +1,16 @@
 using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Events;
+using Letterbook.Core.Workers;
+using Letterbook.Workers.Contracts;
+using MassTransit;
 using Medo;
-using Microsoft.Extensions.Logging;
 
-namespace Letterbook.Core.Workers;
+namespace Letterbook.Workers.Consumers;
 
 /// <summary>
 /// Deliver ActivityPub messages to their destination
 /// </summary>
-public class DeliveryWorker : IObserverWorker
+public class DeliveryWorker : IObserverWorker, IConsumer<ActivityMessage>
 {
 	private readonly ILogger<DeliveryWorker> _logger;
 	private readonly IAccountProfileAdapter _profiles;
@@ -37,5 +38,13 @@ public class DeliveryWorker : IObserverWorker
 
 		var response = await _client.As(profile).SendDocument(new Uri(destination), document);
 		_logger.LogDebug("Handled message {Type}, got response {Response}", value.Type, response);
+	}
+
+	public async Task Consume(ConsumeContext<ActivityMessage> context)
+	{
+		var profile = await _profiles.LookupProfile(context.Message.OnBehalfOf);
+
+		var response = await _client.As(profile).SendDocument(context.Message.Inbox, context.Message.Data);
+		_logger.LogDebug("Handled message {Type}, got response {@Response}", context.Message.Type, response);
 	}
 }

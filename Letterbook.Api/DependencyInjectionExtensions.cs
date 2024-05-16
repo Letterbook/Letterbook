@@ -20,6 +20,7 @@ using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Workers;
+using Letterbook.Workers.Consumers;
 using Letterbook.Workers.Publishers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;

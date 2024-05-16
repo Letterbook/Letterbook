@@ -1,15 +1,15 @@
-using Letterbook.Workers.Consumers;
+using MassTransit;
 
-namespace Company.Consumers
+namespace Letterbook.Workers.Consumers
 {
-    using MassTransit;
-
-    public class TimelineConsumerDefinition :
+	public class TimelineConsumerDefinition :
         ConsumerDefinition<TimelineConsumer>
     {
-        protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TimelineConsumer> consumerConfigurator)
+        protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpoint,
+	        IConsumerConfigurator<TimelineConsumer> consumer,
+	        IRegistrationContext context)
         {
-            endpointConfigurator.UseMessageRetry(r => r.Intervals(500, 1000));
+	        endpoint.UseMessageRetry(r => r.Intervals(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(1000)));
         }
     }
 }
