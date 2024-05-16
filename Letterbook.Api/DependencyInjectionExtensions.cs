@@ -20,6 +20,7 @@ using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Workers;
+using Letterbook.Workers.Publishers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -97,11 +98,11 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IAccountService, AccountService>();
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IPostService, PostService>();
-		services.AddScoped<IAccountEvents, AccountEventService>();
+		services.AddScoped<IAccountEventPublisher, AccountEventPublisher>();
 		services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
-		services.AddScoped<IActivityMessage, ActivityMessageService>();
+		services.AddScoped<IActivityMessagePublisher, ActivityMessagePublisher>();
 		services.AddScoped<IAuthzPostService, PostService>();
-		services.AddScoped<IPostEvents, PostEventService>();
+		services.AddScoped<IPostEventPublisher, PostEventPublisher>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
 		// Register startup workers
@@ -111,8 +112,8 @@ public static class DependencyInjectionExtensions
 		// Register MessageWorkers
 		services.AddScoped<DeliveryWorker>();
 		services.AddSingleton<IEventObserver<DeliveryWorker>, EventObserver<DeliveryWorker>>();
-		services.AddHostedService<ObserverHost<IActivityMessage, DeliveryWorker>>(provider =>
-			new ObserverHost<IActivityMessage, DeliveryWorker>(provider,
+		services.AddHostedService<ObserverHost<IActivityMessagePublisher, DeliveryWorker>>(provider =>
+			new ObserverHost<IActivityMessagePublisher, DeliveryWorker>(provider,
 				provider.GetRequiredService<IMessageBusClient>(),
 				50));
 

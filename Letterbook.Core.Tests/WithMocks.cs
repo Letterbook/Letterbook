@@ -18,7 +18,7 @@ public abstract class WithMocks
 	protected Mock<IPostAdapter> PostAdapterMock;
 	protected Mock<IAccountProfileAdapter> AccountProfileMock;
 	protected Mock<IMessageBusAdapter> MessageBusAdapterMock;
-	protected Mock<IAccountEvents> AccountEventServiceMock;
+	protected Mock<IAccountEventPublisher> AccountEventServiceMock;
 	protected Mock<IActivityPubClient> ActivityPubClientMock;
 	protected Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock;
 	protected Mock<IProfileService> ProfileServiceMock;
@@ -26,7 +26,7 @@ public abstract class WithMocks
 	protected IOptions<CoreOptions> CoreOptionsMock;
 	protected Mock<MockableMessageHandler> HttpMessageHandlerMock;
 	protected ServiceCollection MockedServiceCollection;
-	protected Mock<IPostEvents> PostEventServiceMock;
+	protected Mock<IPostEventPublisher> PostEventServiceMock;
 	protected Mock<IPostService> PostServiceMock;
 	protected Mock<IAuthzPostService> PostServiceAuthMock;
 	protected Mock<IAuthorizationService> AuthorizationServiceMock;
@@ -38,12 +38,12 @@ public abstract class WithMocks
 		PostAdapterMock = new Mock<IPostAdapter>();
 		AccountProfileMock = new Mock<IAccountProfileAdapter>();
 		MessageBusAdapterMock = new Mock<IMessageBusAdapter>();
-		AccountEventServiceMock = new Mock<IAccountEvents>();
+		AccountEventServiceMock = new Mock<IAccountEventPublisher>();
 		ActivityPubClientMock = new Mock<IActivityPubClient>();
 		ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
 		ProfileServiceMock = new Mock<IProfileService>();
 		ProfileServiceAuthMock = new Mock<IAuthzProfileService>();
-		PostEventServiceMock = new Mock<IPostEvents>();
+		PostEventServiceMock = new Mock<IPostEventPublisher>();
 		PostServiceMock = new Mock<IPostService>();
 		PostServiceAuthMock = new Mock<IAuthzPostService>();
 		AuthorizationServiceMock = new Mock<IAuthorizationService>();
@@ -62,7 +62,7 @@ public abstract class WithMocks
 		MockedServiceCollection = new ServiceCollection();
 		MockedServiceCollection.AddScoped<IAccountProfileAdapter>(_ => AccountProfileMock.Object);
 		MockedServiceCollection.AddScoped<IMessageBusAdapter>(_ => MessageBusAdapterMock.Object);
-		MockedServiceCollection.AddScoped<IAccountEvents>(_ => AccountEventServiceMock.Object);
+		MockedServiceCollection.AddScoped<IAccountEventPublisher>(_ => AccountEventServiceMock.Object);
 		MockedServiceCollection.AddScoped<IActivityPubClient>(_ => ActivityPubClientMock.Object);
 		MockedServiceCollection.AddScoped<IActivityPubAuthenticatedClient>(_ => ActivityPubAuthClientMock.Object);
 		MockedServiceCollection.AddScoped<IProfileService>(_ => ProfileServiceMock.Object);

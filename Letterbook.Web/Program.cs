@@ -55,7 +55,8 @@ public class Program
 			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
 			.AddDefaultUI();
 		builder.Services.AddRazorPages();
-		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration));
+		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration))
+			.AddPublishers();
 
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 

@@ -1,5 +1,6 @@
 using CloudNative.CloudEvents;
 using Divergic.Logging.Xunit;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Events;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
@@ -51,8 +52,8 @@ public class DeliveryWorkerTests : WithMocks, IClassFixture<JsonLdSerializerFixt
 			Type = "TestActivity",
 			Subject = "TestActivity",
 			Time = DateTimeOffset.UtcNow,
-			[IActivityMessage.DestinationKey] = _targetProfile.Inbox.ToString(),
-			[IActivityMessage.ProfileKey] = _profile.GetId25(),
+			[IActivityMessagePublisher.DestinationKey] = _targetProfile.Inbox.ToString(),
+			[IActivityMessagePublisher.ProfileKey] = _profile.GetId25(),
 		};
 	}
 

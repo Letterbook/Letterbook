@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
+using Letterbook.Core.Adapters;
 using Letterbook.Workers.Contracts;
+using Letterbook.Workers.Publishers;
 using MassTransit;
 using MassTransit.Logging;
 using MassTransit.Monitoring;
@@ -9,6 +11,18 @@ namespace Letterbook.Workers;
 
 public static class DependencyInjection
 {
+	/// <summary>
+	/// Registers the message publishing services. All host projects will need to do this.
+	/// </summary>
+	/// <param name="services"></param>
+	/// <returns></returns>
+	public static IServiceCollection AddPublishers(this IServiceCollection services)
+	{
+		return services.AddScoped<IActivityMessagePublisher, ActivityMessagePublisher>()
+			.AddScoped<IAccountEventPublisher, AccountEventPublisher>()
+			.AddScoped<IPostEventPublisher, PostEventPublisher>();
+	}
+
 	/// <summary>
 	/// Configures the shared message bus. All host projects will likely need to do this,
 	/// because all host projects need to put messages on the bus

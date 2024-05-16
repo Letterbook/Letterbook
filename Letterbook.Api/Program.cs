@@ -57,7 +57,8 @@ public class Program
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
 			.AddDefaultUI();
-		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration));
+		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration))
+			.AddPublishers();
 
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 

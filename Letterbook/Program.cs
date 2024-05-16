@@ -43,6 +43,7 @@ public class Program
 		builder.Services.AddHealthChecks();
 		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
+		builder.Services.AddPublishers();
 		builder.Services.AddRxMessageBus();
 		builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
 			.AddEntityFrameworkStores<RelationalContext>()

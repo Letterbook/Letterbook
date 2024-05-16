@@ -16,17 +16,17 @@ public class AccountService : IAccountService, IDisposable
 	private readonly ILogger<AccountService> _logger;
 	private readonly CoreOptions _opts;
 	private readonly IAccountProfileAdapter _accountAdapter;
-	private readonly IAccountEvents _eventService;
+	private readonly IAccountEventPublisher _eventPublisherService;
 	private readonly UserManager<Account> _identityManager;
 
 	public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options,
-		IAccountProfileAdapter accountAdapter, IAccountEvents eventService,
+		IAccountProfileAdapter accountAdapter, IAccountEventPublisher eventPublisherService,
 		UserManager<Account> identityManager)
 	{
 		_logger = logger;
 		_opts = options.Value;
 		_accountAdapter = accountAdapter;
-		_eventService = eventService;
+		_eventPublisherService = eventPublisherService;
 		_identityManager = identityManager;
 	}
 
@@ -97,7 +97,7 @@ public class AccountService : IAccountService, IDisposable
 
 		await _accountAdapter.Commit();
 		_logger.LogInformation("Created new account {AccountId}", account.Id);
-		_eventService.Created(account);
+		await _eventPublisherService.Created(account);
 		return created;
 	}
 

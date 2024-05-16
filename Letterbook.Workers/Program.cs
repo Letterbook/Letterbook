@@ -32,6 +32,7 @@ namespace Letterbook.Workers
 					.ReadFrom.Configuration(builder.Configuration))
 				.AddMassTransit(bus => bus.AddWorkers(builder.Configuration)
 					.AddWorkerBus(builder.Configuration))
+				.AddPublishers()
 				.AddLetterbookCore(builder.Configuration)
 				.AddDbAdapter(builder.Configuration)
 				.AddFeedsAdapter(builder.Configuration)

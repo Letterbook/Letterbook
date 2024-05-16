@@ -26,10 +26,7 @@ public static class DependencyInjection
 		services.AddScoped<IAccountService, AccountService>();
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IPostService, PostService>();
-		services.AddScoped<IAccountEvents, AccountEventService>();
-		services.AddScoped<IActivityMessage, ActivityMessageService>();
 		services.AddScoped<IAuthzPostService, PostService>();
-		services.AddScoped<IPostEvents, PostEventService>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 		services.AddSingleton<IHostSigningKeyProvider, DevelopmentHostSigningKeyProvider>();
 

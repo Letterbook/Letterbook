@@ -1,55 +1,57 @@
 ﻿using CloudNative.CloudEvents;
+using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Events;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using MassTransit;
 using Microsoft.Extensions.Options;
 
-namespace Letterbook.Core;
+namespace Letterbook.Workers.Publishers;
 
-public class AccountEventService : IAccountEvents
+public class AccountEventPublisher : IAccountEventPublisher
 {
+	private readonly IBus _bus;
 	private readonly IMessageBusAdapter _messageBusAdapter;
 	private readonly IObserver<CloudEvent> _channel;
 	private readonly CoreOptions _options;
 
-	public AccountEventService(IOptions<CoreOptions> options, IMessageBusAdapter messageBusAdapter)
+	public AccountEventPublisher(IOptions<CoreOptions> options, IBus bus)
 	{
+		_bus = bus;
 		_options = options.Value;
-		_messageBusAdapter = messageBusAdapter;
-		_channel = _messageBusAdapter.OpenChannel<Account>(nameof(AccountEventService));
 	}
 
-	public void Created(Account account)
+	public async Task Created(Account account)
 	{
 		var message = FormatMessage(account, nameof(Created));
-		_channel.OnNext(message);
+		await _bus.Publish(message);
 	}
 
-	public void Deleted(Account account)
+	public async Task Deleted(Account account)
 	{
 		var message = FormatMessage(account, nameof(Deleted));
-		_channel.OnNext(message);
+		await _bus.Publish(message);
 	}
 
-	public void Suspended(Account account)
+	public async Task Suspended(Account account)
 	{
-		var message = FormatMessage(account, nameof(Suspended));
-		_channel.OnNext(message);
+		var message = FormatMessage(account, nameof(Task));
+		await _bus.Publish(message);
 	}
 
-	public void Updated(Account original, Account updated)
+	public async Task Updated(Account original, Account updated)
 	{
 		// TODO: warn on equality
 		// if (ReferenceEquals(original, updated)) _logger.LogWarning("");
 		var message = FormatMessage((original, updated), nameof(Updated));
-		_channel.OnNext(message);
+		await _bus.Publish(message);
 	}
 
-	public void Verified(Account account)
+	public async Task Verified(Account account)
 	{
 		var message = FormatMessage(account, nameof(Verified));
-		_channel.OnNext(message);
+		await _bus.Publish(message);
 	}
 
 	private CloudEvent FormatMessage(Account value, string action)
@@ -59,7 +61,7 @@ public class AccountEventService : IAccountEvents
 			Id = Guid.NewGuid().ToString(),
 			Source = _options.BaseUri(),
 			Data = value,
-			Type = $"{nameof(AccountEventService)}.{value.GetType()}.{action}",
+			Type = $"{nameof(AccountEventPublisher)}.{value.GetType()}.{action}",
 			Subject = value.Id.ToString(),
 			Time = DateTimeOffset.UtcNow,
 			["ltrauth"] = "" // I'd really like events to carry authentication info
@@ -75,7 +77,7 @@ public class AccountEventService : IAccountEvents
 			Id = Guid.NewGuid().ToString(),
 			Source = _options.BaseUri(),
 			Data = values,
-			Type = $"{nameof(AccountEventService)}.{values.updated.GetType()}.{action}",
+			Type = $"{nameof(AccountEventPublisher)}.{values.updated.GetType()}.{action}",
 			Subject = values.updated.Id.ToString(),
 			Time = DateTimeOffset.UtcNow,
 			["ltrauth"] = ""

@@ -32,9 +32,4 @@
       <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Consumers\" />
-      <Folder Include="Contracts\" />
-    </ItemGroup>
-
 </Project>
