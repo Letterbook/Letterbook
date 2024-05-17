@@ -10,7 +10,7 @@ namespace Letterbook.Workers.Consumers;
 /// <summary>
 /// Deliver ActivityPub messages to their destination
 /// </summary>
-public class DeliveryWorker : IObserverWorker, IConsumer<ActivityMessage>
+public class DeliveryWorker : IConsumer<ActivityMessage>
 {
 	private readonly ILogger<DeliveryWorker> _logger;
 	private readonly IAccountProfileAdapter _profiles;
@@ -21,23 +21,6 @@ public class DeliveryWorker : IObserverWorker, IConsumer<ActivityMessage>
 		_logger = logger;
 		_profiles = profiles;
 		_client = client;
-	}
-
-	public async Task DoWork(CloudEvent value, CancellationToken token)
-	{
-		_logger.LogDebug("Handle message {Type}", value.Type);
-		if (value[IActivityMessagePublisher.ProfileKey] is not string shortId ||
-		    value.Data is not string document ||
-		    value[IActivityMessagePublisher.DestinationKey] is not string destination)
-		{
-			_logger.LogError("Couldn't process message {@Message}", value);
-			return;
-		}
-
-		var profile = await _profiles.LookupProfile(Uuid7.FromId25String(shortId));
-
-		var response = await _client.As(profile).SendDocument(new Uri(destination), document);
-		_logger.LogDebug("Handled message {Type}, got response {Response}", value.Type, response);
 	}
 
 	public async Task Consume(ConsumeContext<ActivityMessage> context)

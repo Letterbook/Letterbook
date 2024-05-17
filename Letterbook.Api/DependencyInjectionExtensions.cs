@@ -107,16 +107,7 @@ public static class DependencyInjectionExtensions
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
 		// Register startup workers
-		services.AddScoped<SeedAdminWorker>();
-		services.AddHostedService<WorkerScope<SeedAdminWorker>>();
-
-		// Register MessageWorkers
-		services.AddScoped<DeliveryWorker>();
-		services.AddSingleton<IEventObserver<DeliveryWorker>, EventObserver<DeliveryWorker>>();
-		services.AddHostedService<ObserverHost<IActivityMessagePublisher, DeliveryWorker>>(provider =>
-			new ObserverHost<IActivityMessagePublisher, DeliveryWorker>(provider,
-				provider.GetRequiredService<IMessageBusClient>(),
-				50));
+		services.AddScopedService<SeedAdminWorker>();
 
 		// Register Adapters
 		services.AddScoped<IActivityAdapter, ActivityAdapter>();
