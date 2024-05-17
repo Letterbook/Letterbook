@@ -6,6 +6,7 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Events;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Letterbook.Workers.Contracts;
 using MassTransit;
 using Microsoft.Extensions.Options;
 
@@ -29,7 +30,6 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 
 	public async Task Deliver(Uri inbox, ASType activity, Profile? onBehalfOf)
 	{
-		// _bus.p
 		await _bus.Publish(FormatMessage(inbox, activity, onBehalfOf));
 		_logger.LogInformation("Scheduled message type {Activity} for delivery to {Inbox}",
 			activity.GetType(), inbox);
@@ -37,24 +37,35 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 			activity.GetType(), Environment.CurrentManagedThreadId);
 	}
 
-	private CloudEvent FormatMessage(Uri inbox, ASType activity, Profile? onBehalfOf)
+	private ActivityMessage FormatMessage(Uri inbox, ASType activity, Profile? onBehalfOf)
 	{
 		var subject = activity.Is<ASObject>(out var o)
 			? o.Id
 			: activity.Is<ASLink>(out var l)
 				? l.HRef.ToString()
 				: string.Join(',', activity.TypeMap.ASTypes);
-		return new CloudEvent
+		return new ActivityMessage
 		{
-			Id = Guid.NewGuid().ToString(),
-			Source = _options.BaseUri(),
-			Data = _serializer.Serialize(activity),
-			Type = activity.GetType().ToString(),
+			Source = _options.BaseUri().ToString(),
 			Subject = subject,
-			Time = DateTimeOffset.UtcNow,
-			[IActivityMessagePublisher.DestinationKey] = inbox.ToString(),
-			[IActivityMessagePublisher.ProfileKey] = onBehalfOf?.GetId25(),
-			["ltrauth"] = "",
+			Claims = [],
+			Type = nameof(Deliver),
+			NextData = _serializer.Serialize(activity),
+			OnBehalfOf = onBehalfOf?.GetId(),
+			Inbox = inbox
 		};
+
+		// return new CloudEvent
+		// {
+		// 	Id = Guid.NewGuid().ToString(),
+		// 	Source = _options.BaseUri(),
+		// 	Data = _serializer.Serialize(activity),
+		// 	Type = activity.GetType().ToString(),
+		// 	Subject = subject,
+		// 	Time = DateTimeOffset.UtcNow,
+		// 	[IActivityMessagePublisher.DestinationKey] = inbox.ToString(),
+		// 	[IActivityMessagePublisher.ProfileKey] = onBehalfOf?.GetId25(),
+		// 	["ltrauth"] = "",
+		// };
 	}
 }

@@ -1,9 +1,7 @@
-using CloudNative.CloudEvents;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Workers;
+using Letterbook.Core.Models;
 using Letterbook.Workers.Contracts;
 using MassTransit;
-using Medo;
 
 namespace Letterbook.Workers.Consumers;
 
@@ -25,9 +23,15 @@ public class DeliveryWorker : IConsumer<ActivityMessage>
 
 	public async Task Consume(ConsumeContext<ActivityMessage> context)
 	{
-		var profile = await _profiles.LookupProfile(context.Message.OnBehalfOf);
+		Profile? profile = default;
+		if (context.Message.OnBehalfOf is { } id)
+			profile = await _profiles.LookupProfile(id);
+		else
+			_logger.LogInformation("Sending {Subject} anonymously to {Inbox}", context.Message.Subject, context.Message.Inbox);
 
-		var response = await _client.As(profile).SendDocument(context.Message.Inbox, context.Message.Data);
-		_logger.LogDebug("Handled message {Type}, got response {@Response}", context.Message.Type, response);
+		// TODO: side effects from response
+		// like permanent redirects, for example
+		var response = await _client.As(profile).SendDocument(context.Message.Inbox, context.Message.NextData);
+		_logger.LogDebug("Delivered message {Type}, got response {@Response}", context.Message.Type, response);
 	}
 }

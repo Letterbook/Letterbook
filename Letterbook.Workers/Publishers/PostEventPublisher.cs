@@ -1,9 +1,12 @@
-﻿using CloudNative.CloudEvents;
+﻿using System.Collections.Immutable;
+using System.Security.Claims;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Letterbook.Workers.Contracts;
 using MassTransit;
+using Medo;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Workers.Publishers;
@@ -24,55 +27,42 @@ public class PostEventPublisher : IPostEventPublisher
 	/// <inheritdoc />
 	public async Task Created(Post post)
 	{
-		var message = FormatMessageData(post, nameof(Created));
+		var message = Message(post, nameof(Created), []);
 		await _bus.Publish(message);
-		_logger.LogInformation("{Action} Post event {Id}", nameof(Created), message.Id);
 	}
 
 	/// <inheritdoc />
 	public async Task Deleted(Post post)
 	{
-		var message = FormatMessageData(post, nameof(Deleted));
+		var message = Message(post, nameof(Deleted), []);
 		await _bus.Publish(message);
-		_logger.LogInformation("{Action} Post event {Id}", nameof(Deleted), message.Id);
 	}
 
 	/// <inheritdoc />
 	public async Task Updated(Post post)
 	{
-		var message = FormatMessageData(post, nameof(Updated));
+		var message = Message(post, nameof(Updated), []);
 		await _bus.Publish(message);
-		_logger.LogInformation("{Action} Post event {Id}", nameof(Updated), message.Id);
 	}
 
 	/// <inheritdoc />
 	public async Task Published(Post post)
 	{
-		var message = FormatMessageData(post, nameof(Published));
+		var message = Message(post, nameof(Published), []);
 		await _bus.Publish(message);
-		_logger.LogInformation("{Action} Post event {Id}", nameof(Published), message.Id);
-	}
-
-	/// <inheritdoc />
-	public async Task Received(Post post, Profile recipient)
-	{
-		var message = FormatMessageData(post, recipient.GetId25(), nameof(Received));
-		await _bus.Publish(message);
-		_logger.LogInformation("{Action} Post event {Id}", nameof(Received), message.Id);
 	}
 
 	/// <inheritdoc />
 	public async Task Liked(Post post, Profile likedBy)
 	{
-		var message = FormatMessageData(post, likedBy.GetId25(), nameof(Liked));
+		var message = Message(post, likedBy.GetId(), nameof(Liked), []);
 		await _bus.Publish(message);
-		_logger.LogInformation("{Action} Post event {Id}", nameof(Liked), message.Id);
 	}
 
 	/// <inheritdoc />
 	public async Task Shared(Post post, Profile sharedBy)
 	{
-		var message = FormatMessageData(post, sharedBy.GetId25(), nameof(Shared));
+		var message = Message(post, sharedBy.GetId(), nameof(Shared), []);
 		await _bus.Publish(message);
 	}
 
@@ -80,26 +70,19 @@ public class PostEventPublisher : IPostEventPublisher
 	 * Private methods
 	 */
 
-	private CloudEvent FormatMessageData(Post value, string profileId, string action) =>
-		FormatMessage(new IPostEventPublisher.Data
-		{
-			ProfileId = profileId,
-			Post = value
-		}, value.GetId25(), action);
+	private PostEvent Message(Post value, string action, ImmutableHashSet<Claim> claims) => Message(value, null, action, claims);
 
-	private CloudEvent FormatMessageData(Post value, string action) =>
-		FormatMessage(new IPostEventPublisher.Data{Post = value}, value.GetId25(), action);
+	private PostEvent Message(Post value, Uuid7? sender, string action, ImmutableHashSet<Claim> claims) => Message(value, null, sender, action, claims);
 
-	private CloudEvent FormatMessage(IPostEventPublisher.Data data, string subject, string action)
-	{
-		return new CloudEvent
+	private PostEvent Message(Post nextValue, Post? prevValue, Uuid7? sender, string action, ImmutableHashSet<Claim> claims) =>
+		new PostEvent
 		{
-			Id = Guid.NewGuid().ToString(),
-			Source = _options.BaseUri(),
-			Data = data,
-			Type = $"{nameof(Post)}.{action}",
-			Subject = subject,
-			Time = DateTimeOffset.UtcNow
+			Source = _options.BaseUri().ToString(),
+			Sender = sender,
+			Claims = claims,
+			Type = action,
+			NextData = nextValue,
+			PrevData = prevValue,
+			Subject = nextValue.GetId25()
 		};
-	}
 }

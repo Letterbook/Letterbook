@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Letterbook.Core.Models;
 
 namespace Letterbook.Core.Adapters;
@@ -8,8 +9,8 @@ namespace Letterbook.Core.Adapters;
 public interface IAccountEventPublisher
 {
 	public Task Created(Account account);
-	public Task Deleted(Account account);
-	public Task Suspended(Account account);
-	public Task Updated(Account original, Account updated);
-	public Task Verified(Account account);
+	public Task Deleted(Account account, IEnumerable<Claim> claims);
+	public Task Suspended(Account account, IEnumerable<Claim> claims);
+	public Task Updated(Account original, Account updated, IEnumerable<Claim> claims);
+	public Task Verified(Account account, IEnumerable<Claim> claims);
 }
