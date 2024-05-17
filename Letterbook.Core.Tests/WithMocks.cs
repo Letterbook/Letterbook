@@ -14,22 +14,22 @@ namespace Letterbook.Core.Tests;
 
 public abstract class WithMocks
 {
-	protected Mock<IActivityAdapter> ActivityAdapterMock;
-	protected Mock<IPostAdapter> PostAdapterMock;
-	protected Mock<IAccountProfileAdapter> AccountProfileMock;
-	protected Mock<IMessageBusAdapter> MessageBusAdapterMock;
-	protected Mock<IAccountEventPublisher> AccountEventServiceMock;
-	protected Mock<IActivityPubClient> ActivityPubClientMock;
-	protected Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock;
-	protected Mock<IProfileService> ProfileServiceMock;
-	protected Mock<IAuthzProfileService> ProfileServiceAuthMock;
-	protected IOptions<CoreOptions> CoreOptionsMock;
-	protected Mock<MockableMessageHandler> HttpMessageHandlerMock;
-	protected ServiceCollection MockedServiceCollection;
-	protected Mock<IPostEventPublisher> PostEventServiceMock;
-	protected Mock<IPostService> PostServiceMock;
-	protected Mock<IAuthzPostService> PostServiceAuthMock;
-	protected Mock<IAuthorizationService> AuthorizationServiceMock;
+	public Mock<IActivityAdapter> ActivityAdapterMock;
+	public Mock<IPostAdapter> PostAdapterMock;
+	public Mock<IAccountProfileAdapter> AccountProfileMock;
+	public Mock<IMessageBusAdapter> MessageBusAdapterMock;
+	public Mock<IAccountEventPublisher> AccountEventServiceMock;
+	public Mock<IActivityPubClient> ActivityPubClientMock;
+	public Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock;
+	public Mock<IProfileService> ProfileServiceMock;
+	public Mock<IAuthzProfileService> ProfileServiceAuthMock;
+	public IOptions<CoreOptions> CoreOptionsMock;
+	public Mock<MockableMessageHandler> HttpMessageHandlerMock;
+	public ServiceCollection MockedServiceCollection;
+	public Mock<IPostEventPublisher> PostEventServiceMock;
+	public Mock<IPostService> PostServiceMock;
+	public Mock<IAuthzPostService> PostServiceAuthMock;
+	public Mock<IAuthorizationService> AuthorizationServiceMock;
 
 	protected WithMocks()
 	{

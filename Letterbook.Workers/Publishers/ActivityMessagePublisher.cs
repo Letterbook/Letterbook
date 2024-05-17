@@ -1,9 +1,7 @@
 using ActivityPub.Types.AS;
 using ActivityPub.Types.Conversion;
-using CloudNative.CloudEvents;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Events;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Workers.Contracts;
@@ -42,8 +40,8 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 		var subject = activity.Is<ASObject>(out var o)
 			? o.Id
 			: activity.Is<ASLink>(out var l)
-				? l.HRef.ToString()
-				: string.Join(',', activity.TypeMap.ASTypes);
+				? l.HRef.ToString() : null;
+		subject ??= string.Join(',', activity.TypeMap.ASTypes);
 		return new ActivityMessage
 		{
 			Source = _options.BaseUri().ToString(),
@@ -54,18 +52,5 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 			OnBehalfOf = onBehalfOf?.GetId(),
 			Inbox = inbox
 		};
-
-		// return new CloudEvent
-		// {
-		// 	Id = Guid.NewGuid().ToString(),
-		// 	Source = _options.BaseUri(),
-		// 	Data = _serializer.Serialize(activity),
-		// 	Type = activity.GetType().ToString(),
-		// 	Subject = subject,
-		// 	Time = DateTimeOffset.UtcNow,
-		// 	[IActivityMessagePublisher.DestinationKey] = inbox.ToString(),
-		// 	[IActivityMessagePublisher.ProfileKey] = onBehalfOf?.GetId25(),
-		// 	["ltrauth"] = "",
-		// };
 	}
 }

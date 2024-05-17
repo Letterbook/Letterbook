@@ -1,3 +1,4 @@
+using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Workers.Contracts;
@@ -11,10 +12,10 @@ namespace Letterbook.Workers.Consumers;
 public class DeliveryWorker : IConsumer<ActivityMessage>
 {
 	private readonly ILogger<DeliveryWorker> _logger;
-	private readonly IAccountProfileAdapter _profiles;
+	private readonly IProfileService _profiles;
 	private readonly IActivityPubClient _client;
 
-	public DeliveryWorker(ILogger<DeliveryWorker> logger, IAccountProfileAdapter profiles, IActivityPubClient client)
+	public DeliveryWorker(ILogger<DeliveryWorker> logger, IProfileService profiles, IActivityPubClient client)
 	{
 		_logger = logger;
 		_profiles = profiles;
@@ -25,7 +26,7 @@ public class DeliveryWorker : IConsumer<ActivityMessage>
 	{
 		Profile? profile = default;
 		if (context.Message.OnBehalfOf is { } id)
-			profile = await _profiles.LookupProfile(id);
+			profile = await _profiles.As(context.Message.Claims).LookupProfile(id);
 		else
 			_logger.LogInformation("Sending {Subject} anonymously to {Inbox}", context.Message.Subject, context.Message.Inbox);
 
