@@ -14,8 +14,6 @@ namespace Letterbook.Workers.Publishers;
 public class AccountEventPublisher : IAccountEventPublisher
 {
 	private readonly IBus _bus;
-	private readonly IMessageBusAdapter _messageBusAdapter;
-	private readonly IObserver<CloudEvent> _channel;
 	private readonly CoreOptions _options;
 
 	public AccountEventPublisher(IOptions<CoreOptions> options, IBus bus)

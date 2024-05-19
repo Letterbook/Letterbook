@@ -25,8 +25,6 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	private readonly DeliveryWorker _consumer;
 	private readonly ITestHarness _harness;
 	private readonly Profile _profile;
-	private readonly Post _post;
-	private readonly Document _document;
 
 	public DeliveryWorkerTests(ITestOutputHelper output)
 	{
@@ -41,11 +39,9 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 		_publisher = _provider.GetRequiredService<IActivityMessagePublisher>();
 		_consumer = _provider.GetRequiredService<DeliveryWorker>();
 		_harness = _provider.GetRequiredService<ITestHarness>();
-		_document = new Document();
 
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 		_profile = new FakeProfile("letterbook.example").Generate();
-		_post = new FakePost(_profile).Generate();
 
 		MockAuthorizeAllowAll();
 	}
