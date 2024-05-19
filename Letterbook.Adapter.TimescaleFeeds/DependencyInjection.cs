@@ -7,9 +7,10 @@ namespace Letterbook.Adapter.TimescaleFeeds;
 
 public static class DependencyInjection
 {
-	public static IServiceCollection AddFeedsAdapter(this IServiceCollection services, IConfigurationSection config)
+	public static IServiceCollection AddFeedsAdapter(this IServiceCollection services, IConfigurationManager config)
 	{
-		var dbOptions = config.Get<FeedsDbOptions>() ?? throw new ArgumentNullException(FeedsDbOptions.ConfigKey);
+		var dbOptions = config.GetSection(FeedsDbOptions.ConfigKey)
+			.Get<FeedsDbOptions>() ?? throw new ArgumentNullException(FeedsDbOptions.ConfigKey);
 		var dataSource = DataSource(dbOptions);
 
 		return services.AddDbContext<FeedsContext>(options => options.UseNpgsql(dataSource));

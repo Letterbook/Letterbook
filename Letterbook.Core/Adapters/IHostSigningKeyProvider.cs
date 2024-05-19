@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,12 +15,12 @@ public interface IHostSigningKeyProvider
 public class DevelopmentHostSigningKeyProvider : IHostSigningKeyProvider
 {
 	private readonly ILogger<DevelopmentHostSigningKeyProvider> _logger;
-	private readonly IWebHostEnvironment _webHostEnvironment;
+	private readonly IHostEnvironment _webHostEnvironment;
 	private readonly IOptions<CoreOptions> _coreOptions;
 	private readonly Lazy<Task<SigningKey>> _lazyKey;
 	public DevelopmentHostSigningKeyProvider(
 		ILogger<DevelopmentHostSigningKeyProvider> logger,
-		IWebHostEnvironment webHostEnvironment,
+		IHostEnvironment webHostEnvironment,
 		IOptions<CoreOptions> coreOptions)
 	{
 		_logger = logger;

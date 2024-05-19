@@ -1,9 +1,7 @@
-using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ActivityPub.Types;
-using ActivityPub.Types.AS;
 using DarkLink.Web.WebFinger.Server;
 using DarkLink.Web.WebFinger.Shared;
 using Letterbook.Adapter.ActivityPub;
@@ -11,7 +9,6 @@ using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
-using Letterbook.Api.Authentication.HttpSignature;
 using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
 using Letterbook.Api.Authentication.HttpSignature.Handler;
 using Letterbook.Api.Mappers;
@@ -22,10 +19,8 @@ using Letterbook.Core.Authorization;
 using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
-using Letterbook.Core.Models;
 using Letterbook.Core.Workers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.IdentityModel.Tokens;
@@ -86,15 +81,6 @@ public static class DependencyInjectionExtensions
 			}));
 	}
 
-	public static IdentityBuilder AddIdentity(this IServiceCollection services)
-	{
-		return services.AddIdentity<Account, IdentityRole<Guid>>(options =>
-			{
-
-			})
-			.AddEntityFrameworkStores<RelationalContext>()
-			.AddDefaultTokenProviders();
-	}
 
 	public static IServiceCollection AddServices(this IServiceCollection services, ConfigurationManager configuration)
 	{
@@ -135,8 +121,8 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IPostAdapter, PostAdapter>();
 		services.AddRxMessageBus();
 		services.AddSingleton<IActivityPubDocument, Document>();
-		services.AddDbAdapter(configuration.GetSection(DbOptions.ConfigKey));
-		services.AddFeedsAdapter(configuration.GetSection(FeedsDbOptions.ConfigKey));
+		services.AddDbAdapter(configuration);
+		services.AddFeedsAdapter(configuration);
 		services.TryAddTypesModule();
 
 		// Register HTTP signature authentication services

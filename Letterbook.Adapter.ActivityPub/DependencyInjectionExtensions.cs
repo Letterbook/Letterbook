@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using ActivityPub.Types;
 using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
@@ -23,12 +24,15 @@ public static class DependencyInjectionExtensions
 			.AddHttpMessageHandler<ClientHandler>();
 	}
 
-	public static IServiceCollection AddActivityPubClient(this IServiceCollection services, ConfigurationManager configuration)
+	public static IServiceCollection AddActivityPubClient(this IServiceCollection services, IConfigurationManager configuration)
 	{
-		var coreOptions = configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
-		                  ?? throw new ConfigException(nameof(CoreOptions));
+		var coreOptions = configuration.Get<CoreOptions>() ?? throw new ConfigException(nameof(CoreOptions));
+
+		services.TryAddTypesModule();
 		services
 			.Configure<AddContentDigestOptions>(options => options.WithHash(AddContentDigestOptions.Hash.Sha256))
+			.AddSingleton<IActivityPubDocument, Document>()
+			.AddScoped<IVerificationKeyProvider, ActivityPubClientVerificationKeyProvider>()
 			.ConfigureMessageSigningOptions(options =>
 			{
 				options.WithMandatoryComponent(SignatureComponent.Method);
