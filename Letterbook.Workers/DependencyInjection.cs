@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Text.Json.Serialization;
 using Letterbook.Core.Adapters;
 using Letterbook.Workers.Contracts;
 using Letterbook.Workers.Publishers;
@@ -33,7 +34,16 @@ public static class DependencyInjection
 	public static IBusRegistrationConfigurator AddWorkerBus(this IBusRegistrationConfigurator bus, IConfigurationManager config)
 	{
 		var workerOpts = config.GetSection(WorkerOptions.ConfigKey).Get<WorkerOptions>();
-		bus.UsingInMemory((context, configurator) => configurator.ConfigureEndpoints(context));
+		bus.UsingInMemory((context, configurator) =>
+		{
+			configurator.ConfigureEndpoints(context);
+			configurator.ConfigureJsonSerializerOptions(options =>
+			{
+				options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+
+				return options;
+			});
+		});
 
 		return bus;
 	}
@@ -69,13 +79,7 @@ public static class DependencyInjection
 
 	public static OpenTelemetryBuilder AddWorkerTelemetry(this OpenTelemetryBuilder builder)
 	{
-		return builder.WithMetrics(metrics =>
-			{
-				metrics.AddMeter(InstrumentationOptions.MeterName);
-			})
-			.WithTracing(tracing =>
-			{
-				tracing.AddSource(DiagnosticHeaders.DefaultListenerName);
-			});
+		return builder.WithMetrics(metrics => { metrics.AddMeter(InstrumentationOptions.MeterName); })
+			.WithTracing(tracing => { tracing.AddSource(DiagnosticHeaders.DefaultListenerName); });
 	}
 }
