@@ -15,12 +15,9 @@ using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Authorization;
-using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Workers;
-using Letterbook.Workers.Consumers;
-using Letterbook.Workers.Publishers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -98,11 +95,8 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IAccountService, AccountService>();
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IPostService, PostService>();
-		services.AddScoped<IAccountEventPublisher, AccountEventPublisher>();
 		services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
-		services.AddScoped<IActivityMessagePublisher, ActivityMessagePublisher>();
 		services.AddScoped<IAuthzPostService, PostService>();
-		services.AddScoped<IPostEventPublisher, PostEventPublisher>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
 		// Register startup workers
