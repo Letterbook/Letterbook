@@ -2,6 +2,7 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Medo;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -22,83 +23,56 @@ public class TimelineService : ITimelineService
 		_profileAdapter = profileAdapter;
 	}
 
-	public void HandleCreate(Post post)
+	/// <inheritdoc />
+	public async Task HandlePublish(Post post)
 	{
 		// TODO: account for moderation conditions (blocks, etc)
 		var audience = DefaultAudience(post);
 		var mentions = post.AddressedTo.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
 
 		audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
-		_feeds.AddToTimeline(post);
-
-		foreach (var mention in mentions)
-		{
-			_feeds.AddNotification(mention.Subject, post, ActivityType.Create);
-		}
+		await _feeds.AddToTimeline(post);
 	}
 
-	public void HandleBoost(Post post)
+	/// <inheritdoc />
+	public async Task HandleShare(Post post, Profile sharedBy)
 	{
 		var boostedBy = post.SharesCollection.Last();
-		if (post.Audience.Contains(Audience.Public)
-			|| post.AddressedTo.Contains(Mention.Public)
-			|| post.AddressedTo.Contains(Mention.Unlisted))
-		{
-			_feeds.AddToTimeline(post, boostedBy);
-		}
-
-		foreach (var creator in post.Creators.Where(creator => creator.HasLocalAuthority(_options)))
-		{
-			_feeds.AddNotification(creator, post, ActivityType.Announce, boostedBy);
-		}
+		await _feeds.AddToTimeline(post, boostedBy);
 	}
 
-	public void HandleUpdate(Post note)
+	/// <inheritdoc />
+	public async Task HandleUpdate(Post note)
 	{
 		var audience = DefaultAudience(note);
 		var mentions = note.AddressedTo.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
 
 		audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
-		_feeds.AddToTimeline(note);
-
-		foreach (var mention in mentions)
-		{
-			_feeds.AddNotification(mention.Subject, note, ActivityType.Update);
-		}
-
-		foreach (var profile in note.SharesCollection.Where(profile => profile.HasLocalAuthority(_options)))
-		{
-			_feeds.AddNotification(profile, note, ActivityType.Update);
-		}
-
-		if (note.Creators.Count <= 1) return;
-		foreach (var profile in note.Creators.Where(profile => profile.HasLocalAuthority(_options)))
-		{
-			_feeds.AddNotification(profile, note, ActivityType.Update);
-		}
+		await _feeds.AddToTimeline(note);
 	}
 
-	public void HandleDelete(Post note)
+	/// <inheritdoc />
+	public async Task HandleDelete(Post note)
 	{
 		// TODO: Also handle deleted boosts
-		_feeds.RemoveFromTimelines(note);
+		await _feeds.RemoveFromTimelines(note);
 	}
 
 
-	// public async Task<IEnumerable<Post>> GetFeed(Guid recipientId, DateTime begin, int limit = 40)
-	public async Task<IQueryable<Post>> GetFeed(Guid recipientId, DateTime begin, int limit = 40)
+	/// <inheritdoc />
+	public async Task<IEnumerable<Post>> GetFeed(Uuid7 recipientId, DateTime begin, int limit = 40)
 	{
 		// TODO(moderation): Account for moderation conditions (block, mute, etc)
 		var recipient = await _profileAdapter.LookupProfile(recipientId);
 		return recipient != null
-			? _feeds.GetTimelineEntries(recipient.Audiences, begin, limit)
+			? _feeds.GetTimelineEntries(recipient.Audiences, begin, limit).ToList()
 			: throw CoreException.MissingData("Couldn't lookup Profile to load Feed", typeof(Guid), recipientId);
 	}
 
 	/// <summary>
 	/// Get the audience entries for the addressed recipients, plus followers/public/local, if applicable
 	/// </summary>
-	/// <param name="note"></param>
+	/// <param name="post"></param>
 	/// <returns></returns>
 	private HashSet<Audience> DefaultAudience(Post post)
 	{
