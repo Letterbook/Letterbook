@@ -122,9 +122,7 @@ public class TimelineServiceTest : WithMocks
 		_feeds.Verify(m => m.AddToTimeline(_testPost, booster), Times.Once);
 	}
 
-
-	// actually, it probably should, right?
-	[Fact(DisplayName = "HandleShare should not add follower-only posts to any feed")]
+	[Fact(DisplayName = "HandleShare should not add follower-only posts to public feeds")]
 	public async Task NoAddFollowersToTimelineOnBoost()
 	{
 		_testPost.Audience.Clear();
@@ -134,12 +132,10 @@ public class TimelineServiceTest : WithMocks
 
 		await _timeline.HandleShare(_testPost, booster);
 
-		_feeds.Verify(m => m.AddToTimeline(It.IsAny<Post>(), It.IsAny<Profile>()), Times.Never);
+		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(Audience.Public)), It.IsAny<Profile>()), Times.Never);
 	}
 
-
-	// Correction, yes it should
-	[Fact(DisplayName = "HandleShare should not add private posts to any feed")]
+	[Fact(DisplayName = "HandleShare should not add private posts to public feeds")]
 	public async Task NoAddPrivateToTimelineOnBoost()
 	{
 		_testPost.AddressedTo.Clear();
@@ -150,7 +146,9 @@ public class TimelineServiceTest : WithMocks
 
 		await _timeline.HandleShare(_testPost, booster);
 
-		_feeds.Verify(m => m.AddToTimeline(It.IsAny<Post>(), It.IsAny<Profile>()), Times.Never);
+		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(Audience.Public)), It.IsAny<Profile>()), Times.Never);
+		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(Audience.Followers(_profile))), It.IsAny<Profile>()),
+			Times.Never);
 	}
 
 	[Fact(DisplayName = "HandleUpdate should add to followers timeline")]

@@ -31,6 +31,7 @@ public class TimelineService : ITimelineService
 		var mentions = post.AddressedTo.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
 
 		audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
+		post.Audience = audience;
 		await _feeds.AddToTimeline(post);
 	}
 
