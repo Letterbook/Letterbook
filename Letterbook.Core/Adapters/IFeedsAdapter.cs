@@ -17,6 +17,13 @@ public interface IFeedsAdapter : IDisposable
 	public Task<int> AddToTimeline(Post post, Profile? sharedBy = default);
 
 	/// <summary>
+	/// Update the existing entries for a post
+	/// </summary>
+	/// <param name="post"></param>
+	/// <returns></returns>
+	public Task<int> UpdateTimeline(Post post);
+
+	/// <summary>
 	/// Add a notification of an event to the recipient's notification feed.
 	///
 	/// This will make the notification visible to the specified recipient.

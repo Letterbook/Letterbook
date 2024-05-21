@@ -157,7 +157,7 @@ public class TimelineServiceTest : WithMocks
 		var expected = Audience.Followers(_testPost.Creators.First());
 		_testPost.Audience.Add(expected);
 
-		await _timeline.HandleUpdate(_testPost);
+		await _timeline.HandleUpdate(_testPost, TODO);
 
 		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(expected)), It.IsAny<Profile>()), Times.Once);
 	}
@@ -170,7 +170,7 @@ public class TimelineServiceTest : WithMocks
 		var audience = _testPost.Creators.Select(Audience.Followers).ToArray();
 		_testPost.Audience.Add(Audience.Public);
 
-		await _timeline.HandleUpdate(_testPost);
+		await _timeline.HandleUpdate(_testPost, TODO);
 
 		// This assertion looks more complicated than it is.
 		// It just checks that the followers audience is included for every creator on the note
@@ -183,15 +183,14 @@ public class TimelineServiceTest : WithMocks
 	[Fact(DisplayName = "HandleUpdate should add post to mentioned profiles' feeds")]
 	public async Task AddToMentionsOnUpdate()
 	{
+		var oldPost = _testPost.ShallowClone();
 		var mentioned = Mention.To(_profile);
 		var expected = Audience.FromMention(mentioned.Subject);
 		_testPost.AddressedTo.Add(mentioned);
 
-		await _timeline.HandleUpdate(_testPost);
+		await _timeline.HandleUpdate(_testPost, oldPost);
 
-		// _feeds.Verify(
-		// m => m.AddToTimeline(TestPost, It.Is<ICollection<Audience>>(actual => actual.Contains(expected)),
-		// It.IsAny<Profile>()), Times.Once);
+		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(expected)), It.IsAny<Profile>()), Times.Once);
 	}
 
 
@@ -199,16 +198,11 @@ public class TimelineServiceTest : WithMocks
 	public async Task NoAddPrivateToFollowersOnUpdate()
 	{
 		_testPost.Creators.Add(_profile);
-		var audience = _testPost.Creators.Select(Audience.Followers).ToArray();
-		_testPost.Audience.Remove(Audience.Public);
+		_testPost.Audience.Clear();
 
-		await _timeline.HandleUpdate(_testPost);
+		await _timeline.HandleUpdate(_testPost, TODO);
 
-		// _feeds.Verify(
-		// m => m.AddToTimeline(It.IsAny<Note>(),
-		// It.Is<ICollection<Audience>>(actual =>
-		// audience.Aggregate(false, (contains, expected) => contains || actual.Contains(expected))),
-		// It.IsAny<Profile>()), Times.Never);
+		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(Audience.Public)), It.IsAny<Profile>()), Times.Never);
 	}
 
 	[Fact(DisplayName = "HandleDelete should remove the deleted post from all feeds")]

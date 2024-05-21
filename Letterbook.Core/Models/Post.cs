@@ -106,6 +106,7 @@ public class Post : IFederated, IEquatable<Post>
 
 	public Uuid7 GetId() => _id;
 	public string GetId25() => _id.ToId25String();
+	public Post ShallowClone() => (Post)MemberwiseClone();
 
 	public T AddContent<T>(T content) where T : Content
 	{

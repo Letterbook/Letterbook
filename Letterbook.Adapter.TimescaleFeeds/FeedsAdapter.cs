@@ -19,6 +19,11 @@ public class FeedsAdapter : IFeedsAdapter
 		throw new NotImplementedException();
 	}
 
+	public Task<int> UpdateTimeline(Models.Post post)
+	{
+		throw new NotImplementedException();
+	}
+
 	public void AddNotification(Models.Profile recipient, Models.Post post, Models.ActivityType activity, Models.Profile? sharedBy)
 	{
 		throw new NotImplementedException();

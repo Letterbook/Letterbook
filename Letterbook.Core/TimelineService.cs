@@ -43,13 +43,14 @@ public class TimelineService : ITimelineService
 	}
 
 	/// <inheritdoc />
-	public async Task HandleUpdate(Post note)
+	public async Task HandleUpdate(Post post, Post oldPost)
 	{
-		var audience = DefaultAudience(note);
-		var mentions = note.AddressedTo.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
+		var audience = DefaultAudience(post);
+		var mentions = post.AddressedTo.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
 
 		audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
-		await _feeds.AddToTimeline(note);
+		post.Audience = audience;
+		await _feeds.AddToTimeline(post);
 	}
 
 	/// <inheritdoc />
