@@ -27,11 +27,7 @@ public class TimelineService : ITimelineService
 	public async Task HandlePublish(Post post)
 	{
 		// TODO: account for moderation conditions (blocks, etc)
-		var audience = DefaultAudience(post);
-		var mentions = post.AddressedTo.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
-
-		audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
-		post.Audience = audience;
+		post.Audience = NormalizeAudience(post);
 		await _feeds.AddToTimeline(post);
 	}
 
@@ -45,19 +41,29 @@ public class TimelineService : ITimelineService
 	/// <inheritdoc />
 	public async Task HandleUpdate(Post post, Post oldPost)
 	{
-		var audience = DefaultAudience(post);
-		var mentions = post.AddressedTo.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
+		var removed = NormalizeAudience(oldPost);
+		removed.ExceptWith(NormalizeAudience(post));
+		var added = NormalizeAudience(post);
+		added.ExceptWith(NormalizeAudience(oldPost));
 
-		audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
-		post.Audience = audience;
-		await _feeds.AddToTimeline(post);
+		await _feeds.Start();
+		if (added.Count != 0)
+		{
+			post.Audience = added;
+			await _feeds.AddToTimeline(post);
+		}
+
+		if (removed.Count != 0) await _feeds.RemoveFromTimelines(post, removed);
+
+		if (post.Preview != oldPost.Preview) await _feeds.UpdateTimeline(post);
+		await _feeds.Commit();
 	}
 
 	/// <inheritdoc />
 	public async Task HandleDelete(Post note)
 	{
 		// TODO: Also handle deleted boosts
-		await _feeds.RemoveFromTimelines(note);
+		await _feeds.RemoveFromAllTimelines(note);
 	}
 
 
@@ -76,16 +82,18 @@ public class TimelineService : ITimelineService
 	/// </summary>
 	/// <param name="post"></param>
 	/// <returns></returns>
-	private HashSet<Audience> DefaultAudience(Post post)
+	private HashSet<Audience> NormalizeAudience(Post post)
 	{
 		var result = new HashSet<Audience>();
 		result.UnionWith(post.Audience);
+		result.UnionWith(post.AddressedTo.Where(
+			m => m.Subject.HasLocalAuthority(_options)).Select(m => Audience.FromMention(m.Subject)));
 
 		// The "public audience" would be equivalent to Mastodon's federated global feed
 		// That's not the same thing as putting posts into follower's feeds.
 		// This ensures we include public posts in the followers audience in case the sender doesn't specify it
 		if (!result.Contains(Audience.Public)) return result;
-		result.UnionWith(post.Creators.Select(c => Audience.FromUri(c.Followers, c)));
+		result.UnionWith(post.Creators.Select(Audience.Followers));
 
 		return result;
 	}

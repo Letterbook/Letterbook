@@ -42,7 +42,15 @@ public interface IFeedsAdapter : IDisposable
 	/// </summary>
 	/// <param name="post"></param>
 	/// <returns>The number of affected records</returns>
-	public Task<int> RemoveFromTimelines(Post post);
+	public Task<int> RemoveFromAllTimelines(Post post);
+
+	/// <summary>
+	/// Remove the post from the specified timelines.
+	/// </summary>
+	/// <param name="post"></param>
+	/// <param name="removed"></param>
+	/// <returns></returns>
+	public Task<int> RemoveFromTimelines(Post post, IEnumerable<Audience> removed);
 
 	/// <summary>
 	/// Query notifications for the recipient.
@@ -96,6 +104,21 @@ public interface IFeedsAdapter : IDisposable
 	public IQueryable<Post> GetTimelineEntries(ICollection<Audience> audiences, DateTime before, int limit,
 		ICollection<ActivityObjectType> types, bool includeBoosts = true);
 
+	/// <summary>
+	/// Begin a transaction.
+	/// </summary>
+	/// <returns></returns>
+	public Task Start();
+
+	/// <summary>
+	/// Discard the transaction, if one is in progress.
+	/// </summary>
+	/// <returns></returns>
 	public Task Cancel();
+
+	/// <summary>
+	/// Commit a transaction, if one is in progress.
+	/// </summary>
+	/// <returns></returns>
 	public Task Commit();
 }
