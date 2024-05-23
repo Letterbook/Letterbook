@@ -78,7 +78,7 @@ public class HostMocks : WithMocks
 
 	public new Mock<IActivityPubClient> ActivityPubClientMock => base.ActivityPubClientMock;
 
-	public new Mock<IAccountEvents> AccountEventServiceMock => base.AccountEventServiceMock;
+	public new Mock<IAccountEventPublisher> AccountEventServiceMock => base.AccountEventServiceMock;
 
 	public new Mock<IMessageBusAdapter> MessageBusAdapterMock => base.MessageBusAdapterMock;
 
