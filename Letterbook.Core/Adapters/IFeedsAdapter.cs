@@ -14,7 +14,7 @@ public interface IFeedsAdapter : IDisposable
 	/// <param name="post"></param>
 	/// <param name="sharedBy"></param>
 	/// <returns></returns>
-	public Task<int> AddToTimeline(Post post, Profile? sharedBy = default);
+	public Task AddToTimeline(Post post, Profile? sharedBy = default);
 
 	/// <summary>
 	/// Update the existing entries for a post
