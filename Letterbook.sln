@@ -48,8 +48,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Decisions", "Decisions", "{
 		docs\decisions\08-architecture-update-01.md = docs\decisions\08-architecture-update-01.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.RxMessageBus", "Letterbook.Adapter.RxMessageBus\Letterbook.Adapter.RxMessageBus.csproj", "{FD68DA55-DCCF-4F8B-AFBB-C1383E9C58A0}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.TimescaleFeeds", "Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj", "{DF6AFF86-FFF2-4179-917A-2FAFE10B1A88}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.TimescaleFeeds.Tests", "Letterbook.Adapter.TimescaleFeeds.Tests\Letterbook.Adapter.TimescaleFeeds.Tests.csproj", "{E9879DF8-A3EC-4843-BC01-21C77A13D2D7}"
@@ -57,8 +55,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.ActivityPub", "Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj", "{3B5FBC03-4098-4146-A3D2-58F4B31390CC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.ActivityPub.Test", "Letterbook.Adapter.ActivityPub.Test\Letterbook.Adapter.ActivityPub.Test.csproj", "{151935AD-3AB8-48CB-BBAD-6AF6309B36DE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.RxMessageBus.Tests", "Letterbook.Adapter.RxMessageBus.Tests\Letterbook.Adapter.RxMessageBus.Tests.csproj", "{5172FA38-78CF-4E36-A302-8242C96E9087}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Db.Tests", "Letterbook.Adapter.Db.Tests\Letterbook.Adapter.Db.Tests.csproj", "{3C206372-06A4-4C8B-8BE3-F9A8C1EB5F0B}"
 EndProject
@@ -79,6 +75,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook", "Letterbook\Letterbook.csproj", "{11BCFCEF-2E6A-48DF-A6BD-37CC80E25EDB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Workers", "Letterbook.Workers\Letterbook.Workers.csproj", "{E53BF0A3-8A77-45A9-8CFF-606F20B46789}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Workers.Tests", "Letterbook.Workers.Tests\Letterbook.Workers.Tests.csproj", "{31824A36-4FFD-405D-AAD4-625D59C794F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -145,14 +143,10 @@ Global
 		{E53BF0A3-8A77-45A9-8CFF-606F20B46789}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E53BF0A3-8A77-45A9-8CFF-606F20B46789}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E53BF0A3-8A77-45A9-8CFF-606F20B46789}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FD68DA55-DCCF-4F8B-AFBB-C1383E9C58A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FD68DA55-DCCF-4F8B-AFBB-C1383E9C58A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FD68DA55-DCCF-4F8B-AFBB-C1383E9C58A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FD68DA55-DCCF-4F8B-AFBB-C1383E9C58A0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5172FA38-78CF-4E36-A302-8242C96E9087}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5172FA38-78CF-4E36-A302-8242C96E9087}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5172FA38-78CF-4E36-A302-8242C96E9087}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5172FA38-78CF-4E36-A302-8242C96E9087}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31824A36-4FFD-405D-AAD4-625D59C794F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31824A36-4FFD-405D-AAD4-625D59C794F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31824A36-4FFD-405D-AAD4-625D59C794F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31824A36-4FFD-405D-AAD4-625D59C794F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}

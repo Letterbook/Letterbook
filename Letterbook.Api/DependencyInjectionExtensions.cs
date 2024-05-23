@@ -7,7 +7,6 @@ using DarkLink.Web.WebFinger.Shared;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Signatures;
 using Letterbook.Adapter.Db;
-using Letterbook.Adapter.RxMessageBus;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
 using Letterbook.Api.Authentication.HttpSignature.Handler;
@@ -16,7 +15,6 @@ using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Authorization;
-using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Workers;
@@ -97,29 +95,16 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IAccountService, AccountService>();
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IPostService, PostService>();
-		services.AddScoped<IAccountEvents, AccountEventService>();
 		services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
-		services.AddScoped<IActivityMessage, ActivityMessageService>();
 		services.AddScoped<IAuthzPostService, PostService>();
-		services.AddScoped<IPostEvents, PostEventService>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 
 		// Register startup workers
-		services.AddScoped<SeedAdminWorker>();
-		services.AddHostedService<WorkerScope<SeedAdminWorker>>();
-
-		// Register MessageWorkers
-		services.AddScoped<DeliveryWorker>();
-		services.AddSingleton<IEventObserver<DeliveryWorker>, EventObserver<DeliveryWorker>>();
-		services.AddHostedService<ObserverHost<IActivityMessage, DeliveryWorker>>(provider =>
-			new ObserverHost<IActivityMessage, DeliveryWorker>(provider,
-				provider.GetRequiredService<IMessageBusClient>(),
-				50));
+		services.AddScopedService<SeedAdminWorker>();
 
 		// Register Adapters
 		services.AddScoped<IActivityAdapter, ActivityAdapter>();
 		services.AddScoped<IPostAdapter, PostAdapter>();
-		services.AddRxMessageBus();
 		services.AddSingleton<IActivityPubDocument, Document>();
 		services.AddDbAdapter(configuration);
 		services.AddFeedsAdapter(configuration);
