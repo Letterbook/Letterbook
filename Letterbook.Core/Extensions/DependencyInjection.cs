@@ -18,47 +18,27 @@ public static class DependencyInjection
 		// Register options
 		services.Configure<CoreOptions>(config.GetSection(CoreOptions.ConfigKey));
 
-		// Register Mapping Configs
-		// services.AddSingleton<MappingConfigProvider>();
-
 		// Register Services
 		services.AddScoped<IProfileEventService, ProfileEventService>();
 		services.AddScoped<IAccountService, AccountService>();
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IPostService, PostService>();
-		services.AddScoped<IAccountEvents, AccountEventService>();
-		services.AddScoped<IActivityMessage, ActivityMessageService>();
 		services.AddScoped<IAuthzPostService, PostService>();
-		services.AddScoped<IPostEvents, PostEventService>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 		services.AddSingleton<IHostSigningKeyProvider, DevelopmentHostSigningKeyProvider>();
 
 		// Register service workers
-		services.AddScoped<SeedAdminWorker>();
-		services.AddHostedService<WorkerScope<SeedAdminWorker>>();
-
-		// Register MessageWorkers
-		// services.AddScoped<DeliveryWorker>();
-		// services.AddSingleton<IEventObserver<DeliveryWorker>, EventObserver<DeliveryWorker>>();
-		// services.AddHostedService<ObserverHost<IActivityMessage, DeliveryWorker>>(provider =>
-		// 	new ObserverHost<IActivityMessage, DeliveryWorker>(provider,
-		// 		provider.GetRequiredService<IMessageBusClient>(),
-		// 		50));
-
-		// Register Adapters
-		// services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
-		// services.AddScoped<IActivityAdapter, ActivityAdapter>();
-		// services.AddScoped<IPostAdapter, PostAdapter>();
-		// services.AddRxMessageBus();
-		// services.AddSingleton<IActivityPubDocument, Document>();
-		// services.AddDbAdapter(configuration.GetSection(DbOptions.ConfigKey));
-		// services.AddDbContext<FeedsContext>();
-		// services.TryAddTypesModule();
-
-		// Register HTTP signature authentication services
-		// services.AddScoped<IVerificationKeyProvider, ActivityPubClientVerificationKeyProvider>();
+		services.AddScopedService<SeedAdminWorker>();
 
 		return services;
+	}
+
+	public static IServiceCollection AddScopedService<TScopedWorker>(this IServiceCollection services)
+		where TScopedWorker : class, IScopedWorker
+	{
+
+		return services.AddHostedService<WorkerScope<TScopedWorker>>()
+			.AddScoped<TScopedWorker>();
 	}
 
 	public static OpenTelemetryBuilder AddClientTelemetry(this OpenTelemetryBuilder builder)

@@ -34,16 +34,16 @@ public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;
 	private readonly IProfileService _profileService;
-	private readonly IActivityMessage _message;
+	private readonly IActivityMessagePublisher _messagePublisher;
 	private readonly IActivityPubDocument _apDoc;
 	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Default);
 
 	public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
-		IProfileService profileService, IActivityMessage message, IActivityPubDocument apDoc)
+		IProfileService profileService, IActivityMessagePublisher messagePublisher, IActivityPubDocument apDoc)
 	{
 		_logger = logger;
 		_profileService = profileService;
-		_message = message;
+		_messagePublisher = messagePublisher;
 		_apDoc = apDoc;
 		_logger.LogInformation("Loaded {Controller}", nameof(ActorController));
 	}
@@ -220,7 +220,7 @@ public class ActorController : ControllerBase
 		// But, that doesn't exist, yet. The if(false) is so we don't forget.
 		var acceptResponse = false;
 		if (acceptResponse) return Ok(resultActivity);
-		_message.Deliver(relation.Follower.Inbox, resultActivity, relation.Follows);
+		await _messagePublisher.Deliver(relation.Follower.Inbox, resultActivity, relation.Follows);
 		return Accepted();
 	}
 }

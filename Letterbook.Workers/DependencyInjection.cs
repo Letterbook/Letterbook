@@ -1,5 +1,8 @@
 ﻿using System.Reflection;
-using Letterbook.Core.Contracts;
+using System.Text.Json.Serialization;
+using Letterbook.Core.Adapters;
+using Letterbook.Workers.Contracts;
+using Letterbook.Workers.Publishers;
 using MassTransit;
 using MassTransit.Logging;
 using MassTransit.Monitoring;
@@ -10,6 +13,18 @@ namespace Letterbook.Workers;
 public static class DependencyInjection
 {
 	/// <summary>
+	/// Registers the message publishing services. All host projects will need to do this.
+	/// </summary>
+	/// <param name="services"></param>
+	/// <returns></returns>
+	public static IServiceCollection AddPublishers(this IServiceCollection services)
+	{
+		return services.AddScoped<IActivityMessagePublisher, ActivityMessagePublisher>()
+			.AddScoped<IAccountEventPublisher, AccountEventPublisher>()
+			.AddScoped<IPostEventPublisher, PostEventPublisher>();
+	}
+
+	/// <summary>
 	/// Configures the shared message bus. All host projects will likely need to do this,
 	/// because all host projects need to put messages on the bus
 	/// </summary>
@@ -19,7 +34,16 @@ public static class DependencyInjection
 	public static IBusRegistrationConfigurator AddWorkerBus(this IBusRegistrationConfigurator bus, IConfigurationManager config)
 	{
 		var workerOpts = config.GetSection(WorkerOptions.ConfigKey).Get<WorkerOptions>();
-		bus.UsingInMemory((context, configurator) => configurator.ConfigureEndpoints(context));
+		bus.UsingInMemory((context, configurator) =>
+		{
+			configurator.ConfigureEndpoints(context);
+			configurator.ConfigureJsonSerializerOptions(options =>
+			{
+				options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+
+				return options;
+			});
+		});
 
 		return bus;
 	}
@@ -55,13 +79,7 @@ public static class DependencyInjection
 
 	public static OpenTelemetryBuilder AddWorkerTelemetry(this OpenTelemetryBuilder builder)
 	{
-		return builder.WithMetrics(metrics =>
-			{
-				metrics.AddMeter(InstrumentationOptions.MeterName);
-			})
-			.WithTracing(tracing =>
-			{
-				tracing.AddSource(DiagnosticHeaders.DefaultListenerName);
-			});
+		return builder.WithMetrics(metrics => { metrics.AddMeter(InstrumentationOptions.MeterName); })
+			.WithTracing(tracing => { tracing.AddSource(DiagnosticHeaders.DefaultListenerName); });
 	}
 }
