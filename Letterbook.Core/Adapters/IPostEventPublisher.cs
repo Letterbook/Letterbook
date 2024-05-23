@@ -1,56 +1,50 @@
+using Letterbook.Core.Events;
 using Letterbook.Core.Models;
 
-namespace Letterbook.Core.Events;
+namespace Letterbook.Core.Adapters;
 
 /// <summary>
 /// Events and a corresponding channel related to <see cref="Post">Posts</see>
 /// </summary>
-public interface IPostEvents : IEventChannel
+public interface IPostEventPublisher : IEventChannel
 {
 	/// <summary>
 	/// the post was created
 	/// </summary>
 	/// <param name="post"></param>
-	public void Created(Post post);
+	public Task Created(Post post);
 
 	/// <summary>
 	/// The Post was deleted
 	/// </summary>
 	/// <param name="post"></param>
-	public void Deleted(Post post);
+	public Task Deleted(Post post);
 
 	/// <summary>
 	/// The post was updated
 	/// </summary>
 	/// <param name="post"></param>
-	public void Updated(Post post);
+	public Task Updated(Post post);
 
 	/// <summary>
 	/// The post was published
 	/// </summary>
 	/// <param name="post"></param>
-	public void Published(Post post);
-
-	/// <summary>
-	/// The Post was received for a Profile
-	/// </summary>
-	/// <param name="post"></param>
-	/// <param name="recipient">The Profile who received the Post</param>
-	public void Received(Post post, Profile recipient);
+	public Task Published(Post post);
 
 	/// <summary>
 	/// The Post was Liked by a Profile
 	/// </summary>
 	/// <param name="post"></param>
 	/// <param name="likedBy">The Profile who liked the Post</param>
-	public void Liked(Post post, Profile likedBy);
+	public Task Liked(Post post, Profile likedBy);
 
 	/// <summary>
 	/// The Post was shared by a Profile
 	/// </summary>
 	/// <param name="post"></param>
 	/// <param name="sharedBy">The Profile who shared the Post</param>
-	public void Shared(Post post, Profile sharedBy);
+	public Task Shared(Post post, Profile sharedBy);
 
 	/// <summary>
 	/// The Type of the emitted event's Data field
