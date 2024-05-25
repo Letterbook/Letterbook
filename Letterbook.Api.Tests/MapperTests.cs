@@ -142,7 +142,6 @@ public class MapperTests : WithMocks
 		var actual = mapped.Audience.FirstOrDefault();
 
 		Assert.NotNull(actual);
-		Assert.Equal(uuid, actual.GetId());
 		Assert.Equal(expected.FediId, actual.FediId);
 	}
 

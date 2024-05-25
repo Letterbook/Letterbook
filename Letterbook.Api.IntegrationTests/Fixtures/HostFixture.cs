@@ -9,6 +9,7 @@ using Letterbook.Core.Workers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using Xunit.Abstractions;
@@ -64,10 +65,10 @@ public class HostFixture<T> : WebApplicationFactory<Program>, IIntegrationTestDa
 
 			Deleted = context.Database.EnsureDeleted();
 			context.Database.Migrate();
-			context.AddRange(Accounts);
-			context.AddRange(Profiles);
+			context.Accounts.AddRange(Accounts);
+			context.Profiles.AddRange(Profiles);
 			Records = context.SaveChanges();
-			context.AddRange(Posts.SelectMany(pair => pair.Value));
+			context.Posts.AddRange(Posts.SelectMany(pair => pair.Value));
 			Records += context.SaveChanges();
 		}
 	}

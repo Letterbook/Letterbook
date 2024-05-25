@@ -62,6 +62,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADRs", "ADRs", "{7CFB2A5A-D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.TimescaleFeeds.Tests", "Letterbook.Adapter.TimescaleFeeds.Tests\Letterbook.Adapter.TimescaleFeeds.Tests.csproj", "{F02A8CE8-AC0A-4C6C-9FB0-E9BE9ED50B7D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Workers", "Letterbook.Workers\Letterbook.Workers.csproj", "{58AC1B29-4EE3-4E5B-98FF-95CB67CE30DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Workers.Tests", "Letterbook.Workers.Tests\Letterbook.Workers.Tests.csproj", "{85238A51-284B-4EE6-8179-DC2D773358C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -127,6 +131,14 @@ Global
 		{F02A8CE8-AC0A-4C6C-9FB0-E9BE9ED50B7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F02A8CE8-AC0A-4C6C-9FB0-E9BE9ED50B7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F02A8CE8-AC0A-4C6C-9FB0-E9BE9ED50B7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58AC1B29-4EE3-4E5B-98FF-95CB67CE30DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58AC1B29-4EE3-4E5B-98FF-95CB67CE30DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58AC1B29-4EE3-4E5B-98FF-95CB67CE30DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58AC1B29-4EE3-4E5B-98FF-95CB67CE30DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85238A51-284B-4EE6-8179-DC2D773358C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85238A51-284B-4EE6-8179-DC2D773358C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85238A51-284B-4EE6-8179-DC2D773358C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85238A51-284B-4EE6-8179-DC2D773358C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{7CFB2A5A-DC89-4C9E-87DE-C7B4E518E77C} = {D2ADB5E5-5A1E-414D-9DA1-7888E17AAB8F}

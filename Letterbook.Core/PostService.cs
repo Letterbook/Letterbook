@@ -119,19 +119,12 @@ public class PostService : IAuthzPostService, IPostService
 		// var decision = _authz.Update(Enumerable.Empty<Claim>(), previous) // TODO: authz
 		previous.Client = post.Client; // probably should come from an authz claim
 		previous.InReplyTo = post.InReplyTo;
-		previous.Audience = post.Audience;
 
-		// remove all the removed contents, and add/update everything else
-		var removed = previous.Contents.Except(post.Contents).ToArray();
-		_posts.RemoveRange(removed);
-		previous.Contents = post.Contents;
+		previous.Audience = previous.Audience.ReplaceWith(post.Audience);
+		previous.Contents = previous.Contents.ReplaceWith(post.Contents);
 
 		var published = previous.PublishedDate != null;
-		if (published)
-		{
-			previous.UpdatedDate = DateTimeOffset.UtcNow;
-			// publish again, tbd
-		}
+		if (published) previous.UpdatedDate = DateTimeOffset.UtcNow;
 		else previous.CreatedDate = DateTimeOffset.UtcNow;
 
 
