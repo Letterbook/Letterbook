@@ -133,7 +133,6 @@ public class MapperTests : WithMocks
 		var uuid = Uuid7.NewUuid7();
 		var expected = new AudienceDto
 		{
-			Id = uuid,
 			FediId = FediId(uuid)
 		};
 		_postDto.Audience.Add(expected);
@@ -142,7 +141,6 @@ public class MapperTests : WithMocks
 		var actual = mapped.Audience.FirstOrDefault();
 
 		Assert.NotNull(actual);
-		Assert.Equal(uuid, actual.GetId());
 		Assert.Equal(expected.FediId, actual.FediId);
 	}
 

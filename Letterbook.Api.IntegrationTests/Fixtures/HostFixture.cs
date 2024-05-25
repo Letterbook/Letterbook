@@ -1,8 +1,6 @@
-using System.Text.Json;
 using Letterbook.Adapter.Db;
 using Letterbook.Core;
 using Letterbook.Core.Models;
-using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Fixtures;
 using Letterbook.Core.Workers;
@@ -64,10 +62,10 @@ public class HostFixture<T> : WebApplicationFactory<Program>, IIntegrationTestDa
 
 			Deleted = context.Database.EnsureDeleted();
 			context.Database.Migrate();
-			context.AddRange(Accounts);
-			context.AddRange(Profiles);
+			context.Accounts.AddRange(Accounts);
+			context.Profiles.AddRange(Profiles);
 			Records = context.SaveChanges();
-			context.AddRange(Posts.SelectMany(pair => pair.Value));
+			context.Posts.AddRange(Posts.SelectMany(pair => pair.Value));
 			Records += context.SaveChanges();
 		}
 	}
