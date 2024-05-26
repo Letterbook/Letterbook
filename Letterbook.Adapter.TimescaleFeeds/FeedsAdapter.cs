@@ -14,10 +14,10 @@ public class FeedsAdapter : IFeedsAdapter
 		_feedsContext = feedsContext;
 	}
 
-	public async Task AddToTimeline(Models.Post post, Models.Profile? sharedBy = default)
+	public void AddToTimeline(Models.Post post, Models.Profile? sharedBy = default)
 	{
 		var rows = TimelinePost.Denormalize(post);
-		await _feedsContext.Timelines.AddRangeAsync(rows);
+		_feedsContext.Timelines.AddRange(rows);
 	}
 
 	public async Task<int> UpdateTimeline(Models.Post post)
@@ -51,7 +51,7 @@ public class FeedsAdapter : IFeedsAdapter
 	{
 		var removedIds = removed.Select(a => a.FediId);
 		return await _feedsContext.Timelines
-			.Where(p => p.Id == post.Id && removedIds.Contains(p.AudienceId))
+			.Where(p => p.PostId == post.Id && removedIds.Contains(p.AudienceId))
 			.ExecuteDeleteAsync();
 	}
 
