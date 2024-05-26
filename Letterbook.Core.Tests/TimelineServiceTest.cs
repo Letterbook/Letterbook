@@ -1,4 +1,3 @@
-using Bogus;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
@@ -8,19 +7,15 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Core.Tests;
 
-
-
 public class TimelineServiceTest : WithMocks
 {
 	private readonly ITestOutputHelper _outputHelper;
 	private readonly Mock<ILogger<TimelineService>> _logger;
 	private readonly CoreOptions _opts;
 	private readonly Mock<IFeedsAdapter> _feeds;
-	private readonly FakeNote _note;
-	private readonly FakeProfile _profile;
+	private readonly Profile _profile;
 	private TimelineService _timeline;
-
-	internal Post TestPost;
+	private readonly Post _testPost;
 
 	public TimelineServiceTest(ITestOutputHelper outputHelper)
 	{
@@ -31,24 +26,22 @@ public class TimelineServiceTest : WithMocks
 
 		_outputHelper.WriteLine($"Bogus Seed: {Init.WithSeed()}");
 		_opts = CoreOptionsMock.Value;
-		_profile = new FakeProfile(_opts.DomainName);
-		_note = new FakeNote(_profile);
-		TestPost = _note.Generate();
+		_profile = new FakeProfile(_opts.DomainName).Generate();
+		_testPost = new FakePost(_profile).Generate();
 	}
 
-	[Fact(Skip = "Broken")]
+	[Fact]
 	public void Exists()
 	{
 		Assert.NotNull(_timeline);
 	}
 
-
-	[Fact(DisplayName = "HandleCreate should add public posts to the public audience", Skip = "Broken")]
-	public void AddToPublicOnCreate()
+	[Fact(DisplayName = "HandlePublish should add public posts to the public audience")]
+	public async Task AddToPublicOnCreate()
 	{
-		TestPost.Audience.Add(Audience.Public);
+		_testPost.Audience.Add(Audience.Public);
 
-		_timeline.HandleCreate(TestPost);
+		await _timeline.HandlePublish(_testPost);
 
 		_feeds.Verify(
 			m => m.AddToTimeline(It.IsAny<Post>(), It.IsAny<Profile>()),
@@ -56,13 +49,13 @@ public class TimelineServiceTest : WithMocks
 	}
 
 
-	[Fact(DisplayName = "HandleCreate should add follower posts to the creator's follower audience", Skip = "Broken")]
-	public void AddToFollowersOnCreate()
+	[Fact(DisplayName = "HandlePublish should add follower posts to the creator's follower audience")]
+	public async Task AddToFollowersOnCreate()
 	{
-		var expected = Audience.Followers(TestPost.Creators.First());
-		TestPost.Audience.Add(expected);
+		var expected = Audience.Followers(_testPost.Creators.First());
+		_testPost.Audience.Add(expected);
 
-		_timeline.HandleCreate(TestPost);
+		await _timeline.HandlePublish(_testPost);
 
 		_feeds.Verify(
 			m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(expected)), It.IsAny<Profile>()),
@@ -70,13 +63,13 @@ public class TimelineServiceTest : WithMocks
 	}
 
 
-	[Fact(DisplayName = "HandleCreate should add public posts to the creator's follower audience", Skip = "Broken")]
-	public void AddToFollowersImplicitlyOnCreate()
+	[Fact(DisplayName = "HandlePublish should add public posts to the creator's follower audience")]
+	public async Task AddToFollowersImplicitlyOnCreate()
 	{
-		var expected = Audience.Followers(TestPost.Creators.First());
-		TestPost.Audience.Add(Audience.Public);
+		var expected = Audience.Followers(_testPost.Creators.First());
+		_testPost.Audience.Add(Audience.Public);
 
-		_timeline.HandleCreate(TestPost);
+		await _timeline.HandlePublish(_testPost);
 
 		_feeds.Verify(
 			m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(expected)), It.IsAny<Profile>()),
@@ -84,286 +77,132 @@ public class TimelineServiceTest : WithMocks
 	}
 
 
-	[Fact(DisplayName = "HandleCreate should add any posts to the mentioned profiles' feeds", Skip = "Broken")]
-	public void AddToMentionsOnCreate()
+	[Fact(DisplayName = "HandlePublish should add posts to feed for anyone mentioned in the post")]
+	public async Task AddToMentionsOnCreate()
 	{
-		var mention = new Mention(_profile.Generate(), MentionVisibility.To);
-		TestPost.AddressedTo.Add(mention);
+		var mentioned = new FakeProfile("letterbook.example").Generate();
+		var mention = new Mention(mentioned, MentionVisibility.To);
+		_testPost.AddressedTo.Add(mention);
 		var expected = Audience.FromMention(mention.Subject);
 
-		_timeline.HandleCreate(TestPost);
+		await _timeline.HandlePublish(_testPost);
 
 		_feeds.Verify(
 			m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(expected)), It.IsAny<Profile>()),
 			Times.Once);
 	}
 
-
-	[Fact(DisplayName = "HandleCreate should add any posts to the mentioned profile's notifications", Skip = "Broken")]
-	public void AddMentionToNotificationsOnCreate()
+	[Fact(DisplayName = "HandlePublish should not add private posts to the public or follower feeds")]
+	public async Task NoAddPrivateOnCreate()
 	{
-		var profile = _profile.Generate();
-		TestPost.AddressedTo.Add(new Mention(profile, MentionVisibility.To));
+		var mentioned = new FakeProfile("letterbook.example").Generate();
+		_testPost.Audience.Clear();
+		_testPost.Audience.Remove(Audience.Followers(_testPost.Creators.First()));
+		var mention = Mention.To(mentioned);
+		_testPost.AddressedTo.Add(mention);
 
-		_timeline.HandleCreate(TestPost);
+		await _timeline.HandlePublish(_testPost);
 
-		_feeds.Verify(m => m.AddNotification(profile, TestPost, ActivityType.Create, It.IsAny<Profile?>()),
-			Times.Once);
+		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(Audience.Public)), It.IsAny<Profile>()), Times.Never);
+		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(Audience.Followers(_profile))), It.IsAny<Profile>()),
+			Times.Never);
 	}
 
 
-	[Fact(DisplayName = "HandleCreate should add any posts to all of the mentioned profiles' notifications", Skip = "Broken")]
-	public void AddAllMentionsToNotificationsOnCreate()
+	[Fact(DisplayName = "HandleShare should add public posts to the boost feed")]
+	public async Task AddPublicToTimelineOnBoost()
 	{
-		var faker = new Faker();
+		_testPost.Audience.Add(Audience.Public);
+		var booster = _profile;
+		_testPost.SharesCollection.Add(booster);
 
-		var mentions = _profile.Generate(3)
-			.Select(p => new Mention(p, faker.PickRandom<MentionVisibility>())).ToArray();
-		foreach (var mention in mentions)
-		{
-			TestPost.AddressedTo.Add(mention);
-		}
+		await _timeline.HandleShare(_testPost, _profile);
 
-		_timeline.HandleCreate(TestPost);
-
-		foreach (var mention in mentions)
-		{
-			_feeds.Verify(m => m.AddNotification(mention.Subject, TestPost, ActivityType.Create, It.IsAny<Profile?>()),
-				Times.Once);
-		}
+		_feeds.Verify(m => m.AddToTimeline(_testPost, booster), Times.Once);
 	}
 
-
-	[Fact(DisplayName = "HandleCreate should not add private posts to the public or follower feeds",
-		Skip = "Broken")]
-	public void NoAddPrivateOnCreate()
+	[Fact(DisplayName = "HandleShare should not add follower-only posts to public feeds")]
+	public async Task NoAddFollowersToTimelineOnBoost()
 	{
-		TestPost.Audience.Remove(Audience.Public);
-		TestPost.Audience.Remove(Audience.Followers(TestPost.Creators.First()));
-		var mentioned = Mention.To(_profile.Generate());
-		TestPost.AddressedTo.Add(mentioned);
+		_testPost.Audience.Clear();
+		_testPost.Audience.Add(Audience.Followers(_testPost.Creators.First()));
+		var booster = _profile;
+		_testPost.SharesCollection.Add(booster);
 
-		_timeline.HandleCreate(TestPost);
+		await _timeline.HandleShare(_testPost, booster);
 
-		// _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), Audience.Public, It.IsAny<Profile>()), Times.Never);
-		// _feeds.Verify(
-		//     m => m.AddToTimeline(It.IsAny<Note>(), Audience.Followers(TestPost.Creators.First()),
-		//         It.IsAny<Profile>()),
-		//     Times.Never);
-		// _feeds.Verify(
-		//     m => m.AddToTimeline(It.IsAny<Note>(),
-		//         It.Is<ICollection<Audience>>(audience => audience.Contains(Audience.Public)), It.IsAny<Profile>()),
-		//     Times.Never);
-		// _feeds.Verify(
-		//     m => m.AddToTimeline(It.IsAny<Note>(),
-		//         It.Is<ICollection<Audience>>(audience =>
-		//             audience.Contains(Audience.Followers(TestPost.Creators.First()))), It.IsAny<Profile>()),
-		//     Times.Never);
+		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(Audience.Public)), It.IsAny<Profile>()), Times.Never);
 	}
 
-
-	[Fact(DisplayName = "HandleBoost should add public posts to the boost feed",
-		Skip = "Broken")]
-	public void AddPublicToTimelineOnBoost()
+	[Fact(DisplayName = "HandleShare should not add private posts to public feeds")]
+	public async Task NoAddPrivateToTimelineOnBoost()
 	{
-		TestPost.Audience.Add(Audience.Public);
-		var booster = _profile.Generate();
-		TestPost.SharesCollection.Add(booster);
+		_testPost.AddressedTo.Clear();
+		_testPost.Audience.Clear();
+		_testPost.AddressedTo.Add(Mention.To(_profile));
+		var booster = _profile;
+		_testPost.SharesCollection.Add(booster);
 
-		_timeline.HandleBoost(TestPost);
+		await _timeline.HandleShare(_testPost, booster);
 
-		// _feeds.Verify(m => m.AddToTimeline(TestPost, Audience.Boosts(booster), booster), Times.Once);
+		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(Audience.Public)), It.IsAny<Profile>()), Times.Never);
+		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(Audience.Followers(_profile))), It.IsAny<Profile>()),
+			Times.Never);
 	}
 
-
-	[Fact(DisplayName = "HandleBoost should not add follower posts to any feed",
-		Skip = "Broken")]
-	public void NoAddFollowersToTimelineOnBoost()
+	[Fact(DisplayName = "HandleUpdate should update existing feed entries")]
+	public async Task CanUpdate()
 	{
-		TestPost.Audience.Add(Audience.Followers(TestPost.Creators.First()));
-		var booster = _profile.Generate();
-		TestPost.SharesCollection.Add(booster);
+		var old = _testPost.ShallowClone();
+		_testPost.Preview = "New Preview";
 
-		_timeline.HandleBoost(TestPost);
+		await _timeline.HandleUpdate(_testPost, old);
 
-		// _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.IsAny<Audience>(), It.IsAny<Profile>()), Times.Never);
-		// _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.IsAny<ICollection<Audience>>(), It.IsAny<Profile>()),
-		// Times.Never);
+		_feeds.Verify(m => m.UpdateTimeline(It.IsAny<Post>()), Times.Once);
+		_feeds.Verify(m => m.Start());
+		_feeds.Verify(m => m.Commit());
+		_feeds.VerifyNoOtherCalls();
 	}
 
-
-	[Fact(DisplayName = "HandleBoost should not add private posts to any feed", Skip = "Broken")]
-	public void NoAddPrivateToTimelineOnBoost()
+	[Fact(DisplayName = "HandleUpdate should add post to mentioned profiles' feeds")]
+	public async Task AddToMentionsOnUpdate()
 	{
-		TestPost.AddressedTo.Add(Mention.To(_profile.Generate()));
-		var booster = _profile.Generate();
-		TestPost.SharesCollection.Add(booster);
-
-		_timeline.HandleBoost(TestPost);
-
-		// _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.IsAny<Audience>(), It.IsAny<Profile>()), Times.Never);
-		// _feeds.Verify(m => m.AddToTimeline(It.IsAny<Note>(), It.IsAny<ICollection<Audience>>(), It.IsAny<Profile>()),
-		// Times.Never);
-	}
-
-
-	[Fact(DisplayName = "HandleBoost should add notification for creator", Skip = "Broken")]
-	public void AddNotificationForCreatorOnBoost()
-	{
-		var creator = _profile.Generate();
-		// var note = new FakeNote(creator).Generate();
-		var booster = _profile.Generate();
-		// note.SharesCollection.Add(booster);
-
-		// _timeline.HandleBoost(note);
-
-		// _feeds.Verify(m => m.AddNotification(creator, note, It.IsAny<IEnumerable<Profile>>(), ActivityType.Announce),
-		// Times.Once);
-	}
-
-
-	[Fact(DisplayName = "HandleUpdate should add to followers timeline", Skip = "Broken")]
-	public void AddToFollowersOnUpdate()
-	{
-		var expected = Audience.Followers(TestPost.Creators.First());
-		TestPost.Audience.Add(expected);
-
-		_timeline.HandleUpdate(TestPost);
-
-		// _feeds.Verify(
-		// m => m.AddToTimeline(It.IsAny<Note>(),
-		// It.Is<ICollection<Audience>>(audience => audience.Contains(expected)), It.IsAny<Profile>()),
-		// Times.Once);
-	}
-
-
-	[Fact(DisplayName = "HandleUpdate should add to all creator's followers timeline", Skip = "Broken")]
-	public void AddToAllFollowersOnUpdate()
-	{
-		TestPost.Creators.Add(_profile.Generate());
-		var audience = TestPost.Creators.Select(Audience.Followers).ToArray();
-		TestPost.Audience.Add(Audience.Public);
-
-		_timeline.HandleUpdate(TestPost);
-
-		// This assertion looks more complicated than it is.
-		// It just checks that the followers audience is included for every creator on the note
-		// _feeds.Verify(
-		// m => m.AddToTimeline(It.IsAny<Note>(),
-		// It.Is<ICollection<Audience>>(actual =>
-		// audience.Aggregate(true, (contains, expected) => contains && actual.Contains(expected))),
-		// It.IsAny<Profile>()), Times.Once);
-	}
-
-
-	[Fact(DisplayName = "HandleUpdate should add to all mentioned profiles' notifications", Skip = "Broken")]
-	public void AddToAllMentionedNotifications()
-	{
-		var mentions = _profile.Generate(3).Select(Mention.To).ToArray();
-		foreach (var mention in mentions)
-		{
-			TestPost.AddressedTo.Add(mention);
-		}
-
-		_timeline.HandleUpdate(TestPost);
-
-		foreach (var expected in mentions)
-		{
-			// _feeds.Verify(m => m.AddNotification(expected.Subject, TestPost, TestPost.Creators, ActivityType.Update),
-			// Times.Once);
-		}
-	}
-
-
-	[Fact(DisplayName = "HandleUpdate should add to all boosters' notifications", Skip = "Broken")]
-	public void AddToAllBoostersNotifications()
-	{
-		var boosters = _profile.Generate(3).ToArray();
-		foreach (var mention in boosters)
-		{
-			// TestPost.AddressedTo.Add(mention);
-		}
-
-		_timeline.HandleUpdate(TestPost);
-
-		foreach (var expected in boosters)
-		{
-			// _feeds.Verify(m => m.AddNotification(expected, TestPost, TestPost.Creators, ActivityType.Update),
-			// Times.Once);
-		}
-	}
-
-
-	[Fact(DisplayName = "HandleUpdate should add to multiple creators' notifications", Skip = "Broken")]
-	public void AddToOtherCreatorsNotifications()
-	{
-		var localCreator = _profile.Generate();
-		TestPost.Creators.Add(localCreator);
-
-		_timeline.HandleUpdate(TestPost);
-
-		// _feeds.Verify(m => m.AddNotification(localCreator, TestPost, TestPost.Creators, ActivityType.Update),
-		// Times.Once);
-	}
-
-
-	[Fact(DisplayName = "HandleUpdate should add post to mentioned profiles' feeds", Skip = "Broken")]
-	public void AddToMentionsOnUpdate()
-	{
-		var mentioned = Mention.To(_profile.Generate());
+		var oldPost = _testPost.ShallowClone();
+		var mentioned = Mention.To(_profile);
 		var expected = Audience.FromMention(mentioned.Subject);
-		TestPost.AddressedTo.Add(mentioned);
+		_testPost.AddressedTo = [mentioned];
 
-		_timeline.HandleUpdate(TestPost);
+		await _timeline.HandleUpdate(_testPost, oldPost);
 
-		// _feeds.Verify(
-		// m => m.AddToTimeline(TestPost, It.Is<ICollection<Audience>>(actual => actual.Contains(expected)),
-		// It.IsAny<Profile>()), Times.Once);
+		_feeds.Verify(m => m.AddToTimeline(It.Is<Post>(p => p.Audience.Contains(expected)), It.IsAny<Profile>()), Times.Once);
+		_feeds.Verify(m => m.RemoveFromTimelines(It.IsAny<Post>(), It.IsAny<IEnumerable<Audience>>()), Times.Never);
+		_feeds.Verify(m => m.Start());
+		_feeds.Verify(m => m.Commit());
+		_feeds.VerifyNoOtherCalls();
 	}
 
-
-	[Fact(DisplayName = "HandleUpdate should not add private post to any creator's followers timeline", Skip = "Broken")]
-	public void NoAddPrivateToFollowersOnUpdate()
+	[Fact(DisplayName = "HandleUpdate should remove posts from excluded profile's feeds")]
+	public async Task RemoveFromMentionsOnUpdate()
 	{
-		TestPost.Creators.Add(_profile.Generate());
-		var audience = TestPost.Creators.Select(Audience.Followers).ToArray();
-		TestPost.Audience.Remove(Audience.Public);
+		_testPost.Audience.Clear();
+		var oldPost = _testPost.ShallowClone();
+		var expected = Audience.FromMention(new FakeProfile().Generate());
+		oldPost.Audience = [expected];
 
-		_timeline.HandleUpdate(TestPost);
+		await _timeline.HandleUpdate(_testPost, oldPost);
 
-		// _feeds.Verify(
-		// m => m.AddToTimeline(It.IsAny<Note>(),
-		// It.Is<ICollection<Audience>>(actual =>
-		// audience.Aggregate(false, (contains, expected) => contains || actual.Contains(expected))),
-		// It.IsAny<Profile>()), Times.Never);
+		_feeds.Verify(m => m.AddToTimeline(It.IsAny<Post>(), It.IsAny<Profile>()), Times.Never);
+		_feeds.Verify(m => m.RemoveFromTimelines(It.IsAny<Post>(), It.Is<IEnumerable<Audience>>(a => a.Contains(expected))), Times.Once);
+		_feeds.Verify(m => m.Start());
+		_feeds.Verify(m => m.Commit());
+		_feeds.VerifyNoOtherCalls();
 	}
 
-
-	[Fact(DisplayName = "HandleUpdate should not add to single creator's notifications", Skip = "Broken")]
-	public void NoAddToSingleCreatorsNotifications()
+	[Fact(DisplayName = "HandleDelete should remove the deleted post from all feeds")]
+	public async Task RemoveFromFeedsOnDelete()
 	{
-		_timeline.HandleUpdate(TestPost);
+		await _timeline.HandleDelete(_testPost);
 
-		// _feeds.Verify(
-		// m => m.AddNotification(TestPost.Creators.First(), TestPost, TestPost.Creators, ActivityType.Update),
-		// Times.Never);
-	}
-
-
-	[Fact(DisplayName = "HandleDelete should remove the deleted post from all feeds", Skip = "Broken")]
-	public void RemoveFromFeedsOnDelete()
-	{
-
-		_timeline.HandleDelete(TestPost);
-
-		_feeds.Verify(m => m.RemoveFromTimelines(TestPost), Times.Once);
-	}
-}
-
-public class FakeNote : Faker<Post>
-{
-	public FakeNote(FakeProfile profile)
-	{
-		throw new NotImplementedException();
+		_feeds.Verify(m => m.RemoveFromAllTimelines(_testPost), Times.Once);
 	}
 }

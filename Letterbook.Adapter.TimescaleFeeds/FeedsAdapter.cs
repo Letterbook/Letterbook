@@ -19,13 +19,24 @@ public class FeedsAdapter : IFeedsAdapter
 		throw new NotImplementedException();
 	}
 
+	public Task<int> UpdateTimeline(Models.Post post)
+	{
+		throw new NotImplementedException();
+	}
+
 	public void AddNotification(Models.Profile recipient, Models.Post post, Models.ActivityType activity, Models.Profile? sharedBy)
 	{
 		throw new NotImplementedException();
 	}
 
-	public Task<int> RemoveFromTimelines(Models.Post post)
+	public Task<int> RemoveFromAllTimelines(Models.Post post)
 	{
+		throw new NotImplementedException();
+	}
+
+	public async Task<int> RemoveFromTimelines(Models.Post post, IEnumerable<Models.Audience> removed)
+	{
+		await Task.CompletedTask;
 		throw new NotImplementedException();
 	}
 
@@ -95,11 +106,11 @@ public class FeedsAdapter : IFeedsAdapter
 		_feedsContext.Dispose();
 	}
 
-	private void Start()
+	public async Task Start()
 	{
 		if (_feedsContext.Database.CurrentTransaction is null)
 		{
-			_feedsContext.Database.BeginTransaction();
+			await _feedsContext.Database.BeginTransactionAsync();
 		}
 	}
 }
