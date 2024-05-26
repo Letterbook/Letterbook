@@ -1,4 +1,5 @@
 using Letterbook.Core.Extensions;
+using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 
@@ -34,5 +35,21 @@ public static class IntegrationTestExtensions
 		// Remote profiles
 		// P4 creates post 0, as reply to post P0:3
 		data.Posts.Add(data.Profiles[4], new FakePost(data.Profiles[3], data.Posts[data.Profiles[0]][3]).Generate(1));
+
+		var all = data.Posts
+			.SelectMany(pair => pair.Value)
+			.SelectMany(post => post.Audience)
+			.ToHashSet();
+
+		foreach (var post in data.Posts.SelectMany(pair => pair.Value))
+		{
+			var set = new HashSet<Audience>();
+			foreach (var audience in post.Audience)
+			{
+				set.Add(all.TryGetValue(audience, out var existing) ? existing : audience);
+			}
+
+			post.Audience = set;
+		}
 	}
 }

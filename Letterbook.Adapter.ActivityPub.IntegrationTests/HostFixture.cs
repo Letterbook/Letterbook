@@ -1,8 +1,6 @@
-using Letterbook.Adapter.Db;
 using Letterbook.Api;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Events;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
@@ -11,7 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -41,25 +39,15 @@ public class HostFixture : WebApplicationFactory<Program>
 		builder.UseEnvironment("Sandcastle");
 		builder.ConfigureTestServices(services =>
 		{
-			if (services.SingleOrDefault(descriptor => descriptor.ServiceType == typeof(IAccountProfileAdapter)) is { } adapter)
-			{
-				services.Remove(adapter);
-			}
-
-			if (services.SingleOrDefault(descriptor => descriptor.ServiceType == typeof(IActivityAdapter)) is { } act)
-			{
-				services.Remove(act);
-			}
-
-			if (services.SingleOrDefault(descriptor => descriptor.ServiceType == typeof(SeedAdminWorker)) is { } seed)
-			{
-				services.Remove(seed);
-			}
+			services.RemoveAll(typeof(IAccountProfileAdapter));
+			services.RemoveAll(typeof(IActivityAdapter));
+			services.RemoveAll(typeof(SeedAdminWorker));
 
 			services.AddScoped<IAccountProfileAdapter>(_ => Mocks.AccountProfileMock.Object);
 			services.AddScoped<IActivityAdapter>(_ => Mocks.ActivityAdapterMock.Object);
 			services.AddScoped<SeedAdminWorker>(p =>
-				new SeedAdminWorker(p.GetService<ILogger<SeedAdminWorker>>(), p.GetService<IOptions<CoreOptions>>(), Mock.Of<IAccountService>(), p.GetService<IAccountProfileAdapter>())
+				new SeedAdminWorker(p.GetRequiredService<ILogger<SeedAdminWorker>>(), p.GetRequiredService<IOptions<CoreOptions>>(),
+					Mock.Of<IAccountService>(), p.GetRequiredService<IAccountProfileAdapter>())
 			);
 		});
 		base.ConfigureWebHost(builder);
@@ -78,7 +66,7 @@ public class HostMocks : WithMocks
 
 	public new Mock<IActivityPubClient> ActivityPubClientMock => base.ActivityPubClientMock;
 
-	public new Mock<IAccountEvents> AccountEventServiceMock => base.AccountEventServiceMock;
+	public new Mock<IAccountEventPublisher> AccountEventServiceMock => base.AccountEventServiceMock;
 
 	public new Mock<IMessageBusAdapter> MessageBusAdapterMock => base.MessageBusAdapterMock;
 

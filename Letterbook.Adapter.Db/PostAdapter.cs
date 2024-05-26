@@ -16,8 +16,10 @@ public class PostAdapter : IPostAdapter, IAsyncDisposable
 		_context = context;
 	}
 
-	private static IQueryable<Models.Post> WithDefaults(IQueryable<Models.Post> query) =>
-		query.Include(p => p.Creators).Include(p => p.Contents);
+	private static IQueryable<Models.Post> WithDefaults(IQueryable<Models.Post> query) => query
+		.Include(p => p.Creators)
+		.Include(p => p.Audience)
+		.Include(p => p.Contents);
 
 	private static IQueryable<Models.Post> WithThread(IQueryable<Models.Post> query) => WithDefaults(query)
 		.Include(post => post.Thread).ThenInclude(thread => thread.Posts).ThenInclude(p => p.Creators)
@@ -119,6 +121,7 @@ public class PostAdapter : IPostAdapter, IAsyncDisposable
 			_context.Database.BeginTransaction();
 		}
 	}
+
 	public void Dispose()
 	{
 		_context.Dispose();
