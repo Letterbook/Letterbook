@@ -35,7 +35,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterT
 		Assert.NotNull(_adapter);
 	}
 
-	[Fact]
+	[Fact(DisplayName = "Should query for a set of audiences")]
 	public async Task CanQueryAudience()
 	{
 		var audience = _timescale.Profiles.Take(5).Select(p => Audience.Followers(p));
@@ -44,7 +44,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterT
 		Assert.True(actual);
 	}
 
-	[Fact]
+	[Fact(DisplayName = "Should add a post to the correct timelines")]
 	public async Task CanAddPost()
 	{
 		var post = new FakePost("letterbook.example").Generate();
@@ -61,7 +61,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterT
 		Assert.Equal(expected, actual);
 	}
 
-	[Fact]
+	[Fact(DisplayName = "Should remove a post from all timelines")]
 	public async Task CanRemovePost()
 	{
 		var post = _timescale.Posts.Last();
@@ -72,7 +72,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterT
 		Assert.Equal(0, actual);
 	}
 
-	[Fact]
+	[Fact(DisplayName = "Should remove a post from specific audiences")]
 	public async Task CanRemovePostFromAudience()
 	{
 		var post = _timescale.Posts.First(p => p.AddressedTo.Count >= 1);
@@ -83,6 +83,20 @@ public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterT
 
 		var actual = await _actual.Timelines.Where(p => p.PostId == post.Id).ToListAsync();
 		Assert.DoesNotContain(Audience.FromMention(expected.Subject).FediId, actual.Select(p => p.AudienceId));
+		Assert.NotEmpty(actual);
+	}
+
+	[Fact(DisplayName = "Should update the timeline view of a post")]
+	public async Task CanUpdatePost()
+	{
+		var post = _timescale.Posts.Skip(1).First();
+		var expected = $"Updated in {nameof(CanUpdatePost)}";
+		post.Preview = expected;
+
+		await _adapter.UpdateTimeline(post);
+
+		var actual = await _actual.Timelines.Where(p => p.PostId == post.Id).Select(p => p.Preview).ToListAsync();
+		Assert.All(actual, s => Assert.Equal(s, expected));
 		Assert.NotEmpty(actual);
 	}
 }
