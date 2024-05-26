@@ -83,6 +83,7 @@ public class PostEventPublisher : IPostEventPublisher
 			Type = action,
 			NextData = nextValue,
 			PrevData = prevValue,
-			Subject = nextValue.GetId25()
+			Subject = nextValue.GetId25(),
+			EventType = Enum.Parse<PostEvent.PostEventType>(action)
 		};
 }
