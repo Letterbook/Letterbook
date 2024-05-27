@@ -77,13 +77,11 @@ public class PostEventPublisher : IPostEventPublisher
 	private PostEvent Message(Post nextValue, Post? prevValue, Uuid7? sender, string action, ImmutableHashSet<Claim> claims) =>
 		new PostEvent
 		{
-			Source = _options.BaseUri().ToString(),
 			Sender = sender,
-			Claims = claims,
-			Type = action,
+			Claims = claims.ToArray(),
 			NextData = nextValue,
 			PrevData = prevValue,
 			Subject = nextValue.GetId25(),
-			EventType = Enum.Parse<PostEvent.PostEventType>(action)
+			Type = action
 		};
 }

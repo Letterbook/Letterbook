@@ -13,6 +13,7 @@ public static class DependencyInjection
 	{
 		services.TryAddTypesModule();
 		return services.AddScoped<IActivityPubClient>(_ => mocks.ActivityPubClientMock.Object)
+			.AddScoped<ITimelineService>(_ => mocks.TimelineServiceMock.Object)
 			.AddScoped<IProfileService>(_ => mocks.ProfileServiceMock.Object)
 			.AddSingleton<IOptions<CoreOptions>>(mocks.CoreOptionsMock);
 	}

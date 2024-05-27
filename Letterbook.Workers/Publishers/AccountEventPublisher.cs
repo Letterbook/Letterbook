@@ -58,7 +58,6 @@ public class AccountEventPublisher : IAccountEventPublisher
 	{
 		return new AccountEvent
 		{
-			Source = _options.BaseUri().ToString(),
 			Subject = nextValue.Id.ToString(),
 			Claims = claims.ToImmutableHashSet(),
 			Type = action,

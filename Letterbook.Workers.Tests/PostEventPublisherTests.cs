@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Workers.Tests;
 
-public class PostEventPublisherTests : WithMocks, IAsyncDisposable
+public sealed class PostEventPublisherTests : WithMocks, IAsyncDisposable
 {
 	private readonly ServiceProvider _provider;
 	private readonly IPostEventPublisher _publisher;

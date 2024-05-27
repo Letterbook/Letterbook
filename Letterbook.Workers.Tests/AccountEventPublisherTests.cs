@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Workers.Tests;
 
-public class AccountEventPublisherTests : WithMocks, IAsyncDisposable
+public sealed class AccountEventPublisherTests : WithMocks, IAsyncDisposable, IDisposable
 {
 	private readonly ServiceProvider _provider;
 	private readonly IAccountEventPublisher _publisher;
@@ -94,6 +94,12 @@ public class AccountEventPublisherTests : WithMocks, IAsyncDisposable
 		await _publisher.Verified(_account, []);
 
 		Assert.True(await _harness.Published.Any<AccountEvent>(msg => msg.Context.Message.Type == "Verified"));
+	}
+
+
+	public void Dispose()
+	{
+		_provider.Dispose();
 	}
 
 	public async ValueTask DisposeAsync()
