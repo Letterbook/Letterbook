@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Medo;
 
-namespace Letterbook.Api.Json;
+namespace Letterbook.Core.Models.Mappers.Converters;
 
 public class Uuid7JsonConverter : JsonConverter<Uuid7>
 {

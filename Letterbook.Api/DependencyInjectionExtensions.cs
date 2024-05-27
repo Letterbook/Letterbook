@@ -151,11 +151,7 @@ public static class DependencyInjectionExtensions
 				options.OutputFormatters.Insert(0, new JsonLdOutputFormatter());
 				options.InputFormatters.Insert(0, new JsonLdInputFormatter());
 			})
-			.AddJsonOptions(options =>
-			{
-				options.JsonSerializerOptions.Converters.Add(new Json.Uuid7JsonConverter());
-				options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-			})
+			.AddJsonOptions(options => options.JsonSerializerOptions.AddDtoSerializer())
 			.Services.Configure<ApiBehaviorOptions>(options =>
 			{
 				options.InvalidModelStateResponseFactory = context =>
