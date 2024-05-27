@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Text.Json.Serialization;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Medo;
@@ -20,21 +19,6 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	private Profile()
 	{
 		FediId = default!;
-		Inbox = default!;
-		Outbox = default!;
-		Followers = default!;
-		Following = default!;
-		Type = default;
-		Handle = default!;
-		DisplayName = default!;
-		Description = default!;
-	}
-
-	[JsonConstructor]
-	public Profile(Guid id, Uri fediId)
-	{
-		Id = id;
-		FediId = fediId;
 		Inbox = default!;
 		Outbox = default!;
 		Followers = default!;
@@ -95,16 +79,15 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public string Handle { get; set; }
 	public string DisplayName { get; set; }
 	public string Description { get; set; }
-
-	[JsonIgnore] public CustomField[] CustomFields { get; set; } = [];
-	[JsonIgnore] public DateTime Updated { get; set; } = DateTime.UtcNow;
-	[JsonIgnore] public Account? OwnedBy { get; set; }
-	[JsonIgnore] public ICollection<ProfileAccess> Accessors { get; set; } = new HashSet<ProfileAccess>();
-	[JsonIgnore] public ActivityActorType Type { get; set; }
-	[JsonIgnore] public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
-	[JsonIgnore] public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
-	[JsonIgnore] public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
-	[JsonIgnore] public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
+	public CustomField[] CustomFields { get; set; } = [];
+	public DateTime Updated { get; set; } = DateTime.UtcNow;
+	public Account? OwnedBy { get; set; }
+	public ICollection<ProfileAccess> Accessors { get; set; } = new HashSet<ProfileAccess>();
+	public ActivityActorType Type { get; set; }
+	public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
+	public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
+	public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
+	public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
 
 	public Uuid7 GetId() => _id;
 	public string GetId25() => _id.ToId25String();
