@@ -1,12 +1,9 @@
 using AutoMapper;
-using Letterbook.Api.Dto;
-using Letterbook.Api.Mappers.Converters;
-using Letterbook.Core;
-using Letterbook.Core.Models;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers.Converters;
 using Microsoft.Extensions.Options;
-using Models = Letterbook.Core.Models;
 
-namespace Letterbook.Api.Mappers;
+namespace Letterbook.Core.Models.Mappers;
 
 public class PostMappings : AutoMapper.Profile
 {

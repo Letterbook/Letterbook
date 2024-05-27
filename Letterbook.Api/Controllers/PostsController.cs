@@ -1,11 +1,12 @@
 using System.Net;
 using AutoMapper;
 using Letterbook.Api.Dto;
-using Letterbook.Api.Mappers;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;

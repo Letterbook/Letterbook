@@ -1,9 +1,7 @@
 using AutoMapper;
-using Letterbook.Core;
-using Medo;
 using Microsoft.Extensions.Options;
 
-namespace Letterbook.Api.Mappers;
+namespace Letterbook.Core.Models.Mappers;
 
 /// <summary>
 /// This class exists to allow AutoMapper configs to benefit from Dependency Injection. Specifically, from IOptions.
