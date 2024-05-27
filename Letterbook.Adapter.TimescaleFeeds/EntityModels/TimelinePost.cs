@@ -66,7 +66,7 @@ public class TimelinePost
 	/// <summary>ID of the Thread to which the Post belongs</summary>
 	public required Guid ThreadId { get; set; }
 
-	public static implicit operator Post(TimelinePost p) => new Post
+	public static explicit operator Post(TimelinePost p) => new Post
 	{
 		Id = p.PostId,
 		Thread = new ThreadContext()
@@ -82,6 +82,19 @@ public class TimelinePost
 		UpdatedDate = p.UpdatedDate,
 		Audience = [],
 		InReplyTo = p.InReplyToId != null ? new Post() { Id = p.InReplyToId.Value } : default,
+	};
+
+	public static explicit operator TimelinePost(Post p) => new TimelinePost
+	{
+		PostId = p.Id,
+		Preview = p.Preview ?? "PREVIEW NOT AVAILABLE", // TODO: Generate Preview
+		Authority = p.Authority,
+		Creators = p.Creators.Select(pc => (TimelineProfile)pc).ToList(),
+		Summary = p.Summary,
+		UpdatedDate = p.UpdatedDate ?? p.CreatedDate,
+		InReplyToId = p.InReplyTo?.Id,
+		AudienceId = p.Audience.FirstOrDefault()?.FediId!,
+		ThreadId = p.Thread.Id
 	};
 
 	public static IEnumerable<TimelinePost> Denormalize(Post p, Profile? sharedBy = null)

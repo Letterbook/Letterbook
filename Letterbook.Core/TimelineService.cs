@@ -28,14 +28,16 @@ public class TimelineService : ITimelineService
 	{
 		// TODO: account for moderation conditions (blocks, etc)
 		post.Audience = NormalizeAudience(post);
-		await _feeds.AddToTimeline(post);
+		_feeds.AddToTimeline(post);
+		await _feeds.Commit();
 	}
 
 	/// <inheritdoc />
 	public async Task HandleShare(Post post, Profile sharedBy)
 	{
 		var boostedBy = post.SharesCollection.Last();
-		await _feeds.AddToTimeline(post, boostedBy);
+		_feeds.AddToTimeline(post, boostedBy);
+		await _feeds.Commit();
 	}
 
 	/// <inheritdoc />
@@ -50,7 +52,7 @@ public class TimelineService : ITimelineService
 		if (added.Count != 0)
 		{
 			post.Audience = added;
-			await _feeds.AddToTimeline(post);
+			_feeds.AddToTimeline(post);
 		}
 
 		if (removed.Count != 0) await _feeds.RemoveFromTimelines(post, removed);
