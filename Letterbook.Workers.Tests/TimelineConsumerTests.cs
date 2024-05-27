@@ -30,7 +30,7 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 	{
 		_output = output;
 		_provider = new ServiceCollection()
-			.AddSingleton<ILoggerFactory>(_ => output.BuildLoggerFactory(LogLevel.Debug))
+			.AddSingleton<ILoggerFactory>(_ => output.BuildLoggerFactory(LogLevel.Error))
 			.AddMocks(this)
 			.AddMassTransitTestHarness(bus =>
 			{
