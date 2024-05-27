@@ -1,11 +1,10 @@
 using AutoMapper;
-using Letterbook.Api.Dto;
-using Letterbook.Api.Mappers;
-using Letterbook.Core.Tests;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Tests.Fakes;
 using Medo;
 
-namespace Letterbook.Api.Tests;
+namespace Letterbook.Core.Tests;
 
 public class MapperTests : WithMocks
 {

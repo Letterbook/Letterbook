@@ -10,13 +10,13 @@ using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
 using Letterbook.Api.Authentication.HttpSignature.Handler;
-using Letterbook.Api.Mappers;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Authorization;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Workers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -151,11 +151,7 @@ public static class DependencyInjectionExtensions
 				options.OutputFormatters.Insert(0, new JsonLdOutputFormatter());
 				options.InputFormatters.Insert(0, new JsonLdInputFormatter());
 			})
-			.AddJsonOptions(options =>
-			{
-				options.JsonSerializerOptions.Converters.Add(new Json.Uuid7JsonConverter());
-				options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-			})
+			.AddJsonOptions(options => options.JsonSerializerOptions.AddDtoSerializer())
 			.Services.Configure<ApiBehaviorOptions>(options =>
 			{
 				options.InvalidModelStateResponseFactory = context =>
