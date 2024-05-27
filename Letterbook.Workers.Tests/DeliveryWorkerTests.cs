@@ -44,6 +44,7 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 		_profile = new FakeProfile("letterbook.example").Generate();
 
 		MockAuthorizeAllowAll();
+		_harness.Start().Wait();
 	}
 
 	[Fact]
@@ -56,7 +57,6 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	[Fact(DisplayName = "Should consume ActivityMessages")]
 	public async Task CanConsume()
 	{
-		await _harness.Start();
 		var asDoc = new NoteObject();
 		asDoc.AttributedTo.Add(new Linkable<ASObject>(new ASLink
 		{
@@ -80,7 +80,6 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	[Fact(DisplayName = "Should publish ActivityMessages")]
 	public async Task CanPublish()
 	{
-		await _harness.Start();
 		var asDoc = new NoteObject();
 		asDoc.AttributedTo.Add(new Linkable<ASObject>(new ASLink
 		{
@@ -95,7 +94,6 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	[Fact(DisplayName = "Should send ASDocs to their destination")]
 	public async Task CanSend()
 	{
-		await _harness.Start();
 		var asDoc = new NoteObject();
 		asDoc.AttributedTo.Add(new Linkable<ASObject>(new ASLink
 		{
@@ -111,5 +109,6 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	public async ValueTask DisposeAsync()
 	{
 		await _provider.DisposeAsync();
+		await _harness.Stop();
 	}
 }
