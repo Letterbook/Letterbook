@@ -1,7 +1,8 @@
-﻿using ActivityPub.Types;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Authorization;
-using Letterbook.Core.Events;
+using Letterbook.Core.Models.Mappers.Converters;
 using Letterbook.Core.Workers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,5 +64,13 @@ public static class DependencyInjection
 			{
 				tracing.AddOtlpExporter();
 			});
+	}
+
+	public static JsonSerializerOptions AddDtoSerializer(this JsonSerializerOptions options)
+	{
+		options.Converters.Add(new Uuid7JsonConverter());
+		options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+
+		return options;
 	}
 }
