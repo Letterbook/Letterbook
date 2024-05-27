@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 
-namespace Letterbook.Api.Mappers.Converters;
+namespace Letterbook.Core.Models.Mappers.Converters;
 
 public class DateTimeOffsetMapper : IValueConverter<DateTimeOffset?, DateTimeOffset>,
 	IValueConverter<DateTimeOffset?, DateTimeOffset?>,
