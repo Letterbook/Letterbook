@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
-using Letterbook.Api.Dto;
-using Letterbook.Api.Mappers.Converters;
-using Models = Letterbook.Core.Models;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers.Converters;
 using Medo;
 
-namespace Letterbook.Api.Mappers;
+namespace Letterbook.Core.Models.Mappers;
 
 public class BaseMappings : AutoMapper.Profile
 {

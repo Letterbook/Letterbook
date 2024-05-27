@@ -1,7 +1,4 @@
-using Letterbook.Core.Models;
-using Medo;
-
-namespace Letterbook.Api.Dto;
+namespace Letterbook.Core.Models.Dto;
 
 public class MentionDto
 {

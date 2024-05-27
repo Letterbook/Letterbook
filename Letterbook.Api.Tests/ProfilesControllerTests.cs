@@ -1,7 +1,8 @@
 ﻿using Letterbook.Api.Controllers;
 using Letterbook.Api.Dto;
-using Letterbook.Api.Mappers;
 using Letterbook.Core.Extensions;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Tests.Fakes;
 using Medo;
 using Microsoft.AspNetCore.Mvc;

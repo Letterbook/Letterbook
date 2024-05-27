@@ -1,6 +1,7 @@
 using Bogus;
 using Letterbook.Api.Dto;
 using Letterbook.Core;
+using Letterbook.Core.Models.Dto;
 
 namespace Letterbook.Api.Tests.Fakes;
 

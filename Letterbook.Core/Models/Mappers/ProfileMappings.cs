@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
-using Letterbook.Api.Dto;
-using Models = Letterbook.Core.Models;
+using Letterbook.Core.Models.Dto;
 
 
-namespace Letterbook.Api.Mappers;
+namespace Letterbook.Core.Models.Mappers;
 
 public class ProfileMappings : AutoMapper.Profile
 {
