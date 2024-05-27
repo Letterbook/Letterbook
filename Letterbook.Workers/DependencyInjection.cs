@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.Json.Serialization;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Letterbook.Workers.Contracts;
 using Letterbook.Workers.Publishers;
 using MassTransit;
@@ -37,12 +38,7 @@ public static class DependencyInjection
 		bus.UsingInMemory((context, configurator) =>
 		{
 			configurator.ConfigureEndpoints(context);
-			configurator.ConfigureJsonSerializerOptions(options =>
-			{
-				options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-
-				return options;
-			});
+			configurator.ConfigureJsonSerializerOptions(options => options.AddDtoSerializer());
 		});
 
 		return bus;

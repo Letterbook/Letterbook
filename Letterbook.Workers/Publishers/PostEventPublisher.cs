@@ -1,13 +1,16 @@
 ﻿using System.Collections.Immutable;
 using System.Security.Claims;
+using AutoMapper;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers;
 using Letterbook.Workers.Contracts;
 using MassTransit;
 using Medo;
 using Microsoft.Extensions.Options;
+using Profile = Letterbook.Core.Models.Profile;
 
 namespace Letterbook.Workers.Publishers;
 
@@ -16,12 +19,14 @@ public class PostEventPublisher : IPostEventPublisher
 	private readonly ILogger<PostEventPublisher> _logger;
 	private readonly IBus _bus;
 	private readonly CoreOptions _options;
+	private readonly Mapper _mapper;
 
-	public PostEventPublisher(ILogger<PostEventPublisher> logger, IOptions<CoreOptions> options, IBus bus)
+	public PostEventPublisher(ILogger<PostEventPublisher> logger, IOptions<CoreOptions> options, IBus bus, MappingConfigProvider maps)
 	{
 		_logger = logger;
 		_bus = bus;
 		_options = options.Value;
+		_mapper = new Mapper(maps.Posts);
 	}
 
 	/// <inheritdoc />
@@ -72,15 +77,16 @@ public class PostEventPublisher : IPostEventPublisher
 
 	private PostEvent Message(Post value, string action, ImmutableHashSet<Claim> claims) => Message(value, null, action, claims);
 
-	private PostEvent Message(Post value, Uuid7? sender, string action, ImmutableHashSet<Claim> claims) => Message(value, null, sender, action, claims);
+	private PostEvent Message(Post value, Uuid7? sender, string action, ImmutableHashSet<Claim> claims) =>
+		Message(value, null, sender, action, claims);
 
 	private PostEvent Message(Post nextValue, Post? prevValue, Uuid7? sender, string action, ImmutableHashSet<Claim> claims) =>
 		new PostEvent
 		{
 			Sender = sender,
 			Claims = claims.ToArray(),
-			NextData = nextValue,
-			PrevData = prevValue,
+			NextData = _mapper.Map<PostDto>(nextValue),
+			PrevData = prevValue is null ? null : _mapper.Map<PostDto>(prevValue),
 			Subject = nextValue.GetId25(),
 			Type = action
 		};

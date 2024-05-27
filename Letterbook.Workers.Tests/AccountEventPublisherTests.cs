@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Workers.Tests;
 
-public sealed class AccountEventPublisherTests : WithMocks, IAsyncDisposable, IDisposable
+public sealed class AccountEventPublisherTests : WithMocks, IAsyncDisposable
 {
 	private readonly ServiceProvider _provider;
 	private readonly IAccountEventPublisher _publisher;
@@ -25,15 +25,7 @@ public sealed class AccountEventPublisherTests : WithMocks, IAsyncDisposable, ID
 			.AddScoped<IAccountEventPublisher, AccountEventPublisher>()
 			.AddMassTransitTestHarness(bus =>
 			{
-				bus.UsingInMemory((_, configurator) =>
-				{
-					configurator.ConfigureJsonSerializerOptions(options =>
-					{
-						options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-
-						return options;
-					});
-				});
+				bus.AddTestBus();
 			})
 			.BuildServiceProvider();
 		_publisher = _provider.GetRequiredService<IAccountEventPublisher>();
@@ -96,11 +88,9 @@ public sealed class AccountEventPublisherTests : WithMocks, IAsyncDisposable, ID
 		Assert.True(await _harness.Published.Any<AccountEvent>(msg => msg.Context.Message.Type == "Verified"));
 	}
 
-
-	public void Dispose()
-	{
-		_provider.Dispose();
-	}
+	/*
+	 * Support methods
+	 */
 
 	public async ValueTask DisposeAsync()
 	{
