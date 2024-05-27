@@ -6,7 +6,7 @@ public interface IFeedsAdapter : IDisposable
 {
 	/// <summary>
 	/// Add a Post to the front of the timeline.
-	///
+	/// 
 	/// This will make it available to members of any audience that should include this post.
 	/// Typically, that includes the followers of the author(s), or of the sharing profile, and anyone addressed or
 	/// mentioned in the post
@@ -14,7 +14,7 @@ public interface IFeedsAdapter : IDisposable
 	/// <param name="post"></param>
 	/// <param name="sharedBy"></param>
 	/// <returns></returns>
-	public Task<int> AddToTimeline(Post post, Profile? sharedBy = default);
+	public void AddToTimeline(Post post, Profile? sharedBy = default);
 
 	/// <summary>
 	/// Update the existing entries for a post
