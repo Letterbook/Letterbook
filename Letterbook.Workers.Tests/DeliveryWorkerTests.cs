@@ -73,6 +73,7 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 			Inbox = new Uri("https://peer.example/Actor/SharedInbox")
 		});
 
+		Assert.True(await _harness.Published.Any<ActivityMessage>());
 		Assert.True(await _harness.Consumed.Any<ActivityMessage>());
 	}
 
