@@ -14,14 +14,27 @@ public class FeedsAdapter : IFeedsAdapter
 		_feedsContext = feedsContext;
 	}
 
-	public Task<int> AddToTimeline(Models.Post post, Models.Profile? sharedBy = default)
+	public void AddToTimeline(Models.Post post, Models.Profile? sharedBy = default)
 	{
-		throw new NotImplementedException();
+		var rows = TimelinePost.Denormalize(post);
+		_feedsContext.Timelines.AddRange(rows);
 	}
 
-	public Task<int> UpdateTimeline(Models.Post post)
+	public async Task<int> UpdateTimeline(Models.Post post)
 	{
-		throw new NotImplementedException();
+		// leave time, id, postId, and audienceId as they are
+		// this will update the content of the timelinePost, but leave it in-place in the timeline
+		var tp = (TimelinePost)post;
+		return await _feedsContext.Timelines
+			.Where(p => p.PostId == tp.PostId)
+			.ExecuteUpdateAsync(props => props
+				.SetProperty(p => p.Preview, tp.Preview)
+				.SetProperty(p => p.Authority, tp.Authority)
+				.SetProperty(p => p.Creators, tp.Creators)
+				.SetProperty(p => p.Summary, tp.Summary)
+				.SetProperty(p => p.UpdatedDate, tp.UpdatedDate)
+				.SetProperty(p => p.InReplyToId, tp.InReplyToId)
+				.SetProperty(p => p.ThreadId, tp.ThreadId));
 	}
 
 	public void AddNotification(Models.Profile recipient, Models.Post post, Models.ActivityType activity, Models.Profile? sharedBy)
@@ -29,15 +42,17 @@ public class FeedsAdapter : IFeedsAdapter
 		throw new NotImplementedException();
 	}
 
-	public Task<int> RemoveFromAllTimelines(Models.Post post)
+	public async Task<int> RemoveFromAllTimelines(Models.Post post)
 	{
-		throw new NotImplementedException();
+		return await _feedsContext.Timelines.Where(p => p.PostId == post.Id).ExecuteDeleteAsync();
 	}
 
 	public async Task<int> RemoveFromTimelines(Models.Post post, IEnumerable<Models.Audience> removed)
 	{
-		await Task.CompletedTask;
-		throw new NotImplementedException();
+		var removedIds = removed.Select(a => a.FediId);
+		return await _feedsContext.Timelines
+			.Where(p => p.PostId == post.Id && removedIds.Contains(p.AudienceId))
+			.ExecuteDeleteAsync();
 	}
 
 	public IEnumerable<Models.Notification> GetAggregateNotifications(Models.Profile recipient, DateTime begin,
