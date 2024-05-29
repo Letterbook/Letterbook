@@ -12,9 +12,9 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Renovate Bot GitHub Action
-        uses: renovatebot/github-action@v40
+        uses: renovatebot/github-action@v40.1.11
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          configurationFile: .github/renovate-cli-config.json
+          token: ${{ secrets.RENOVATE_TOKEN }}
+          configurationFile: .github/renovate-cli-config.json5
           renovate-version: 37-slim
             
