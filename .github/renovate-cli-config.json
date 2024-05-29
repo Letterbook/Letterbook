@@ -6,12 +6,5 @@
   "includeForks": false,
   "repositories": [
     "Letterbook/Letterbook"
-  ],
-  "packageRules": [
-    {
-      "description": "lockFileMaintenance",
-      "dependencyDashboardApproval": false,
-      "stabilityDays": 1
-    }
   ]
 }
