@@ -1,18 +1,14 @@
 ﻿{
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "ignoreDeps": ["Moq", "dotnet-sdk"],
+  "ignoreDeps": ["Moq"],
   "packageRules": [
     {
       "matchCategories": ["dotnet"],
       "groupName": "dotnet packages"
     },
     {
-      "matchCategories": ["github-actions"],
-      "groupName": "github actions"
-    },
-    {
-      "matchCategories": ["docker"],
-      "groupName": "docker images"
+      "matchCategories": ["github-actions", "docker"],
+      "groupName": "dev dependencies"
     },
     {
       "matchDepNames": ["dotnet-sdk"],
