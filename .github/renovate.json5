@@ -13,6 +13,11 @@
     {
       "matchCategories": ["docker"],
       "groupName": "docker images"
+    },
+    {
+      matchDepNames: ["dotnet-sdk"],
+      "updateTypes": ["minor", "patch"],
+      "enabled": false
     }
   ]
 }
