@@ -39,7 +39,7 @@
       </PackageReference>
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
       <PackageReference Include="Npgsql.OpenTelemetry" Version="8.0.3" />
-      <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="4.10.1" />
+      <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="5.6.0" />
       <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.8.1" />
     </ItemGroup>
 

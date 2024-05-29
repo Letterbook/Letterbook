@@ -17,8 +17,8 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="NSign.Abstractions" Version="1.0.2" />
-      <PackageReference Include="NSign.Client" Version="0.19.3" />
-      <PackageReference Include="NSign.SignatureProviders" Version="0.19.3" />
+      <PackageReference Include="NSign.Client" Version="1.0.2" />
+      <PackageReference Include="NSign.SignatureProviders" Version="1.0.2" />
     </ItemGroup>
 
     <ItemGroup>
