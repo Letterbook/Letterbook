@@ -3,8 +3,6 @@
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
   "onboarding": true,
   "platform": "github",
-  "includeForks": false,
-  "repositories": [
-    "Letterbook/Letterbook"
-  ]
+  "forkProcessing": "disabled",
+  "repositories": ["Letterbook/Letterbook"]
 }
