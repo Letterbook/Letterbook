@@ -1,6 +1,6 @@
 ﻿{
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "ignoreDeps": ["Moq", "dotnet-sdk"],
+  "ignoreDeps": ["Moq"],
   "packageRules": [
     {
       "matchCategories": ["dotnet"],
@@ -13,6 +13,11 @@
     {
       "matchCategories": ["docker"],
       "groupName": "docker images"
+    },
+    {
+      matchDepNames: ["dotnet-sdk"],
+      "updateTypes": ["minor", "patch"],
+      "enabled": false
     }
   ]
 }
