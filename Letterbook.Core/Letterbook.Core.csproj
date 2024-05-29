@@ -17,19 +17,19 @@
       </PackageReference>
       <PackageReference Include="MassTransit.Abstractions" Version="8.2.2" />
       <PackageReference Include="Medo.Uuid7" Version="1.9.1" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.6" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.8.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.6" />
+      <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.6" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-      <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.2.0" />
+      <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.6.0" />
       <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.1" />
       <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.6.0-rc.1" />
-      <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.6.0" />
+      <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.8.1" />
       <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
     </ItemGroup>
 
