@@ -15,8 +15,12 @@
       "groupName": "docker images"
     },
     {
-      matchDepNames: ["dotnet-sdk"],
-      "updateTypes": ["minor", "patch"],
+      "matchDepNames": ["dotnet-sdk"],
+      "updateTypes": ["patch"],
+      "enabled": false
+    },
+    {
+      "matchDepPrefixes": ["Microsoft.CodeAnalysis"],
       "enabled": false
     }
   ]
