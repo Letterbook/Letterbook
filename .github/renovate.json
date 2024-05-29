@@ -1,0 +1,18 @@
+﻿{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "ignoreDeps": ["Moq"],
+  "packageRules": [
+    {
+      "matchCategories": ["dotnet"],
+      "groupName": "dotnet packages"
+    },
+    {
+      "matchCategories": ["github-actions"],
+      "groupName": "github actions"
+    },
+    {
+      "matchCategories": ["docker"],
+      "groupName": "docker images"
+    }
+  ]
+}
