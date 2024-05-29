@@ -1,0 +1,17 @@
+﻿{
+  "branchPrefix": "test-renovate/",
+  "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "onboarding": true,
+  "platform": "github",
+  "includeForks": false,
+  "repositories": [
+    "Letterbook/Letterbook"
+  ],
+  "packageRules": [
+    {
+      "description": "lockFileMaintenance",
+      "dependencyDashboardApproval": false,
+      "stabilityDays": 1
+    }
+  ]
+}
