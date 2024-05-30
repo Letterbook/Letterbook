@@ -12,7 +12,7 @@
       <PackageReference Include="AutoMapper" Version="13.0.1" />
       <PackageReference Include="AutoMapper.Collection" Version="10.0.0" />
       <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
-      <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3">
+      <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
