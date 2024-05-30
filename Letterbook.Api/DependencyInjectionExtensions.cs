@@ -117,7 +117,7 @@ public static class DependencyInjectionExtensions
 		return services;
 	}
 
-	public static OpenTelemetryBuilder AddTelemetry(this IServiceCollection services)
+	public static IOpenTelemetryBuilder AddTelemetry(this IServiceCollection services)
 	{
 		return services.AddOpenTelemetry()
 			.ConfigureResource(resource => { resource.AddService("Letterbook"); })

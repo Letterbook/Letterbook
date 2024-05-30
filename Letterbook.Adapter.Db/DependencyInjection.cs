@@ -21,7 +21,7 @@ public static class DependencyInjection
 			.AddScoped<IPostAdapter, PostAdapter>();
 	}
 
-	public static OpenTelemetryBuilder AddDbTelemetry(this OpenTelemetryBuilder builder)
+	public static IOpenTelemetryBuilder AddDbTelemetry(this IOpenTelemetryBuilder builder)
 	{
 		return builder.WithMetrics(metrics =>
 			{

@@ -42,7 +42,7 @@ public static class DependencyInjection
 			.AddScoped<TScopedWorker>();
 	}
 
-	public static OpenTelemetryBuilder AddClientTelemetry(this OpenTelemetryBuilder builder)
+	public static IOpenTelemetryBuilder AddClientTelemetry(this IOpenTelemetryBuilder builder)
 	{
 		return builder.WithMetrics(metrics =>
 			{
@@ -54,7 +54,7 @@ public static class DependencyInjection
 			});
 	}
 
-	public static OpenTelemetryBuilder AddTelemetryExporters(this OpenTelemetryBuilder builder)
+	public static IOpenTelemetryBuilder AddTelemetryExporters(this IOpenTelemetryBuilder builder)
 	{
 		return builder.WithMetrics(metrics =>
 			{

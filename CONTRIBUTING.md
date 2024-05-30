@@ -151,14 +151,14 @@ Letterbook is meant to be easy to set up and run. The default `Letterbook` host 
 
 ### Running tests
 
-Unit tests are included in the main solution. They should run in a few seconds and have zero dependencies.
+The Letterbook.sln contains the full set of unit and integration tests. Unit tests have zero dependencies, and they should run in just a few seconds. Integration tests depend on hosting or connecting to real services, and will also take longer to run. To run all tests, simply run the default test command.
 ```shell
-dotnet test Letterbook.sln
+dotnet test
 ```
 
-Integration tests are located in a separate solution, because they depend on a real database, and take longer to run. First, start your Postgres instance, then you can run the tests.
+There is also a solution filter that excludes the integration tests. To run only unit tests, target that solution file when running dotnet test. If you're using Jetbrains Rider or Visual Studio, you can also open that `.slnf` file like a solution. 
 ```shell
-dotnet test Letterbook.IntegrationTests.sln
+dotnet test Letterbook.UnitTests.slnf
 ```
 
 ### Using VS Code

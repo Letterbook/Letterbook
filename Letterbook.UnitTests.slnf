@@ -1,0 +1,22 @@
+﻿{
+  "solution": {
+    "path": "Letterbook.sln",
+    "projects": [
+      "Letterbook\\Letterbook.csproj",
+      "Letterbook.Adapter.ActivityPub\\Letterbook.Adapter.ActivityPub.csproj",
+      "Letterbook.Adapter.ActivityPub.Test\\Letterbook.Adapter.ActivityPub.Test.csproj",
+      "Letterbook.Adapter.Db\\Letterbook.Adapter.Db.csproj",
+      "Letterbook.Adapter.Db.Tests\\Letterbook.Adapter.Db.Tests.csproj",
+      "Letterbook.Adapter.TimescaleFeeds\\Letterbook.Adapter.TimescaleFeeds.csproj",
+      "Letterbook.Adapter.TimescaleFeeds.Tests\\Letterbook.Adapter.TimescaleFeeds.Tests.csproj",
+      "Letterbook.Api\\Letterbook.Api.csproj",
+      "Letterbook.Api.Authentication.HttpSignature\\Letterbook.Api.Authentication.HttpSignature.csproj",
+      "Letterbook.Api.Tests\\Letterbook.Api.Tests.csproj",
+      "Letterbook.Core\\Letterbook.Core.csproj",
+      "Letterbook.Core.Tests\\Letterbook.Core.Tests.csproj",
+      "Letterbook.Web\\Letterbook.Web.csproj",
+      "Letterbook.Workers\\Letterbook.Workers.csproj",
+      "Letterbook.Workers.Tests\\Letterbook.Workers.Tests.csproj"
+    ]
+  }
+}
