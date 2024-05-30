@@ -44,7 +44,6 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 		subject ??= string.Join(',', activity.TypeMap.ASTypes);
 		return new ActivityMessage
 		{
-			Source = _options.BaseUri().ToString(),
 			Subject = subject,
 			Claims = [],
 			Type = nameof(Deliver),

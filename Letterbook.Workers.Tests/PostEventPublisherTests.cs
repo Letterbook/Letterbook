@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using Letterbook.Core.Adapters;
+﻿using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
@@ -12,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Workers.Tests;
 
-public class PostEventPublisherTests : WithMocks, IAsyncDisposable
+public sealed class PostEventPublisherTests : WithMocks, IAsyncDisposable
 {
 	private readonly ServiceProvider _provider;
 	private readonly IPostEventPublisher _publisher;
@@ -27,15 +26,7 @@ public class PostEventPublisherTests : WithMocks, IAsyncDisposable
 			.AddScoped<IPostEventPublisher, PostEventPublisher>()
 			.AddMassTransitTestHarness(bus =>
 			{
-				bus.UsingInMemory((_, configurator) =>
-				{
-					configurator.ConfigureJsonSerializerOptions(options =>
-					{
-						options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-
-						return options;
-					});
-				});
+				bus.AddTestBus();
 			})
 			.BuildServiceProvider();
 		_publisher = _provider.GetRequiredService<IPostEventPublisher>();

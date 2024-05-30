@@ -1,8 +1,6 @@
-using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Util;
-using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests;
@@ -13,6 +11,7 @@ using Letterbook.Workers.Publishers;
 using MassTransit;
 using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
 
@@ -29,12 +28,10 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	public DeliveryWorkerTests(ITestOutputHelper output)
 	{
 		_provider = new ServiceCollection()
+			.AddSingleton(output.BuildLoggerFactory(LogLevel.Debug))
 			.AddMocks(this)
 			.AddScoped<IActivityMessagePublisher, ActivityMessagePublisher>()
-			.AddMassTransitTestHarness(bus =>
-			{
-				bus.AddConsumer<DeliveryWorker>();
-			})
+			.AddMassTransitTestHarness(bus => { bus.AddConsumer<DeliveryWorker>(); })
 			.BuildServiceProvider();
 		_publisher = _provider.GetRequiredService<IActivityMessagePublisher>();
 		_consumer = _provider.GetRequiredService<DeliveryWorker>();
@@ -44,6 +41,7 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 		_profile = new FakeProfile("letterbook.example").Generate();
 
 		MockAuthorizeAllowAll();
+		_harness.Start().Wait();
 	}
 
 	[Fact]
@@ -53,62 +51,51 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 		Assert.NotNull(_consumer);
 	}
 
-	[Fact(DisplayName = "Should consume ActivityMessages")]
-	public async Task CanConsume()
+	[Theory(DisplayName = "Should send ASDocs to their destination")]
+	[MemberData(nameof(GenerateDoc))]
+	public async Task CanSend(ASObject asDoc, Uri inbox)
 	{
-		await _harness.Start();
-		var asDoc = new NoteObject();
-		asDoc.AttributedTo.Add(new Linkable<ASObject>(new ASLink
-		{
-			HRef = _profile.FediId
-		}));
-
-		await _harness.Bus.Publish(new ActivityMessage
-		{
-			Subject = "test",
-			Claims = [],
-			Type = "Deliver",
-			NextData = "fake message",
-			OnBehalfOf = _profile.GetId(),
-			Inbox = new Uri("https://peer.example/Actor/SharedInbox")
-		});
-
-		Assert.True(await _harness.Consumed.Any<ActivityMessage>());
-	}
-
-	[Fact(DisplayName = "Should publish ActivityMessages")]
-	public async Task CanPublish()
-	{
-		await _harness.Start();
-		var asDoc = new NoteObject();
-		asDoc.AttributedTo.Add(new Linkable<ASObject>(new ASLink
-		{
-			HRef = _profile.FediId
-		}));
-
-		await _publisher.Deliver(new Uri("https://peer.example/Actor/SharedInbox"), asDoc, _profile);
+		await _publisher.Deliver(inbox, asDoc, _profile);
 
 		Assert.True(await _harness.Published.Any<ActivityMessage>());
-	}
-
-	[Fact(DisplayName = "Should send ASDocs to their destination")]
-	public async Task CanSend()
-	{
-		await _harness.Start();
-		var asDoc = new NoteObject();
-		asDoc.AttributedTo.Add(new Linkable<ASObject>(new ASLink
-		{
-			HRef = _profile.FediId
-		}));
-
-		await _publisher.Deliver(new Uri("https://peer.example/Actor/SharedInbox"), asDoc, _profile);
+		Assert.True(await _harness.Consumed.Any<ActivityMessage>());
 
 		ActivityPubAuthClientMock.Verify(c => c.SendDocument(It.IsAny<Uri>(), It.IsAny<string>()));
 		ActivityPubAuthClientMock.VerifyNoOtherCalls();
 	}
 
+	/*
+	 * Support methods
+	 */
+
+	public static IEnumerable<object[]> GenerateDoc()
+	{
+		var faker = new FakeProfile();
+		foreach (var profile in faker.Generate(50))
+		{
+			yield return
+			[
+				Doc(profile.FediId),
+				profile.FediId
+			];
+		}
+
+		yield break;
+
+		NoteObject Doc(Uri href)
+		{
+			var asDoc = new NoteObject();
+			asDoc.AttributedTo.Add(new Linkable<ASObject>(new ASLink
+			{
+				HRef = href
+			}));
+			return asDoc;
+		}
+	}
+
 	public async ValueTask DisposeAsync()
 	{
 		await _provider.DisposeAsync();
+		await _harness.Stop();
 	}
 }

@@ -9,7 +9,7 @@ namespace Letterbook.Workers.Consumers
 	        IConsumerConfigurator<TimelineConsumer> consumer,
 	        IRegistrationContext context)
         {
-	        endpoint.UseMessageRetry(r => r.Intervals(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(1000)));
+	        consumer.UseMessageRetry(r => r.Intervals(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(1000)));
         }
     }
 }
