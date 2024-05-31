@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Html;
 using Microsoft.Extensions.Options;
+using System.ComponentModel.DataAnnotations;
 
 namespace Letterbook.Web.Pages;
 
@@ -29,8 +30,6 @@ public class Profile : PageModel
 		_options = options.Value;
 	}
 
-	[BindProperty, Display(Name="Description")]
-	public string ProfileDescription { get; set; } = default!;
 	
 	public async Task<IActionResult> OnGet(string handle)
 	{
@@ -44,21 +43,7 @@ public class Profile : PageModel
 		DisplayName = profile.DisplayName;
 		Description = new HtmlString(profile.Description);
 		CustomFields = profile.CustomFields;
-		ProfileDescription = profile.Description;
 
-		return Page();
-	}
-	
-	public async Task<IActionResult> OnPostAsync(string handle)
-	{
-		var found = await _profiles.As(User.Claims).FindProfiles(handle);
-		if (found.FirstOrDefault() is not { } profile)
-			return NotFound();
-		if (ModelState.IsValid) {
-			await _profiles.As(User.Claims).UpdateDescription(profile.Id, ProfileDescription);
-			return RedirectToPage("Profile", new { handle = handle });
-		}
-		
 		return Page();
 	}
 }

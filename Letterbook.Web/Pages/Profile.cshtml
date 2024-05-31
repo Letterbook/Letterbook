@@ -11,19 +11,11 @@
         <span>@Model.Handle</span>
     </h1>
     
+    <a href="/@@@Model.BareHandle/edit">Edit</a>
+    
     <div>
         <h3>Description</h3>
         <div>@Model.Description</div>
-        
-        <form method="post" asp-route-handle="@Model.BareHandle">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="ProfileDescription"></label>
-                <textarea asp-for="ProfileDescription"></textarea>
-                <span asp-validation-for="ProfileDescription"></span>
-            </div>
-            <button>Update</button>
-        </form>
         
         <h3>Custom Fields</h3>
         <dl>
