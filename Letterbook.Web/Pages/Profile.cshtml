@@ -15,7 +15,7 @@
         <h3>Description</h3>
         <div>@Model.Description</div>
         
-        <form method="post">
+        <form method="post" asp-route-handle="@Model.BareHandle">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="ProfileDescription"></label>

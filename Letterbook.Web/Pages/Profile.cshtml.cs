@@ -11,6 +11,7 @@ public class Profile : PageModel
 	private readonly IProfileService _profiles;
 	private readonly CoreOptions _options;
 
+	public required string BareHandle { get; set; }
 	public required string Handle { get; set; }
 	public required string DisplayName { get; set; }
 	public required HtmlString Description { get; set; }
@@ -28,7 +29,7 @@ public class Profile : PageModel
 		_options = options.Value;
 	}
 
-	[BindProperty]
+	[BindProperty, Display(Name="Description")]
 	public string ProfileDescription { get; set; } = default!;
 	
 	public async Task<IActionResult> OnGet(string handle)
@@ -38,11 +39,12 @@ public class Profile : PageModel
 			return NotFound();
 		Prof = profile;
 
+		BareHandle = handle;
 		Handle = $"@{handle}@{_options.DomainName}";
 		DisplayName = profile.DisplayName;
 		Description = new HtmlString(profile.Description);
 		CustomFields = profile.CustomFields;
-
+		ProfileDescription = profile.Description;
 
 		return Page();
 	}
@@ -53,9 +55,10 @@ public class Profile : PageModel
 		if (found.FirstOrDefault() is not { } profile)
 			return NotFound();
 		if (ModelState.IsValid) {
-			_profiles.As(User.Claims).UpdateDescription(profile.Id, ProfileDescription);
+			await _profiles.As(User.Claims).UpdateDescription(profile.Id, ProfileDescription);
 			return RedirectToPage("Profile", new { handle = handle });
 		}
+		
 		return Page();
 	}
 }
