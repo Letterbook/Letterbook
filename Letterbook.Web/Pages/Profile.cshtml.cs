@@ -28,6 +28,9 @@ public class Profile : PageModel
 		_options = options.Value;
 	}
 
+	[BindProperty]
+	public string ProfileDescription { get; set; } = default!;
+	
 	public async Task<IActionResult> OnGet(string handle)
 	{
 		var found = await _profiles.As(User.Claims).FindProfiles(handle);
@@ -41,6 +44,18 @@ public class Profile : PageModel
 		CustomFields = profile.CustomFields;
 
 
+		return Page();
+	}
+	
+	public async Task<IActionResult> OnPostAsync(string handle)
+	{
+		var found = await _profiles.As(User.Claims).FindProfiles(handle);
+		if (found.FirstOrDefault() is not { } profile)
+			return NotFound();
+		if (ModelState.IsValid) {
+			_profiles.As(User.Claims).UpdateDescription(profile.Id, ProfileDescription);
+			return RedirectToPage("Profile", new { handle = handle });
+		}
 		return Page();
 	}
 }

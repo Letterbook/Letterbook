@@ -12,8 +12,20 @@
     </h1>
     
     <div>
+        <h3>Description</h3>
         <div>@Model.Description</div>
         
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ProfileDescription"></label>
+                <textarea asp-for="ProfileDescription"></textarea>
+                <span asp-validation-for="ProfileDescription"></span>
+            </div>
+            <button>Update</button>
+        </form>
+        
+        <h3>Custom Fields</h3>
         <dl>
             @foreach (var field in @Model.CustomFields) {
                 <dt>@field.Label</dt>
@@ -21,6 +33,7 @@
             }
         </dl>
         
+        <h3>Info</h3>
         <div>
             <div>
                 @Model.GetFollowerCount() Followers
