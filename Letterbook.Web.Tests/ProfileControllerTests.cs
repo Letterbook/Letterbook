@@ -33,7 +33,7 @@ public class ProfileControllerTests : WithMockContext
 		Assert.NotNull(_page);
 	}
 
-	[Fact(DisplayName = "Should load the page for a profile")]
+	[Fact(DisplayName = "Should load the template data for a profile")]
 	public async Task CanGetPage()
 	{
 		ProfileServiceAuthMock.Setup(m => m.FindProfiles(It.IsAny<string>())).ReturnsAsync([_profile]);
