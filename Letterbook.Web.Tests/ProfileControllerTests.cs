@@ -14,6 +14,8 @@ public class ProfileControllerTests : WithMockContext
 
 	public ProfileControllerTests(ITestOutputHelper output)
 	{
+		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
+
 		_profile = new FakeProfile("letterbook.example").Generate();
 		_page = new Profile(ProfileServiceMock.Object, CoreOptionsMock)
 		{
