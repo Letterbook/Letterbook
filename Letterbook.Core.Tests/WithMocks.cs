@@ -31,6 +31,7 @@ public abstract class WithMocks
 	public Mock<IAuthzPostService> PostServiceAuthMock;
 	public Mock<IAuthorizationService> AuthorizationServiceMock;
 	public Mock<ITimelineService> TimelineServiceMock;
+	public Mock<IAuthzTimelineService> AuthzTimelineServiceMock;
 
 	protected WithMocks()
 	{
@@ -49,10 +50,12 @@ public abstract class WithMocks
 		PostServiceAuthMock = new Mock<IAuthzPostService>();
 		AuthorizationServiceMock = new Mock<IAuthorizationService>();
 		TimelineServiceMock = new Mock<ITimelineService>();
+		AuthzTimelineServiceMock = new Mock<IAuthzTimelineService>();
 
 		ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
 		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>(), It.IsAny<Uuid7>())).Returns(PostServiceAuthMock.Object);
 		ProfileServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(ProfileServiceAuthMock.Object);
+		TimelineServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(AuthzTimelineServiceMock.Object);
 		var mockOptions = new CoreOptions
 		{
 			DomainName = "letterbook.example",
