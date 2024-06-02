@@ -15,6 +15,7 @@
       "Letterbook.Core\\Letterbook.Core.csproj",
       "Letterbook.Core.Tests\\Letterbook.Core.Tests.csproj",
       "Letterbook.Web\\Letterbook.Web.csproj",
+      "Letterbook.Web.Tests\\Letterbook.Web.Tests.csproj",
       "Letterbook.Workers\\Letterbook.Workers.csproj",
       "Letterbook.Workers.Tests\\Letterbook.Workers.Tests.csproj"
     ]
