@@ -89,6 +89,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.Db.Integ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Adapter.TimescaleFeeds.IntegrationTests", "Letterbook.Adapter.TimescaleFeeds.IntegrationTests\Letterbook.Adapter.TimescaleFeeds.IntegrationTests.csproj", "{3B0A7F42-F214-4F1C-80EA-D858F1649CB2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.IntegrationTests", "Letterbook.IntegrationTests\Letterbook.IntegrationTests.csproj", "{9BFBB986-3B9D-459A-8FC8-37DC158644E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -174,6 +176,10 @@ Global
 		{3B0A7F42-F214-4F1C-80EA-D858F1649CB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B0A7F42-F214-4F1C-80EA-D858F1649CB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B0A7F42-F214-4F1C-80EA-D858F1649CB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BFBB986-3B9D-459A-8FC8-37DC158644E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BFBB986-3B9D-459A-8FC8-37DC158644E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BFBB986-3B9D-459A-8FC8-37DC158644E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BFBB986-3B9D-459A-8FC8-37DC158644E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}

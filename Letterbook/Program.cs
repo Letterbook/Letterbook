@@ -1,8 +1,10 @@
 using System.Reflection;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
+using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Api;
 using Letterbook.Api.Swagger;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Workers;
 using MassTransit;
@@ -38,11 +40,16 @@ public class Program
 		);
 
 		builder.Services.AddApiProperties(builder.Configuration);
-		builder.Services.AddTelemetry();
+		builder.Services.AddTelemetry()
+			.AddDbTelemetry()
+			.AddClientTelemetry()
+			.AddTelemetryExporters();
 		builder.Services.AddHealthChecks();
 		builder.Services.AddActivityPubClient(builder.Configuration);
-		builder.Services.AddServices(builder.Configuration);
+		builder.Services.AddLetterbookCore(builder.Configuration);
 		builder.Services.AddPublishers();
+		builder.Services.AddDbAdapter(builder.Configuration);
+		builder.Services.AddFeedsAdapter(builder.Configuration);
 		builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
