@@ -36,7 +36,8 @@ public class Program
 			.Enrich.FromLogContext()
 			.Enrich.WithSpan()
 			.ReadFrom.Configuration(context.Configuration)
-			.ReadFrom.Services(services)
+			.ReadFrom.Services(services),
+			true
 		);
 
 		builder.Services.AddApiProperties(builder.Configuration);

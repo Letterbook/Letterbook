@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Xunit.Abstractions;
 using Xunit.Sdk;
@@ -49,6 +50,9 @@ where T : ITestSeed
 	public bool Deleted { get; set; }
 
 	public readonly CoreOptions Options;
+	private NpgsqlDataSourceBuilder _ds;
+	private RelationalContext _context;
+	private readonly IServiceScope _scope;
 
 	public HostFixture(IMessageSink sink)
 	{
@@ -60,17 +64,21 @@ where T : ITestSeed
 			Port = "5127"
 		};
 
+		_ds = new NpgsqlDataSourceBuilder(ConnectionString);
+		_ds.EnableDynamicJson();
+		_scope = Services.CreateScope();
+		_context = CreateContext();
+
 		InitializeTestData();
 	}
 
 	public RelationalContext CreateContext()
 	{
-		var ds = new NpgsqlDataSourceBuilder(ConnectionString);
-		ds.EnableDynamicJson();
-		return new RelationalContext(new DbContextOptionsBuilder<RelationalContext>()
-			.EnableSensitiveDataLogging()
-			.UseNpgsql(ds.Build())
-			.Options);
+		// return new RelationalContext(new DbContextOptionsBuilder<RelationalContext>()
+			// .EnableSensitiveDataLogging()
+			// .UseNpgsql(_ds.Build())
+			// .Options);
+			return _scope.ServiceProvider.GetRequiredService<RelationalContext>();
 	}
 
 	private void InitializeTestData()
@@ -82,15 +90,13 @@ where T : ITestSeed
 			this.InitTestData(Options);
 			// this.InitTimelineData(Options);
 
-			var context = CreateContext();
-
-			Deleted = context.Database.EnsureDeleted();
-			context.Database.Migrate();
-			context.Accounts.AddRange(Accounts);
-			context.Profiles.AddRange(Profiles);
-			Records = context.SaveChanges();
-			context.Posts.AddRange(Posts.SelectMany(pair => pair.Value));
-			Records += context.SaveChanges();
+			Deleted = _context.Database.EnsureDeleted();
+			_context.Database.Migrate();
+			_context.Accounts.AddRange(Accounts);
+			_context.Profiles.AddRange(Profiles);
+			Records = _context.SaveChanges();
+			_context.Posts.AddRange(Posts.SelectMany(pair => pair.Value));
+			Records += _context.SaveChanges();
 			// context.Posts.AddRange(Timeline);
 			// Records += context.SaveChanges();
 		}
@@ -117,6 +123,8 @@ where T : ITestSeed
 				var seedDescriptor = services.SingleOrDefault(d => d.ImplementationType == typeof(WorkerScope<SeedAdminWorker>));
 
 				if (seedDescriptor != null) services.Remove(seedDescriptor);
+				// services.AddSingleton<RelationalContext>();
+				// services.AddSingleton<FeedsContext>();
 			});
 
 		base.ConfigureWebHost(builder);
