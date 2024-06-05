@@ -3,6 +3,7 @@ using Letterbook.Core.Models;
 using Letterbook.IntegrationTests.Fixtures;
 using Medo;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
@@ -11,8 +12,13 @@ namespace Letterbook.IntegrationTests;
 
 [Trait("Infra", "Postgres")]
 [Trait("Driver", "Adapter")]
-public class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTests>>, ITestSeed
+public sealed class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTests>>, ITestSeed, IDisposable
 {
+	public void Dispose()
+	{
+		_scope.Dispose();
+	}
+
 	private readonly ITestOutputHelper _output;
 	private readonly HostFixture<PostAdapterTests> _host;
 	private PostAdapter _adapter;
@@ -21,6 +27,7 @@ public class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTests>>, IT
 	private Dictionary<Profile, List<Post>> _posts;
 	private List<Profile> _profiles;
 	private static ValueComparer<Post> _cmp;
+	private readonly IServiceScope _scope;
 	static int? ITestSeed.Seed() => null;
 
 	public PostAdapterTests(ITestOutputHelper output, HostFixture<PostAdapterTests> host)
@@ -29,9 +36,10 @@ public class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTests>>, IT
 		_host = host;
 		_posts = host.Posts;
 		_profiles = host.Profiles;
+		_scope = host.CreateScope();
 
-		_context = host.CreateContext();
-		_actual = host.CreateContext();
+		_context = host.CreateContext(_scope);
+		_actual = host.CreateContext(_scope);
 		_adapter = new PostAdapter(Mock.Of<ILogger<PostAdapter>>(), _context);
 	}
 

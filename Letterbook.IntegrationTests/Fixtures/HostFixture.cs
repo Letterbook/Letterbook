@@ -20,6 +20,16 @@ namespace Letterbook.IntegrationTests.Fixtures;
 public class HostFixture<T> : WebApplicationFactory<Program>, IIntegrationTestData
 where T : ITestSeed
 {
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing)
+		{
+			_scope.Dispose();
+		}
+
+		base.Dispose(disposing);
+	}
+
 	private readonly IMessageSink _sink;
 	private static readonly object _lock = new();
 
@@ -48,11 +58,11 @@ where T : ITestSeed
 	public List<Post> Timeline { get; set; } = new();
 	public int Records { get; set; }
 	public bool Deleted { get; set; }
+	private readonly IServiceScope _scope;
 
 	public readonly CoreOptions Options;
 	private NpgsqlDataSourceBuilder _ds;
 	private RelationalContext _context;
-	private readonly IServiceScope _scope;
 
 	public HostFixture(IMessageSink sink)
 	{
@@ -66,20 +76,27 @@ where T : ITestSeed
 
 		_ds = new NpgsqlDataSourceBuilder(ConnectionString);
 		_ds.EnableDynamicJson();
-		_scope = Services.CreateScope();
-		_context = CreateContext();
+		_scope = CreateScope();
+		_context = CreateContext(_scope);
 
 		InitializeTestData();
 	}
 
-	public RelationalContext CreateContext()
-	{
-		// return new RelationalContext(new DbContextOptionsBuilder<RelationalContext>()
-			// .EnableSensitiveDataLogging()
-			// .UseNpgsql(_ds.Build())
-			// .Options);
-			return _scope.ServiceProvider.GetRequiredService<RelationalContext>();
-	}
+	/// <summary>
+	/// Create a new RelationalContext from the given scope
+	/// Call <see cref="CreateScope"/> to get a new scope
+	/// </summary>
+	/// <param name="scope"></param>
+	/// <returns></returns>
+	public RelationalContext CreateContext(IServiceScope scope) =>
+		scope.ServiceProvider.GetRequiredService<RelationalContext>();
+
+	/// <summary>
+	/// Create a new scope for resolving scoped services
+	/// Be sure to dispose the scope when you're done
+	/// </summary>
+	/// <returns></returns>
+	public IServiceScope CreateScope() => Services.CreateScope();
 
 	private void InitializeTestData()
 	{
