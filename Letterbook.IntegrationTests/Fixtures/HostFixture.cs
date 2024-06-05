@@ -17,6 +17,7 @@ using RelationalContext = Letterbook.Adapter.Db.RelationalContext;
 namespace Letterbook.IntegrationTests.Fixtures;
 
 public class HostFixture<T> : WebApplicationFactory<Program>, IIntegrationTestData
+where T : ITestSeed
 {
 	private readonly IMessageSink _sink;
 	private static readonly object _lock = new();
@@ -66,7 +67,8 @@ public class HostFixture<T> : WebApplicationFactory<Program>, IIntegrationTestDa
 	{
 		lock (_lock)
 		{
-			_sink.OnMessage(new DiagnosticMessage("Bogus Seed: {0}", Init.WithSeed()));
+
+			_sink.OnMessage(new DiagnosticMessage("Bogus Seed: {0}", Init.WithSeed(T.Seed())));
 			this.InitTestData(Options);
 			// this.InitTimelineData(Options);
 
@@ -114,4 +116,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>, IIntegrationTestDa
 
 		base.ConfigureWebHost(builder);
 	}
+}
+
+public interface ITestSeed
+{
+	static abstract int? Seed();
 }

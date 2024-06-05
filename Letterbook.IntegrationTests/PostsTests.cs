@@ -19,7 +19,7 @@ namespace Letterbook.IntegrationTests;
 
 [Trait("Infra", "Postgres")]
 [Trait("Driver", "Api")]
-public class PostsTests : IClassFixture<HostFixture<PostsTests>>
+public class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSeed
 {
 	private readonly HostFixture<PostsTests> _host;
 	private readonly HttpClient _client;
@@ -29,6 +29,7 @@ public class PostsTests : IClassFixture<HostFixture<PostsTests>>
 	private readonly JsonSerializerOptions _json;
 	private readonly Dictionary<Profile, List<Post>> _posts;
 	private readonly ContentTextComparer _contentTextComparer = new ContentTextComparer();
+	static int? ITestSeed.Seed() => null;
 
 	public PostsTests(HostFixture<PostsTests> host)
 	{

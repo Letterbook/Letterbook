@@ -18,7 +18,7 @@ namespace Letterbook.IntegrationTests;
 
 [Trait("Infra", "Postgres")]
 [Trait("Driver", "Api")]
-public class ProfileTests : IClassFixture<HostFixture<ProfileTests>>
+public class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITestSeed
 {
 	private readonly HostFixture<ProfileTests> _host;
 	private readonly HttpClient _client;
@@ -28,6 +28,7 @@ public class ProfileTests : IClassFixture<HostFixture<ProfileTests>>
 	private readonly Mapper _mapper;
 	private readonly JsonSerializerOptions _json;
 	private readonly List<Account> _accounts;
+	static int? ITestSeed.Seed() => null;
 
 	public ProfileTests(HostFixture<ProfileTests> host)
 	{

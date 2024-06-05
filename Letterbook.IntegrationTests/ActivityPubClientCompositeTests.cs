@@ -1,32 +1,26 @@
 using System.Security.Claims;
 using Letterbook.Core;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.IntegrationTests.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Moq;
 using Xunit.Abstractions;
 
-namespace Letterbook.Adapter.ActivityPub.IntegrationTests;
+namespace Letterbook.IntegrationTests;
 
-// These tests bypass the API (which mostly doesn't exist yet), and mock the database (because managing test data is
-// hard). Everything else is live. So, the end result is they send real federated messages using the real core logic
-// and AP client. The test data is entirely fabricated by the test, and we don't have to worry about our own
-// authentication.
-[Trait("ActivityPub", "Client")]
-[Trait("Composite", "ActivityPub")]
-[Trait("Composite", "Mastodon")]
-public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
+public class ActivityPubClientCompositeTests : IClassFixture<HostFixture<ActivityPubClientCompositeTests>>, ITestSeed
 {
 	private readonly ITestOutputHelper _output;
-	private readonly HostFixture _hostFactory;
+	private readonly HostFixture<ActivityPubClientCompositeTests> _host;
 	private FakeProfile _fakeProfile;
 	private readonly IOptions<CoreOptions> _options;
+	public static int? Seed() => null;
 
-	public ActivityPubClientCompositeTests(ITestOutputHelper output, HostFixture hostFactory)
+	public ActivityPubClientCompositeTests(ITestOutputHelper output, HostFixture<ActivityPubClientCompositeTests> host)
 	{
 		_output = output;
-		_hostFactory = hostFactory;
-		_options = _hostFactory.Services.GetService<IOptions<CoreOptions>>();
+		_host = host;
+		_options = _host.Services.GetRequiredService<IOptions<CoreOptions>>();
 		_output.WriteLine(_options.Value.DomainName);
 
 		// Initialize with a consistent seed, so we get consistent data.
@@ -39,7 +33,7 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
 	[Fact]
 	public void Exists()
 	{
-		Assert.NotNull(_hostFactory);
+		Assert.NotNull(_host);
 	}
 
 	[Fact(Skip = "Requires actor controllers")]
@@ -48,12 +42,8 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture>
 		var remote = new Uri("http://localhost:3080/users/user");
 		var profile = _fakeProfile.Generate();
 		var target = new FakeProfile(remote).Generate();
-		HostFixture.Mocks.AccountProfileMock.Setup(m => m.LookupProfile((Guid)profile.Id!))
-			.ReturnsAsync(profile);
-		// HostFixture.Mocks.AccountProfileMock.Setup(m => m.LookupProfile(remote))
-		// .ReturnsAsync(target);
 
-		using var scope = _hostFactory.Services.CreateScope();
+		using var scope = _host.Services.CreateScope();
 
 		var profileService = scope.ServiceProvider.GetRequiredService<IProfileService>();
 
