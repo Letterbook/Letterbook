@@ -3,20 +3,22 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
-using Letterbook.Api.IntegrationTests.Fixtures;
 using Letterbook.Api.Tests.Fakes;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Models.Mappers.Converters;
+using Letterbook.IntegrationTests.Fixtures;
 using Medo;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Profile = Letterbook.Core.Models.Profile;
 
-namespace Letterbook.Api.IntegrationTests;
+namespace Letterbook.IntegrationTests;
 
+[Trait("Infra", "Postgres")]
+[Trait("Driver", "Api")]
 public class PostsTests : IClassFixture<HostFixture<PostsTests>>
 {
 	private readonly HostFixture<PostsTests> _host;
@@ -231,7 +233,7 @@ public class PostsTests : IClassFixture<HostFixture<PostsTests>>
 
 public class ContentTextComparer : IEqualityComparer<ContentDto>
 {
-	public bool Equals(ContentDto x, ContentDto y)
+	public bool Equals(ContentDto? x, ContentDto? y)
 	{
 		if (ReferenceEquals(x, null)) return false;
 		if (ReferenceEquals(y, null)) return false;

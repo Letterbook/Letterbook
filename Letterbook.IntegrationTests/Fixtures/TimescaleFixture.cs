@@ -1,4 +1,5 @@
 using Bogus;
+using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Adapter.TimescaleFeeds._Tests.Fixtures;
 using Letterbook.Adapter.TimescaleFeeds.EntityModels;
 using Letterbook.Core.Models;
@@ -6,7 +7,7 @@ using Letterbook.Core.Tests.Fakes;
 using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;
 
-namespace Letterbook.Adapter.TimescaleFeeds.IntegrationTests.Fixtures;
+namespace Letterbook.IntegrationTests.Fixtures;
 
 public class TimescaleDataFixture<T> : TimescaleFixture<T>
 {

@@ -3,19 +3,21 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
-using Letterbook.Api.IntegrationTests.Fixtures;
 using Letterbook.Api.Tests.Fakes;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Models.Mappers.Converters;
+using Letterbook.IntegrationTests.Fixtures;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Profile = Letterbook.Core.Models.Profile;
 
-namespace Letterbook.Api.IntegrationTests;
+namespace Letterbook.IntegrationTests;
 
+[Trait("Infra", "Postgres")]
+[Trait("Driver", "Api")]
 public class ProfileTests : IClassFixture<HostFixture<ProfileTests>>
 {
 	private readonly HostFixture<ProfileTests> _host;

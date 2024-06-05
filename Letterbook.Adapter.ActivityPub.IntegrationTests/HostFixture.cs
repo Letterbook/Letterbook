@@ -18,6 +18,9 @@ using Xunit.Sdk;
 
 namespace Letterbook.Adapter.ActivityPub.IntegrationTests;
 
+[Trait("Driver", "Api")]
+[Trait("Infra", "Postgres")]
+[Trait("Infra", "Peer")]
 public class HostFixture : WebApplicationFactory<Program>
 {
 	private static readonly Lazy<HostMocks> Lazy = new Lazy<HostMocks>();
