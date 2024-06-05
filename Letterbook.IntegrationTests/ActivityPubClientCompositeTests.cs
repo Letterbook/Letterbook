@@ -8,6 +8,9 @@ using Xunit.Abstractions;
 
 namespace Letterbook.IntegrationTests;
 
+[Trait("Infra", "Postgres")]
+[Trait("Infra", "Federation")]
+[Trait("Driver", "Api")]
 public class ActivityPubClientCompositeTests : IClassFixture<HostFixture<ActivityPubClientCompositeTests>>, ITestSeed
 {
 	private readonly ITestOutputHelper _output;
@@ -36,7 +39,7 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture<Activit
 		Assert.NotNull(_host);
 	}
 
-	[Fact(Skip = "Requires actor controllers")]
+	[Fact(Skip = "Requires federation infra")]
 	public async Task SendFollow()
 	{
 		var remote = new Uri("http://localhost:3080/users/user");

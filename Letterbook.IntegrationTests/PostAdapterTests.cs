@@ -1,34 +1,37 @@
-using Letterbook.Adapter.Db.IntegrationTests.Fixtures;
+using Letterbook.Adapter.Db;
 using Letterbook.Core.Models;
+using Letterbook.IntegrationTests.Fixtures;
 using Medo;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
 
-namespace Letterbook.Adapter.Db.IntegrationTests;
+namespace Letterbook.IntegrationTests;
 
-[Collection("Integration")]
-public class PostAdapterTests : IClassFixture<PostgresFixture>
+[Trait("Infra", "Postgres")]
+[Trait("Driver", "Adapter")]
+public class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTests>>, ITestSeed
 {
 	private readonly ITestOutputHelper _output;
-	private readonly PostgresFixture _pg;
+	private readonly HostFixture<PostAdapterTests> _host;
 	private PostAdapter _adapter;
 	private RelationalContext _context;
 	private RelationalContext _actual;
 	private Dictionary<Profile, List<Post>> _posts;
 	private List<Profile> _profiles;
 	private static ValueComparer<Post> _cmp;
+	static int? ITestSeed.Seed() => null;
 
-	public PostAdapterTests(ITestOutputHelper output, PostgresFixture pg)
+	public PostAdapterTests(ITestOutputHelper output, HostFixture<PostAdapterTests> host)
 	{
 		_output = output;
-		_pg = pg;
-		_posts = pg.Posts;
-		_profiles = pg.Profiles;
+		_host = host;
+		_posts = host.Posts;
+		_profiles = host.Profiles;
 
-		_context = pg.CreateContext();
-		_actual = pg.CreateContext();
+		_context = host.CreateContext();
+		_actual = host.CreateContext();
 		_adapter = new PostAdapter(Mock.Of<ILogger<PostAdapter>>(), _context);
 	}
 

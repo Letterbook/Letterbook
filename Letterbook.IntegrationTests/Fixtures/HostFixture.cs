@@ -63,6 +63,16 @@ where T : ITestSeed
 		InitializeTestData();
 	}
 
+	public RelationalContext CreateContext()
+	{
+		var ds = new NpgsqlDataSourceBuilder(ConnectionString);
+		ds.EnableDynamicJson();
+		return new RelationalContext(new DbContextOptionsBuilder<RelationalContext>()
+			.EnableSensitiveDataLogging()
+			.UseNpgsql(ds.Build())
+			.Options);
+	}
+
 	private void InitializeTestData()
 	{
 		lock (_lock)
@@ -72,12 +82,7 @@ where T : ITestSeed
 			this.InitTestData(Options);
 			// this.InitTimelineData(Options);
 
-			var ds = new NpgsqlDataSourceBuilder(ConnectionString);
-			ds.EnableDynamicJson();
-			var context = new RelationalContext(new DbContextOptionsBuilder<RelationalContext>()
-				.EnableSensitiveDataLogging()
-				.UseNpgsql(ds.Build())
-				.Options);
+			var context = CreateContext();
 
 			Deleted = context.Database.EnsureDeleted();
 			context.Database.Migrate();
