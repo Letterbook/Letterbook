@@ -19,8 +19,13 @@ namespace Letterbook.IntegrationTests;
 
 [Trait("Infra", "Postgres")]
 [Trait("Driver", "Api")]
-public class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSeed
+public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSeed, IDisposable
 {
+	public void Dispose()
+	{
+		_scope.Dispose();
+	}
+
 	private readonly HostFixture<PostsTests> _host;
 	private readonly HttpClient _client;
 	private readonly List<Profile> _profiles;
@@ -29,11 +34,13 @@ public class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSeed
 	private readonly JsonSerializerOptions _json;
 	private readonly Dictionary<Profile, List<Post>> _posts;
 	private readonly ContentTextComparer _contentTextComparer = new ContentTextComparer();
+	private readonly IServiceScope _scope;
 	static int? ITestSeed.Seed() => null;
 
 	public PostsTests(HostFixture<PostsTests> host)
 	{
 		_host = host;
+		_scope = host.CreateScope();
 		_client = _host.Options == null
 			? _host.CreateClient()
 			: _host.CreateClient(new WebApplicationFactoryClientOptions()
@@ -43,7 +50,7 @@ public class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSeed
 		_profiles = _host.Profiles;
 		_posts = _host.Posts;
 		_postDto = new FakePostDto(_profiles[0]);
-		var postMappings = _host.Services.GetRequiredService<MappingConfigProvider>().Posts;
+		var postMappings = _scope.ServiceProvider.GetRequiredService<MappingConfigProvider>().Posts;
 		_mapper = new Mapper(postMappings);
 		_json = new JsonSerializerOptions(JsonSerializerDefaults.Web)
 		{

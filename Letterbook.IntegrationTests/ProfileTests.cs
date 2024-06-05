@@ -18,8 +18,13 @@ namespace Letterbook.IntegrationTests;
 
 [Trait("Infra", "Postgres")]
 [Trait("Driver", "Api")]
-public class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITestSeed
+public sealed class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITestSeed, IDisposable
 {
+	public void Dispose()
+	{
+		_scope.Dispose();
+	}
+
 	private readonly HostFixture<ProfileTests> _host;
 	private readonly HttpClient _client;
 	private readonly List<Profile> _profiles;
@@ -28,11 +33,13 @@ public class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITestSeed
 	private readonly Mapper _mapper;
 	private readonly JsonSerializerOptions _json;
 	private readonly List<Account> _accounts;
+	private readonly IServiceScope _scope;
 	static int? ITestSeed.Seed() => null;
 
 	public ProfileTests(HostFixture<ProfileTests> host)
 	{
 		_host = host;
+		_scope = host.CreateScope();
 		_client = _host.Options == null
 			? _host.CreateClient()
 			: _host.CreateClient(new WebApplicationFactoryClientOptions()
@@ -43,7 +50,7 @@ public class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITestSeed
 		_accounts = _host.Accounts;
 		_posts = _host.Posts;
 		_postDto = new FakePostDto(_profiles[0]);
-		var profileMappings = _host.Services.GetRequiredService<MappingConfigProvider>().Profiles;
+		var profileMappings = _scope.ServiceProvider.GetRequiredService<MappingConfigProvider>().Profiles;
 		_mapper = new Mapper(profileMappings);
 		_json = new JsonSerializerOptions(JsonSerializerDefaults.Web)
 		{
