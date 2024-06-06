@@ -11,6 +11,7 @@ public class TimelinesApiTests : IClassFixture<HostFixture<TimelinesApiTests>>, 
 	private readonly HostFixture<TimelinesApiTests> _host;
 	private readonly HttpClient _client;
 	static int? ITestSeed.Seed() => null;
+	static int ITestSeed.TimelineCount() => 500;
 
 	public TimelinesApiTests(HostFixture<TimelinesApiTests> host)
 	{

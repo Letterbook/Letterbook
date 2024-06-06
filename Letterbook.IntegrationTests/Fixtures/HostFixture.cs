@@ -1,6 +1,7 @@
 using Bogus;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
+using Letterbook.Adapter.TimescaleFeeds.EntityModels;
 using Letterbook.Core;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
@@ -33,7 +34,6 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	}
 
 	private readonly IMessageSink _sink;
-	private static readonly object _lock = new();
 
 	private string ConnectionString =
 		$"Database=letterbook_{typeof(T).Name};" +
@@ -59,13 +59,12 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	public List<Account> Accounts { get; set; } = new();
 	public Dictionary<Profile, List<Post>> Posts { get; set; } = new();
 	public List<Post> Timeline { get; set; } = new();
-	public int Records { get; set; }
-	public bool Deleted { get; set; }
 	private readonly IServiceScope _scope;
 
 	public readonly CoreOptions Options;
 	private NpgsqlDataSourceBuilder _ds;
-	private RelationalContext _context;
+	private readonly RelationalContext _context;
+	private readonly FeedsContext _feedsContext;
 
 	public HostFixture(IMessageSink sink)
 	{
@@ -81,9 +80,19 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_ds.EnableDynamicJson();
 		_scope = CreateScope();
 		_context = CreateContext(_scope);
+		_feedsContext = CreateFeedsContext(_scope);
 
 		InitializeTestData();
 	}
+
+	/// <summary>
+	/// Create a new FeedsContext from the given scope
+	/// Call <see cref="CreateScope"/> to get a new scope
+	/// </summary>
+	/// <param name="scope"></param>
+	/// <returns></returns>
+	private FeedsContext CreateFeedsContext(IServiceScope scope) =>
+		scope.ServiceProvider.GetRequiredService<FeedsContext>();
 
 	/// <summary>
 	/// Create a new RelationalContext from the given scope
@@ -107,15 +116,20 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		InitTestData();
 		InitTimelineData();
 
-		Deleted = _context.Database.EnsureDeleted();
+		_context.Database.EnsureDeleted();
 		_context.Database.Migrate();
 		_context.Accounts.AddRange(Accounts);
 		_context.Profiles.AddRange(Profiles);
-		Records = _context.SaveChanges();
+		_context.SaveChanges();
+
 		_context.Posts.AddRange(Posts.SelectMany(pair => pair.Value));
-		Records += _context.SaveChanges();
 		_context.Posts.AddRange(Timeline);
-		Records += _context.SaveChanges();
+		_context.SaveChanges();
+
+		_feedsContext.Database.EnsureDeleted();
+		_feedsContext.Database.Migrate();
+		_feedsContext.AddRange(Timeline.Select(p => TimelinePost.Denormalize(p)).SelectMany(p => p));
+		_feedsContext.SaveChanges();
 	}
 
 	protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -197,7 +211,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		var authority = Options.BaseUri() ?? new Uri("letterbook.example");
 		var faker = new Faker();
 
-		while (Timeline.Count < 1000)
+		while (Timeline.Count < T.TimelineCount())
 		{
 			Profile creator;
 			// Pick or add new Creator
@@ -259,5 +273,6 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 public interface ITestSeed
 {
-	static abstract int? Seed();
+	static virtual int? Seed() => null;
+	static virtual int TimelineCount() => 0;
 }
