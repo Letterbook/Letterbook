@@ -78,6 +78,7 @@ public class TimelineService : IAuthzTimelineService, ITimelineService
 	{
 		// TODO(moderation): Account for moderation conditions (block, mute, etc)
 		var recipient = await _profileAdapter.LookupProfile(profileId);
+		_logger.LogDebug("Getting feed for {Profile} with membership in {Count} Audiences", profileId, recipient?.Audiences.Count);
 		return recipient != null
 			? _feeds.GetTimelineEntries(recipient.Audiences, begin, limit).ToList()
 			: throw CoreException.MissingData("Couldn't lookup Profile to load Feed", typeof(Guid), profileId);

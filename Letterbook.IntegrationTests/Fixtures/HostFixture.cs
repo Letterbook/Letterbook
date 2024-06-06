@@ -91,7 +91,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	/// </summary>
 	/// <param name="scope"></param>
 	/// <returns></returns>
-	private FeedsContext CreateFeedsContext(IServiceScope scope) =>
+	public FeedsContext CreateFeedsContext(IServiceScope scope) =>
 		scope.ServiceProvider.GetRequiredService<FeedsContext>();
 
 	/// <summary>
