@@ -19,6 +19,8 @@ public class ProfileEdit : PageModel
 	{
 		_profiles = profiles;
 		_options = options.Value;
+		Description = "";
+		DisplayName = "";
 	}
     
 	[BindProperty]
