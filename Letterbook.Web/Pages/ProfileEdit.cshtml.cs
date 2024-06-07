@@ -14,7 +14,7 @@ public class ProfileEdit : PageModel
     private readonly IProfileService _profiles;
 	private readonly CoreOptions _options;
     
-   	public string? Handle { get; set; }
+   	public string Handle { get; set; }
 
 	public ProfileEdit(IProfileService profiles, IOptions<CoreOptions> options)
 	{
@@ -22,6 +22,7 @@ public class ProfileEdit : PageModel
 		_options = options.Value;
 		Description = "";
 		DisplayName = "";
+		Handle = "";
 	}
     
 	[BindProperty]
