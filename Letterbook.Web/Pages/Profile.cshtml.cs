@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Html;
 using Microsoft.Extensions.Options;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.CodeAnalysis;
 
 namespace Letterbook.Web.Pages;
 
@@ -12,11 +13,11 @@ public class Profile : PageModel
 	private readonly IProfileService _profiles;
 	private readonly CoreOptions _options;
 
-	public string BareHandle { get; set; }
-	public string Handle { get; set; }
-	public string DisplayName { get; set; }
-	public HtmlString Description { get; set; }
-	public Models.CustomField[] CustomFields { get; set; }
+	public string? BareHandle { get; set; }
+	public string? Handle { get; set; }
+	public string? DisplayName { get; set; }
+	public HtmlString? Description { get; set; }
+	public Models.CustomField[]? CustomFields { get; set; }
 
 	private protected Models.Profile? Prof { get; set; }
 

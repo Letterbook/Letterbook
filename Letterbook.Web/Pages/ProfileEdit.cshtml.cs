@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.Extensions.Options;
 using System;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.CodeAnalysis;
 
 namespace Letterbook.Web.Pages;
 
@@ -13,7 +14,7 @@ public class ProfileEdit : PageModel
     private readonly IProfileService _profiles;
 	private readonly CoreOptions _options;
     
-   	public string Handle { get; set; }
+   	public string? Handle { get; set; }
 
 	public ProfileEdit(IProfileService profiles, IOptions<CoreOptions> options)
 	{
