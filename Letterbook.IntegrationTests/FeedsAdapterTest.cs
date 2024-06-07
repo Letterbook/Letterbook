@@ -1,12 +1,14 @@
-using Bogus;
-using Letterbook.Adapter.TimescaleFeeds.IntegrationTests.Fixtures;
+using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.IntegrationTests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Xunit.Abstractions;
 
-namespace Letterbook.Adapter.TimescaleFeeds.IntegrationTests;
+namespace Letterbook.IntegrationTests;
 
+[Trait("Infra", "Timescale")]
+[Trait("Driver", "Adapter")]
 public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterTest>>
 {
 	private ITestOutputHelper _output;
@@ -14,7 +16,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterT
 	private FeedsContext _context;
 	private FeedsContext _actual;
 	private TimescaleDataFixture<FeedsAdapterTest> _timescale;
-	private Faker _fake;
+	// private Faker _fake;
 
 	public FeedsAdapterTest(ITestOutputHelper outputHelper, TimescaleDataFixture<FeedsAdapterTest> timescale)
 	{
@@ -29,7 +31,6 @@ public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterT
 	}
 
 	[Fact(DisplayName = "Should exist")]
-	[Trait("FeedsAdapter", "Timeline")]
 	public void Exists()
 	{
 		Assert.NotNull(_adapter);
