@@ -25,9 +25,9 @@ public interface IAccountProfileAdapter : IDisposable
 	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uri relationId);
 
 	// Lookup Profile including relations to another profile
-	[Obsolete("Use IQueryable methods")]
+	[Obsolete("Use IQueryable methods", false)]
 	public Task<Profile?> LookupProfileWithRelation(Uri id, Uri relationId);
-	[Obsolete("Use IQueryable methods")]
+	[Obsolete("Use IQueryable methods", false)]
 	public Task<Profile?> LookupProfileWithRelation(Uuid7 localId, Uri relationId);
 
 	public IAsyncEnumerable<Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0);
