@@ -13,7 +13,7 @@ public class ProfileEdit : PageModel
     private readonly IProfileService _profiles;
 	private readonly CoreOptions _options;
     
-   	public required string Handle { get; set; }
+   	public string Handle { get; set; }
 
 	public ProfileEdit(IProfileService profiles, IOptions<CoreOptions> options)
 	{

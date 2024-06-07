@@ -12,11 +12,11 @@ public class Profile : PageModel
 	private readonly IProfileService _profiles;
 	private readonly CoreOptions _options;
 
-	public required string BareHandle { get; set; }
-	public required string Handle { get; set; }
-	public required string DisplayName { get; set; }
-	public required HtmlString Description { get; set; }
-	public required Models.CustomField[] CustomFields { get; set; }
+	public string BareHandle { get; set; }
+	public string Handle { get; set; }
+	public string DisplayName { get; set; }
+	public HtmlString Description { get; set; }
+	public Models.CustomField[] CustomFields { get; set; }
 
 	private protected Models.Profile? Prof { get; set; }
 
