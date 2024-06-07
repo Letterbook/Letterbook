@@ -34,6 +34,7 @@ public class Profile : PageModel
 		Handle = "";
 		DisplayName = "";
 		Description = new HtmlString("");
+		CustomFields = new Models.CustomField[0];
 	}
 
 	
