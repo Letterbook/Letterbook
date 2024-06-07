@@ -4,6 +4,7 @@ using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Medo;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -77,7 +78,10 @@ public class TimelineService : IAuthzTimelineService, ITimelineService
 	public async Task<IEnumerable<Post>> GetFeed(Uuid7 profileId, DateTimeOffset begin, int limit = 40)
 	{
 		// TODO(moderation): Account for moderation conditions (block, mute, etc)
-		var recipient = await _profileAdapter.LookupProfile(profileId);
+		var query = _profileAdapter.SingleProfile(profileId);
+		query = _profileAdapter.WithAudience(query);
+		var recipient = await query.SingleOrDefaultAsync();
+
 		_logger.LogDebug("Getting feed for {Profile} with membership in {Count} Audiences", profileId, recipient?.Audiences.Count);
 		return recipient != null
 			? _feeds.GetTimelineEntries(recipient.Audiences, begin, limit).ToList()
