@@ -3,21 +3,28 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
-using Letterbook.Api.IntegrationTests.Fixtures;
 using Letterbook.Api.Tests.Fakes;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Models.Mappers.Converters;
+using Letterbook.IntegrationTests.Fixtures;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Profile = Letterbook.Core.Models.Profile;
 
-namespace Letterbook.Api.IntegrationTests;
+namespace Letterbook.IntegrationTests;
 
-public class ProfileTests : IClassFixture<HostFixture<ProfileTests>>
+[Trait("Infra", "Postgres")]
+[Trait("Driver", "Api")]
+public sealed class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITestSeed, IDisposable
 {
+	public void Dispose()
+	{
+		_scope.Dispose();
+	}
+
 	private readonly HostFixture<ProfileTests> _host;
 	private readonly HttpClient _client;
 	private readonly List<Profile> _profiles;
@@ -26,10 +33,13 @@ public class ProfileTests : IClassFixture<HostFixture<ProfileTests>>
 	private readonly Mapper _mapper;
 	private readonly JsonSerializerOptions _json;
 	private readonly List<Account> _accounts;
+	private readonly IServiceScope _scope;
+	static int? ITestSeed.Seed() => null;
 
 	public ProfileTests(HostFixture<ProfileTests> host)
 	{
 		_host = host;
+		_scope = host.CreateScope();
 		_client = _host.Options == null
 			? _host.CreateClient()
 			: _host.CreateClient(new WebApplicationFactoryClientOptions()
@@ -40,7 +50,7 @@ public class ProfileTests : IClassFixture<HostFixture<ProfileTests>>
 		_accounts = _host.Accounts;
 		_posts = _host.Posts;
 		_postDto = new FakePostDto(_profiles[0]);
-		var profileMappings = _host.Services.GetRequiredService<MappingConfigProvider>().Profiles;
+		var profileMappings = _scope.ServiceProvider.GetRequiredService<MappingConfigProvider>().Profiles;
 		_mapper = new Mapper(profileMappings);
 		_json = new JsonSerializerOptions(JsonSerializerDefaults.Web)
 		{

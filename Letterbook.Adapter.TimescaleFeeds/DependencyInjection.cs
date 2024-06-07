@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Letterbook.Core.Adapters;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -13,7 +14,8 @@ public static class DependencyInjection
 			.Get<FeedsDbOptions>() ?? throw new ArgumentNullException(FeedsDbOptions.ConfigKey);
 		var dataSource = DataSource(dbOptions);
 
-		return services.AddDbContext<FeedsContext>(options => options.UseNpgsql(dataSource));
+		return services.AddDbContext<FeedsContext>(options => options.UseNpgsql(dataSource))
+			.AddScoped<IFeedsAdapter, FeedsAdapter>();
 	}
 
 	internal static NpgsqlDataSource DataSource(FeedsDbOptions dbOptions)

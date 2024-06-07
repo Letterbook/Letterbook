@@ -2,7 +2,7 @@
 on:
   workflow_dispatch:
   schedule:
-    - cron: '5 0/4 * * *'
+    - cron: '5,35 1 * * 1,5' # "At minute 5 and 35 past hour 1 on Monday and Friday (UTC)."
 
 jobs:
   Renovate:

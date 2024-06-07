@@ -62,7 +62,8 @@ public static class DependencyInjection
 		var entryAssembly = Assembly.GetExecutingAssembly();
 		var consumers = AppDomain.CurrentDomain.GetAssemblies()
 			.SelectMany(s => s.GetTypes())
-			.Where(p => typeof(IConsumer).IsAssignableFrom(p) && p.IsClass && !p.IsAbstract)
+			.Where(p => typeof(IConsumer).IsAssignableFrom(p) && p.IsClass && !p.IsAbstract &&
+			            (p.Namespace?.StartsWith("Letterbook") ?? false))
 			.ToArray();
 
 		bus.AddConsumers(consumers);

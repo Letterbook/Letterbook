@@ -1,38 +1,49 @@
-using Letterbook.Adapter.Db.IntegrationTests.Fixtures;
+using Letterbook.Adapter.Db;
 using Letterbook.Core.Models;
-using Medo;
+using Letterbook.IntegrationTests.Fixtures;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
 
-namespace Letterbook.Adapter.Db.IntegrationTests;
+namespace Letterbook.IntegrationTests;
 
-[Collection("Integration")]
-public class AccountProfileAdapterTests : IClassFixture<PostgresFixture>
+[Trait("Infra", "Postgres")]
+[Trait("Driver", "Api")]
+public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<AccountProfileAdapterTests>>, ITestSeed, IDisposable
 {
+	public void Dispose()
+	{
+		_scope.Dispose();
+	}
+
 	private readonly ITestOutputHelper _output;
-	private readonly PostgresFixture _postgres;
+	private readonly HostFixture<AccountProfileAdapterTests> _host;
 	private AccountProfileAdapter _adapter;
 	private RelationalContext _context;
 	private RelationalContext _actual;
 	private List<Profile> _profiles;
 	private List<Account> _accounts;
+	private readonly IServiceScope _scope;
+	static int? ITestSeed.Seed() => null;
 
-	public AccountProfileAdapterTests(ITestOutputHelper output, PostgresFixture postgres)
+	public AccountProfileAdapterTests(ITestOutputHelper output, HostFixture<AccountProfileAdapterTests> host)
 	{
 		_output = output;
-		_postgres = postgres;
+		_host = host;
+		_scope = _host.CreateScope();
 
-		_profiles = postgres.Profiles;
-		_accounts = postgres.Accounts;
-		_context = _postgres.CreateContext();
-		_actual = _postgres.CreateContext();
+		_profiles = host.Profiles;
+		_accounts = host.Accounts;
+		_context = _host.CreateContext(_scope);
+		_actual = _host.CreateContext(_scope);
 		_adapter = new AccountProfileAdapter(Mock.Of<ILogger<AccountProfileAdapter>>(), _context);
 	}
 
 	[Fact]
 	public void Exists()
-	{ }
+	{
+	}
 
 	[Trait("AccountProfileAdapter", "AnyProfile")]
 	[Fact(DisplayName = "Should indicate ID is in use")]
