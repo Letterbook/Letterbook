@@ -22,7 +22,8 @@ public class TimelineServiceTest : WithMocks
 		_outputHelper = outputHelper;
 		_logger = new Mock<ILogger<TimelineService>>();
 		_feeds = new Mock<IFeedsAdapter>();
-		_timeline = new TimelineService(_logger.Object, CoreOptionsMock, _feeds.Object, AccountProfileMock.Object);
+		_timeline = new TimelineService(_logger.Object, CoreOptionsMock, _feeds.Object, AccountProfileMock.Object,
+			AuthorizationServiceMock.Object);
 
 		_outputHelper.WriteLine($"Bogus Seed: {Init.WithSeed()}");
 		_opts = CoreOptionsMock.Value;

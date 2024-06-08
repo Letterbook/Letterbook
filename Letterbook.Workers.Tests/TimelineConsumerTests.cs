@@ -78,7 +78,7 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 
 		Assert.True(await _harness.Published.Any<PostEvent>());
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
-		TimelineServiceMock.VerifyNoOtherCalls();
+		AuthzTimelineServiceMock.VerifyNoOtherCalls();
 		Assert.Empty(_faultObserver.Faults);
 	}
 
@@ -97,8 +97,8 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 
 		Assert.True(await _harness.Published.Any<PostEvent>());
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
-		TimelineServiceMock.Verify(m => m.HandlePublish(It.IsAny<Post>()));
-		TimelineServiceMock.VerifyNoOtherCalls();
+		AuthzTimelineServiceMock.Verify(m => m.HandlePublish(It.IsAny<Post>()));
+		AuthzTimelineServiceMock.VerifyNoOtherCalls();
 		Assert.Empty(_faultObserver.Faults);
 	}
 
@@ -122,8 +122,8 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 
 		Assert.True(await _harness.Published.Any<PostEvent>());
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
-		TimelineServiceMock.Verify(m => m.HandleUpdate(It.IsAny<Post>(), It.IsAny<Post>()));
-		TimelineServiceMock.VerifyNoOtherCalls();
+		AuthzTimelineServiceMock.Verify(m => m.HandleUpdate(It.IsAny<Post>(), It.IsAny<Post>()));
+		AuthzTimelineServiceMock.VerifyNoOtherCalls();
 		Assert.Empty(_faultObserver.Faults);
 	}
 
@@ -142,7 +142,7 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 
 		Assert.True(await _harness.Published.Any<PostEvent>());
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
-		TimelineServiceMock.VerifyNoOtherCalls();
+		AuthzTimelineServiceMock.VerifyNoOtherCalls();
 		Assert.Empty(_faultObserver.Faults);
 	}
 
@@ -168,8 +168,8 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 		Assert.True(await _harness.Published.Any<PostEvent>());
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
 		Assert.Empty(_faultObserver.Faults);
-		TimelineServiceMock.Verify(m => m.HandleShare(It.IsAny<Post>(), sharedBy));
-		TimelineServiceMock.VerifyNoOtherCalls();
+		AuthzTimelineServiceMock.Verify(m => m.HandleShare(It.IsAny<Post>(), sharedBy));
+		AuthzTimelineServiceMock.VerifyNoOtherCalls();
 	}
 
 	[Fact(DisplayName = "Should not add to timeline for malformed Shared events")]
@@ -193,8 +193,8 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 		Assert.True(await _harness.Published.Any<PostEvent>());
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
 		Assert.Empty(_faultObserver.Faults);
-		TimelineServiceMock.Verify(m => m.HandleShare(It.IsAny<Post>(), It.IsAny<Profile>()), Times.Never);
-		TimelineServiceMock.VerifyNoOtherCalls();
+		AuthzTimelineServiceMock.Verify(m => m.HandleShare(It.IsAny<Post>(), It.IsAny<Profile>()), Times.Never);
+		AuthzTimelineServiceMock.VerifyNoOtherCalls();
 	}
 
 	[Fact(DisplayName = "Should not update timeline for Liked events")]
@@ -212,7 +212,7 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 
 		Assert.True(await _harness.Published.Any<PostEvent>());
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
-		TimelineServiceMock.VerifyNoOtherCalls();
+		AuthzTimelineServiceMock.VerifyNoOtherCalls();
 		Assert.Empty(_faultObserver.Faults);
 	}
 
