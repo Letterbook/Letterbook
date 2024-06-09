@@ -29,6 +29,9 @@ jobs:
       - name: Restore
         run: dotnet restore Letterbook.sln
       
+      - name: Restore Tools
+        run: dotnet tool restore
+        
       - name: Build
         run: dotnet build Letterbook.sln --configuration Release
       
@@ -41,9 +44,6 @@ jobs:
         with:
           name: TestResults
           path: '**/TestResults/'
-      
-      - name: Install EF Tools
-        run: dotnet tool restore
       
       - name: Check Relational Migrations
         run: dotnet ef migrations has-pending-model-changes --no-build
