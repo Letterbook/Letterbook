@@ -1,0 +1,1171 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "ActivityPub endpoints",
+    "description": "ActivityPub objects and specified endpoints",
+    "contact": {
+      "url": "https://www.w3.org/TR/activitypub/"
+    },
+    "version": "v1"
+  },
+  "paths": {
+    "/actor/{id}": {
+      "get": {
+        "tags": [
+          "Actor"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/actor/{id}/collections/followers": {
+      "get": {
+        "tags": [
+          "Actor"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/actor/{id}/collections/following": {
+      "get": {
+        "tags": [
+          "Actor"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/actor/{id}/collections/liked": {
+      "get": {
+        "tags": [
+          "Actor"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/actor/{id}/inbox": {
+      "get": {
+        "tags": [
+          "Actor"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Actor"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/ld+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ASType"
+              }
+            },
+            "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
+              "schema": {
+                "$ref": "#/components/schemas/ASType"
+              }
+            },
+            "application/activity+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ASType"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ASActivity"
+                }
+              },
+              "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
+                "schema": {
+                  "$ref": "#/components/schemas/ASActivity"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "202": {
+            "description": "Accepted"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Gone",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "421": {
+            "description": "Misdirected Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actor/shared_inbox": {
+      "post": {
+        "tags": [
+          "Actor"
+        ],
+        "requestBody": {
+          "content": {
+            "application/ld+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ASType"
+              }
+            },
+            "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
+              "schema": {
+                "$ref": "#/components/schemas/ASType"
+              }
+            },
+            "application/activity+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ASType"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
+    "/actor/{id}/outbox": {
+      "get": {
+        "tags": [
+          "Actor"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Actor"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/object/{type}/{id}/collections/likes": {
+      "get": {
+        "tags": [
+          "Object"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/object/{type}/{id}/collections/shares": {
+      "get": {
+        "tags": [
+          "Object"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ASActivity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAnonymous": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "attributedTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "preview": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "name": {
+            "$ref": "#/components/schemas/NaturalLanguageString"
+          },
+          "mediaType": {
+            "type": "string",
+            "nullable": true
+          },
+          "attachment": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "audience": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "bcc": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "bTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "cc": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "context": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "generator": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/ImageObjectLinkable"
+          },
+          "image": {
+            "$ref": "#/components/schemas/ImageObjectLinkable"
+          },
+          "inReplyTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "replies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "tag": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "to": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "url": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASLink"
+            },
+            "nullable": true
+          },
+          "content": {
+            "$ref": "#/components/schemas/NaturalLanguageString"
+          },
+          "duration": {
+            "type": "string",
+            "nullable": true
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "published": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "summary": {
+            "$ref": "#/components/schemas/NaturalLanguageString"
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/ASObject"
+          },
+          "likes": {
+            "$ref": "#/components/schemas/ASCollectionLinkable"
+          },
+          "shares": {
+            "$ref": "#/components/schemas/ASCollectionLinkable"
+          },
+          "actor": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "instrument": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "object": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "origin": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "target": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ASCollectionLinkable": {
+        "type": "object",
+        "properties": {
+          "hasLink": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "link": {
+            "$ref": "#/components/schemas/ASLink"
+          },
+          "hasValue": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "value": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ASLink": {
+        "required": [
+          "hRef"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAnonymous": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "attributedTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "preview": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "name": {
+            "$ref": "#/components/schemas/NaturalLanguageString"
+          },
+          "mediaType": {
+            "type": "string",
+            "nullable": true
+          },
+          "hRef": {
+            "$ref": "#/components/schemas/ASUri"
+          },
+          "hRefLang": {
+            "type": "string",
+            "nullable": true
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "rel": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinkRel"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ASObject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAnonymous": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "attributedTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "preview": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "name": {
+            "$ref": "#/components/schemas/NaturalLanguageString"
+          },
+          "mediaType": {
+            "type": "string",
+            "nullable": true
+          },
+          "attachment": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "audience": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "bcc": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "bTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "cc": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "context": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "generator": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/ImageObjectLinkable"
+          },
+          "image": {
+            "$ref": "#/components/schemas/ImageObjectLinkable"
+          },
+          "inReplyTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "replies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "tag": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "to": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "url": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASLink"
+            },
+            "nullable": true
+          },
+          "content": {
+            "$ref": "#/components/schemas/NaturalLanguageString"
+          },
+          "duration": {
+            "type": "string",
+            "nullable": true
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "published": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "summary": {
+            "$ref": "#/components/schemas/NaturalLanguageString"
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/ASObject"
+          },
+          "likes": {
+            "$ref": "#/components/schemas/ASCollectionLinkable"
+          },
+          "shares": {
+            "$ref": "#/components/schemas/ASCollectionLinkable"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ASObjectLinkable": {
+        "type": "object",
+        "properties": {
+          "hasLink": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "link": {
+            "$ref": "#/components/schemas/ASLink"
+          },
+          "hasValue": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "value": {
+            "$ref": "#/components/schemas/ASObject"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ASType": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAnonymous": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "attributedTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "preview": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "name": {
+            "$ref": "#/components/schemas/NaturalLanguageString"
+          },
+          "mediaType": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ASUri": {
+        "type": "object",
+        "properties": {
+          "uri": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/06csqa4w4po0wp1ybuj4xmib1"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ImageObject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAnonymous": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "attributedTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "preview": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "name": {
+            "$ref": "#/components/schemas/NaturalLanguageString"
+          },
+          "mediaType": {
+            "type": "string",
+            "nullable": true
+          },
+          "attachment": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "audience": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "bcc": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "bTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "cc": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "context": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "generator": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "icon": {
+            "$ref": "#/components/schemas/ImageObjectLinkable"
+          },
+          "image": {
+            "$ref": "#/components/schemas/ImageObjectLinkable"
+          },
+          "inReplyTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "location": {
+            "$ref": "#/components/schemas/ASObjectLinkable"
+          },
+          "replies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "tag": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "to": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASObjectLinkable"
+            },
+            "nullable": true
+          },
+          "url": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ASLink"
+            },
+            "nullable": true
+          },
+          "content": {
+            "$ref": "#/components/schemas/NaturalLanguageString"
+          },
+          "duration": {
+            "type": "string",
+            "nullable": true
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "published": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "summary": {
+            "$ref": "#/components/schemas/NaturalLanguageString"
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "source": {
+            "$ref": "#/components/schemas/ASObject"
+          },
+          "likes": {
+            "$ref": "#/components/schemas/ASCollectionLinkable"
+          },
+          "shares": {
+            "$ref": "#/components/schemas/ASCollectionLinkable"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ImageObjectLinkable": {
+        "type": "object",
+        "properties": {
+          "hasLink": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "link": {
+            "$ref": "#/components/schemas/ASLink"
+          },
+          "hasValue": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "value": {
+            "$ref": "#/components/schemas/ImageObject"
+          }
+        },
+        "additionalProperties": false
+      },
+      "LinkRel": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "NaturalLanguageString": {
+        "type": "object",
+        "properties": {
+          "defaultValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "languageMap": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true,
+            "readOnly": true
+          },
+          "hasLanguages": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": { }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "Enter the Authorization header, including the Bearer scheme, like so: `Bearer <JWT>`",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}

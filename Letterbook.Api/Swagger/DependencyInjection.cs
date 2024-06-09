@@ -21,7 +21,7 @@ public static class DependencyInjection
 					Title = "Letterbook APIs",
 					Description = "Letterbook's first party API",
 					Version = "v1",
-					Contact = new() { Url = new Uri("https://letterbookhq.com") }
+					Contact = new() { Url = new Uri("https://letterbook.com") }
 				});
 			options.SwaggerDoc(Docs.MastodonV1Desc.Name,
 				new OpenApiInfo

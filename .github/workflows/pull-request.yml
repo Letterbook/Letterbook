@@ -43,18 +43,22 @@ jobs:
           path: '**/TestResults/'
       
       - name: Install EF Tools
-        run: |
-          dotnet tool install --global dotnet-ef --version 8.0.0
-          dotnet tool restore
+        run: dotnet tool restore
       
-      - name: Test Migrations
+      - name: Check Relational Migrations
+        run: dotnet ef migrations has-pending-model-changes --no-build
+        working-directory: Letterbook.Adapter.Db/
+        
+      - name: Check Feeds Migrations
+        run: dotnet ef migrations has-pending-model-changes --no-build
+        working-directory: Letterbook.Adapter.TimescaleFeeds/
+
+      - name: Check Generated Files
         run: |
-          dotnet ef migrations add CI
           CHANGED=$(git status --porcelain -uno)
           if [ -n "$CHANGED" ]; then
             echo "$CHANGED"
-            echo 'Failed: Stale migrations'
+            echo 'Failed: Stale files'
             exit 1
           fi
-        working-directory: Letterbook.Adapter.Db/
         shell: bash

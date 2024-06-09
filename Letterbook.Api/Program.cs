@@ -32,35 +32,10 @@ public class Program
 			.WriteTo.Console()
 			.CreateBootstrapLogger();
 
+		builder.ConfigureHostBuilder();
+
 		var coreOptions = builder.Configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
 		                  ?? throw new ConfigException(nameof(CoreOptions));
-
-		if (!builder.Environment.IsProduction())
-			builder.Configuration.AddUserSecrets<Program>();
-		// Register Serilog - Serialized Logging (configured in appsettings.json)
-		builder.Host.UseSerilog((context, services, configuration) => configuration
-			.Enrich.FromLogContext()
-			.Enrich.WithSpan()
-			.ReadFrom.Configuration(context.Configuration)
-			.ReadFrom.Services(services),
-			true
-		);
-
-		builder.Services.AddApiProperties(builder.Configuration);
-		// Register Open Telemetry
-		builder.Services.AddTelemetry();
-		builder.Services.AddHealthChecks()
-			// .Add();
-			;
-		builder.Services.AddActivityPubClient(builder.Configuration);
-		builder.Services.AddServices(builder.Configuration);
-		builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
-			.AddEntityFrameworkStores<RelationalContext>()
-			.AddDefaultTokenProviders()
-			.AddDefaultUI();
-		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration))
-			.AddPublishers();
-
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 
 		var app = builder.Build();
