@@ -4,7 +4,8 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <UserSecretsId>dotnet-Letterbook.Workers-C449C3B5-C808-4EEB-97C8-20AB9E3B5C50</UserSecretsId>
+        <UserSecretsId>5932fff5-e723-4c65-90fc-ec9f045b4119</UserSecretsId>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
     <ItemGroup>
