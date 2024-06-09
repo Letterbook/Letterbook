@@ -9,10 +9,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MassTransit" Version="8.2.2"/>
-        <PackageReference Include="Npgsql" Version="8.0.3"/>
-        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.6.0-rc.1"/>
-        <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.8.1"/>
+        <PackageReference Include="MassTransit" />
+        <PackageReference Include="Npgsql" />
+        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
     </ItemGroup>
 
     <ItemGroup>
@@ -22,88 +22,88 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj"/>
-        <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj"/>
-        <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj"/>
-        <ProjectReference Include="..\Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj"/>
-        <ProjectReference Include="..\Letterbook.Api\Letterbook.Api.csproj"/>
-        <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj"/>
-        <ProjectReference Include="..\Letterbook.Web\Letterbook.Web.csproj"/>
-        <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj"/>
+        <ProjectReference Include="..\Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj" />
+        <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj" />
+        <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj" />
+        <ProjectReference Include="..\Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj" />
+        <ProjectReference Include="..\Letterbook.Api\Letterbook.Api.csproj" />
+        <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
+        <ProjectReference Include="..\Letterbook.Web\Letterbook.Web.csproj" />
+        <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <Content Remove="wwwroot\lib\jquery\dist\jquery.min.map"/>
-        <Content Remove="wwwroot\lib\jquery\dist\jquery.min.js"/>
-        <Content Remove="wwwroot\lib\jquery\LICENSE.txt"/>
-        <Content Remove="wwwroot\lib\jquery-validation\dist\jquery.validate.min.js"/>
-        <Content Remove="wwwroot\lib\jquery-validation\dist\jquery.validate.js"/>
-        <Content Remove="wwwroot\lib\jquery-validation\dist\additional-methods.min.js"/>
-        <Content Remove="wwwroot\lib\jquery-validation\LICENSE.md"/>
-        <Content Remove="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js"/>
-        <Content Remove="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.js.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.js"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css"/>
-        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map"/>
-        <Content Remove="wwwroot\favicon.ico"/>
-        <Content Remove="Pages\_ViewStart.cshtml"/>
-        <Content Remove="Pages\Shared\_ValidationScriptsPartial.cshtml"/>
-        <Content Remove="Pages\Privacy.cshtml"/>
-        <Content Remove="Pages\Index.cshtml"/>
+        <Content Remove="wwwroot\lib\jquery\dist\jquery.min.map" />
+        <Content Remove="wwwroot\lib\jquery\dist\jquery.min.js" />
+        <Content Remove="wwwroot\lib\jquery\LICENSE.txt" />
+        <Content Remove="wwwroot\lib\jquery-validation\dist\jquery.validate.min.js" />
+        <Content Remove="wwwroot\lib\jquery-validation\dist\jquery.validate.js" />
+        <Content Remove="wwwroot\lib\jquery-validation\dist\additional-methods.min.js" />
+        <Content Remove="wwwroot\lib\jquery-validation\LICENSE.md" />
+        <Content Remove="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js" />
+        <Content Remove="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.min.js" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.js.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.js" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.min.js" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.esm.js" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.min.js" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\js\bootstrap.bundle.js.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.min.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.rtl.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.min.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.min.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.rtl.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.min.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-utilities.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.min.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.rtl.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.min.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-reboot.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.min.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.rtl.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css.map" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css" />
+        <Content Remove="wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map" />
+        <Content Remove="wwwroot\favicon.ico" />
+        <Content Remove="Pages\_ViewStart.cshtml" />
+        <Content Remove="Pages\Shared\_ValidationScriptsPartial.cshtml" />
+        <Content Remove="Pages\Privacy.cshtml" />
+        <Content Remove="Pages\Index.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Pages\Shared\"/>
-        <Folder Include="wwwroot\css\"/>
-        <Folder Include="wwwroot\js\"/>
-        <Folder Include="wwwroot\lib\bootstrap\dist\css\"/>
-        <Folder Include="wwwroot\lib\bootstrap\dist\js\"/>
-        <Folder Include="wwwroot\lib\jquery-validation-unobtrusive\"/>
-        <Folder Include="wwwroot\lib\jquery\dist\"/>
+        <Folder Include="Pages\Shared\" />
+        <Folder Include="wwwroot\css\" />
+        <Folder Include="wwwroot\js\" />
+        <Folder Include="wwwroot\lib\bootstrap\dist\css\" />
+        <Folder Include="wwwroot\lib\bootstrap\dist\js\" />
+        <Folder Include="wwwroot\lib\jquery-validation-unobtrusive\" />
+        <Folder Include="wwwroot\lib\jquery\dist\" />
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="Pages\Privacy.cshtml.cs"/>
-        <Compile Remove="Pages\Index.cshtml.cs"/>
-        <Compile Remove="Pages\Error.cshtml.cs"/>
+        <Compile Remove="Pages\Privacy.cshtml.cs" />
+        <Compile Remove="Pages\Index.cshtml.cs" />
+        <Compile Remove="Pages\Error.cshtml.cs" />
     </ItemGroup>
 
 </Project>

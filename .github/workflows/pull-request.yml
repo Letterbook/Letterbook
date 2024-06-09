@@ -17,7 +17,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      
     steps:
       - uses: actions/checkout@v4
         
