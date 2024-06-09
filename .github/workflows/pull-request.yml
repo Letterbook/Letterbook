@@ -34,21 +34,13 @@ jobs:
         with:
           path: ${{env.NUGET_PACKAGES}}
           key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
-          restore-keys: |
-            ${{ runner.os }}-nuget-
       
-      - name: Restore
+      - name: Restore Packages
         if: steps.package-cache.outputs.cache-hit != 'true'
         run: dotnet restore
       
       - name: Restore Tools
         run: dotnet tool restore
-        
-#      - name: Cache Nuget Packages
-#        uses: actions/cache/save@v4
-#        with:
-#          path: ${{env.NUGET_PACKAGES}}
-#          key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
       
       - name: Build
         run: dotnet build Letterbook.sln --configuration Release
