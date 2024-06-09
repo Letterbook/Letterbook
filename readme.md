@@ -81,7 +81,7 @@ All of this is just the beginning of what we have planned for Letterbook. We're 
 
 ## Contributing
 
-> [!NOTE]
+> [!TIP]
 > To get started developing, see the Quckstart section in the [Contributing Guide](./CONTRIBUTING.md)
 
 
@@ -95,11 +95,11 @@ Please reach out to let us know you're interested in the project! There are many
 6. Project management
 7. Technical communication
 
-> [!NOTE]
+## Roadmap
+
+> [!IMPORTANT]
 > We use projects to organize the backlog  
 > Our current project is the [Single User Preview](https://github.com/orgs/Letterbook/projects/5/views/4)
-
-## Roadmap
 
 It might help to put all this in context of what has and hasn't been done already. At this point, we've essentially climbed one mountain, and now we're surveying all of the other mountains we still have ahead of us. The plan is to move toward a product that could be responsibly run in production for a single user, with the goal of supporting large multi-user deployments in the future. We'll learn more from the experience of supporting live workloads, and build more robust tools, features, and performance based on that experience. Right now is a great time to join the project. There's so much that needs to be done, and also a solid foundation to work from.
 

@@ -57,12 +57,6 @@
     <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="mastodon-v1.json" />
-    <Content Remove="letterbook-v1.json" />
-    <Content Remove="activity-pub-v1.json" />
-  </ItemGroup>
-
   <Target Name="GenerateOpenAPI" AfterTargets="Build" Condition="$(Configuration)=='Release'">
     <!-- Usage -->
     <!-- dotnet swagger tofile -\-output [path] [entryAssembly].dll [openApi document name] -->
