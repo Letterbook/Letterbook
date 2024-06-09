@@ -28,23 +28,27 @@ jobs:
         with:
           dotnet-version: 8.0.x
       
-      - name: Restore Package Cache
-        uses: actions/cache/restore@v4
+      - name: Package Cache
+        id: package-cache
+        uses: actions/cache@v4
         with:
           path: ${{env.NUGET_PACKAGES}}
-          key: "${{ runner.os }}-${{ hashFiles('Directory.Packages.props') }}"
+          key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
+          restore-keys: |
+            ${{ runner.os }}-nuget-
       
       - name: Restore
+        if: steps.package-cache.outputs.cache-hit != 'true'
         run: dotnet restore
       
       - name: Restore Tools
         run: dotnet tool restore
         
-      - name: Cache Nuget Packages
-        uses: actions/cache@v4
-        with:
-          path: ${{env.NUGET_PACKAGES}}
-          key: "${{ runner.os }}-${{ hashFiles('Directory.Packages.props') }}"
+#      - name: Cache Nuget Packages
+#        uses: actions/cache/save@v4
+#        with:
+#          path: ${{env.NUGET_PACKAGES}}
+#          key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
       
       - name: Build
         run: dotnet build Letterbook.sln --configuration Release
