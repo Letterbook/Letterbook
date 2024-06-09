@@ -13,7 +13,11 @@ public static class DependencyInjection
 		// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 		return services.AddEndpointsApiExplorer()
 			.AddSwaggerGen(options =>
-		{
+			{
+				var r = new Random(691029504);
+				var b = new byte[16];
+				r.NextBytes(b);
+				var id = new Uuid7(b).ToId22String();
 			options.EnableAnnotations();
 			options.SwaggerDoc(Docs.LetterbookV1Desc.Name,
 				new OpenApiInfo
@@ -43,13 +47,13 @@ public static class DependencyInjection
 			{
 				Type = "string",
 				Pattern = "[0-9a-z]{25}",
-				Example = new OpenApiString(Uuid7.NewUuid7().ToId25String())
+				Example = new OpenApiString(id)
 			});
 			options.MapType<Uri>(() => new OpenApiSchema
 			{
 				Type = "string",
 				Pattern = @"https://\w+\.\w+/\w*",
-				Example = new OpenApiString($"https://example.com/{Uuid7.NewUuid7().ToId25String()}")
+				Example = new OpenApiString($"https://example.com/{id}")
 			});
 			options.AddSecurityDefinition(name: "Bearer", securityScheme: new OpenApiSecurityScheme
 			{
