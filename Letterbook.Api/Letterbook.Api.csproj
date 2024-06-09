@@ -9,7 +9,6 @@
     <NoWarn>
       ASP0023 <!-- Warns for ambiguous routes, but our routes are not actually ambiguous -->
     </NoWarn>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <ItemGroup>

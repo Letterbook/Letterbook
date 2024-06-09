@@ -27,14 +27,25 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-          cache: true
+      
+      - name: Restore Package Cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{env.NUGET_PACKAGES}}
+          key: "${{ runner.os }}-${{ hashFiles('Directory.Packages.props') }}"
       
       - name: Restore
-        run: dotnet restore Letterbook.sln
+        run: dotnet restore
       
       - name: Restore Tools
         run: dotnet tool restore
         
+      - name: Cache Nuget Packages
+        uses: actions/cache@v4
+        with:
+          path: ${{env.NUGET_PACKAGES}}
+          key: "${{ runner.os }}-${{ hashFiles('Directory.Packages.props') }}"
+      
       - name: Build
         run: dotnet build Letterbook.sln --configuration Release
       

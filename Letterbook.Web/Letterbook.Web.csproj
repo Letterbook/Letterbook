@@ -6,7 +6,6 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <UserSecretsId>5932fff5-e723-4c65-90fc-ec9f045b4119</UserSecretsId>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     </PropertyGroup>
 
     <ItemGroup>
