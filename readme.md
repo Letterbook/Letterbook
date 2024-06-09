@@ -1,6 +1,8 @@
 # Letterbook
 
-[![Build](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml/badge.svg?branch=main)](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml)
+[![Build status badge](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml/badge.svg?branch=main)](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml)
+[![Good first issues badge](https://img.shields.io/github/issues-search/letterbook/letterbook?query=is%3Aissue%20is%3Aopen%20label%3A%22ready%20to%20start%22%2C%22good%20first%20issue%22%20&style=flat&logo=github&label=Good%20first%20issue&labelColor=%23404951&color=%2333CB56)](https://github.com/Letterbook/Letterbook/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22%2C%22ready+to+start%22)
+
 
 Letterbook is a federated microblogging service, implementing ActivityPub. The goal for the project is to make hosting a fediverse server a better and more sustainable experience. We also want to make it a safer and more inclusive space for the people who make the fediverse their social media home. Those are big aspirations, but we have some solid plans about how to start, and [we would love more input about where to go from there](#contributing).
 
@@ -79,7 +81,7 @@ All of this is just the beginning of what we have planned for Letterbook. We're 
 
 ## Contributing
 
-> [!NOTE]
+> [!TIP]
 > To get started developing, see the Quckstart section in the [Contributing Guide](./CONTRIBUTING.md)
 
 
@@ -93,11 +95,11 @@ Please reach out to let us know you're interested in the project! There are many
 6. Project management
 7. Technical communication
 
-> [!NOTE]
+## Roadmap
+
+> [!IMPORTANT]
 > We use projects to organize the backlog  
 > Our current project is the [Single User Preview](https://github.com/orgs/Letterbook/projects/5/views/4)
-
-## Roadmap
 
 It might help to put all this in context of what has and hasn't been done already. At this point, we've essentially climbed one mountain, and now we're surveying all of the other mountains we still have ahead of us. The plan is to move toward a product that could be responsibly run in production for a single user, with the goal of supporting large multi-user deployments in the future. We'll learn more from the experience of supporting live workloads, and build more robust tools, features, and performance based on that experience. Right now is a great time to join the project. There's so much that needs to be done, and also a solid foundation to work from.
 

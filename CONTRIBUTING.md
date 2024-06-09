@@ -147,6 +147,10 @@ Other adapters may of course be involved. If a change requires a new or updated 
 
 ### Running the Server
 
+> [!IMPORTANT]
+> The build depends on some dotnet tools to generate some docs and assets.  
+> You must run `dotnet tool restore` to get the tools before you build the project for the first time. 
+
 Letterbook is meant to be easy to set up and run. The default `Letterbook` host project provides all the functionality of the service. However, it's also possible to run the major components on their own. In development, you can run the `Letterbook` project from any of the launch settings. 
 
 ### Running tests

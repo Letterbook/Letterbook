@@ -85,6 +85,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.IntegrationTests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Web.Tests", "Letterbook.Web.Tests\Letterbook.Web.Tests.csproj", "{D0CF9A7E-C21D-412F-B4EF-8555B2957C85}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OpenApi", "OpenApi", "{74EB160F-90AA-4DD7-B7F5-0D0627B000F7}"
+	ProjectSection(SolutionItems) = preProject
+		docs\openApi\activity-pub-v1.json = docs\openApi\activity-pub-v1.json
+		docs\openApi\letterbook-v1.json = docs\openApi\letterbook-v1.json
+		docs\openApi\mastodon-v1.json = docs\openApi\mastodon-v1.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -167,5 +174,6 @@ Global
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
 		{4FB3BADC-1EDD-482C-8D60-AD46D676A12F} = {D5E41A46-D753-4214-AF70-1839E56B4A14}
 		{1D8F2C94-1796-48A0-B9D7-172E645607F5} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
+		{74EB160F-90AA-4DD7-B7F5-0D0627B000F7} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
 	EndGlobalSection
 EndGlobal

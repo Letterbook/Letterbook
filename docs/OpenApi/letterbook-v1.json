@@ -1,0 +1,1777 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Letterbook APIs",
+    "description": "Letterbook's first party API",
+    "contact": {
+      "url": "https://letterbook.com"
+    },
+    "version": "v1"
+  },
+  "paths": {
+    "/{selfId}/follow": {
+      "post": {
+        "tags": [
+          "Debug"
+        ],
+        "parameters": [
+          {
+            "name": "selfId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/lb/v1/posts/{profileId}/post": {
+      "post": {
+        "tags": [
+          "Posts"
+        ],
+        "summary": "Post",
+        "description": "Draft a new post, and optionally publish it",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "draft",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/posts/{profileId}/post/{postId}": {
+      "post": {
+        "tags": [
+          "Posts"
+        ],
+        "summary": "Publish",
+        "description": "Publish an existing draft post",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Posts"
+        ],
+        "summary": "Update",
+        "description": "Update an entire post, including all contents",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Posts"
+        ],
+        "summary": "Delete",
+        "description": "Delete a post",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Posts"
+        ],
+        "summary": "Get",
+        "description": "Get a post",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "withThread",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/posts/{profileId}/post/{postId}/content": {
+      "post": {
+        "tags": [
+          "Posts"
+        ],
+        "summary": "Attach",
+        "description": "Attach additional content to a post",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/posts/{profileId}/post/{postId}/content/{contentId}": {
+      "put": {
+        "tags": [
+          "Posts"
+        ],
+        "summary": "Edit",
+        "description": "Edit the content of a post",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "contentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Posts"
+        ],
+        "summary": "Remove",
+        "description": "Remove content from a post",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "contentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/posts/{profileId}/post/drafts": {
+      "get": {
+        "tags": [
+          "Posts"
+        ],
+        "summary": "Drafts",
+        "description": "Get unpublished drafts",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/posts/{profileId}/post/{postId}/replies": {
+      "get": {
+        "tags": [
+          "Posts"
+        ],
+        "summary": "Replies",
+        "description": "Get replies to a post",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/posts/{profileId}/thread/{threadId}": {
+      "get": {
+        "tags": [
+          "Posts"
+        ],
+        "summary": "Thread",
+        "description": "Get a thread by id",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "threadId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/profiles/{profileId}": {
+      "get": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Get",
+        "description": "Lookup a profile by ID",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Delete",
+        "description": "Not Implemented",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Edit",
+        "description": "Update profile properties",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FullProfileDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FullProfileDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FullProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/profiles/new/{accountId}": {
+      "post": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "New Profile",
+        "description": "Create a new profile that belongs to the given account",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "handle",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/profiles/{profileId}/field/{index}": {
+      "post": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Add Field",
+        "description": "Add a custom field to the profile",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomField"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomField"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomField"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Remove Field",
+        "description": "Remove a custom field from the profile",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Update Field",
+        "description": "Update a custom field on the profile",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomField"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomField"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomField"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/timelines/{profileId}": {
+      "get": {
+        "tags": [
+          "Timelines"
+        ],
+        "summary": "Get",
+        "description": "Get posts for the Profile's regular timeline feed",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "starting",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PostDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/user_account/login": {
+      "post": {
+        "tags": [
+          "UserAccount"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/user_account/logout": {
+      "post": {
+        "tags": [
+          "UserAccount"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/lb/v1/user_account/register": {
+      "post": {
+        "tags": [
+          "UserAccount"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActivityActorType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "AudienceDto": {
+        "type": "object",
+        "properties": {
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "sourceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceType": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ContentDto": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "[0-9a-z]{25}",
+            "type": "string",
+            "nullable": true,
+            "example": "HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "preview": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "sortKey": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "text": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CustomField": {
+        "required": [
+          "label",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FollowRequest": {
+        "required": [
+          "targetId"
+        ],
+        "type": "object",
+        "properties": {
+          "targetId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FullProfileDto": {
+        "required": [
+          "description",
+          "displayName",
+          "handle",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "[0-9a-z]{25}",
+            "type": "string",
+            "example": "HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "handle": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "customFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "nullable": true
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/ActivityActorType"
+          },
+          "audiences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AudienceDto"
+            },
+            "nullable": true
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicKeyDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginRequest": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MentionDto": {
+        "type": "object",
+        "properties": {
+          "mentioned": {
+            "type": "string",
+            "nullable": true
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/MentionVisibility"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MentionVisibility": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "MiniProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "[0-9a-z]{25}",
+            "type": "string",
+            "nullable": true,
+            "example": "HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "handle": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PostDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "[0-9a-z]{25}",
+            "type": "string",
+            "nullable": true,
+            "example": "HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "thread": {
+            "$ref": "#/components/schemas/ThreadDto"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "preview": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "type": "string",
+            "nullable": true
+          },
+          "creators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MiniProfileDto"
+            },
+            "nullable": true
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "publishedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "contents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentDto"
+            },
+            "nullable": true
+          },
+          "audience": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AudienceDto"
+            },
+            "nullable": true
+          },
+          "addressedTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MentionDto"
+            },
+            "nullable": true
+          },
+          "inReplyTo": {
+            "$ref": "#/components/schemas/PostDto"
+          },
+          "repliesCollection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PostDto"
+            },
+            "nullable": true
+          },
+          "likesCollection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MiniProfileDto"
+            },
+            "nullable": true
+          },
+          "sharesCollection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MiniProfileDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicKeyDto": {
+        "required": [
+          "created",
+          "expires",
+          "family",
+          "fediId",
+          "publicKeyPem"
+        ],
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "family": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicKeyPem": {
+            "type": "string",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegistrationRequest": {
+        "required": [
+          "confirmPassword",
+          "email",
+          "handle",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "handle": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          },
+          "confirmPassword": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ThreadDto": {
+        "required": [
+          "fediId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "[0-9a-z]{25}",
+            "type": "string",
+            "nullable": true,
+            "example": "HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "posts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PostDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TokenResponse": {
+        "required": [
+          "access_token",
+          "expires_in",
+          "token_type"
+        ],
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "nullable": true
+          },
+          "token_type": {
+            "type": "string",
+            "nullable": true
+          },
+          "expires_in": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "refresh_token": {
+            "type": "string",
+            "nullable": true
+          },
+          "scope": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "Enter the Authorization header, including the Bearer scheme, like so: `Bearer <JWT>`",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}

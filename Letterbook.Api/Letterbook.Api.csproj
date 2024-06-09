@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -12,36 +12,36 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ActivityPub.Types" Version="0.1.0-snapshot.2024-01-08.18-02-38" />
-    <PackageReference Include="AutoMapper" Version="13.0.1" />
-    <PackageReference Include="AutoMapper.Collection" Version="10.0.0" />
-    <PackageReference Include="DarkLink.Web.WebFinger.Server" Version="1.0.0" />
-    <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1">
+    <PackageReference Include="ActivityPub.Types" />
+    <PackageReference Include="AutoMapper" />
+    <PackageReference Include="AutoMapper.Collection" />
+    <PackageReference Include="DarkLink.Web.WebFinger.Server" />
+    <PackageReference Include="GitHubActionsTestLogger">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.8.0">
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.6.0" />
-    <PackageReference Include="NSign.AspNetCore" Version="1.0.2" />
-    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.6.0-rc.1" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.8.1" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.8.1" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
-    <PackageReference Include="Request.Body.Peeker" Version="1.3.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
-    <PackageReference Include="Serilog.Enrichers.Span" Version="3.1.0" />
-    <PackageReference Include="Serilog.Expressions" Version="4.0.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.1" />
-    <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.3.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
+    <PackageReference Include="NSign.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+    <PackageReference Include="Request.Body.Peeker" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Enrichers.Span" />
+    <PackageReference Include="Serilog.Expressions" />
+    <PackageReference Include="Serilog.Settings.Configuration" />
+    <PackageReference Include="Serilog.Sinks.Grafana.Loki" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" />
   </ItemGroup>
 
   <ItemGroup>
@@ -56,5 +56,14 @@
     <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
     <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj" />
   </ItemGroup>
+
+  <Target Name="GenerateOpenAPI" AfterTargets="Build" Condition="$(Configuration)=='Release'">
+    <!-- Usage -->
+    <!-- dotnet swagger tofile -\-output [path] [entryAssembly].dll [openApi document name] -->
+    <!-- Docs for future APIs (ex: lb/v2) should be generatd here as well, by invoking dotnet swagger again -->
+    <Exec Command="dotnet swagger tofile --output ../docs/OpenApi/letterbook-v1.json $(OutputPath)$(AssemblyName).dll letterbook-v1" WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" />
+    <Exec Command="dotnet swagger tofile --output ../docs/OpenApi/mastodon-v1.json $(OutputPath)$(AssemblyName).dll mastodon-v1" WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" />
+    <Exec Command="dotnet swagger tofile --output ../docs/OpenApi/activity-pub-v1.json $(OutputPath)$(AssemblyName).dll activity-pub-v1" WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" />
+  </Target>
 
 </Project>
