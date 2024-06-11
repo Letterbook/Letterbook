@@ -1,6 +1,6 @@
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
-using Letterbook.Api;
+using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
@@ -30,7 +30,7 @@ public class Program
 		                  ?? throw new ConfigException(nameof(CoreOptions));
 
 		if (!builder.Environment.IsProduction())
-			builder.Configuration.AddUserSecrets<Api.Program>();
+			builder.Configuration.AddUserSecrets<Program>();
 		// Register Serilog - Serialized Logging (configured in appsettings.json)
 		builder.Host.UseSerilog((context, services, configuration) => configuration
 			.Enrich.FromLogContext()
@@ -39,11 +39,22 @@ public class Program
 			.ReadFrom.Services(services)
 		);
 
-		builder.Services.AddApiProperties(builder.Configuration);
-		builder.Services.AddTelemetry();
+		builder.Services.AddOpenTelemetry()
+			.AddDbTelemetry()
+			.AddClientTelemetry()
+			.AddTelemetryExporters();
+		builder.Services
+			.AddSerilog(s => s.Enrich.FromLogContext()
+				.Enrich.WithSpan()
+				.ReadFrom.Configuration(builder.Configuration))
+			.AddMassTransit(bus => bus.AddWorkers(builder.Configuration)
+				.AddWorkerBus(builder.Configuration))
+			.AddPublishers()
+			.AddLetterbookCore(builder.Configuration)
+			.AddDbAdapter(builder.Configuration)
+			.AddFeedsAdapter(builder.Configuration)
+			.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddHealthChecks();
-		builder.Services.AddActivityPubClient(builder.Configuration);
-		builder.Services.AddServices(builder.Configuration);
 		builder.Services.AddIdentity<Models.Account, IdentityRole<Guid>>()
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
@@ -55,8 +66,6 @@ public class Program
 			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
 			.AddDefaultUI();
 		builder.Services.AddRazorPages();
-		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration))
-			.AddPublishers();
 
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 
@@ -82,7 +91,6 @@ public class Program
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();
-		app.UseWebFingerScoped();
 
 		app.UseAuthentication();
 		app.UseAuthorization();
@@ -90,7 +98,6 @@ public class Program
 		app.UseSerilogRequestLogging();
 
 		app.MapRazorPages();
-		app.UsePathBase(new PathString("/api/v1"));
 
 		app.Run("http://localhost:5127");
 	}
