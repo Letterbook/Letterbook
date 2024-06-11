@@ -41,7 +41,7 @@ public class Program
 		);
 
 		builder.Services.AddApiProperties(builder.Configuration);
-		builder.Services.AddTelemetry()
+		builder.Services.AddOpenTelemetry()
 			.AddDbTelemetry()
 			.AddClientTelemetry()
 			.AddTelemetryExporters();

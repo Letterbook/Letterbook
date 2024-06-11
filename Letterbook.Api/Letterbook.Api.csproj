@@ -45,10 +45,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ReferencePathWithRefAssemblies Update="C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\7.0.5\ref\net7.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj" />
     <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj" />
     <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj" />
