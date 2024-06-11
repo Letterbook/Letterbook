@@ -29,6 +29,22 @@ The rest of the stack is getting into very familiar territory for most dotnet de
 
 # How Do You Measure a Year
 
+Is it five hundred twenty-five thousand, six hundred minutes? I guess. Midnights? Cups of coffee? Actually, yeah, it was a lot more of both of those than is probably wise. It was also:
+
+- 900 commits
+- 296 tests
+- 146 pull requests
+- 546 CI builds
+- 119 issues
+- 546 source files (I wanted to count lines of code, but MS is being uncooperative and I refuse to use VisualStudio)
+- 35 pages of docs (including this one! So meta)
+
+But most importantly: **_13 contributors_**
+
+## Thank You
+
+
+
 [apsharp]: https://github.com/warriordog/activitypubsharp
 [nsign]: https://github.com/Unisys/NSign
 [webfinger]: https://github.com/WiiPlayer2/DarkLink.Web.ActivityPub 
