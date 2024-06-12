@@ -43,11 +43,11 @@ But most importantly: **_13 contributors_**
 
 ## Thank You
 
-Everyone who's contributed to Letterbook has been a gift. And not all of those contributions show up in Github, which is half the point of this article. So allow me to highlight some of those contributions.
+Everyone who's contributed to Letterbook has been a gift. And not all of those contributions show up in Github, which is half the point of this article. So allow me to highlight some of the most significant ones.
 
 ### Getting Started
 
-First, I should really say happy birthday to _this_ toot:
+Actually, forget that other toot. Happy birthday to _this_ toot:
 
 <iframe src="https://hachyderm.io/@runewake2/110567203751528214/embed" class="mastodon-embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script src="https://hachyderm.io/embed.js" async="async"></script>
 
