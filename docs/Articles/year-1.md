@@ -29,21 +29,47 @@ The rest of the stack is getting into very familiar territory for most dotnet de
 
 # How Do You Measure a Year
 
-Is it five hundred twenty-five thousand, six hundred minutes? I guess. Midnights? Cups of coffee? Actually, yeah, it was a lot more of both of those than is probably wise. It was also:
+It is five hundred twenty-five thousand, six hundred minutes? I guess. That's not the most relevant measure. Midnights? Cups of coffee? Actually, yeah, it was a lot more of both of those than was probably wise. It was also:
 
 - 900 commits
 - 296 tests
 - 146 pull requests
 - 546 CI builds
 - 119 issues
-- 546 source files (I wanted to count lines of code, but MS is being uncooperative and I refuse to use VisualStudio)
+- 529 source files (I wanted to count lines of code, but MS is being uncooperative and I refuse to use VisualStudio)
 - 35 pages of docs (including this one! So meta)
 
 But most importantly: **_13 contributors_**
 
 ## Thank You
 
+Everyone who's contributed to Letterbook has been a gift. And not all of those contributions show up in Github, which is half the point of this article. So allow me to highlight some of those contributions.
 
+### Getting Started
+
+First, I should really say happy birthday to _this_ toot:
+
+<iframe src="https://hachyderm.io/@runewake2/110567203751528214/embed" class="mastodon-embed" style="max-width: 100%; border: 0" width="400" allowfullscreen="allowfullscreen"></iframe><script src="https://hachyderm.io/embed.js" async="async"></script>
+
+Sam offered to help out when I was just considering doing the project. That was the boost I needed. She started this whole adventure with me, and then stayed involved throughout. She also helped write the code of conduct and built a lot of our CI, dev, test, and telemetry pipelines. She's also been available to talk through designs, welcome other people, and answer questions.
+
+### ActivityPubSharp
+
+I cannot thank Hazel (@hazelnoot@enby.life) enough for they work they did building ActivityPubSharp. The ActivityPub data types are _so_ challenging to serialize and deserialize to meaningfully typed objects. Hazel built a solution that not only does that, but also gracefully handles extensions to those types, which is critical in practice.
+
+### Auth
+
+At least half of Letterbook's Auth system was built by Lauri (@rytmis@hachyderm.io), which is amazing. He set up http signature validation and integrated that into AspNet Core, and fixed up actor documents to properly enable bi-directional authentication with other fedi servers.
+
+### Research & Design
+
+UX research and interaction design is exactly the kind of thing that doesn't show up in Github, and Matthew (@mattly@hachyderm.io) has done quite a bit of it. Talking through features and designs has been so helpful, and I'm really excited to start collecting real data to inform that process.
+
+### Visuals
+
+It feels weird to use words like product or brand for an essentially non-commercial endeavor, but that doesn't mean they don't apply. Otherwise, Letterbook is just software and an abstract concept. Lynds (https://www.lyndslesh.com/) has been helping out with that, and you can see the beginnings of that here, with the logo!
+
+![Logo1.svg](images%2FLogo1.svg)
 
 [apsharp]: https://github.com/warriordog/activitypubsharp
 [nsign]: https://github.com/Unisys/NSign
