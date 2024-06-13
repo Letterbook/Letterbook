@@ -8,7 +8,9 @@ using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Workers;
 using MassTransit;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
@@ -82,7 +84,11 @@ public class Program
 		}
 
 		// app.UseHttpsRedirection();
-		app.UseStaticFiles();
+		app.UseStaticFiles(new StaticFileOptions
+		{
+			FileProvider = new ManifestEmbeddedFileProvider(Assembly.GetAssembly(typeof(Web.Program))!, "wwwroot"),
+
+		});
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();
