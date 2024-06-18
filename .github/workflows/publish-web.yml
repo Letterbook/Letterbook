@@ -1,4 +1,4 @@
-﻿name: Build
+﻿name: Publish Web Docs
 
 permissions:
   contents: write
@@ -10,15 +10,15 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v2.0.0
+        uses: actions/checkout@v4
 
-      - name: setup .net core
-        uses: actions/setup-dotnet@v3
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0'
+          dotnet-version: 8.0.x
 
       - name: build
         working-directory: ./Letterbook.Docs
@@ -63,12 +63,14 @@ jobs:
             echo "Prerendering for deployment to $custom_domain"
             dotnet run --AppTasks=prerender --environment Production --BaseUrl "$site_base_url"
           fi
-
-      # Deploy UI to GitHub Pages
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+          
+      # Use GitHub Actions Pages integraton to upload artifact and deploy it.
+      - name: "Setup GitHub Pages"
+        uses: actions/configure-pages@v5
+      - name: "Upload Web Artifact"
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./Letterbook.Docs/dist
-          user_name: 'GitHub Action'
-          user_email: 'action@github.com'
+          path: './Letterbook.Docs/dist'
+      - name: "Deploy to GitHub Pages"
+        id: deployment
+        uses: actions/deploy-pages@v4
