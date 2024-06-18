@@ -1,0 +1,25 @@
+@page "/vue/{Slug}"
+@model Letterbook.Docs.Page
+@inject MarkdownPages Markdown
+@implements IRenderStatic<Letterbook.Docs.Page>
+
+@functions {
+    public List<Page> GetStaticProps(RenderContext ctx) =>
+        ctx.Resolve<MarkdownPages>().GetVisiblePages("vue").Map(page => new Page { Slug = page.Slug.RightPart('/') });
+}
+
+@await Html.PartialAsync("DocsPage", new Shared.DocsPage {
+   Brand = "ServiceStack Vue",
+   Slug = Model.Slug,
+   Folder = "vue",
+   DefaultMenu = new MarkdownMenu {
+       Icon = Markdown.DefaultMenuIcon,
+       Text = "Vue",
+       Link = "/vue/",
+   },
+}.Init(this, Markdown))
+
+<script type="module">
+import { setMetadata } from "/pages/vue/data.mjs"
+setMetadata()
+</script>

@@ -1,0 +1,201 @@
+﻿@page "/"
+@attribute [RenderStatic]
+@inject MarkdownPages Markdown
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@{
+    Func<dynamic?, object> header =
+        @<div class="pb-16">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 text-center">
+                <h1 class="mx-auto max-w-4xl font-display text-5xl font-medium tracking-tight text-slate-900 dark:text-slate-50 sm:text-7xl">
+                    <span class="relative whitespace-nowrap text-blue-600">
+                        <svg aria-hidden="true" viewBox="0 0 418 42" class="absolute top-2/3 left-0 h-[0.58em] w-full fill-blue-300/70" preserveAspectRatio="none">
+                            <path d="M203.371.916c-26.013-2.078-76.686 1.963-124.73 9.946L67.3 12.749C35.421 18.062 18.2 21.766 6.004 25.934 1.244 27.561.828 27.778.874 28.61c.07 1.214.828 1.121 9.595-1.176 9.072-2.377 17.15-3.92 39.246-7.496C123.565 7.986 157.869 4.492 195.942 5.046c7.461.108 19.25 1.696 19.17 2.582-.107 1.183-7.874 4.31-25.75 10.366-21.992 7.45-35.43 12.534-36.701 13.884-2.173 2.308-.202 4.407 4.442 4.734 2.654.187 3.263.157 15.593-.78 35.401-2.686 57.944-3.488 88.365-3.143 46.327.526 75.721 2.23 130.788 7.584 19.787 1.924 20.814 1.98 24.557 1.332l.066-.011c1.201-.203 1.53-1.825.399-2.335-2.911-1.31-4.893-1.604-22.048-3.261-57.509-5.556-87.871-7.36-132.059-7.842-23.239-.254-33.617-.116-50.627.674-11.629.54-42.371 2.494-46.696 2.967-2.359.259 8.133-3.625 26.504-9.81 23.239-7.825 27.934-10.149 28.304-14.005.417-4.348-3.529-6-16.878-7.066Z"></path>
+                        </svg><span class="relative">Razor Press</span>
+                    </span>
+                    <p>
+                        Static Site Generator for fast Content &amp; Documentation
+                    </p>
+                </h1>
+                <p class="mx-auto mt-6 max-w-2xl text-lg tracking-tight text-slate-700 dark:text-slate-200">
+                    Simple, Powerful, Fast, Flexible &amp; FREE! Use Razor Pages to generate beautiful Tailwind
+                    static websites powered by Markdown &amp; enhanced with Vue
+                </p>
+                <p class="mx-auto mt-6 max-w-2xl text-lg tracking-tight text-slate-700 dark:text-slate-200">
+                    Auto deploys to GitHub Pages to Host for FREE on GitHub CDN
+                </p>
+            </div>
+            
+            <div>
+                <div class="flex justify-center">
+                    <lite-youtube class="w-full mx-4 my-4" width="560" height="315" videoid="uqEa_DfFFDQ" style="background-image: url('https://img.youtube.com/vi/uqEa_DfFFDQ/maxresdefault.jpg')"></lite-youtube>
+                </div>
+            </div>
+            
+            <div class="relative bg-white dark:bg-black mb-8 py-8">
+                <div class="mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:max-w-7xl lg:px-8">
+                    <div class="mt-20">
+                        <h2 class="text-center mb-4 text-4xl font-bold leading-8">Why Razor Press?</h2>
+                    </div>
+                    <div class="relative bg-white dark:bg-black mb-8 py-8">
+                        <div class="mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:max-w-7xl lg:px-8">
+                            <div class="mt-12">
+                                <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
+        
+                                    <div class="pt-6">
+                                        <div class="flow-root rounded-lg bg-gray-50 dark:bg-gray-900 px-6 pb-8">
+                                            <div class="-mt-6">
+                                                <div>
+                                                    <a href="https://stackoverflow.com/questions/ask?tags=servicestack" class="inline-flex items-center justify-center rounded-md bg-indigo-500 p-2 shadow-lg text-white">
+                                                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0M3 6v13m9-13v13m9-13v13"/></svg>
+                                                    </a>
+                                                </div>
+                                                <h3 class="mt-8 text-lg font-medium tracking-tight text-gray-900 dark:text-gray-50">
+                                                    Focus on your writing
+                                                </h3>
+                                                <p class="mt-5 text-base text-gray-500 dark:text-gray-400">
+                                                    Effortlessly create beautiful documentation websites with minimal, distraction-free markdown content
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+        
+                                    <div class="pt-6">
+                                        <div class="flow-root rounded-lg bg-gray-50 dark:bg-gray-900 px-6 pb-8">
+                                            <div class="-mt-6">
+                                                <div>
+                                                    <span class="inline-flex items-center justify-center rounded-md bg-indigo-500 p-2 shadow-lg text-white">
+                                                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m11.5 15.97l.41 2.44c-.26.14-.68.27-1.24.39c-.57.13-1.24.2-2.01.2c-2.21-.04-3.87-.7-4.98-1.96C2.56 15.77 2 14.16 2 12.21c.05-2.31.72-4.08 2-5.32C5.32 5.64 6.96 5 8.94 5c.75 0 1.4.07 1.94.19s.94.25 1.2.4l-.58 2.49l-1.06-.34c-.4-.1-.86-.15-1.39-.15c-1.16-.01-2.12.36-2.87 1.1c-.76.73-1.15 1.85-1.18 3.34c0 1.36.37 2.42 1.08 3.2c.71.77 1.71 1.17 2.99 1.18l1.33-.12c.43-.08.79-.19 1.1-.32M13.89 19l.61-4H13l.34-2h1.5l.32-2h-1.5L14 9h1.5l.61-4h2l-.61 4h1l.61-4h2l-.61 4H22l-.34 2h-1.5l-.32 2h1.5L21 15h-1.5l-.61 4h-2l.61-4h-1l-.61 4h-2m2.95-6h1l.32-2h-1l-.32 2Z"/></svg>
+                                                    </span>
+                                                </div>
+                                                <h3 class="mt-8 text-lg font-medium tracking-tight text-gray-900 dark:text-gray-50">
+                                                    Use Razor Pages
+                                                </h3>
+                                                <p class="mt-5 text-base text-gray-500 dark:text-gray-400">
+                                                    Use C# and Razor Pages to create rich, flexible multi-layout, 
+                                                    hybrid Markdown &amp; Razor statically generated websites
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+        
+                                    <div class="pt-6">
+                                        <div class="flow-root rounded-lg bg-gray-50 dark:bg-gray-900 px-6 pb-8">
+                                            <div class="-mt-6">
+                                                <div>
+                                                    <span class="inline-flex items-center justify-center rounded-md bg-indigo-500 p-2 shadow-lg text-white">
+                                                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><path fill="currentColor" d="M512 34.512L256 477.488L0 34.512h41.601L256 405.502l214.399-370.99H512zM256 135.247L196.818 34.512h-89.766L256 292.248L404.948 34.512h-89.766L256 135.247z"/></svg>
+                                                    </span>
+                                                </div>
+                                                <h3 class="mt-8 text-lg font-medium tracking-tight text-gray-900 dark:text-gray-50">
+                                                    Enhance with Vue
+                                                </h3>
+                                                <p class="mt-5 text-base text-gray-500 dark:text-gray-400">
+                                                    Enhance your documentation with interactive Vue components,
+                                                    embedded directly in Markdown pages
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+        
+                                    <div class="pt-6">
+                                        <div class="flow-root rounded-lg bg-gray-50 dark:bg-gray-900 px-6 pb-8">
+                                            <div class="-mt-6">
+                                                <div>
+                                                    <span class="inline-flex items-center justify-center rounded-md bg-indigo-500 p-2 shadow-lg text-white">
+                                                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="currentColor" d="M2.491 4.046a.75.75 0 0 1 .83.218L7 8.592l3.678-4.328A.75.75 0 0 1 12 4.75v9.5a.75.75 0 0 1-1.5 0V6.79l-2.929 3.446a.75.75 0 0 1-1.142 0L3.5 6.79v7.46a.75.75 0 0 1-1.5 0v-9.5a.75.75 0 0 1 .491-.704ZM13.22 11.72a.75.75 0 0 1 1.06 0l.72.72V4.75a.75.75 0 0 1 1.5 0v7.69l.72-.72a.75.75 0 1 1 1.06 1.06l-2 2a.75.75 0 0 1-1.06 0l-2-2a.75.75 0 0 1 0-1.06Z"/></svg>
+                                                    </span>
+                                                </div>
+                                                <h3 class="mt-8 text-lg font-medium tracking-tight text-gray-900 dark:text-gray-50">
+                                                    Markdown Features
+                                                </h3>
+                                                <p class="mt-5 text-base text-gray-500 dark:text-gray-400">
+                                                    Use built-in Markdig features and extensions to easily 
+                                                    create beautiful and consistent Markdown-powered content
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+        
+                                    <div class="pt-6">
+                                        <div class="flow-root rounded-lg bg-gray-50 dark:bg-gray-900 px-6 pb-8">
+                                            <div class="-mt-6">
+                                                <div>
+                                                    <span class="inline-flex items-center justify-center rounded-md bg-indigo-500 p-2 shadow-lg text-white">
+                                                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><path fill="currentColor" d="M206 128a77.92 77.92 0 0 0-32.53-63.31L167.1 29.5A14 14 0 0 0 153.32 18h-50.64A14 14 0 0 0 88.9 29.5l-6.37 35.19a77.87 77.87 0 0 0 0 126.62l6.37 35.19a14 14 0 0 0 13.78 11.5h50.64a14 14 0 0 0 13.78-11.5l6.37-35.19A77.92 77.92 0 0 0 206 128ZM100.71 31.64a2 2 0 0 1 2-1.64h50.64a2 2 0 0 1 2 1.64l4.56 25.19a77.68 77.68 0 0 0-63.7 0Zm54.58 192.72a2 2 0 0 1-2 1.64h-50.61a2 2 0 0 1-2-1.64l-4.56-25.19a77.68 77.68 0 0 0 63.7 0ZM128 194a66 66 0 1 1 66-66a66.08 66.08 0 0 1-66 66Zm46-66a6 6 0 0 1-6 6h-40a6 6 0 0 1-6-6V88a6 6 0 0 1 12 0v34h34a6 6 0 0 1 6 6Z"/></svg>
+                                                    </span>
+                                                </div>
+                                                <h3 class="mt-8 text-lg font-medium tracking-tight text-gray-900 dark:text-gray-50">
+                                                    Great Dev UX
+                                                </h3>
+                                                <p class="mt-5 text-base text-gray-500 dark:text-gray-400">
+                                                    Enjoy the great dev experience of <b>dotnet watch</b> and <b>tailwindcss</b> tools,
+                                                    preview most changes without server restarts
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+        
+                                    <div class="pt-6">
+                                        <div class="flow-root rounded-lg bg-gray-50 dark:bg-gray-900 px-6 pb-8">
+                                            <div class="-mt-6">
+                                                <div>
+                                                    <span class="inline-flex items-center justify-center rounded-md bg-indigo-500 p-2 shadow-lg text-white">
+                                                        <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M461.81 53.81a4.4 4.4 0 0 0-3.3-3.39c-54.38-13.3-180 34.09-248.13 102.17a294.9 294.9 0 0 0-33.09 39.08c-21-1.9-42-.3-59.88 7.5c-50.49 22.2-65.18 80.18-69.28 105.07a9 9 0 0 0 9.8 10.4l81.07-8.9a180.29 180.29 0 0 0 1.1 18.3a18.15 18.15 0 0 0 5.3 11.09l31.39 31.39a18.15 18.15 0 0 0 11.1 5.3a179.91 179.91 0 0 0 18.19 1.1l-8.89 81a9 9 0 0 0 10.39 9.79c24.9-4 83-18.69 105.07-69.17c7.8-17.9 9.4-38.79 7.6-59.69a293.91 293.91 0 0 0 39.19-33.09c68.38-68 115.47-190.86 102.37-247.95ZM298.66 213.67a42.7 42.7 0 1 1 60.38 0a42.65 42.65 0 0 1-60.38 0Z"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M109.64 352a45.06 45.06 0 0 0-26.35 12.84C65.67 382.52 64 448 64 448s65.52-1.67 83.15-19.31A44.73 44.73 0 0 0 160 402.32"/></svg>
+                                                    </span>
+                                                </div>
+                                                <h3 class="mt-8 text-lg font-medium tracking-tight text-gray-900 dark:text-gray-50">
+                                                    Ship Fast, Reliable Sites
+                                                </h3>
+                                                <p class="mt-5 text-base text-gray-500 dark:text-gray-400">
+                                                    Enjoy the performance, reliability and portability benefits of hosting static content on any CDN
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+        
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <section class="mt-24">
+                <h2 class="text-4xl md:text-6xl font-bold tracking-tighter leading-tight md:pr-8 whitespace-nowrap text-center pt-8">
+                    Getting Started
+                </h2>
+                <div class="mb-8 md:mb-16">
+                    <div class="sm:mx-0 sm:px-4 sm:py-8 flex justify-evenly">
+                        <div id="getting-started"></div>
+                    </div>
+                </div>
+            </section>
+            
+        </div>;
+}
+
+@await Html.PartialAsync("DocsPage", new Shared.DocsPage
+{
+   Brand = "Documentation",
+   Folder = "",
+   Slug = "index",
+   Header = header,
+   HideTitle = true,
+   HideDocumentMap = true,
+   DefaultMenu = new MarkdownMenu
+   {
+       Icon = Markdown.DefaultMenuIcon,
+       Text = "Home",
+       Link = "/",
+   },
+}.Init(this, Markdown))
+
+<script type="module">
+import { mount } from "app.mjs"
+import GettingStarted from "./mjs/components/GettingStarted.mjs" 
+
+mount('#getting-started', GettingStarted, { template:'razor-press' })
+</script>

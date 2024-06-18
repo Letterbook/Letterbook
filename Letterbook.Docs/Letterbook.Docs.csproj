@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="Letterbook.Docs" />
+    <Using Include="ServiceStack" />
+    <Using Include="ServiceStack.Mvc" />
+  </ItemGroup>
+
+  <!-- dotnet watch support -->
+  <Target Name="RazorWatch" BeforeTargets="_CoreCollectWatchItems">
+    <ItemGroup>
+      <RazorWatch Include="**\*.cshtml" />
+      <Watch Include="%(RazorWatch.FullPath)" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Markdig" Version="0.34.*" />
+    <PackageReference Include="ServiceStack" Version="8.*" />
+    <PackageReference Include="ServiceStack.Mvc" Version="8.*" />
+
+    <!-- Required for Razor compilation on change: https://docs.microsoft.com/en-us/aspnet/core/mvc/views/view-compilation?view=aspnetcore-5.0 -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.*" />
+  </ItemGroup>
+
+</Project>

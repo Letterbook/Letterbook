@@ -1,0 +1,19 @@
+@page "/creatorkit/{Slug}"
+@model Letterbook.Docs.Page
+@inject MarkdownPages Markdown
+
+@implements IRenderStatic<Letterbook.Docs.Page>
+@functions {
+    public List<Page> GetStaticProps(RenderContext ctx) =>
+        ctx.Resolve<MarkdownPages>().GetVisiblePages("creatorkit").Map(page => new Page { Slug = page.Slug.RightPart('/') });
+}
+
+@await Html.PartialAsync("DocsPage", new Shared.DocsPage {
+   Slug = Model.Slug,
+   Folder = "creatorkit",
+   DefaultMenu = new MarkdownMenu {
+       Icon = Markdown.DefaultMenuIcon,
+       Text = "Creator Kit",
+       Link = "/creatorkit/",
+   },
+}.Init(this, Markdown))
