@@ -2,7 +2,7 @@
 
 namespace Letterbook.Docs;
 
-public class AppHost() : AppHostBase("Letterbook.Docs"), IHostingStartup
+public class AppHost() : AppHostBase("Letterbook"), IHostingStartup
 {
     public void Configure(IWebHostBuilder builder) => builder
         .ConfigureServices(services => {

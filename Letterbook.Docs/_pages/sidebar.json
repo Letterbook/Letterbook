@@ -4,54 +4,29 @@
     "link": "/",
     "children": [
       {
-        "text": "What is Razor Press?",
-        "link": "/what-is-razor-press"
-      },
-      {
-        "text": "Structure",
-        "link": "/structure"
-      },
-      {
-        "text": "Static Site Generation",
-        "link": "/ssg"
-      },
-      {
-        "text": "Deployments",
-        "link": "/deployments"
+        "text": "What is Letterbook?",
+        "link": "/what-is-letterbook"
       }
     ]
   },
   {
-    "text": "Markdown",
+    "text": "Run Your Instance",
     "children": [
       {
-        "text": "Markdown Syntax",
-        "link": "/syntax"
-      },
-      {
-        "text": "Markdown Containers",
-        "link": "/containers"
-      },
-      {
-        "text": "Using Vue in Markdown",
-        "link": "/vue-in-markdown"
+        "text": "Dockerized Deployments",
+        "link": "/deploy"
+      }, {
+        "text": "Observability",
+        "link": "/observability"
       }
     ]
   },
   {
-    "text": "Features",
+    "text": "Other",
     "children": [
       {
-        "text": "Sidebars",
-        "link": "/sidebars"
-      },
-      {
-        "text": "Redirects",
-        "link": "/redirects"
-      },
-      {
-        "text": "Typesense Real-Time Search",
-        "link": "/typesense"
+        "text": "Contribute",
+        "link": "/contribute"
       }
     ]
   }
