@@ -1,12 +1,21 @@
 ﻿name: Publish Web Docs
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 on:
   push:
     branches:
       - 'main'
+  workflow_dispatch: # Allow manual site deployments if necessary
+
+# Only ever deploy at most once at a time. In-progress builds should complete before queueing new builds.
+# If a new build is queued while other unstarted builds are in the queue those new builds will be skipped for the more recent option.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build:
