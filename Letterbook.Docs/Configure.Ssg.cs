@@ -37,7 +37,9 @@ public class ConfigureSsg : IHostingStartup
                         config.AddBuiltInContainers();
                         // Add Custom Block or Inline containers
                         config.AddBlockContainer("YouTube", new YouTubeContainer());
+                        config.AddBlockContainer("Mastodon", new MastodonContainer());
                         config.AddInlineContainer("YouTube", new YouTubeInlineContainer());
+                        config.AddInlineContainer("Mastodon", new MastodonInlineContainer());
                     }
                 });
 
