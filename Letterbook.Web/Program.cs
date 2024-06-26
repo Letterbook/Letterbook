@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
@@ -6,7 +7,10 @@ using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Workers;
 using MassTransit;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
@@ -54,7 +58,6 @@ public class Program
 			.AddDbAdapter(builder.Configuration)
 			.AddFeedsAdapter(builder.Configuration)
 			.AddActivityPubClient(builder.Configuration);
-		builder.Services.AddHealthChecks();
 		builder.Services.AddIdentity<Models.Account, IdentityRole<Guid>>()
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
@@ -66,6 +69,19 @@ public class Program
 			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
 			.AddDefaultUI();
 		builder.Services.AddRazorPages();
+		builder.Services.AddAuthentication(options =>
+			{
+				options.DefaultScheme = IdentityConstants.ApplicationScheme;
+			})
+			.AddIdentityCookies();
+		builder.Services.AddAuthorization(options =>
+		{
+			options.AddPolicy("Web", policy =>
+			{
+				policy.AddRequirements(new ClaimsAuthorizationRequirement("dne", []));
+			});
+		});
+		// builder.Services.AddWebAuthz(builder.Configuration);
 
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 
@@ -101,4 +117,20 @@ public class Program
 
 		app.Run("http://localhost:5127");
 	}
+}
+
+public class WebSchemeHandler : AuthenticationHandler<WebSchemeOptions>
+{
+
+	public WebSchemeHandler(IOptionsMonitor<WebSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
+	{
+	}
+	protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+	{
+		throw new NotImplementedException();
+	}
+}
+
+public class WebSchemeOptions : AuthenticationSchemeOptions
+{
 }

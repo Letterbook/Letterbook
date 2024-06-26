@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Html;
 using Microsoft.Extensions.Options;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.CodeAnalysis;
-using Letterbook.Core.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Letterbook.Web.Pages;
 
+[AllowAnonymous]
+[Authorize(Policy = Constants.AuthzPolicy)]
 public class Profile : PageModel
 {
 	private readonly IProfileService _profiles;
@@ -37,7 +37,6 @@ public class Profile : PageModel
 		CustomFields = new Models.CustomField[0];
 	}
 
-	
 	public async Task<IActionResult> OnGet(string handle)
 	{
 		var found = await _profiles.As(User.Claims).FindProfiles(handle);

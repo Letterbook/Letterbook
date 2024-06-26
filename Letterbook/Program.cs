@@ -6,6 +6,7 @@ using Letterbook.Api;
 using Letterbook.Api.Swagger;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Letterbook.Web;
 using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Http.Features;
@@ -59,6 +60,10 @@ public class Program
 			.AddDefaultUI();
 		builder.Services.AddRazorPages()
 			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
+		builder.Services.AddAuthorization(options =>
+		{
+			options.AddWebAuthzPolicy();
+		});
 		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration)
 			.AddWorkers(builder.Configuration));
 
