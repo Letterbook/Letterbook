@@ -17,6 +17,7 @@ public class ConfigureSsg : IHostingStartup
             context.Configuration.GetSection(nameof(AppConfig)).Bind(AppConfig.Instance);
             services.AddSingleton(AppConfig.Instance);
             services.AddSingleton<RazorPagesEngine>();
+            services.AddSingleton<MarkdownBlog>();
             services.AddSingleton<MarkdownIncludes>();
             services.AddSingleton<MarkdownPages>();
             services.AddSingleton<MarkdownVideos>();
@@ -44,13 +45,15 @@ public class ConfigureSsg : IHostingStartup
                 });
 
                 var includes = appHost.Resolve<MarkdownIncludes>();
+                var blog = appHost.Resolve<MarkdownBlog>();
                 var pages = appHost.Resolve<MarkdownPages>();
                 var videos = appHost.Resolve<MarkdownVideos>();
                 var meta = appHost.Resolve<MarkdownMeta>();
 
-                meta.Features = [pages, videos];
+                meta.Features = [blog, pages, videos];
 
                 includes.LoadFrom("_includes");
+                blog.LoadFrom("_pages/blog");
                 pages.LoadFrom("_pages");
                 videos.LoadFrom("_videos");
                 AppConfig.Instance.GitPagesBaseUrl ??= ResolveGitBlobBaseUrl(appHost.ContentRootDirectory);
