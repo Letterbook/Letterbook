@@ -8,10 +8,12 @@ using Letterbook.Api.Dto;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Medo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -27,20 +29,21 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [Consumes("application/ld+json",
 	"application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
 	"application/activity+json")]
+[Authorize(policy: "ActivityPub")]
 public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;
 	private readonly IProfileService _profileService;
-	private readonly IActivityMessageService _messageService;
+	private readonly IActivityMessagePublisher _messagePublisher;
 	private readonly IActivityPubDocument _apDoc;
 	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Default);
 
 	public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
-		IProfileService profileService, IActivityMessageService messageService, IActivityPubDocument apDoc)
+		IProfileService profileService, IActivityMessagePublisher messagePublisher, IActivityPubDocument apDoc)
 	{
 		_logger = logger;
 		_profileService = profileService;
-		_messageService = messageService;
+		_messagePublisher = messagePublisher;
 		_apDoc = apDoc;
 		_logger.LogInformation("Loaded {Controller}", nameof(ActorController));
 	}
@@ -217,7 +220,7 @@ public class ActorController : ControllerBase
 		// But, that doesn't exist, yet. The if(false) is so we don't forget.
 		var acceptResponse = false;
 		if (acceptResponse) return Ok(resultActivity);
-		_messageService.Deliver(relation.Follower.Inbox, resultActivity, relation.Follows);
+		await _messagePublisher.Deliver(relation.Follower.Inbox, resultActivity, relation.Follows);
 		return Accepted();
 	}
 }

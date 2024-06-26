@@ -1,14 +1,21 @@
+using System.Security.Cryptography;
+using System.Text;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
+using ActivityPub.Types.AS.Extended.Actor;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Util;
 using AutoMapper;
 using JetBrains.Annotations;
 using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Core.Models;
+using Medo;
+using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Utilities.IO.Pem;
+using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
+using PemWriter = Org.BouncyCastle.OpenSsl.PemWriter;
 
 namespace Letterbook.Adapter.ActivityPub.Mappers;
 
@@ -28,6 +35,7 @@ public static class AstMapper
 	private static void FromActor(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<PersonActorExtension, Models.Profile>(MemberList.Destination)
+			.ConstructUsing(_ => Models.Profile.CreateEmpty(Uuid7.NewUuid7()))
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
 			.ForMember(dest => dest.Authority, opt => opt.Ignore())
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -50,9 +58,21 @@ public static class AstMapper
 			.ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers))
 			.ForMember(dest => dest.Following, opt => opt.MapFrom(src => src.Following))
 			.ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!))
-			.AfterMap((_, profile) => { profile.Type = ActivityActorType.Person; });
+			.AfterMap((_, profile) => { profile.Type = ActivityActorType.Person; })
+			.ReverseMap()
+			.ForMember(
+				dest => dest.PublicKey,
+				opt => opt.MapFrom<PublicKeyConverter, SigningKey?>(src => src.Keys.FirstOrDefault()));
+
+		cfg.CreateMap<ApplicationActorExtension, InstanceActor>(MemberList.Destination)
+			.ForMember(dest => dest.Id, opt => opt.Ignore())
+			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
+			.ForMember(dest => dest.Authority, opt => opt.Ignore())
+			.ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!));
 
 		cfg.CreateMap<PublicKey?, SigningKey?>()
+			.ConvertUsing<PublicKeyConverter>();
+		cfg.CreateMap<SigningKey?, PublicKey?>()
 			.ConvertUsing<PublicKeyConverter>();
 	}
 
@@ -103,6 +123,10 @@ public static class AstMapper
     private static void FromASType(IMapperConfigurationExpression cfg)
     {
 	    cfg.CreateMap<ASType, Models.Profile>()
+		    .ConvertUsing<ASTypeConverter>();
+	    cfg.CreateMap<ASType, Models.InstanceActor>()
+		    .ConvertUsing<ASTypeConverter>();
+	    cfg.CreateMap<ASType, Models.IFederatedActor>()
 		    .ConvertUsing<ASTypeConverter>();
     }
 
@@ -390,8 +414,10 @@ internal class IdConverter : ITypeConverter<ASLink, Uri>,
 [UsedImplicitly]
 internal class PublicKeyConverter :
 	ITypeConverter<PublicKey?, SigningKey?>,
+	ITypeConverter<SigningKey?, PublicKey?>,
 	IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>,
-	ITypeConverter<string, ReadOnlyMemory<byte>>
+	IMemberValueResolver<ApplicationActorExtension, Models.InstanceActor, PublicKey?, IList<SigningKey>>,
+	ITypeConverter<string, ReadOnlyMemory<byte>>, IMemberValueResolver<Models.Profile, PersonActorExtension, SigningKey?, PublicKey?>
 {
 	public SigningKey? Convert(PublicKey? source, SigningKey? destination, ResolutionContext context)
 	{
@@ -408,19 +434,52 @@ internal class PublicKeyConverter :
 			_ => SigningKey.KeyFamily.Unknown
 		};
 
-		destination ??= new SigningKey() { FediId = new Uri(source.Id) };
+		destination ??= SigningKey.CreateEmpty(Uuid7.NewUuid7(), new Uri(source.Id));
 
 		destination.FediId = new Uri(source.Id);
 		destination.Label = "From federation peer";
 		destination.PublicKey = context.Mapper.Map<ReadOnlyMemory<byte>>(source.PublicKeyPem);
 		destination.Family = alg;
-		destination.Created = DateTimeOffset.Now;
+		destination.Created = DateTimeOffset.UtcNow;
+
+		return destination;
+	}
+
+	public PublicKey? Convert(SigningKey? source, PublicKey? destination, ResolutionContext context)
+	{
+		if (source is null) return default;
+
+		AsymmetricAlgorithm? algo = source.Family switch
+		{
+			SigningKey.KeyFamily.Rsa => source.GetRsa(),
+			SigningKey.KeyFamily.Dsa => source.GetDsa(),
+			SigningKey.KeyFamily.EcDsa => source.GetEcDsa(),
+			_ => null
+		};
+
+		destination ??= new PublicKey()
+		{
+			Id = source.FediId.ToString(),
+			Owner = default!,
+			PublicKeyPem = algo?.ExportSubjectPublicKeyInfoPem() ?? ""
+		};
 
 		return destination;
 	}
 
 	IList<SigningKey> IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>
 		.Resolve(PersonActorExtension source, Models.Profile destination, PublicKey? sourceMember,
+			IList<SigningKey>? destMember, ResolutionContext context)
+	{
+		var key = context.Mapper.Map<SigningKey>(sourceMember);
+		destMember ??= new List<SigningKey>();
+		if (key is not null) destMember.Add(key);
+
+		return destMember;
+	}
+
+	IList<SigningKey> IMemberValueResolver<ApplicationActorExtension, Models.InstanceActor, PublicKey?, IList<SigningKey>>
+		.Resolve(ApplicationActorExtension source, Models.InstanceActor destination, PublicKey? sourceMember,
 			IList<SigningKey>? destMember, ResolutionContext context)
 	{
 		var key = context.Mapper.Map<SigningKey>(sourceMember);
@@ -438,6 +497,18 @@ internal class PublicKeyConverter :
 				.Skip(1)
 				.SkipLast(1));
 		return System.Convert.FromBase64String(b64);
+	}
+
+	public PublicKey Resolve(Models.Profile source, PersonActorExtension destination, SigningKey? sourceMember, PublicKey? destMember,
+		ResolutionContext context)
+	{
+		if (destMember != null)
+		{
+			context.Mapper.Map(sourceMember, destMember);
+			return destMember;
+		}
+
+		return context.Mapper.Map<PublicKey>(sourceMember);
 	}
 }
 
@@ -458,10 +529,47 @@ public class NaturalLanguageStringConverter
 
 [UsedImplicitly]
 internal class ASTypeConverter :
-	ITypeConverter<ASType, Models.Profile>
+	ITypeConverter<ASType, Models.Profile>,
+	ITypeConverter<ASType, Models.InstanceActor>,
+	ITypeConverter<ASType, Models.IFederatedActor>
 {
 	public Models.Profile Convert(ASType source, Models.Profile? destination, ResolutionContext context)
 		=> Convert<PersonActorExtension, Models.Profile>(source, destination, context);
+
+	public Models.InstanceActor Convert(ASType source, Models.InstanceActor? destination, ResolutionContext context)
+		=> Convert<ApplicationActorExtension, Models.InstanceActor>(source, destination, context);
+
+	/// <summary>
+	/// This implementation allows <see cref="Client.Fetch{T}"/> to be called with IFederatedActor as the type. It will
+	/// map to any known actor type and return it as an <see cref="IFederatedActor"/>.
+	/// </summary>
+	public Models.IFederatedActor Convert(ASType source, Models.IFederatedActor? destination, ResolutionContext context)
+	{
+		IFederatedActor? result = null;
+		if (source.Is<ApplicationActorExtension>())
+		{
+			result = Convert<ApplicationActorExtension, InstanceActor>(source, null, context);
+		}
+		else if (source.Is<PersonActorExtension>())
+		{
+			result = Convert<PersonActorExtension, Models.Profile>(source, null, context);
+		}
+
+		if (result is null)
+		{
+			return null!;
+		}
+
+		if (destination is null)
+		{
+			return result;
+		}
+
+		destination.FediId = result.FediId;
+		destination.Keys = result.Keys;
+
+		return destination;
+	}
 
 	private TFederated Convert<TASType, TFederated>(ASType source, TFederated? destination, ResolutionContext context)
 		where TASType : ASType, IASModel<TASType>

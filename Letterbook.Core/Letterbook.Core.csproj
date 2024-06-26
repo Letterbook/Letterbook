@@ -8,23 +8,30 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ActivityPub.Types" Version="0.1.0-snapshot.2024-01-08.18-02-38" />
-      <PackageReference Include="CloudNative.CloudEvents" Version="2.7.1" />
-      <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3">
+      <PackageReference Include="ActivityPub.Types" />
+      <PackageReference Include="AutoMapper" />
+      <PackageReference Include="CloudNative.CloudEvents" />
+      <PackageReference Include="GitHubActionsTestLogger">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Medo.Uuid7" Version="1.9.1" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.0" />
-      <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
-      <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.8.0">
+      <PackageReference Include="MassTransit.Abstractions" />
+      <PackageReference Include="Medo.Uuid7" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.UI" />
+      <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+      <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-      <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.2.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" />
+      <PackageReference Include="Microsoft.Extensions.Identity.Core" />
+      <PackageReference Include="Microsoft.Extensions.Identity.Stores" />
+      <PackageReference Include="Microsoft.Extensions.Logging" />
+      <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
+      <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+      <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
+      <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+      <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     </ItemGroup>
 
 </Project>

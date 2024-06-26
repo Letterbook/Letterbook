@@ -1,9 +1,12 @@
 using Letterbook.Adapter.ActivityPub;
-using Letterbook.Api;
-using Letterbook.Api.Swagger;
+using Letterbook.Adapter.Db;
+using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Letterbook.Workers;
+using MassTransit;
+using Microsoft.AspNetCore.Identity;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
@@ -27,7 +30,7 @@ public class Program
 		                  ?? throw new ConfigException(nameof(CoreOptions));
 
 		if (!builder.Environment.IsProduction())
-			builder.Configuration.AddUserSecrets<Api.Program>();
+			builder.Configuration.AddUserSecrets<Program>();
 		// Register Serilog - Serialized Logging (configured in appsettings.json)
 		builder.Host.UseSerilog((context, services, configuration) => configuration
 			.Enrich.FromLogContext()
@@ -36,11 +39,32 @@ public class Program
 			.ReadFrom.Services(services)
 		);
 
-		builder.Services.AddApiProperties(builder.Configuration);
-		builder.Services.AddTelemetry();
+		builder.Services.AddOpenTelemetry()
+			.AddDbTelemetry()
+			.AddClientTelemetry()
+			.AddTelemetryExporters();
+		builder.Services
+			.AddSerilog(s => s.Enrich.FromLogContext()
+				.Enrich.WithSpan()
+				.ReadFrom.Configuration(builder.Configuration))
+			.AddMassTransit(bus => bus.AddWorkers(builder.Configuration)
+				.AddWorkerBus(builder.Configuration))
+			.AddPublishers()
+			.AddLetterbookCore(builder.Configuration)
+			.AddDbAdapter(builder.Configuration)
+			.AddFeedsAdapter(builder.Configuration)
+			.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddHealthChecks();
-		builder.Services.AddActivityPubClient(builder.Configuration);
-		builder.Services.AddServices(builder.Configuration);
+		builder.Services.AddIdentity<Models.Account, IdentityRole<Guid>>()
+			.AddEntityFrameworkStores<RelationalContext>()
+			.AddDefaultTokenProviders()
+			// Aspnet Core Identity includes a default UI, which provides basic account management.
+			// This includes register, login, logout, and maintenance views.
+			// However, it only seems to work well for fairly simple (single project) apps.  It also looks extremely Microsoft.
+			// We likely don't want to use it long term, but it's nice for the moment.
+			//
+			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
+			.AddDefaultUI();
 		builder.Services.AddRazorPages();
 
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
@@ -61,14 +85,12 @@ public class Program
 				context.Request.EnableBuffering();
 				return next();
 			});
-			app.UseSwaggerConfig();
 		}
 
 		app.UseStaticFiles();
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();
-		app.UseWebFingerScoped();
 
 		app.UseAuthentication();
 		app.UseAuthorization();
@@ -76,8 +98,6 @@ public class Program
 		app.UseSerilogRequestLogging();
 
 		app.MapRazorPages();
-		app.UsePathBase(new PathString("/api/v1"));
-		app.MapControllers();
 
 		app.Run("http://localhost:5127");
 	}

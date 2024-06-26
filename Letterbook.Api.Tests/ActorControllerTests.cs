@@ -1,6 +1,7 @@
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Api.Controllers.ActivityPub;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Events;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests;
@@ -27,7 +28,7 @@ public class ActorControllerTests : WithMockContext
 	{
 		_output = output;
 		_controller = new ActorController(CoreOptionsMock, Mock.Of<ILogger<ActorController>>(),
-			ProfileServiceMock.Object, Mock.Of<IActivityMessageService>(), new Document())
+			ProfileServiceMock.Object, Mock.Of<IActivityMessagePublisher>(), new Document())
 		{
 			ControllerContext = new ControllerContext()
 			{

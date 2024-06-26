@@ -55,7 +55,15 @@ public sealed class FakeProfile : Faker<Profile>
 		CustomInstantiator(f =>
 		{
 			var localId = f.Random.Uuid7();
-			var builder = new UriBuilder(uri.Authority);
+			var builder = new UriBuilder(uri)
+			{
+				Fragment = null,
+				Password = null,
+				Path = null,
+				Query = null,
+				UserName = null,
+			};
+
 			builder.Path += $"actor/{localId.ToId22String()}";
 			var id = builder.Uri;
 			var basePath = builder.Path;
