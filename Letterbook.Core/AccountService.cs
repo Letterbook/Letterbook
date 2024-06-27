@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -106,11 +106,18 @@ public class AccountService : IAccountService, IDisposable
 		return await _accountAdapter.LookupAccount(id);
 	}
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-	public async Task<IEnumerable<Account>> FindAccounts(string email)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+	public IAsyncEnumerable<Account> FindAccounts(string email)
 	{
-		throw new NotImplementedException();
+		return _accountAdapter.WithProfiles(_accountAdapter.SearchAccounts())
+			.Where(account => account.NormalizedEmail == _identityManager.NormalizeEmail(email))
+			.AsAsyncEnumerable();
+	}
+
+	public async Task<Account?> FirstAccount(string email)
+	{
+		return await _accountAdapter.WithProfiles(_accountAdapter.SearchAccounts())
+			.Where(account => account.NormalizedEmail == _identityManager.NormalizeEmail(email))
+			.FirstOrDefaultAsync();
 	}
 
 	// TODO: do this through Identity

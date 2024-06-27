@@ -52,7 +52,7 @@ public class ProfileClaims : IEquatable<ProfileClaims>
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine(Account.GetHashCode(), Profile.GetHashCode());
+		return HashCode.Combine(_id);
 	}
 
 	public static bool operator ==(ProfileClaims? left, ProfileClaims? right)

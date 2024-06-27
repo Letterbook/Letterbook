@@ -14,8 +14,20 @@ public interface IAccountProfileAdapter : IDisposable
 	public bool RecordAccount(Account account);
 	public Task<bool> RecordAccounts(IEnumerable<Account> accounts);
 	public Task<Account?> LookupAccount(Guid id);
-	public Task<Account?> FindAccountByEmail(string email);
+	public Task<Account?> FindAccountByEmail(string normalizedEmail);
+
+	/// <summary>
+	/// Query for Accounts
+	/// </summary>
+	/// <returns></returns>
 	public IQueryable<Account> SearchAccounts();
+
+	/// <summary>
+	/// Compose a query including LinkedProfiles
+	/// </summary>
+	/// <param name="query">The query to compose onto</param>
+	/// <returns></returns>
+	public IQueryable<Account> WithProfiles(IQueryable<Account> query);
 
 	public Task<bool> AnyProfile(string handle);
 	public Task<Profile?> LookupProfile(Uuid7 localId);
