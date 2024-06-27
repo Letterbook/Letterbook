@@ -164,7 +164,8 @@ public class AccountService : IAccountService, IDisposable
 		var account = await _accountAdapter.LookupAccount(accountId);
 		if (account is null) return false;
 
-		var link = new ProfileClaims(account, profile, [ProfileClaim.None]);
+		var link = account.LinkedProfiles.FirstOrDefault(claims => claims.Profile == profile);
+		if (link is null) return false;
 
 		var result = account.LinkedProfiles.Remove(link);
 		if (result) await _accountAdapter.Commit();
