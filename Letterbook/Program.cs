@@ -63,6 +63,7 @@ public class Program
 		builder.Services.AddAuthorization(options =>
 		{
 			options.AddWebAuthzPolicy();
+			options.AddpiAuthzPolicy();
 		});
 		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration)
 			.AddWorkers(builder.Configuration));

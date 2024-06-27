@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Letterbook.Api.Controllers;
 
+[Authorize(Policy = Constants.ApiPolicy)]
 [ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 [Route("/lb/v1/[controller]/[action]")]
 public class UserAccountController : ControllerBase
@@ -36,6 +37,7 @@ public class UserAccountController : ControllerBase
 		return handler.WriteToken(handler.CreateToken(descriptor));
 	}
 
+	[AllowAnonymous]
 	[HttpPost]
 	[ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
 	public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
@@ -82,6 +84,7 @@ public class UserAccountController : ControllerBase
 		return SignOut();
 	}
 
+	[AllowAnonymous]
 	[HttpPost]
 	[ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
 	public async Task<IActionResult> Register([FromBody] RegistrationRequest registration)

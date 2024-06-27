@@ -24,6 +24,7 @@ public class Profile : PageModel
 
 	public int GetFollowerCount() => Prof!.FollowersCollection.Count;
 	public int GetFollowingCount() => Prof!.FollowingCollection.Count;
+	public string GetId() => Prof!.GetId25();
 
 
 	public Profile(IProfileService profiles, IOptions<CoreOptions> options)

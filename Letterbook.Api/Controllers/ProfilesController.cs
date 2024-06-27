@@ -6,13 +6,16 @@ using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Medo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Annotations;
+using IAuthorizationService = Letterbook.Core.IAuthorizationService;
 using Models = Letterbook.Core.Models;
 
 namespace Letterbook.Api.Controllers;
 
+[Authorize(Policy = Constants.ApiPolicy)]
 [ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 [Route("/lb/v1/[controller]")]
 public class ProfilesController : ControllerBase

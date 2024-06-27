@@ -22,6 +22,7 @@ using Letterbook.Core.Workers;
 using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -33,7 +34,8 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Enrichers.Span;
-using Constants = DarkLink.Web.WebFinger.Shared.Constants;
+using IAuthorizationService = Letterbook.Core.IAuthorizationService;
+using WebFinger = DarkLink.Web.WebFinger.Shared.Constants;
 
 namespace Letterbook.Api;
 
@@ -53,10 +55,10 @@ public static class DependencyInjectionExtensions
 	public static void UseWebFingerScoped(this IApplicationBuilder app)
 	{
 		app.Map(
-			Constants.HTTP_PATH,
+			WebFinger.HTTP_PATH,
 			app => app.Run(async ctx =>
 			{
-				if (!ctx.Request.Query.TryGetValue(Constants.QUERY_RESOURCE, out var resourceRaw)
+				if (!ctx.Request.Query.TryGetValue(WebFinger.QUERY_RESOURCE, out var resourceRaw)
 				    || !Uri.TryCreate(resourceRaw, UriKind.RelativeOrAbsolute, out var resource))
 				{
 					ctx.Response.StatusCode = (int)HttpStatusCode.BadRequest;
@@ -67,7 +69,7 @@ public static class DependencyInjectionExtensions
 				var resourceDescriptorProvider =
 					scope.ServiceProvider.GetRequiredService<IResourceDescriptorProvider>();
 
-				ctx.Request.Query.TryGetValue(Constants.QUERY_RELATION, out var relations);
+				ctx.Request.Query.TryGetValue(WebFinger.QUERY_RELATION, out var relations);
 
 				var descriptor =
 					await resourceDescriptorProvider.GetResourceDescriptorAsync(resource, relations, ctx.Request, ctx.RequestAborted);
@@ -80,7 +82,7 @@ public static class DependencyInjectionExtensions
 				await ctx.Response.WriteAsJsonAsync(
 					descriptor,
 					JsonSerializerOptions,
-					Constants.MEDIA_TYPE,
+					WebFinger.MEDIA_TYPE,
 					ctx.RequestAborted);
 			}));
 	}
@@ -121,6 +123,15 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IVerificationKeyProvider, ActivityPubClientVerificationKeyProvider>();
 
 		return services;
+	}
+
+	public static AuthorizationOptions AddpiAuthzPolicy(this AuthorizationOptions options)
+	{
+		options.AddPolicy(Constants.ApiPolicy, policy =>
+		{
+			policy.RequireAuthenticatedUser();
+		});
+		return options;
 	}
 
 	public static IOpenTelemetryBuilder AddTelemetry(this IServiceCollection services)
@@ -214,6 +225,10 @@ public static class DependencyInjectionExtensions
 		);
 
 		builder.Services.AddApiProperties(builder.Configuration);
+		builder.Services.AddAuthorization(options =>
+		{
+			options.AddpiAuthzPolicy();
+		});
 		// Register Open Telemetry
 		builder.Services.AddTelemetry();
 		builder.Services.AddHealthChecks()
@@ -223,8 +238,7 @@ public static class DependencyInjectionExtensions
 		builder.Services.AddServices(builder.Configuration);
 		builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
 			.AddEntityFrameworkStores<RelationalContext>()
-			.AddDefaultTokenProviders()
-			.AddDefaultUI();
+			.AddDefaultTokenProviders();
 		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration))
 			.AddPublishers();
 
