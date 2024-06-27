@@ -32,7 +32,8 @@ public static class DependencyInjection
 			.AddSingleton<IHostSigningKeyProvider, DevelopmentHostSigningKeyProvider>();
 
 		// Register service workers
-		services.AddScopedService<SeedAdminWorker>();
+		services.AddScopedService<SeedAdminWorker>()
+			.AddHostedService<HostLifetimeWorker>();
 
 		return services;
 	}
