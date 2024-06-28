@@ -20,7 +20,7 @@ public static class DependencyInjection
 		return services.ConfigureApplicationCookie(options =>
 		{
 			options.SlidingExpiration = true;
-			options.ExpireTimeSpan = TimeSpan.FromDays(30);
+			options.ExpireTimeSpan = TimeSpan.FromDays(90);
 		});
 	}
 }
