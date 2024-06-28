@@ -8,7 +8,6 @@ using Letterbook.Core.Extensions;
 using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -57,8 +56,9 @@ public class Program
 			.AddLetterbookCore(builder.Configuration)
 			.AddDbAdapter(builder.Configuration)
 			.AddFeedsAdapter(builder.Configuration)
-			.AddActivityPubClient(builder.Configuration);
-		builder.Services.AddIdentity<Models.Account, IdentityRole<Guid>>()
+			.AddActivityPubClient(builder.Configuration)
+			.AddWebCookies();
+		builder.Services.AddIdentity<Models.Account, IdentityRole<Guid>>(identity => identity.ConfigureIdentity())
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
 			// Aspnet Core Identity includes a default UI, which provides basic account management.
@@ -69,19 +69,10 @@ public class Program
 			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
 			.AddDefaultUI();
 		builder.Services.AddRazorPages();
-		builder.Services.AddAuthentication(options =>
-			{
-				options.DefaultScheme = IdentityConstants.ApplicationScheme;
-			})
-			.AddIdentityCookies();
 		builder.Services.AddAuthorization(options =>
 		{
-			options.AddPolicy("Web", policy =>
-			{
-				policy.AddRequirements(new ClaimsAuthorizationRequirement("dne", []));
-			});
+			options.AddWebAuthzPolicy();
 		});
-		// builder.Services.AddWebAuthz(builder.Configuration);
 
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 

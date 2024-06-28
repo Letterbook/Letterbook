@@ -83,12 +83,6 @@ public class AccountService : IAccountService, IDisposable
 		{
 			created = await _identityManager.CreateAsync(account, password);
 			if (!created.Succeeded) return created;
-
-			await _identityManager.AddClaimsAsync(account, new[]
-			{
-				new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),
-				new Claim(JwtRegisteredClaimNames.Email, email)
-			});
 		}
 		catch (Exception ex)
 		{

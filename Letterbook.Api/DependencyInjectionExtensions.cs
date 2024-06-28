@@ -236,7 +236,7 @@ public static class DependencyInjectionExtensions
 			;
 		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
-		builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
+		builder.Services.AddIdentity<Account, IdentityRole<Guid>>(identity => identity.ConfigureIdentity())
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders();
 		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration))

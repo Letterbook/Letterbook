@@ -39,10 +39,4 @@ public class Account : IdentityUser<Guid>, IIdentity
 	}
 
 	public Account ShallowClone() => (Account)MemberwiseClone();
-
-	public void Authenticate(string type)
-	{
-		_isAuthenticated = true;
-		_authenticationType = type;
-	}
 }

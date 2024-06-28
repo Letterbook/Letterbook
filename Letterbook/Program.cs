@@ -9,7 +9,6 @@ using Letterbook.Core.Models;
 using Letterbook.Web;
 using Letterbook.Workers;
 using MassTransit;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
@@ -43,18 +42,19 @@ public class Program
 			true
 		);
 
-		builder.Services.AddApiProperties(builder.Configuration);
 		builder.Services.AddOpenTelemetry()
 			.AddDbTelemetry()
 			.AddClientTelemetry()
 			.AddTelemetryExporters();
 		builder.Services.AddHealthChecks();
-		builder.Services.AddActivityPubClient(builder.Configuration);
-		builder.Services.AddLetterbookCore(builder.Configuration);
-		builder.Services.AddPublishers();
-		builder.Services.AddDbAdapter(builder.Configuration);
-		builder.Services.AddFeedsAdapter(builder.Configuration);
-		builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
+		builder.Services.AddLetterbookCore(builder.Configuration)
+			.AddActivityPubClient(builder.Configuration)
+			.AddApiProperties(builder.Configuration)
+			.AddPublishers()
+			.AddDbAdapter(builder.Configuration)
+			.AddFeedsAdapter(builder.Configuration)
+			.AddWebCookies();
+		builder.Services.AddIdentity<Account, IdentityRole<Guid>>(identity => identity.ConfigureIdentity())
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
 			.AddDefaultUI();
