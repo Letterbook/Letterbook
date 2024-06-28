@@ -4,10 +4,65 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <UserSecretsId>5932fff5-e723-4c65-90fc-ec9f045b4119</UserSecretsId>
+        <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Letterbook.Api\Letterbook.Api.csproj" />
+        <EmbeddedResource Include="wwwroot\**\*" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>$(MSBuildProjectName).IntegrationTests</_Parameter1>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>$(MSBuildProjectName).Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ActivityPub.Types" />
+        <PackageReference Include="AutoMapper" />
+        <PackageReference Include="AutoMapper.Collection" />
+<!--        <PackageReference Include="DarkLink.Web.WebFinger.Server" />-->
+        <PackageReference Include="GitHubActionsTestLogger">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="Microsoft.AspNetCore.StaticFiles" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
+        <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
+<!--        <PackageReference Include="NSign.AspNetCore" />-->
+        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+        <PackageReference Include="Request.Body.Peeker" />
+        <PackageReference Include="Serilog.AspNetCore" />
+        <PackageReference Include="Serilog.Enrichers.Span" />
+        <PackageReference Include="Serilog.Expressions" />
+        <PackageReference Include="Serilog.Settings.Configuration" />
+        <PackageReference Include="Serilog.Sinks.Grafana.Loki" />
+<!--        <PackageReference Include="Swashbuckle.AspNetCore" />-->
+<!--        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" />-->
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj" />
+      <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj" />
+      <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj" />
+      <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
+      <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj" />
     </ItemGroup>
 
 </Project>

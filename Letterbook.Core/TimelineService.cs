@@ -1,116 +1,117 @@
+using System.Security.Claims;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Medo;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-public class TimelineService : ITimelineService
+public class TimelineService : IAuthzTimelineService, ITimelineService
 {
 	private ILogger<TimelineService> _logger;
 	private CoreOptions _options;
 	private IFeedsAdapter _feeds;
 	private IAccountProfileAdapter _profileAdapter;
+	private readonly IAuthorizationService _authz;
+	private IEnumerable<Claim>? _claims;
 
-	public TimelineService(ILogger<TimelineService> logger, IOptions<CoreOptions> options, IFeedsAdapter feeds, IAccountProfileAdapter profileAdapter)
+	public TimelineService(ILogger<TimelineService> logger, IOptions<CoreOptions> options, IFeedsAdapter feeds, IAccountProfileAdapter profileAdapter, IAuthorizationService authz)
 	{
 		_logger = logger;
 		_options = options.Value;
 		_feeds = feeds;
 		_profileAdapter = profileAdapter;
+		_authz = authz;
 	}
 
-	public void HandleCreate(Post post)
+	/// <inheritdoc />
+	public async Task HandlePublish(Post post)
 	{
 		// TODO: account for moderation conditions (blocks, etc)
-		var audience = DefaultAudience(post);
-		var mentions = post.AddressedTo.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
-
-		audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
+		post.Audience = NormalizeAudience(post);
 		_feeds.AddToTimeline(post);
-
-		foreach (var mention in mentions)
-		{
-			_feeds.AddNotification(mention.Subject, post, ActivityType.Create);
-		}
+		await _feeds.Commit();
 	}
 
-	public void HandleBoost(Post post)
+	/// <inheritdoc />
+	public async Task HandleShare(Post post, Profile sharedBy)
 	{
 		var boostedBy = post.SharesCollection.Last();
-		if (post.Audience.Contains(Audience.Public)
-			|| post.AddressedTo.Contains(Mention.Public)
-			|| post.AddressedTo.Contains(Mention.Unlisted))
-		{
-			_feeds.AddToTimeline(post, boostedBy);
-		}
-
-		foreach (var creator in post.Creators.Where(creator => creator.HasLocalAuthority(_options)))
-		{
-			_feeds.AddNotification(creator, post, ActivityType.Announce, boostedBy);
-		}
+		_feeds.AddToTimeline(post, boostedBy);
+		await _feeds.Commit();
 	}
 
-	public void HandleUpdate(Post note)
+	/// <inheritdoc />
+	public async Task HandleUpdate(Post post, Post oldPost)
 	{
-		var audience = DefaultAudience(note);
-		var mentions = note.AddressedTo.Where(mention => mention.Subject.HasLocalAuthority(_options)).ToArray();
+		var removed = NormalizeAudience(oldPost);
+		removed.ExceptWith(NormalizeAudience(post));
+		var added = NormalizeAudience(post);
+		added.ExceptWith(NormalizeAudience(oldPost));
 
-		audience.UnionWith(mentions.Select(mention => Audience.FromMention(mention.Subject)));
-		_feeds.AddToTimeline(note);
-
-		foreach (var mention in mentions)
+		await _feeds.Start();
+		if (added.Count != 0)
 		{
-			_feeds.AddNotification(mention.Subject, note, ActivityType.Update);
+			post.Audience = added;
+			_feeds.AddToTimeline(post);
 		}
 
-		foreach (var profile in note.SharesCollection.Where(profile => profile.HasLocalAuthority(_options)))
-		{
-			_feeds.AddNotification(profile, note, ActivityType.Update);
-		}
+		if (removed.Count != 0) await _feeds.RemoveFromTimelines(post, removed);
 
-		if (note.Creators.Count <= 1) return;
-		foreach (var profile in note.Creators.Where(profile => profile.HasLocalAuthority(_options)))
-		{
-			_feeds.AddNotification(profile, note, ActivityType.Update);
-		}
+		if (post.Preview != oldPost.Preview) await _feeds.UpdateTimeline(post);
+		await _feeds.Commit();
 	}
 
-	public void HandleDelete(Post note)
+	/// <inheritdoc />
+	public async Task HandleDelete(Post note)
 	{
 		// TODO: Also handle deleted boosts
-		_feeds.RemoveFromTimelines(note);
+		await _feeds.RemoveFromAllTimelines(note);
 	}
 
 
-	// public async Task<IEnumerable<Post>> GetFeed(Guid recipientId, DateTime begin, int limit = 40)
-	public async Task<IEnumerable<TimelineEntry>> GetFeed(Guid recipientId, DateTime begin, int limit = 40)
+	/// <inheritdoc />
+	public async Task<IEnumerable<Post>> GetFeed(Uuid7 profileId, DateTimeOffset begin, int limit = 40)
 	{
 		// TODO(moderation): Account for moderation conditions (block, mute, etc)
-		var recipient = await _profileAdapter.LookupProfile(recipientId);
+		var query = _profileAdapter.SingleProfile(profileId);
+		query = _profileAdapter.WithAudience(query);
+		var recipient = await query.SingleOrDefaultAsync();
+
+		_logger.LogDebug("Getting feed for {Profile} with membership in {Count} Audiences", profileId, recipient?.Audiences.Count);
 		return recipient != null
-			? _feeds.GetTimelineEntries(recipient.Audiences, begin, limit)
-			: throw CoreException.MissingData("Couldn't lookup Profile to load Feed", typeof(Guid), recipientId);
+			? _feeds.GetTimelineEntries(recipient.Audiences, begin, limit).ToList()
+			: throw CoreException.MissingData("Couldn't lookup Profile to load Feed", typeof(Guid), profileId);
 	}
 
 	/// <summary>
 	/// Get the audience entries for the addressed recipients, plus followers/public/local, if applicable
 	/// </summary>
-	/// <param name="note"></param>
+	/// <param name="post"></param>
 	/// <returns></returns>
-	private HashSet<Audience> DefaultAudience(Post post)
+	private HashSet<Audience> NormalizeAudience(Post post)
 	{
 		var result = new HashSet<Audience>();
 		result.UnionWith(post.Audience);
+		result.UnionWith(post.AddressedTo.Where(
+			m => m.Subject.HasLocalAuthority(_options)).Select(m => Audience.FromMention(m.Subject)));
 
 		// The "public audience" would be equivalent to Mastodon's federated global feed
 		// That's not the same thing as putting posts into follower's feeds.
 		// This ensures we include public posts in the followers audience in case the sender doesn't specify it
 		if (!result.Contains(Audience.Public)) return result;
-		result.UnionWith(post.Creators.Select(c => Audience.FromUri(c.Followers, c)));
+		result.UnionWith(post.Creators.Select(Audience.Followers));
 
 		return result;
+	}
+
+	public IAuthzTimelineService As(IEnumerable<Claim> claims)
+	{
+		_claims = claims;
+		return this;
 	}
 }

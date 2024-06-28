@@ -1,0 +1,49 @@
+{
+  "metadata": [
+    {
+      
+      "src": [
+        {
+          "src": "../../",
+          "files": [
+            "Letterbook*/Letterbook*.csproj"
+          ],
+          "exclude": [
+            "**/*Test*"
+          ]
+        }
+      ],
+      "dest": "api"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "**/*.{md,yml}"
+        ],
+        "exclude": [
+          "_site/**"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ]
+      }
+    ],
+    "output": "_site",
+    "template": [
+      "default",
+      "modern"
+    ],
+    "globalMetadata": {
+      "_appName": "Letterbook",
+      "_appTitle": "Letterbook",
+      "_enableSearch": true,
+      "pdf": false
+    }
+  }
+}

@@ -1,3 +1,4 @@
 {
-    "dotnet.defaultSolution": "Letterbook.sln"
+    "dotnet.defaultSolution": "Letterbook.sln",
+    "dotnet.server.useOmnisharp": true
 }

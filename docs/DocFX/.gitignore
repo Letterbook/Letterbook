@@ -1,0 +1,3 @@
+# temporarily ignore generated files, until we figure out how to handle docs
+_site/
+api/

@@ -18,20 +18,20 @@ namespace Letterbook.Adapter.Db.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "8.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("AudienceProfileMembers", b =>
                 {
-                    b.Property<Guid>("AudiencesId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("AudiencesFediId")
+                        .HasColumnType("text");
 
                     b.Property<Guid>("MembersId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("AudiencesId", "MembersId");
+                    b.HasKey("AudiencesFediId", "MembersId");
 
                     b.HasIndex("MembersId");
 
@@ -92,19 +92,13 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("Letterbook.Core.Models.Audience", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("FediId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid?>("SourceId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("FediId");
+                    b.HasKey("FediId");
 
                     b.HasIndex("SourceId");
 
@@ -584,13 +578,13 @@ namespace Letterbook.Adapter.Db.Migrations
 
             modelBuilder.Entity("PostsToAudience", b =>
                 {
-                    b.Property<Guid>("AudienceId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("AudienceFediId")
+                        .HasColumnType("text");
 
                     b.Property<Guid>("PostId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("AudienceId", "PostId");
+                    b.HasKey("AudienceFediId", "PostId");
 
                     b.HasIndex("PostId");
 
@@ -612,7 +606,7 @@ namespace Letterbook.Adapter.Db.Migrations
                 {
                     b.HasOne("Letterbook.Core.Models.Audience", null)
                         .WithMany()
-                        .HasForeignKey("AudiencesId")
+                        .HasForeignKey("AudiencesFediId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -840,7 +834,7 @@ namespace Letterbook.Adapter.Db.Migrations
                 {
                     b.HasOne("Letterbook.Core.Models.Audience", null)
                         .WithMany()
-                        .HasForeignKey("AudienceId")
+                        .HasForeignKey("AudienceFediId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

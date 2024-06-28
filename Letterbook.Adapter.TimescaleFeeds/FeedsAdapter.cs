@@ -1,6 +1,4 @@
-using System.Runtime.CompilerServices;
-using System.Text;
-using Letterbook.Adapter.TimescaleFeeds.Extensions;
+using Letterbook.Adapter.TimescaleFeeds.EntityModels;
 using Letterbook.Core.Adapters;
 using Microsoft.EntityFrameworkCore;
 using Models = Letterbook.Core.Models;
@@ -14,72 +12,29 @@ public class FeedsAdapter : IFeedsAdapter
 	public FeedsAdapter(FeedsContext feedsContext)
 	{
 		_feedsContext = feedsContext;
-		// _canceled = false;
 	}
 
-	public async Task<int> AddToTimeline<T>(T subject, Models.Audience audience, Models.Profile? boostedBy = default)
-		where T : Models.IContentRef
+	public void AddToTimeline(Models.Post post, Models.Profile? sharedBy = default)
 	{
-		Start();
-		var line = new Models.TimelineEntry()
-		{
-			Type = subject.Type,
-			EntityId = subject.FediId.ToString(),
-			AudienceKey = audience.FediId.ToString(),
-			AudienceName = null,
-			CreatedBy = subject.Creators.Select(c => c.FediId.ToString()).ToArray(),
-			Authority = subject.Authority,
-			BoostedBy = boostedBy?.FediId.ToString(),
-			CreatedDate = subject.CreatedDate
-		};
-
-		return await _feedsContext.Database.ExecuteSqlAsync(
-			$"""
-             INSERT INTO "Feeds" ("Time", "Type", "EntityId", "AudienceKey", "AudienceName", "CreatedBy", "Authority", "BoostedBy", "CreatedDate")
-             VALUES ({line.Time}, {line.Type}, {line.EntityId}, {line.AudienceKey}, {null}, ARRAY [{string.Join(',', line.CreatedBy)}], {line.Authority}, {line.BoostedBy}, {line.CreatedDate});
-             """);
+		var rows = TimelinePost.Denormalize(post);
+		_feedsContext.Timelines.AddRange(rows);
 	}
 
-	public async Task<int> AddToTimeline<T>(T subject, ICollection<Models.Audience> audience,
-		Models.Profile? boostedBy = default)
-		where T : Models.IContentRef
+	public async Task<int> UpdateTimeline(Models.Post post)
 	{
-		if (!audience.Any()) return 0;
-
-		Start();
-		// language=NONE suppress jetbrains embedded sql highlighting because it's more annoying than helpful here
-		var builder = new StringBuilder(
-			"""
-            INSERT INTO "Feeds" ("Time", "Type", "EntityId", "AudienceKey", "AudienceName", "CreatedBy", "Authority", "BoostedBy", "CreatedDate")
-            VALUES 
-            """);
-
-		for (var i = 0; i < audience.Count; i++)
-		{
-			builder.AppendEntryRow(i);
-			if (i + 1 < audience.Count) builder.Append(",\n");
-		}
-
-		var values = new List<object?>();
-		foreach (var each in audience)
-		{
-			values.AddRange(subject.ToEntryValues(each, boostedBy));
-		}
-
-		builder.Append(';');
-		var sql = FormattableStringFactory.Create(builder.ToString(), values.ToArray());
-		return await _feedsContext.Database.ExecuteSqlAsync(sql);
-	}
-
-	public Task<int> AddToTimeline(Models.Post post, Models.Profile? sharedBy = default)
-	{
-		throw new NotImplementedException();
-	}
-
-	public void AddNotification<T>(Models.Profile recipient, T subject, IEnumerable<Models.Profile> actors,
-		Models.ActivityType activity) where T : Models.IContentRef
-	{
-		throw new NotImplementedException();
+		// leave time, id, postId, and audienceId as they are
+		// this will update the content of the timelinePost, but leave it in-place in the timeline
+		var tp = (TimelinePost)post;
+		return await _feedsContext.Timelines
+			.Where(p => p.PostId == tp.PostId)
+			.ExecuteUpdateAsync(props => props
+				.SetProperty(p => p.Preview, tp.Preview)
+				.SetProperty(p => p.Authority, tp.Authority)
+				.SetProperty(p => p.Creators, tp.Creators)
+				.SetProperty(p => p.Summary, tp.Summary)
+				.SetProperty(p => p.UpdatedDate, tp.UpdatedDate)
+				.SetProperty(p => p.InReplyToId, tp.InReplyToId)
+				.SetProperty(p => p.ThreadId, tp.ThreadId));
 	}
 
 	public void AddNotification(Models.Profile recipient, Models.Post post, Models.ActivityType activity, Models.Profile? sharedBy)
@@ -87,36 +42,17 @@ public class FeedsAdapter : IFeedsAdapter
 		throw new NotImplementedException();
 	}
 
-	public async Task<int> RemoveFromTimelines<T>(T subject) where T : Models.IContentRef
+	public async Task<int> RemoveFromAllTimelines(Models.Post post)
 	{
-		Start();
-		return await _feedsContext.Database.ExecuteSqlAsync(
-			$"""
-            DELETE FROM "Feeds"
-            WHERE "EntityId" = {subject.FediId.ToString()};
-            """);
+		return await _feedsContext.Timelines.Where(p => p.PostId == post.Id).ExecuteDeleteAsync();
 	}
 
-	public Task<int> RemoveFromTimelines(Models.Post post)
+	public async Task<int> RemoveFromTimelines(Models.Post post, IEnumerable<Models.Audience> removed)
 	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<int> RemoveFromTimelines<T>(T subject, ICollection<Models.Audience> audiences) where T : Models.IContentRef
-	{
-		Start();
-		var keys = audiences.Select(a => $"{a.FediId}" as object);
-		var builder = new StringBuilder(
-			"""
-            DELETE FROM "Feeds"
-            WHERE "EntityId" = {0}
-            AND "AudienceKey" in (
-            """);
-		builder.AppendJoin(',', Enumerable.Range(1, audiences.Count).Select(i => $"{{{i}}}"));
-		builder.Append(");");
-		var sql = FormattableStringFactory.Create(builder.ToString(), keys.Prepend(subject.FediId.ToString()).ToArray());
-
-		return await _feedsContext.Database.ExecuteSqlAsync(sql);
+		var removedIds = removed.Select(a => a.FediId);
+		return await _feedsContext.Timelines
+			.Where(p => p.PostId == post.Id && removedIds.Contains(p.AudienceId))
+			.ExecuteDeleteAsync();
 	}
 
 	public IEnumerable<Models.Notification> GetAggregateNotifications(Models.Profile recipient, DateTime begin,
@@ -131,45 +67,52 @@ public class FeedsAdapter : IFeedsAdapter
 		throw new NotImplementedException();
 	}
 
-	public IQueryable<Models.TimelineEntry> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime before,
-		int limit, bool includeBoosts = true)
+	public IQueryable<Models.Post> GetTimelineEntries(IEnumerable<Models.Audience> audiences, DateTimeOffset before,
+		int limit, bool includeShared = true)
 	{
-		var keys = audiences.Select(a => a.FediId.ToString());
-		return _feedsContext.Feeds
-			.AsNoTracking()
-			.Where(t => t.Time <= before)
-			.Where(t => keys.Contains(t.AudienceKey))
-			.Where(t => includeBoosts || t.BoostedBy != null)
-			.GroupBy(t => t.EntityId).Select(g => g.First())
-			// Equivalent to DistinctBy, but EFCore won't translate that for some reason
-			// .DistinctBy(t => t.EntityId)
-			.Take(limit);
+		var keys = audiences.Select(a => a.FediId);
+		return _feedsContext.Timelines
+				.AsNoTracking()
+				.OrderBy(t => t.Time)
+				.Where(t => t.Time <= before)
+				.Where(t => keys.Contains(t.AudienceId))
+				.Where(t => includeShared || t.SharedBy != null)
+				// Equivalent to DistinctBy, but EFCore won't translate that for some reason
+				// See https://github.com/npgsql/efcore.pg/issues/894
+				// and https://github.com/dotnet/efcore/issues/27470
+				// .DistinctBy(t => t.EntityId)
+				.GroupBy(t => t.PostId).Select(g => g.First())
+				.Take(limit)
+				.Cast<Models.Post>();
 	}
 
-	public IQueryable<Models.TimelineEntry> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime before,
+	public IQueryable<Models.Post> GetTimelineEntries(ICollection<Models.Audience> audiences, DateTime before,
 		int limit, ICollection<Models.ActivityObjectType> types,
 		bool includeBoosts = true)
 	{
 		throw new NotImplementedException();
 	}
 
-	public Task Cancel()
+	public async Task Cancel()
 	{
 		if (_feedsContext.Database.CurrentTransaction is not null)
 		{
-			return _feedsContext.Database.RollbackTransactionAsync();
+			await _feedsContext.Database.RollbackTransactionAsync();
+			return;
 		}
 
-		return Task.CompletedTask;
+		await Task.CompletedTask;
 	}
-	public Task Commit()
+
+	public async Task Commit()
 	{
 		if (_feedsContext.Database.CurrentTransaction is not null)
 		{
-			return _feedsContext.Database.CommitTransactionAsync();
+			await _feedsContext.Database.CommitTransactionAsync();
+			return;
 		}
 
-		return Task.CompletedTask;
+		await _feedsContext.SaveChangesAsync();
 	}
 
 	public void Dispose()
@@ -178,11 +121,11 @@ public class FeedsAdapter : IFeedsAdapter
 		_feedsContext.Dispose();
 	}
 
-	private void Start()
+	public async Task Start()
 	{
 		if (_feedsContext.Database.CurrentTransaction is null)
 		{
-			_feedsContext.Database.BeginTransaction();
+			await _feedsContext.Database.BeginTransactionAsync();
 		}
 	}
 }

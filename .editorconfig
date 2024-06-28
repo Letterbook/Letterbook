@@ -6,3 +6,4 @@ indent_style = tab
 max_line_length = 140
 insert_final_newline = false
 trim_trailing_whitespace = true
+dotnet_diagnostic.CS0618.severity = suggestion

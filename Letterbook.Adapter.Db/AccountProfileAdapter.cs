@@ -62,7 +62,24 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 		return _context.Profiles.FirstOrDefaultAsync(profile => profile.FediId == id);
 	}
 
-	private Task<Models.Profile?> WithRelation(IQueryable<Models.Profile> query, Uri relationId)
+	public IQueryable<Models.Profile> SingleProfile(Uuid7 id)
+	{
+		return _context.Profiles.Where(profile => profile.Id == id.ToGuid())
+			.Take(1);
+	}
+
+	public IQueryable<Models.Profile> SingleProfile(Uri fediId)
+	{
+		return _context.Profiles.Where(profile => profile.FediId == fediId)
+			.Take(1);
+	}
+
+	public IQueryable<Models.Profile> WithAudience(IQueryable<Models.Profile> query)
+	{
+		return query.Include(profile => profile.Audiences);
+	}
+
+	public IQueryable<Models.Profile> WithRelation(IQueryable<Models.Profile> query, Uri relationId)
 	{
 		return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.FediId == relationId))
 				.ThenInclude(relation => relation.Follows)
@@ -70,18 +87,19 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 				.ThenInclude(relation => relation.Follower)
 			.Include(profile => profile.Keys)
 			.Include(profile => profile.Audiences)
-			.AsSplitQuery()
-			.FirstOrDefaultAsync();
+			.AsSplitQuery();
 	}
 
 	public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)
 	{
-		return WithRelation(_context.Profiles.Where(profile => profile.FediId == id), relationId);
+		return WithRelation(_context.Profiles.Where(profile => profile.FediId == id), relationId)
+			.FirstOrDefaultAsync();
 	}
 
 	public Task<Models.Profile?> LookupProfileWithRelation(Uuid7 localId, Uri relationId)
 	{
-		return WithRelation(_context.Profiles.Where(profile => profile.Id == localId.ToGuid()), relationId);
+		return WithRelation(_context.Profiles.Where(profile => profile.Id == localId.ToGuid()), relationId)
+			.FirstOrDefaultAsync();
 	}
 
 	public IAsyncEnumerable<Models.Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0)

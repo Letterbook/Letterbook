@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+#pragma warning disable CS8604 // Possible null reference argument.
 
 namespace Letterbook.Web.Areas.Identity.Pages.Account
 {
@@ -24,7 +25,7 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
 
         [BindProperty]
         public required InputModel Input { get; set; }
-        public required string ReturnUrl { get; set; }
+        public required string? ReturnUrl { get; set; }
         public required IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         [SetsRequiredMembers]
@@ -60,32 +61,32 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
-            public string Email { get; set; }
+            public required string Email { get; set; }
 
             [Required]
             [Display(Name = "Username")]
-            public string Handle { get; set; }
+            public required string Handle { get; set; }
 
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
-            public string Password { get; set; }
+            public required string Password { get; set; }
 
             [DataType(DataType.Password)]
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
+            public required string ConfirmPassword { get; set; }
         }
 
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string? returnUrl = null)
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -133,7 +134,7 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
 		        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
 		        protocol: Request.Scheme);
 
-	        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+	        await _emailSender!.SendEmailAsync(Input.Email, "Confirm your email",
 		        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
         }
 
@@ -157,7 +158,7 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
             {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
-            return (IUserEmailStore<IdentityUser>)_userStore;
+            return (IUserEmailStore<IdentityUser>)_userStore!;
         }
     }
 }

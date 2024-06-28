@@ -11,9 +11,13 @@
         <span>@Model.Handle</span>
     </h1>
     
+    <a href="/@@@Model.BareHandle/edit">Edit</a>
+    
     <div>
+        <h3>Description</h3>
         <div>@Model.Description</div>
         
+        <h3>Custom Fields</h3>
         <dl>
             @foreach (var field in @Model.CustomFields) {
                 <dt>@field.Label</dt>
@@ -21,6 +25,7 @@
             }
         </dl>
         
+        <h3>Info</h3>
         <div>
             <div>
                 @Model.GetFollowerCount() Followers

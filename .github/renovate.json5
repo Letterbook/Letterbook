@@ -1,0 +1,23 @@
+﻿{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "ignoreDeps": ["Moq"],
+  "packageRules": [
+    {
+      "matchCategories": ["dotnet"],
+      "groupName": "dotnet packages"
+    },
+    {
+      "matchCategories": ["github-actions", "docker"],
+      "groupName": "dev dependencies"
+    },
+    {
+      "matchDepNames": ["dotnet-sdk"],
+      "updateTypes": ["patch"],
+      "enabled": false
+    },
+    {
+      "matchDepPrefixes": ["Microsoft.CodeAnalysis"],
+      "enabled": false
+    }
+  ]
+}

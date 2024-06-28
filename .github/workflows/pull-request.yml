@@ -17,7 +17,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      
     steps:
       - uses: actions/checkout@v4
         
@@ -26,14 +28,25 @@ jobs:
         with:
           dotnet-version: 8.0.x
       
-      - name: Restore
-        run: dotnet restore Letterbook.sln
+      - name: Package Cache
+        id: package-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{env.NUGET_PACKAGES}}
+          key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
+      
+      - name: Restore Packages
+        if: steps.package-cache.outputs.cache-hit != 'true'
+        run: dotnet restore
+      
+      - name: Restore Tools
+        run: dotnet tool restore
       
       - name: Build
         run: dotnet build Letterbook.sln --configuration Release
       
       - name: Test
-        run: dotnet test Letterbook.sln --configuration Release --logger GitHubActions --blame-crash --no-build
+        run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --blame-crash --no-build
         
       - name: Save test crash report
         if: failure()
@@ -42,19 +55,20 @@ jobs:
           name: TestResults
           path: '**/TestResults/'
       
-      - name: Install EF Tools
+      - name: Check Relational Migrations
+        run: dotnet ef migrations has-pending-model-changes
+        working-directory: Letterbook.Adapter.Db/
+        
+      - name: Check Feeds Migrations
+        run: dotnet ef migrations has-pending-model-changes
+        working-directory: Letterbook.Adapter.TimescaleFeeds/
+
+      - name: Check Generated Files
         run: |
-          dotnet tool install --global dotnet-ef --version 8.0.0
-          dotnet tool restore
-      
-      - name: Test Migrations
-        run: |
-          dotnet ef migrations add CI
           CHANGED=$(git status --porcelain -uno)
           if [ -n "$CHANGED" ]; then
             echo "$CHANGED"
-            echo 'Failed: Stale migrations'
+            echo 'Failed: Stale files'
             exit 1
           fi
-        working-directory: Letterbook.Adapter.Db/
         shell: bash

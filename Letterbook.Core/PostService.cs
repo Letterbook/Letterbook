@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
@@ -20,17 +21,17 @@ public class PostService : IAuthzPostService, IPostService
 	private readonly ILogger<PostService> _logger;
 	private readonly CoreOptions _options;
 	private readonly IPostAdapter _posts;
-	private readonly IPostEventService _postEvents;
+	private readonly IPostEventPublisher _postEventPublisher;
 	private readonly IActivityPubClient _apClient;
 	private Uuid7 _profileId;
 	private IEnumerable<Claim> _claims = null!;
 
 	public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options,
-		IPostAdapter posts, IPostEventService postEvents, IActivityPubClient apClient)
+		IPostAdapter posts, IPostEventPublisher postEventPublisher, IActivityPubClient apClient)
 	{
 		_logger = logger;
 		_posts = posts;
-		_postEvents = postEvents;
+		_postEventPublisher = postEventPublisher;
 		_apClient = apClient;
 		_options = options.Value;
 	}
@@ -98,8 +99,8 @@ public class PostService : IAuthzPostService, IPostService
 		if (publish) post.PublishedDate = DateTimeOffset.UtcNow;
 		_posts.Add(post);
 		await _posts.Commit();
-		_postEvents.Created(post);
-		if (publish) _postEvents.Published(post);
+		await _postEventPublisher.Created(post);
+		if (publish) await _postEventPublisher.Published(post);
 
 		return post;
 	}
@@ -118,25 +119,18 @@ public class PostService : IAuthzPostService, IPostService
 		// var decision = _authz.Update(Enumerable.Empty<Claim>(), previous) // TODO: authz
 		previous.Client = post.Client; // probably should come from an authz claim
 		previous.InReplyTo = post.InReplyTo;
-		previous.Audience = post.Audience;
 
-		// remove all the removed contents, and add/update everything else
-		var removed = previous.Contents.Except(post.Contents).ToArray();
-		_posts.RemoveRange(removed);
-		previous.Contents = post.Contents;
+		previous.Audience = previous.Audience.ReplaceWith(post.Audience);
+		previous.Contents = previous.Contents.ReplaceWith(post.Contents);
 
 		var published = previous.PublishedDate != null;
-		if (published)
-		{
-			previous.UpdatedDate = DateTimeOffset.UtcNow;
-			// publish again, tbd
-		}
+		if (published) previous.UpdatedDate = DateTimeOffset.UtcNow;
 		else previous.CreatedDate = DateTimeOffset.UtcNow;
 
 
 		_posts.Update(previous);
 		await _posts.Commit();
-		_postEvents.Updated(previous);
+		await _postEventPublisher.Updated(previous);
 
 		return previous;
 	}
@@ -149,7 +143,7 @@ public class PostService : IAuthzPostService, IPostService
 		post.DeletedDate = DateTimeOffset.UtcNow;
 		_posts.Remove(post);
 		await _posts.Commit();
-		_postEvents.Deleted(post);
+		await _postEventPublisher.Deleted(post);
 	}
 
 	public async Task<Post> Publish(Uuid7 id, bool localOnly = false)
@@ -163,7 +157,7 @@ public class PostService : IAuthzPostService, IPostService
 
 		_posts.Update(post);
 		await _posts.Commit();
-		_postEvents.Published(post);
+		await _postEventPublisher.Published(post);
 		return post;
 	}
 
@@ -179,12 +173,12 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			_postEvents.Published(post);
+			await _postEventPublisher.Published(post);
 		}
 
 		_posts.Update(post);
 		await _posts.Commit();
-		_postEvents.Updated(post);
+		await _postEventPublisher.Updated(post);
 		return post;
 	}
 
@@ -206,13 +200,13 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			_postEvents.Published(post);
+			await _postEventPublisher.Published(post);
 		}
 
 		_posts.Remove(content);
 		_posts.Update(post);
 		await _posts.Commit();
-		_postEvents.Updated(post);
+		await _postEventPublisher.Updated(post);
 		return post;
 	}
 
@@ -241,12 +235,12 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			_postEvents.Published(post);
+			await _postEventPublisher.Published(post);
 		}
 
 		_posts.Update(post);
 		await _posts.Commit();
-		_postEvents.Updated(post);
+		await _postEventPublisher.Updated(post);
 		return post;
 	}
 
