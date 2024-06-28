@@ -17,6 +17,11 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 		_context = context;
 	}
 
+	public IQueryable<Models.Account> SingleAccount(Guid accountId)
+	{
+		return _context.Accounts.Where(account => account.Id == accountId).Take(1).AsQueryable();
+	}
+
 	public bool RecordAccount(Models.Account account)
 	{
 		var added = _context.Accounts.Add(account);
@@ -34,10 +39,25 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 		return _context.Accounts.FirstOrDefaultAsync(account => account.Id == id);
 	}
 
+	public async Task<Models.Account?> FindAccountByEmail(string normalizedEmail)
+	{
+		return await _context.Accounts
+			.Include(account => account.LinkedProfiles)
+			.FirstOrDefaultAsync(account => account.NormalizedEmail == normalizedEmail);
+	}
+
 	public IQueryable<Models.Account> SearchAccounts()
 	{
 		return _context.Accounts.AsQueryable();
 	}
+
+	public IQueryable<Models.Account> WithProfiles(IQueryable<Models.Account> query)
+	{
+		return query
+			.Include(account => account.LinkedProfiles)
+			.AsSplitQuery();
+	}
+
 
 	public Task<bool> AnyProfile(string handle)
 	{

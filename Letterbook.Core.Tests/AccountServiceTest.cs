@@ -1,9 +1,9 @@
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
-using Medo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using MockQueryable.Moq;
 using Moq;
 using Xunit.Abstractions;
 
@@ -17,6 +17,7 @@ public class AccountServiceTest : WithMocks
 	private FakeAccount _fakeAccount;
 	private FakeProfile _fakeProfile;
 	private MockIdentityManager _mockIdentityManager;
+	private readonly Account _account;
 
 	public AccountServiceTest(ITestOutputHelper outputHelper)
 	{
@@ -29,6 +30,8 @@ public class AccountServiceTest : WithMocks
 
 		_accountService = new AccountService(loggerMock, CoreOptionsMock, AccountProfileMock.Object,
 			AccountEventServiceMock.Object, _mockIdentityManager.Create());
+
+		_account = _fakeAccount.Generate();
 	}
 
 	[Fact]
@@ -74,7 +77,8 @@ public class AccountServiceTest : WithMocks
 	public async Task LookupTest()
 	{
 		var expected = _fakeAccount.Generate();
-		AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).ReturnsAsync(expected);
+		var queryable = new List<Account>() { expected }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>())).Returns(queryable);
 
 		var actual = await _accountService.LookupAccount(expected.Id);
 
@@ -85,7 +89,8 @@ public class AccountServiceTest : WithMocks
 	public async Task LookupTestNoResult()
 	{
 		var expected = _fakeAccount.Generate();
-		AccountProfileMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).ReturnsAsync(default(Account));
+		var queryable = Array.Empty<Account>().BuildMock();
+		AccountProfileMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>())).Returns(queryable);
 
 		var actual = await _accountService.LookupAccount(expected.Id);
 
@@ -109,10 +114,10 @@ public class AccountServiceTest : WithMocks
 	{
 		var account = _fakeAccount.Generate();
 		var profile = _fakeProfile.Generate();
-		var expected = new ProfileAccess(account, profile, ProfilePermission.All);
+		var expected = new ProfileClaims(account, profile, [ProfileClaim.Owner]);
 		AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
-		await _accountService.AddLinkedProfile(account.Id, profile, ProfilePermission.All);
+		await _accountService.AddLinkedProfile(account.Id, profile, [ProfileClaim.Owner]);
 
 		Assert.Contains(account.LinkedProfiles, linkedProfile => linkedProfile == expected);
 	}
@@ -122,7 +127,7 @@ public class AccountServiceTest : WithMocks
 	{
 		var account = _fakeAccount.Generate();
 		var profile = _fakeProfile.Generate();
-		var expected = new ProfileAccess(account, profile, ProfilePermission.All);
+		var expected = new ProfileClaims(account, profile, [ProfileClaim.Owner]);
 		account.LinkedProfiles.Add(expected);
 		AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
@@ -136,13 +141,41 @@ public class AccountServiceTest : WithMocks
 	{
 		var account = _fakeAccount.Generate();
 		var profile = _fakeProfile.Generate();
-		var expected = new ProfileAccess(account, profile, ProfilePermission.All);
+		var expected = new ProfileClaims(account, profile, [ProfileClaim.Owner]);
 		account.LinkedProfiles.Add(expected);
 		AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
-		await _accountService.UpdateLinkedProfile(account.Id, profile, ProfilePermission.None);
+		await _accountService.UpdateLinkedProfile(account.Id, profile, [ProfileClaim.None]);
 
 		var accountLink = account.LinkedProfiles.SingleOrDefault(p => p.Equals(expected));
-		Assert.Equal(accountLink?.Permission, ProfilePermission.None);
+		Assert.Equal(accountLink?.Claims, [ProfileClaim.None]);
+	}
+
+	[Fact(DisplayName = "Should include linked profiles")]
+	public async Task CanGetFirstWithProfiles()
+	{
+		var queryable = new List<Account> { _account }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>()))
+			.Returns(queryable);
+
+		var actual = await _accountService.FirstAccount(_account.Email!);
+
+		Assert.NotNull(actual);
+		Assert.NotNull(actual.LinkedProfiles);
+		Assert.NotEmpty(actual.LinkedProfiles);
+	}
+
+	[Fact(DisplayName = "Should cast to claims")]
+	public async Task CanGetProfileClaims()
+	{
+		var queryable = new List<Account> { _account }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>()))
+			.Returns(queryable);
+
+		var result = await _accountService.FirstAccount(_account.Email!);
+		Assert.NotNull(result);
+
+		var actual = result.ProfileClaims();
+		Assert.NotEmpty(actual);
 	}
 }

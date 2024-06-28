@@ -3,15 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Html;
 using Microsoft.Extensions.Options;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.CodeAnalysis;
-using Letterbook.Core.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Letterbook.Web.Pages;
 
+[AllowAnonymous]
+[Authorize(Policy = Constants.AuthzPolicy)]
 public class Profile : PageModel
 {
 	private readonly IProfileService _profiles;
+	private readonly ILogger<Profile> _logger;
 	private readonly CoreOptions _options;
 
 	public string BareHandle { get; set; }
@@ -24,11 +25,13 @@ public class Profile : PageModel
 
 	public int GetFollowerCount() => Prof!.FollowersCollection.Count;
 	public int GetFollowingCount() => Prof!.FollowingCollection.Count;
+	public string GetId() => Prof!.GetId25();
 
 
-	public Profile(IProfileService profiles, IOptions<CoreOptions> options)
+	public Profile(IProfileService profiles, IOptions<CoreOptions> options, ILogger<Profile> logger)
 	{
 		_profiles = profiles;
+		_logger = logger;
 		_options = options.Value;
 		BareHandle = "";
 		Handle = "";
@@ -37,9 +40,10 @@ public class Profile : PageModel
 		CustomFields = new Models.CustomField[0];
 	}
 
-	
 	public async Task<IActionResult> OnGet(string handle)
 	{
+		_logger.LogDebug("Account {Name} has effective claims {Claims}", User.Identity?.Name, User.Claims);
+
 		var found = await _profiles.As(User.Claims).FindProfiles(handle);
 		if (found.FirstOrDefault() is not { } profile)
 			return NotFound();

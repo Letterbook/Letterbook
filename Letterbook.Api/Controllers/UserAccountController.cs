@@ -1,5 +1,4 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using Letterbook.Api.Dto;
 using Letterbook.Api.Swagger;
@@ -13,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Letterbook.Api.Controllers;
 
+[Authorize(Policy = Constants.ApiPolicy)]
 [ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 [Route("/lb/v1/[controller]/[action]")]
 public class UserAccountController : ControllerBase
@@ -37,20 +37,22 @@ public class UserAccountController : ControllerBase
 		return handler.WriteToken(handler.CreateToken(descriptor));
 	}
 
+	[AllowAnonymous]
 	[HttpPost]
 	[ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
 	public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
 	{
 		try
 		{
-			var claims = await _accountService.AuthenticatePassword(loginRequest.Email, loginRequest.Password);
-			if (!claims.Any()) return Unauthorized();
+			var identity = await _accountService.AuthenticatePassword(loginRequest.Email, loginRequest.Password);
+			if (!identity.Authenticated) return Unauthorized();
+			// TODO: 2FA
 
 			// TODO: asymmetric signing key
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_hostSecret));
 			var tokenDescriptor = new SecurityTokenDescriptor
 			{
-				Subject = new ClaimsIdentity(claims),
+				Subject = identity,
 				Issuer = _coreOptions.BaseUri().ToString(),
 				Audience = _coreOptions.BaseUri().ToString(),
 				NotBefore = DateTime.UtcNow,
@@ -82,6 +84,7 @@ public class UserAccountController : ControllerBase
 		return SignOut();
 	}
 
+	[AllowAnonymous]
 	[HttpPost]
 	[ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
 	public async Task<IActionResult> Register([FromBody] RegistrationRequest registration)
