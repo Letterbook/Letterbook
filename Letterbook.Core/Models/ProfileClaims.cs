@@ -64,4 +64,9 @@ public class ProfileClaims : IEquatable<ProfileClaims>
 	{
 		return !Equals(left, right);
 	}
+
+	public static explicit operator Claim(ProfileClaims profileClaims)
+	{
+		return new Claim($"profile:{profileClaims.Profile.GetId25()}", string.Join(',', profileClaims.Claims));
+	}
 }

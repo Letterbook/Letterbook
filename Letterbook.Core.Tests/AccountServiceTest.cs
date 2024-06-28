@@ -1,9 +1,9 @@
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
-using Medo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using MockQueryable.Moq;
 using Moq;
 using Xunit.Abstractions;
 
@@ -17,6 +17,7 @@ public class AccountServiceTest : WithMocks
 	private FakeAccount _fakeAccount;
 	private FakeProfile _fakeProfile;
 	private MockIdentityManager _mockIdentityManager;
+	private readonly Account _account;
 
 	public AccountServiceTest(ITestOutputHelper outputHelper)
 	{
@@ -29,6 +30,8 @@ public class AccountServiceTest : WithMocks
 
 		_accountService = new AccountService(loggerMock, CoreOptionsMock, AccountProfileMock.Object,
 			AccountEventServiceMock.Object, _mockIdentityManager.Create());
+
+		_account = _fakeAccount.Generate();
 	}
 
 	[Fact]
@@ -144,5 +147,33 @@ public class AccountServiceTest : WithMocks
 
 		var accountLink = account.LinkedProfiles.SingleOrDefault(p => p.Equals(expected));
 		Assert.Equal(accountLink?.Claims, [ProfileClaim.None]);
+	}
+
+	[Fact(DisplayName = "Should include linked profiles")]
+	public async Task CanGetFirstWithProfiles()
+	{
+		var queryable = new List<Account> { _account }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>()))
+			.Returns(queryable);
+
+		var actual = await _accountService.FirstAccount(_account.Email!);
+
+		Assert.NotNull(actual);
+		Assert.NotNull(actual.LinkedProfiles);
+		Assert.NotEmpty(actual.LinkedProfiles);
+	}
+
+	[Fact(DisplayName = "Should cast to claims")]
+	public async Task CanGetProfileClaims()
+	{
+		var queryable = new List<Account> { _account }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>()))
+			.Returns(queryable);
+
+		var result = await _accountService.FirstAccount(_account.Email!);
+		Assert.NotNull(result);
+
+		var actual = result.ProfileClaims();
+		Assert.NotEmpty(actual);
 	}
 }

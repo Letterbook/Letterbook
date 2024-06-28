@@ -92,15 +92,11 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
 		                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
 	                }
 
-	                var profileClaims = user.LinkedProfiles
-		                .Select(l => new Claim($"profile:{l.Profile.GetId25()}", string.Join(",", l.Claims)));
-	                var defaultProfile = user.LinkedProfiles.OrderBy(pc => pc.GetId())
-		                .FirstOrDefault(pc => pc.Claims.Contains(Models.ProfileClaim.Owner));
-	                if (defaultProfile is not null)
-		                profileClaims = profileClaims.Append(new Claim("activeProfile", defaultProfile.Profile.GetId25()));
+	                var profileClaims = user.ProfileClaims(true);
 
 	                await _signInManager.SignInWithClaimsAsync(user, Input.RememberMe, profileClaims);
-	                _logger.LogDebug("Account {User} signed in and granted {ProfileClaims}", user.UserName, profileClaims);
+	                _logger.LogDebug("Account {Name} signed in and granted claims {ProfileClaims}", user.UserName, profileClaims);
+	                _logger.LogDebug("Account {Name} has effective claims {Claims}", User.Identity?.Name, User.Claims);
 	                return LocalRedirect(returnUrl);
                 }
 
@@ -108,7 +104,7 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
                 var lockedOut = await _userManager.IsLockedOutAsync(user);
                 if (lockedOut)
                 {
-                    _logger.LogWarning("User {Name} account locked out", user.UserName);
+                    _logger.LogWarning("Account {Name} locked out for repeated failed logins", user.UserName);
                     return RedirectToPage("./Lockout");
                 }
 
