@@ -15,22 +15,12 @@ public static class DependencyInjection
 		return options;
 	}
 
-	public static IServiceCollection AddWebAuthz(this IServiceCollection services, ConfigurationManager configuration)
-	{
-		services.AddAuthorization(options =>
-		{
-			options.AddWebAuthzPolicy();
-		});
-
-		return services;
-	}
-
 	public static IServiceCollection AddWebCookies(this IServiceCollection services)
 	{
 		return services.ConfigureApplicationCookie(options =>
 		{
 			options.SlidingExpiration = true;
-			options.ExpireTimeSpan = TimeSpan.FromDays(90);
+			options.ExpireTimeSpan = TimeSpan.FromDays(30);
 		});
 	}
 }

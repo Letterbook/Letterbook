@@ -17,6 +17,11 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 		_context = context;
 	}
 
+	public IQueryable<Models.Account> SingleAccount(Guid accountId)
+	{
+		return _context.Accounts.Where(account => account.Id == accountId).Take(1).AsQueryable();
+	}
+
 	public bool RecordAccount(Models.Account account)
 	{
 		var added = _context.Accounts.Add(account);

@@ -4,6 +4,7 @@ using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Api;
 using Letterbook.Api.Swagger;
+using Letterbook.AspNet;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Web;
@@ -102,8 +103,12 @@ public class Program
 
 		app.UseAuthentication();
 		app.UseAuthorization();
+		app.UseWhen((context => !context.Request.Path.StartsWithSegments("/Identity")), applicationBuilder =>
+		{
+			applicationBuilder.UseMiddleware<ProfileIdentityMiddleware>();
+		});
 
-		app.UseSerilogRequestLogging();
+		// app.UseSerilogRequestLogging();
 
 		app.MapRazorPages();
 		app.UsePathBase(new PathString("/api/v1"));

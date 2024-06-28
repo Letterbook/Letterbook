@@ -30,7 +30,7 @@ public class Account : IdentityUser<Guid>, IIdentity
 			.Select(claims => (Claim)claims);
 
 		if (defaultActive && LinkedProfiles.FirstOrDefault(l => l.Claims.Contains(ProfileClaim.Owner)) is { } active)
-			claims = claims.Append(new Claim($"activeProfile", active.Profile.GetId25()));
+			claims = claims.Append(new Claim(ApplicationClaims.ActiveProfile, active.Profile.GetId25()));
 
 		return claims;
 	}

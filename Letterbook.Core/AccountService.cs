@@ -97,7 +97,9 @@ public class AccountService : IAccountService, IDisposable
 
 	public async Task<Account?> LookupAccount(Guid id)
 	{
-		return await _accountAdapter.LookupAccount(id);
+		return await _accountAdapter
+			.WithProfiles(_accountAdapter.SingleAccount(id))
+			.FirstOrDefaultAsync();
 	}
 
 	public IAsyncEnumerable<Account> FindAccounts(string email)

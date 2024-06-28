@@ -71,6 +71,9 @@ public static class DependencyInjection
 
 	public static void ConfigureIdentity(this IdentityOptions identity)
 	{
+		// Removes "@" from the default list, which would likely cause problems for other services using webfinger
+		identity.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._+";
+		identity.User.RequireUniqueEmail = true;
 		identity.ClaimsIdentity.EmailClaimType = JwtRegisteredClaimNames.Email;
 		identity.ClaimsIdentity.UserIdClaimType = JwtRegisteredClaimNames.Sub;
 		identity.ClaimsIdentity.UserNameClaimType = JwtRegisteredClaimNames.PreferredUsername;

@@ -2,6 +2,7 @@ using System.Text.Encodings.Web;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
+using Letterbook.AspNet;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
@@ -101,8 +102,12 @@ public class Program
 
 		app.UseAuthentication();
 		app.UseAuthorization();
-
 		app.UseSerilogRequestLogging();
+
+		app.UseWhen(context => !context.Request.Path.StartsWithSegments("/Identity"), applicationBuilder =>
+		{
+			applicationBuilder.UseMiddleware<ProfileIdentityMiddleware>();
+		});
 
 		app.MapRazorPages();
 

@@ -11,6 +11,13 @@ public interface IAccountProfileAdapter : IDisposable
 
 	delegate bool ProfileComparer(Profile profile);
 
+	/// <summary>
+	/// Query for one account by ID
+	/// </summary>
+	/// <param name="accountId"></param>
+	/// <returns></returns>
+	IQueryable<Account> SingleAccount(Guid accountId);
+
 	public bool RecordAccount(Account account);
 	public Task<bool> RecordAccounts(IEnumerable<Account> accounts);
 	public Task<Account?> LookupAccount(Guid id);

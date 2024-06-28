@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Claims;
 using Letterbook.Core;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -12,7 +11,6 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly SignInManager<Models.Account> _signInManager;
-        private readonly UserManager<Models.Account> _userManager;
         private readonly IAccountService _accounts;
         private readonly ILogger<LoginModel> _logger;
 
@@ -26,10 +24,9 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
         public required string ErrorMessage { get; set; } = null!;
 
         [SetsRequiredMembers]
-        public LoginModel(ILogger<LoginModel> logger, SignInManager<Models.Account> signInManager, UserManager<Models.Account> userManager, IAccountService accounts)
+        public LoginModel(ILogger<LoginModel> logger, SignInManager<Models.Account> signInManager, IAccountService accounts)
         {
             _signInManager = signInManager;
-            _userManager = userManager;
             _accounts = accounts;
             _logger = logger;
         }
@@ -83,26 +80,19 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
 	                return Page();
                 }
 
-                var succeeded = await _userManager.CheckPasswordAsync(user, Input.Password);
-                if(succeeded)
+                var result = await _signInManager.PasswordSignInAsync(user, Input.Password, Input.RememberMe, true);
+                if(result.Succeeded)
                 {
 	                if (user.TwoFactorEnabled)
 	                {
-		                // TODO: set activeProfile on 2fa login
 		                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
 	                }
 
-	                var profileClaims = user.ProfileClaims(true);
-
-	                await _signInManager.SignInWithClaimsAsync(user, Input.RememberMe, profileClaims);
-	                _logger.LogDebug("Account {Name} signed in and granted claims {ProfileClaims}", user.UserName, profileClaims);
 	                _logger.LogDebug("Account {Name} has effective claims {Claims}", User.Identity?.Name, User.Claims);
 	                return LocalRedirect(returnUrl);
                 }
 
-                await _userManager.AccessFailedAsync(user);
-                var lockedOut = await _userManager.IsLockedOutAsync(user);
-                if (lockedOut)
+                if (result.IsLockedOut)
                 {
                     _logger.LogWarning("Account {Name} locked out for repeated failed logins", user.UserName);
                     return RedirectToPage("./Lockout");

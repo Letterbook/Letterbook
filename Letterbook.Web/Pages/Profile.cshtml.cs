@@ -12,6 +12,7 @@ namespace Letterbook.Web.Pages;
 public class Profile : PageModel
 {
 	private readonly IProfileService _profiles;
+	private readonly ILogger<Profile> _logger;
 	private readonly CoreOptions _options;
 
 	public string BareHandle { get; set; }
@@ -27,9 +28,10 @@ public class Profile : PageModel
 	public string GetId() => Prof!.GetId25();
 
 
-	public Profile(IProfileService profiles, IOptions<CoreOptions> options)
+	public Profile(IProfileService profiles, IOptions<CoreOptions> options, ILogger<Profile> logger)
 	{
 		_profiles = profiles;
+		_logger = logger;
 		_options = options.Value;
 		BareHandle = "";
 		Handle = "";
@@ -40,6 +42,8 @@ public class Profile : PageModel
 
 	public async Task<IActionResult> OnGet(string handle)
 	{
+		_logger.LogDebug("Account {Name} has effective claims {Claims}", User.Identity?.Name, User.Claims);
+
 		var found = await _profiles.As(User.Claims).FindProfiles(handle);
 		if (found.FirstOrDefault() is not { } profile)
 			return NotFound();
