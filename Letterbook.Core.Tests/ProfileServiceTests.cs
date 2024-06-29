@@ -7,6 +7,7 @@ using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.Extensions.Logging;
+using MockQueryable.Moq;
 using Moq;
 using Xunit.Abstractions;
 
@@ -411,8 +412,11 @@ public class ProfileServiceTests : WithMocks
 	{
 		var follower = new FakeProfile().Generate();
 		_profile.Follow(follower, FollowState.Accepted);
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), follower.FediId))
-			.ReturnsAsync(_profile);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+			.Returns(queryable);
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
+			.Returns(queryable);
 
 		await _service.Unfollow(_profile.GetId(), follower.FediId);
 

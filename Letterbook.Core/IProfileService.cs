@@ -14,6 +14,14 @@ public interface IAuthzProfileService
 {
 	Task<Profile> CreateProfile(Profile profile);
 	Task<Profile> CreateProfile(Guid ownerId, string handle);
+
+	/// <summary>
+	/// Set a new display name for the given profile
+	/// </summary>
+	/// <param name="localId"></param>
+	/// <param name="displayName"></param>
+	/// <returns>The original and updated Profiles, or null if no change was made</returns>
+	/// <exception cref="CoreException"></exception>
 	Task<UpdateResponse<Profile>> UpdateDisplayName(Guid localId, string displayName);
 	Task<UpdateResponse<Profile>> UpdateDescription(Guid localId, string description);
 	Task<UpdateResponse<Profile>> InsertCustomField(Guid localId, int index, string key, string value);
@@ -33,13 +41,21 @@ public interface IAuthzProfileService
 	Task<Profile?> LookupProfile(Uuid7 profileId, Uuid7? relatedProfile = null);
 	Task<Profile?> LookupProfile(Uri fediId, Uuid7? relatedProfile = null);
 	Task<IEnumerable<Profile>> FindProfiles(string handle);
-	Task<FollowerRelation> Follow(Guid selfId, Uri targetId);
-	Task<FollowerRelation> Follow(Guid selfId, Guid localId);
+	Task<FollowerRelation> Follow(Uuid7 selfId, Uri targetId);
+	Task<FollowerRelation> Follow(Uuid7 selfId, Uuid7 localId);
 	Task<FollowerRelation> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId);
 	Task<FollowerRelation> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId);
 	Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response);
 	Task RemoveFollower(Guid selfId, Uri followerId);
-	Task Unfollow(Guid selfId, Uri followerId);
+
+	/// <summary>
+	/// Stop following the target
+	/// </summary>
+	/// <param name="selfId"></param>
+	/// <param name="targetId"></param>
+	/// <returns></returns>
+	Task<FollowerRelation> Unfollow(Uuid7 selfId, Uri targetId);
+	Task<FollowerRelation?> Unfollow(Uuid7 selfId, Uuid7 targetId);
 	Task ReportProfile(Guid selfId, Uri profileId);
 
 	/// <summary>
@@ -50,7 +66,7 @@ public interface IAuthzProfileService
 	/// <param name="followedBefore">Get relations that began before this date</param>
 	/// <param name="limit"></param>
 	/// <returns></returns>
-	Task<IAsyncEnumerable<Profile>> LookupFollowing(Uuid7 profileId, DateTimeOffset? followedBefore, int limit);
+	Task<IQueryable<Profile>> LookupFollowing(Uuid7 profileId, DateTimeOffset? followedBefore, int limit);
 
 	/// <summary>
 	/// Lookup the list of profiles that follow the specified profile
@@ -60,8 +76,7 @@ public interface IAuthzProfileService
 	/// <param name="followedBefore">Get relations that began before this date</param>
 	/// <param name="limit"></param>
 	/// <returns></returns>
-	Task<IAsyncEnumerable<Profile>> LookupFollowers(Uuid7 profileId, DateTimeOffset? followedBefore, int limit);
-
+	Task<IQueryable<Profile>> LookupFollowers(Uuid7 profileId, DateTimeOffset? followedBefore, int limit);
 
 	// - [ ] receive report
 	// - [ ] block

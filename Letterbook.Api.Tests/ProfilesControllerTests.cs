@@ -4,9 +4,11 @@ using Letterbook.Core.Extensions;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.Core.Values;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MockQueryable.Moq;
 using Moq;
 using Xunit.Abstractions;
 
@@ -128,5 +130,54 @@ public class ProfilesControllerTests : WithMockContext
 		var response = Assert.IsType<OkObjectResult>(result);
 		var actual = Assert.IsType<FullProfileDto>(response.Value);
 		Assert.Equal(_profile.Handle, actual.Handle);
+	}
+
+	[Fact(DisplayName = "Should query following")]
+	public async Task CanQueryFollowing()
+	{
+		foreach (var following in _fakeProfile.Generate(5))
+		{
+			_profile.Follow(following, FollowState.Accepted);
+		}
+		var queryable = _profile.FollowingCollection.Select(r => r.Follows).BuildMock();
+		ProfileServiceAuthMock.Setup(m => m.LookupFollowing(_profile.GetId(), It.IsAny<DateTimeOffset>(), It.IsAny<int>()))
+			.ReturnsAsync(queryable);
+
+		var result = await _controller.GetFollowing(_profile.GetId(), null);
+
+		var response = Assert.IsType<OkObjectResult>(result);
+		var actual = Assert.IsAssignableFrom<IAsyncEnumerable<MiniProfileDto>>(response.Value);
+		Assert.InRange(await actual.CountAsync(), 5, 100);
+	}
+
+	[Fact(DisplayName = "Should follow a target profile")]
+	public async Task CanFollow()
+	{
+
+		var target = _fakeProfile.Generate();
+		ProfileServiceAuthMock.Setup(m => m.Follow(_profile.GetId(), target.GetId()))
+			.ReturnsAsync(new Models.FollowerRelation(_profile, target, FollowState.Accepted));
+
+		var result = await _controller.Follow(_profile.GetId(), target.GetId());
+
+		var response = Assert.IsType<OkObjectResult>(result);
+		var actual = Assert.IsAssignableFrom<Models.FollowerRelation>(response.Value);
+		Assert.Equal(FollowState.Accepted, actual.State);
+	}
+
+	[Fact(DisplayName = "Should unfollow a target profile")]
+	public async Task CanUnfollow()
+	{
+
+		var target = _fakeProfile.Generate();
+		_profile.Follow(target, FollowState.Accepted);
+		ProfileServiceAuthMock.Setup(m => m.Unfollow(_profile.GetId(), target.GetId()))
+			.ReturnsAsync(new Models.FollowerRelation(_profile, target, FollowState.None));
+
+		var result = await _controller.Unfollow(_profile.GetId(), target.GetId());
+
+		var response = Assert.IsType<OkObjectResult>(result);
+		var actual = Assert.IsAssignableFrom<Models.FollowerRelation>(response.Value);
+		Assert.Equal(FollowState.None, actual.State);
 	}
 }

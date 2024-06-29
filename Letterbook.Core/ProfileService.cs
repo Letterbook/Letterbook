@@ -64,13 +64,6 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return profile;
 	}
 
-	/// <summary>
-	///
-	/// </summary>
-	/// <param name="localId"></param>
-	/// <param name="displayName"></param>
-	/// <returns>The original and updated Profiles, or null if no change was made</returns>
-	/// <exception cref="CoreException"></exception>
 	public async Task<UpdateResponse<Profile>> UpdateDisplayName(Guid localId, string displayName)
 	{
 		// TODO(moderation): vulgarity filters
@@ -248,14 +241,14 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		}
 	}
 
-	public async Task<FollowerRelation> Follow(Guid selfId, Uri targetId)
+	public async Task<FollowerRelation> Follow(Uuid7 selfId, Uri targetId)
 	{
 		var self = await RequireProfile(selfId, targetId);
 		var target = await ResolveProfile(targetId, self);
 		return await Follow(self, target, false);
 	}
 
-	public async Task<FollowerRelation> Follow(Guid selfId, Guid targetId)
+	public async Task<FollowerRelation> Follow(Uuid7 selfId, Uuid7 targetId)
 	{
 		var target = await RequireProfile(targetId);
 		var self = await RequireProfile(selfId, target.FediId);
@@ -337,18 +330,36 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		await _profiles.Commit();
 	}
 
-	public async Task Unfollow(Guid selfId, Uri followerId)
+	private async Task<FollowerRelation> Unfollow(Profile self, FollowerRelation relation)
 	{
-		var self = await _profiles.LookupProfileWithRelation(selfId, followerId)
-				   ?? throw CoreException.MissingData(
-					   $"Failed to update local profile {selfId} because it could not be found", typeof(Profile),
-					   selfId);
-		var follows = self.FollowingCollection
-			.FirstOrDefault(p => p.Follows.FediId.OriginalString == followerId.OriginalString)?.Follows;
-
-		if (follows is null) return;
-		self.Unfollow(follows);
+		self.Unfollow(relation.Follows);
 		await _profiles.Commit();
+		relation.State = FollowState.None;
+		return relation;
+	}
+
+	public async Task<FollowerRelation> Unfollow(Uuid7 selfId, Uri targetId)
+	{
+		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), targetId).FirstOrDefaultAsync()
+		           ?? throw CoreException
+			           .MissingData<Profile>($"Failed to update local profile {selfId} because it could not be found", selfId);
+		var relation = self.FollowingCollection
+			.FirstOrDefault(p => p.Follows.FediId.OriginalString == targetId.OriginalString);
+
+		if (relation is null) return new FollowerRelation(self, Profile.CreateEmpty(targetId), FollowState.None);
+		return await Unfollow(self, relation);
+	}
+
+	public async Task<FollowerRelation?> Unfollow(Uuid7 selfId, Uuid7 targetId)
+	{
+		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), targetId).FirstOrDefaultAsync()
+		           ?? throw CoreException
+			           .MissingData<Profile>($"Failed to update local profile {selfId} because it could not be found", selfId);
+		var relation = self.FollowingCollection
+			.FirstOrDefault(p => p.Follows.GetId() == targetId);
+
+		if (relation is null) return new FollowerRelation(self, Profile.CreateEmpty(targetId), FollowState.None);
+		return await Unfollow(self, relation);
 	}
 
 	public Task ReportProfile(Guid selfId, Uri profileId)
@@ -356,20 +367,18 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		throw new NotImplementedException();
 	}
 
-	public async Task<IAsyncEnumerable<Profile>> LookupFollowing(Uuid7 profileId, DateTimeOffset? followedBefore, int limit)
+	public async Task<IQueryable<Profile>> LookupFollowing(Uuid7 profileId, DateTimeOffset? followedBefore, int limit)
 	{
-		var profile = await _profiles.LookupProfile(profileId);
-		if (profile is null) throw CoreException.MissingData<Profile>("Profile is not available", profileId);
-
+		var profile = await _profiles.LookupProfile(profileId)
+		              ?? throw CoreException.MissingData<Profile>("Profile is not available", profileId);
 		return _profiles.QueryFrom(profile, Math.Min(1000, limit), query => query.FollowingCollection)
 			.Include(relation => relation.Follows)
 			.OrderByDescending(relation => relation.Date)
 			.Where(relation => relation.Date < followedBefore)
-			.Select(relation => relation.Follows)
-			.AsAsyncEnumerable();
+			.Select(relation => relation.Follows);
 	}
 
-	public Task< IAsyncEnumerable<Profile>> LookupFollowers(Uuid7 profileId, DateTimeOffset? followedBefore, int limit)
+	public Task<IQueryable<Profile>> LookupFollowers(Uuid7 profileId, DateTimeOffset? followedBefore, int limit)
 	{
 		throw new NotImplementedException();
 	}
