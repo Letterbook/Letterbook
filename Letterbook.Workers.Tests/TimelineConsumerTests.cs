@@ -9,6 +9,7 @@ using Letterbook.Workers.Contracts;
 using Letterbook.Workers.Tests.Fakes;
 using MassTransit;
 using MassTransit.Testing;
+using Medo;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -150,7 +151,7 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 	public async Task CanConsumeShared()
 	{
 		var sharedBy = new FakeProfile().Generate();
-		ProfileServiceAuthMock.Setup(m => m.LookupProfile(sharedBy.GetId())).ReturnsAsync(sharedBy);
+		ProfileServiceAuthMock.Setup(m => m.LookupProfile(sharedBy.GetId(), It.IsAny<Uuid7?>())).ReturnsAsync(sharedBy);
 		_post.PublishedDate = DateTimeOffset.UtcNow;
 
 		_output.WriteLine("sharedBy: {0}", sharedBy.GetId());
@@ -176,7 +177,7 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 	public async Task CanConsumeBadShared()
 	{
 		var sharedBy = new FakeProfile().Generate();
-		ProfileServiceAuthMock.Setup(m => m.LookupProfile(sharedBy.GetId())).ReturnsAsync(sharedBy);
+		ProfileServiceAuthMock.Setup(m => m.LookupProfile(sharedBy.GetId(), It.IsAny<Uuid7?>())).ReturnsAsync(sharedBy);
 		_post.PublishedDate = DateTimeOffset.UtcNow;
 
 		_output.WriteLine("sharedBy: {0}", sharedBy.GetId());

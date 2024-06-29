@@ -110,6 +110,17 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 			.AsSplitQuery();
 	}
 
+	public IQueryable<Models.Profile> WithRelation(IQueryable<Models.Profile> query, Uuid7 relationId)
+	{
+		return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId.ToGuid()))
+				.ThenInclude(relation => relation.Follows)
+			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId.ToGuid()))
+				.ThenInclude(relation => relation.Follower)
+			.Include(profile => profile.Keys)
+			.Include(profile => profile.Audiences)
+			.AsSplitQuery();
+	}
+
 	public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)
 	{
 		return WithRelation(_context.Profiles.Where(profile => profile.FediId == id), relationId)

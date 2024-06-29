@@ -43,6 +43,7 @@ public interface IAccountProfileAdapter : IDisposable
 	public IQueryable<Profile> SingleProfile(Uri fediId);
 	public IQueryable<Profile> WithAudience(IQueryable<Profile> query);
 	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uri relationId);
+	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uuid7 relationId);
 
 	// Lookup Profile including relations to another profile
 	[Obsolete("Use IQueryable methods", false)]

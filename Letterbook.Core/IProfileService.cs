@@ -20,8 +20,18 @@ public interface IAuthzProfileService
 	Task<UpdateResponse<Profile>> RemoveCustomField(Guid localId, int index);
 	Task<UpdateResponse<Profile>> UpdateCustomField(Guid localId, int index, string key, string value);
 	Task<UpdateResponse<Profile>> UpdateProfile(Profile profile);
-	Task<Profile?> LookupProfile(Uuid7 localId);
-	Task<Profile?> LookupProfile(Uri id);
+
+	/// <summary>
+	/// Lookup a profile, optionally including relationship information to another profile
+	/// </summary>
+	/// <remarks>
+	/// Should require `Follow` and `ApproveFollower` on the selfProfile, in order to check existing relationships
+	/// </remarks>
+	/// <param name="profileId">The profile to lookup</param>
+	/// <param name="relatedProfile">The profile to check for a relationship</param>
+	/// <returns></returns>
+	Task<Profile?> LookupProfile(Uuid7 profileId, Uuid7? relatedProfile = null);
+	Task<Profile?> LookupProfile(Uri fediId, Uuid7? relatedProfile = null);
 	Task<IEnumerable<Profile>> FindProfiles(string handle);
 	Task<FollowState> Follow(Guid selfId, Uri targetId);
 	Task<FollowState> Follow(Guid selfId, Guid localId);

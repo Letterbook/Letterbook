@@ -7,6 +7,7 @@ using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Medo;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -185,14 +186,20 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		throw new NotImplementedException();
 	}
 
-	public async Task<Profile?> LookupProfile(Uuid7 localId)
+	public async Task<Profile?> LookupProfile(Uuid7 profileId, Uuid7? relatedProfile)
 	{
-		return await _profiles.LookupProfile(localId);
+		var query = _profiles.SingleProfile(profileId);
+		query = relatedProfile.HasValue ? _profiles.WithRelation(query, relatedProfile.Value) : query;
+
+		return await query.FirstOrDefaultAsync();
 	}
 
-	public async Task<Profile?> LookupProfile(Uri id)
+	public async Task<Profile?> LookupProfile(Uri fediId, Uuid7? relatedProfile)
 	{
-		return await _profiles.LookupProfile(id);
+		var query = _profiles.SingleProfile(fediId);
+		query = relatedProfile.HasValue ? _profiles.WithRelation(query, relatedProfile.Value) : query;
+
+		return await query.FirstOrDefaultAsync();
 	}
 
 	public async Task<IEnumerable<Profile>> FindProfiles(string handle)
