@@ -429,6 +429,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	private async Task<FollowerRelation> AcceptFollower(Profile self, FollowerRelation relation)
 	{
+		if (relation.State != FollowState.Pending) return relation;
+
 		relation.State = FollowState.Accepted;
 		if (relation.Follower.HasLocalAuthority(_coreConfig))
 			relation.Follower.Audiences.Add(Audience.Followers(self));
@@ -525,8 +527,5 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await _client.Fetch<TResult>(id, key);
 	}
 
-	public IAuthzProfileService As(IEnumerable<Claim> claims)
-	{
-		return this;
-	}
+	public IAuthzProfileService As(IEnumerable<Claim> claims) => this;
 }

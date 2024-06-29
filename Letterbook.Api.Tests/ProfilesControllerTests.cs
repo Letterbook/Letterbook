@@ -150,6 +150,24 @@ public class ProfilesControllerTests : WithMockContext
 		Assert.InRange(await actual.CountAsync(), 5, 100);
 	}
 
+	[Fact(DisplayName = "Should query followers")]
+	public async Task CanQueryFollowers()
+	{
+		foreach (var follower in _fakeProfile.Generate(5))
+		{
+			_profile.AddFollower(follower, FollowState.Accepted);
+		}
+		var queryable = _profile.FollowersCollection.Select(r => r.Follower).BuildMock();
+		ProfileServiceAuthMock.Setup(m => m.LookupFollowers(_profile.GetId(), It.IsAny<DateTimeOffset>(), It.IsAny<int>()))
+			.ReturnsAsync(queryable);
+
+		var result = await _controller.GetFollowers(_profile.GetId(), null);
+
+		var response = Assert.IsType<OkObjectResult>(result);
+		var actual = Assert.IsAssignableFrom<IAsyncEnumerable<MiniProfileDto>>(response.Value);
+		Assert.InRange(await actual.CountAsync(), 5, 100);
+	}
+
 	[Fact(DisplayName = "Should follow a target profile")]
 	public async Task CanFollow()
 	{
@@ -163,6 +181,34 @@ public class ProfilesControllerTests : WithMockContext
 		var response = Assert.IsType<OkObjectResult>(result);
 		var actual = Assert.IsAssignableFrom<Models.FollowerRelation>(response.Value);
 		Assert.Equal(FollowState.Accepted, actual.State);
+	}
+
+	[Fact(DisplayName = "Should accept a follow request")]
+	public async Task CanAcceptFollower()
+	{
+		var target = _fakeProfile.Generate();
+		ProfileServiceAuthMock.Setup(m => m.AcceptFollower(_profile.GetId(), target.GetId()))
+			.ReturnsAsync(new Models.FollowerRelation(_profile, target, FollowState.Accepted));
+
+		var result = await _controller.AcceptFollower(_profile.GetId(), target.GetId());
+
+		var response = Assert.IsType<OkObjectResult>(result);
+		var actual = Assert.IsAssignableFrom<Models.FollowerRelation>(response.Value);
+		Assert.Equal(FollowState.Accepted, actual.State);
+	}
+
+	[Fact(DisplayName = "Should remove a follower")]
+	public async Task CanRemoveFollower()
+	{
+		var target = _fakeProfile.Generate();
+		ProfileServiceAuthMock.Setup(m => m.RemoveFollower(_profile.GetId(), target.GetId()))
+			.ReturnsAsync(new Models.FollowerRelation(_profile, target, FollowState.None));
+
+		var result = await _controller.RemoveFollower(_profile.GetId(), target.GetId());
+
+		var response = Assert.IsType<OkObjectResult>(result);
+		var actual = Assert.IsAssignableFrom<Models.FollowerRelation>(response.Value);
+		Assert.Equal(FollowState.None, actual.State);
 	}
 
 	[Fact(DisplayName = "Should unfollow a target profile")]

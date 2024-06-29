@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Cryptography;
 using Bogus;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
@@ -449,6 +450,21 @@ public class ProfileServiceTests : WithMocks
 			: await _service.AcceptFollower(_profile.GetId(), follower.FediId);
 
 		Assert.Equal(FollowState.Accepted, actual.State);
+		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
+	}
+
+	[Fact(DisplayName = "Should not add a follower that did not request to follow")]
+	public async Task NoForceFollower()
+	{
+		var follower = new FakeProfile().Generate();
+		_profile.AddFollower(follower, FollowState.None);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+			.Returns(queryable);
+
+		var actual = await _service.AcceptFollower(_profile.GetId(), follower.GetId());
+
+		Assert.Equal(FollowState.None, actual.State);
 		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
 	}
 }

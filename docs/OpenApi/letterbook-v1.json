@@ -1110,6 +1110,352 @@
         }
       }
     },
+    "/lb/v1/profiles/{profileId}/following": {
+      "get": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Get followed profiles",
+        "description": "Get the paged list of profiles followed by the given profile",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "followedBefore",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MiniProfileDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MiniProfileDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MiniProfileDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/profiles/{profileId}/following/{followProfileId}": {
+      "put": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Follow request",
+        "description": "Request to follow the followProfileId",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "followProfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Unfollow",
+        "description": "Stop following the followProfileId",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "followProfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/profiles/{profileId}/follower": {
+      "get": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Get followers",
+        "description": "Get the paged list of profiles that follow the given profile",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "followedBefore",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MiniProfileDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MiniProfileDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MiniProfileDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/profiles/{profileId}/follower/{followerProfileId}": {
+      "put": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Accept follow request",
+        "description": "Accept a follow request from the followerProfileId",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "followerProfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Remove Follower",
+        "description": "Remove the followProfileId as a follower, or reject their follow request",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "followerProfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/lb/v1/timelines/{profileId}": {
       "get": {
         "tags": [
@@ -1391,6 +1737,39 @@
           "targetId": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FollowState": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "FollowerRelationDto": {
+        "type": "object",
+        "properties": {
+          "follower": {
+            "pattern": "[0-9a-z]{25}",
+            "type": "string",
+            "example": "HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "follows": {
+            "pattern": "[0-9a-z]{25}",
+            "type": "string",
+            "example": "HQqgQL5NFV4bPxZaTXhCPW"
+          },
+          "state": {
+            "$ref": "#/components/schemas/FollowState"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
