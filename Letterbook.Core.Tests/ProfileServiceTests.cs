@@ -254,7 +254,7 @@ public class ProfileServiceTests : WithMocks
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, (Uuid7)target.Id!);
 
-		Assert.Equal(FollowState.Accepted, actual);
+		Assert.Equal(FollowState.Accepted, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
 	}
 
@@ -271,7 +271,7 @@ public class ProfileServiceTests : WithMocks
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
-		Assert.Equal(FollowState.Accepted, actual);
+		Assert.Equal(FollowState.Accepted, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
 	}
 
@@ -296,7 +296,7 @@ public class ProfileServiceTests : WithMocks
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
-		Assert.Equal(FollowState.Accepted, actual);
+		Assert.Equal(FollowState.Accepted, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
 	}
 
@@ -321,7 +321,7 @@ public class ProfileServiceTests : WithMocks
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
-		Assert.Equal(FollowState.Pending, actual);
+		Assert.Equal(FollowState.Pending, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
 	}
 
@@ -346,7 +346,7 @@ public class ProfileServiceTests : WithMocks
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
-		Assert.Equal(FollowState.Rejected, actual);
+		Assert.Equal(FollowState.Rejected, actual.State);
 		Assert.Empty(_profile.FollowingCollection);
 		Assert.Empty(target.FollowersCollection);
 	}

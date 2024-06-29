@@ -33,14 +33,35 @@ public interface IAuthzProfileService
 	Task<Profile?> LookupProfile(Uuid7 profileId, Uuid7? relatedProfile = null);
 	Task<Profile?> LookupProfile(Uri fediId, Uuid7? relatedProfile = null);
 	Task<IEnumerable<Profile>> FindProfiles(string handle);
-	Task<FollowState> Follow(Guid selfId, Uri targetId);
-	Task<FollowState> Follow(Guid selfId, Guid localId);
+	Task<FollowerRelation> Follow(Guid selfId, Uri targetId);
+	Task<FollowerRelation> Follow(Guid selfId, Guid localId);
 	Task<FollowerRelation> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId);
 	Task<FollowerRelation> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId);
 	Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response);
 	Task RemoveFollower(Guid selfId, Uri followerId);
 	Task Unfollow(Guid selfId, Uri followerId);
 	Task ReportProfile(Guid selfId, Uri profileId);
+
+	/// <summary>
+	/// Lookup the list of profiles that the specified profile is following
+	/// </summary>
+	/// <remarks>Results are ordered reverse chronologically, by the date the relation began (most recent first)</remarks>
+	/// <param name="profileId"></param>
+	/// <param name="followedBefore">Get relations that began before this date</param>
+	/// <param name="limit"></param>
+	/// <returns></returns>
+	Task<IAsyncEnumerable<Profile>> LookupFollowing(Uuid7 profileId, DateTimeOffset? followedBefore, int limit);
+
+	/// <summary>
+	/// Lookup the list of profiles that follow the specified profile
+	/// </summary>
+	/// <remarks>Results are ordered reverse chronologically, by the date the relation began (most recent first)</remarks>
+	/// <param name="profileId"></param>
+	/// <param name="followedBefore">Get relations that began before this date</param>
+	/// <param name="limit"></param>
+	/// <returns></returns>
+	Task<IAsyncEnumerable<Profile>> LookupFollowers(Uuid7 profileId, DateTimeOffset? followedBefore, int limit);
+
 
 	// - [ ] receive report
 	// - [ ] block

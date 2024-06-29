@@ -215,7 +215,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return profiles;
 	}
 
-	private async Task<FollowState> Follow(Profile self, Profile target, bool subscribeOnly)
+	private async Task<FollowerRelation> Follow(Profile self, Profile target, bool subscribeOnly)
 	{
 		if (target.Authority == _coreConfig.BaseUri().Authority)
 		{
@@ -226,7 +226,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 			self.Audiences.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
 			self.Audiences.Add(Audience.Boosts(target));
 			await _profiles.Commit();
-			return relation.State;
+			return relation;
 		}
 
 		// TODO(moderation): Check for blocks
@@ -240,22 +240,22 @@ public class ProfileService : IProfileService, IAuthzProfileService
 				self.Audiences.Add(Audience.Followers(target));
 				self.Audiences.Add(Audience.Boosts(target));
 				await _profiles.Commit();
-				return followState.Data;
+				return new FollowerRelation(self, target, followState.Data);
 			case FollowState.None:
 			case FollowState.Rejected:
 			default:
-				return followState.Data;
+				return new FollowerRelation(self, target, followState.Data);
 		}
 	}
 
-	public async Task<FollowState> Follow(Guid selfId, Uri targetId)
+	public async Task<FollowerRelation> Follow(Guid selfId, Uri targetId)
 	{
 		var self = await RequireProfile(selfId, targetId);
 		var target = await ResolveProfile(targetId, self);
 		return await Follow(self, target, false);
 	}
 
-	public async Task<FollowState> Follow(Guid selfId, Guid targetId)
+	public async Task<FollowerRelation> Follow(Guid selfId, Guid targetId)
 	{
 		var target = await RequireProfile(targetId);
 		var self = await RequireProfile(selfId, target.FediId);
@@ -352,6 +352,24 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	}
 
 	public Task ReportProfile(Guid selfId, Uri profileId)
+	{
+		throw new NotImplementedException();
+	}
+
+	public async Task<IAsyncEnumerable<Profile>> LookupFollowing(Uuid7 profileId, DateTimeOffset? followedBefore, int limit)
+	{
+		var profile = await _profiles.LookupProfile(profileId);
+		if (profile is null) throw CoreException.MissingData<Profile>("Profile is not available", profileId);
+
+		return _profiles.QueryFrom(profile, Math.Min(1000, limit), query => query.FollowingCollection)
+			.Include(relation => relation.Follows)
+			.OrderByDescending(relation => relation.Date)
+			.Where(relation => relation.Date < followedBefore)
+			.Select(relation => relation.Follows)
+			.AsAsyncEnumerable();
+	}
+
+	public Task< IAsyncEnumerable<Profile>> LookupFollowers(Uuid7 profileId, DateTimeOffset? followedBefore, int limit)
 	{
 		throw new NotImplementedException();
 	}

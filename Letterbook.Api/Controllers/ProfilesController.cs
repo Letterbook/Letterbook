@@ -125,4 +125,71 @@ public class ProfilesController : ControllerBase
 			? Ok(_mapper.Map<FullProfileDto>(result.Updated))
 			: NotFound();
 	}
+
+	[HttpGet("{profileId}/follow")]
+	[ProducesResponseType<IEnumerable<MiniProfileDto>>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Get followed profiles", "Get the paged list of profiles followed by the given profile")]
+	public async Task<IActionResult> GetFollowing(Uuid7 profileId, DateTimeOffset? followedBefore, int limit = 100)
+	{
+		followedBefore ??= DateTimeOffset.UtcNow;
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		var list = await _profiles.As(User.Claims).LookupFollowing(profileId, followedBefore, limit);
+		return Ok(list.Select(_mapper.Map<MiniProfileDto>));
+	}
+
+
+	[HttpPut("{profileId}/follow/{followProfileId}")]
+	[ProducesResponseType<FollowerRelationDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Follow request", "Request to follow the followProfileId")]
+	public async Task<IActionResult> Follow(Uuid7 profileId, Uuid7 followProfileId)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		var result = await _profiles.As(User.Claims).Follow(profileId, followProfileId);
+		return Ok(result);
+	}
+
+	[HttpDelete("{profileId}/follow/{followProfileId}")]
+	[ProducesResponseType<FollowerRelationDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Unfollow", "Stop following the followProfileId")]
+	public async Task<IActionResult> Unfollow(Uuid7 profileId, Uuid7 followProfileId)
+	{
+		await Task.CompletedTask;
+		throw new NotImplementedException();
+	}
+
+	[HttpGet("{profileId}/follower")]
+	[ProducesResponseType<IEnumerable<MiniProfileDto>>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Get followers", "Get the paged list of profiles that follow the given profile")]
+	public async Task<IActionResult> GetFollowers(Uuid7 profileId, DateTimeOffset? followedBefore, int limit = 100)
+	{
+		followedBefore ??= DateTimeOffset.UtcNow;
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		var list = await _profiles.As(User.Claims).LookupFollowers(profileId, followedBefore, limit);
+		return Ok(list.Select(_mapper.Map<MiniProfileDto>));
+	}
+
+	[HttpPut("{profileId}/follower/{followerProfileId}")]
+	[ProducesResponseType<FollowerRelationDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Accept follow request", "Accept a follow request from the followerProfileId")]
+	public async Task<IActionResult> AcceptFollower(Uuid7 profileId, Uuid7 followerProfileId)
+	{
+		await Task.CompletedTask;
+		throw new NotImplementedException();
+	}
+
+
+	[HttpDelete("{profileId}/follower/{followerProfileId}")]
+	[ProducesResponseType<FollowerRelationDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Remove Follower", "Remove the followProfileId as a follower, or reject their follow request")]
+	public async Task<IActionResult> RemoveFollower(Uuid7 profileId, Uuid7 followerProfileId)
+	{
+		await Task.CompletedTask;
+		throw new NotImplementedException();
+	}
 }
