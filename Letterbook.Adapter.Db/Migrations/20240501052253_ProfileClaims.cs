@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -8,6 +9,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Letterbook.Adapter.Db.Migrations
 {
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
+
     public partial class ProfileClaims : Migration
     {
         /// <inheritdoc />
