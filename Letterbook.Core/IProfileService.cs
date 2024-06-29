@@ -39,14 +39,37 @@ public interface IAuthzProfileService
 	/// <param name="relatedProfile">The profile to check for a relationship</param>
 	/// <returns></returns>
 	Task<Profile?> LookupProfile(Uuid7 profileId, Uuid7? relatedProfile = null);
+
+	/// <see cref="LookupProfile(Medo.Uuid7,System.Nullable{Medo.Uuid7})"/>
 	Task<Profile?> LookupProfile(Uri fediId, Uuid7? relatedProfile = null);
 	Task<IEnumerable<Profile>> FindProfiles(string handle);
+
+	/// <see cref="Follow(Medo.Uuid7,Medo.Uuid7)"/>
 	Task<FollowerRelation> Follow(Uuid7 selfId, Uri targetId);
-	Task<FollowerRelation> Follow(Uuid7 selfId, Uuid7 localId);
+
+	/// <summary>
+	/// Request to follow the target profile
+	/// </summary>
+	/// <remarks>Returned relationship state is likely to be transient for target profiles hosted on remote servers</remarks>
+	/// <param name="selfId"></param>
+	/// <param name="targetId"></param>
+	/// <returns></returns>
+	Task<FollowerRelation> Follow(Uuid7 selfId, Uuid7 targetId);
 	Task<FollowerRelation> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId);
 	Task<FollowerRelation> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId);
 	Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response);
-	Task RemoveFollower(Guid selfId, Uri followerId);
+
+	/// <summary>
+	/// Remove the target profile as a follower
+	/// </summary>
+	/// <remarks>This will also reject a pending follow request from the follower</remarks>
+	/// <param name="selfId"></param>
+	/// <param name="followerId"></param>
+	/// <returns></returns>
+	Task<FollowerRelation> RemoveFollower(Uuid7 selfId, Uri followerId);
+
+	/// <see cref="RemoveFollower(Medo.Uuid7,System.Uri)"/>
+	Task<FollowerRelation> RemoveFollower(Uuid7 selfId, Uuid7 followerId);
 
 	/// <summary>
 	/// Stop following the target
@@ -55,8 +78,9 @@ public interface IAuthzProfileService
 	/// <param name="targetId"></param>
 	/// <returns></returns>
 	Task<FollowerRelation> Unfollow(Uuid7 selfId, Uri targetId);
+
+	/// <see cref="Unfollow(Medo.Uuid7,System.Uri)"/>
 	Task<FollowerRelation?> Unfollow(Uuid7 selfId, Uuid7 targetId);
-	Task ReportProfile(Guid selfId, Uri profileId);
 
 	/// <summary>
 	/// Lookup the list of profiles that the specified profile is following
@@ -77,6 +101,19 @@ public interface IAuthzProfileService
 	/// <param name="limit"></param>
 	/// <returns></returns>
 	Task<IQueryable<Profile>> LookupFollowers(Uuid7 profileId, DateTimeOffset? followedBefore, int limit);
+
+	/// <summary>
+	/// Approve a follow request from the target profile
+	/// </summary>
+	/// <param name="profileId"></param>
+	/// <param name="followerId"></param>
+	/// <returns></returns>
+	Task<FollowerRelation> AcceptFollower(Uuid7 profileId, Uuid7 followerId);
+
+	/// <see cref="AcceptFollower(Medo.Uuid7,Medo.Uuid7)"/>
+	Task<FollowerRelation> AcceptFollower(Uuid7 profileId, Uri followerId);
+
+	Task ReportProfile(Guid selfId, Uri profileId);
 
 	// - [ ] receive report
 	// - [ ] block

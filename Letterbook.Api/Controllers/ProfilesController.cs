@@ -182,8 +182,11 @@ public class ProfilesController : ControllerBase
 	[SwaggerOperation("Accept follow request", "Accept a follow request from the followerProfileId")]
 	public async Task<IActionResult> AcceptFollower(Uuid7 profileId, Uuid7 followerProfileId)
 	{
-		await Task.CompletedTask;
-		throw new NotImplementedException();
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		var result = await _profiles.As(User.Claims).AcceptFollower(profileId, followerProfileId);
+		return Ok(result);
 	}
 
 	[HttpDelete("{profileId}/follower/{followerProfileId}")]
@@ -191,7 +194,10 @@ public class ProfilesController : ControllerBase
 	[SwaggerOperation("Remove Follower", "Remove the followProfileId as a follower, or reject their follow request")]
 	public async Task<IActionResult> RemoveFollower(Uuid7 profileId, Uuid7 followerProfileId)
 	{
-		await Task.CompletedTask;
-		throw new NotImplementedException();
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		var result = await _profiles.As(User.Claims).RemoveFollower(profileId, followerProfileId);
+		return Ok(result);
 	}
 }

@@ -158,6 +158,13 @@ public class CoreException : Exception
 		[CallerLineNumber] int line = -1) => MissingData(message, typeof(T), id, innerEx, name, path, line);
 	// ReSharper restore ExplicitCallerInfoArgument
 
+	public static CoreException MissingData<T>(object id, Exception? innerEx = null,
+		// ReSharper disable ExplicitCallerInfoArgument
+		[CallerMemberName] string name = "",
+		[CallerFilePath] string path = "",
+		[CallerLineNumber] int line = -1) => MissingData($"{typeof(T).Name} not found using {id}", typeof(T), id, innerEx, name, path, line);
+	// ReSharper restore ExplicitCallerInfoArgument
+
 	public static CoreException InternalError(string message, Exception? innerEx = null,
 		[CallerMemberName] string name = "",
 		[CallerFilePath] string path = "",

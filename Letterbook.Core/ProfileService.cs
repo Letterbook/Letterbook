@@ -316,23 +316,52 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		}
 	}
 
-	public async Task RemoveFollower(Guid selfId, Uri followerId)
+	private async Task<FollowerRelation> RemoveFollower(Profile self, FollowerRelation relation)
 	{
-		var self = await _profiles.LookupProfileWithRelation(selfId, followerId)
-				   ?? throw CoreException.MissingData(
-					   $"Failed to update local profile {selfId} because it could not be found", typeof(Profile),
-					   selfId);
-		var follower = self.FollowersCollection
-			.FirstOrDefault(p => p.Follower.FediId.OriginalString == followerId.OriginalString)?.Follower;
-
-		if (follower is null) return;
-		self.RemoveFollower(follower);
+		self.RemoveFollower(relation.Follower);
+		if (relation.Follower.HasLocalAuthority(_coreConfig))
+			relation.Follower.LeaveAudience(self);
+		// TODO: federate this
 		await _profiles.Commit();
+		relation.State = FollowState.None;
+		return relation;
+	}
+
+	public async Task<FollowerRelation> RemoveFollower(Uuid7 selfId, Uri followerId)
+	{
+		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), followerId).FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(selfId);
+		var relation = self.FollowersCollection
+			.FirstOrDefault(p => p.Follower.FediId.OriginalString == followerId.OriginalString);
+
+		if (relation is null) return new FollowerRelation(Profile.CreateEmpty(followerId), self, FollowState.None);
+		return await RemoveFollower(self, relation);
+	}
+
+	public async Task<FollowerRelation> RemoveFollower(Uuid7 selfId, Uuid7 followerId)
+	{
+		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), followerId).FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(selfId);
+		var relation = self.FollowersCollection
+			.FirstOrDefault(p => p.Follower.GetId() == followerId);
+
+		if (relation is null) return new FollowerRelation(Profile.CreateEmpty(followerId), self, FollowState.None);
+		return await RemoveFollower(self, relation);
 	}
 
 	private async Task<FollowerRelation> Unfollow(Profile self, FollowerRelation relation)
 	{
 		self.Unfollow(relation.Follows);
+		self.Audiences.Remove(Audience.Followers(relation.Follows));
+		self.Audiences.Remove(Audience.Subscribers(relation.Follows));
+		if (self.Audiences.Count > 0)
+		{
+			foreach (var each in self.Audiences.Where(audience => audience.Source == relation.Follows))
+			{
+				self.Audiences.Remove(each);
+			}
+		}
+		// TODO: federate this
 		await _profiles.Commit();
 		relation.State = FollowState.None;
 		return relation;
@@ -340,9 +369,11 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> Unfollow(Uuid7 selfId, Uri targetId)
 	{
-		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), targetId).FirstOrDefaultAsync()
-		           ?? throw CoreException
-			           .MissingData<Profile>($"Failed to update local profile {selfId} because it could not be found", selfId);
+		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), targetId)
+			           .Include(profile => profile.Audiences.Where(
+				           audience => audience.Source != null && audience.Source.FediId.OriginalString == targetId.OriginalString))
+			           .FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(selfId);
 		var relation = self.FollowingCollection
 			.FirstOrDefault(p => p.Follows.FediId.OriginalString == targetId.OriginalString);
 
@@ -352,9 +383,11 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation?> Unfollow(Uuid7 selfId, Uuid7 targetId)
 	{
-		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), targetId).FirstOrDefaultAsync()
-		           ?? throw CoreException
-			           .MissingData<Profile>($"Failed to update local profile {selfId} because it could not be found", selfId);
+		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), targetId)
+			           .Include(profile => profile.Audiences.Where(
+				           audience => audience.Source != null && audience.Source.Id == Uuid7.ToGuid(targetId)))
+			           .FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(selfId);
 		var relation = self.FollowingCollection
 			.FirstOrDefault(p => p.Follows.GetId() == targetId);
 
@@ -367,10 +400,15 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		throw new NotImplementedException();
 	}
 
+	public Task ReportProfile(Guid selfId, Guid localId)
+	{
+		throw new NotImplementedException();
+	}
+
 	public async Task<IQueryable<Profile>> LookupFollowing(Uuid7 profileId, DateTimeOffset? followedBefore, int limit)
 	{
 		var profile = await _profiles.LookupProfile(profileId)
-		              ?? throw CoreException.MissingData<Profile>("Profile is not available", profileId);
+		              ?? throw CoreException.MissingData<Profile>(profileId);
 		return _profiles.QueryFrom(profile, Math.Min(1000, limit), query => query.FollowingCollection)
 			.Include(relation => relation.Follows)
 			.OrderByDescending(relation => relation.Date)
@@ -378,14 +416,47 @@ public class ProfileService : IProfileService, IAuthzProfileService
 			.Select(relation => relation.Follows);
 	}
 
-	public Task<IQueryable<Profile>> LookupFollowers(Uuid7 profileId, DateTimeOffset? followedBefore, int limit)
+	public async Task<IQueryable<Profile>> LookupFollowers(Uuid7 profileId, DateTimeOffset? followedBefore, int limit)
 	{
-		throw new NotImplementedException();
+		var profile = await _profiles.LookupProfile(profileId)
+		              ?? throw CoreException.MissingData<Profile>(profileId);
+		return _profiles.QueryFrom(profile, Math.Min(1000, limit), query => query.FollowersCollection)
+			.Include(relation => relation.Follower)
+			.OrderByDescending(relation => relation.Date)
+			.Where(relation => relation.Date < followedBefore)
+			.Select(relation => relation.Follower);
 	}
 
-	public Task ReportProfile(Guid selfId, Guid localId)
+	private async Task<FollowerRelation> AcceptFollower(Profile self, FollowerRelation relation)
 	{
-		throw new NotImplementedException();
+		relation.State = FollowState.Accepted;
+		if (relation.Follower.HasLocalAuthority(_coreConfig))
+			relation.Follower.Audiences.Add(Audience.Followers(self));
+		// TODO: federate this
+		await _profiles.Commit();
+		return relation;
+	}
+
+	public async Task<FollowerRelation> AcceptFollower(Uuid7 profileId, Uri followerId)
+	{
+		var self = await _profiles.WithRelation(_profiles.SingleProfile(profileId), followerId).FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(profileId);
+		var relation = self.FollowersCollection
+			.FirstOrDefault(p => p.Follower.FediId.OriginalString == followerId.OriginalString);
+
+		if (relation is null) return new FollowerRelation(Profile.CreateEmpty(followerId), self, FollowState.None);
+		return await AcceptFollower(self, relation);
+	}
+
+	public async Task<FollowerRelation> AcceptFollower(Uuid7 profileId, Uuid7 followerId)
+	{
+		var self = await _profiles.WithRelation(_profiles.SingleProfile(profileId), followerId).FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(profileId);
+		var relation = self.FollowersCollection
+			.FirstOrDefault(p => p.Follower.GetId() == followerId);
+
+		if (relation is null) return new FollowerRelation(Profile.CreateEmpty(followerId), self, FollowState.None);
+		return await AcceptFollower(self, relation);
 	}
 
 	[SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
