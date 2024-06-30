@@ -40,12 +40,14 @@ public sealed class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITe
 	{
 		_host = host;
 		_scope = host.CreateScope();
-		_client = _host.Options == null
-			? _host.CreateClient()
-			: _host.CreateClient(new WebApplicationFactoryClientOptions()
-			{
-				BaseAddress = _host.Options.BaseUri()
-			});
+		var clientOptions = new WebApplicationFactoryClientOptions
+		{
+			BaseAddress = _host.Options?.BaseUri() ?? new Uri("localhost:5127"),
+			AllowAutoRedirect = false
+		};
+		_client = _host.CreateClient(clientOptions);
+		_client.DefaultRequestHeaders.Authorization = new("Test", $"{_host.Accounts[0].Id}");
+
 		_profiles = _host.Profiles;
 		_accounts = _host.Accounts;
 		_posts = _host.Posts;
@@ -57,6 +59,7 @@ public sealed class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITe
 			Converters = { new Uuid7JsonConverter() },
 			ReferenceHandler = ReferenceHandler.IgnoreCycles
 		};
+
 	}
 
 	private bool CustomFieldComparer(CustomField? l, CustomField? r)
@@ -111,7 +114,6 @@ public sealed class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITe
 		Assert.Equal(expected, actual.CustomFields?[0], CustomFieldComparer);
 	}
 
-
 	[Fact(DisplayName = "Should remove a custom field from a profile")]
 	public async Task CanRemoveField()
 	{
@@ -154,5 +156,21 @@ public sealed class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITe
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 		var actual = Assert.IsType<FullProfileDto>(await response.Content.ReadFromJsonAsync<FullProfileDto>(_json));
 		Assert.Equal(dto, actual);
+	}
+
+	[Fact(DisplayName = "Should query followers")]
+	public async Task CanGetFollowers()
+	{
+		var P1 = _profiles[1];
+		var P5 = _profiles[5];
+		var path = $"/lb/v1/profiles/{P5.GetId25()}/follower";
+		var response = await _client.GetAsync(path);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert.IsAssignableFrom<IEnumerable<MiniProfileDto>>(
+			await response.Content.ReadFromJsonAsync<IEnumerable<MiniProfileDto>>(_json));
+
+		Assert.Contains(actual, dto => dto.Id == P1.GetId());
 	}
 }

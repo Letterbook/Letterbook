@@ -59,6 +59,7 @@ public class Program
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
 			.AddDefaultUI();
+		builder.Services.AddAuthentication("Test");
 		builder.Services.AddRazorPages()
 			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
 		builder.Services.AddAuthorization(options =>

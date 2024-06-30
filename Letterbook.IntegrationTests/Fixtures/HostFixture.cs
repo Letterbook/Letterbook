@@ -8,6 +8,8 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Letterbook.Core.Workers;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -153,8 +155,19 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 				var seedDescriptor = services.SingleOrDefault(d => d.ImplementationType == typeof(WorkerScope<SeedAdminWorker>));
 
 				if (seedDescriptor != null) services.Remove(seedDescriptor);
-				// services.AddSingleton<RelationalContext>();
-				// services.AddSingleton<FeedsContext>();
+
+				services.AddAuthentication("Test")
+					.AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
+				services.AddAuthorization(options =>
+				{
+					options.DefaultPolicy = new AuthorizationPolicyBuilder("Test")
+						.RequireAuthenticatedUser()
+						.Build();
+				});
+				services.ConfigureApplicationCookie(options =>
+				{
+					options.ForwardAuthenticate = "Test";
+				});
 			});
 
 		base.ConfigureWebHost(builder);
@@ -173,6 +186,8 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		Profiles[0].Follow(Profiles[4], FollowState.Accepted);
 		Profiles[0].Follow(Profiles[5], FollowState.Accepted);
 		Profiles[0].AddFollower(Profiles[4], FollowState.Accepted);
+		// P1 has requested to follow P5
+		Profiles[1].FollowingCollection.Add(new FollowerRelation(Profiles[1], Profiles[5], FollowState.Pending));
 
 		// Local profiles
 		// P0 creates posts 0-2

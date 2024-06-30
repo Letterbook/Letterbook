@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 namespace Letterbook.IntegrationTests;
 
 [Trait("Infra", "Postgres")]
-[Trait("Driver", "Api")]
+[Trait("Driver", "Adapter")]
 public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<AccountProfileAdapterTests>>, ITestSeed, IDisposable
 {
 	public void Dispose()

@@ -9,47 +9,6 @@
     "version": "v1"
   },
   "paths": {
-    "/{selfId}/follow": {
-      "post": {
-        "tags": [
-          "Debug"
-        ],
-        "parameters": [
-          {
-            "name": "selfId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FollowRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FollowRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FollowRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/lb/v1/posts/{profileId}/post": {
       "post": {
         "tags": [
@@ -1722,19 +1681,6 @@
             "nullable": true
           },
           "value": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "FollowRequest": {
-        "required": [
-          "targetId"
-        ],
-        "type": "object",
-        "properties": {
-          "targetId": {
             "type": "string",
             "nullable": true
           }
