@@ -388,7 +388,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 				           audience => audience.Source != null && audience.Source.Id == Uuid7.ToGuid(targetId)))
 			           .FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
-		var relation = self.FollowingCollection
+		var relation = self!.FollowingCollection
 			.FirstOrDefault(p => p.Follows.GetId() == targetId);
 
 		if (relation is null) return new FollowerRelation(self, Profile.CreateEmpty(targetId), FollowState.None);

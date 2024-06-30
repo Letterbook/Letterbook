@@ -27,7 +27,8 @@ public class ProfilesController : ControllerBase
 	private readonly IAuthorizationService _authz;
 	private readonly Mapper _mapper;
 
-	public ProfilesController(ILogger<ProfilesController> logger, IOptions<CoreOptions> options, IProfileService profiles, MappingConfigProvider mappingConfig, IAuthorizationService authz)
+	public ProfilesController(ILogger<ProfilesController> logger, IOptions<CoreOptions> options, IProfileService profiles,
+		MappingConfigProvider mappingConfig, IAuthorizationService authz)
 	{
 		_logger = logger;
 		_options = options;
@@ -50,7 +51,7 @@ public class ProfilesController : ControllerBase
 	[HttpPost("new/{accountId}")]
 	[ProducesResponseType<FullProfileDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("New Profile", "Create a new profile that belongs to the given account")]
-	public async Task<IActionResult> Create(Guid accountId, [FromQuery]string handle)
+	public async Task<IActionResult> Create(Guid accountId, [FromQuery] string handle)
 	{
 		var result = await _profiles.As(User.Claims).CreateProfile(accountId, handle);
 		return Ok(_mapper.Map<FullProfileDto>(result));
@@ -68,11 +69,11 @@ public class ProfilesController : ControllerBase
 	[HttpPut("{profileId}")]
 	[ProducesResponseType<FullProfileDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Edit", "Update profile properties")]
-	public async Task<IActionResult> Edit(Uuid7 profileId, [FromBody]FullProfileDto dto)
+	public async Task<IActionResult> Edit(Uuid7 profileId, [FromBody] FullProfileDto dto)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
-		if (_mapper.Map<Models.Profile>(dto) is not {} profile)
+		if (_mapper.Map<Models.Profile>(dto) is not { } profile)
 			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(FullProfileDto)}"));
 
 		var decision = _authz.Update(User.Claims, profile, profileId);
@@ -88,7 +89,7 @@ public class ProfilesController : ControllerBase
 	[HttpPost("{profileId}/field/{index}")]
 	[ProducesResponseType<FullProfileDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Add Field", "Add a custom field to the profile")]
-	public async Task<IActionResult> AddField(Uuid7 profileId, int index, [FromBody]Models.CustomField dto)
+	public async Task<IActionResult> AddField(Uuid7 profileId, int index, [FromBody] Models.CustomField dto)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
@@ -116,7 +117,7 @@ public class ProfilesController : ControllerBase
 	[HttpPut("{profileId}/field/{index}")]
 	[ProducesResponseType<FullProfileDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Update Field", "Update a custom field on the profile")]
-	public async Task<IActionResult> UpdateField(Uuid7 profileId, int index, [FromBody]Models.CustomField dto)
+	public async Task<IActionResult> UpdateField(Uuid7 profileId, int index, [FromBody] Models.CustomField dto)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
@@ -149,7 +150,7 @@ public class ProfilesController : ControllerBase
 			return BadRequest(ModelState);
 
 		var result = await _profiles.As(User.Claims).Follow(profileId, followProfileId);
-		return Ok(result);
+		return Ok(_mapper.Map<FollowerRelationDto>(result));
 	}
 
 	[HttpDelete("{profileId}/following/{followProfileId}")]
@@ -161,7 +162,7 @@ public class ProfilesController : ControllerBase
 			return BadRequest(ModelState);
 
 		var result = await _profiles.As(User.Claims).Unfollow(profileId, followProfileId);
-		return Ok(result);
+		return Ok(_mapper.Map<FollowerRelationDto>(result));
 	}
 
 	[HttpGet("{profileId}/follower")]
@@ -186,7 +187,7 @@ public class ProfilesController : ControllerBase
 			return BadRequest(ModelState);
 
 		var result = await _profiles.As(User.Claims).AcceptFollower(profileId, followerProfileId);
-		return Ok(result);
+		return Ok(_mapper.Map<FollowerRelationDto>(result));
 	}
 
 	[HttpDelete("{profileId}/follower/{followerProfileId}")]
@@ -198,6 +199,6 @@ public class ProfilesController : ControllerBase
 			return BadRequest(ModelState);
 
 		var result = await _profiles.As(User.Claims).RemoveFollower(profileId, followerProfileId);
-		return Ok(result);
+		return Ok(_mapper.Map<FollowerRelationDto>(result));
 	}
 }

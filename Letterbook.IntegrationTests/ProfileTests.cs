@@ -9,6 +9,7 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Models.Mappers.Converters;
+using Letterbook.Core.Values;
 using Letterbook.IntegrationTests.Fixtures;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -158,6 +159,7 @@ public sealed class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITe
 		Assert.Equal(dto, actual);
 	}
 
+	[Trait("Group", "Follow")]
 	[Fact(DisplayName = "Should query followers")]
 	public async Task CanGetFollowers()
 	{
@@ -172,5 +174,78 @@ public sealed class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITe
 			await response.Content.ReadFromJsonAsync<IEnumerable<MiniProfileDto>>(_json));
 
 		Assert.Contains(actual, dto => dto.Id == P1.GetId());
+	}
+
+	[Trait("Group", "Follow")]
+	[Fact(DisplayName = "Should query following")]
+	public async Task CanGetFollows()
+	{
+		var P1 = _profiles[1];
+		var P5 = _profiles[5];
+		var path = $"/lb/v1/profiles/{P1.GetId25()}/following";
+		var response = await _client.GetAsync(path);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert.IsAssignableFrom<IEnumerable<MiniProfileDto>>(
+			await response.Content.ReadFromJsonAsync<IEnumerable<MiniProfileDto>>(_json));
+
+		Assert.Contains(actual, dto => dto.Id == P5.GetId());
+	}
+
+	[Trait("Group", "Follow")]
+	[Fact(DisplayName = "Should send a follow request")]
+	public async Task CanFollow()
+	{
+		var P7 = _profiles[7];
+		var P8 = _profiles[8];
+		var path = $"/lb/v1/profiles/{P7.GetId25()}/following/{P8.GetId25()}";
+		var response = await _client.PutAsync(path, null);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var content = await response.Content.ReadAsStringAsync();
+		var actual = Assert.IsAssignableFrom<FollowerRelationDto>(
+			await response.Content.ReadFromJsonAsync<FollowerRelationDto>(_json));
+
+		Assert.Equal(P7.GetId(), actual.Follower);
+		Assert.Equal(P8.GetId(), actual.Follows);
+		Assert.Equal(FollowState.Accepted, actual.State);
+	}
+
+	[Trait("Group", "Follow")]
+	[Fact(DisplayName = "Should send unfollow")]
+	public async Task CanUnfollow()
+	{
+		var P9 = _profiles[9];
+		var P8 = _profiles[8];
+		var path = $"/lb/v1/profiles/{P8.GetId25()}/following/{P9.GetId25()}";
+		var response = await _client.DeleteAsync(path);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var content = await response.Content.ReadAsStringAsync();
+		var actual = Assert.IsAssignableFrom<FollowerRelationDto>(
+			await response.Content.ReadFromJsonAsync<FollowerRelationDto>(_json));
+
+		Assert.Equal(FollowState.None, actual.State);
+	}
+
+	[Trait("Group", "Follow")]
+	[Fact(DisplayName = "Should remove follower")]
+	public async Task CanRemoveFollower()
+	{
+		var P9 = _profiles[9];
+		var P8 = _profiles[8];
+		var path = $"/lb/v1/profiles/{P8.GetId25()}/follower/{P9.GetId25()}";
+		var response = await _client.DeleteAsync(path);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var content = await response.Content.ReadAsStringAsync();
+		var actual = Assert.IsAssignableFrom<FollowerRelationDto>(
+			await response.Content.ReadFromJsonAsync<FollowerRelationDto>(_json));
+
+		Assert.Equal(FollowState.None, actual.State);
 	}
 }
