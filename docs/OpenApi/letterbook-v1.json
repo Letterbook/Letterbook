@@ -1703,11 +1703,13 @@
           "follower": {
             "pattern": "[0-9a-z]{25}",
             "type": "string",
+            "nullable": true,
             "example": "HQqgQL5NFV4bPxZaTXhCPW"
           },
           "follows": {
             "pattern": "[0-9a-z]{25}",
             "type": "string",
+            "nullable": true,
             "example": "HQqgQL5NFV4bPxZaTXhCPW"
           },
           "state": {
