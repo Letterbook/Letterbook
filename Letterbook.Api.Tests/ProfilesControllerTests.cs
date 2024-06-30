@@ -179,7 +179,7 @@ public class ProfilesControllerTests : WithMockContext
 		var result = await _controller.Follow(_profile.GetId(), target.GetId());
 
 		var response = Assert.IsType<OkObjectResult>(result);
-		var actual = Assert.IsAssignableFrom<Models.FollowerRelation>(response.Value);
+		var actual = Assert.IsAssignableFrom<FollowerRelationDto>(response.Value);
 		Assert.Equal(FollowState.Accepted, actual.State);
 	}
 
@@ -193,7 +193,7 @@ public class ProfilesControllerTests : WithMockContext
 		var result = await _controller.AcceptFollower(_profile.GetId(), target.GetId());
 
 		var response = Assert.IsType<OkObjectResult>(result);
-		var actual = Assert.IsAssignableFrom<Models.FollowerRelation>(response.Value);
+		var actual = Assert.IsAssignableFrom<FollowerRelationDto>(response.Value);
 		Assert.Equal(FollowState.Accepted, actual.State);
 	}
 
@@ -207,7 +207,7 @@ public class ProfilesControllerTests : WithMockContext
 		var result = await _controller.RemoveFollower(_profile.GetId(), target.GetId());
 
 		var response = Assert.IsType<OkObjectResult>(result);
-		var actual = Assert.IsAssignableFrom<Models.FollowerRelation>(response.Value);
+		var actual = Assert.IsAssignableFrom<FollowerRelationDto>(response.Value);
 		Assert.Equal(FollowState.None, actual.State);
 	}
 
@@ -223,7 +223,7 @@ public class ProfilesControllerTests : WithMockContext
 		var result = await _controller.Unfollow(_profile.GetId(), target.GetId());
 
 		var response = Assert.IsType<OkObjectResult>(result);
-		var actual = Assert.IsAssignableFrom<Models.FollowerRelation>(response.Value);
+		var actual = Assert.IsAssignableFrom<FollowerRelationDto>(response.Value);
 		Assert.Equal(FollowState.None, actual.State);
 	}
 }
