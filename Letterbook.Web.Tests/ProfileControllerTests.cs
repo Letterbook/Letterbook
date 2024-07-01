@@ -21,10 +21,6 @@ public class ProfileControllerTests : WithMockContext
 		_page = new Profile(ProfileServiceMock.Object, CoreOptionsMock, Mock.Of<ILogger<Profile>>())
 		{
 			PageContext = PageContext,
-			Handle = null!,
-			DisplayName = null!,
-			Description = null!,
-			CustomFields = []
 		};
 	}
 
@@ -47,5 +43,19 @@ public class ProfileControllerTests : WithMockContext
 		Assert.Equal($"@{_profile.Handle}@letterbook.example", _page.Handle);
 		Assert.Equal(_profile.DisplayName, _page.DisplayName);
 		Assert.Equal(_profile.CustomFields, _page.CustomFields);
+	}
+
+	[Fact(DisplayName = "Should load the template data for a profile")]
+	public async Task CanGetFollowers()
+	{
+		ProfileServiceAuthMock.Setup(m => m.FindProfiles(It.IsAny<string>())).ReturnsAsync([_profile]);
+
+		var result = await _page.OnGet(_profile.Handle);
+
+		var page = Assert.IsType<PageResult>(result);
+
+		var actual = Assert.IsType<Profile>(page.Model);
+
+		Assert.Fail();
 	}
 }
