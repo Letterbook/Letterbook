@@ -20,7 +20,7 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 
 	public IQueryable<Models.Account> SingleAccount(Guid accountId)
 	{
-		return _context.Accounts.Where(account => account.Id == accountId).Take(1).AsQueryable();
+		return _context.Accounts.Where(account => account.Id == accountId).AsQueryable();
 	}
 
 	public bool RecordAccount(Models.Account account)
@@ -85,14 +85,12 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 
 	public IQueryable<Models.Profile> SingleProfile(Uuid7 id)
 	{
-		return _context.Profiles.Where(profile => profile.Id == id.ToGuid())
-			.Take(1);
+		return _context.Profiles.Where(profile => profile.Id == id.ToGuid());
 	}
 
 	public IQueryable<Models.Profile> SingleProfile(Uri fediId)
 	{
-		return _context.Profiles.Where(profile => profile.FediId == fediId)
-			.Take(1);
+		return _context.Profiles.Where(profile => profile.FediId == fediId);
 	}
 
 	public IQueryable<Models.Profile> WithAudience(IQueryable<Models.Profile> query)

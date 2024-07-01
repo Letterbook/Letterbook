@@ -113,15 +113,35 @@ public interface IAuthzProfileService
 	/// <see cref="AcceptFollower(Medo.Uuid7,Medo.Uuid7)"/>
 	Task<FollowerRelation> AcceptFollower(Uuid7 profileId, Uri followerId);
 
+	Task<int> FollowerCount(Profile profile);
+	Task<int> FollowingCount(Profile profile);
+
 	Task ReportProfile(Guid selfId, Uri profileId);
 
+
 	// - [ ] receive report
+
+
 	// - [ ] block
+
+
 	// - [ ] mute
+
+
 	// - [ ] subscribe (follow, but only see public posts)
+
+
 	// - [ ] transfer in
+
+
 	// - [ ] transfer out
+
+
 	// - [ ] delete profile
+
+
 	// - [ ] grant access to another account
+
+
 	// - [ ] revoke access
 }

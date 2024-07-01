@@ -395,6 +395,20 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await Unfollow(self, relation);
 	}
 
+	public Task<int> FollowerCount(Profile profile)
+	{
+		return _profiles.QueryFrom(profile, 1, p => p.FollowersCollection)
+			.OrderBy(r => r.Date)
+			.CountAsync();
+	}
+
+	public Task<int> FollowingCount(Profile profile)
+	{
+		return _profiles.QueryFrom(profile, 1, p => p.FollowersCollection)
+			.OrderBy(r => r.Date)
+			.CountAsync();
+	}
+
 	public Task ReportProfile(Guid selfId, Uri profileId)
 	{
 		throw new NotImplementedException();
