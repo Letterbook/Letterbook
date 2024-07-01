@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Letterbook.Core.Models;
 using Medo;
 
@@ -43,6 +44,19 @@ public interface IAccountProfileAdapter : IDisposable
 	public IQueryable<Profile> SingleProfile(Uri fediId);
 	public IQueryable<Profile> WithAudience(IQueryable<Profile> query);
 	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uri relationId);
+	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uuid7 relationId);
+
+	/// <summary>
+	/// Query for navigation entities, using the given profile as a root entity
+	/// </summary>
+	/// <remarks>Consumers should be sure to set an OrderBy property</remarks>
+	/// <param name="profile"></param>
+	/// <param name="limit"></param>
+	/// <param name="queryExpression">An expression func that specifies the navigation property to query</param>
+	/// <typeparam name="T"></typeparam>
+	/// <returns></returns>
+	public IQueryable<T> QueryFrom<T>(Profile profile, int limit, Expression<Func<Profile, IEnumerable<T>>> queryExpression)
+		where T : class;
 
 	// Lookup Profile including relations to another profile
 	[Obsolete("Use IQueryable methods", false)]

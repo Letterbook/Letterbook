@@ -9,8 +9,7 @@ public static class DependencyInjection
 	{
 		options.AddPolicy(Constants.AuthzPolicy, policy =>
 		{
-			policy.RequireAuthenticatedUser()
-				.AddAuthenticationSchemes(IdentityConstants.ApplicationScheme);
+			policy.RequireAuthenticatedUser();
 		});
 		return options;
 	}

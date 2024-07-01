@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Letterbook.Core.Adapters;
 using Medo;
 using Microsoft.EntityFrameworkCore;
@@ -102,12 +103,29 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 	public IQueryable<Models.Profile> WithRelation(IQueryable<Models.Profile> query, Uri relationId)
 	{
 		return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.FediId == relationId))
-				.ThenInclude(relation => relation.Follows)
+			.ThenInclude(relation => relation.Follows)
 			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.FediId == relationId))
-				.ThenInclude(relation => relation.Follower)
+			.ThenInclude(relation => relation.Follower)
 			.Include(profile => profile.Keys)
 			.Include(profile => profile.Audiences)
 			.AsSplitQuery();
+	}
+
+	public IQueryable<Models.Profile> WithRelation(IQueryable<Models.Profile> query, Uuid7 relationId)
+	{
+		return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId.ToGuid()))
+			.ThenInclude(relation => relation.Follows)
+			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId.ToGuid()))
+			.ThenInclude(relation => relation.Follower)
+			.Include(profile => profile.Keys)
+			.Include(profile => profile.Audiences)
+			.AsSplitQuery();
+	}
+
+	public IQueryable<T> QueryFrom<T>(Models.Profile profile, int limit, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
+		where T : class
+	{
+		return _context.Entry(profile).Collection(queryExpression).Query().Take(limit);
 	}
 
 	public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)
@@ -209,6 +227,7 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 			_context.Database.BeginTransaction();
 		}
 	}
+
 	public void Dispose()
 	{
 		_context.Dispose();
