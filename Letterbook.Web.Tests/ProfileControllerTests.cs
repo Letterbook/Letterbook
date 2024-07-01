@@ -45,16 +45,12 @@ public class ProfileControllerTests : WithMockContext
 		Assert.Equal(_profile.CustomFields, _page.CustomFields);
 	}
 
-	[Fact(DisplayName = "Should load the template data for a profile")]
+	[Fact(DisplayName = "Should get the follower count")]
 	public async Task CanGetFollowers()
 	{
 		ProfileServiceAuthMock.Setup(m => m.FindProfiles(It.IsAny<string>())).ReturnsAsync([_profile]);
 
 		var result = await _page.OnGet(_profile.Handle);
-
-		var page = Assert.IsType<PageResult>(result);
-
-		var actual = Assert.IsType<Profile>(page.Model);
 
 		Assert.Fail();
 	}
