@@ -120,10 +120,10 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 			.AsSplitQuery();
 	}
 
-	public IQueryable<T> QueryFrom<T>(Models.Profile profile, int limit, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
+	public IQueryable<T> QueryFrom<T>(Models.Profile profile, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
 		where T : class
 	{
-		return _context.Entry(profile).Collection(queryExpression).Query().Take(limit);
+		return _context.Entry(profile).Collection(queryExpression).Query();
 	}
 
 	public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)

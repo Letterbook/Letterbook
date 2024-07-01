@@ -51,11 +51,10 @@ public interface IAccountProfileAdapter : IDisposable
 	/// </summary>
 	/// <remarks>Consumers should be sure to set an OrderBy property</remarks>
 	/// <param name="profile"></param>
-	/// <param name="limit"></param>
 	/// <param name="queryExpression">An expression func that specifies the navigation property to query</param>
 	/// <typeparam name="T"></typeparam>
 	/// <returns></returns>
-	public IQueryable<T> QueryFrom<T>(Profile profile, int limit, Expression<Func<Profile, IEnumerable<T>>> queryExpression)
+	public IQueryable<T> QueryFrom<T>(Profile profile, Expression<Func<Profile, IEnumerable<T>>> queryExpression)
 		where T : class;
 
 	// Lookup Profile including relations to another profile
