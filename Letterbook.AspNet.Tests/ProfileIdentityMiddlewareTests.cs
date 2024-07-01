@@ -68,6 +68,24 @@ public class ProfileIdentityMiddlewareTests : WithMocks
 		Assert.Equal("Test resource", await bodyReader.ReadLineAsync());
 	}
 
+	[Fact(DisplayName = "Should re-challenge invalid authentication")]
+	public async Task Reauthenticate()
+	{
+		var sub = new Claim("sub", $"{Guid.NewGuid()}");
+		AccountServiceMock.Setup(m => m.LookupAccount(It.IsAny<Guid>())).ReturnsAsync(default(Account));
+
+		var context = await _server.SendAsync(c =>
+		{
+			c.User = new ClaimsPrincipal(new ClaimsIdentity([sub], "Test"));
+			c.Request.Method = "Get";
+			c.Request.Path = "/";
+		});
+
+		var bodyReader = new StreamReader(context.Response.Body);
+
+		Assert.Equal(401, context.Response.StatusCode);
+	}
+
 	[Fact(DisplayName = "Should provide run-time profile claims on authenticated requests")]
 	public async Task LookupClaims()
 	{

@@ -104,7 +104,7 @@ public class Program
 
 		app.UseAuthentication();
 		app.UseAuthorization();
-		app.UseWhen((context => !context.Request.Path.StartsWithSegments("/Identity")), applicationBuilder =>
+		app.UseWhen(ProfileIdentityPaths, applicationBuilder =>
 		{
 			applicationBuilder.UseMiddleware<ProfileIdentityMiddleware>();
 		});
@@ -116,5 +116,16 @@ public class Program
 		app.MapControllers();
 
 		app.Run("http://localhost:5127");
+
+		return;
+
+		static bool ProfileIdentityPaths(HttpContext context)
+		{
+			return !context.Request.Path.StartsWithSegments("/Identity/")
+			       // TODO: prefix with /ap/v1
+			       // Need to use url generators integrated with routing, instead of just a bunch of magic strings
+			       && !context.Request.Path.StartsWithSegments("/actor/")
+			       && !context.Request.Path.StartsWithSegments("/object/");
+		}
 	}
 }

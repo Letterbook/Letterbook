@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Letterbook.Core;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -25,8 +24,6 @@ public class ProfileIdentityMiddleware
 			return;
 		}
 
-		var cancellationToken = context.RequestAborted;
-
 		// 2 - Lookup the account with LinkedProfiles
 		var userSub = context.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
 		if (string.IsNullOrEmpty(userSub) ||
@@ -35,9 +32,7 @@ public class ProfileIdentityMiddleware
 		{
 			if (context.Response.HasStarted) return;
 
-			context.Response.Clear();
-			context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-			await context.Response.WriteAsync("Required sub claim is invalid", cancellationToken);
+			await context.ChallengeAsync(context.User.Identity.AuthenticationType);
 			return;
 		}
 
