@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace Letterbook.IntegrationTests.Fixtures;
+namespace Letterbook.AspNet.Tests.Fixtures;
 
 public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
@@ -20,7 +20,7 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 		Context.Request.Headers.TryGetValue("Authorization", out var id);
 		var claims = new[]
 		{
-			new Claim(JwtRegisteredClaimNames.Sub, id[0]!.Split(' ')[1]),// ?? Guid.NewGuid().ToString()),
+			new Claim(JwtRegisteredClaimNames.Sub, id[0]!.Split(' ')[1]),
 			new Claim(JwtRegisteredClaimNames.PreferredUsername, "Test user"),
 			new Claim(JwtRegisteredClaimNames.Email, "Test@example.com"),
 		};

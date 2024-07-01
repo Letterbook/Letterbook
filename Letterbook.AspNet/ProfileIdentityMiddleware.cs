@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Security.Claims;
 using Letterbook.Core;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
 
@@ -40,9 +41,22 @@ public class ProfileIdentityMiddleware
 			return;
 		}
 
-		var hasActiveProfile = context.User.Claims.Any(claim => claim.Type == ApplicationClaims.ActiveProfile);
+		// 3 - Validate permission on the claimed activeProfile
+		var activeProfile = context.User.Claims.FirstOrDefault(claim => claim.Type == ApplicationClaims.ActiveProfile);
+		var hasActiveProfile = activeProfile != null;
+		if (hasActiveProfile)
+		{
+			var valid = account.LinkedProfiles.Any(link => link.Profile.GetId25() == activeProfile!.Value);
+			if (!valid)
+			{
+				if (context.Response.HasStarted) return;
 
-		// 3 - Build the profile claims identity and add it to the User principal
+				await context.ChallengeAsync(context.User.Identity.AuthenticationType);
+				return;
+			}
+		}
+
+		// 4 - Build the profile claims identity and add it to the User principal
 		var claimsIdentity = new ClaimsIdentity(account.ProfileClaims(!hasActiveProfile), context.User.Identity?.AuthenticationType);
 		context.User.AddIdentity(claimsIdentity);
 		await _next(context);

@@ -32,6 +32,7 @@ public abstract class WithMocks
 	public Mock<IAuthorizationService> AuthorizationServiceMock;
 	public Mock<ITimelineService> TimelineServiceMock;
 	public Mock<IAuthzTimelineService> AuthzTimelineServiceMock;
+	public Mock<IAccountService> AccountServiceMock;
 
 	protected WithMocks()
 	{
@@ -51,6 +52,7 @@ public abstract class WithMocks
 		AuthorizationServiceMock = new Mock<IAuthorizationService>();
 		TimelineServiceMock = new Mock<ITimelineService>();
 		AuthzTimelineServiceMock = new Mock<IAuthzTimelineService>();
+		AccountServiceMock = new Mock<IAccountService>();
 
 		ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
 		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>(), It.IsAny<Uuid7>())).Returns(PostServiceAuthMock.Object);

@@ -2,6 +2,7 @@ using Bogus;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Adapter.TimescaleFeeds.EntityModels;
+using Letterbook.AspNet.Tests.Fixtures;
 using Letterbook.Core;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
