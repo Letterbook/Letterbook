@@ -1,0 +1,67 @@
+﻿@page
+@model ErrorModel
+@{
+    Layout = "";
+    ViewData["Title"] = Model.Status switch {
+        404 => "Not Found",
+        403 => "Forbidden",
+        _ => "Error."
+    };
+    ViewData["Message"] = Model.Status switch {
+        404 => "This page does not exist.",
+        403 => "You do not have access to this page.",
+        _ => "An error occurred while processing your request."
+    };
+}
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"]</title>
+    <base href="@(RazorSsg.GetBaseHref() ?? "/")"/>
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+@await Html.PartialAsync("Header")
+
+<div class="">
+    <main role="main" class="h-screen px-4 text-black bg-white text-center flex flex-col items-center justify-center">
+        <div class="-mt-48 flex items-center">
+            <h1 class="inline-block border-gray-300 border-r m-0 mr-5 py-2 pr-4 text-2xl font-medium">@(Model.Code ?? Response.StatusCode.ToString())</h1>
+            <div class="inline-block text-left">
+                <h2 class="text-sm font-normal">@ViewData["Message"]</h2>
+                @if (Model.Role != null)
+                {
+                    <div class="text-sm font-normal">
+                        Requires <b>@Model.Role</b> Role.
+                    </div>
+                }
+                @if (Model.Permission != null)
+                {
+                    <div class="text-sm font-normal">
+                        Requires <b>@Model.Permission</b> Permission.
+                    </div>
+                }
+            </div>
+        </div>
+        @if (Model.Status != 403)
+        {
+            <div class="mt-2">
+                <button onclick="history.back()"
+                        class="inline-flex justify-center py-1 px-2 shadow rounded text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M10.05 16.94v-4h8.92l.03-2.01h-8.95V6.94l-5 5Z"/>
+                    </svg>
+                    back
+                </button>
+            </div>
+        }
+    </main>
+</div>
+
+@await Html.PartialAsync("Footer")
+
+</body>
+</html>

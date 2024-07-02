@@ -1,0 +1,85 @@
+﻿name: Publish Web Docs
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+on:
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch: # Allow manual site deployments if necessary
+
+# Only ever deploy at most once at a time. In-progress builds should complete before queueing new builds.
+# If a new build is queued while other unstarted builds are in the queue those new builds will be skipped for the more recent option.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: build
+        working-directory: ./Letterbook.Docs
+        run: dotnet build .
+
+      - name: Assign default GitHub URL base path
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          custom_domain=$(gh api "/repos/${{ github.repository }}/pages" | jq -r '.cname // empty')
+          echo "CNAME config detected: $custom_domain"
+          repo_name=$(echo ${{ github.repository }} | cut -d '/' -f 2)
+          org_name=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
+          if [ ! -f "./Letterbook.Docs/wwwroot/CNAME" ] && [ -z "$custom_domain" ] 
+          then
+            echo "ssg_base_href=$(echo https://$org_name.github.io/$repo_name/)" 
+            echo "ssg_base_href=$(echo https://$org_name.github.io/$repo_name/)" >> $GITHUB_ENV
+          else
+            if [ ! -z "$custom_domain" ]
+            then
+              echo "Persist CNAME '$custom_domain' to ./Letterbook.Docs/wwwroot/CNAME"
+              echo "$custom_domain" >> ./Letterbook.Docs/wwwroot/CNAME
+              echo "custom_domain=$custom_domain" >> $GITHUB_ENV
+            fi
+          fi
+
+      - name: Build tailwind
+        working-directory: ./Letterbook.Docs
+        run: |
+          npm run build
+
+      - name: prerender
+        working-directory: ./Letterbook.Docs
+        run: |
+          site_base_href=${{ env.ssg_base_href }}
+          site_base_url="https://${{ env.custom_domain }}"
+          if [ ! -z "$site_base_href" ]
+          then
+            echo "Prerendering for deployment to $site_base_href"
+            dotnet run --AppTasks=prerender --environment Production --BaseHref "$site_base_href"
+          else
+            echo "Prerendering for deployment to $custom_domain"
+            dotnet run --AppTasks=prerender --environment Production --BaseUrl "$site_base_url"
+          fi
+          
+      # Use GitHub Actions Pages integraton to upload artifact and deploy it.
+      - name: "Setup GitHub Pages"
+        uses: actions/configure-pages@v5
+      - name: "Upload Web Artifact"
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './Letterbook.Docs/dist'
+      - name: "Deploy to GitHub Pages"
+        id: deployment
+        uses: actions/deploy-pages@v4
