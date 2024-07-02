@@ -395,6 +395,18 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await Unfollow(self, relation);
 	}
 
+	public Task<int> FollowerCount(Profile profile)
+	{
+		return _profiles.QueryFrom(profile, p => p.FollowersCollection)
+			.CountAsync();
+	}
+
+	public Task<int> FollowingCount(Profile profile)
+	{
+		return _profiles.QueryFrom(profile, p => p.FollowingCollection)
+			.CountAsync();
+	}
+
 	public Task ReportProfile(Guid selfId, Uri profileId)
 	{
 		throw new NotImplementedException();
@@ -409,7 +421,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	{
 		var profile = await _profiles.LookupProfile(profileId)
 		              ?? throw CoreException.MissingData<Profile>(profileId);
-		return _profiles.QueryFrom(profile, Math.Min(1000, limit), query => query.FollowingCollection)
+		return _profiles.QueryFrom(profile, query => query.FollowingCollection)
+			.Take(Math.Max(limit, 200))
 			.Include(relation => relation.Follows)
 			.OrderByDescending(relation => relation.Date)
 			.Where(relation => relation.Date < followedBefore)
@@ -420,7 +433,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	{
 		var profile = await _profiles.LookupProfile(profileId)
 		              ?? throw CoreException.MissingData<Profile>(profileId);
-		return _profiles.QueryFrom(profile, Math.Min(1000, limit), query => query.FollowersCollection)
+		return _profiles.QueryFrom(profile, query => query.FollowersCollection)
+			.Take(Math.Max(limit, 200))
 			.Include(relation => relation.Follower)
 			.OrderByDescending(relation => relation.Date)
 			.Where(relation => relation.Date < followedBefore)

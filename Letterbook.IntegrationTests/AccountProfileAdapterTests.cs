@@ -174,7 +174,7 @@ public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<Accou
 	[Fact(DisplayName = "Query from profiles")]
 	public async Task QueryFromProfile()
 	{
-		var query = _adapter.QueryFrom(_profiles[0], 1, profile => profile.Audiences);
+		var query = _adapter.QueryFrom(_profiles[0], profile => profile.Audiences);
 		var actual = await query.ToListAsync();
 
 		Assert.Single(actual);
@@ -184,7 +184,7 @@ public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<Accou
 	[Fact(DisplayName = "Query from profiles Include navigation")]
 	public async Task QueryFromProfileAndInclude()
 	{
-		var query = _adapter.QueryFrom(_profiles[0], 1, profile => profile.FollowersCollection);
+		var query = _adapter.QueryFrom(_profiles[0], profile => profile.FollowersCollection);
 		var actual = await query
 			.Include(relation => relation.Follower)
 			.Select(relation => relation.Follower)
