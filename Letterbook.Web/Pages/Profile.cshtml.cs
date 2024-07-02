@@ -1,4 +1,5 @@
 ﻿using Letterbook.Core;
+using Medo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Html;
@@ -16,7 +17,7 @@ public class Profile : PageModel
 	private readonly CoreOptions _options;
 	private IAuthzProfileService _profiles;
 	private Models.Profile _profile;
-	private Models.Profile _self = default!;
+	private Models.Profile? _self;
 
 	/// The full conventional fediverse @user@domain username.
 	/// Ostensibly globally unique
@@ -43,6 +44,8 @@ public class Profile : PageModel
 	/// The internal unique ID for this profile (used a lot in our APIs)
 	public string Id => _profile.GetId25();
 
+	public string? SelfId => User.Claims.FirstOrDefault(c => c.Type == "activeProfile")?.Value;
+
 	/// Whether this profile follows the User's activeProfile
 	public bool FollowsYou => _self?.FollowersCollection.Any() ?? false;
 
@@ -67,7 +70,12 @@ public class Profile : PageModel
 		var found = await _profiles.FindProfiles(handle);
 		if (found.FirstOrDefault() is not { } profile)
 			return NotFound();
+
 		_profile = profile;
+		if (SelfId is { } id && await _profiles.LookupProfile(Uuid7.FromId25String(id), profile.GetId()) is { } self)
+		{
+			_self = self;
+		}
 
 		return Page();
 	}

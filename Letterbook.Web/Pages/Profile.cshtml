@@ -11,9 +11,17 @@
         <span>@Model.Handle</span>
     </h1>
     
-    @if (User.Identity?.IsAuthenticated == true)
+    @if (User.Identity?.IsAuthenticated == true && Model.SelfId == Model.Id)
     {
         <a asp-page="ProfileEdit" asp-route-handle="@Model.BareHandle">Edit</a>
+    }
+    @if (User.Identity?.IsAuthenticated == true && Model.SelfId != Model.Id)
+    {
+        <button>@(Model.YouFollow ? "Unfollow" : "Follow")</button>
+        if(Model.FollowsYou)
+        {
+            <span>Follows you</span>
+        }
     }
 
     <div>

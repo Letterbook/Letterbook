@@ -43,7 +43,16 @@ public interface IAccountProfileAdapter : IDisposable
 	public IQueryable<Profile> SingleProfile(Uuid7 id);
 	public IQueryable<Profile> SingleProfile(Uri fediId);
 	public IQueryable<Profile> WithAudience(IQueryable<Profile> query);
+
+	/// <summary>
+	/// Include follow relationships in the profile query
+	/// </summary>
+	/// <param name="query"></param>
+	/// <param name="relationId"></param>
+	/// <returns></returns>
 	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uri relationId);
+
+	/// <see cref="WithRelation(System.Linq.IQueryable{Letterbook.Core.Models.Profile},System.Uri)"/>
 	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uuid7 relationId);
 
 	/// <summary>
