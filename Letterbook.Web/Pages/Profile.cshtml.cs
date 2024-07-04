@@ -1,4 +1,7 @@
-﻿using Letterbook.Core;
+﻿using AutoMapper;
+using Letterbook.Core;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -15,6 +18,7 @@ public class Profile : PageModel
 	private readonly IProfileService _profileSvc;
 	private readonly ILogger<Profile> _logger;
 	private readonly CoreOptions _options;
+	private readonly Mapper _mapper;
 	private IAuthzProfileService _profiles;
 	private Models.Profile _profile;
 	private Models.Profile? _self;
@@ -53,12 +57,13 @@ public class Profile : PageModel
 	public bool YouFollow => _self?.FollowingCollection.Any() ?? false;
 
 
-	public Profile(IProfileService profiles, IOptions<CoreOptions> options, ILogger<Profile> logger)
+	public Profile(IProfileService profiles, IOptions<CoreOptions> options, ILogger<Profile> logger, MappingConfigProvider maps)
 	{
 		_profile = default!;
 		_profiles = default!;
 		_profileSvc = profiles;
 		_logger = logger;
+		_mapper = new Mapper(maps.Profiles);
 		_options = options.Value;
 	}
 
@@ -76,6 +81,34 @@ public class Profile : PageModel
 		{
 			_self = self;
 		}
+
+		return Page();
+	}
+
+	public async Task<IActionResult> OnPostFollowRequest(Uuid7 followId)
+	{
+		if (SelfId is not { } selfId)
+			return Challenge();
+
+		_profiles = _profileSvc.As(User.Claims);
+		var result = await _profiles.Follow(Uuid7.FromId25String(selfId), followId);
+		_profile = result.Follows;
+		_self = result.Follower;
+
+		return Page();
+	}
+
+	public async Task<IActionResult> OnPostUnfollow(Uuid7 followId)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+		if (SelfId is not { } selfId)
+			return Challenge();
+
+		_profiles = _profileSvc.As(User.Claims);
+		var result = await _profiles.Unfollow(Uuid7.FromId25String(selfId), followId);
+		_profile = (await _profiles.LookupProfile(followId))!;
+		_self = (result?.Follower ?? await _profiles.LookupProfile(Uuid7.FromId25String(selfId)))!;
 
 		return Page();
 	}

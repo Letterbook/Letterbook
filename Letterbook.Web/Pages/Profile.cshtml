@@ -17,7 +17,19 @@
     }
     @if (User.Identity?.IsAuthenticated == true && Model.SelfId != Model.Id)
     {
-        <button>@(Model.YouFollow ? "Unfollow" : "Follow")</button>
+        if (Model.YouFollow)
+        {
+            
+            <form asp-page-handler="Unfollow" asp-route-followId="@Model.Id" method="post">
+                <button>Unfollow</button>
+            </form>
+        }
+        else
+        {
+            <form asp-page-handler="FollowRequest" asp-route-followId="@Model.Id" method="post">
+                <button>Follow</button>
+            </form>
+        }
         if(Model.FollowsYou)
         {
             <span>Follows you</span>

@@ -210,14 +210,20 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	private async Task<FollowerRelation> Follow(Profile self, Profile target, bool subscribeOnly)
 	{
-		if (target.Authority == _coreConfig.BaseUri().Authority)
+		if (target.HasLocalAuthority(_coreConfig))
 		{
 			// TODO(moderation): Check for blocks
 			// TODO(moderation): Check for requiresApproval
 			var relation = self.Follow(target, FollowState.Accepted);
-			// target.FollowersCollection.Add(relation);
-			self.Audiences.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
-			self.Audiences.Add(Audience.Boosts(target));
+			var joining = new HashSet<Audience>();
+
+			joining.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
+			joining.Add(Audience.Boosts(target));
+			foreach (var audience in joining.ReplaceFrom(target.Headlining))
+			{
+				self.Audiences.Add(audience);
+			}
+
 			await _profiles.Commit();
 			return relation;
 		}
@@ -243,15 +249,29 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> Follow(Uuid7 selfId, Uri targetId)
 	{
-		var self = await RequireProfile(selfId, targetId);
-		var target = await ResolveProfile(targetId, self);
+		var target = await _profiles.WithRelation(_profiles.SingleProfile(targetId), selfId)
+			           .Include(profile => profile.Headlining)
+			           .FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(targetId);
+
+		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), targetId)
+			           .FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(selfId);
+
 		return await Follow(self, target, false);
 	}
 
 	public async Task<FollowerRelation> Follow(Uuid7 selfId, Uuid7 targetId)
 	{
-		var target = await RequireProfile(targetId);
-		var self = await RequireProfile(selfId, target.FediId);
+		var target = await _profiles.WithRelation(_profiles.SingleProfile(targetId), selfId)
+			             .Include(profile => profile.Headlining)
+			             .FirstOrDefaultAsync()
+		             ?? throw CoreException.MissingData<Profile>(targetId);
+
+		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), targetId)
+			           .FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(selfId);
+
 		return await Follow(self, target, false);
 	}
 
@@ -352,8 +372,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private async Task<FollowerRelation> Unfollow(Profile self, FollowerRelation relation)
 	{
 		self.Unfollow(relation.Follows);
-		self.Audiences.Remove(Audience.Followers(relation.Follows));
-		self.Audiences.Remove(Audience.Subscribers(relation.Follows));
+		// self.Audiences.Clear();
+		// self.Audiences.Remove(Audience.Followers(relation.Follows));
+		// self.Audiences.Remove(Audience.Subscribers(relation.Follows));
 		if (self.Audiences.Count > 0)
 		{
 			foreach (var each in self.Audiences.Where(audience => audience.Source == relation.Follows))
