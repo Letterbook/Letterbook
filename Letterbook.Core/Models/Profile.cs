@@ -84,6 +84,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public Account? OwnedBy { get; set; }
 	public ICollection<ProfileClaims> Accessors { get; set; } = new HashSet<ProfileClaims>();
 	public ActivityActorType Type { get; set; }
+	public ICollection<Audience> Headlining { get; set; } = new HashSet<Audience>();
 	public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
 	public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
 	public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
