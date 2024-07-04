@@ -182,6 +182,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 			DisplayName = handle,
 		};
 		profile.Audiences.Add(Audience.FromMention(profile));
+		profile.Headlining.Add(Audience.Followers(profile));
 		return profile;
 	}
 
