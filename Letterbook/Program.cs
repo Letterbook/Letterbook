@@ -4,11 +4,14 @@ using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Api;
 using Letterbook.Api.Swagger;
+using Letterbook.AspNet;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Letterbook.Web;
 using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
@@ -40,23 +43,30 @@ public class Program
 			true
 		);
 
-		builder.Services.AddApiProperties(builder.Configuration);
 		builder.Services.AddOpenTelemetry()
 			.AddDbTelemetry()
 			.AddClientTelemetry()
 			.AddTelemetryExporters();
 		builder.Services.AddHealthChecks();
-		builder.Services.AddActivityPubClient(builder.Configuration);
-		builder.Services.AddLetterbookCore(builder.Configuration);
-		builder.Services.AddPublishers();
-		builder.Services.AddDbAdapter(builder.Configuration);
-		builder.Services.AddFeedsAdapter(builder.Configuration);
-		builder.Services.AddIdentity<Account, IdentityRole<Guid>>()
+		builder.Services.AddLetterbookCore(builder.Configuration)
+			.AddActivityPubClient(builder.Configuration)
+			.AddApiProperties(builder.Configuration)
+			.AddPublishers()
+			.AddDbAdapter(builder.Configuration)
+			.AddFeedsAdapter(builder.Configuration)
+			.AddWebCookies();
+		builder.Services.AddIdentity<Account, IdentityRole<Guid>>(identity => identity.ConfigureIdentity())
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
 			.AddDefaultUI();
+		builder.Services.AddAuthentication("Test");
 		builder.Services.AddRazorPages()
 			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
+		builder.Services.AddAuthorization(options =>
+		{
+			options.AddWebAuthzPolicy();
+			options.AddpiAuthzPolicy();
+		});
 		builder.Services.AddMassTransit(bus => bus.AddWorkerBus(builder.Configuration)
 			.AddWorkers(builder.Configuration));
 
@@ -82,7 +92,11 @@ public class Program
 		}
 
 		// app.UseHttpsRedirection();
-		app.UseStaticFiles();
+		app.UseStaticFiles(new StaticFileOptions
+		{
+			FileProvider = new ManifestEmbeddedFileProvider(Assembly.GetAssembly(typeof(Web.Program))!, "wwwroot"),
+
+		});
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();
@@ -90,13 +104,28 @@ public class Program
 
 		app.UseAuthentication();
 		app.UseAuthorization();
+		app.UseWhen(ProfileIdentityPaths, applicationBuilder =>
+		{
+			applicationBuilder.UseMiddleware<ProfileIdentityMiddleware>();
+		});
 
-		app.UseSerilogRequestLogging();
+		// app.UseSerilogRequestLogging();
 
 		app.MapRazorPages();
 		app.UsePathBase(new PathString("/api/v1"));
 		app.MapControllers();
 
 		app.Run("http://localhost:5127");
+
+		return;
+
+		static bool ProfileIdentityPaths(HttpContext context)
+		{
+			return !context.Request.Path.StartsWithSegments("/Identity/")
+			       // TODO: prefix with /ap/v1
+			       // Need to use url generators integrated with routing, instead of just a bunch of magic strings
+			       && !context.Request.Path.StartsWithSegments("/actor/")
+			       && !context.Request.Path.StartsWithSegments("/object/");
+		}
 	}
 }

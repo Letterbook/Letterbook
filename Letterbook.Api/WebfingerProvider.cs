@@ -6,7 +6,6 @@ using DarkLink.Web.WebFinger.Shared;
 using Letterbook.Core;
 using Letterbook.Core.Extensions;
 using Microsoft.Extensions.Options;
-using Constants = Letterbook.Core.Constants;
 
 namespace Letterbook.Api;
 
@@ -50,7 +49,7 @@ public class WebfingerProvider : IResourceDescriptorProvider
 				Links = ImmutableList.Create(
 					DarkLink.Web.WebFinger.Shared.Link.Create("self") with
 					{
-						Type = Constants.ActivityPubAccept,
+						Type = Core.Constants.ActivityPubAccept,
 						Href = subject.FediId,
 					}),
 			};

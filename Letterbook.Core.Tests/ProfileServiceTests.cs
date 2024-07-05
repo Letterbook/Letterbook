@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Cryptography;
 using Bogus;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
@@ -7,6 +8,7 @@ using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.Extensions.Logging;
+using MockQueryable.Moq;
 using Moq;
 using Xunit.Abstractions;
 
@@ -254,7 +256,7 @@ public class ProfileServiceTests : WithMocks
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, (Uuid7)target.Id!);
 
-		Assert.Equal(FollowState.Accepted, actual);
+		Assert.Equal(FollowState.Accepted, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
 	}
 
@@ -271,7 +273,7 @@ public class ProfileServiceTests : WithMocks
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
-		Assert.Equal(FollowState.Accepted, actual);
+		Assert.Equal(FollowState.Accepted, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
 	}
 
@@ -296,7 +298,7 @@ public class ProfileServiceTests : WithMocks
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
-		Assert.Equal(FollowState.Accepted, actual);
+		Assert.Equal(FollowState.Accepted, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
 	}
 
@@ -321,7 +323,7 @@ public class ProfileServiceTests : WithMocks
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
-		Assert.Equal(FollowState.Pending, actual);
+		Assert.Equal(FollowState.Pending, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
 	}
 
@@ -346,7 +348,7 @@ public class ProfileServiceTests : WithMocks
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
-		Assert.Equal(FollowState.Rejected, actual);
+		Assert.Equal(FollowState.Rejected, actual.State);
 		Assert.Empty(_profile.FollowingCollection);
 		Assert.Empty(target.FollowersCollection);
 	}
@@ -393,29 +395,76 @@ public class ProfileServiceTests : WithMocks
 		// Assert.Equal(FollowState.Accepted, _profile.Following.FirstOrDefault(r => r.Follows.Id == target.Id)?.State);
 	}
 
-	[Fact(DisplayName = "Should remove a follower")]
-	public async Task RemoveFollower()
+	[InlineData(false)]
+	[InlineData(true)]
+	[Theory(DisplayName = "Should remove a follower")]
+	public async Task RemoveFollower(bool useId)
 	{
 		var follower = new FakeProfile().Generate();
 		_profile.AddFollower(follower, FollowState.Accepted);
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), follower.FediId))
-			.ReturnsAsync(_profile);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+			.Returns(queryable);
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
+			.Returns(queryable);
 
-		await _service.RemoveFollower(_profile.GetId(), follower.FediId);
+		var actual = useId ? await _service.RemoveFollower(_profile.GetId(), follower.GetId())
+			:await _service.RemoveFollower(_profile.GetId(), follower.FediId);
 
 		Assert.DoesNotContain(follower, _profile.FollowersCollection.Select(r => r.Follower));
 	}
 
-	[Fact(DisplayName = "Should unfollow")]
-	public async Task Unfollow()
+	[InlineData(false)]
+	[InlineData(true)]
+	[Theory(DisplayName = "Should unfollow")]
+	public async Task Unfollow(bool useId)
 	{
 		var follower = new FakeProfile().Generate();
 		_profile.Follow(follower, FollowState.Accepted);
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), follower.FediId))
-			.ReturnsAsync(_profile);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+			.Returns(queryable);
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
+			.Returns(queryable);
 
-		await _service.Unfollow(_profile.GetId(), follower.FediId);
+		var actual = useId ? await _service.Unfollow(_profile.GetId(), follower.GetId())
+			: await _service.Unfollow(_profile.GetId(), follower.FediId);
 
 		Assert.DoesNotContain(follower, _profile.FollowingCollection.Select(r => r.Follows));
+	}
+
+	[InlineData(false)]
+	[InlineData(true)]
+	[Theory(DisplayName = "Should accept a follower")]
+	public async Task AcceptFollower(bool useId)
+	{
+		var follower = new FakeProfile().Generate();
+		_profile.AddFollower(follower, FollowState.Pending);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+			.Returns(queryable);
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
+			.Returns(queryable);
+
+		var actual = useId ? await _service.AcceptFollower(_profile.GetId(), follower.GetId())
+			: await _service.AcceptFollower(_profile.GetId(), follower.FediId);
+
+		Assert.Equal(FollowState.Accepted, actual.State);
+		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
+	}
+
+	[Fact(DisplayName = "Should not add a follower that did not request to follow")]
+	public async Task NoForceFollower()
+	{
+		var follower = new FakeProfile().Generate();
+		_profile.AddFollower(follower, FollowState.None);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+			.Returns(queryable);
+
+		var actual = await _service.AcceptFollower(_profile.GetId(), follower.GetId());
+
+		Assert.Equal(FollowState.None, actual.State);
+		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
 	}
 }

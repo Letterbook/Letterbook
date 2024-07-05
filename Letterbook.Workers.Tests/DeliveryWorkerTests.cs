@@ -52,7 +52,7 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	}
 
 	[Theory(DisplayName = "Should send ASDocs to their destination")]
-	[MemberData(nameof(GenerateDoc))]
+	[MemberData(nameof(GenerateDoc), 50)]
 	public async Task CanSend(ASObject asDoc, Uri inbox)
 	{
 		await _publisher.Deliver(inbox, asDoc, _profile);
@@ -68,10 +68,10 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	 * Support methods
 	 */
 
-	public static IEnumerable<object[]> GenerateDoc()
+	public static IEnumerable<object[]> GenerateDoc(int count)
 	{
 		var faker = new FakeProfile();
-		foreach (var profile in faker.Generate(50))
+		foreach (var profile in faker.Generate(count))
 		{
 			yield return
 			[

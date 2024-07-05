@@ -2,12 +2,15 @@ using Bogus;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Adapter.TimescaleFeeds.EntityModels;
+using Letterbook.AspNet.Tests.Fixtures;
 using Letterbook.Core;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Letterbook.Core.Workers;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -153,8 +156,19 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 				var seedDescriptor = services.SingleOrDefault(d => d.ImplementationType == typeof(WorkerScope<SeedAdminWorker>));
 
 				if (seedDescriptor != null) services.Remove(seedDescriptor);
-				// services.AddSingleton<RelationalContext>();
-				// services.AddSingleton<FeedsContext>();
+
+				services.AddAuthentication("Test")
+					.AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
+				services.AddAuthorization(options =>
+				{
+					options.DefaultPolicy = new AuthorizationPolicyBuilder("Test")
+						.RequireAuthenticatedUser()
+						.Build();
+				});
+				services.ConfigureApplicationCookie(options =>
+				{
+					options.ForwardAuthenticate = "Test";
+				});
 			});
 
 		base.ConfigureWebHost(builder);
@@ -164,15 +178,24 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	{
 		var authority = Options.BaseUri() ?? new Uri("letterbook.example");
 		Accounts.AddRange(new FakeAccount(false).Generate(2));
-		Profiles.AddRange(new FakeProfile(authority, Accounts[0]).Generate(3));
-		Profiles.Add(new FakeProfile(authority, Accounts[1]).Generate());
-		Profiles.AddRange(new FakeProfile().Generate(3));
+		Profiles.AddRange(new FakeProfile(authority, Accounts[0]).Generate(3)); // P0-2
+		Profiles.Add(new FakeProfile(authority, Accounts[1]).Generate()); // P3
+		Profiles.AddRange(new FakeProfile().Generate(3)); // P4-6
+		Profiles.AddRange(new FakeProfile(authority).Generate(3)); // P7-9 (Group: Follow)
 
 		// P0 follows P4 and P5
 		// P4 follows P0
 		Profiles[0].Follow(Profiles[4], FollowState.Accepted);
 		Profiles[0].Follow(Profiles[5], FollowState.Accepted);
 		Profiles[0].AddFollower(Profiles[4], FollowState.Accepted);
+		// P1 has requested to follow P5
+		Profiles[1].FollowingCollection.Add(new FollowerRelation(Profiles[1], Profiles[5], FollowState.Pending));
+		// P9 follows P8 and P7
+		Profiles[9].Follow(Profiles[8], FollowState.Accepted);
+		Profiles[9].Follow(Profiles[7], FollowState.Accepted);
+		// P8 follows P9 (with proper audience)
+		Profiles[8].Follow(Profiles[9], FollowState.Accepted);
+		Profiles[8].Audiences.Add(Audience.Followers(Profiles[9]));
 
 		// Local profiles
 		// P0 creates posts 0-2

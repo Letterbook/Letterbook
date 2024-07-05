@@ -41,5 +41,7 @@ public class BaseMappings : AutoMapper.Profile
 		CreateMap<Models.Audience, AudienceDto>(MemberList.Destination)
 			.ForMember(dto => dto.SourceType, opt => opt.Ignore())
 			.ForMember(dto => dto.SourceId, opt => opt.Ignore());
+
+		CreateMap<FollowerRelation, FollowerRelationDto>(MemberList.Destination);
 	}
 }

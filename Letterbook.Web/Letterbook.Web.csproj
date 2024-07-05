@@ -6,8 +6,13 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <UserSecretsId>5932fff5-e723-4c65-90fc-ec9f045b4119</UserSecretsId>
+        <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
     </PropertyGroup>
 
+    <ItemGroup>
+        <EmbeddedResource Include="wwwroot\**\*" />
+    </ItemGroup>
+    
     <ItemGroup>
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
             <_Parameter1>$(MSBuildProjectName).IntegrationTests</_Parameter1>
@@ -29,11 +34,13 @@
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="Microsoft.AspNetCore.StaticFiles" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
         <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
 <!--        <PackageReference Include="NSign.AspNetCore" />-->
         <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
@@ -54,6 +61,7 @@
       <ProjectReference Include="..\Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj" />
       <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj" />
       <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj" />
+      <ProjectReference Include="..\Letterbook.AspNet\Letterbook.AspNet.csproj" />
       <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
       <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj" />
     </ItemGroup>

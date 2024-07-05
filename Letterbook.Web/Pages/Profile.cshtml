@@ -11,8 +11,11 @@
         <span>@Model.Handle</span>
     </h1>
     
-    <a href="/@@@Model.BareHandle/edit">Edit</a>
-    
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a asp-page="ProfileEdit" asp-route-handle="@Model.BareHandle">Edit</a>
+    }
+
     <div>
         <h3>Description</h3>
         <div>@Model.Description</div>
@@ -36,5 +39,7 @@
         </div>
         
     </div>
+    
+    <p>Profile Id: <code>@Model.GetId()</code></p>
     
 </div>

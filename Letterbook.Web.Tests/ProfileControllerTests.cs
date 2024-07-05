@@ -2,6 +2,7 @@ using System.Net;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Web.Pages;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit.Abstractions;
 
@@ -17,7 +18,7 @@ public class ProfileControllerTests : WithMockContext
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 
 		_profile = new FakeProfile("letterbook.example").Generate();
-		_page = new Profile(ProfileServiceMock.Object, CoreOptionsMock)
+		_page = new Profile(ProfileServiceMock.Object, CoreOptionsMock, Mock.Of<ILogger<Profile>>())
 		{
 			PageContext = PageContext,
 			Handle = null!,

@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Letterbook.Core.Models;
 using Medo;
 
@@ -11,10 +12,30 @@ public interface IAccountProfileAdapter : IDisposable
 
 	delegate bool ProfileComparer(Profile profile);
 
+	/// <summary>
+	/// Query for one account by ID
+	/// </summary>
+	/// <param name="accountId"></param>
+	/// <returns></returns>
+	IQueryable<Account> SingleAccount(Guid accountId);
+
 	public bool RecordAccount(Account account);
 	public Task<bool> RecordAccounts(IEnumerable<Account> accounts);
 	public Task<Account?> LookupAccount(Guid id);
+	public Task<Account?> FindAccountByEmail(string normalizedEmail);
+
+	/// <summary>
+	/// Query for Accounts
+	/// </summary>
+	/// <returns></returns>
 	public IQueryable<Account> SearchAccounts();
+
+	/// <summary>
+	/// Compose a query including LinkedProfiles
+	/// </summary>
+	/// <param name="query">The query to compose onto</param>
+	/// <returns></returns>
+	public IQueryable<Account> WithProfiles(IQueryable<Account> query);
 
 	public Task<bool> AnyProfile(string handle);
 	public Task<Profile?> LookupProfile(Uuid7 localId);
@@ -23,6 +44,19 @@ public interface IAccountProfileAdapter : IDisposable
 	public IQueryable<Profile> SingleProfile(Uri fediId);
 	public IQueryable<Profile> WithAudience(IQueryable<Profile> query);
 	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uri relationId);
+	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uuid7 relationId);
+
+	/// <summary>
+	/// Query for navigation entities, using the given profile as a root entity
+	/// </summary>
+	/// <remarks>Consumers should be sure to set an OrderBy property</remarks>
+	/// <param name="profile"></param>
+	/// <param name="limit"></param>
+	/// <param name="queryExpression">An expression func that specifies the navigation property to query</param>
+	/// <typeparam name="T"></typeparam>
+	/// <returns></returns>
+	public IQueryable<T> QueryFrom<T>(Profile profile, int limit, Expression<Func<Profile, IEnumerable<T>>> queryExpression)
+		where T : class;
 
 	// Lookup Profile including relations to another profile
 	[Obsolete("Use IQueryable methods", false)]
