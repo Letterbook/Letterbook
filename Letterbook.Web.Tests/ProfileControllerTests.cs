@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Letterbook.Web.Pages;
@@ -19,7 +20,7 @@ public class ProfileControllerTests : WithMockContext
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 
 		_profile = new FakeProfile("letterbook.example").Generate();
-		_page = new Profile(ProfileServiceMock.Object, CoreOptionsMock, Mock.Of<ILogger<Profile>>())
+		_page = new Profile(ProfileServiceMock.Object, CoreOptionsMock, Mock.Of<ILogger<Profile>>(), new MappingConfigProvider(CoreOptionsMock))
 		{
 			PageContext = PageContext,
 		};
