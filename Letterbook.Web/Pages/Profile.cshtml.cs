@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Letterbook.Core;
-using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
@@ -85,7 +84,7 @@ public class Profile : PageModel
 		return Page();
 	}
 
-	public async Task<IActionResult> OnPostFollowRequest(Uuid7 followId)
+	public async Task<IActionResult> OnPostFollowRequest(string handle, Uuid7 followId)
 	{
 		if (SelfId is not { } selfId)
 			return Challenge();
@@ -95,10 +94,10 @@ public class Profile : PageModel
 		_profile = result.Follows;
 		_self = result.Follower;
 
-		return Page();
+		return RedirectToPage(GetType().Name, new { handle });
 	}
 
-	public async Task<IActionResult> OnPostUnfollow(Uuid7 followId)
+	public async Task<IActionResult> OnPostUnfollow(string handle, Uuid7 followId)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
@@ -110,6 +109,6 @@ public class Profile : PageModel
 		_profile = (await _profiles.LookupProfile(followId))!;
 		_self = (result?.Follower ?? await _profiles.LookupProfile(Uuid7.FromId25String(selfId)))!;
 
-		return Page();
+		return RedirectToPage(GetType().Name, new { handle });
 	}
 }
