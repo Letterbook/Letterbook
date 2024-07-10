@@ -118,6 +118,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_sink.OnMessage(new DiagnosticMessage("Bogus Seed: {0}", Init.WithSeed(T.Seed())));
 		InitTestData();
 		InitTimelineData();
+		DataCleanupRefs();
 
 		_context.Database.EnsureDeleted();
 		_context.Database.Migrate();
@@ -126,13 +127,35 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_context.SaveChanges();
 
 		_context.Posts.AddRange(Posts.SelectMany(pair => pair.Value));
-		_context.Posts.AddRange(Timeline);
 		_context.SaveChanges();
 
 		_feedsContext.Database.EnsureDeleted();
 		_feedsContext.Database.Migrate();
 		_feedsContext.AddRange(Timeline.Select(p => TimelinePost.Denormalize(p)).SelectMany(p => p));
 		_feedsContext.SaveChanges();
+	}
+
+	private void DataCleanupRefs()
+	{
+		var allAudience = Profiles.SelectMany(profile => profile.Headlining).ToHashSet();
+		allAudience.UnionWith(Profiles.SelectMany(profile => profile.Audiences));
+		allAudience.UnionWith(Posts.SelectMany(pair => pair.Value).SelectMany(post => post.Audience));
+
+		foreach (var p in Profiles)
+		{
+			p.Audiences = p.Audiences.ReplaceFrom(allAudience);
+			p.Headlining = p.Headlining.ReplaceFrom(allAudience);
+		}
+
+		foreach (var post in Timeline)
+		{
+			post.Audience = post.Audience.ReplaceFrom(allAudience);
+		}
+
+		foreach (var post in Posts.SelectMany(pair => pair.Value))
+		{
+			post.Audience = post.Audience.ReplaceFrom(allAudience);
+		}
 	}
 
 	protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -257,20 +280,6 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 			}
 
 			Timeline.AddRange(GeneratePosts(creator));
-		}
-
-		var allAudience = Posts
-			.SelectMany(pair => pair.Value)
-			.SelectMany(post => post.Audience)
-			.ToHashSet();
-		allAudience.UnionWith(Timeline.SelectMany(post => post.Audience));
-
-		foreach (var post in Timeline)
-		{
-			var set = new HashSet<Audience>(allAudience);
-			set.IntersectWith(post.Audience);
-
-			post.Audience = set;
 		}
 
 		return;
