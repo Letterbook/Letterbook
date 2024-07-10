@@ -154,7 +154,7 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("Date")
+                    b.Property<DateTimeOffset>("Date")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("FollowerId")
@@ -622,7 +622,7 @@ namespace Letterbook.Adapter.Db.Migrations
             modelBuilder.Entity("Letterbook.Core.Models.Audience", b =>
                 {
                     b.HasOne("Letterbook.Core.Models.Profile", "Source")
-                        .WithMany()
+                        .WithMany("Leading")
                         .HasForeignKey("SourceId");
 
                     b.Navigation("Source");
@@ -868,6 +868,8 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("FollowingCollection");
 
                     b.Navigation("Keys");
+
+                    b.Navigation("Leading");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.ThreadContext", b =>
