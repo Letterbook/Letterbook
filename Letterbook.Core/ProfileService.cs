@@ -362,7 +362,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> RemoveFollower(Uuid7 selfId, Uri followerId)
 	{
-		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), followerId).FirstOrDefaultAsync()
+		var self = await _profiles.SingleProfile(selfId).WithRelation(followerId).FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
 		var relation = self.FollowersCollection
 			.FirstOrDefault(p => p.Follower.FediId.OriginalString == followerId.OriginalString);
