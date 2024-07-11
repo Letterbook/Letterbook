@@ -109,7 +109,7 @@ public class Program
 			applicationBuilder.UseMiddleware<ProfileIdentityMiddleware>();
 		});
 
-		// app.UseSerilogRequestLogging();
+		app.UseSerilogRequestLogging();
 
 		app.MapRazorPages();
 		app.UsePathBase(new PathString("/api/v1"));
