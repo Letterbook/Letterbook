@@ -18,12 +18,12 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private ILogger<ProfileService> _logger;
 	private CoreOptions _coreConfig;
 	private IAccountProfileAdapter _profiles;
-	private IProfileEventService _profileEvents;
+	private IProfileEventPublisher _profileEvents;
 	private readonly IActivityPubClient _client;
 	private readonly IHostSigningKeyProvider _hostSigningKeyProvider;
 
 	public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options,
-		IAccountProfileAdapter profiles, IProfileEventService profileEvents, IActivityPubClient client, IHostSigningKeyProvider hostSigningKeyProvider)
+		IAccountProfileAdapter profiles, IProfileEventPublisher profileEvents, IActivityPubClient client, IHostSigningKeyProvider hostSigningKeyProvider)
 	{
 		_logger = logger;
 		_coreConfig = options.Value;
@@ -60,7 +60,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		profile.OwnedBy = account;
 		account.LinkedProfiles.Add(new ProfileClaims(account, profile, [ProfileClaim.Owner]));
 		await _profiles.Commit();
-		_profileEvents.Created(profile);
+		await _profileEvents.Created(profile);
 
 		return profile;
 	}
@@ -78,7 +78,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		var original = profile.ShallowClone();
 		profile.DisplayName = displayName;
 		await _profiles.Commit();
-		_profileEvents.Updated(original: original, updated: profile);
+		await _profileEvents.Updated(original: original, updated: profile);
 
 		return new UpdateResponse<Profile>
 		{
@@ -100,7 +100,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		var original = profile.ShallowClone();
 		profile.Description = description;
 		await _profiles.Commit();
-		_profileEvents.Updated(original: original, updated: profile);
+		await _profileEvents.Updated(original: original, updated: profile);
 
 		return new UpdateResponse<Profile>
 		{
@@ -122,7 +122,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		profile.CustomFields = customFields.ToArray();
 
 		await _profiles.Commit();
-		_profileEvents.Updated(original: original, updated: profile);
+		await _profileEvents.Updated(original: original, updated: profile);
 
 		return new UpdateResponse<Profile>
 		{
@@ -143,7 +143,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		profile.CustomFields = customFields.ToArray();
 
 		await _profiles.Commit();
-		_profileEvents.Updated(original: original, updated: profile);
+		await _profileEvents.Updated(original: original, updated: profile);
 
 		return new UpdateResponse<Profile>
 		{
@@ -169,7 +169,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		profile.CustomFields[index] = new CustomField { Label = key, Value = value };
 
 		await _profiles.Commit();
-		_profileEvents.Updated(original: original, updated: profile);
+		await _profileEvents.Updated(original: original, updated: profile);
 
 		return new UpdateResponse<Profile>
 		{

@@ -1,11 +1,24 @@
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
+using ActivityPub.Types.Conversion;
 using Letterbook.Core.Adapters;
 
 namespace Letterbook.Adapter.ActivityPub;
 
 public class Document : IActivityPubDocument
 {
+	private IJsonLdSerializer _serializer;
+
+	public Document(IJsonLdSerializer serializer)
+	{
+		_serializer = serializer;
+	}
+
+	public string Serialize(ASType document)
+	{
+		return _serializer.Serialize(document);
+	}
+
 	public AcceptActivity Accept(Models.Profile actor, ASObject asObject)
 	{
 		var doc = new AcceptActivity();

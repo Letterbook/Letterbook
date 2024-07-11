@@ -6,6 +6,7 @@ namespace Letterbook.Core.Adapters;
 
 public interface IActivityPubDocument
 {
+	public string Serialize(ASType document);
 	AcceptActivity Accept(Profile actor, ASObject asObject);
 	AddActivity Add(Profile actor, ASObject asObject, ASObject target);
 	AnnounceActivity Announce(Profile actor, IContentRef content);

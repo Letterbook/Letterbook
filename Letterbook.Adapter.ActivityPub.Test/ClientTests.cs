@@ -31,7 +31,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 	public ClientTests(ITestOutputHelper output, JsonLdSerializerFixture fixture)
 	{
 		var httpClient = new HttpClient(HttpMessageHandlerMock.Object);
-		_client = new Client(Mock.Of<ILogger<Client>>(), httpClient, fixture.JsonLdSerializer, new Document());
+		_client = new Client(Mock.Of<ILogger<Client>>(), httpClient, fixture.JsonLdSerializer, new Document(fixture.JsonLdSerializer));
 		_output = output;
 
 		_output.WriteLine($"Bogus Seed: {Init.WithSeed()}");

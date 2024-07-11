@@ -99,7 +99,7 @@ public static class DependencyInjectionExtensions
 		services.AddSingleton<MappingConfigProvider>();
 
 		// Register Services
-		services.AddScoped<IProfileEventService, ProfileEventService>();
+		services.AddScoped<IProfileEventPublisher, ProfileEventPublisher>();
 		services.AddScoped<IAccountService, AccountService>();
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IPostService, PostService>();

@@ -32,7 +32,7 @@ public class DeliveryWorker : IConsumer<ActivityMessage>
 
 		// TODO: side effects from response
 		// like permanent redirects, for example
-		var response = await _client.As(profile).SendDocument(context.Message.Inbox, context.Message.NextData);
+		var response = await _client.As(profile).SendDocument(context.Message.Inbox, context.Message.Data);
 		_logger.LogDebug("Delivered message {Type}, got response {@Response}", context.Message.Type, response);
 	}
 }
