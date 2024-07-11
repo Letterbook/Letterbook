@@ -16,8 +16,6 @@ public class Profile : PageModel
 {
 	private readonly IProfileService _profileSvc;
 	private readonly ILogger<Profile> _logger;
-	private readonly CoreOptions _options;
-	private readonly Mapper _mapper;
 	private IAuthzProfileService _profiles;
 	private Models.Profile _profile;
 	private Models.Profile? _self;
@@ -56,14 +54,12 @@ public class Profile : PageModel
 	public bool YouFollow => _self?.FollowingCollection.Any() ?? false;
 
 
-	public Profile(IProfileService profiles, IOptions<CoreOptions> options, ILogger<Profile> logger, MappingConfigProvider maps)
+	public Profile(IProfileService profiles, ILogger<Profile> logger)
 	{
 		_profile = default!;
 		_profiles = default!;
 		_profileSvc = profiles;
 		_logger = logger;
-		_mapper = new Mapper(maps.Profiles);
-		_options = options.Value;
 	}
 
 	public async Task<IActionResult> OnGet(string handle)

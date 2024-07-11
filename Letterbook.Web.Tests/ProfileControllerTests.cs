@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Letterbook.Core.Models.Mappers;
+using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Letterbook.Web.Pages;
@@ -14,13 +15,18 @@ public class ProfileControllerTests : WithMockContext
 {
 	private Profile _page;
 	private readonly Models.Profile _profile;
+	private Models.Profile _selfProfile;
+	private ClaimsPrincipal _principal;
 
 	public ProfileControllerTests(ITestOutputHelper output)
 	{
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 
+		_selfProfile = new FakeProfile("letterbook.example").Generate();
+		_principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("activeProfile", _selfProfile.GetId25())], "Test"));
+
 		_profile = new FakeProfile("letterbook.example").Generate();
-		_page = new Profile(ProfileServiceMock.Object, CoreOptionsMock, Mock.Of<ILogger<Profile>>(), new MappingConfigProvider(CoreOptionsMock))
+		_page = new Profile(ProfileServiceMock.Object, Mock.Of<ILogger<Profile>>())
 		{
 			PageContext = PageContext,
 		};
@@ -77,32 +83,58 @@ public class ProfileControllerTests : WithMockContext
 	[Fact(DisplayName = "Should load activeProfile for relationship checks")]
 	public async Task CanGetSelf()
 	{
-		var selfProfile = new FakeProfile("letterbook.example").Generate();
-		var identity = new ClaimsIdentity([new Claim("activeProfile", selfProfile.GetId25())], "Test");
-		var principal = new ClaimsPrincipal(identity);
-		MockHttpContext.SetupGet(ctx => ctx.User).Returns(principal);
+		MockHttpContext.SetupGet(ctx => ctx.User).Returns(_principal);
 
 		var result = await _page.OnGet(_profile.Handle);
 
-		Assert.Equal(selfProfile.GetId25(), _page.SelfId);
+		Assert.Equal(_selfProfile.GetId25(), _page.SelfId);
 	}
 
 	[Fact(DisplayName = "Should perform relationship checks")]
 	public async Task CanGetFollowerStatus()
 	{
-		var selfProfile = new FakeProfile("letterbook.example").Generate();
-		var identity = new ClaimsIdentity([new Claim("activeProfile", selfProfile.GetId25())], "Test");
-		var principal = new ClaimsPrincipal(identity);
-		selfProfile.Follow(_profile, FollowState.Accepted);
-		selfProfile.AddFollower(_profile, FollowState.Accepted);
+		_selfProfile.Follow(_profile, FollowState.Accepted);
+		_selfProfile.AddFollower(_profile, FollowState.Accepted);
 
-		MockHttpContext.SetupGet(ctx => ctx.User).Returns(principal);
-		ProfileServiceAuthMock.Setup(m => m.LookupProfile(selfProfile.GetId(), _profile.GetId()))
-			.ReturnsAsync(selfProfile);
+		MockHttpContext.SetupGet(ctx => ctx.User).Returns(_principal);
+		ProfileServiceAuthMock.Setup(m => m.LookupProfile(_selfProfile.GetId(), _profile.GetId()))
+			.ReturnsAsync(_selfProfile);
 
 		await _page.OnGet(_profile.Handle);
 
 		Assert.True(_page.FollowsYou);
 		Assert.True(_page.YouFollow);
+	}
+
+	[Fact(DisplayName = "Should follow")]
+	public async Task CanPostFollowRequest()
+	{
+		MockHttpContext.SetupGet(ctx => ctx.User).Returns(_principal);
+
+		var result = await _page.OnPostFollowRequest(_profile.Handle, _profile.GetId());
+
+		ProfileServiceAuthMock.Verify(m => m.Follow(_selfProfile.GetId(), _profile.GetId()));
+	}
+
+	[Fact(DisplayName = "Should unfollow")]
+	public async Task CanPostUnfollow()
+	{
+		_selfProfile.Follow(_profile, FollowState.Accepted);
+		MockHttpContext.SetupGet(ctx => ctx.User).Returns(_principal);
+
+		var result = await _page.OnPostUnfollow(_profile.Handle, _profile.GetId());
+
+		ProfileServiceAuthMock.Verify(m => m.Unfollow(_selfProfile.GetId(), _profile.GetId()));
+	}
+
+	[Fact(DisplayName = "Should remove follower")]
+	public async Task CanPostRemoveFollower()
+	{
+		_profile.Follow(_selfProfile, FollowState.Accepted);
+		MockHttpContext.SetupGet(ctx => ctx.User).Returns(_principal);
+
+		var result = await _page.OnPostRemoveFollower(_profile.Handle, _profile.GetId());
+
+		ProfileServiceAuthMock.Verify(m => m.RemoveFollower(_selfProfile.GetId(), _profile.GetId()));
 	}
 }
