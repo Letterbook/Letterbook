@@ -44,7 +44,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		if (account == null)
 		{
 			_logger.LogError("Failed to create a new profile because no account exists with ID {AccountId}", ownerId);
-			throw CoreException.MissingData("Cannot attach new Profile to Account because Account could not be found", typeof(Account), ownerId);
+			throw CoreException.MissingData("Cannot attach new Profile to Account because Account could not be found", typeof(Account),
+				ownerId);
 		}
 
 		if (await _profiles.AnyProfile(handle))
@@ -68,10 +69,11 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	{
 		// TODO(moderation): vulgarity filters
 		var profile = await RequireProfile(localId);
-		if (profile.DisplayName == displayName) return new UpdateResponse<Profile>
-		{
-			Original = profile
-		};
+		if (profile.DisplayName == displayName)
+			return new UpdateResponse<Profile>
+			{
+				Original = profile
+			};
 
 		var original = profile.ShallowClone();
 		profile.DisplayName = displayName;
@@ -89,10 +91,11 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	public async Task<UpdateResponse<Profile>> UpdateDescription(Guid localId, string description)
 	{
 		var profile = await RequireProfile(localId);
-		if (profile.Description == description) return new UpdateResponse<Profile>
-		{
-			Original = profile
-		};
+		if (profile.Description == description)
+			return new UpdateResponse<Profile>
+			{
+				Original = profile
+			};
 
 		var original = profile.ShallowClone();
 		profile.Description = description;
@@ -156,10 +159,11 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		if (index >= profile.CustomFields.Length)
 			throw CoreException.InvalidRequest("Cannot update custom field because it doesn't exist");
 		var field = profile.CustomFields[index];
-		if (field.Label == key && field.Value == value) return new UpdateResponse<Profile>
-		{
-			Original = profile
-		};
+		if (field.Label == key && field.Value == value)
+			return new UpdateResponse<Profile>
+			{
+				Original = profile
+			};
 		var original = profile.ShallowClone();
 
 		profile.CustomFields[index] = new CustomField { Label = key, Value = value };
@@ -210,14 +214,20 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	private async Task<FollowerRelation> Follow(Profile self, Profile target, bool subscribeOnly)
 	{
-		if (target.Authority == _coreConfig.BaseUri().Authority)
+		if (target.HasLocalAuthority(_coreConfig))
 		{
 			// TODO(moderation): Check for blocks
 			// TODO(moderation): Check for requiresApproval
 			var relation = self.Follow(target, FollowState.Accepted);
-			// target.FollowersCollection.Add(relation);
-			self.Audiences.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
-			self.Audiences.Add(Audience.Boosts(target));
+			var joining = new HashSet<Audience>();
+
+			joining.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
+			joining.Add(Audience.Boosts(target));
+			foreach (var audience in joining.ReplaceFrom(target.Headlining))
+			{
+				self.Audiences.Add(audience);
+			}
+
 			await _profiles.Commit();
 			return relation;
 		}
@@ -243,15 +253,31 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> Follow(Uuid7 selfId, Uri targetId)
 	{
-		var self = await RequireProfile(selfId, targetId);
-		var target = await ResolveProfile(targetId, self);
+		var self = await _profiles.SingleProfile(selfId).WithRelation(targetId).FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(selfId);
+		var target = await _profiles.SingleProfile(targetId)
+			             .Include(profile => profile.Headlining)
+			             .WithRelation(selfId)
+			             .FirstOrDefaultAsync()
+		             ?? await ResolveProfile(targetId, self)
+		             ?? throw CoreException.MissingData<Profile>(targetId);
+
 		return await Follow(self, target, false);
 	}
 
 	public async Task<FollowerRelation> Follow(Uuid7 selfId, Uuid7 targetId)
 	{
-		var target = await RequireProfile(targetId);
-		var self = await RequireProfile(selfId, target.FediId);
+		var target = await _profiles.SingleProfile(targetId)
+			             .WithRelation(selfId)
+			             .Include(profile => profile.Headlining)
+			             .FirstOrDefaultAsync()
+		             ?? throw CoreException.MissingData<Profile>(targetId);
+
+		var self = await _profiles.SingleProfile(selfId)
+			           .WithRelation(targetId)
+			           .FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(selfId);
+
 		return await Follow(self, target, false);
 	}
 
@@ -293,11 +319,18 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	{
 		if (selfId.Authority != _coreConfig.BaseUri().Authority)
 		{
-			_logger.LogWarning("Received a response to a follow request from {TargetId} concerning {SelfId}, but this is not the origin server", targetId, selfId);
+			_logger.LogWarning(
+				"Received a response to a follow request from {TargetId} concerning {SelfId}, but this is not the origin server", targetId,
+				selfId);
 			throw CoreException.WrongAuthority($"Cannot update Profile {selfId} because it has a different origin server", selfId);
 		}
-		var profile = await _profiles.LookupProfileWithRelation(selfId, targetId) ?? throw CoreException.MissingData($"Cannot update Profile {selfId} because it could not be found", typeof(Profile), selfId);
-		var relation = profile.FollowingCollection.FirstOrDefault(r => r.Follows.FediId == targetId) ?? throw CoreException.MissingData($"Cannot update following relationship for {selfId} concerning {targetId} because it could not be found", typeof(FollowerRelation), targetId);
+
+		var profile = await _profiles.LookupProfileWithRelation(selfId, targetId) ??
+		              throw CoreException.MissingData($"Cannot update Profile {selfId} because it could not be found", typeof(Profile),
+			              selfId);
+		var relation = profile.FollowingCollection.FirstOrDefault(r => r.Follows.FediId == targetId) ?? throw CoreException.MissingData(
+			$"Cannot update following relationship for {selfId} concerning {targetId} because it could not be found",
+			typeof(FollowerRelation), targetId);
 		switch (response)
 		{
 			case FollowState.Accepted:
@@ -329,7 +362,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> RemoveFollower(Uuid7 selfId, Uri followerId)
 	{
-		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), followerId).FirstOrDefaultAsync()
+		var self = await _profiles.SingleProfile(selfId).WithRelation(followerId).FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
 		var relation = self.FollowersCollection
 			.FirstOrDefault(p => p.Follower.FediId.OriginalString == followerId.OriginalString);
@@ -340,8 +373,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> RemoveFollower(Uuid7 selfId, Uuid7 followerId)
 	{
-		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), followerId).FirstOrDefaultAsync()
-		           ?? throw CoreException.MissingData<Profile>(selfId);
+		var self = await _profiles.SingleProfile(selfId)
+			.WithRelation(followerId)
+			.FirstOrDefaultAsync() ?? throw CoreException.MissingData<Profile>(selfId);
 		var relation = self.FollowersCollection
 			.FirstOrDefault(p => p.Follower.GetId() == followerId);
 
@@ -352,8 +386,6 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private async Task<FollowerRelation> Unfollow(Profile self, FollowerRelation relation)
 	{
 		self.Unfollow(relation.Follows);
-		self.Audiences.Remove(Audience.Followers(relation.Follows));
-		self.Audiences.Remove(Audience.Subscribers(relation.Follows));
 		if (self.Audiences.Count > 0)
 		{
 			foreach (var each in self.Audiences.Where(audience => audience.Source == relation.Follows))
@@ -361,6 +393,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 				self.Audiences.Remove(each);
 			}
 		}
+
 		// TODO: federate this
 		await _profiles.Commit();
 		relation.State = FollowState.None;
@@ -395,6 +428,18 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await Unfollow(self, relation);
 	}
 
+	public Task<int> FollowerCount(Profile profile)
+	{
+		return _profiles.QueryFrom(profile, p => p.FollowersCollection)
+			.CountAsync();
+	}
+
+	public Task<int> FollowingCount(Profile profile)
+	{
+		return _profiles.QueryFrom(profile, p => p.FollowingCollection)
+			.CountAsync();
+	}
+
 	public Task ReportProfile(Guid selfId, Uri profileId)
 	{
 		throw new NotImplementedException();
@@ -409,7 +454,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	{
 		var profile = await _profiles.LookupProfile(profileId)
 		              ?? throw CoreException.MissingData<Profile>(profileId);
-		return _profiles.QueryFrom(profile, Math.Min(1000, limit), query => query.FollowingCollection)
+		return _profiles.QueryFrom(profile, query => query.FollowingCollection)
+			.Take(Math.Max(limit, 200))
 			.Include(relation => relation.Follows)
 			.OrderByDescending(relation => relation.Date)
 			.Where(relation => relation.Date < followedBefore)
@@ -420,7 +466,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	{
 		var profile = await _profiles.LookupProfile(profileId)
 		              ?? throw CoreException.MissingData<Profile>(profileId);
-		return _profiles.QueryFrom(profile, Math.Min(1000, limit), query => query.FollowersCollection)
+		return _profiles.QueryFrom(profile, query => query.FollowersCollection)
+			.Take(Math.Max(limit, 200))
 			.Include(relation => relation.Follower)
 			.OrderByDescending(relation => relation.Date)
 			.Where(relation => relation.Date < followedBefore)
@@ -486,8 +533,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	{
 		var profile = await _profiles.LookupProfile(profileId);
 		if (profile != null
-			&& !profile.HasLocalAuthority(_coreConfig)
-			&& profile.Updated.Add(TimeSpan.FromHours(12)) >= DateTime.UtcNow) return profile;
+		    && !profile.HasLocalAuthority(_coreConfig)
+		    && profile.Updated.Add(TimeSpan.FromHours(12)) >= DateTime.UtcNow) return profile;
 
 		try
 		{
@@ -511,9 +558,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 			await _profiles.Cancel();
 			throw;
 		}
+
 		_logger.LogInformation("Fetched Profile {ProfileId} from origin", profileId);
 		return profile;
-
 	}
 
 	private async Task<TResult> Fetch<TResult>(Uri id, Profile? onBehalfOf) where TResult : IFederated
