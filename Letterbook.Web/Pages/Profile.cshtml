@@ -32,7 +32,11 @@
         }
         if(Model.FollowsYou)
         {
-            <span>Follows you</span>
+            <form asp-page-handler="RemoveFollower" asp-route-followerId="@Model.Id" method="post">
+                <span>Follows you</span>
+                <button>Remove follower</button>
+            </form>
+            
         }
     }
 

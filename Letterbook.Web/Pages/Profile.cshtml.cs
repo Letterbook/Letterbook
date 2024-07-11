@@ -68,7 +68,6 @@ public class Profile : PageModel
 
 	public async Task<IActionResult> OnGet(string handle)
 	{
-		_logger.LogDebug("Account {Name} has effective claims {Claims}", User.Identity?.Name, User.Claims);
 		_profiles = _profileSvc.As(User.Claims);
 
 		var found = await _profiles.FindProfiles(handle);
@@ -90,9 +89,7 @@ public class Profile : PageModel
 			return Challenge();
 
 		_profiles = _profileSvc.As(User.Claims);
-		var result = await _profiles.Follow(Uuid7.FromId25String(selfId), followId);
-		_profile = result.Follows;
-		_self = result.Follower;
+		await _profiles.Follow(Uuid7.FromId25String(selfId), followId);
 
 		return RedirectToPage(GetType().Name, new { handle });
 	}
@@ -105,9 +102,20 @@ public class Profile : PageModel
 			return Challenge();
 
 		_profiles = _profileSvc.As(User.Claims);
-		var result = await _profiles.Unfollow(Uuid7.FromId25String(selfId), followId);
-		_profile = (await _profiles.LookupProfile(followId))!;
-		_self = (result?.Follower ?? await _profiles.LookupProfile(Uuid7.FromId25String(selfId)))!;
+		await _profiles.Unfollow(Uuid7.FromId25String(selfId), followId);
+
+		return RedirectToPage(GetType().Name, new { handle });
+	}
+
+	public async Task<IActionResult> OnPostRemoveFollower(string handle, Uuid7 followerId)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+		if (SelfId is not { } selfId)
+			return Challenge();
+
+		_profiles = _profileSvc.As(User.Claims);
+		var result = await _profiles.RemoveFollower(Uuid7.FromId25String(selfId), followerId);
 
 		return RedirectToPage(GetType().Name, new { handle });
 	}

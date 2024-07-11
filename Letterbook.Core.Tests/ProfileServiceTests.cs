@@ -387,10 +387,8 @@ public class ProfileServiceTests : WithMocks
 		var follower = new FakeProfile().Generate();
 		_profile.AddFollower(follower, FollowState.Accepted);
 		var queryable = new List<Profile> { _profile }.BuildMock();
-		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
-			.Returns(queryable);
-		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
-			.Returns(queryable);
+		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryable);
+		AccountProfileMock.Setup(m => m.SingleProfile(_profile.FediId)).Returns(queryable);
 
 		var actual = useId ? await _service.RemoveFollower(_profile.GetId(), follower.GetId())
 			:await _service.RemoveFollower(_profile.GetId(), follower.FediId);

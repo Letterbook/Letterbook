@@ -373,8 +373,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> RemoveFollower(Uuid7 selfId, Uuid7 followerId)
 	{
-		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), followerId).FirstOrDefaultAsync()
-		           ?? throw CoreException.MissingData<Profile>(selfId);
+		var self = await _profiles.SingleProfile(selfId)
+			.WithRelation(followerId)
+			.FirstOrDefaultAsync() ?? throw CoreException.MissingData<Profile>(selfId);
 		var relation = self.FollowersCollection
 			.FirstOrDefault(p => p.Follower.GetId() == followerId);
 
@@ -385,9 +386,6 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private async Task<FollowerRelation> Unfollow(Profile self, FollowerRelation relation)
 	{
 		self.Unfollow(relation.Follows);
-		// self.Audiences.Clear();
-		// self.Audiences.Remove(Audience.Followers(relation.Follows));
-		// self.Audiences.Remove(Audience.Subscribers(relation.Follows));
 		if (self.Audiences.Count > 0)
 		{
 			foreach (var each in self.Audiences.Where(audience => audience.Source == relation.Follows))
