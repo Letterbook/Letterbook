@@ -13,10 +13,10 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 {
 	private readonly CoreOptions _options;
 	private readonly ILogger<ActivityMessagePublisher> _logger;
-	private readonly Document _document;
+	private readonly IActivityPubDocument _document;
 	private readonly IBus _bus;
 
-	public ActivityMessagePublisher(ILogger<ActivityMessagePublisher> logger, IOptions<CoreOptions> options, Document document, IBus bus)
+	public ActivityMessagePublisher(ILogger<ActivityMessagePublisher> logger, IOptions<CoreOptions> options, IActivityPubDocument document, IBus bus)
 	{
 		_options = options.Value;
 		_bus = bus;

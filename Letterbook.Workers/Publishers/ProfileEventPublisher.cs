@@ -1,8 +1,7 @@
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
-using Microsoft.Extensions.Logging;
 
-namespace Letterbook.Core;
+namespace Letterbook.Workers.Publishers;
 
 public class ProfileEventPublisher : IProfileEventPublisher
 {
