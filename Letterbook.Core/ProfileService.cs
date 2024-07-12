@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
@@ -302,12 +303,23 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	{
 		var relation = target.AddFollower(follower, FollowState.Accepted);
 		await _profiles.Commit();
-		// if (relation.State == FollowState.Rejected) return relation;
 
-		// Todo: punt more AP responses to a delivery queue
-		// Todo: also, implement that delivery queue
-		// await _client.As(target).SendAccept(follower.Inbox, ActivityType.Follow, follower.Id, requestId);
-		return relation;
+		var actor = target;
+		var inbox = follower.Inbox;
+		switch (relation.State)
+		{
+			case FollowState.Accepted:
+				await _activity.AcceptFollower(inbox, follower, actor);
+				return relation;
+			case FollowState.None:
+			case FollowState.Rejected:
+				await _activity.RejectFollower(inbox, follower, actor);
+				return relation;
+			case FollowState.Pending:
+			default:
+				await _activity.PendingFollower(inbox, follower, actor);
+				return relation;
+		}
 	}
 
 	public async Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response)
@@ -349,8 +361,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		self.RemoveFollower(relation.Follower);
 		if (relation.Follower.HasLocalAuthority(_coreConfig))
 			relation.Follower.LeaveAudience(self);
-		// TODO: federate this
+
 		await _profiles.Commit();
+		await _activity.RemoveFollower(relation.Follower.Inbox, relation.Follower, self);
 		relation.State = FollowState.None;
 		return relation;
 	}
@@ -389,8 +402,14 @@ public class ProfileService : IProfileService, IAuthzProfileService
 			}
 		}
 
-		// TODO: federate this
 		await _profiles.Commit();
+
+		if (!relation.Follows.HasLocalAuthority(_coreConfig))
+		{
+			var target = relation.Follows;
+			await _activity.Unfollow(target.Inbox, target, self);
+		}
+
 		relation.State = FollowState.None;
 		return relation;
 	}
@@ -565,6 +584,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 			return await _client.As(onBehalfOf).Fetch<TResult>(id);
 		}
 
+		Activity.Current?.AddEvent(new("HostKeySignature"));
 		var key = await _hostSigningKeyProvider.GetSigningKey();
 		return await _client.Fetch<TResult>(id, key);
 	}

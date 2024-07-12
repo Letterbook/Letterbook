@@ -56,8 +56,8 @@ public interface IActivityMessagePublisher : IEventChannel
 	/// </summary>
 	/// <remarks>This will be represented as an Accept:Follow Activity</remarks>
 	/// <param name="inbox"></param>
-	/// <param name="target"></param>
-	/// <param name="actor"></param>
+	/// <param name="target">The profile that previously made the request</param>
+	/// <param name="actor">The current actor profile that is accepting the request</param>
 	/// <returns></returns>
 	public Task AcceptFollower(Uri inbox, Profile target, Profile actor);
 
@@ -66,8 +66,19 @@ public interface IActivityMessagePublisher : IEventChannel
 	/// </summary>
 	/// <remarks>This will be represented as a Reject:Follow Activity</remarks>
 	/// <param name="inbox"></param>
-	/// <param name="target"></param>
-	/// <param name="actor"></param>
+	/// <param name="target">The profile that previously made the request</param>
+	/// <param name="actor">The current actor profile that is accepting the request</param>
 	/// <returns></returns>
 	public Task RejectFollower(Uri inbox, Profile target, Profile actor);
+
+	/// <summary>
+	/// Construct an AP document that notifies the target's follow request is pending acceptance and send it
+	/// to the specified inbox
+	/// </summary>
+	/// <remarks>This will be represented as a TentativeAccept:Follow Activity</remarks>
+	/// <param name="inbox"></param>
+	/// <param name="target">The profile that previously made the request</param>
+	/// <param name="actor">The current actor profile that is accepting the request</param>
+	/// <returns></returns>
+	public Task PendingFollower(Uri inbox, Profile target, Profile actor);
 }

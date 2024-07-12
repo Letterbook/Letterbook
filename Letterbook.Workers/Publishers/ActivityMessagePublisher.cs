@@ -69,6 +69,12 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 		await Deliver(inbox, document, actor);
 	}
 
+	public async Task PendingFollower(Uri inbox, Profile target, Profile actor)
+	{
+		var document = _document.TentativeAccept(actor, _document.Follow(target, actor));
+		await Deliver(inbox, document, actor);
+	}
+
 	private ActivityMessage FormatMessage(Uri inbox, ASType activity, Profile? onBehalfOf)
 	{
 		var subject = activity.Is<ASObject>(out var o)
