@@ -1,6 +1,8 @@
+using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Util;
+using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests;
@@ -27,12 +29,15 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 
 	public DeliveryWorkerTests(ITestOutputHelper output)
 	{
-		_provider = new ServiceCollection()
+		var services = new ServiceCollection()
 			.AddSingleton(output.BuildLoggerFactory(LogLevel.Debug))
 			.AddMocks(this)
 			.AddScoped<IActivityMessagePublisher, ActivityMessagePublisher>()
-			.AddMassTransitTestHarness(bus => { bus.AddConsumer<DeliveryWorker>(); })
-			.BuildServiceProvider();
+			.AddScoped<IActivityPubDocument, Document>()
+			.AddMassTransitTestHarness(bus => { bus.AddConsumer<DeliveryWorker>(); });
+		services.TryAddTypesModule();
+
+		_provider = services.BuildServiceProvider();
 		_publisher = _provider.GetRequiredService<IActivityMessagePublisher>();
 		_consumer = _provider.GetRequiredService<DeliveryWorker>();
 		_harness = _provider.GetRequiredService<ITestHarness>();

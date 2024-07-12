@@ -34,6 +34,7 @@ public abstract class WithMocks
 	public Mock<IAuthzTimelineService> AuthzTimelineServiceMock;
 	public Mock<IAccountService> AccountServiceMock;
 	public Mock<IJsonLdSerializer> JsonLdSerializerMock;
+	public Mock<IActivityMessagePublisher> ActivityPublisherMock;
 
 	protected WithMocks()
 	{
@@ -55,6 +56,7 @@ public abstract class WithMocks
 		AuthzTimelineServiceMock = new Mock<IAuthzTimelineService>();
 		AccountServiceMock = new Mock<IAccountService>();
 		JsonLdSerializerMock = new Mock<IJsonLdSerializer>();
+		ActivityPublisherMock = new Mock<IActivityMessagePublisher>();
 
 		ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
 		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>(), It.IsAny<Uuid7>())).Returns(PostServiceAuthMock.Object);

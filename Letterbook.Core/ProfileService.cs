@@ -21,9 +21,11 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private IProfileEventPublisher _profileEvents;
 	private readonly IActivityPubClient _client;
 	private readonly IHostSigningKeyProvider _hostSigningKeyProvider;
+	private readonly IActivityMessagePublisher _activity;
 
 	public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options,
-		IAccountProfileAdapter profiles, IProfileEventPublisher profileEvents, IActivityPubClient client, IHostSigningKeyProvider hostSigningKeyProvider)
+		IAccountProfileAdapter profiles, IProfileEventPublisher profileEvents, IActivityPubClient client,
+		IHostSigningKeyProvider hostSigningKeyProvider, IActivityMessagePublisher activity)
 	{
 		_logger = logger;
 		_coreConfig = options.Value;
@@ -31,6 +33,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		_profileEvents = profileEvents;
 		_client = client;
 		_hostSigningKeyProvider = hostSigningKeyProvider;
+		_activity = activity;
 	}
 
 	public Task<Profile> CreateProfile(Profile profile)
@@ -234,21 +237,13 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 		// TODO(moderation): Check for blocks
 		// TODO(moderation): Check for requiresApproval
-		var followState = await _client.As(self).SendFollow(target.Inbox, target);
-		switch (followState.Data)
-		{
-			case FollowState.Accepted:
-			case FollowState.Pending:
-				self.Follow(target, followState.Data);
-				self.Audiences.Add(Audience.Followers(target));
-				self.Audiences.Add(Audience.Boosts(target));
-				await _profiles.Commit();
-				return new FollowerRelation(self, target, followState.Data);
-			case FollowState.None:
-			case FollowState.Rejected:
-			default:
-				return new FollowerRelation(self, target, followState.Data);
-		}
+		await _activity.Follow(target.Inbox, target, self);
+
+		self.Follow(target, FollowState.Pending);
+		self.Audiences.Add(Audience.Followers(target));
+		self.Audiences.Add(Audience.Boosts(target));
+		await _profiles.Commit();
+		return new FollowerRelation(self, target, FollowState.Pending);
 	}
 
 	public async Task<FollowerRelation> Follow(Uuid7 selfId, Uri targetId)
