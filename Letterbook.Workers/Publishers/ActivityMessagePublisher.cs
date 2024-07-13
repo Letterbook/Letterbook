@@ -1,5 +1,4 @@
 using ActivityPub.Types.AS;
-using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
@@ -77,14 +76,14 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 
 	private ActivityMessage FormatMessage(Uri inbox, ASType activity, Profile? onBehalfOf)
 	{
-		var subject = activity.Is<ASObject>(out var o)
+		var act = activity.Is<ASObject>(out var o)
 			? o.Id
 			: activity.Is<ASLink>(out var l)
 				? l.HRef.ToString() : null;
-		subject ??= string.Join(',', activity.TypeMap.ASTypes);
+		act ??= string.Join(',', activity.TypeMap.ASTypes);
 		return new ActivityMessage
 		{
-			Subject = subject,
+			Activity = act,
 			Claims = [],
 			Type = nameof(Deliver),
 			Data = _document.Serialize(activity),

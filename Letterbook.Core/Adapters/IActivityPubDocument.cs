@@ -19,7 +19,7 @@ public interface IActivityPubDocument
 	RejectActivity Reject(Profile actor, ASObject asObject);
 	RemoveActivity Remove(Profile actor, ASType @object, ASType target);
 	TentativeAcceptActivity TentativeAccept(Profile actor, ASObject asObject);
-	UndoActivity Undo(Profile actor, ASType @object);
+	UndoActivity Undo(Profile actor, ASObject @object);
 	UpdateActivity Update(Profile actor, IContentRef content);
 	ASActivity BuildActivity(Models.ActivityType type);
 }

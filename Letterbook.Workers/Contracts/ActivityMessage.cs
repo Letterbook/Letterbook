@@ -9,7 +9,7 @@ public record ActivityMessage
 	public Uuid7? OnBehalfOf { get; init; }
 	public required Uri Inbox { get; init; }
 	public required string Data { get; init; }
-	public required string Subject { get; init; }
+	public required string Activity { get; init; }
 	public required string Type { get; init; }
 	public required ImmutableHashSet<Claim> Claims { get; init; }
 }

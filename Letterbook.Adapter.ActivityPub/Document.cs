@@ -91,9 +91,12 @@ public class Document : IActivityPubDocument
 		return doc;
 	}
 
-	public UndoActivity Undo(Models.Profile actor, ASType @object)
+	public UndoActivity Undo(Models.Profile actor, ASObject asObject)
 	{
-		throw new NotImplementedException();
+		var doc = new UndoActivity();
+		doc.Actor.Add(ActorLink(actor));
+		doc.Object.Add(asObject);
+		return doc;
 	}
 
 	public UpdateActivity Update(Models.Profile actor, Models.IContentRef content)

@@ -25,7 +25,6 @@ public abstract class WithMocks
 	public Mock<IAuthzProfileService> ProfileServiceAuthMock;
 	public IOptions<CoreOptions> CoreOptionsMock;
 	public Mock<MockableMessageHandler> HttpMessageHandlerMock;
-	public ServiceCollection MockedServiceCollection;
 	public Mock<IPostEventPublisher> PostEventServiceMock;
 	public Mock<IPostService> PostServiceMock;
 	public Mock<IAuthzPostService> PostServiceAuthMock;
@@ -35,6 +34,8 @@ public abstract class WithMocks
 	public Mock<IAccountService> AccountServiceMock;
 	public Mock<IJsonLdSerializer> JsonLdSerializerMock;
 	public Mock<IActivityMessagePublisher> ActivityPublisherMock;
+
+	public ServiceCollection MockedServiceCollection;
 
 	protected WithMocks()
 	{
