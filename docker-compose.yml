@@ -72,8 +72,10 @@ services:
     
   tempo:
     container_name: tempo
-    image: grafana/tempo:2.5.0
+    image: &tempo-image grafana/tempo:2.5.0
     command: [ "-config.file=/etc/tempo.yaml" ]
+    depends_on:
+      - tempo-init
     volumes:
       - ./Letterbook.Dashboards/Tempo/tempo.yaml:/etc/tempo.yaml
       - letterbook_tempo_data:/tmp/tempo
@@ -81,6 +83,16 @@ services:
       - "9095:9095" # tempo grpc
       - "4317:4317"  # otlp grpc
     restart: unless-stopped
+
+  tempo-init:
+    image: *tempo-image
+    user: root
+    entrypoint:
+      - "chown"
+      - "10001:10001"
+      - "/var/tempo"
+    volumes:
+      - letterbook_tempo_data:/var/tempo
 
   db_metrics_exporter:
     container_name: metrics_exporter
