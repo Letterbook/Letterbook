@@ -1,7 +1,7 @@
 ﻿# REST templates for Letterbook's first-party APIs
 
 ### Draft and publish
-POST http://{{host}}/lb/v1/posts/{{profileId}}/post
+POST {{host}}/lb/v1/posts/{{profileId}}/post
 Content-Type: application/json
 
 {
