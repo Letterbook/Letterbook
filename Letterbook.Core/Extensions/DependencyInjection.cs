@@ -30,6 +30,7 @@ public static class DependencyInjection
 			.AddScoped<IAuthzPostService, PostService>()
 			.AddScoped<ITimelineService, TimelineService>()
 			.AddScoped<MappingConfigProvider>()
+			.AddSingleton<Instrumentation>()
 			.AddSingleton<IAuthorizationService, AuthorizationService>()
 			.AddSingleton<IHostSigningKeyProvider, DevelopmentHostSigningKeyProvider>();
 
@@ -47,6 +48,19 @@ public static class DependencyInjection
 			.AddScoped<TScopedWorker>();
 	}
 
+	public static OpenTelemetryBuilder AddTelemetry(this OpenTelemetryBuilder builder)
+	{
+		return builder.WithMetrics(metrics =>
+			{
+				metrics.AddHttpClientInstrumentation();
+				metrics.AddPrometheusExporter();
+			})
+			.WithTracing(tracing =>
+			{
+				tracing.AddHttpClientInstrumentation();
+				tracing.AddOtlpExporter();
+			});
+	}
 	public static IOpenTelemetryBuilder AddClientTelemetry(this IOpenTelemetryBuilder builder)
 	{
 		return builder
