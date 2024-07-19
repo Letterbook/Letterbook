@@ -29,7 +29,7 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [Consumes("application/ld+json",
 	"application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
 	"application/activity+json")]
-[Authorize(policy: "ActivityPub")]
+[Authorize(policy: Constants.ActivityPubPolicy)]
 public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;
@@ -51,6 +51,7 @@ public class ActorController : ControllerBase
 
 	[HttpGet]
 	[Route("{id}")]
+	[AllowAnonymous]
 	public async Task<IActionResult> GetActor(string id)
 	{
 		if (!Id.TryAsUuid7(id, out var uuid))
