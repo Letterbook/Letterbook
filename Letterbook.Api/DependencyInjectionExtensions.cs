@@ -132,6 +132,12 @@ public static class DependencyInjectionExtensions
 		{
 			policy.RequireAuthenticatedUser();
 		});
+
+		options.AddPolicy(Constants.ActivityPubPolicy, policy =>
+		{
+			policy.RequireAuthenticatedUser();
+			policy.AddAuthenticationSchemes(HttpSignatureAuthenticationDefaults.Scheme);
+		});
 		return options;
 	}
 
@@ -199,15 +205,6 @@ public static class DependencyInjectionExtensions
 				options.RequireHttpsMetadata = false;
 			})
 			.AddHttpSignature();
-
-		services.AddAuthorization(opts =>
-		{
-			opts.AddPolicy("ActivityPub", static policy =>
-			{
-				policy.RequireAuthenticatedUser();
-				policy.AddAuthenticationSchemes(HttpSignatureAuthenticationDefaults.Scheme);
-			});
-		});
 
 		return services;
 	}

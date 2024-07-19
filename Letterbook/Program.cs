@@ -3,6 +3,7 @@ using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Api;
+using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
 using Letterbook.Api.Swagger;
 using Letterbook.AspNet;
 using Letterbook.Core.Extensions;
@@ -44,6 +45,8 @@ public class Program
 		);
 
 		builder.Services.AddOpenTelemetry()
+			.AddAspnetTelemetry()
+			.AddWorkerTelemetry()
 			.AddDbTelemetry()
 			.AddClientTelemetry()
 			.AddTelemetryExporters();
@@ -59,7 +62,6 @@ public class Program
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
 			.AddDefaultUI();
-		builder.Services.AddAuthentication("Test");
 		builder.Services.AddRazorPages()
 			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
 		builder.Services.AddAuthorization(options =>
@@ -102,6 +104,7 @@ public class Program
 		app.MapPrometheusScrapingEndpoint();
 		app.UseWebFingerScoped();
 
+		app.UseHttpSignatureVerification();
 		app.UseAuthentication();
 		app.UseAuthorization();
 		app.UseWhen(ProfileIdentityPaths, applicationBuilder =>
@@ -121,11 +124,11 @@ public class Program
 
 		static bool ProfileIdentityPaths(HttpContext context)
 		{
-			return !context.Request.Path.StartsWithSegments("/Identity/")
+			return !context.Request.Path.StartsWithSegments("/Identity")
 			       // TODO: prefix with /ap/v1
 			       // Need to use url generators integrated with routing, instead of just a bunch of magic strings
-			       && !context.Request.Path.StartsWithSegments("/actor/")
-			       && !context.Request.Path.StartsWithSegments("/object/");
+			       && !context.Request.Path.StartsWithSegments("/actor")
+			       && !context.Request.Path.StartsWithSegments("/object");
 		}
 	}
 }
