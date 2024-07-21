@@ -8,5 +8,5 @@ Accept: application/ld+json; profile="https://www.w3.org/ns/activitystreams"
 
 
 ### Webfinger Peer
-GET {{peer}}/.well-known/webfinger?resource=acct:@{{peer_user}}@{{peer_domain}} 
+GET {{peer}}/.well-known/webfinger?resource=acct:{{peer_user}}@{{peer_domain}} 
 

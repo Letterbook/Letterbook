@@ -26,4 +26,5 @@ Content-Type: application/json
   "sharesCollection": []
 }
 
-###
+### Follow FediId
+POST {{host}}/lb/v1/profiles/{{id}}/
