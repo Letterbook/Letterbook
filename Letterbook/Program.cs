@@ -45,11 +45,10 @@ public class Program
 		);
 
 		builder.Services.AddOpenTelemetry()
+			.AddTelemetry()
 			.AddAspnetTelemetry()
 			.AddWorkerTelemetry()
-			.AddDbTelemetry()
-			.AddClientTelemetry()
-			.AddTelemetryExporters();
+			.AddDbTelemetry();
 		builder.Services.AddHealthChecks();
 		builder.Services.AddLetterbookCore(builder.Configuration)
 			.AddActivityPubClient(builder.Configuration)
