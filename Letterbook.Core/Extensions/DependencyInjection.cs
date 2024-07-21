@@ -57,6 +57,7 @@ public static class DependencyInjection
 			})
 			.WithTracing(tracing =>
 			{
+				tracing.AddSource(["Letterbook", "Letterbook.*"]);
 				tracing.AddHttpClientInstrumentation();
 				tracing.AddOtlpExporter();
 			});

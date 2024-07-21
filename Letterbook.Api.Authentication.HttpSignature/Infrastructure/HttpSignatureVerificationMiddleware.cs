@@ -1,6 +1,4 @@
-using System.Diagnostics;
 using Letterbook.Api.Authentication.HttpSignature.Verification;
-using Letterbook.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -23,18 +21,6 @@ public class HttpSignatureVerificationMiddleware : IMiddleware
 {
 	private readonly ILogger<HttpSignatureVerificationMiddleware> _logger;
 	private readonly IFederatedActorHttpSignatureVerifier _verifier;
-	private readonly ActivitySource _instrumentation;
-
-	public HttpSignatureVerificationMiddleware(
-		ILogger<HttpSignatureVerificationMiddleware> logger,
-		IFederatedActorHttpSignatureVerifier verifier,
-		Instrumentation instrumentation
-		)
-	{
-		_logger = logger;
-		_verifier = verifier;
-		_instrumentation = instrumentation.ActivitySource;
-	}
 
 	public HttpSignatureVerificationMiddleware(
 		ILogger<HttpSignatureVerificationMiddleware> logger,
@@ -43,12 +29,10 @@ public class HttpSignatureVerificationMiddleware : IMiddleware
 	{
 		_logger = logger;
 		_verifier = verifier;
-		_instrumentation = Activity.Current?.Source ?? new ActivitySource(GetType().Name);
 	}
 
 	public async Task InvokeAsync(HttpContext context, RequestDelegate next)
 	{
-		using var activity = _instrumentation.StartActivity(GetType().Name);
 		var signatureFeature = new HttpSignatureFeature();
 		context.Features.Set(signatureFeature);
 
