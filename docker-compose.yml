@@ -5,7 +5,7 @@ services:
   # Services required for Letterbook operation
   timescale:
     container_name: timescale
-    image: timescale/timescaledb:2.15.2-pg15-oss
+    image: timescale/timescaledb:2.15.3-pg15-oss
     environment:
       - POSTGRES_USER=letterbook
       - POSTGRES_PASSWORD=letterbookpw
@@ -63,7 +63,7 @@ services:
     
   prometheus:
     container_name: prometheus
-    image: prom/prometheus:v2.53.0
+    image: prom/prometheus:v2.53.1
     ports:
       - "9090:9090"
     volumes:
