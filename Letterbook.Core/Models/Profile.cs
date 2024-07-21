@@ -57,9 +57,9 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		SharedInbox = builder.Uri;
 
 		builder.Path = basePath;
-		builder.Fragment = "public_keys/0";
+		builder.Fragment = "key-0";
 		Keys.Add(SigningKey.Rsa(0, builder.Uri));
-		builder.Fragment = "public_keys/1";
+		builder.Fragment = "key-1";
 		Keys.Add(SigningKey.EcDsa(1, builder.Uri));
 	}
 
