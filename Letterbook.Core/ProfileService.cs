@@ -190,7 +190,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	public async Task<Profile?> LookupProfile(Uuid7 profileId, Uuid7? relatedProfile)
 	{
 		var query = _profiles.SingleProfile(profileId);
-		query = relatedProfile.HasValue ? _profiles.WithRelation(query, relatedProfile.Value) : query;
+		query = relatedProfile.HasValue ? _profiles.WithRelation(query, relatedProfile.Value) : query.Include(p => p.Keys);
 
 		return await query.FirstOrDefaultAsync();
 	}
