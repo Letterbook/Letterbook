@@ -27,8 +27,8 @@ public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSign
 			var signatureFeature = Context.Features.Get<HttpSignatureFeature>();
 			if (signatureFeature == null)
 			{
-				return AuthenticateResult.Fail(
-					$"HTTP Signature feature is not available in the request context. Ensure that {nameof(HttpSignatureVerificationMiddleware)} is added to the pipeline before authentication.");
+				_logger.LogError($"Ensure that {nameof(HttpSignatureVerificationMiddleware)} is added to the pipeline before authentication.");
+				return AuthenticateResult.Fail("HTTP Signature feature is not available in the request context.");
 			}
 
 			var identities = signatureFeature

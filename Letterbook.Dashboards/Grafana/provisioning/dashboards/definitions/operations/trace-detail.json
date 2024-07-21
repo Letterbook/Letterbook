@@ -108,7 +108,7 @@
           "tableType": "traces"
         }
       ],
-      "title": "New Panel",
+      "title": "Trace",
       "type": "traces"
     },
     {
@@ -203,7 +203,7 @@
           "fullMetaSearch": false,
           "includeNullMetadata": false,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "{{schemaname}}.{{relname}}",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -220,19 +220,19 @@
       {
         "current": {
           "selected": false,
-          "text": "2c65228b1272d3672f01102295b1f767",
-          "value": "2c65228b1272d3672f01102295b1f767"
+          "text": "970ad27aea83b05f26a8442bffd07bc2",
+          "value": "970ad27aea83b05f26a8442bffd07bc2"
         },
         "hide": 0,
         "name": "TraceID",
         "options": [
           {
             "selected": true,
-            "text": "2c65228b1272d3672f01102295b1f767",
-            "value": "2c65228b1272d3672f01102295b1f767"
+            "text": "970ad27aea83b05f26a8442bffd07bc2",
+            "value": "970ad27aea83b05f26a8442bffd07bc2"
           }
         ],
-        "query": "2c65228b1272d3672f01102295b1f767",
+        "query": "970ad27aea83b05f26a8442bffd07bc2",
         "skipUrlSync": false,
         "type": "textbox"
       }
@@ -246,6 +246,6 @@
   "timezone": "browser",
   "title": "Trace Detail",
   "uid": "fdrsk9dluncaoc",
-  "version": 3,
+  "version": 1,
   "weekStart": ""
 }

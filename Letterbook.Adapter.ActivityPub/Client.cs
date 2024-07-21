@@ -64,7 +64,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 			case >= 400 and < 500:
 				var body = await response.Content.ReadAsStringAsync();
 				_logger.LogInformation("Received client error from {Method} {Uri}", response.RequestMessage?.Method, response.RequestMessage?.RequestUri);
-				_logger.LogDebug("Client error response had headers {Headers} and body {Body}", response.Headers, body);
+				_logger.LogDebug("Client error response had headers {@Headers} and body {Body}", response.Headers, body);
 				throw ClientException.RequestError(response.StatusCode,
 					$"Couldn't {response.RequestMessage?.Method.ToString() ?? "METHOD UNKNOWN"} AP resource ({response.RequestMessage?.RequestUri})",
 					body, name: name, path: path, line: line);
