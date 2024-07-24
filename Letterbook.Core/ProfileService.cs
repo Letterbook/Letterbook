@@ -243,6 +243,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		self.Follow(target, FollowState.Pending);
 		self.Audiences.Add(Audience.Followers(target));
 		self.Audiences.Add(Audience.Boosts(target));
+		self.Audiences = self.Audiences.ReplaceFrom(target.Headlining);
 		await _profiles.Commit();
 		return new FollowerRelation(self, target, FollowState.Pending);
 	}
@@ -271,6 +272,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 		var self = await _profiles.SingleProfile(selfId)
 			           .WithRelation(targetId)
+			           .Include(profile => profile.Audiences.Where(audience => audience.Source!.Id == Uuid7.ToGuid(targetId)))
 			           .FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
 
