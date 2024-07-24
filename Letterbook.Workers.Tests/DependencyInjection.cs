@@ -1,10 +1,9 @@
-﻿using System.Text.Json.Serialization;
-using ActivityPub.Types;
+﻿using ActivityPub.Types;
+using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models.Mappers;
-using Letterbook.Core.Models.Mappers.Converters;
 using Letterbook.Core.Tests;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,13 +13,14 @@ namespace Letterbook.Workers.Tests;
 
 public static class DependencyInjection
 {
-	public static IServiceCollection AddMocks(this IServiceCollection services, WithMocks mocks)
+	internal static IServiceCollection AddMocks(this IServiceCollection services, WithMocks mocks)
 	{
 		services.TryAddTypesModule();
 		return services.AddScoped<IActivityPubClient>(_ => mocks.ActivityPubClientMock.Object)
 			.AddScoped<ITimelineService>(_ => mocks.TimelineServiceMock.Object)
 			.AddScoped<IProfileService>(_ => mocks.ProfileServiceMock.Object)
 			.AddSingleton<MappingConfigProvider>()
+			.AddScoped<IActivityPubDocument, Document>()
 			.AddSingleton<IOptions<CoreOptions>>(mocks.CoreOptionsMock);
 	}
 

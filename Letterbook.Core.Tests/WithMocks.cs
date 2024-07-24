@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using ActivityPub.Types;
+using ActivityPub.Types.Conversion;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Authorization;
-using Letterbook.Core.Events;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Mocks;
 using Medo;
@@ -25,7 +25,6 @@ public abstract class WithMocks
 	public Mock<IAuthzProfileService> ProfileServiceAuthMock;
 	public IOptions<CoreOptions> CoreOptionsMock;
 	public Mock<MockableMessageHandler> HttpMessageHandlerMock;
-	public ServiceCollection MockedServiceCollection;
 	public Mock<IPostEventPublisher> PostEventServiceMock;
 	public Mock<IPostService> PostServiceMock;
 	public Mock<IAuthzPostService> PostServiceAuthMock;
@@ -33,6 +32,10 @@ public abstract class WithMocks
 	public Mock<ITimelineService> TimelineServiceMock;
 	public Mock<IAuthzTimelineService> AuthzTimelineServiceMock;
 	public Mock<IAccountService> AccountServiceMock;
+	public Mock<IJsonLdSerializer> JsonLdSerializerMock;
+	public Mock<IActivityMessagePublisher> ActivityPublisherMock;
+
+	public ServiceCollection MockedServiceCollection;
 
 	protected WithMocks()
 	{
@@ -53,6 +56,8 @@ public abstract class WithMocks
 		TimelineServiceMock = new Mock<ITimelineService>();
 		AuthzTimelineServiceMock = new Mock<IAuthzTimelineService>();
 		AccountServiceMock = new Mock<IAccountService>();
+		JsonLdSerializerMock = new Mock<IJsonLdSerializer>();
+		ActivityPublisherMock = new Mock<IActivityMessagePublisher>();
 
 		ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
 		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>(), It.IsAny<Uuid7>())).Returns(PostServiceAuthMock.Object);

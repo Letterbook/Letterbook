@@ -31,7 +31,7 @@ public class ProfileServiceTests : WithMocks
 		CoreOptionsMock.Value.MaxCustomFields = 2;
 
 		_service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object,
-			Mock.Of<IProfileEventService>(), ActivityPubClientMock.Object, Mock.Of<IHostSigningKeyProvider>());
+			Mock.Of<IProfileEventPublisher>(), ActivityPubClientMock.Object, Mock.Of<IHostSigningKeyProvider>(), ActivityPublisherMock.Object);
 		_profile = _fakeProfile.Generate();
 	}
 
@@ -269,31 +269,6 @@ public class ProfileServiceTests : WithMocks
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
 	}
 
-	[Fact(DisplayName = "Should add remote follows accepted")]
-	public async Task FollowRemoteAccept()
-	{
-		var target = new FakeProfile().Generate();
-		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
-		AccountProfileMock.Setup(m => m.SingleProfile(target.FediId)).Returns(new List<Profile>{target}.BuildMock());
-		// AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), target.GetId()))
-			// .Returns(new List<Profile>{ _profile }.BuildMock());
-		// AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), _profile.GetId()))
-			// .Returns(new List<Profile>().BuildMock());
-		ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.FediId)).ReturnsAsync(target);
-		ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox, target))
-			.ReturnsAsync(new ClientResponse<FollowState>()
-			{
-				Data = FollowState.Accepted,
-				StatusCode = HttpStatusCode.OK,
-				DeliveredAddress = target.Inbox
-			});
-
-		var actual = await _service.Follow(_profile.GetId(), target.FediId);
-
-		Assert.Equal(FollowState.Accepted, actual.State);
-		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
-	}
-
 	[Fact(DisplayName = "Should add remote follows pending")]
 	public async Task FollowRemotePending()
 	{
@@ -301,40 +276,13 @@ public class ProfileServiceTests : WithMocks
 		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
 		AccountProfileMock.Setup(m => m.SingleProfile(target.FediId)).Returns(new List<Profile>().BuildMock());
 		ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.FediId)).ReturnsAsync(target);
-		ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox, target))
-			.ReturnsAsync(new ClientResponse<FollowState>()
-			{
-				Data = FollowState.Pending,
-				StatusCode = HttpStatusCode.OK,
-				DeliveredAddress = target.Inbox
-			});
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
 		Assert.Equal(FollowState.Pending, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
-	}
-
-	[Fact(DisplayName = "Should not add rejected remote follows")]
-	public async Task FollowRemoteRejected()
-	{
-		var target = new FakeProfile().Generate();
-		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
-		AccountProfileMock.Setup(m => m.SingleProfile(target.FediId)).Returns(new List<Profile>().BuildMock());
-		ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.FediId)).ReturnsAsync(target);
-		ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox, target))
-			.ReturnsAsync(new ClientResponse<FollowState>()
-			{
-				Data = FollowState.Rejected,
-				StatusCode = HttpStatusCode.OK,
-				DeliveredAddress = target.Inbox
-			});
-
-		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
-
-		Assert.Equal(FollowState.Rejected, actual.State);
-		Assert.Empty(_profile.FollowingCollection);
-		Assert.Empty(target.FollowersCollection);
+		ActivityPublisherMock.Verify(m => m.Follow(target.Inbox, target, _profile));
+		ActivityPublisherMock.VerifyNoOtherCalls();
 	}
 
 	[Fact(DisplayName = "Should add a new follower")]

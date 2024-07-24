@@ -2,7 +2,7 @@ using Letterbook.Api.Authentication.HttpSignature.Verification;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using NSign;
+using Constants = NSign.Constants;
 
 namespace Letterbook.Api.Authentication.HttpSignature.Infrastructure;
 
@@ -25,7 +25,7 @@ public class HttpSignatureVerificationMiddleware : IMiddleware
 	public HttpSignatureVerificationMiddleware(
 		ILogger<HttpSignatureVerificationMiddleware> logger,
 		IFederatedActorHttpSignatureVerifier verifier
-		)
+	)
 	{
 		_logger = logger;
 		_verifier = verifier;
