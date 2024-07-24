@@ -23,7 +23,7 @@ public static class DependencyInjection
 		services.Configure<CoreOptions>(config.GetSection(CoreOptions.ConfigKey));
 
 		// Register Services
-		services.AddScoped<IProfileEventService, ProfileEventService>()
+		services
 			.AddScoped<IAccountService, AccountService>()
 			.AddScoped<IProfileService, ProfileService>()
 			.AddScoped<IPostService, PostService>()

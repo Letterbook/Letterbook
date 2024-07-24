@@ -20,6 +20,7 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Workers;
 using Letterbook.Workers;
+using Letterbook.Workers.Publishers;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -99,7 +100,7 @@ public static class DependencyInjectionExtensions
 		services.AddSingleton<MappingConfigProvider>();
 
 		// Register Services
-		services.AddScoped<IProfileEventService, ProfileEventService>();
+		services.AddScoped<IProfileEventPublisher, ProfileEventPublisher>();
 		services.AddScoped<IAccountService, AccountService>();
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IPostService, PostService>();

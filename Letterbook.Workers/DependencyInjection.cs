@@ -22,7 +22,8 @@ public static class DependencyInjection
 	{
 		return services.AddScoped<IActivityMessagePublisher, ActivityMessagePublisher>()
 			.AddScoped<IAccountEventPublisher, AccountEventPublisher>()
-			.AddScoped<IPostEventPublisher, PostEventPublisher>();
+			.AddScoped<IPostEventPublisher, PostEventPublisher>()
+			.AddScoped<IProfileEventPublisher, ProfileEventPublisher>();
 	}
 
 	/// <summary>

@@ -153,6 +153,18 @@ public class ProfilesController : ControllerBase
 		return Ok(_mapper.Map<FollowerRelationDto>(result));
 	}
 
+	[HttpPut("{profileId}/following/remote")]
+	[ProducesResponseType<FollowerRelationDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Follow request", "Request to follow the followProfileId on a remote peer server")]
+	public async Task<IActionResult> FollowRemote(Uuid7 profileId, Uri followProfileId)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		var result = await _profiles.As(User.Claims).Follow(profileId, followProfileId);
+		return Ok(_mapper.Map<FollowerRelationDto>(result));
+	}
+
 	[HttpDelete("{profileId}/following/{followProfileId}")]
 	[ProducesResponseType<FollowerRelationDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Unfollow", "Stop following the followProfileId")]

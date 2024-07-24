@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
@@ -18,12 +19,14 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private ILogger<ProfileService> _logger;
 	private CoreOptions _coreConfig;
 	private IAccountProfileAdapter _profiles;
-	private IProfileEventService _profileEvents;
+	private IProfileEventPublisher _profileEvents;
 	private readonly IActivityPubClient _client;
 	private readonly IHostSigningKeyProvider _hostSigningKeyProvider;
+	private readonly IActivityMessagePublisher _activity;
 
 	public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options,
-		IAccountProfileAdapter profiles, IProfileEventService profileEvents, IActivityPubClient client, IHostSigningKeyProvider hostSigningKeyProvider)
+		IAccountProfileAdapter profiles, IProfileEventPublisher profileEvents, IActivityPubClient client,
+		IHostSigningKeyProvider hostSigningKeyProvider, IActivityMessagePublisher activity)
 	{
 		_logger = logger;
 		_coreConfig = options.Value;
@@ -31,6 +34,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		_profileEvents = profileEvents;
 		_client = client;
 		_hostSigningKeyProvider = hostSigningKeyProvider;
+		_activity = activity;
 	}
 
 	public Task<Profile> CreateProfile(Profile profile)
@@ -60,7 +64,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		profile.OwnedBy = account;
 		account.LinkedProfiles.Add(new ProfileClaims(account, profile, [ProfileClaim.Owner]));
 		await _profiles.Commit();
-		_profileEvents.Created(profile);
+		await _profileEvents.Created(profile);
 
 		return profile;
 	}
@@ -78,7 +82,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		var original = profile.ShallowClone();
 		profile.DisplayName = displayName;
 		await _profiles.Commit();
-		_profileEvents.Updated(original: original, updated: profile);
+		await _profileEvents.Updated(original: original, updated: profile);
 
 		return new UpdateResponse<Profile>
 		{
@@ -100,7 +104,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		var original = profile.ShallowClone();
 		profile.Description = description;
 		await _profiles.Commit();
-		_profileEvents.Updated(original: original, updated: profile);
+		await _profileEvents.Updated(original: original, updated: profile);
 
 		return new UpdateResponse<Profile>
 		{
@@ -122,7 +126,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		profile.CustomFields = customFields.ToArray();
 
 		await _profiles.Commit();
-		_profileEvents.Updated(original: original, updated: profile);
+		await _profileEvents.Updated(original: original, updated: profile);
 
 		return new UpdateResponse<Profile>
 		{
@@ -143,7 +147,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		profile.CustomFields = customFields.ToArray();
 
 		await _profiles.Commit();
-		_profileEvents.Updated(original: original, updated: profile);
+		await _profileEvents.Updated(original: original, updated: profile);
 
 		return new UpdateResponse<Profile>
 		{
@@ -169,7 +173,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		profile.CustomFields[index] = new CustomField { Label = key, Value = value };
 
 		await _profiles.Commit();
-		_profileEvents.Updated(original: original, updated: profile);
+		await _profileEvents.Updated(original: original, updated: profile);
 
 		return new UpdateResponse<Profile>
 		{
@@ -234,21 +238,13 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 		// TODO(moderation): Check for blocks
 		// TODO(moderation): Check for requiresApproval
-		var followState = await _client.As(self).SendFollow(target.Inbox, target);
-		switch (followState.Data)
-		{
-			case FollowState.Accepted:
-			case FollowState.Pending:
-				self.Follow(target, followState.Data);
-				self.Audiences.Add(Audience.Followers(target));
-				self.Audiences.Add(Audience.Boosts(target));
-				await _profiles.Commit();
-				return new FollowerRelation(self, target, followState.Data);
-			case FollowState.None:
-			case FollowState.Rejected:
-			default:
-				return new FollowerRelation(self, target, followState.Data);
-		}
+		await _activity.Follow(target.Inbox, target, self);
+
+		self.Follow(target, FollowState.Pending);
+		self.Audiences.Add(Audience.Followers(target));
+		self.Audiences.Add(Audience.Boosts(target));
+		await _profiles.Commit();
+		return new FollowerRelation(self, target, FollowState.Pending);
 	}
 
 	public async Task<FollowerRelation> Follow(Uuid7 selfId, Uri targetId)
@@ -307,12 +303,23 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	{
 		var relation = target.AddFollower(follower, FollowState.Accepted);
 		await _profiles.Commit();
-		// if (relation.State == FollowState.Rejected) return relation;
 
-		// Todo: punt more AP responses to a delivery queue
-		// Todo: also, implement that delivery queue
-		// await _client.As(target).SendAccept(follower.Inbox, ActivityType.Follow, follower.Id, requestId);
-		return relation;
+		var actor = target;
+		var inbox = follower.Inbox;
+		switch (relation.State)
+		{
+			case FollowState.Accepted:
+				await _activity.AcceptFollower(inbox, follower, actor);
+				return relation;
+			case FollowState.None:
+			case FollowState.Rejected:
+				await _activity.RejectFollower(inbox, follower, actor);
+				return relation;
+			case FollowState.Pending:
+			default:
+				await _activity.PendingFollower(inbox, follower, actor);
+				return relation;
+		}
 	}
 
 	public async Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response)
@@ -354,8 +361,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		self.RemoveFollower(relation.Follower);
 		if (relation.Follower.HasLocalAuthority(_coreConfig))
 			relation.Follower.LeaveAudience(self);
-		// TODO: federate this
+
 		await _profiles.Commit();
+		await _activity.RemoveFollower(relation.Follower.Inbox, relation.Follower, self);
 		relation.State = FollowState.None;
 		return relation;
 	}
@@ -394,8 +402,14 @@ public class ProfileService : IProfileService, IAuthzProfileService
 			}
 		}
 
-		// TODO: federate this
 		await _profiles.Commit();
+
+		if (!relation.Follows.HasLocalAuthority(_coreConfig))
+		{
+			var target = relation.Follows;
+			await _activity.Unfollow(target.Inbox, target, self);
+		}
+
 		relation.State = FollowState.None;
 		return relation;
 	}
@@ -570,6 +584,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 			return await _client.As(onBehalfOf).Fetch<TResult>(id);
 		}
 
+		Activity.Current?.AddEvent(new("HostKeySignature"));
 		var key = await _hostSigningKeyProvider.GetSigningKey();
 		return await _client.Fetch<TResult>(id, key);
 	}

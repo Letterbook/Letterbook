@@ -1242,6 +1242,58 @@
         }
       }
     },
+    "/lb/v1/profiles/{profileId}/following/remote": {
+      "put": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Follow request",
+        "description": "Request to follow the followProfileId on a remote peer server",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "followProfileId",
+            "in": "query",
+            "schema": {
+              "pattern": "https://\\w+\\.\\w+/\\w*",
+              "type": "string",
+              "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/lb/v1/profiles/{profileId}/follower": {
       "get": {
         "tags": [
