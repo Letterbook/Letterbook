@@ -104,10 +104,10 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 					components.Signature = pair.Value.Trim('"');
 					break;
 				case "headers":
-					components.Spec = ParseSpec(pair.Value, components.Spec);
+					ParseSpec(pair.Value, components.Spec);
 					break;
 				case "algorithm":
-					components.Spec = ParseAlg(pair.Value, components.Spec);
+					ParseAlg(pair.Value, components.Spec);
 					break;
 				default:
 					_logger.LogWarning(
@@ -126,16 +126,15 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 		}
 		// keyId="https://my-example.com/actor#main-key",headers="(request-target) host date",signature="Y2FiYW...IxNGRiZDk4ZA=="
 
-		SignatureInputSpec ParseSpec(string headersString, SignatureInputSpec? spec)
+		void ParseSpec(string headersString, SignatureInputSpec spec)
 		{
 			_logger.LogDebug("Parsing Mastodon signature headers '{Headers}'", headersString);
-			spec ??= new SignatureInputSpec("spec");
 			var match = DerivedComponentsRegex().Match(headersString);
 			if (match.Success)
 			{
 				foreach (var token in match.Value.Split(new[] { ' ', '(', ')' }, StringSplitOptions.RemoveEmptyEntries))
 				{
-					spec.Value.SignatureParameters.AddComponent(new DerivedComponent("@" + token));
+					spec.SignatureParameters.AddComponent(new DerivedComponent("@" + token));
 				}
 			}
 
@@ -150,18 +149,16 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 				});
 			foreach (var component in comps)
 			{
-				spec.Value.SignatureParameters.AddComponent(component);
+				spec.SignatureParameters.AddComponent(component);
 			}
 
 			_logger.LogDebug("Parsed Mastodon signature headers as {@Spec}", spec);
-			return spec.Value;
 		}
 	}
 
-	private SignatureInputSpec ParseAlg(string alg, SignatureInputSpec? originalSpec)
+	private void ParseAlg(string alg, SignatureInputSpec spec)
 	{
-		var spec = originalSpec ?? new SignatureInputSpec("spec");
-		switch (alg.Replace("\"", ""))
+		switch (alg.Trim('"'))
 		{
 			case "rsa-sha256":
 				spec.SignatureParameters.Algorithm = SignatureAlgorithms.RsaPkcs15Sha256;
@@ -177,7 +174,6 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 				spec.SignatureParameters.Algorithm = SignatureAlgorithms.RsaPkcs15Sha256;
 				break;
 		}
-		return spec;
 	}
 
 	private bool VerifySignature(MastodonSignatureComponents components, Models.SigningKey verificationKey,
@@ -197,7 +193,7 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 
 	public class MastodonSignatureComponents
 	{
-		public SignatureInputSpec Spec { get; set; }
+		public SignatureInputSpec Spec { get; set; } = new SignatureInputSpec("spec");
 		public string? KeyId { get; set; }
 		public string? Signature { get; set; }
 	}
