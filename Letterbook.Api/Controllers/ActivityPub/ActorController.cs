@@ -115,13 +115,25 @@ public class ActorController : ControllerBase
 		try
 		{
 			if (activity.Is<AcceptActivity>(out var accept))
+			{
+				_logger.LogDebug("Inbox received: {Activity}", "Accept");
 				return await InboxAccept(id, accept);
+			}
 			if (activity.Is<RejectActivity>(out var reject))
+			{
+				_logger.LogDebug("Inbox received: {Activity}", "Reject");
 				return await InboxReject(id, reject);
+			}
 			if (activity.Is<FollowActivity>(out var follow))
+			{
+				_logger.LogDebug("Inbox received: {Activity}", "Follow");
 				return await InboxFollow(id, follow);
+			}
 			if (activity.Is<UndoActivity>(out var undo))
+			{
+				_logger.LogDebug("Inbox received: {Activity}", "Undo");
 				return await InboxUndo(id, undo);
+			}
 
 			_logger.LogWarning("Ignored unknown activity {ActivityType}", activity.GetType());
 			_logger.LogDebug("Ignored unknown activity details {@Activity}", activity);
@@ -168,7 +180,7 @@ public class ActorController : ControllerBase
 	private bool TryUnwrapActivity(ASActivity wrapper, string verb, [NotNullWhen(true)] out ASActivity? activity,
 		[NotNullWhen(true)] out Uri? actorId, [NotNullWhen(false)] out IActionResult? error)
 	{
-		if (wrapper.Object.SingleOrDefault()?.Value is not ASActivity asObject)
+		if (wrapper.Object.SingleOrDefault()?.Value?.Is<ASActivity>(out var asObject) != true)
 		{
 			_logger.LogDebug("Can't unwrap; Not an activity");
 			error = new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
@@ -178,7 +190,7 @@ public class ActorController : ControllerBase
 			return false;
 		}
 
-		if (asObject.Actor.SingleOrDefault() is not { } actor)
+		if (asObject!.Actor.SingleOrDefault() is not { } actor)
 		{
 			_logger.LogDebug("Can't unwrap; invalid actor");
 			error = new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
@@ -236,23 +248,26 @@ public class ActorController : ControllerBase
 
 	private async Task<IActionResult> InboxUndo(Uuid7 id, ASActivity activity)
 	{
-		if (activity.Object.SingleOrDefault()?.Value is not ASActivity activityObject)
-			return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
-				"Object of an Undo must have exactly one value, which must be another Activity"));
+		if (!TryUnwrapActivity(activity, "Undo", out var activityObject, out var undoActorId, out var error))
+			return error;
+
 		if (activityObject.Is<AnnounceActivity>(out var announceActivity))
 			throw new NotImplementedException();
 		if (activityObject.Is<BlockActivity>(out var blockActivity))
 			throw new NotImplementedException();
 		if (activityObject.Is<FollowActivity>(out var followActivity))
 		{
-			if ((followActivity.Actor.SingleOrDefault() ?? activityObject.Actor.SingleOrDefault()) is not { } actor)
-				return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
-					"Undo:Follow can only be performed by exactly one Actor at a time"));
-			if (!actor.TryGetId(out var actorId))
-				return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.InvalidRequest,
-					"Actor ID is required to Undo:Follow"));
-			await _profileService.As(User.Claims).RemoveFollower(id, actorId);
-			return new OkResult();
+			_logger.LogDebug("Undo activity: {Object}", "Follow");
+			if (followActivity.Object.SingleOrDefault() is not {} target
+			    || !target.TryGetId(out var targetId)
+			    || !targetId.ToString().Contains(id.ToId25String()))
+				return BadRequest();
+			if (followActivity.Actor.SingleOrDefault() is not {} actor
+				|| !actor.TryGetId(out var followerId))
+				return BadRequest();
+
+			await _profileService.As(User.Claims).RemoveFollower(id, followerId);
+			return Ok();
 		}
 		if (activityObject.Is<LikeActivity>(out var likeActivity))
 			throw new NotImplementedException();
