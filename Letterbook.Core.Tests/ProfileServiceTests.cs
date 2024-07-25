@@ -303,11 +303,11 @@ public class ProfileServiceTests : WithMocks
 	{
 		var target = new FakeProfile().Generate();
 		_profile.Follow(target, FollowState.Pending);
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.FediId, target.FediId)).ReturnsAsync(_profile);
+		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), target.FediId)).ReturnsAsync(_profile);
 
-		var actual = await _service.ReceiveFollowReply(_profile.FediId, target.FediId, FollowState.Accepted);
+		var actual = await _service.ReceiveFollowReply(_profile.GetId(), target.FediId, FollowState.Accepted);
 
-		Assert.Equal(FollowState.Accepted, actual);
+		Assert.Equal(FollowState.Accepted, actual.State);
 		Assert.Equal(FollowState.Accepted,
 			_profile.FollowingCollection.FirstOrDefault(r => r.Follows.FediId == target.FediId)?.State);
 	}
@@ -317,11 +317,11 @@ public class ProfileServiceTests : WithMocks
 	{
 		var target = new FakeProfile().Generate();
 		_profile.Follow(target, FollowState.Pending);
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.FediId, target.FediId)).ReturnsAsync(_profile);
+		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), target.FediId)).ReturnsAsync(_profile);
 
-		var actual = await _service.ReceiveFollowReply(_profile.FediId, target.FediId, FollowState.Rejected);
+		var actual = await _service.ReceiveFollowReply(_profile.GetId(), target.FediId, FollowState.Rejected);
 
-		Assert.Equal(FollowState.None, actual);
+		Assert.Equal(FollowState.None, actual.State);
 		Assert.DoesNotContain(target, _profile.FollowingCollection.Select(r => r.Follows));
 
 		// Assert.Equal(FollowState.Accepted, _profile.Following.FirstOrDefault(r => r.Follows.Id == target.Id)?.State);

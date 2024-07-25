@@ -42,8 +42,9 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
             }
           }
         ],
@@ -65,8 +66,9 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
             }
           }
         ],
@@ -88,8 +90,9 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
             }
           }
         ],
@@ -111,8 +114,9 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
             }
           }
         ],
@@ -132,7 +136,9 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
             }
           }
         ],
