@@ -101,7 +101,6 @@ public class Program
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();
-		app.UseWebFingerScoped();
 
 		app.UseHttpSignatureVerification();
 		app.UseAuthentication();
@@ -113,6 +112,7 @@ public class Program
 
 		app.UseSerilogRequestLogging();
 
+		app.UseWebFingerScoped();
 		app.MapRazorPages();
 		app.UsePathBase(new PathString("/api/v1"));
 		app.MapControllers();
@@ -127,7 +127,8 @@ public class Program
 			       // TODO: prefix with /ap/v1
 			       // Need to use url generators integrated with routing, instead of just a bunch of magic strings
 			       && !context.Request.Path.StartsWithSegments("/actor")
-			       && !context.Request.Path.StartsWithSegments("/object");
+			       && !context.Request.Path.StartsWithSegments("/object")
+			       && !context.Request.Path.StartsWithSegments("/.well-known");
 		}
 	}
 }
