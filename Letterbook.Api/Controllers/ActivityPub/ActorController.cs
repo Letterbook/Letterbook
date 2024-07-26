@@ -121,7 +121,6 @@ public class ActorController : ControllerBase
 			}
 			if (activity.Is<RejectActivity>(out var reject))
 			{
-				_logger.LogDebug("Inbox received: {Activity}", "Reject");
 				return await InboxReject(id, reject);
 			}
 			if (activity.Is<FollowActivity>(out var follow))
@@ -231,15 +230,22 @@ public class ActorController : ControllerBase
 		return Accepted();
 	}
 
-	private async Task<IActionResult> InboxReject(Uuid7 localId, RejectActivity activity)
+	private async Task<IActionResult> InboxReject(Uuid7 localId, RejectActivity rejectActivity)
 	{
-		if (!TryUnwrapActivity(activity, "Reject", out var activityObject, out var actorId, out var error))
+		_logger.LogDebug("Inbox received: {Activity}", "Reject");
+		if (!TryUnwrapActivity(rejectActivity, "Reject", out var activityObject, out var actorId, out var error))
 			return error;
 
-		if (activityObject.Is<FollowActivity>())
+		if (activityObject.Is<FollowActivity>(out var followActivity))
 		{
-			await _profileService.As(User.Claims).ReceiveFollowReply(localId, actorId, FollowState.Rejected);
-			return Ok();
+			if (actorId.ToString().Contains(localId.ToId25String())
+				&& rejectActivity.Actor.SingleOrDefault()?.TryGetId(out var targetId) == true)
+			{
+				await _profileService.As(User.Claims).ReceiveFollowReply(localId, targetId, FollowState.Rejected);
+				return Ok();
+			}
+
+			return BadRequest();
 		}
 
 		_logger.LogWarning("{Method}: Unknown object semantics {@ObjectType}", nameof(InboxReject) , activityObject.TypeMap.ASTypes);
