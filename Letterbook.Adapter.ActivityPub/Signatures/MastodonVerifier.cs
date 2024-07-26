@@ -104,7 +104,10 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 					components.Signature = pair.Value.Trim('"');
 					break;
 				case "headers":
-					components.Spec = ParseSpec(pair.Value);
+					ParseSpec(pair.Value, components.Spec);
+					break;
+				case "algorithm":
+					ParseAlg(pair.Value, components.Spec);
 					break;
 				default:
 					_logger.LogWarning(
@@ -123,10 +126,9 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 		}
 		// keyId="https://my-example.com/actor#main-key",headers="(request-target) host date",signature="Y2FiYW...IxNGRiZDk4ZA=="
 
-		SignatureInputSpec ParseSpec(string headersString)
+		void ParseSpec(string headersString, SignatureInputSpec spec)
 		{
 			_logger.LogDebug("Parsing Mastodon signature headers '{Headers}'", headersString);
-			var spec = new SignatureInputSpec("spec");
 			var match = DerivedComponentsRegex().Match(headersString);
 			if (match.Success)
 			{
@@ -151,7 +153,26 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 			}
 
 			_logger.LogDebug("Parsed Mastodon signature headers as {@Spec}", spec);
-			return spec;
+		}
+	}
+
+	private void ParseAlg(string alg, SignatureInputSpec spec)
+	{
+		switch (alg.Trim('"'))
+		{
+			case "rsa-sha256":
+				spec.SignatureParameters.Algorithm = SignatureAlgorithms.RsaPkcs15Sha256;
+				break;
+			case SignatureAlgorithms.EcdsaP256Sha256:
+			case SignatureAlgorithms.EcdsaP384Sha384:
+			case SignatureAlgorithms.RsaPssSha512:
+			case SignatureAlgorithms.RsaPkcs15Sha256:
+				spec.SignatureParameters.Algorithm = alg;
+				break;
+			default:
+				_logger.LogWarning("Unrecognized signature algorithm {Algorithm} in mastodon-compatible signature", alg);
+				spec.SignatureParameters.Algorithm = SignatureAlgorithms.RsaPkcs15Sha256;
+				break;
 		}
 	}
 
@@ -166,12 +187,13 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 		var algorithm = verificationKey.GetRsa();
 		builder.Visit(components.Spec.SignatureParameters);
 		return algorithm.VerifyData(Encoding.ASCII.GetBytes(builder.SigningDocument),
+			// TODO: support other algorithms
 			Convert.FromBase64String(components.Signature), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 	}
 
 	public class MastodonSignatureComponents
 	{
-		public SignatureInputSpec Spec { get; set; }
+		public SignatureInputSpec Spec { get; set; } = new SignatureInputSpec("spec");
 		public string? KeyId { get; set; }
 		public string? Signature { get; set; }
 	}
