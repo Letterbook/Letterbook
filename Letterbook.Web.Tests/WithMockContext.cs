@@ -15,7 +15,6 @@ public abstract class WithMockContext : WithMocks
 	protected List<Claim> Claims;
 	protected ClaimsIdentity Identity;
 	protected ClaimsPrincipal ClaimsPrincipal;
-	protected Mock<IPrincipal> MockPrincipal;
 	protected Mock<HttpContext> MockHttpContext;
 	protected PageContext PageContext;
 
@@ -24,10 +23,6 @@ public abstract class WithMockContext : WithMocks
 		Claims = new List<Claim>();
 		Identity = new ClaimsIdentity(Claims, "MockContext");
 		ClaimsPrincipal = new ClaimsPrincipal(Identity);
-
-		MockPrincipal = new Mock<IPrincipal>();
-		MockPrincipal.Setup(x => x.Identity).Returns(Identity);
-		MockPrincipal.Setup(x => x.IsInRole(It.IsAny<string>())).Returns(true);
 
 		MockHttpContext = new Mock<HttpContext>();
 		MockHttpContext.SetupGet(m => m.User).Returns(ClaimsPrincipal);

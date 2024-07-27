@@ -29,7 +29,7 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [Consumes("application/ld+json",
 	"application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
 	"application/activity+json")]
-[Authorize(policy: "ActivityPub")]
+[Authorize(policy: Constants.ActivityPubPolicy)]
 public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;
@@ -51,6 +51,7 @@ public class ActorController : ControllerBase
 
 	[HttpGet]
 	[Route("{id}")]
+	[AllowAnonymous]
 	public async Task<IActionResult> GetActor(string id)
 	{
 		if (!Id.TryAsUuid7(id, out var uuid))
@@ -146,7 +147,7 @@ public class ActorController : ControllerBase
 	[HttpGet]
 	[ActionName("Outbox")]
 	[Route("{id}/[action]")]
-	public IActionResult GetOutbox(int id)
+	public IActionResult GetOutbox(Uuid7 id)
 	{
 		throw new NotImplementedException();
 	}
@@ -154,7 +155,7 @@ public class ActorController : ControllerBase
 	[HttpPost]
 	[ActionName("Outbox")]
 	[Route("{id}/[action]")]
-	public IActionResult PostOutbox(int id)
+	public IActionResult PostOutbox(Uuid7 id)
 	{
 		throw new NotImplementedException();
 	}
@@ -205,22 +206,8 @@ public class ActorController : ControllerBase
 			return BadRequest(new ErrorMessage(ErrorCodes.None, "Actor ID is required for follower"));
 
 		followRequest.TryGetId(out var activityId);
-		var relation = await _profileService.As(User.Claims).ReceiveFollowRequest(localId, actorId, activityId);
+		await _profileService.As(User.Claims).ReceiveFollowRequest(localId, actorId, activityId);
 
-		ASType resultActivity = relation.State switch
-		{
-			FollowState.Accepted => _apDoc.Accept(relation.Follows, followRequest),
-			FollowState.Pending => _apDoc.TentativeAccept(relation.Follows, followRequest),
-			_ => _apDoc.Reject(relation.Follows, followRequest)
-		};
-
-		// We should publish and implement a reply negotiation mechanism. The options are basically response or inbox.
-		// Response would mean reply "in-band" via the http response.
-		// Inbox would mean reply "out-of-band" via a new POST to the actor's inbox.
-		// But, that doesn't exist, yet. The if(false) is so we don't forget.
-		var acceptResponse = false;
-		if (acceptResponse) return Ok(resultActivity);
-		await _messagePublisher.Deliver(relation.Follower.Inbox, resultActivity, relation.Follows);
 		return Accepted();
 	}
 }

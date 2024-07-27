@@ -44,6 +44,7 @@ public static class AstMapper
 			.ForMember(dest => dest.OwnedBy, opt => opt.Ignore())
 			.ForMember(dest => dest.Accessors, opt => opt.Ignore())
 			.ForMember(dest => dest.Audiences, opt => opt.Ignore())
+			.ForMember(dest => dest.Headlining, opt => opt.Ignore())
 			.ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
 			.ForMember(dest => dest.FollowingCollection, opt => opt.Ignore())
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))

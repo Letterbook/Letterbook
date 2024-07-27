@@ -64,7 +64,7 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 			case >= 400 and < 500:
 				var body = await response.Content.ReadAsStringAsync();
 				_logger.LogInformation("Received client error from {Method} {Uri}", response.RequestMessage?.Method, response.RequestMessage?.RequestUri);
-				_logger.LogDebug("Client error response had headers {Headers} and body {Body}", response.Headers, body);
+				_logger.LogDebug("Client error response had headers {@Headers} and body {Body}", response.Headers, body);
 				throw ClientException.RequestError(response.StatusCode,
 					$"Couldn't {response.RequestMessage?.Method.ToString() ?? "METHOD UNKNOWN"} AP resource ({response.RequestMessage?.RequestUri})",
 					body, name: name, path: path, line: line);
@@ -149,109 +149,6 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 			Data = FollowState.Pending,
 			DeliveredAddress = response.RequestMessage?.RequestUri
 		};
-	}
-
-	public async Task<ClientResponse<object>> SendCreate(Uri inbox, IContentRef content)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<ClientResponse<object>> SendUpdate(Uri inbox, IContentRef content)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<ClientResponse<object>> SendDelete(Uri inbox, IContentRef content)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<ClientResponse<object>> SendBlock(Uri inbox, IContentRef content)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<ClientResponse<object>> SendBoost(Uri inbox, IContentRef content)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<ClientResponse<object>> SendLike(Uri inbox, IContentRef content)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<ClientResponse<object>> SendDislike(Uri inbox, IContentRef content)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<ClientResponse<object>> SendAccept(Uri inbox, ActivityType activityToAccept, Uri requestorId,
-		Uri? subjectId)
-	{
-		/*** Mastodon expects objects that look like this
-         * {
-         *   '@context': 'https://www.w3.org/ns/activitystreams',
-         *   id: 'foo',
-         *   type: 'Accept',
-         *   actor: 'https://letterbook.example/actor/me',
-         *   object: {
-         *     id: 'bar',
-         *     type: 'Follow',
-         *     actor: 'https://mastodon.example/user/them',
-         *     object: 'https://letterbook.example/actor/me',
-         *   }
-         */
-		if (_actor is null || subjectId is null)
-			throw CoreException.MissingData("Cannot build a semantic Accept Activity without an Actor and Object",
-				typeof(Models.Profile), null);
-		ASActivity acceptObject = _document.BuildActivity(activityToAccept);
-		var accept = _document.Accept((Models.Profile)_actor, acceptObject);
-
-		acceptObject.Actor.Add(requestorId);
-		acceptObject.Object.Add(_actor.FediId);
-
-		return await SendAccept(inbox, accept);
-	}
-
-	private async Task<ClientResponse<object>> SendAccept(Uri inbox, ASActivity activity)
-	{
-		var message = SignedRequest(HttpMethod.Post, inbox, activity);
-		var response = await _httpClient.SendAsync(message);
-
-		await ValidateResponseHeaders(response);
-
-		return new ClientResponse<object>()
-		{
-			DeliveredAddress = response.RequestMessage?.RequestUri,
-			Data = default,
-			StatusCode = response.StatusCode
-		};
-	}
-
-	public async Task<ClientResponse<object>> SendReject(Uri inbox, IContentRef content)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<ClientResponse<object>> SendPending(Uri inbox, IContentRef content)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<ClientResponse<object>> SendAdd(Uri inbox, IContentRef content, Uri collection)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<ClientResponse<object>> SendRemove(Uri inbox, IContentRef content, Uri collection)
-	{
-		throw new NotImplementedException();
-	}
-
-	public async Task<ClientResponse<object>> SendUnfollow(Uri inbox)
-	{
-		throw new NotImplementedException();
 	}
 
 	public async Task<ClientResponse<object>> SendDocument(Uri inbox, ASType document)

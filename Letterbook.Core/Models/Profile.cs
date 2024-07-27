@@ -57,9 +57,9 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		SharedInbox = builder.Uri;
 
 		builder.Path = basePath;
-		builder.Fragment = "public_keys/0";
+		builder.Fragment = "key-0";
 		Keys.Add(SigningKey.Rsa(0, builder.Uri));
-		builder.Fragment = "public_keys/1";
+		builder.Fragment = "key-1";
 		Keys.Add(SigningKey.EcDsa(1, builder.Uri));
 	}
 
@@ -82,8 +82,9 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public CustomField[] CustomFields { get; set; } = [];
 	public DateTime Updated { get; set; } = DateTime.UtcNow;
 	public Account? OwnedBy { get; set; }
-	public ICollection<ProfileAccess> Accessors { get; set; } = new HashSet<ProfileAccess>();
+	public ICollection<ProfileClaims> Accessors { get; set; } = new HashSet<ProfileClaims>();
 	public ActivityActorType Type { get; set; }
+	public ICollection<Audience> Headlining { get; set; } = new HashSet<Audience>();
 	public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
 	public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
 	public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
@@ -181,6 +182,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 			DisplayName = handle,
 		};
 		profile.Audiences.Add(Audience.FromMention(profile));
+		profile.Headlining.Add(Audience.Followers(profile));
 		return profile;
 	}
 

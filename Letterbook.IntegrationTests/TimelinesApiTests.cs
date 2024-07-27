@@ -2,10 +2,12 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers.Converters;
 using Letterbook.Core.Values;
 using Letterbook.IntegrationTests.Fixtures;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 
 namespace Letterbook.IntegrationTests;
@@ -27,7 +29,13 @@ public class TimelinesApiTests : IClassFixture<HostFixture<TimelinesApiTests>>, 
 	public TimelinesApiTests(HostFixture<TimelinesApiTests> host)
 	{
 		_host = host;
-		_client = _host.CreateClient();
+		var clientOptions = new WebApplicationFactoryClientOptions
+		{
+			BaseAddress = _host.Options?.BaseUri() ?? new Uri("localhost:5127"),
+			AllowAutoRedirect = false
+		};
+		_client = _host.CreateClient(clientOptions);
+		_client.DefaultRequestHeaders.Authorization = new("Test", $"{_host.Accounts[0].Id}");
 
 		_json = new JsonSerializerOptions(JsonSerializerDefaults.Web)
 		{

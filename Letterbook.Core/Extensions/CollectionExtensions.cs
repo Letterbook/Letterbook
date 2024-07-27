@@ -6,8 +6,12 @@ public static class CollectionExtensions
 	/// Uses IEquatable comparisons to return a new Collection which has items that are equivalent to the replacement collection,
 	/// but reusing any equivalent objects from the source collection.
 	///
-	/// This ensures that values are added and removed correctly, while preserving the reference equality for the source values.
+	/// The resulting collection is the same size and has the same values as the replacement, but retains reference equality to the
+	/// source, where there was overlap.
 	/// </summary>
+	/// <remarks>
+	/// This ensures that values are added and removed correctly, while preserving the reference equality for the source values.
+	/// </remarks>
 	/// <param name="source"></param>
 	/// <param name="replacement"></param>
 	/// <typeparam name="T"></typeparam>
@@ -17,6 +21,27 @@ public static class CollectionExtensions
 		var result = source.ToHashSet();
 		result.UnionWith(replacement);
 		result.IntersectWith(replacement);
+
+		return result;
+	}
+
+	/// <summary>
+	/// Uses IEquatable comparisons to return a new Collection which is equivalent to the source collection, but has intersecting
+	/// members taken from the replacement collection.
+	///
+	/// The resulting collection is the same size and has the same values as the source, but has reference equality to the
+	/// replacement, where there was overlap.
+	/// </summary>
+	/// <remarks>
+	/// This ensures that values are added and removed correctly, while preserving the reference equality for the source values.
+	/// </remarks>
+	/// <param name="source"></param>
+	/// <param name="from"></param>
+	public static ICollection<T> ReplaceFrom<T>(this ICollection<T> source, ICollection<T> from)
+	{
+		var result = from.ToHashSet();
+		result.IntersectWith(source);
+		result.UnionWith(source);
 
 		return result;
 	}

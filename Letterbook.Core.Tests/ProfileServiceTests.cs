@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Cryptography;
 using Bogus;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
@@ -7,6 +8,7 @@ using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.Extensions.Logging;
+using MockQueryable.Moq;
 using Moq;
 using Xunit.Abstractions;
 
@@ -29,7 +31,7 @@ public class ProfileServiceTests : WithMocks
 		CoreOptionsMock.Value.MaxCustomFields = 2;
 
 		_service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object,
-			Mock.Of<IProfileEventService>(), ActivityPubClientMock.Object, Mock.Of<IHostSigningKeyProvider>());
+			Mock.Of<IProfileEventPublisher>(), ActivityPubClientMock.Object, Mock.Of<IHostSigningKeyProvider>(), ActivityPublisherMock.Object);
 		_profile = _fakeProfile.Generate();
 	}
 
@@ -245,16 +247,12 @@ public class ProfileServiceTests : WithMocks
 	public async Task FollowLocalProfile()
 	{
 		var target = _fakeProfile.Generate();
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(
-			It.Is<Uuid7>(self => self == (Uuid7)_profile.Id!),
-			It.Is<Uri>(uri => uri == target.FediId)
-		)).ReturnsAsync(_profile);
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(self => self == (Uuid7)target.Id!)))
-			.ReturnsAsync(target);
+		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
+		AccountProfileMock.Setup(m => m.SingleProfile(target.GetId())).Returns(new List<Profile>{target}.BuildMock());
 
-		var actual = await _service.Follow((Uuid7)_profile.Id!, (Uuid7)target.Id!);
+		var actual = await _service.Follow(_profile.GetId(), target.GetId());
 
-		Assert.Equal(FollowState.Accepted, actual);
+		Assert.Equal(FollowState.Accepted, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
 	}
 
@@ -262,41 +260,12 @@ public class ProfileServiceTests : WithMocks
 	public async Task FollowLocalProfileUrl()
 	{
 		var target = _fakeProfile.Generate();
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(
-			It.Is<Uuid7>(self => self == (Uuid7)_profile.Id!),
-			It.Is<Uri>(uri => uri == target.FediId)
-		)).ReturnsAsync(_profile);
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.FediId)))
-			.ReturnsAsync(target);
+		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
+		AccountProfileMock.Setup(m => m.SingleProfile(target.FediId)).Returns(new List<Profile>{target}.BuildMock());
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
-		Assert.Equal(FollowState.Accepted, actual);
-		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
-	}
-
-	[Fact(DisplayName = "Should add remote follows accepted")]
-	public async Task FollowRemoteAccept()
-	{
-		var target = new FakeProfile().Generate();
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(
-			It.Is<Uuid7>(self => self == (Uuid7)_profile.Id!),
-			It.Is<Uri>(uri => uri == target.FediId)
-		)).ReturnsAsync(_profile);
-		AccountProfileMock.Setup(m => m.LookupProfile(target.FediId))
-			.ReturnsAsync(default(Profile));
-		ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.FediId)).ReturnsAsync(target);
-		ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox, target))
-			.ReturnsAsync(new ClientResponse<FollowState>()
-			{
-				Data = FollowState.Accepted,
-				StatusCode = HttpStatusCode.OK,
-				DeliveredAddress = target.Inbox
-			});
-
-		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
-
-		Assert.Equal(FollowState.Accepted, actual);
+		Assert.Equal(FollowState.Accepted, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
 	}
 
@@ -304,51 +273,16 @@ public class ProfileServiceTests : WithMocks
 	public async Task FollowRemotePending()
 	{
 		var target = new FakeProfile().Generate();
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(
-			It.Is<Uuid7>(self => self == (Uuid7)_profile.Id!),
-			It.Is<Uri>(uri => uri == target.FediId)
-		)).ReturnsAsync(_profile);
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.FediId)))
-			.ReturnsAsync(default(Profile));
+		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
+		AccountProfileMock.Setup(m => m.SingleProfile(target.FediId)).Returns(new List<Profile>().BuildMock());
 		ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.FediId)).ReturnsAsync(target);
-		ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox, target))
-			.ReturnsAsync(new ClientResponse<FollowState>()
-			{
-				Data = FollowState.Pending,
-				StatusCode = HttpStatusCode.OK,
-				DeliveredAddress = target.Inbox
-			});
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
-		Assert.Equal(FollowState.Pending, actual);
+		Assert.Equal(FollowState.Pending, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
-	}
-
-	[Fact(DisplayName = "Should not add rejected remote follows")]
-	public async Task FollowRemoteRejected()
-	{
-		var target = new FakeProfile().Generate();
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(
-			It.Is<Uuid7>(self => self == (Uuid7)_profile.Id!),
-			It.Is<Uri>(uri => uri == target.FediId)
-		)).ReturnsAsync(_profile);
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uri>(self => self == target.FediId)))
-			.ReturnsAsync(default(Profile));
-		ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.FediId)).ReturnsAsync(target);
-		ActivityPubAuthClientMock.Setup(m => m.SendFollow(target.Inbox, target))
-			.ReturnsAsync(new ClientResponse<FollowState>()
-			{
-				Data = FollowState.Rejected,
-				StatusCode = HttpStatusCode.OK,
-				DeliveredAddress = target.Inbox
-			});
-
-		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
-
-		Assert.Equal(FollowState.Rejected, actual);
-		Assert.Empty(_profile.FollowingCollection);
-		Assert.Empty(target.FollowersCollection);
+		ActivityPublisherMock.Verify(m => m.Follow(target.Inbox, target, _profile));
+		ActivityPublisherMock.VerifyNoOtherCalls();
 	}
 
 	[Fact(DisplayName = "Should add a new follower")]
@@ -393,29 +327,74 @@ public class ProfileServiceTests : WithMocks
 		// Assert.Equal(FollowState.Accepted, _profile.Following.FirstOrDefault(r => r.Follows.Id == target.Id)?.State);
 	}
 
-	[Fact(DisplayName = "Should remove a follower")]
-	public async Task RemoveFollower()
+	[InlineData(false)]
+	[InlineData(true)]
+	[Theory(DisplayName = "Should remove a follower")]
+	public async Task RemoveFollower(bool useId)
 	{
 		var follower = new FakeProfile().Generate();
 		_profile.AddFollower(follower, FollowState.Accepted);
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), follower.FediId))
-			.ReturnsAsync(_profile);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryable);
+		AccountProfileMock.Setup(m => m.SingleProfile(_profile.FediId)).Returns(queryable);
 
-		await _service.RemoveFollower(_profile.GetId(), follower.FediId);
+		var actual = useId ? await _service.RemoveFollower(_profile.GetId(), follower.GetId())
+			:await _service.RemoveFollower(_profile.GetId(), follower.FediId);
 
 		Assert.DoesNotContain(follower, _profile.FollowersCollection.Select(r => r.Follower));
 	}
 
-	[Fact(DisplayName = "Should unfollow")]
-	public async Task Unfollow()
+	[InlineData(false)]
+	[InlineData(true)]
+	[Theory(DisplayName = "Should unfollow")]
+	public async Task Unfollow(bool useId)
 	{
 		var follower = new FakeProfile().Generate();
 		_profile.Follow(follower, FollowState.Accepted);
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), follower.FediId))
-			.ReturnsAsync(_profile);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+			.Returns(queryable);
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
+			.Returns(queryable);
 
-		await _service.Unfollow(_profile.GetId(), follower.FediId);
+		var actual = useId ? await _service.Unfollow(_profile.GetId(), follower.GetId())
+			: await _service.Unfollow(_profile.GetId(), follower.FediId);
 
 		Assert.DoesNotContain(follower, _profile.FollowingCollection.Select(r => r.Follows));
+	}
+
+	[InlineData(false)]
+	[InlineData(true)]
+	[Theory(DisplayName = "Should accept a follower")]
+	public async Task AcceptFollower(bool useId)
+	{
+		var follower = new FakeProfile().Generate();
+		_profile.AddFollower(follower, FollowState.Pending);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+			.Returns(queryable);
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
+			.Returns(queryable);
+
+		var actual = useId ? await _service.AcceptFollower(_profile.GetId(), follower.GetId())
+			: await _service.AcceptFollower(_profile.GetId(), follower.FediId);
+
+		Assert.Equal(FollowState.Accepted, actual.State);
+		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
+	}
+
+	[Fact(DisplayName = "Should not add a follower that did not request to follow")]
+	public async Task NoForceFollower()
+	{
+		var follower = new FakeProfile().Generate();
+		_profile.AddFollower(follower, FollowState.None);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+			.Returns(queryable);
+
+		var actual = await _service.AcceptFollower(_profile.GetId(), follower.GetId());
+
+		Assert.Equal(FollowState.None, actual.State);
+		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
 	}
 }

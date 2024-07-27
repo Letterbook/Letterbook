@@ -1,8 +1,9 @@
+using System.Security.Claims;
 using Medo;
 
 namespace Letterbook.Core.Models;
 
-public class ProfileAccess : IEquatable<ProfileAccess>
+public class ProfileClaims : IEquatable<ProfileClaims>
 {
 	private Uuid7 _id;
 
@@ -14,28 +15,27 @@ public class ProfileAccess : IEquatable<ProfileAccess>
 
 	public Profile Profile { get; init; }
 	public Account Account { get; init; }
-	public ProfilePermission Permission { get; set; }
+	public List<ProfileClaim> Claims { get; set; } = [];
 
-	private ProfileAccess()
+	private ProfileClaims()
 	{
 		Id = Uuid7.NewUuid7();
 		Profile = default!;
 		Account = default!;
-		Permission = default!;
 	}
 
-	public ProfileAccess(Account account, Profile profile, ProfilePermission permission)
+	public ProfileClaims(Account account, Profile profile, IEnumerable<ProfileClaim> claims)
 	{
 		Id = Uuid7.NewUuid7();
 		Account = account;
 		Profile = profile;
-		Permission = permission;
+		Claims.AddRange(claims);
 	}
 
 	public Uuid7 GetId() => _id;
 	public string GetId25() => _id.ToId25String();
 
-	public bool Equals(ProfileAccess? other)
+	public bool Equals(ProfileClaims? other)
 	{
 		if (ReferenceEquals(null, other)) return false;
 		if (ReferenceEquals(this, other)) return true;
@@ -47,21 +47,26 @@ public class ProfileAccess : IEquatable<ProfileAccess>
 		if (ReferenceEquals(null, obj)) return false;
 		if (ReferenceEquals(this, obj)) return true;
 		if (obj.GetType() != this.GetType()) return false;
-		return Equals((ProfileAccess)obj);
+		return Equals((ProfileClaims)obj);
 	}
 
 	public override int GetHashCode()
 	{
-		return HashCode.Combine(Account.GetHashCode(), Profile.GetHashCode());
+		return HashCode.Combine(_id);
 	}
 
-	public static bool operator ==(ProfileAccess? left, ProfileAccess? right)
+	public static bool operator ==(ProfileClaims? left, ProfileClaims? right)
 	{
 		return Equals(left, right);
 	}
 
-	public static bool operator !=(ProfileAccess? left, ProfileAccess? right)
+	public static bool operator !=(ProfileClaims? left, ProfileClaims? right)
 	{
 		return !Equals(left, right);
+	}
+
+	public static explicit operator Claim(ProfileClaims profileClaims)
+	{
+		return new Claim($"profile:{profileClaims.Profile.GetId25()}", string.Join(',', profileClaims.Claims));
 	}
 }

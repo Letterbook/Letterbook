@@ -35,6 +35,8 @@ public class RelationalContext : DbContext
 	{
 		base.OnModelCreating(modelBuilder);
 		modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+		modelBuilder.Entity<ProfileClaims>().Navigation(claims => claims.Profile).AutoInclude();
 	}
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

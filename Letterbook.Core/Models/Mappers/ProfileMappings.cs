@@ -16,6 +16,7 @@ public class ProfileMappings : AutoMapper.Profile
 			.ForSourceMember(dto => dto.Keys, opt => opt.DoNotValidate())
 			.ForMember(profile => profile.Updated, opt => opt.Ignore())
 			.ForMember(profile => profile.Keys, opt => opt.Ignore());
+		CreateMap<Models.Profile, MiniProfileDto>(MemberList.Destination);
 
 		CreateMap<Models.SigningKey, PublicKeyDto>()
 			.ForMember(dto => dto.PublicKeyPem, opt => opt.MapFrom<PublicKeyPemConverter>());

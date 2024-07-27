@@ -1,6 +1,8 @@
 using Letterbook.Adapter.Db;
 using Letterbook.Core.Models;
 using Letterbook.IntegrationTests.Fixtures;
+using Medo;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -9,7 +11,7 @@ using Xunit.Abstractions;
 namespace Letterbook.IntegrationTests;
 
 [Trait("Infra", "Postgres")]
-[Trait("Driver", "Api")]
+[Trait("Driver", "Adapter")]
 public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<AccountProfileAdapterTests>>, ITestSeed, IDisposable
 {
 	public void Dispose()
@@ -166,5 +168,30 @@ public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<Accou
 
 		Assert.Contains(_profiles[0], list);
 		Assert.DoesNotContain(_profiles[1], list);
+	}
+
+	[Trait("AccountProfileAdapter", "QueryFrom")]
+	[Fact(DisplayName = "Query from profiles")]
+	public async Task QueryFromProfile()
+	{
+		var query = _adapter.QueryFrom(_profiles[0], profile => profile.Audiences);
+		var actual = await query.ToListAsync();
+
+		Assert.Single(actual);
+	}
+
+	[Trait("AccountProfileAdapter", "QueryFrom")]
+	[Fact(DisplayName = "Query from profiles Include navigation")]
+	public async Task QueryFromProfileAndInclude()
+	{
+		var query = _adapter.QueryFrom(_profiles[0], profile => profile.FollowersCollection);
+		var actual = await query
+			.Include(relation => relation.Follower)
+			.Select(relation => relation.Follower)
+			.ToListAsync();
+
+		Assert.Single(actual);
+		var profile = Assert.IsType<Profile>(actual.First());
+		Assert.NotEqual(Uuid7.Empty, profile.GetId());
 	}
 }

@@ -11,15 +11,42 @@
         <span>@Model.Handle</span>
     </h1>
     
-    <a href="/@@@Model.BareHandle/edit">Edit</a>
-    
+    @if (User.Identity?.IsAuthenticated == true && Model.SelfId == Model.Id)
+    {
+        <a asp-page="ProfileEdit" asp-route-handle="@Model.BareHandle">Edit</a>
+    }
+    @if (User.Identity?.IsAuthenticated == true && Model.SelfId != Model.Id)
+    {
+        if (Model.YouFollow)
+        {
+            
+            <form asp-page-handler="Unfollow" asp-route-followId="@Model.Id" method="post">
+                <button>Unfollow</button>
+            </form>
+        }
+        else
+        {
+            <form asp-page-handler="FollowRequest" asp-route-followId="@Model.Id" method="post">
+                <button>Follow</button>
+            </form>
+        }
+        if(Model.FollowsYou)
+        {
+            <form asp-page-handler="RemoveFollower" asp-route-followerId="@Model.Id" method="post">
+                <span>Follows you</span>
+                <button>Remove follower</button>
+            </form>
+            
+        }
+    }
+
     <div>
         <h3>Description</h3>
         <div>@Model.Description</div>
         
         <h3>Custom Fields</h3>
         <dl>
-            @foreach (var field in @Model.CustomFields) {
+            @foreach (var field in Model.CustomFields) {
                 <dt>@field.Label</dt>
                 <dd>@field.Value</dd>
             }
@@ -28,13 +55,15 @@
         <h3>Info</h3>
         <div>
             <div>
-                @Model.GetFollowerCount() Followers
+                @await Model.FollowerCount Followers
             </div>
             <div>
-                @Model.GetFollowingCount() Following
+                @await Model.FollowingCount Following
             </div>
         </div>
         
     </div>
+    
+    <p>Profile Id: <code>@Model.Id</code></p>
     
 </div>

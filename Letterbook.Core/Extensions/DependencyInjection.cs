@@ -5,8 +5,10 @@ using Letterbook.Core.Authorization;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Models.Mappers.Converters;
 using Letterbook.Core.Workers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.JsonWebTokens;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -21,18 +23,20 @@ public static class DependencyInjection
 		services.Configure<CoreOptions>(config.GetSection(CoreOptions.ConfigKey));
 
 		// Register Services
-		services.AddScoped<IProfileEventService, ProfileEventService>()
+		services
 			.AddScoped<IAccountService, AccountService>()
 			.AddScoped<IProfileService, ProfileService>()
 			.AddScoped<IPostService, PostService>()
 			.AddScoped<IAuthzPostService, PostService>()
 			.AddScoped<ITimelineService, TimelineService>()
 			.AddScoped<MappingConfigProvider>()
+			.AddSingleton<Instrumentation>()
 			.AddSingleton<IAuthorizationService, AuthorizationService>()
 			.AddSingleton<IHostSigningKeyProvider, DevelopmentHostSigningKeyProvider>();
 
 		// Register service workers
-		services.AddScopedService<SeedAdminWorker>();
+		services.AddScopedService<SeedAdminWorker>()
+			.AddHostedService<HostLifetimeWorker>();
 
 		return services;
 	}
@@ -44,6 +48,20 @@ public static class DependencyInjection
 			.AddScoped<TScopedWorker>();
 	}
 
+	public static OpenTelemetryBuilder AddTelemetry(this OpenTelemetryBuilder builder)
+	{
+		return builder.WithMetrics(metrics =>
+			{
+				metrics.AddHttpClientInstrumentation();
+				metrics.AddPrometheusExporter();
+			})
+			.WithTracing(tracing =>
+			{
+				tracing.AddSource(["Letterbook", "Letterbook.*"]);
+				tracing.AddHttpClientInstrumentation();
+				tracing.AddOtlpExporter();
+			});
+	}
 	public static IOpenTelemetryBuilder AddClientTelemetry(this IOpenTelemetryBuilder builder)
 	{
 		return builder
@@ -64,5 +82,15 @@ public static class DependencyInjection
 		options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 
 		return options;
+	}
+
+	public static void ConfigureIdentity(this IdentityOptions identity)
+	{
+		// Removes "@" from the default list, which would likely cause problems for other services using webfinger
+		identity.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._+";
+		identity.User.RequireUniqueEmail = true;
+		identity.ClaimsIdentity.EmailClaimType = JwtRegisteredClaimNames.Email;
+		identity.ClaimsIdentity.UserIdClaimType = JwtRegisteredClaimNames.Sub;
+		identity.ClaimsIdentity.UserNameClaimType = JwtRegisteredClaimNames.PreferredUsername;
 	}
 }
