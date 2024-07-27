@@ -233,6 +233,8 @@ Settings -> Build, Execution, Deployment -> Unit Testing -> Test Runner
 
 ### Debugging
 
+![Screenshot of a grafana dashboard showing a distributed trace with correlated logs](docs/grafana-trace-detail.png)
+
 #### Telemetry
 
 Letterbook is normally very debuggable. You can just pick a launch profile and run it with debugging enabled. But, it's still a good idea to use and get familiar with the telemetry. At some point, there will be Letterbook instances running in production, and simply attaching a debugger will no longer be an option. We provide some observability backends to in docker compose, to use during development. Using our own telemetry during development helps us to make that telemetry more useful. It also generally makes it more apparent what the server is doing.
@@ -249,7 +251,7 @@ The solution that seems to work best is to tunnel those connections through a un
 
 1. Add the `rootless.yml` overlay to the docker-compose.yml file  
 ```shell
-docker compose -f docker-comopose.yml -f rootless.yml up -d
+docker compose -f docker-compose.yml -f rootless.yml up -d
 ```  
   
 This will set up a socat container in the docker networking namespace, listening on port 3000 and forwarding to a socket that is mounted as a volume in the container. Prometheus will scrape this endpoint instead of the special docker host domain.  
