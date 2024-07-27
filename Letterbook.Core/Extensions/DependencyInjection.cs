@@ -53,7 +53,10 @@ public static class DependencyInjection
 		return builder.WithMetrics(metrics =>
 			{
 				metrics.AddHttpClientInstrumentation();
-				metrics.AddPrometheusExporter();
+				metrics.AddPrometheusExporter(o =>
+				{
+					o.DisableTotalNameSuffixForCounters = true;
+				});
 			})
 			.WithTracing(tracing =>
 			{

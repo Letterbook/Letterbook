@@ -9,6 +9,8 @@ Priorities for the project, and some guidance on how to balance those priorities
 - [ ] Deferred
 - [ ] Superseded
 
+Updated 2024-07-26
+
 # Decision
 
 This is about guidance, so here's the guidance.
@@ -20,13 +22,26 @@ This is about guidance, so here's the guidance.
 
 ## Impact
 
+> [!NOTE]
+> Updated 2024-07-26 to reflect actual state of the project
+
 Now
 * DB - Postgres
-* Object Storage - Any S3 compatible
+* Timeseries DB - Timescale
+* Scheduling - MassTransit (in-memory)
+* UI Framework - Server-side rendering + HTMX
 
 Future
-* Message Queue - Something internal (maybe subscriber pattern?), then RabbitMQ (if/when we need it)
-* Orchestration - Something internal (threads, processes), then maybe Nomad?
+* Object Storage - Any S3 compatible
+* Message Queue - MassTransit (RabbitMQ)
+* Streaming/Websockets - TBD, likely SignalR
+* Javascript Framework - TBD, likely VueJS if needed
+* XMPP - TBD
+* ~~Orchestration - Something internal (threads, processes), then maybe Nomad?~~ (We're unlikely to build out generalized orchestration solutions)
+
+Optional/Alternatives
+* In-process DB - TBD (useful for development, strongly discouraged in production)
+* File storage - Local filesystem (useful for development and small deployments, strongly discouraged in production)
 
 ## Context
 
@@ -34,7 +49,7 @@ Basically, this came up when I was considering which database engine should serv
 
 ### Optimize for the operators
 
-There is some some threshold of features that would make Letterbook viable for users. Beyond that, we should favor the needs of instance administrators, operations teams, and moderators. That group is likely to overwhelmingly be hobbyists and volunteers. They will often have shoestring budgets. They will probably live all over the world, speak numerous languages, and work in various time zones. In particular, I'm thinking of the experience that the https://hachyderm.io team had in setting up and scaling up their mastodon instance. They had a team of frankly world class SREs, and they still struggled with it continuously for weeks. Many instances had to close registrations during the twitter migration because they couldn't operationally support the added demand. You shouldn't have to have a team of senior engineers to run a community chat service.
+There is some threshold of features that would make Letterbook viable for users. Beyond that, we should favor the needs of instance administrators, operations teams, and moderators. That group is likely to overwhelmingly be hobbyists and volunteers. They will often have shoestring budgets. They will probably live all over the world, speak numerous languages, and work in various time zones. In particular, I'm thinking of the experience that the https://hachyderm.io team had in setting up and scaling up their mastodon instance. They had a team of frankly world-class SREs, and they still struggled with it continuously for weeks. Many instances had to close registrations during the twitter migration because they couldn't operationally support the added demand. You shouldn't have to have a team of senior engineers to run a community chat service.
 
 ### Minimize cost
 
