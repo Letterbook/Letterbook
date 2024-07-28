@@ -61,19 +61,26 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 					_logger.LogDebug("Server response had headers {Headers} and body {Body}", response.Headers,
 						await response.Content.ReadAsStringAsync());
 				throw ClientException.RemoteHostError(response.StatusCode, name: name, path: path, line: line);
+
 			case >= 400 and < 500:
 				var body = await response.Content.ReadAsStringAsync();
-				_logger.LogInformation("Received client error from {Method} {Uri}", response.RequestMessage?.Method, response.RequestMessage?.RequestUri);
-				_logger.LogDebug("Client error response had headers {@Headers} and body {Body}", response.Headers, body);
+				_logger.LogWarning("Received client error {StatusCode} {StatusReason} response from {Method} {Uri}",
+					(int)response.StatusCode, response.StatusCode, response.RequestMessage?.Method, response.RequestMessage?.RequestUri);
+				_logger.LogDebug("Client error response had headers {Headers} and body {Body}",
+					new Dictionary<string, IEnumerable<string>>(response.Headers), body);
 				throw ClientException.RequestError(response.StatusCode,
 					$"Couldn't {response.RequestMessage?.Method.ToString() ?? "METHOD UNKNOWN"} AP resource ({response.RequestMessage?.RequestUri})",
 					body, name: name, path: path, line: line);
+
 			case >= 300 and < 400:
 				return false;
+
 			case >= 201 and < 300:
 				return default;
+
 			case 200:
 				return true;
+
 			default:
 				return false;
 		}

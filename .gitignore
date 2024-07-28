@@ -9,7 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-*local.*
+*[Ll]ocal.*
 *private.env*
 development.key
 
