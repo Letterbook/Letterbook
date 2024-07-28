@@ -123,7 +123,7 @@ Please note that this roadmap is only updated ocassionally. The project's Github
 
 * [@jenniferplusplus@hachyderm.io](https://hachyderm.io/@jenniferplusplus)
 * [@runewake2@hachyderm.io](https://hachyderm.io/@runewake2)
-* [@hazel@koehlercode.dev](https://hachyderm.io/@hazel@koehlercode.dev)
+* [@hazelnoot@enby.life](https://enby.life/@hazelnoot)
 
 
 [sup-board]: https://github.com/orgs/Letterbook/projects/5/views/4
