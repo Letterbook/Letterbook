@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
 using AutoMapper;
@@ -8,7 +9,6 @@ using Letterbook.Api.Dto;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
@@ -29,6 +29,9 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [Consumes("application/ld+json",
 	"application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
 	"application/activity+json")]
+// [Produces("application/ld+json",
+	// "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
+	// "application/activity+json")]
 [Authorize(policy: Constants.ActivityPubPolicy)]
 public class ActorController : ControllerBase
 {
@@ -67,33 +70,33 @@ public class ActorController : ControllerBase
 	[HttpGet]
 	[ActionName("Followers")]
 	[Route("{id}/collections/[action]")]
-	public IActionResult GetFollowers(int id)
+	public IActionResult GetFollowers(Uuid7 id)
 	{
-		throw new NotImplementedException();
+		return NoContent();
 	}
 
 	[HttpGet]
 	[ActionName("Following")]
 	[Route("{id}/collections/[action]")]
-	public IActionResult GetFollowing(int id)
+	public IActionResult GetFollowing(Uuid7 id)
 	{
-		throw new NotImplementedException();
+		return NoContent();
 	}
 
 	[HttpGet]
 	[ActionName("Liked")]
 	[Route("{id}/collections/[action]")]
-	public IActionResult GetLiked(int id)
+	public IActionResult GetLiked(Uuid7 id)
 	{
-		throw new NotImplementedException();
+		return NoContent();
 	}
 
 	[HttpGet]
 	[ActionName("Inbox")]
 	[Route("{id}/[action]")]
-	public IActionResult GetInbox(int id)
+	public IActionResult GetInbox(Uuid7 id)
 	{
-		throw new NotImplementedException();
+		return NoContent();
 	}
 
 	[HttpPost]
@@ -107,17 +110,29 @@ public class ActorController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status410Gone)]
 	[ProducesResponseType(StatusCodes.Status421MisdirectedRequest)]
 	[ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-	public async Task<IActionResult> PostInbox(string id, ASType activity)
+	public async Task<IActionResult> PostInbox(Uuid7 id, ASType activity)
 	{
-		var localId = Uuid7.FromId25String(id);
 		try
 		{
 			if (activity.Is<AcceptActivity>(out var accept))
-				return await InboxAccept(localId, accept);
+			{
+				_logger.LogDebug("Inbox received: {Activity}", "Accept");
+				return await InboxAccept(id, accept);
+			}
+			if (activity.Is<RejectActivity>(out var reject))
+			{
+				return await InboxReject(id, reject);
+			}
 			if (activity.Is<FollowActivity>(out var follow))
-				return await InboxFollow(localId, follow);
+			{
+				_logger.LogDebug("Inbox received: {Activity}", "Follow");
+				return await InboxFollow(id, follow);
+			}
 			if (activity.Is<UndoActivity>(out var undo))
-				return await InboxUndo(localId, undo);
+			{
+				_logger.LogDebug("Inbox received: {Activity}", "Undo");
+				return await InboxUndo(id, undo);
+			}
 
 			_logger.LogWarning("Ignored unknown activity {ActivityType}", activity.GetType());
 			_logger.LogDebug("Ignored unknown activity details {@Activity}", activity);
@@ -133,15 +148,12 @@ public class ActorController : ControllerBase
 		}
 	}
 
-
 	[HttpPost]
 	[Route("[action]")]
 	[ProducesResponseType(StatusCodes.Status202Accepted)]
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-	public async Task<ActionResult> SharedInbox(ASType activity)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+	public IActionResult SharedInbox(ASType activity)
 	{
-		throw new NotImplementedException();
+		return NoContent();
 	}
 
 	[HttpGet]
@@ -149,7 +161,7 @@ public class ActorController : ControllerBase
 	[Route("{id}/[action]")]
 	public IActionResult GetOutbox(Uuid7 id)
 	{
-		throw new NotImplementedException();
+		return NoContent();
 	}
 
 	[HttpPost]
@@ -164,32 +176,104 @@ public class ActorController : ControllerBase
      * Support methods       *
      * * * * * * * * * * * * */
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-	private async Task<IActionResult> InboxAccept(Guid localId, ASActivity activity)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+	private bool TryUnwrapActivity(ASActivity wrapper, string verb, [NotNullWhen(true)] out ASActivity? activity,
+		[NotNullWhen(true)] out Uri? actorId, [NotNullWhen(false)] out IActionResult? error)
 	{
-		throw new NotImplementedException();
+		if (wrapper.Object.SingleOrDefault()?.Value?.Is<ASActivity>(out var asObject) != true)
+		{
+			_logger.LogDebug("Can't unwrap; Not an activity");
+			error = new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
+				$"Object of {verb} must have exactly one value, which must be another Activity"));
+			activity = default;
+			actorId = default;
+			return false;
+		}
+
+		if (asObject!.Actor.SingleOrDefault() is not { } actor)
+		{
+			_logger.LogDebug("Can't unwrap; invalid actor");
+			error = new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
+				$"{verb} must be performed by exactly one Actor"));
+			activity = default;
+			actorId = default;
+			return false;
+		}
+
+		if (!actor.TryGetId(out var id))
+		{
+			_logger.LogDebug("Can't unwrap; no actor ID");
+			error = new BadRequestObjectResult(new ErrorMessage(ErrorCodes.InvalidRequest,
+				"Actor ID is required"));
+			activity = default;
+			actorId = default;
+			return false;
+		}
+
+		activity = asObject;
+		actorId = id;
+		error = default;
+		return true;
 	}
 
-	private async Task<IActionResult> InboxUndo(Guid id, ASActivity activity)
+	private async Task<IActionResult> InboxAccept(Uuid7 localId, ASActivity activity)
 	{
-		if (activity.Object.SingleOrDefault()?.Value is not ASActivity activityObject)
-			return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
-				"Object of an Undo must have exactly one value, which must be another Activity"));
+		if (!TryUnwrapActivity(activity, "Accept", out var activityObject, out var actorId, out var error))
+			return error;
+
+		if (activityObject.Is<FollowActivity>())
+		{
+			await _profileService.As(User.Claims).ReceiveFollowReply(localId, actorId, FollowState.Accepted);
+			return Ok();
+		}
+
+		_logger.LogWarning("{Method}: Unknown object semantics {@ObjectType}", nameof(InboxAccept) , activityObject.TypeMap.ASTypes);
+		return Accepted();
+	}
+
+	private async Task<IActionResult> InboxReject(Uuid7 localId, RejectActivity rejectActivity)
+	{
+		_logger.LogDebug("Inbox received: {Activity}", "Reject");
+		if (!TryUnwrapActivity(rejectActivity, "Reject", out var activityObject, out var actorId, out var error))
+			return error;
+
+		if (activityObject.Is<FollowActivity>(out var followActivity))
+		{
+			if (actorId.ToString().Contains(localId.ToId25String())
+				&& rejectActivity.Actor.SingleOrDefault()?.TryGetId(out var targetId) == true)
+			{
+				await _profileService.As(User.Claims).ReceiveFollowReply(localId, targetId, FollowState.Rejected);
+				return Ok();
+			}
+
+			return BadRequest();
+		}
+
+		_logger.LogWarning("{Method}: Unknown object semantics {@ObjectType}", nameof(InboxReject) , activityObject.TypeMap.ASTypes);
+		return Accepted();
+	}
+
+	private async Task<IActionResult> InboxUndo(Uuid7 id, ASActivity activity)
+	{
+		if (!TryUnwrapActivity(activity, "Undo", out var activityObject, out var undoActorId, out var error))
+			return error;
+
 		if (activityObject.Is<AnnounceActivity>(out var announceActivity))
 			throw new NotImplementedException();
 		if (activityObject.Is<BlockActivity>(out var blockActivity))
 			throw new NotImplementedException();
 		if (activityObject.Is<FollowActivity>(out var followActivity))
 		{
-			if ((followActivity.Actor.SingleOrDefault() ?? activityObject.Actor.SingleOrDefault()) is not { } actor)
-				return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.UnknownSemantics,
-					"Undo:Follow can only be performed by exactly one Actor at a time"));
-			if (!actor.TryGetId(out var actorId))
-				return new BadRequestObjectResult(new ErrorMessage(ErrorCodes.InvalidRequest,
-					"Actor ID is required to Undo:Follow"));
-			await _profileService.As(User.Claims).RemoveFollower(id, actorId);
-			return new OkResult();
+			_logger.LogDebug("Undo activity: {Object}", "Follow");
+			if (followActivity.Object.SingleOrDefault() is not {} target
+			    || !target.TryGetId(out var targetId)
+			    || !targetId.ToString().Contains(id.ToId25String()))
+				return BadRequest();
+			if (followActivity.Actor.SingleOrDefault() is not {} actor
+				|| !actor.TryGetId(out var followerId))
+				return BadRequest();
+
+			await _profileService.As(User.Claims).RemoveFollower(id, followerId);
+			return Ok();
 		}
 		if (activityObject.Is<LikeActivity>(out var likeActivity))
 			throw new NotImplementedException();
@@ -198,7 +282,7 @@ public class ActorController : ControllerBase
 		return new AcceptedResult();
 	}
 
-	private async Task<IActionResult> InboxFollow(Guid localId, ASActivity followRequest)
+	private async Task<IActionResult> InboxFollow(Uuid7 localId, ASActivity followRequest)
 	{
 		if (followRequest.Actor.Count > 1) return BadRequest(new ErrorMessage(ErrorCodes.None, "Only one Actor can follow at a time"));
 		var actor = followRequest.Actor.First();

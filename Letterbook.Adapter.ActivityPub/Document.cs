@@ -57,9 +57,11 @@ public class Document : IActivityPubDocument
 		throw new NotImplementedException();
 	}
 
-	public FollowActivity Follow(Models.Profile actor, Models.Profile target)
+	public FollowActivity Follow(Models.Profile actor, Models.Profile target, Uri? id = null, bool implicitId = false)
 	{
 		var doc = new FollowActivity();
+		id ??= implicitId ? ImplicitId(actor.FediId, "Follow", target.FediId) : null;
+		if (id is not null) doc.Id = id.ToString();
 		doc.Actor.Add(ActorLink(actor));
 		doc.Object.Add(ActorLink(target));
 		return doc;
@@ -91,9 +93,11 @@ public class Document : IActivityPubDocument
 		return doc;
 	}
 
-	public UndoActivity Undo(Models.Profile actor, ASObject asObject)
+	public UndoActivity Undo(Models.Profile actor, ASObject asObject, Uri? id = null, bool implicitId = false)
 	{
 		var doc = new UndoActivity();
+		id ??= implicitId ? ImplicitId(actor.FediId, "Undo", asObject.Id) : null;
+		if (id is not null) doc.Id = id.OriginalString;
 		doc.Actor.Add(ActorLink(actor));
 		doc.Object.Add(asObject);
 		return doc;
@@ -102,6 +106,25 @@ public class Document : IActivityPubDocument
 	public UpdateActivity Update(Models.Profile actor, Models.IContentRef content)
 	{
 		throw new NotImplementedException();
+	}
+
+	private Uri ImplicitId(Uri id, string activity, Uri? targetId = null)
+	{
+		var builder = new UriBuilder(id);
+		builder.Fragment = $"{activity}/" + builder.Fragment;
+		if (targetId is not null)
+		{
+			builder.Fragment += targetId.Authority + targetId.PathAndQuery;
+		}
+
+		return builder.Uri;
+	}
+
+	private Uri ImplicitId(Uri id, string activity, string? targetId)
+	{
+		return targetId is not null
+			? ImplicitId(id, activity, new Uri(targetId))
+			: ImplicitId(id, activity);
 	}
 
 	private ASLink ActorLink(Models.IFederated contentRef)
