@@ -1,0 +1,15 @@
+services:
+  tunnel:
+    container_name: socat
+    image: docker.io/alpine/socat
+    volumes:
+      - ./sockets/:/sockets/
+    ports:
+      - 3000
+    command:
+      - '-d'
+      - '-d'
+      - tcp-listen:3000,reuseaddr,retry,fork
+      - unix:/sockets/host.sock,reuseaddr
+    restart: always
+  
