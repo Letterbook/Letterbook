@@ -33,6 +33,14 @@ services:
       - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf
     restart: always
 
+  # Optional debug tools
+  httpbin:
+    container_name: httpbin
+    image: kennethreitz/httpbin
+    ports:
+      - '8200:80'
+    restart: unless-stopped
+
   # Optional Dashboarding and Observability Services 
   loki:
     container_name: loki
@@ -41,13 +49,6 @@ services:
       - "3100:3100"
     restart: unless-stopped
     
-  httpbin:
-    container_name: httpbin
-    image: kennethreitz/httpbin
-    ports:
-      - '8200:80'
-    restart: unless-stopped
-  
   grafana:    
     depends_on:
       - loki
@@ -85,6 +86,7 @@ services:
     restart: unless-stopped
 
   tempo-init:
+    container_name: tempo-init
     image: *tempo-image
     user: root
     entrypoint:
