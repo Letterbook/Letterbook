@@ -18,21 +18,25 @@ public class DocsPage : PageModel
     public bool HideEditOnGitHub { get; set; }
     public Action<List<MarkdownMenu>>? SidebarFilter { get; set; }
 
-    public DocsPage Init(Microsoft.AspNetCore.Mvc.RazorPages.Page page, MarkdownPages markdown)
+    public DocsPage Init(Microsoft.AspNetCore.Mvc.RazorPages.Page page, MarkdownFileInfo? markdown)
     {
-        Doc = markdown.GetBySlug($"{Folder}/{Slug}");
-        if (Doc == null)
+        if (markdown == null)
         {
             page.Response.Redirect("/404");
             return this;
         }
 
+        Doc = markdown;
+
         if (!string.IsNullOrEmpty(Brand))
         {
             page.ViewContext.ViewData["Brand"] = Brand;
         }
-        
+
         page.ViewContext.ViewData["Title"] = Doc.Title;
         return this;
     }
+
+    public DocsPage Init(Microsoft.AspNetCore.Mvc.RazorPages.Page page, MarkdownPages markdown) =>
+	    Init(page, markdown.GetBySlug($"{Folder}/{Slug}"));
 }

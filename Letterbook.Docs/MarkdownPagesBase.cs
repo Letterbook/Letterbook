@@ -1,5 +1,6 @@
 // run node postinstall.js to update to latest version
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Markdig;
 using Markdig.Parsers;
@@ -46,7 +47,7 @@ public class MarkdownFileBase
     public List<string> Tags { get; set; } = new();
 
     /// <summary>
-    /// Date document is published. Documents with future Dates are only shown in Development 
+    /// Date document is published. Documents with future Dates are only shown in Development
     /// </summary>
     public DateTime? Date { get; set; }
 
@@ -93,17 +94,13 @@ public class MarkdownFileBase
     }
 }
 
-public interface IMarkdownPages
-{
-    string Id { get; }
-    List<MarkdownFileBase> GetAll();
-}
-
 public abstract class MarkdownPagesBase<T>(ILogger log, IWebHostEnvironment env, IVirtualFiles fs) : IMarkdownPages
     where T : MarkdownFileBase
 {
     public abstract string Id { get; }
     public IVirtualFiles VirtualFiles => fs;
+
+    public abstract void LoadFrom(string dir);
 
     public virtual MarkdownPipeline CreatePipeline()
     {
@@ -208,19 +205,6 @@ public abstract class MarkdownPagesBase<T>(ILogger log, IWebHostEnvironment env,
 
     public virtual List<MarkdownFileBase> GetAll() => new();
 
-    public virtual string? StripFrontmatter(string? content)
-    {
-        if (content == null)
-            return null;
-        var startPos = content.IndexOf("---", StringComparison.CurrentCulture);
-        if (startPos == -1)
-            return content;
-        var endPos = content.IndexOf("---", startPos + 3, StringComparison.Ordinal);
-        if (endPos == -1)
-            return content;
-        return content.Substring(endPos + 3).Trim();
-    }
-
     public virtual MarkdownFileBase ToMetaDoc(T x, Action<MarkdownFileBase>? fn = null)
     {
         var to = new MarkdownFileBase
@@ -243,7 +227,7 @@ public abstract class MarkdownPagesBase<T>(ILogger log, IWebHostEnvironment env,
     }
 
     /// <summary>
-    /// Need to escape '{{' and '}}' template literals when using content inside a Vue template 
+    /// Need to escape '{{' and '}}' template literals when using content inside a Vue template
     /// </summary>
     public virtual string? SanitizeVueTemplate(string? content)
     {
@@ -262,7 +246,7 @@ public class MarkdownIncludes(ILogger<MarkdownIncludes> log, IWebHostEnvironment
     public override string Id => "includes";
     public List<MarkdownFileInfo> Pages { get; } = [];
 
-    public void LoadFrom(string fromDirectory)
+    public override void LoadFrom(string fromDirectory)
     {
         Pages.Clear();
         var files = VirtualFiles.GetDirectory(fromDirectory).GetAllFiles()

@@ -16,8 +16,8 @@ public class MarkdownVideos(ILogger<MarkdownVideos> log, IWebHostEnvironment env
             ? Fresh(docs.Where(IsVisible).OrderBy(x => x.Order).ThenBy(x => x.FileName).ToList())
             : [];
     }
-    
-    public void LoadFrom(string fromDirectory)
+
+    public override void LoadFrom(string fromDirectory)
     {
         Groups.Clear();
         var dirs = VirtualFiles.GetDirectory(fromDirectory).GetDirectories().ToList();
@@ -48,13 +48,13 @@ public class MarkdownVideos(ILogger<MarkdownVideos> log, IWebHostEnvironment env
             }
         }
     }
-    
+
     public override List<MarkdownFileBase> GetAll()
     {
         var to = new List<MarkdownFileBase>();
         foreach (var entry in Groups)
         {
-            to.AddRange(entry.Value.Where(IsVisible).Map(doc => ToMetaDoc(doc, x => x.Content = StripFrontmatter(doc.Content))));
+            to.AddRange(entry.Value.Where(IsVisible).Map(doc => ToMetaDoc(doc, x => x.Content = MarkdownExtensions.StripFrontmatter(doc.Content))));
         }
         return to;
     }

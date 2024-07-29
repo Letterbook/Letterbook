@@ -1,19 +1,42 @@
-﻿@page "/blog/{Slug}"
-@model Letterbook.Docs.Page
-@inject MarkdownPages Markdown
+﻿@page "/blog/post/{Year}/{Month}/{Day}/{Slug}"
+@model Letterbook.Docs.Pages.Blog.Page
 
-@implements IRenderStatic<Letterbook.Docs.Page>
+@implements IRenderStatic<Page>
+
 @functions {
-    public List<Page> GetStaticProps(RenderContext ctx) =>
-        ctx.Resolve<MarkdownPages>().GetVisiblePages("_pages/blog").Map(page => new Page { Slug = page.Slug.RightPart('/') });
+
+    public List<Page> GetStaticProps(RenderContext ctx) {
+        var blog = ctx.Resolve<MarkdownChrono>();
+        return blog.GetAll()
+            .Select(p => new Page(blog)
+            {
+                Slug = p.Slug!,
+                Year = p.Date!.Value.Year,
+                Month = p.Date.Value.Month,
+                Day = p.Date.Value.Day,
+            })
+            .ToList();
+    }
+
 }
 
-@await Html.PartialAsync("DocsPage", new Shared.DocsPage {
-    Slug = Model.Slug,
-    Folder = "blog",
-    DefaultMenu = new MarkdownMenu {
-        Icon = Markdown.DefaultMenuIcon,
-        Text = "Blog",
-        Link = "/blog/",
-    },
-}.Init(this, Markdown))
+@{
+    // Layout = "_LayoutEmpty";
+
+    if (Model.Source == null)
+    {
+        Response.Redirect("/404");
+        return;
+    }
+
+    Response.StatusCode = 200;
+}
+
+<h1>@Model.Source.Title</h1>
+<article>
+    @Model.Doc
+</article>
+
+@* @await Html.PartialAsync("DocsPage", new DocsPage() { *@
+@* Slug = Model.Slug, *@
+@* }.Init(this, Markdown.GetByDate(date, Model.Slug))); *@

@@ -1,72 +1,90 @@
-﻿namespace Letterbook.Docs;
+﻿using System.Diagnostics.CodeAnalysis;
+using Markdig;
 
-﻿// run node postinstall.js to update to latest version
+namespace Letterbook.Docs;
+
 using System.Globalization;
 using ServiceStack.IO;
 
-public class MarkdownBlog(ILogger<MarkdownBlog> log, IWebHostEnvironment env, IVirtualFiles fs)
-    : MarkdownPagesBase<MarkdownFileInfo>(log, env, fs)
+/// <summary>
+/// A MarkdownFiles loader for markdown that is organized in chronological subdirectories.
+/// <remarks>The subdirectories should be named using the yyyy-MM-dd format</remarks>
+/// </summary>
+/// <param name="log"></param>
+/// <param name="env"></param>
+/// <param name="fs"></param>
+public class MarkdownChrono(ILogger<MarkdownChrono> log, IWebHostEnvironment env, IVirtualFiles fs)
+	: MarkdownPagesBase<MarkdownFileInfo>(log, env, fs)
 {
-    public override string Id => "blog";
-    public Dictionary<string, List<MarkdownFileInfo>> Features { get; set; } = new();
+	public override string Id => "blog";
+	public List<MarkdownFileInfo> Posts { get; set; } = new();
 
-    public List<MarkdownFileInfo> GetFeatures(string release)
-    {
-        return Features.TryGetValue(release, out var docs)
-            ? Fresh(docs.Where(IsVisible).OrderBy(x => x.Order).ThenBy(x => x.FileName).ToList())
-            : [];
-    }
+	public override void LoadFrom(string fromDirectory)
+	{
+		Posts.Clear();
+		var dirs = VirtualFiles.GetDirectory(fromDirectory).GetDirectories().ToList();
+		log.LogInformation("Found {Count} directories in {FromDir}", dirs.Count, fromDirectory);
 
-    public void LoadFrom(string fromDirectory)
-    {
-        Features.Clear();
-        var dirs = VirtualFiles.GetDirectory(fromDirectory).GetDirectories().ToList();
-        log.LogInformation("Found {Count} blog directories", dirs.Count);
+		var pipeline = CreatePipeline();
 
-        var pipeline = CreatePipeline();
+		foreach (var dir in dirs)
+		{
+			if (!DateTime.TryParseExact(dir.Name, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+				    DateTimeStyles.AdjustToUniversal, out var date))
+			{
+				log.LogWarning("Could not parse date '{DatePart}', ignoring...", dir.Name);
+				continue;
+			}
 
-        foreach (var dir in dirs)
-        {
-            var datePart = dir.Name.LeftPart('_');
-            if (!DateTime.TryParseExact(datePart, "yyyy-MM-dd", CultureInfo.InvariantCulture,
-                    DateTimeStyles.AdjustToUniversal, out var date))
-            {
-                log.LogWarning("Could not parse date '{DatePart}', ignoring...", datePart);
-                continue;
-            }
+			foreach (var file in dir.GetFiles().OrderBy(x => x.Name))
+			{
+				try
+				{
+					var doc = Load(file.VirtualPath, pipeline);
+					if (doc == null)
+						continue;
 
-            var releaseVersion = dir.Name.RightPart('_');
-            var releaseDate = date;
+					Posts.Add(doc);
+				}
+				catch (Exception e)
+				{
+					log.LogError(e, "Couldn't load {VirtualPath}: {Message}", file.VirtualPath, e.Message);
+				}
+			}
+		}
+	}
 
-            foreach (var file in dir.GetFiles().OrderBy(x => x.Name))
-            {
-                try
-                {
-                    var doc = Load(file.VirtualPath, pipeline);
-                    if (doc == null)
-                        continue;
+	public override MarkdownFileInfo? Load(string path, MarkdownPipeline? pipeline = null)
+	{
+		if (!TryGetDate(out var date))
+			return default;
 
-                    doc.Date = releaseDate;
-                    doc.Group = releaseVersion;
+		var doc = base.Load(path, pipeline);
+		if (doc == null) return doc;
+		doc.Date = date;
 
-                    var releaseFeatures = Features.GetOrAdd(dir.Name, v => new List<MarkdownFileInfo>());
-                    releaseFeatures.Add(doc);
-                }
-                catch (Exception e)
-                {
-                    log.LogError(e, "Couldn't load {VirtualPath}: {Message}", file.VirtualPath, e.Message);
-                }
-            }
-        }
-    }
+		return doc;
 
-    public override List<MarkdownFileBase> GetAll()
-    {
-        var to = new List<MarkdownFileBase>();
-        foreach (var entry in Features)
-        {
-            to.AddRange(entry.Value.Where(IsVisible).Map(doc => ToMetaDoc(doc, x => x.Content = StripFrontmatter(doc.Content))));
-        }
-        return to;
-    }
+		bool TryGetDate([NotNullWhen(true)] out DateTime? dt)
+		{
+			dt = null;
+			var parts = path.Split('/');
+			if (parts.Length != 3) return false;
+
+			var found = DateTime.TryParseExact(parts[1], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal,
+				out var d);
+			dt = d;
+			return found;
+		}
+	}
+
+	public override List<MarkdownFileBase> GetAll() => Posts.Where(IsVisible).Select(Doc).ToList();
+
+	public MarkdownFileInfo? GetByDate(DateTime date, string slug)
+	{
+		return Fresh(Posts.Where(IsVisible).Where(x => x.Date == date).FirstOrDefault(x => x.Slug == slug.Trim('/')));
+	}
+
+	private MarkdownFileBase Doc(MarkdownFileInfo info) =>
+		ToMetaDoc(info, x => x.Content = MarkdownExtensions.StripFrontmatter(info.Content));
 }

@@ -1,3 +1,4 @@
+using System.Reflection;
 using Markdig.Extensions.CustomContainers;
 using Markdig.Renderers;
 using Markdig.Renderers.Html;
@@ -15,13 +16,16 @@ public class ConfigureSsg : IHostingStartup
         .ConfigureServices((context,services) =>
         {
             context.Configuration.GetSection(nameof(AppConfig)).Bind(AppConfig.Instance);
+            // Assembly.GetAssembly(GetType()).
             services.AddSingleton(AppConfig.Instance);
             services.AddSingleton<RazorPagesEngine>();
-            services.AddSingleton<MarkdownBlog>();
+            services.AddSingleton<MarkdownChrono>();
             services.AddSingleton<MarkdownIncludes>();
             services.AddSingleton<MarkdownPages>();
             services.AddSingleton<MarkdownVideos>();
             services.AddSingleton<MarkdownMeta>();
+            services.AddMarkdown<MarkdownChrono>("_blog");
+            services.AddMarkdown<MarkdownChrono>("_updates");
         })
         .ConfigureAppHost(
             appHost => appHost.Plugins.Add(new CleanUrlsFeature()),
@@ -44,16 +48,20 @@ public class ConfigureSsg : IHostingStartup
                     }
                 });
 
+                var meta = appHost.Resolve<MarkdownMeta>();
                 var includes = appHost.Resolve<MarkdownIncludes>();
-                var blog = appHost.Resolve<MarkdownBlog>();
                 var pages = appHost.Resolve<MarkdownPages>();
                 var videos = appHost.Resolve<MarkdownVideos>();
-                var meta = appHost.Resolve<MarkdownMeta>();
 
-                meta.Features = [blog, pages, videos];
+                meta.Features = [pages, videos];
+                builder.ConfigureServices(services =>
+                {
+	                var provider = services.BuildServiceProvider();
+	                var blog = provider.GetRequiredKeyedService<MarkdownChrono>("_blog");
+	                meta.Features.Add(blog);
+                });
 
                 includes.LoadFrom("_includes");
-                blog.LoadFrom("_pages/blog");
                 pages.LoadFrom("_pages");
                 videos.LoadFrom("_videos");
                 AppConfig.Instance.GitPagesBaseUrl ??= ResolveGitBlobBaseUrl(appHost.ContentRootDirectory);
@@ -63,9 +71,12 @@ public class ConfigureSsg : IHostingStartup
                 // prerender with: `$ npm run prerender`
                 AppTasks.Register("prerender", args =>
                 {
-                    appHost.Resolve<MarkdownMeta>().RenderToAsync(
-                        metaDir: appHost.ContentRootDirectory.RealPath.CombineWith("wwwroot/meta"),
-                        baseUrl: HtmlHelpers.ToAbsoluteContentUrl("")).GetAwaiter().GetResult();
+	                // TODO: Broken meta
+	                // As far as I can tell, what this does is build a collection of metadata from the site's markdown source
+	                // That might be nice to have, if we can get it working
+                    // appHost.Resolve<MarkdownMeta>().RenderToAsync(
+                    //     metaDir: appHost.ContentRootDirectory.RealPath.CombineWith("wwwroot/meta"),
+                    //     baseUrl: HtmlHelpers.ToAbsoluteContentUrl("")).GetAwaiter().GetResult();
 
                     var distDir = appHost.ContentRootDirectory.RealPath.CombineWith("dist");
                     if (Directory.Exists(distDir))
@@ -78,7 +89,7 @@ public class ConfigureSsg : IHostingStartup
                     RazorSsg.PrerenderRedirectsAsync(appHost.ContentRootDirectory.GetFile("redirects.json"), distDir)
                         .GetAwaiter().GetResult();
 
-                    var razorFiles = appHost.VirtualFiles.GetAllMatchingFiles("*.cshtml");
+                    var razorFiles = appHost.VirtualFiles.GetAllMatchingFiles("Blog/Index.cshtml");
                     RazorSsg.PrerenderAsync(appHost, razorFiles, distDir).GetAwaiter().GetResult();
                 });
             });

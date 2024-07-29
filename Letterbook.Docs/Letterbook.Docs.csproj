@@ -34,4 +34,25 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Blog\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Blog\Page.cshtml" />
+    <_ContentIncludedByDefault Remove="dist\meta\2021\all.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2021\videos.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2023\all.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2023\videos.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2024\all.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2024\blog.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2024\pages.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\all.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\index.json" />
+    <_ContentIncludedByDefault Remove="dist\pages\vue\bookings.json" />
+    <_ContentIncludedByDefault Remove="dist\pages\vue\metadata.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Pages\Blog\Index.cshtml" />
+    <AdditionalFiles Include="Pages\Blog\Page.cshtml" />
+  </ItemGroup>
+
 </Project>

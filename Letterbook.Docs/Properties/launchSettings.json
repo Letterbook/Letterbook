@@ -21,16 +21,16 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:5002/"
+      "applicationUrl": "http://localhost:5002/"
     },
-    "Letterbook.Docs Prerender": {
+    "Prerender": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "commandLineArgs": "--AppTasks=prerender",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:5002/"
+      "applicationUrl": "http://localhost:5002/"
     }
   }
 }

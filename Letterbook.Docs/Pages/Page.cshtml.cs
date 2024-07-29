@@ -7,4 +7,6 @@ public class Page : PageModel
 {
     [FromRoute]
     public string Slug { get; set; }
+
+    public MarkdownFileInfo Source { get; set; }
 }

@@ -1,51 +1,48 @@
 @page "/blog/"
-@attribute [RenderStatic]
-@model Letterbook.Docs.Page
-@inject MarkdownBlog Blog
+@* @attribute [RenderStatic] *@
+@model Letterbook.Docs.Pages.Blog.Index
+
+@implements IRenderStatic<Index>
+@functions {
+
+    public List<Index> GetStaticProps(RenderContext ctx)
+    {
+        var blog = ctx.Services.GetRequiredKeyedService<MarkdownChrono>("_blog");
+        return [new Index(blog)];
+    }
+
+}
+
 @{
     ViewData["Title"] = "Blog";
     ViewData["Brand"] = "Blog";
-    var articles = Blog.Features.Keys.OrderByDescending(x => x).ToList();
 }
 
-<h1 class="pt-10 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight md:leading-none text-center">
-    Blog
-</h1>
+@* <h1 class="pt-10 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight md:leading-none text-center"> *@
+    @* Blog *@
+@* </h1> *@
 
 <div class="relative px-6 pt-16 pb-20 lg:px-8 lg:pt-24 lg:pb-28">
 
     <div class="relative mx-auto max-w-7xl">
-    @foreach (var article in articles)
+    @foreach (var article in Model.Blog.Posts)
     {
-        var features = Blog.GetFeatures(article);
-        var articleVersion = article.RightPart('_');
-        if (features.Count == 0) continue;
-        var releaseDate = features[0].Date!.Value;
-        
-        <h2 class="text-center mb-4 text-6xl md:text-7xl font-bold tracking-tighter leading-tight">@articleVersion</h2>
-        <div class="text-center text-lg font-normal text-gray-500 mb-8">@($"{releaseDate:MMMM d, yyyy}")</div>
-
-        @foreach (var feature in features)
-        {
+        int y = article.Date!.Value.Year;
+        int m = article.Date!.Value.Month;
+        int d = article.Date!.Value.Day;
             <div class="flex flex-wrap my-24">
                 <div class="w-full sm:w-1/2 animated px-4">
-                    <a href="@feature.Url"><img src="@feature.Image" alt="" loading="lazy"></a>
+                    <a href="@article.Url"><img src="@article.Image" alt="" loading="lazy"></a>
                 </div>
                 <div class="w-full sm:w-1/2 text-left wow fadeInLeft animated px-4">
                     <h3 class="m-0 mb-4">
-                        <a class="text-2xl font-normal text-blue-500 hover:text-blue-600" href="@feature.Url">@feature.Title</a>
+                        <a class="text-2xl font-normal text-blue-500 hover:text-blue-600" href="blog/post/@y/@m/@d/@article.Slug">@article.Title</a>
                     </h3>
                     <div class="prose max-w-none">
-                        @Html.Raw(feature.Preview)
-                    </div>
-                    <div class="text-center sm:text-left my-10">
-                        <a href="@feature.Url" class="text-white text-sm font-semibold py-2.5 px-3.5 rounded outline-none focus:outline-none mr-1 mb-1 bg-slate-700 active:bg-slate-600 shadow hover:shadow-lg ease-linear transition-all duration-150">
-                            Learn more
-                        </a>
+                        @Html.Raw(article.Preview)
                     </div>
                 </div>
             </div>
-        }
     }
     </div>
 </div>
