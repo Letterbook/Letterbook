@@ -1,3 +1,5 @@
+using Letterbook.DocsSsg.Markdown;
+
 namespace Letterbook.DocsSsg;
 
 public class Program
@@ -8,6 +10,9 @@ public class Program
 
 		// Add services to the container.
 		builder.Services.AddRazorPages();
+		builder.Services.AddMarkdig();
+		builder.Services.AddProjectFiles();
+		builder.Services.AddMarkdown<MarkdownChrono>("_blog");
 
 		var app = builder.Build();
 

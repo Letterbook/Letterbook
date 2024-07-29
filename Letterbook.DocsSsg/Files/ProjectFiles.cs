@@ -6,6 +6,13 @@ public class ProjectFiles(IWebHostEnvironment environment) : IProjectFiles
 {
 	private readonly IFileProvider _root = environment.ContentRootFileProvider;
 
+	public IFileProvider Root => _root;
+
+	public IFileInfo? GetDirectory(string path)
+	{
+		var p = _root.GetFileInfo(path);
+		return p.IsDirectory ? p : default;
+	}
 	public IEnumerable<IFileInfo> GetSubdirectories(string path) => _root.GetDirectoryContents(path).Where(c => c.IsDirectory);
 	public IEnumerable<IFileInfo> GetFiles(string path) => _root.GetDirectoryContents(path).Where(c => !c.IsDirectory);
 

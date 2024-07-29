@@ -1,0 +1,14 @@
+@page
+@using Microsoft.AspNetCore.Html
+@model Letterbook.DocsSsg.Pages.Blog.Index
+
+<h1>Blog</h1>
+<ol>
+    @foreach (var post in Model.Posts)
+    {
+        <li>
+            <p>@post.Title</p>
+            @(new HtmlString(post.HtmlLede))
+        </li>
+    }
+</ol>

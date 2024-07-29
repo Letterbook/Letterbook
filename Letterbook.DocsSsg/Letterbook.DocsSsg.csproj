@@ -7,17 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Reference Include="Markdig">
-        <HintPath>..\..\..\.nuget\packages\markdig\0.34.0\lib\net8.0\Markdig.dll</HintPath>
-      </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
+      <PackageReference Include="Markdig" />
       <PackageReference Include="YamlDotNet" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Generator\" />
     </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
 using System.Globalization;
 using Letterbook.DocsSsg.Files;
 using Markdig;
+using Microsoft.Extensions.FileProviders;
 
 namespace Letterbook.DocsSsg.Markdown;
 
@@ -18,28 +19,28 @@ public class MarkdownChrono(ILogger<MarkdownChrono> log, IWebHostEnvironment env
 	public void LoadFrom(string path)
 	{
 		Files.Clear();
-		var files = fs.GetSubdirectories(path).GetPaths().ToList();
+		var files = fs.GetSubdirectories(path).GetFiles().Where(f => f.PhysicalPath != null).ToList();
 		log.LogInformation("Found {Count} files", files.Count);
 		foreach (var file in files)
 		{
 			if (Load(file) is { } doc)
 			{
 				Files.Add(doc);
-				log.LogInformation("Loaded {Path}", file);
+				log.LogInformation("Loaded {Path}", file.PhysicalPath);
 			}
 			else
 			{
-				log.LogWarning("Couldn't load {Path}", file);
+				log.LogWarning("Couldn't load {Path}", file.PhysicalPath);
 			}
 		}
 	}
 
-	public override MarkdownDoc? Load(string path)
+	public override MarkdownDoc? Load(IFileInfo file)
 	{
 		if (!TryGetDate(out var date))
 			return default;
 
-		var doc = base.Load(path);
+		var doc = base.Load(file);
 		if (doc == null) return doc;
 		doc.Date = date;
 
@@ -47,11 +48,12 @@ public class MarkdownChrono(ILogger<MarkdownChrono> log, IWebHostEnvironment env
 
 		bool TryGetDate(out DateTime dt)
 		{
+			var p = Path.GetFileName(Path.GetDirectoryName(file.PhysicalPath!));
 			dt = new DateTime();
-			var parts = path.Split('/');
-			if (parts.Length != 3) return false;
+			// var parts = file.Split('/');
+			// if (parts.Length != 3) return false;
 
-			var found = DateTime.TryParseExact(parts[1], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal,
+			var found = DateTime.TryParseExact(p, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal,
 				out var d);
 			dt = d;
 			return found;

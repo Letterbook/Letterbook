@@ -4,6 +4,7 @@ namespace Letterbook.DocsSsg.Files;
 
 public interface IProjectFiles
 {
+	public IFileInfo? GetDirectory(string path);
 	public IEnumerable<IFileInfo> GetSubdirectories(string path);
 	public IEnumerable<IFileInfo> GetFiles(string path);
 	public void ClearDist();

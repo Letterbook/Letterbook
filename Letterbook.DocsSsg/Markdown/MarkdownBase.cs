@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Markdig;
 using Markdig.Syntax;
+using Microsoft.Extensions.FileProviders;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -15,16 +16,16 @@ public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownP
 	{
 		return string.Join('-', SlugRegex().Split(filename).Where(static s => s != ""));
 	}
-	public virtual T? Load(string path)
+	public virtual T? Load(IFileInfo file)
 	{
-		if (Path.GetFileNameWithoutExtension(path) is not { } filename || File.ReadAllText(path) is not { } content)
+		if (Path.GetFileNameWithoutExtension(file.PhysicalPath) is not { } filename || File.ReadAllText(file.PhysicalPath!) is not { } content)
 			return default;
 		var doc = CreateDocument(content);
 
 		doc.Title ??= filename;
 
-		doc.Path = path;
-		doc.FileName = Path.GetFileName(path) ;
+		doc.Path = file.PhysicalPath!;
+		doc.FileName = Path.GetFileName(file.Name) ;
 		doc.Slug = Slug(filename);
 
 		return doc;
@@ -32,7 +33,10 @@ public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownP
 
 	public virtual T CreateDocument(string content)
 	{
-		var renderer = new Markdig.Renderers.HtmlRenderer(new StringWriter());
+		var writer = new StringWriter();
+		var ledeWriter = new StringWriter();
+		var renderer = new Markdig.Renderers.HtmlRenderer(writer);
+		var ledeRenderer = new Markdig.Renderers.HtmlRenderer(ledeWriter);
 		pipeline.Setup(renderer);
 
 		var document = Markdig.Markdown.Parse(content, pipeline);
@@ -44,9 +48,13 @@ public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownP
 			.Build();
 		var doc = fmText is null
 			? Activator.CreateInstance<T>()
-			: deserializer.Deserialize<T>(string.Join('\n', fmText.Lines.Lines).Trim(['-']));
+			: deserializer.Deserialize<T>(string.Join('\n', fmText.Lines));
 
+		if (document.Descendants<ParagraphBlock>().FirstOrDefault() is { } paragraph)
+			ledeRenderer.Render(paragraph);
 
+		doc.HtmlLede = ledeWriter.ToString();
+		doc.Html = writer.ToString();
 		return doc;
 	}
 

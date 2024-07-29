@@ -15,6 +15,7 @@
     <PackageVersion Include="DarkLink.Web.WebFinger.Server" Version="1.0.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
     <PackageVersion Include="ILogger.Moq" Version="1.1.10" />
+    <PackageVersion Include="Markdig" Version="0.37.0" />
     <PackageVersion Include="MassTransit" Version="8.2.3" />
     <PackageVersion Include="MassTransit.Abstractions" Version="8.2.3" />
     <PackageVersion Include="Medo.Uuid7" Version="2.0.0" />
