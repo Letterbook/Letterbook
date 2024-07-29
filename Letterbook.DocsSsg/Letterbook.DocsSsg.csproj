@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Reference Include="Markdig">
+        <HintPath>..\..\..\.nuget\packages\markdig\0.34.0\lib\net8.0\Markdig.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="YamlDotNet" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Generator\" />
+    </ItemGroup>
+
+</Project>

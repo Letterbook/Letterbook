@@ -97,6 +97,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OpenApi", "OpenApi", "{9B2C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.AspNet.Tests", "Letterbook.AspNet.Tests\Letterbook.AspNet.Tests.csproj", "{441FC3A5-980A-4205-B888-B877556C0A57}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Docs", "Letterbook.Docs\Letterbook.Docs.csproj", "{E59A87C4-FB3F-4A63-AE77-66E05F254779}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.DocsSsg", "Letterbook.DocsSsg\Letterbook.DocsSsg.csproj", "{8BE476D7-D103-4E54-B08D-F6016EAABFEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Docs.Tests", "Letterbook.Docs.Tests\Letterbook.Docs.Tests.csproj", "{2F2907F2-630C-445C-992B-ED84D6AA296A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -182,6 +188,18 @@ Global
 		{441FC3A5-980A-4205-B888-B877556C0A57}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{441FC3A5-980A-4205-B888-B877556C0A57}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{441FC3A5-980A-4205-B888-B877556C0A57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E59A87C4-FB3F-4A63-AE77-66E05F254779}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E59A87C4-FB3F-4A63-AE77-66E05F254779}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E59A87C4-FB3F-4A63-AE77-66E05F254779}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E59A87C4-FB3F-4A63-AE77-66E05F254779}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BE476D7-D103-4E54-B08D-F6016EAABFEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BE476D7-D103-4E54-B08D-F6016EAABFEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BE476D7-D103-4E54-B08D-F6016EAABFEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BE476D7-D103-4E54-B08D-F6016EAABFEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F2907F2-630C-445C-992B-ED84D6AA296A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F2907F2-630C-445C-992B-ED84D6AA296A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F2907F2-630C-445C-992B-ED84D6AA296A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F2907F2-630C-445C-992B-ED84D6AA296A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
