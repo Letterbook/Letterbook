@@ -13,7 +13,7 @@ public interface IProfileService
 public interface IAuthzProfileService
 {
 	Task<Profile> CreateProfile(Profile profile);
-	Task<Profile> CreateProfile(Guid ownerId, string handle);
+	Task<Profile> CreateProfile(Uuid7 ownerId, string handle);
 
 	/// <summary>
 	/// Set a new display name for the given profile
@@ -22,11 +22,11 @@ public interface IAuthzProfileService
 	/// <param name="displayName"></param>
 	/// <returns>The original and updated Profiles, or null if no change was made</returns>
 	/// <exception cref="CoreException"></exception>
-	Task<UpdateResponse<Profile>> UpdateDisplayName(Guid localId, string displayName);
-	Task<UpdateResponse<Profile>> UpdateDescription(Guid localId, string description);
-	Task<UpdateResponse<Profile>> InsertCustomField(Guid localId, int index, string key, string value);
-	Task<UpdateResponse<Profile>> RemoveCustomField(Guid localId, int index);
-	Task<UpdateResponse<Profile>> UpdateCustomField(Guid localId, int index, string key, string value);
+	Task<UpdateResponse<Profile>> UpdateDisplayName(Uuid7 localId, string displayName);
+	Task<UpdateResponse<Profile>> UpdateDescription(Uuid7 localId, string description);
+	Task<UpdateResponse<Profile>> InsertCustomField(Uuid7 localId, int index, string key, string value);
+	Task<UpdateResponse<Profile>> RemoveCustomField(Uuid7 localId, int index);
+	Task<UpdateResponse<Profile>> UpdateCustomField(Uuid7 localId, int index, string key, string value);
 	Task<UpdateResponse<Profile>> UpdateProfile(Profile profile);
 
 	/// <summary>
@@ -56,8 +56,16 @@ public interface IAuthzProfileService
 	/// <returns></returns>
 	Task<FollowerRelation> Follow(Uuid7 selfId, Uuid7 targetId);
 	Task<FollowerRelation> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId);
-	Task<FollowerRelation> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId);
-	Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response);
+	Task<FollowerRelation> ReceiveFollowRequest(Uuid7 localId, Uri followerId, Uri? requestId);
+
+	/// <summary>
+	/// Update the follow relationship with the replied state
+	/// </summary>
+	/// <param name="selfId"></param>
+	/// <param name="targetId"></param>
+	/// <param name="response"></param>
+	/// <returns></returns>
+	Task<FollowerRelation> ReceiveFollowReply(Uuid7 selfId, Uri targetId, FollowState response);
 
 	/// <summary>
 	/// Remove the target profile as a follower
@@ -116,7 +124,7 @@ public interface IAuthzProfileService
 	Task<int> FollowerCount(Profile profile);
 	Task<int> FollowingCount(Profile profile);
 
-	Task ReportProfile(Guid selfId, Uri profileId);
+	Task ReportProfile(Uuid7 selfId, Uri profileId);
 
 
 	// - [ ] receive report

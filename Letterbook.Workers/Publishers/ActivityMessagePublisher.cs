@@ -36,23 +36,19 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 	/// <inheritdoc />
 	public async Task Follow(Uri inbox, Profile target, Profile actor)
 	{
-		var document = _document.Follow(actor, target);
+		var document = _document.Follow(actor, target, implicitId: true);
 		await Deliver(inbox, document, actor);
 	}
 
 	/// <inheritdoc />
 	public async Task Unfollow(Uri inbox, Profile target, Profile actor)
 	{
-		var document = _document.Undo(actor, _document.Follow(actor, target));
+		var document = _document.Undo(actor, _document.Follow(actor, target, implicitId: true));
 		await Deliver(inbox, document, actor);
 	}
 
 	/// <inheritdoc />
-	public async Task RemoveFollower(Uri inbox, Profile target, Profile actor)
-	{
-		var document = _document.Undo(actor, _document.Accept(actor, _document.Follow(target, actor)));
-		await Deliver(inbox, document, actor);
-	}
+	public async Task RemoveFollower(Uri inbox, Profile target, Profile actor) => await RejectFollower(inbox, target, actor);
 
 	/// <inheritdoc />
 	public async Task AcceptFollower(Uri inbox, Profile target, Profile actor)
@@ -81,12 +77,14 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 			: activity.Is<ASLink>(out var l)
 				? l.HRef.ToString() : null;
 		act ??= string.Join(',', activity.TypeMap.ASTypes);
+		var data = _document.Serialize(activity);
+		_logger.LogDebug("Scheduling message to {Inbox} with {Document}", inbox, data);
 		return new ActivityMessage
 		{
 			Activity = act,
 			Claims = [],
 			Type = nameof(Deliver),
-			Data = _document.Serialize(activity),
+			Data = data,
 			OnBehalfOf = onBehalfOf?.GetId(),
 			Inbox = inbox
 		};

@@ -14,12 +14,12 @@ public interface IActivityPubDocument
 	CreateActivity Create(Profile actor, IContentRef content);
 	DeleteActivity Delete(Profile actor, IContentRef content);
 	DislikeActivity Dislike(Profile actor, IContentRef content);
-	FollowActivity Follow(Profile actor, Profile target);
+	FollowActivity Follow(Profile actor, Profile target, Uri? id = null, bool implicitId = false);
 	LikeActivity Like(Profile actor, IContentRef content);
 	RejectActivity Reject(Profile actor, ASObject asObject);
 	RemoveActivity Remove(Profile actor, ASType @object, ASType target);
 	TentativeAcceptActivity TentativeAccept(Profile actor, ASObject asObject);
-	UndoActivity Undo(Profile actor, ASObject @object);
+	UndoActivity Undo(Profile actor, ASObject @object, Uri? id = null, bool implicitId = false);
 	UpdateActivity Update(Profile actor, IContentRef content);
 	ASActivity BuildActivity(Models.ActivityType type);
 }

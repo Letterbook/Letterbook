@@ -22,6 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development"
 		CONTRIBUTING.md = CONTRIBUTING.md
 		docker-compose.mastodon.yml = docker-compose.mastodon.yml
 		.editorconfig = .editorconfig
+		rootless.yml = rootless.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D5E41A46-D753-4214-AF70-1839E56B4A14}"
@@ -96,6 +97,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OpenApi", "OpenApi", "{9B2C
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.AspNet.Tests", "Letterbook.AspNet.Tests\Letterbook.AspNet.Tests.csproj", "{441FC3A5-980A-4205-B888-B877556C0A57}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{801E0E9E-EE45-42E4-A496-4A87E75D256D}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\socket.sh = scripts\socket.sh
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Docs", "Letterbook.Docs\Letterbook.Docs.csproj", "{E59A87C4-FB3F-4A63-AE77-66E05F254779}"
 EndProject
@@ -206,5 +212,6 @@ Global
 		{4FB3BADC-1EDD-482C-8D60-AD46D676A12F} = {D5E41A46-D753-4214-AF70-1839E56B4A14}
 		{1D8F2C94-1796-48A0-B9D7-172E645607F5} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
 		{9B2CFD6B-FD4B-4624-9A70-C79F7B68709C} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
+		{801E0E9E-EE45-42E4-A496-4A87E75D256D} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
 	EndGlobalSection
 EndGlobal
