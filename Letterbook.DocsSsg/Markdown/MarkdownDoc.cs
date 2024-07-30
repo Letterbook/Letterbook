@@ -10,6 +10,7 @@ public class MarkdownDoc
 	public required string HtmlLede { get; set; }
 	public required string Html { get; set; }
 	public required DateTime Date { get; set; }
+	public int Order { get; set; }
 	public List<string> Tags { get; set; } = new();
 	public List<string> Authors { get; set; } = new();
 	public bool Draft { get; set; } = false;

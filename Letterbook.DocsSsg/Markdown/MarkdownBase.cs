@@ -18,12 +18,13 @@ public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownP
 	}
 	public virtual T? Load(IFileInfo file)
 	{
-		if (Path.GetFileNameWithoutExtension(file.PhysicalPath) is not { } filename || File.ReadAllText(file.PhysicalPath!) is not { } content)
+		if (Path.GetFileNameWithoutExtension(file.PhysicalPath) is not { } filename
+		    || Path.GetExtension(file.PhysicalPath) != ".md"
+		    || File.ReadAllText(file.PhysicalPath!) is not { } content)
 			return default;
 		var doc = CreateDocument(content);
 
 		doc.Title ??= filename;
-
 		doc.Path = file.PhysicalPath!;
 		doc.FileName = Path.GetFileName(file.Name) ;
 		doc.Slug = Slug(filename);
@@ -31,6 +32,7 @@ public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownP
 		return doc;
 	}
 
+	public abstract MarkdownDoc Reload(MarkdownDoc doc);
 	public virtual T CreateDocument(string content)
 	{
 		var writer = new StringWriter();
@@ -55,6 +57,7 @@ public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownP
 
 		doc.HtmlLede = ledeWriter.ToString();
 		doc.Html = writer.ToString();
+		doc.Source = content;
 		return doc;
 	}
 

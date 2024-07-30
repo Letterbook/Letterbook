@@ -1,3 +1,4 @@
+using Letterbook.DocsSsg.Markdown;
 using Microsoft.Extensions.FileProviders;
 
 namespace Letterbook.DocsSsg.Files;
@@ -5,16 +6,33 @@ namespace Letterbook.DocsSsg.Files;
 public class ProjectFiles(IWebHostEnvironment environment) : IProjectFiles
 {
 	private readonly IFileProvider _root = environment.ContentRootFileProvider;
-
-	public IFileProvider Root => _root;
+	private readonly string _rootPath = environment.ContentRootPath;
 
 	public IFileInfo? GetDirectory(string path)
 	{
 		var p = _root.GetFileInfo(path);
 		return p.IsDirectory ? p : default;
 	}
-	public IEnumerable<IFileInfo> GetSubdirectories(string path) => _root.GetDirectoryContents(path).Where(c => c.IsDirectory);
-	public IEnumerable<IFileInfo> GetFiles(string path) => _root.GetDirectoryContents(path).Where(c => !c.IsDirectory);
+
+	public IEnumerable<IFileInfo> GetSubdirectories(string path) =>
+		_root.GetDirectoryContents(path).Where(IsDirectory);
+
+	public IEnumerable<IFileInfo> GetSubdirectories(IFileInfo path) =>
+		path.PhysicalPath == null ? [] : GetSubdirectories(Relative(path.PhysicalPath));
+
+	public IEnumerable<IFileInfo> GetSubdirectories(IEnumerable<IFileInfo> path) =>
+		path.SelectMany(GetSubdirectories);
+
+	public IEnumerable<IFileInfo> GetFiles(string path) =>
+		_root.GetDirectoryContents(path).Where(NotDirectory);
+
+	public IEnumerable<IFileInfo> GetFiles(IFileInfo path) =>
+		path.PhysicalPath == null ? [] : GetFiles(Relative(path.PhysicalPath));
+
+	public IEnumerable<IFileInfo> GetFiles(IEnumerable<IFileInfo> path) =>
+		path.SelectMany(GetFiles);
+
+	public IFileInfo GetMarkdownDoc(MarkdownDoc doc) => _root.GetFileInfo(Relative(doc.Path));
 
 	public void ClearDist()
 	{
@@ -32,4 +50,8 @@ public class ProjectFiles(IWebHostEnvironment environment) : IProjectFiles
 		using var fs = new FileStream(dest, FileMode.Create, FileAccess.Write, FileShare.None);
 		return stream.CopyToAsync(fs);
 	}
+
+	private string Relative(string physicalPath) => Path.GetRelativePath(_rootPath, physicalPath);
+	private static bool IsDirectory(IFileInfo file) => file.IsDirectory;
+	private static bool NotDirectory(IFileInfo file) => !file.IsDirectory;
 }

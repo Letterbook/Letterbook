@@ -14,12 +14,13 @@ public class MarkdownChrono(ILogger<MarkdownChrono> log, IWebHostEnvironment env
 {
 	public List<MarkdownDoc> Files { get; set; } = new();
 
-	public List<MarkdownDoc> GetAll() => Files.Where(IsVisible).ToList();
+	public List<MarkdownDoc> GetAll() => Files.Where(IsVisible)
+		.OrderBy(f => f.Date).ThenBy(f => f.Order).ThenBy(f => f.FileName).ToList();
 
 	public void LoadFrom(string path)
 	{
 		Files.Clear();
-		var files = fs.GetSubdirectories(path).GetFiles().Where(f => f.PhysicalPath != null).ToList();
+		var files = fs.GetSubdirectories(path).Then(fs.GetFiles).Where(f => f.PhysicalPath != null).ToList();
 		log.LogInformation("Found {Count} files", files.Count);
 		foreach (var file in files)
 		{
@@ -60,4 +61,5 @@ public class MarkdownChrono(ILogger<MarkdownChrono> log, IWebHostEnvironment env
 		}
 	}
 
+	public override MarkdownDoc Reload(MarkdownDoc doc) => Load(fs.GetMarkdownDoc(doc)) ?? doc;
 }
