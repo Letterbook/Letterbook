@@ -145,7 +145,7 @@ public abstract class MarkdownPagesBase<T>(ILogger log, IWebHostEnvironment env,
         var renderer = new Markdig.Renderers.HtmlRenderer(writer);
         pipeline.Setup(renderer);
 
-        var document = Markdown.Parse(content, pipeline);
+        var document = Markdig.Markdown.Parse(content, pipeline);
         renderer.Render(document);
 
         var block = document

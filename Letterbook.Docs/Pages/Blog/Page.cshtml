@@ -5,15 +5,16 @@
 
 @functions {
 
-    public List<Page> GetStaticProps(RenderContext ctx) {
-        var blog = ctx.Resolve<MarkdownChrono>();
-        return blog.GetAll()
+    public List<Page> GetStaticProps(RenderContext ctx)
+    {
+        var blog = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownDate>>();
+        return blog.GetMarkdown("_blog").GetAll()
             .Select(p => new Page(blog)
             {
-                Slug = p.Slug!,
-                Year = p.Date!.Value.Year,
-                Month = p.Date.Value.Month,
-                Day = p.Date.Value.Day,
+                Slug = p.Slug,
+                Year = p.Date.Year,
+                Month = p.Date.Month,
+                Day = p.Date.Day,
             })
             .ToList();
     }
@@ -21,8 +22,6 @@
 }
 
 @{
-    // Layout = "_LayoutEmpty";
-
     if (Model.Source == null)
     {
         Response.Redirect("/404");
@@ -30,13 +29,10 @@
     }
 
     Response.StatusCode = 200;
+    ViewData["Title"] = Model.Source.Title;
 }
 
 <h1>@Model.Source.Title</h1>
 <article>
     @Model.Doc
 </article>
-
-@* @await Html.PartialAsync("DocsPage", new DocsPage() { *@
-@* Slug = Model.Slug, *@
-@* }.Init(this, Markdown.GetByDate(date, Model.Slug))); *@

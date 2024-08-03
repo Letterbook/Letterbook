@@ -1,15 +1,12 @@
-using Microsoft.AspNetCore.Components;
+using Letterbook.Docs.Markdown;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Letterbook.Docs.Pages.Blog;
 
-public class Page([FromKeyedServices("_blog")] MarkdownChrono blog) : PageModel
+public class Page([FromServices] MarkdownFilesFactory<MarkdownDate> blog) : PageModel
 {
-	private readonly IServiceProvider _services;
-	private MarkdownFileBase? _source;
-
 	[FromRoute]
 	public string Slug { get; set; }
 
@@ -22,9 +19,9 @@ public class Page([FromKeyedServices("_blog")] MarkdownChrono blog) : PageModel
 	[FromRoute]
 	public int Day { get; set; }
 
-	public MarkdownChrono Blog { get; set; } = blog;
+	public MarkdownDate Blog { get; set; } = blog.GetMarkdown("_blog");
 
-	public MarkdownFileBase? Source => _source ??= Blog.GetByDate(new DateTime(Year, Month, Day), Slug);
+	public MarkdownDoc? Source =>  Blog.GetByDate(new DateTime(Year, Month, Day), Slug);
 
-	public HtmlString Doc => new HtmlString(Source?.Preview);
+	public HtmlString Doc => new HtmlString(Source?.Html);
 }

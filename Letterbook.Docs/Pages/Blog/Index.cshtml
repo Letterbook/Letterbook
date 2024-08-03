@@ -1,48 +1,46 @@
 @page "/blog/"
-@* @attribute [RenderStatic] *@
+@using Microsoft.AspNetCore.Html
 @model Letterbook.Docs.Pages.Blog.Index
-
-@implements IRenderStatic<Index>
-@functions {
-
-    public List<Index> GetStaticProps(RenderContext ctx)
-    {
-        var blog = ctx.Services.GetRequiredKeyedService<MarkdownChrono>("_blog");
-        return [new Index(blog)];
-    }
-
-}
 
 @{
     ViewData["Title"] = "Blog";
     ViewData["Brand"] = "Blog";
 }
 
+@implements IRenderStatic<Index>
+
+@functions {
+
+    public List<Index> GetStaticProps(RenderContext ctx)
+    {
+        var blog = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownDate>>();
+        return [new Index(blog)];
+    }
+
+}
+
 @* <h1 class="pt-10 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight md:leading-none text-center"> *@
-    @* Blog *@
+@* Blog *@
 @* </h1> *@
 
 <div class="relative px-6 pt-16 pb-20 lg:px-8 lg:pt-24 lg:pb-28">
 
     <div class="relative mx-auto max-w-7xl">
-    @foreach (var article in Model.Blog.Posts)
-    {
-        int y = article.Date!.Value.Year;
-        int m = article.Date!.Value.Month;
-        int d = article.Date!.Value.Day;
+        @foreach (var article in Model.Blog.Files)
+        {
+            int y = article.Date.Year;
+            int m = article.Date.Month;
+            int d = article.Date.Day;
             <div class="flex flex-wrap my-24">
-                <div class="w-full sm:w-1/2 animated px-4">
-                    <a href="@article.Url"><img src="@article.Image" alt="" loading="lazy"></a>
-                </div>
                 <div class="w-full sm:w-1/2 text-left wow fadeInLeft animated px-4">
                     <h3 class="m-0 mb-4">
                         <a class="text-2xl font-normal text-blue-500 hover:text-blue-600" href="blog/post/@y/@m/@d/@article.Slug">@article.Title</a>
                     </h3>
                     <div class="prose max-w-none">
-                        @Html.Raw(article.Preview)
+                        @(new HtmlString(article.HtmlLede))
                     </div>
                 </div>
             </div>
-    }
+        }
     </div>
 </div>

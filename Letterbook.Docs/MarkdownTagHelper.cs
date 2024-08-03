@@ -10,7 +10,7 @@ namespace Letterbook.Docs;
 public class MarkdownTagHelper : TagHelper
 {
     public ModelExpression? Content { get; set; }
-    
+
     public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
         if (output.TagName == "markdown")
@@ -20,7 +20,7 @@ public class MarkdownTagHelper : TagHelper
         output.Attributes.RemoveAll("markdown");
 
         var content = await GetContent(output);
-        
+
         var pipeline = new MarkdownPipelineBuilder()
             .UseAdvancedExtensions()
             .Build();
@@ -43,7 +43,7 @@ public class MarkdownTagHelper : TagHelper
                 include = include[0] != '/'
                     ? "_includes/" + include
                     : include.TrimStart('/');
-                
+
                 doc = includes.Pages.FirstOrDefault(x => x.Path == include);
                 if (doc == null && pages != null)
                 {
@@ -71,7 +71,7 @@ public class MarkdownTagHelper : TagHelper
         }
         else
         {
-            var document = Markdown.Parse(content ?? "", pipeline);
+            var document = Markdig.Markdown.Parse(content ?? "", pipeline);
             renderer.Render(document);
         }
 

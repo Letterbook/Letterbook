@@ -1,4 +1,5 @@
 using System.Reflection;
+using Letterbook.Docs.Markdown;
 using Markdig.Extensions.CustomContainers;
 using Markdig.Renderers;
 using Markdig.Renderers.Html;
@@ -16,16 +17,23 @@ public class ConfigureSsg : IHostingStartup
         .ConfigureServices((context,services) =>
         {
             context.Configuration.GetSection(nameof(AppConfig)).Bind(AppConfig.Instance);
-            // Assembly.GetAssembly(GetType()).
             services.AddSingleton(AppConfig.Instance);
             services.AddSingleton<RazorPagesEngine>();
-            services.AddSingleton<MarkdownChrono>();
             services.AddSingleton<MarkdownIncludes>();
             services.AddSingleton<MarkdownPages>();
             services.AddSingleton<MarkdownVideos>();
             services.AddSingleton<MarkdownMeta>();
-            services.AddMarkdown<MarkdownChrono>("_blog");
-            services.AddMarkdown<MarkdownChrono>("_updates");
+
+            services.AddMarkdown<MarkdownDate>()
+				.AddProjectFiles();
+            services.AddMarkdig()
+	            .UseCustomContainers(extensions =>
+	            {
+		            extensions.AddBlockContainer("YouTube", new YouTubeContainer());
+		            extensions.AddBlockContainer("Mastodon", new MastodonContainer());
+		            extensions.AddInlineContainer("YouTube", new YouTubeInlineContainer());
+		            extensions.AddInlineContainer("Mastodon", new MastodonInlineContainer());
+	            });
         })
         .ConfigureAppHost(
             appHost => appHost.Plugins.Add(new CleanUrlsFeature()),
@@ -42,8 +50,8 @@ public class ConfigureSsg : IHostingStartup
                         config.AddBuiltInContainers();
                         // Add Custom Block or Inline containers
                         config.AddBlockContainer("YouTube", new YouTubeContainer());
-                        config.AddBlockContainer("Mastodon", new MastodonContainer());
                         config.AddInlineContainer("YouTube", new YouTubeInlineContainer());
+                        config.AddBlockContainer("Mastodon", new MastodonContainer());
                         config.AddInlineContainer("Mastodon", new MastodonInlineContainer());
                     }
                 });
@@ -54,12 +62,6 @@ public class ConfigureSsg : IHostingStartup
                 var videos = appHost.Resolve<MarkdownVideos>();
 
                 meta.Features = [pages, videos];
-                builder.ConfigureServices(services =>
-                {
-	                var provider = services.BuildServiceProvider();
-	                var blog = provider.GetRequiredKeyedService<MarkdownChrono>("_blog");
-	                meta.Features.Add(blog);
-                });
 
                 includes.LoadFrom("_includes");
                 pages.LoadFrom("_pages");
@@ -89,7 +91,7 @@ public class ConfigureSsg : IHostingStartup
                     RazorSsg.PrerenderRedirectsAsync(appHost.ContentRootDirectory.GetFile("redirects.json"), distDir)
                         .GetAwaiter().GetResult();
 
-                    var razorFiles = appHost.VirtualFiles.GetAllMatchingFiles("Blog/Index.cshtml");
+                    var razorFiles = appHost.VirtualFiles.GetAllMatchingFiles("*.cshtml");
                     RazorSsg.PrerenderAsync(appHost, razorFiles, distDir).GetAwaiter().GetResult();
                 });
             });
