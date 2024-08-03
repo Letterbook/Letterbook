@@ -23,5 +23,5 @@ public class Page([FromServices] MarkdownFilesFactory<MarkdownDate> blog) : Page
 
 	public MarkdownDoc? Source =>  Blog.GetByDate(new DateTime(Year, Month, Day), Slug);
 
-	public HtmlString Doc => new HtmlString(Source?.Html);
+	public HtmlString Html => new(Source?.Html);
 }
