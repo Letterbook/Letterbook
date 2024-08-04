@@ -16,6 +16,7 @@ public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownP
 	{
 		return string.Join('-', SlugRegex().Split(filename).Where(static s => s != ""));
 	}
+
 	public virtual T? Load(IFileInfo file)
 	{
 		if (Path.GetFileNameWithoutExtension(file.PhysicalPath) is not { } filename
@@ -32,7 +33,7 @@ public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownP
 		return doc;
 	}
 
-	public abstract MarkdownDoc Reload(MarkdownDoc doc);
+	public abstract T Reload(T doc);
 	public virtual T CreateDocument(string content)
 	{
 		var writer = new StringWriter();
