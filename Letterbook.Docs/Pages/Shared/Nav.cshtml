@@ -1,0 +1,24 @@
+@{
+    void RenderNavLink(string href, string text)
+    {
+        <li class="@Html.ClassNames(Html.MatchesPath(href) ? "highlight" : "")">
+            <a href="@href">@text</a>
+        </li>
+    }
+
+    var menuItems = new (string Href, string Text)[]
+    {
+        ("/", "Home"),
+        ("/blog", "Blog"),
+        ("/docs", "Docs"),
+    };
+}
+
+<nav>
+    <ul>
+        @foreach (var item in menuItems)
+        {
+            RenderNavLink(item.Href, item.Text);
+        }
+    </ul>
+</nav>

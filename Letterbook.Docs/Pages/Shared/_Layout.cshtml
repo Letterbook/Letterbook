@@ -4,32 +4,16 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
     <link rel="icon" type="image/svg" href="/img/logo.svg">
+    <link rel="stylesheet" href="/lib/picocss/css/pico.min.css"/>
     <title>@ViewData["Title"]</title>
-    <script>
-    if (location.search === "?dark") localStorage.setItem('color-scheme','dark') 
-    if (location.search === "?light") localStorage.removeItem('color-scheme') 
-    const cls = document.querySelector('html').classList
-    if (localStorage.getItem('color-scheme') === 'dark')
-        cls.add('dark')
-    else
-        cls.remove('dark')
-    </script>
-    <link rel="stylesheet" href="/css/app.css">
-
-    <script async src="https://ga.jspm.io/npm:es-module-shims@1.6.3/dist/es-module-shims.js"></script>
-    @Html.ImportMap(new() {
-        ["app.mjs"]              = ("/mjs/app.mjs",                     "/mjs/app.mjs"),
-        ["vue"]                  = ("/lib/mjs/vue.mjs",                 "/lib/mjs/vue.min.mjs"),
-        ["@servicestack/client"] = ("/lib/mjs/servicestack-client.mjs", "/lib/mjs/servicestack-client.min.mjs"),
-        ["@servicestack/vue"]    = ("/lib/mjs/servicestack-vue.mjs",    "/lib/mjs/servicestack-vue.min.mjs"),
-    })
 </head>
-<body class="bg-white dark:bg-black dark:text-white">
-@await Html.PartialAsync("Header")
+<body >
+@await Html.PartialAsync("Nav")
 
-<div class="min-h-screen">
-    <main role="main" class="pt-16 pb-3">
+<div >
+    <main role="main" class="container">
         @RenderBody()
     </main>
 </div>

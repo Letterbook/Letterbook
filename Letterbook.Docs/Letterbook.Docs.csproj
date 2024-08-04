@@ -21,17 +21,13 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    
-    <PackageReference Include="Markdig" Version="0.34.*" />
-    <PackageReference Include="ServiceStack" Version="8.*" />
-    <PackageReference Include="ServiceStack.Mvc" Version="8.*" />
+    <PackageReference Include="Markdig"/>
+    <PackageReference Include="Microsoft.Web.LibraryManager.Build" />
+    <PackageReference Include="ServiceStack" />
+    <PackageReference Include="ServiceStack.Mvc" />
 
     <!-- Required for Razor compilation on change: https://docs.microsoft.com/en-us/aspnet/core/mvc/views/view-compilation?view=aspnetcore-5.0 -->
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.*" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
