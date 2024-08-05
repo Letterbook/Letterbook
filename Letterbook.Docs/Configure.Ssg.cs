@@ -34,6 +34,20 @@ public class ConfigureSsg : IHostingStartup
 		            extensions.AddBlockContainer("Mastodon", new MastodonContainer());
 		            extensions.AddInlineContainer("YouTube", new YouTubeInlineContainer());
 		            extensions.AddInlineContainer("Mastodon", new MastodonInlineContainer());
+		            extensions.AddBlockContainer("Tip", new CustomInfoRenderer());
+		            extensions.AddBlockContainer("Info", new CustomInfoRenderer(){
+			            Class = "info",
+			            Title = "INFO",
+		            });
+		            extensions.AddBlockContainer("Warning", new CustomInfoRenderer(){
+			            Class = "warning",
+			            Title = "WARNING",
+		            });
+		            extensions.AddBlockContainer("Danger", new CustomInfoRenderer()
+		            {
+			            Class = "danger",
+			            Title = "DANGER",
+		            });
 	            });
         })
         .ConfigureAppHost(

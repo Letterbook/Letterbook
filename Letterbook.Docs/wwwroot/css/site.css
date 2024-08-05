@@ -26,9 +26,9 @@
     --hollywood-cerise-highlight: hsl(325, 92%, 65.7%);
     
     /* Accent color */
-    --spring-bud: hsla(77, 99%, 49%, 1);
-    --spring-bud-shade: hsla(77, 99%, 49%, 1);
-    --spring-bud-highlight: hsl(79, 100%, 42.4%);
+    --spring-bud: hsla(77, 89%, 49%, 1);
+    --spring-bud-shade: hsl(79, 89%, 42.4%);
+    --spring-bud-highlight: hsla(77, 89%, 49%, 1);
     
     /* Contrast color */
     --safety-orange: hsla(29, 100%, 50%, 1);
@@ -125,4 +125,47 @@ img.logo {
     h1 {
         margin-bottom: 0;
     }
+}
+
+div.custom-block {
+    background-color: var(--pico-card-background-color);
+    border-color: var(--pico-card-border-color);
+    border-width: 1px 1px 1px 0.5rem;
+    border-style: solid;
+    padding: 1rem;
+    
+    p {
+        margin-top: auto;
+        margin-bottom: auto;
+    }
+}
+
+.custom-block.tip {
+    border-color: var(--spring-bud);
+    p.custom-block-title {
+        color: var(--spring-bud);
+    }
+}
+.custom-block.info {
+    border-color: var(--aero);
+    p.custom-block-title {
+        color: var(--aero);
+    }
+}
+.custom-block.danger {
+    border-color: var(--safety-orange);
+    p.custom-block-title {
+        color: var(--safety-orange);
+    }
+}
+.custom-block.warning {
+    border-color: var(--hollywood-cerise);
+    p.custom-block-title {
+        color: var(--hollywood-cerise);
+    }
+}
+
+.text-center {
+    display: flex;
+    justify-content: center;
 }

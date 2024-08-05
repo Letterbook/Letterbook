@@ -34,3 +34,11 @@
 }
 
 @Model.Html
+
+@section Head
+{
+    @foreach (var author in @Model.Source.Authors)
+    {
+        <link rel="author" href="/blog/author/@author"/>
+    }
+}
