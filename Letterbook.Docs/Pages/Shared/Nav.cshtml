@@ -1,8 +1,11 @@
+@inherits Microsoft.AspNetCore.Mvc.Razor.RazorPage<TModel>
 @{
+    string CurrentNav(string href) => Html.MatchesPath(href) ? "current" : "alternate";
     void RenderNavLink(string href, string text)
     {
-        <li class="@Html.ClassNames(Html.MatchesPath(href) ? "highlight" : "")">
-            <a href="@href">@text</a>
+        <li class="@Html.ClassNames(CurrentNav(href))">
+            <a href="@href" aria-current="@(Html.MatchesPath(href) ? "page" : "")" 
+               class="@Html.ClassNames(CurrentNav(href))">@text</a>
         </li>
     }
 
@@ -14,11 +17,22 @@
     };
 }
 
-<nav>
-    <ul>
-        @foreach (var item in menuItems)
-        {
-            RenderNavLink(item.Href, item.Text);
-        }
+<nav class="top-nav">
+    <ul class="align-bottom">
+        <li><img href="/img/letterbook.png" alt="Letterbook logo" src="/img/letterbook.svg" class="logo"/></li>
+        <li><h1 style="">@ViewData["Title"]</h1></li>
+    </ul>
+    <ul class="align-bottom">
+        <li>
+            <details class="dropdown">
+                <summary>@menuItems.First(each => Html.MatchesPath(each.Href)).Text</summary>
+                <ul>
+                    @foreach (var item in menuItems)//.Where(each => !Html.MatchesPath(each.Href)))
+                    {
+                        RenderNavLink(item.Href, item.Text);
+                    }
+                </ul>
+            </details>
+        </li>
     </ul>
 </nav>

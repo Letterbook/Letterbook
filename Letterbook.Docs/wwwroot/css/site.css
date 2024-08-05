@@ -1,0 +1,128 @@
+/* Font used for user content (except monospaced) */
+@font-face {
+    font-family: inclusve_sans;
+    src: url("font/InclusiveSans-Regular.woff") format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* The wordmark font */
+@font-face {
+    font-family: "Share Tech Mono";
+    src: url("font/ShareTechMono-Regular.woff2") format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    /* Main color */
+    --aero: hsla(187, 96%, 44%, 1);
+    --aero-shade: hsl(180, 100%, 27.1%);
+    --aero-highlight: hsl(180, 84.9%, 63.7%);
+    
+    /* Secondary color */
+    --hollywood-cerise: hsla(321, 99%, 46%, 1);
+    --hollywood-cerise-shade: hsl(325, 100%, 35.9%);
+    --hollywood-cerise-highlight: hsl(325, 92%, 65.7%);
+    
+    /* Accent color */
+    --spring-bud: hsla(77, 99%, 49%, 1);
+    --spring-bud-shade: hsla(77, 99%, 49%, 1);
+    --spring-bud-highlight: hsl(79, 100%, 42.4%);
+    
+    /* Contrast color */
+    --safety-orange: hsla(29, 100%, 50%, 1);
+    --safety-orange-shade: hsl(27, 100%, 45.3%);
+    --safety-orange-highlight: hsl(27, 100%, 67.5%);
+    
+    /* Background colors */
+    --charcoal: hsla(204, 19%, 26%, 1);
+    --cool-paper: hsl(210,16.7%,95.3%);
+}
+
+/* Light color scheme (Default) */
+/* Can be forced with data-theme="light" */
+[data-theme="light"],
+:root:not([data-theme="dark"]) {
+    --pico-background-color: var(--cool-paper);
+    --pico-primary: var(--aero);
+    --pico-primary-focus: var(--aero-highlight);
+    --pico-secondary: var(--hollywood-cerise);
+    --pico-secondary-focus: var(--hollywood-cerise-highlight);
+    --pico-contrast: var(--safety-orange);
+    --pico-contrast-focus: var(--safety-orange-highlight);
+}
+
+/* Dark color scheme (Auto) */
+/* Automatically enabled if user has Dark mode enabled */
+@media only screen and (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+        --pico-background-color: var(--charcoal);
+        --pico-primary: var(--aero);
+        --pico-primary-focus: var(--aero-highlight);
+        --pico-secondary: var(--hollywood-cerise);
+        --pico-secondary-focus: var(--hollywood-cerise-highlight);
+        --pico-contrast: var(--safety-orange);
+        --pico-contrast-focus: var(--safety-orange-highlight);
+    }
+}
+
+/* Dark color scheme (Forced) */
+/* Enabled if forced with data-theme="dark" */
+[data-theme="dark"] {
+    --pico-background-color: var(--charcoal);
+    --pico-primary: var(--aero);
+    --pico-primary-focus: var(--aero-highlight);
+    --pico-secondary: var(--hollywood-cerise);
+    --pico-secondary-focus: var(--hollywood-cerise-highlight);
+    --pico-contrast: var(--safety-orange);
+    --pico-contrast-focus: var(--safety-orange-highlight);
+}
+
+code, pre, .letterbook-brand {
+    --pico-font-family: "Share Tech Mono", monospace;
+}
+
+nav details.dropdown .current {
+    color: var(--aero);
+
+    :hover {
+        color: var(--hollywood-cerise-highlight);
+    }
+}
+
+nav .alternate {
+    color: var(--hollywood-cerise);
+    
+    :hover {
+        color: var(--hollywood-cerise-highlight);
+    }
+}
+
+.text-lg {
+    font-size: 110%;
+}
+
+.text-xl {
+    font-size: 125%;
+}
+
+.text-sm {
+    font-size: 85%;
+}
+
+img.logo {
+    display: inline-block;
+    max-height: 6rem;
+    overflow: visible;
+    margin-bottom: -1rem;
+}
+
+.top-nav {
+    ul {
+        align-items: end;
+    }
+    h1 {
+        margin-bottom: 0;
+    }
+}

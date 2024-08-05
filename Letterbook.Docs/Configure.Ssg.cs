@@ -25,6 +25,7 @@ public class ConfigureSsg : IHostingStartup
             services.AddSingleton<MarkdownMeta>();
 
             services.AddMarkdown<MarkdownDate>()
+	            .AddMarkdown<MarkdownCategories>()
 				.AddProjectFiles();
             services.AddMarkdig()
 	            .UseCustomContainers(extensions =>

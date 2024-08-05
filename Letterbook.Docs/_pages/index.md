@@ -1,15 +1,9 @@
 ---
-title: Documentation
+title: Letterbook Project
 ---
 
-## ServiceStack Community
+Letterbook is a federated microblogging service, implementing ActivityPub. The goal for the project is to make hosting a fediverse server a better and more sustainable experience. We also want to make it a safer and more inclusive space for the people who make the fediverse their social media home. Those are big aspirations, but we have some solid plans about how to start, and we would love more input about where to go from there.
 
-- [servicestack.net/discord](https://servicestack.net/discord) - Join **#ServiceStack** Discord Channel
-- [servicestack.net/discuss](https://servicestack.net/discuss) - ServiceStack Community GitHub Discussions
-    - [servicestack.net/ask](https://servicestack.net/ask) - Q & A Community Support
-    - [servicestack.net/ideas](https://servicestack.net/ideas) - Submit Ideas & Feature Requests
+## Features
 
 ## Contributing
-
-- [Contributing Guide](https://docs.servicestack.net/contributing) - Read our Contributing Guide
-- [Contribution License Agreement](https://docs.google.com/forms/d/16Op0fmKaqYtxGL4sg7w_g-cXXyCoWjzppgkuqzOeKyk/viewform) - Please sign our CLA before Contributing

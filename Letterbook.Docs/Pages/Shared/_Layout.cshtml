@@ -7,23 +7,20 @@
     <meta name="color-scheme" content="light dark">
     <link rel="icon" type="image/svg" href="/img/logo.svg">
     <link rel="stylesheet" href="/lib/picocss/css/pico.min.css"/>
+    <link rel="stylesheet" href="/css/site.css"/>
     <title>@ViewData["Title"]</title>
+    @await RenderSectionAsync("Head", required: false)
 </head>
-<body >
+<body class="container">
 @await Html.PartialAsync("Nav")
 
-<div >
-    <main role="main" class="container">
-        @RenderBody()
-    </main>
-</div>
+@await RenderSectionAsync("Sidebar", required: false)
+
+<main role="main">
+    @RenderBody()
+</main>
 
 @await Html.PartialAsync("Footer")
-
-<script type="module">
-import { init } from "app.mjs"
-init()
-</script>
 
 @await RenderSectionAsync("Scripts", required: false)
 

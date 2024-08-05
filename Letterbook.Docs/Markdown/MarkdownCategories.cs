@@ -57,7 +57,7 @@ public class MarkdownCategories(ILogger<MarkdownCategories> log, IWebHostEnviron
 
 	public override MarkdownCategory Reload(MarkdownCategory doc) => Load(fs.GetMarkdownDoc(doc)) ?? doc;
 
-	public MarkdownCategory? GetByCategory(string category, string slug)
+	public MarkdownCategory? GetByCategory(string? category, string slug)
 	{
 		var doc = GetAll().Where(IsVisible).Where(x => x.Category == category).FirstOrDefault(x => x.Slug == slug.Trim('/'));
 		return doc != null ? Reload(doc) : doc;

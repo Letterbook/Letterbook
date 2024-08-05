@@ -3,7 +3,7 @@
 @model Letterbook.Docs.Pages.Blog.Index
 
 @{
-    ViewData["Title"] = "Blog";
+    ViewData["Title"] = "Letterbook Blog";
     ViewData["Brand"] = "Blog";
 }
 
@@ -19,28 +19,20 @@
 
 }
 
-@* <h1 class="pt-10 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight md:leading-none text-center"> *@
-@* Blog *@
-@* </h1> *@
 
-<div >
-
-    <div >
-        @foreach (var article in Model.Blog.Files)
-        {
-            int y = article.Date.Year;
-            int m = article.Date.Month;
-            int d = article.Date.Day;
-            <div >
-                <div >
-                    <h3 >
-                        <a href="blog/post/@y/@m/@d/@article.Slug">@article.Title</a>
-                    </h3>
-                    <div >
-                        @(new HtmlString(article.HtmlLede))
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-</div>
+@foreach (var article in Model.Blog.Files)
+{
+    int y = article.Date.Year;
+    int m = article.Date.Month;
+    int d = article.Date.Day;
+    <article >
+        <header>
+            
+        <h3 >
+            <a href="blog/post/@y/@m/@d/@article.Slug">@article.Title</a>
+        </h3>
+        </header>
+        @(new HtmlString(article.HtmlLede))
+        <footer><time datetime="@article.Date.ToString("yyyy-MM-dd")">@article.Date.ToString("D")</time></footer>
+    </article>
+}

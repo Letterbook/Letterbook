@@ -1,38 +1,22 @@
 ﻿@page "/"
+@using ServiceStack.Host
+@model Letterbook.Docs.Pages.Index
+
 @attribute [RenderStatic]
-@inject MarkdownPages Markdown
 @{
     ViewData["Title"] = "Letterbook";
 }
 
 @{
-    Func<dynamic?, object> header =
-        @<div class="pb-16">
-            <h1 class="pt-10 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight md:leading-none text-center">
-                Letterbook
-            </h1>
-        </div>;
+    if (Model.Source == null)
+    {
+        Response.Redirect("/404");
+        return;
+    }
+
+
+    Response.StatusCode = 200;
+    ViewData["Title"] = Model.Source.Title;
 }
 
-@await Html.PartialAsync("DocsPage", new Shared.DocsPage
-{
-   Brand = "Documentation",
-   Folder = "",
-   Slug = "index",
-   Header = header,
-   HideTitle = true,
-   HideDocumentMap = true,
-   DefaultMenu = new MarkdownMenu
-   {
-       Icon = Markdown.DefaultMenuIcon,
-       Text = "Home",
-       Link = "/",
-   },
-}.Init(this, Markdown))
-
-<script type="module">
-import { mount } from "app.mjs"
-import GettingStarted from "./mjs/components/GettingStarted.mjs" 
-
-mount('#getting-started', GettingStarted, { template:'razor-press' })
-</script>
+@Html.Raw(Model.Html)

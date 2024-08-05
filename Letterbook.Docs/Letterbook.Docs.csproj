@@ -52,4 +52,11 @@
     <AdditionalFiles Include="Pages\Blog\Page.cshtml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\css\font\InclusiveSans-Regular.woff" />
+    <EmbeddedResource Include="wwwroot\css\font\InclusiveSans.OFL.txt" />
+    <EmbeddedResource Include="wwwroot\css\font\ShareTechMono-Regular.woff2" />
+    <EmbeddedResource Include="wwwroot\css\font\ShareTechMono.OFL.txt" />
+  </ItemGroup>
+
 </Project>

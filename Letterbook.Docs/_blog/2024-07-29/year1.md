@@ -22,6 +22,10 @@ And ordered list, even!
 
 And *formatting* **ooh** ***ahhh***
 
+```csharp
+This isn't really csharp, but that's ok
+```
+
 ~~strike that~~
 
 Country road, [Take me home](/blog)
