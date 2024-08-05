@@ -20,7 +20,7 @@
 }
 
 
-@foreach (var article in Model.Blog.Files)
+@foreach (var article in Model.Blog.GetAll())
 {
     int y = article.Date.Year;
     int m = article.Date.Month;
@@ -33,6 +33,11 @@
         </h3>
         </header>
         @(new HtmlString(article.HtmlLede))
-        <footer><time datetime="@article.Date.ToString("yyyy-MM-dd")">@article.Date.ToString("D")</time></footer>
+        <footer><time datetime="@article.Date.ToString("yyyy-MM-dd")">@article.Date.ToString("D")</time>
+            @if (article.Authors.Any())
+            {
+                <p class="authors">By @(string.Join(", ", article.Authors))</p>
+            }
+            </footer>
     </article>
 }

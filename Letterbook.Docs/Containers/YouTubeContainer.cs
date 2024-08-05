@@ -20,7 +20,7 @@ public class YouTubeContainer : HtmlObjectRenderer<CustomContainer>
 		var youtubeId = obj.Arguments!;
 		var attrs = obj.TryGetAttributes()!;
 		attrs.Classes ??= new();
-		attrs.Classes.Add("not-prose text-center");
+		attrs.Classes.Add("not-prose justify-center");
 
 		renderer.Write("<div").WriteAttributes(obj).Write('>');
 		renderer.WriteLine("<div class=\"text-3xl font-extrabold tracking-tight\">");

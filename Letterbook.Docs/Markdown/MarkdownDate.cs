@@ -16,7 +16,7 @@ public class MarkdownDate(ILogger<MarkdownDate> log, IWebHostEnvironment env, IP
 
 	List<T> IMarkdownFiles.GetAll<T>() => GetAll().Cast<T>().ToList();
 	public List<MarkdownDoc> GetAll() => Files.Where(IsVisible)
-		.OrderBy(f => f.Date).ThenBy(f => f.Order).ThenBy(f => f.FileName).ToList();
+		.OrderByDescending(f => f.Date).ThenBy(f => f.Order).ThenBy(f => f.FileName).ToList();
 
 	public void LoadFrom(string path)
 	{

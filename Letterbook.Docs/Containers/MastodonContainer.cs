@@ -22,7 +22,7 @@ public class MastodonContainer : HtmlObjectRenderer<CustomContainer>
 		var embedPathUrl = $"https://{new Uri(postUrl).Host}/embed.js";
 		var attrs = obj.TryGetAttributes()!;
 		attrs.Classes ??= new();
-		attrs.Classes.Add("not-prose text-center");
+		attrs.Classes.Add("not-prose justify-center");
 
 		renderer.Write("<div").WriteAttributes(obj).Write('>');
 		renderer.WriteLine(@$"<div class=""mt-3 flex justify-center"">

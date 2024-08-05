@@ -33,6 +33,19 @@
     ViewData["Title"] = Model.Source.Title;
 }
 
+@foreach (var author in Model.Source.Authors)
+{
+    <p>From @author</p>
+}
+
+@if (Model.Source.Image is { } image)
+{
+    <figure>
+        <img src="@image.Href" alt="@image.Alt"/>
+        <figcaption><a hrref="@image.Attribution">Source</a></figcaption>
+    </figure>
+}
+
 @Model.Html
 
 @section Head
@@ -40,5 +53,9 @@
     @foreach (var author in @Model.Source.Authors)
     {
         <link rel="author" href="/blog/author/@author"/>
+    }
+    @if (Model.Source.Canonical is { } canonical && new Uri(canonical) is {} href)
+    {
+        <link rel="canonical" href="@(href.IsAbsoluteUri ? href.ToString() : $"https://letterbook.com/{href.ToString()}")"/>
     }
 }

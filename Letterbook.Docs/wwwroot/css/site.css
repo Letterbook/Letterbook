@@ -165,7 +165,7 @@ div.custom-block {
     }
 }
 
-.text-center {
+.justify-center {
     display: flex;
     justify-content: center;
 }
