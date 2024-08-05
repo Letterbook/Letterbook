@@ -1,10 +1,16 @@
 ﻿@page "/"
-@using ServiceStack.Host
 @model Letterbook.Docs.Pages.Index
 
-@attribute [RenderStatic]
-@{
-    ViewData["Title"] = "Letterbook";
+@implements IRenderStatic<Index>
+
+@functions {
+
+    public List<Index> GetStaticProps(RenderContext ctx)
+    {
+        var page = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownCategories>>();
+        return [new Index(page)];
+    }
+
 }
 
 @{
