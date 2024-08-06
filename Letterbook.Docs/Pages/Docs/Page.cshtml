@@ -1,19 +1,36 @@
-@page "/docs/{Slug}"
-@model Letterbook.Docs.Page
-@inject MarkdownPages Markdown
+@page "/docs/{Category}/{Slug}"
+@model Letterbook.Docs.Pages.Docs.Page
 
-@implements IRenderStatic<Letterbook.Docs.Page>
-@functions {
-    public List<Page> GetStaticProps(RenderContext ctx) =>
-        ctx.Resolve<MarkdownPages>().GetVisiblePages("docs").Map(page => new Page { Slug = page.Slug.RightPart('/') });
+@implements IRenderStatic<Page>
+@functions
+{
+    public List<Page> GetStaticProps(RenderContext ctx)
+    {
+        var docs = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownCategories>>();
+        return docs.GetMarkdown("_pages").GetAll()
+            .Where(each => each.Category != null && each.Slug != "index")
+            .OrderBy(each => each.Category ?? each.Slug)
+            .ThenBy(each => each.Order)
+            .ThenBy(each => each.Slug)
+            .Select(each => new Page(docs)
+            {
+                Category = each.Category?.ToLowerInvariant() ?? "page",
+                Slug = each.Slug
+            }).ToList();
+    }
+
 }
 
-@await Html.PartialAsync("DocsPage", new Shared.DocsPage {
-   Slug = Model.Slug,
-   Folder = "docs",
-   DefaultMenu = new MarkdownMenu {
-       Icon = Markdown.DefaultMenuIcon,
-       Text = "Docs",
-       Link = "/docs/",
-   },
-}.Init(this, Markdown))
+@{
+    if (Model.Source == null)
+    {
+        Response.Redirect("/404");
+        return;
+    }
+
+
+    Response.StatusCode = 200;
+    ViewData["Title"] = Model.Source.Title;
+}
+
+@Model.Html

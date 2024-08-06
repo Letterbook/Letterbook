@@ -5,6 +5,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <NoWarn>
+      CS8618; <!-- Warn for null values on non-nullable properties. The SSG pipeline makes that hard to enforce. -->
+    </NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="Letterbook.Docs" />

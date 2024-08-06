@@ -1,6 +1,7 @@
 using Letterbook.Docs.Files;
 using Letterbook.Docs.Markdown;
 using Markdig;
+using ContainerExtensions = Letterbook.Docs.Markdown.ContainerExtensions;
 
 namespace Letterbook.Docs;
 
@@ -26,5 +27,14 @@ public static class DependencyInjection
 		services.AddSingleton<MarkdownPipeline>(_ => builder.Build());
 
 		return builder;
+	}
+
+	public static MarkdownPipelineBuilder UseCustomContainers(this MarkdownPipelineBuilder pipeline,
+		Action<ContainerExtensions>? configure = null)
+	{
+		var ext = new ContainerExtensions();
+		configure?.Invoke(ext);
+		pipeline.Extensions.AddIfNotAlready(ext);
+		return pipeline;
 	}
 }

@@ -1,9 +1,24 @@
 @page "/docs/"
-@attribute [RenderStatic]
+@model Letterbook.Docs.Pages.Docs.Index
 @{
     ViewData["Title"] = "Docs";
 }
 
-<h1 class="pt-10 text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight md:leading-none text-center">
-    Docs
-</h1>
+@implements IRenderStatic<Index>
+
+@functions {
+
+    public List<Index> GetStaticProps(RenderContext ctx)
+    {
+        var categories = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownCategories>>();
+        return [new Index(categories)];
+    }
+
+}
+
+<ul>
+@foreach (var p in Model.Categories.GetAll())
+{
+    <li><a href=@($"docs/{p.Category ?? "page"}/{p.Slug}")>@p.Slug</a></li>
+}
+</ul>
