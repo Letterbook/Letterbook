@@ -36,6 +36,10 @@
 @foreach (var author in Model.Source.Authors)
 {
     <p>From @author</p>
+    @if (Model.Source.Canonical is { } canonical && new Uri(canonical) is {} href && href.IsAbsoluteUri)
+    {
+        <cite>Originally published at <a href="@href.ToString()">@href.ToString()</a></cite>
+    }
 }
 
 @if (Model.Source.Image is { } image)
@@ -46,7 +50,7 @@
     </figure>
 }
 
-@Model.Html
+<div class="blog-grid">@Model.Html</div>
 
 @section Head
 {

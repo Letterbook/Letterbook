@@ -32,5 +32,3 @@ If this all sounds very critical, well, it is. I'm critical of the things I care
 Tools are also reciprocal with culture. We build tools, but we are also shaped by the affordances of those tools. There's no magic to this, either, and nothing changes overnight. But when you change what's possible, what's easy, what's visible, you can change behavior. Changing behavior changes culture. And everything is downstream from culture.
 
 I'm building Letterbook. I think it can be a very good thing. I would like it if you join me.
-
-""Originally published at https://jenniferplusplus.com/letterbook""

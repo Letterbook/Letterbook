@@ -36,6 +36,7 @@ The rest of the stack is getting into very familiar territory for most dotnet de
 
 # How Do You Measure a Year
 
+:::
 It is five hundred twenty-five thousand, six hundred minutes? I guess. That's not the most relevant measure. Midnights? Cups of coffee? Actually, yeah, it was a lot more of both of those than was probably wise. It was also:
 
 - 900 commits
@@ -47,6 +48,16 @@ It is five hundred twenty-five thousand, six hundred minutes? I guess. That's no
 - 35 pages of docs (including this one! So meta)
 
 But most importantly: **_13 contributors_**
+:::
+
+<aside>
+<details>
+<summary>About these numbers</summary>
+<p>An astute reader might notice that these numbers don't line up very well with the state of the Letterbook repository. There's a couple of reasons for that. First, I'm counting some contributions in other repositories, as well as non-code contributions. After all, this blog exists in part to acknowledge contributions other than code!</p>
+<p>Second, I wrote this post at then end of May, but it took a surprisingly long time to get this site online. That is, perhaps, a topic for its own article.</p>
+</details>
+</aside>
+
 
 ## Thank You
 

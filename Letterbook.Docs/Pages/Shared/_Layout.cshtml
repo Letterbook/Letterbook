@@ -14,9 +14,8 @@
 <body class="container">
 @await Html.PartialAsync("Nav")
 
-@await RenderSectionAsync("Sidebar", required: false)
-
-<main role="main">
+<main role="main" class="@(IsSectionDefined("Sidebar") ? "sidebar-grid" : null)">
+    @await RenderSectionAsync("Sidebar", required: false)
     @RenderBody()
 </main>
 
