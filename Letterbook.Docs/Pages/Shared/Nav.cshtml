@@ -24,7 +24,7 @@
     <ul class="align-bottom">
         <li>
             <details class="dropdown">
-                <summary>@menuItems.First(each => Html.MatchesPath(each.Href)).Text</summary>
+                <summary>@menuItems.FirstOrDefault(each => Html.MatchesPath(each.Href)).Text</summary>
                 <ul>
                     @foreach (var item in menuItems)//.Where(each => !Html.MatchesPath(each.Href)))
                     {
