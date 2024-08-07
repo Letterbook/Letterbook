@@ -66,17 +66,11 @@ jobs:
       - name: Check Docs Prerender
         working-directory: ./Letterbook.Docs
         run: |
-          site_base_href=${{ env.ssg_base_href }}
-          site_base_url="https://${{ env.custom_domain }}"
-          if [ ! -z "$site_base_href" ]
-          then
-            echo "Prerendering for deployment to $site_base_href"
-            dotnet run --AppTasks=prerender --environment Production --BaseHref "$site_base_href"
-          else
-            echo "Prerendering for deployment to $custom_domain"
-            dotnet run --AppTasks=prerender --environment Production --BaseUrl "$site_base_url"
-          fi
-   
+          echo "Prerendering for deployment to $custom_domain"
+          dotnet run --AppTasks=prerender --BaseUrl "${{env.custom_domain}}"
+        env:
+          custom_domain: "letterbook.com"
+      
       - name: Check Generated Files
         run: |
           CHANGED=$(git status --porcelain -uno)
