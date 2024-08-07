@@ -67,7 +67,7 @@ jobs:
         working-directory: ./Letterbook.Docs
         run: |
           echo "Prerendering for deployment to $custom_domain"
-          dotnet run --AppTasks=prerender --environment Production --BaseUrl "${{env.custom_domain}}"
+          dotnet run --AppTasks=prerender --BaseUrl "${{env.custom_domain}}"
         env:
           custom_domain: "letterbook.com"
       
