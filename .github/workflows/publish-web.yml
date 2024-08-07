@@ -67,10 +67,10 @@ jobs:
           if [ ! -z "$site_base_href" ]
           then
             echo "Prerendering for deployment to $site_base_href"
-            dotnet run --AppTasks=prerender --environment Production --BaseHref "$site_base_href"
+            dotnet run --AppTasks=prerender --BaseHref "$site_base_href"
           else
             echo "Prerendering for deployment to $custom_domain"
-            dotnet run --AppTasks=prerender --environment Production --BaseUrl "$site_base_url"
+            dotnet run --AppTasks=prerender --BaseUrl "$site_base_url"
           fi
           
       # Use GitHub Actions Pages integraton to upload artifact and deploy it.
