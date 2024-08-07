@@ -32,19 +32,18 @@
       - [Debugging Federation](#debugging-federation)
   - [License](#license)
 
-
 ## Code of Conduct
 
 Please read the [Code of Conduct][coc]. It's adapted from the commonly used contributor covenant, but it's not just boilerplate. Be sure you can uphold the project's shared values and abide by the standards laid out in that document. You're more than welcome to ask for clarification.
 
 These values will have a direct impact on the features we do and don't implement, how we prioritize them, and how they are designed. For example:
 
-* We believe tracking and mass data harvesting are dangerous and unethical; we won't build or support those activities and will attempt to limit the personal data we collect
-* We believe that cryptocoins, NFTs, and related technologies are purposefully wasteful and deceptive; we will not incorporate them
-* We believe so-called AI—especially generative AI—is extractive, wasteful, hazardous, and usually deceptive; we will view it with skepticism
-* We will prefer opt-in rather than opt-out dynamics wherever possible
-* We will seek and respect consent, by helping people to make well informed choices without manipulation
-* We will build moderation and administration tools that preserve autonomy and privacy, as well as foster safety
+- We believe tracking and mass data harvesting are dangerous and unethical; we won't build or support those activities and will attempt to limit the personal data we collect
+- We believe that cryptocoins, NFTs, and related technologies are purposefully wasteful and deceptive; we will not incorporate them
+- We believe so-called AI—especially generative AI—is extractive, wasteful, hazardous, and usually deceptive; we will view it with skepticism
+- We will prefer opt-in rather than opt-out dynamics wherever possible
+- We will seek and respect consent, by helping people to make well informed choices without manipulation
+- We will build moderation and administration tools that preserve autonomy and privacy, as well as foster safety
 
 ### Responsible "AI" Contributions
 
@@ -70,10 +69,10 @@ Writing docs is both hard and valuable. Because a lot of things about the projec
 
 We plan to support enough of the Mastodon API to provide good compatibility with Mastodon clients. So you may find these docs to be valuable. They also provide some useful information about how to interoperate with other federated services.
 
-* [Mastodon Docs](https://docs.joinmastodon.org/)
-* [Mastodon API routes](https://docs.joinmastodon.org/dev/routes/)
-* [ActivityPub Spec](https://www.w3.org/TR/activitypub/)
-* [ActivityStreams Vocabulary](https://www.w3.org/TR/activitystreams-vocabulary/)
+- [Mastodon Docs](https://docs.joinmastodon.org/)
+- [Mastodon API routes](https://docs.joinmastodon.org/dev/routes/)
+- [ActivityPub Spec](https://www.w3.org/TR/activitypub/)
+- [ActivityStreams Vocabulary](https://www.w3.org/TR/activitystreams-vocabulary/)
 
 ## Development
 
@@ -88,30 +87,34 @@ This will get you up an running quickly. You can skip ahead for some discussion 
 0. [Install the dotnet 8 SDK][dotnet] and a docker runtime with docker compose (either [docker desktop][docker] or [podman][podman] should work)
 
 1. Start up the database
+
 ```shell
 docker-compose up -d
 ```
 
 2. Migrate the database
+
 ```shell
-dotnet tool retore
+dotnet tool restore
 dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj
 dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj
 ```
 
 3. Add an application host secret
+
 ```shell
 dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook
 ```
 
 4. Run Letterbook (in watch mode)
+
 ```shell
 dotnet restore Letterbook.sln
 dotnet watch run --project Letterbook.Web
 ```
 
 5. Open the UI http://localhost:5127  
-There is also a Swagger UI http://localhost:5127/swagger/index.html
+   There is also a Swagger UI http://localhost:5127/swagger/index.html
 
 ### Navigating the Codebase
 
@@ -148,23 +151,24 @@ All the workers are defined and configured in the Workers project.
 
 Other adapters may of course be involved. If a change requires a new or updated db query, that would happen in the Adapters.Db project. That's also where db migrations are configured. The TimescaleFeeds project plays a critical role with timelines and notifications. Other adapters are critical when working with their respective features.
 
-
 ### Running the Server
 
 > [!IMPORTANT]
 > The build depends on some dotnet tools to generate some docs and assets.  
-> You must run `dotnet tool restore` to get the tools before you build the project for the first time. 
+> You must run `dotnet tool restore` to get the tools before you build the project for the first time.
 
-Letterbook is meant to be easy to set up and run. The default `Letterbook` host project provides all the functionality of the service. However, it's also possible to run the major components on their own. In development, you can run the `Letterbook` project from any of the launch settings. 
+Letterbook is meant to be easy to set up and run. The default `Letterbook` host project provides all the functionality of the service. However, it's also possible to run the major components on their own. In development, you can run the `Letterbook` project from any of the launch settings.
 
 ### Running tests
 
 The Letterbook.sln contains the full set of unit and integration tests. Unit tests have zero dependencies, and they should run in just a few seconds. Integration tests depend on hosting or connecting to real services, and will also take longer to run. To run all tests, simply run the default test command.
+
 ```shell
 dotnet test
 ```
 
-There is also a solution filter that excludes the integration tests. To run only unit tests, target that solution file when running dotnet test. If you're using Jetbrains Rider or Visual Studio, you can also open that `.slnf` file like a solution. 
+There is also a solution filter that excludes the integration tests. To run only unit tests, target that solution file when running dotnet test. If you're using Jetbrains Rider or Visual Studio, you can also open that `.slnf` file like a solution.
+
 ```shell
 dotnet test Letterbook.UnitTests.slnf
 ```
@@ -184,9 +188,11 @@ Tests can be run from the built-in test runner.
 ### Dependencies
 
 #### ~~_Docker_~~
+
 Docker is _not_ actually a dependency for Letterbook. We use docker as a convenient way to manage our other dependencies in development, but you can use other methods if you prefer. To do that, you should read on to the following sections. We don't plan to ever introduce a real dependency on Docker, although we will likely (eventually) publish a docker container image for admins who prefer that option.
 
 #### Postgresql
+
 Letterbook depends on a Postgres database. It attempts to seed an initial administrator account on startup, so you must have the database available in order to run the app. Letterbook depends on the database for essentially everything, so even if we didn't require it on start up, we would require it for any API call you could make.
 
 If it's your first time setting up the database you will need to apply the Database migrations by running the entity framework tools.
@@ -194,6 +200,7 @@ If it's your first time setting up the database you will need to apply the Datab
 This process is documented in more detail at [Letterbook.Adapter.Db](Letterbook.Adapter.Db/readme.md).
 
 #### Host secrets
+
 Letterbook depends on a host secret which comes from a secret provider in order to mint and validate authentication tokens. In development, you can use Dotnet user secrets. (We don't have a production solution, yet 😅). In the interest of developing good security practice, this is not something we can provide in the repository. You have to generate your own secret.
 
 > [!NOTE]
@@ -213,7 +220,7 @@ At the moment, Letterbook uses `System.Security.Cryptography` for its RSA implem
 System.PlatformNotSupportedException: OpenSSL is required for algorithm 'RSAOpenSsl' but could not be found
 ```
 
-You can fix this by installing OpenSSL via [Homebrew](https://brew.sh) and providing its library path to the dotnet 
+You can fix this by installing OpenSSL via [Homebrew](https://brew.sh) and providing its library path to the dotnet
 runtime. This is done by setting the environment variable `DYLD_LIBRARY_PATH`. The correct value might vary by version,
 but it's likely to be `/opt/homebrew/opt/openssl@3/lib`.
 
@@ -226,7 +233,7 @@ local launch configuration in Rider and configuring the environment variable the
 
 ![Screenshot of an example Rider launch configuration that specifies the library path](docs/rider-macos-openssl-launch-config.png)
 
-For test runs, you can set the path in Rider settings: 
+For test runs, you can set the path in Rider settings:
 Settings -> Build, Execution, Deployment -> Unit Testing -> Test Runner
 
 ![Screenshot of an example Rider test runner configuration that specifies the library path](docs/rider-macos-openssl-test-runner.png)
@@ -249,18 +256,20 @@ One of the backends we provide is Prometheus, a very popular metrics database. B
 
 The solution that seems to work best is to tunnel those connections through a unix domain socket. So, if you're running rootless docker on linux, and you want the full range of telemetry data for your dashboards, there are a couple of extra steps.
 
-1. Add the `rootless.yml` overlay to the docker-compose.yml file  
+1. Add the `rootless.yml` overlay to the docker-compose.yml file
+
 ```shell
 docker compose -f docker-compose.yml -f rootless.yml up -d
-```  
-  
-This will set up a socat container in the docker networking namespace, listening on port 3000 and forwarding to a socket that is mounted as a volume in the container. Prometheus will scrape this endpoint instead of the special docker host domain.  
-  
-2. Use `socat` on the host to listen on the same socket and then forward to Letterbook    
+```
+
+This will set up a socat container in the docker networking namespace, listening on port 3000 and forwarding to a socket that is mounted as a volume in the container. Prometheus will scrape this endpoint instead of the special docker host domain.
+
+2. Use `socat` on the host to listen on the same socket and then forward to Letterbook
+
 ```shell
 ./scripts/socket.sh
-```  
-  
+```
+
 #### Debugging Federation
 
 In addition to Letterbook's own dependencies, you may find it useful to have a 3rd party system to exercise federation. The [Letterbook Sandcastles project][sandcastles] provides pre-configured instances of some other fediverse software. We encourage you to make use of that, and to contribute configurations for any other federated peers you're familiar with.
