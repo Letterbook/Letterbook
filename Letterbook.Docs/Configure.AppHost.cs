@@ -12,6 +12,7 @@ public class AppHost() : AppHostBase("Letterbook"), IHostingStartup
     public override void Configure()
     {
     }
+
 }
 
 public class Hello : IGet, IReturn<StringResponse> {}

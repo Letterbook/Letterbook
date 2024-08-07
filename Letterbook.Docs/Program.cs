@@ -1,4 +1,6 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using Microsoft.AspNetCore.Rewrite;
+
+var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
 // Add services to the container.
@@ -30,6 +32,9 @@ app.UseAuthorization();
 app.MapRazorPages();
 
 app.UseStatusCodePagesWithReExecute("/Error", "?status={0}");
+
+app.UseRewriter(new RewriteOptions()
+	.Add(RewriteRules.ReWriteRequests));
 
 app.UseServiceStack(new AppHost(), options => {
     options.MapEndpoints();
