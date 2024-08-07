@@ -1,0 +1,65 @@
+﻿@page "/blog/post/{Year}/{Month}/{Day}/{Slug}"
+@model Letterbook.Docs.Pages.Blog.Page
+
+@implements IRenderStatic<Page>
+
+@functions {
+
+    public List<Page> GetStaticProps(RenderContext ctx)
+    {
+        var blog = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownDate>>();
+        return blog.GetMarkdown("_blog").GetAll()
+            .Select(p => new Page(blog)
+            {
+                Slug = p.Slug,
+                Year = p.Date.Year,
+                Month = p.Date.Month,
+                Day = p.Date.Day,
+            })
+            .ToList();
+    }
+
+}
+
+@{
+    if (Model.Source == null)
+    {
+        Response.Redirect("/404");
+        return;
+    }
+
+
+    Response.StatusCode = 200;
+    ViewData["Title"] = Model.Source.Title;
+}
+
+@foreach (var author in Model.Source.Authors)
+{
+    <p>From @author</p>
+    @if (Model.Source.Canonical is { } canonical && new Uri(canonical) is {} href && href.IsAbsoluteUri)
+    {
+        <cite>Originally published at <a href="@href.ToString()">@href.ToString()</a></cite>
+    }
+}
+
+@if (Model.Source.Image is { } image)
+{
+    <figure>
+        <img src="@image.Href" alt="@image.Alt"/>
+        <figcaption><a hrref="@image.Attribution">Source</a></figcaption>
+    </figure>
+}
+
+<div class="blog-grid">@Model.Html</div>
+
+@section Head
+{
+    @foreach (var author in @Model.Source.Authors)
+    {
+        <link rel="author" href="/blog/author/@author"/>
+    }
+    @if (Model.Source.Canonical is { } canonical && new Uri(canonical) is {} href)
+    {
+        <link rel="canonical" href="@(href.IsAbsoluteUri ? href.ToString() : $"https://letterbook.com/{href.ToString()}")"/>
+    }
+}
