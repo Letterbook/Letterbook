@@ -1,5 +1,7 @@
 # Letterbook
 
+![Letterbook logo](./docs/letterbook-banner-dark.png)
+
 [![Build status badge](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml/badge.svg?branch=main)](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml)
 [![Good first issues badge](https://img.shields.io/github/issues-search/letterbook/letterbook?query=is%3Aissue%20is%3Aopen%20label%3A%22ready%20to%20start%22%2C%22good%20first%20issue%22%20&style=flat&logo=github&label=Good%20first%20issue&labelColor=%23404951&color=%2333CB56)](https://github.com/Letterbook/Letterbook/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22%2C%22ready+to+start%22)
 
