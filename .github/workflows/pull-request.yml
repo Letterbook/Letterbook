@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'main'
+      - "main"
   pull_request:
     types:
       - opened
@@ -12,53 +12,71 @@ on:
       - synchronize
       - ready_for_review
     branches:
-      - 'main'
+      - "main"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-      
+
     steps:
       - uses: actions/checkout@v4
-        
+
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      
+
       - name: Package Cache
         id: package-cache
         uses: actions/cache@v4
         with:
           path: ${{env.NUGET_PACKAGES}}
           key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
-      
+
       - name: Restore Packages
         if: steps.package-cache.outputs.cache-hit != 'true'
         run: dotnet restore
-      
+
       - name: Restore Tools
         run: dotnet tool restore
-      
+
       - name: Build
         run: dotnet build Letterbook.sln --configuration Release
-      
+
       - name: Test
         run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --blame-crash --no-build
-        
+
+      - name: Run docker-compose
+        uses: hoverkraft-tech/compose-action@v2.0.1
+
+      - name: Seed database
+        run:
+          dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj &&
+          dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj &&
+          dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook
+
+      - name: Start server
+        run: dotnet run --project Letterbook.Web &
+
+      - name: Install Playwright Browsers
+        run: pwsh Letterbook.Web.Tests/bin/Release/net8.0/playwright.ps1 install firefox
+
+      - name: E2E Test
+        run: BROWSER=firefox dotnet test Letterbook.Web.Tests.E2E --no-build --configuration Release
+
       - name: Save test crash report
         if: failure()
         uses: actions/upload-artifact@v3
         with:
           name: TestResults
-          path: '**/TestResults/'
-      
+          path: "**/TestResults/"
+
       - name: Check Relational Migrations
         run: dotnet ef migrations has-pending-model-changes
         working-directory: Letterbook.Adapter.Db/
-        
+
       - name: Check Feeds Migrations
         run: dotnet ef migrations has-pending-model-changes
         working-directory: Letterbook.Adapter.TimescaleFeeds/
@@ -70,7 +88,7 @@ jobs:
           dotnet run --AppTasks=prerender --BaseUrl "${{env.custom_domain}}"
         env:
           custom_domain: "letterbook.com"
-      
+
       - name: Check Generated Files
         run: |
           CHANGED=$(git status --porcelain -uno)
