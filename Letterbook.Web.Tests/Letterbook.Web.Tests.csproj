@@ -17,6 +17,7 @@
         </PackageReference>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Microsoft.Playwright" />
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -31,6 +32,12 @@
     <ItemGroup>
       <ProjectReference Include="..\Letterbook.Core.Tests\Letterbook.Core.Tests.csproj" />
       <ProjectReference Include="..\Letterbook.Web\Letterbook.Web.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="ServiceStack">
+        <HintPath>..\..\..\.nuget\packages\servicestack\8.3.0\lib\net8.0\ServiceStack.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
