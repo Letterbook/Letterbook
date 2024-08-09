@@ -333,7 +333,7 @@ internal class
 			Post = post,
 			// TODO: multiple languages
 			// or even just single languages, but with knowledge of what language is specified
-			Text = sourceContent?.DefaultValue ?? ""
+			Html = sourceContent?.DefaultValue ?? ""
 		};
 		if (source.Preview?.TryGetValue(out var value) == true)
 			note.Preview = context.Mapper.Map<string>(value);

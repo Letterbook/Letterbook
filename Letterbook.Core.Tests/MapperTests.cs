@@ -50,6 +50,26 @@ public class MapperTests : WithMocks
 		Assert.NotNull(actual);
 	}
 
+	[InlineData("text/plain")]
+	[InlineData("text/markdown")]
+	[InlineData("text/html")]
+	[InlineData(null)]
+	[Theory(DisplayName = "Should map ContentDto as Note")]
+	public void MapNote(string? type)
+	{
+		var noteDto = new ContentDto
+		{
+			Type = "Note",
+			Text = "test text",
+			ContentType = type,
+		};
+		_postDto.Contents.Add(noteDto);
+		var actual = _postMapper.Map<Models.Note>(noteDto);
+
+		Assert.NotNull(actual);
+		Assert.Equal(type ?? "text/plain", actual.SourceContentType?.ToString());
+	}
+
 	[Fact(DisplayName = "Should generate an Id")]
 	public void MapPostNewId()
 	{

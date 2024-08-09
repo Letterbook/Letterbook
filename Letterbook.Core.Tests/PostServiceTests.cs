@@ -120,7 +120,7 @@ public class PostServiceTests : WithMocks
 
 		var actual = await _service.Update(_post.GetId(), update);
 		var actualNote = Assert.IsType<Note>(actual.Contents.First());
-		Assert.Equal(expectedNote.Text, actualNote.Text);
+		Assert.Equal(expectedNote.SourceText, actualNote.SourceText);
 	}
 
 	[Fact(DisplayName = "Should not update sensitive fields")]
@@ -178,14 +178,14 @@ public class PostServiceTests : WithMocks
 		var note = new Fakes.FakeNote(_post).Generate();
 		note.Id = _post.Contents.First().Id;
 		note.FediId = _post.Contents.First().FediId;
-		note.Text = expected;
+		note.SourceText = expected;
 		note.GeneratePreview();
 		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
 		var result = await _service.UpdateContent(_post.Id, note.Id, note);
 
 		var actual = Assert.IsType<Note>(result.Contents.FirstOrDefault());
-		Assert.Equal(expected, actual.Text);
+		Assert.Equal(expected, actual.SourceText);
 	}
 
 	[Fact(DisplayName = "Should remove content from a post")]

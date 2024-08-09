@@ -10,5 +10,6 @@ public class ConfigureContent : IEntityTypeConfiguration<Models.Content>
 		builder.HasDiscriminator();
 		builder.HasKey(note => note.Id);
 		builder.HasIndex(note => note.FediId);
+		builder.Property(note => note.ContentType).HasConversion<ContentTypeConverter>();
 	}
 }

@@ -1,7 +1,7 @@
+using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
@@ -60,6 +60,8 @@ public class PostService : IAuthzPostService, IPostService
 		return await _posts.LookupThread(threadId);
 	}
 
+	// TODO: generate HTML from source
+	// also content types
 	public async Task<Post> DraftNote(Uuid7 authorId, string contentSource, Uuid7? inReplyToId = default)
 	{
 		var author = await _posts.LookupProfile(authorId)
@@ -67,9 +69,11 @@ public class PostService : IAuthzPostService, IPostService
 		var post = new Post(_options);
 		var note = new Note
 		{
-			Text = contentSource,
+			SourceText = contentSource,
+			SourceContentType = new ContentType("text/plain"),
 			Post = post,
-			FediId = default!
+			FediId = default!,
+			Html = contentSource
 		};
 		post.Creators.Add(author);
 		note.SetLocalFediId(_options);
