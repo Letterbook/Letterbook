@@ -33,11 +33,4 @@
       <ProjectReference Include="..\Letterbook.Core.Tests\Letterbook.Core.Tests.csproj" />
       <ProjectReference Include="..\Letterbook.Web\Letterbook.Web.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="ServiceStack">
-        <HintPath>..\..\..\.nuget\packages\servicestack\8.3.0\lib\net8.0\ServiceStack.dll</HintPath>
-      </Reference>
-    </ItemGroup>
-
 </Project>
