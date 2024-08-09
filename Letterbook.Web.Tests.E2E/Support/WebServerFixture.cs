@@ -20,13 +20,13 @@ using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 
-namespace Letterbook.Web.Tests.UI.Support;
+namespace Letterbook.Web.Tests.E2E.Support;
 
-public class WebServerFixture : IAsyncLifetime
+public class WebServerFixture
 {
 	private readonly IHost? _host;
 	private Uri BaseUrl { get; } = Settings.BaseUrl;
-	private bool Disallow { get; } = Settings.DisallowWebServerFixture;
+	private bool Disallow { get; } = !Settings.AllowWebServerFixture;
 
 	public WebServerFixture()
 	{
@@ -39,7 +39,7 @@ public class WebServerFixture : IAsyncLifetime
 
 		if (Disallow)
 		{
-			Log.Logger.Information($"Not starting server because <{nameof(Settings.DisallowWebServerFixture)}> is on");
+			Log.Logger.Information($"Not starting server because <{nameof(Settings.AllowWebServerFixture)}> is on");
 			return;
 		}
 
@@ -109,7 +109,7 @@ public class WebServerFixture : IAsyncLifetime
 			.AddFeedsAdapter(builder.Configuration)
 			.AddActivityPubClient(builder.Configuration)
 			.AddWebCookies();
-		builder.Services.AddIdentity<Models.Account, IdentityRole<Guid>>(identity => identity.ConfigureIdentity())
+		builder.Services.AddIdentity<Core.Models.Account, IdentityRole<Guid>>(identity => identity.ConfigureIdentity())
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
 			// Aspnet Core Identity includes a default UI, which provides basic account management.

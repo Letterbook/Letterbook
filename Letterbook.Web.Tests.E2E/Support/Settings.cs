@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace Letterbook.Web.Tests.UI.Support;
+namespace Letterbook.Web.Tests.E2E.Support;
 
 static class Settings
 {
@@ -9,12 +9,12 @@ static class Settings
 	public static Uri BaseUrl = new(Get(nameof(BaseUrl), $"http://localhost:{Port()}"));
 	public static bool Headless => bool.Parse(Get(nameof(Headless), bool.TrueString));
 	public static bool NoSkip => bool.Parse(Get(nameof(NoSkip), bool.FalseString));
-	public static bool DisallowWebServerFixture => bool.Parse(Get(nameof(DisallowWebServerFixture), bool.FalseString));
+	public static bool AllowWebServerFixture => bool.Parse(Get(nameof(AllowWebServerFixture), bool.TrueString));
 
 	private static string Get(string name, string @default)
 		=> Environment.GetEnvironmentVariable(name) ?? @default;
 
-	private static int Port() => DisallowWebServerFixture ? DefaultPort : GetRandomUnusedPort();
+	private static int Port() => AllowWebServerFixture ? GetRandomUnusedPort(): DefaultPort;
 
 	private static int GetRandomUnusedPort()
 	{

@@ -1,8 +1,8 @@
 using Microsoft.Playwright;
 
-namespace Letterbook.Web.Tests.UI.Support;
+namespace Letterbook.Web.Tests.E2E.Support;
 
-public class PlaywrightFixture : IDisposable, IAsyncLifetime
+public class PlaywrightFixture : IDisposable
 {
 	private class Options
 	{
