@@ -20,9 +20,10 @@ public class Note : Content
 		return Preview;
 	}
 
+	// TODO: proper sanitization
 	public override void Sanitize()
 	{
-		throw new NotImplementedException();
+		Html = SourceText ?? "";
 	}
 
 	public override void UpdateFrom(Content content)

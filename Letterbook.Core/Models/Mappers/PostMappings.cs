@@ -40,6 +40,7 @@ public class PostMappings : AutoMapper.Profile
 			{
 				ct.GeneratePreview();
 				ct.SetLocalFediId(options.Value);
+				ct.Sanitize();
 			});
 
 		CreateMap<Post, PostDto>(MemberList.Destination);
