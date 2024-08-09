@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook", "Letterbook\Letterbook.csproj", "{11BCFCEF-2E6A-48DF-A6BD-37CC80E25EDB}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Api", "Letterbook.Api\Letterbook.Api.csproj", "{2153952C-93B2-459A-9881-7AA82B394A80}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Api.Tests", "Letterbook.Api.Tests\Letterbook.Api.Tests.csproj", "{26191462-CED5-4AF4-A5BD-94E31768F376}"
@@ -75,8 +77,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Web", "Letterbook.Web\Letterbook.Web.csproj", "{CA5F8A6B-4388-41EA-91FB-45C9A7A53E17}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Api.Authentication.HttpSignature", "Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj", "{C2B3F054-B9F8-4EE8-847C-A290E7588F12}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook", "Letterbook\Letterbook.csproj", "{11BCFCEF-2E6A-48DF-A6BD-37CC80E25EDB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Workers", "Letterbook.Workers\Letterbook.Workers.csproj", "{E53BF0A3-8A77-45A9-8CFF-606F20B46789}"
 EndProject
