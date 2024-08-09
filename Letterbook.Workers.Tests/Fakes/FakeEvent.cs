@@ -5,5 +5,5 @@
 /// </summary>
 public record FakeEvent
 {
-	public string Data { get; init; }
+	public required string Data { get; init; }
 }

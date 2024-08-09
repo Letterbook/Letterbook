@@ -20,7 +20,7 @@ public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSign
 		_logger = loggerFactory.CreateLogger<HttpSignatureAuthenticationHandler>();
 	}
 
-	protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+	protected override Task<AuthenticateResult> HandleAuthenticateAsync()
 	{
 		try
 		{
@@ -28,7 +28,7 @@ public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSign
 			if (signatureFeature == null)
 			{
 				_logger.LogError($"Ensure that {nameof(HttpSignatureVerificationMiddleware)} is added to the pipeline before authentication.");
-				return AuthenticateResult.Fail("HTTP Signature feature is not available in the request context.");
+				return Task.FromResult(AuthenticateResult.Fail("HTTP Signature feature is not available in the request context."));
 			}
 
 			var identities = signatureFeature
@@ -44,10 +44,10 @@ public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSign
 			if (principal.Identities.Any())
 			{
 				_logger.LogInformation("Successfully authenticated: {IdentityList}", string.Join(", ", principal.Identities.Select(i => i.Name)));
-				return AuthenticateResult.Success(
+				return Task.FromResult(AuthenticateResult.Success(
 					new AuthenticationTicket(
 						principal,
-						HttpSignatureAuthenticationDefaults.Scheme));
+						HttpSignatureAuthenticationDefaults.Scheme)));
 			}
 		}
 		catch (Exception ex)
@@ -55,6 +55,6 @@ public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSign
 			_logger.LogError("Unhandled exception during request signature authentication: {Exception}", ex);
 		}
 
-		return AuthenticateResult.Fail("No valid HTTP signatures found");
+		return Task.FromResult(AuthenticateResult.Fail("No valid HTTP signatures found"));
 	}
 }
