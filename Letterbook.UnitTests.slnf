@@ -19,8 +19,7 @@
       "Letterbook.Web\\Letterbook.Web.csproj",
       "Letterbook.Workers.Tests\\Letterbook.Workers.Tests.csproj",
       "Letterbook.Workers\\Letterbook.Workers.csproj",
-      "Letterbook\\Letterbook.csproj",
-      "Letterbook.Web.Tests.E2E\\Letterbook.Web.Tests.E2E.csproj"
+      "Letterbook\\Letterbook.csproj"
     ]
   }
 }
