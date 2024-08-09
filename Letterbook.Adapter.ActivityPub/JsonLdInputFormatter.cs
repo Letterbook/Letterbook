@@ -37,7 +37,7 @@ public class JsonLdInputFormatter : TextInputFormatter
 	{
 		if (!logger.IsEnabled(LogLevel.Debug) || !body.CanRead) return;
 
-		logger.LogDebug("Parsed Activity {Activity}", serializer.Serialize(parsed));
+		logger.LogDebug("Parsed Activity {ActivityJson}", serializer.Serialize(parsed));
 		try
 		{
 			body.Seek(0, SeekOrigin.Begin);
@@ -46,7 +46,7 @@ public class JsonLdInputFormatter : TextInputFormatter
 
 			if (read > 0)
 			{
-				logger.LogDebug("Raw activity {Json}", Encoding.UTF8.GetString(buffer));
+				logger.LogDebug("Raw activity {ActivityJson}", Encoding.UTF8.GetString(buffer));
 			}
 			else logger.LogDebug("Couldn't reread the request body");
 		}

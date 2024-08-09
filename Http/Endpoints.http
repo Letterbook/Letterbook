@@ -2,10 +2,12 @@
 GET {{host}}/actor/{{actor_id}}
 Accept: application/ld+json; profile="https://www.w3.org/ns/activitystreams"
 
+### Webfinger Actor
+GET {{host}}/.well-known/webfinger?resource=acct:{{user}}@{{host_domain}}
+
 ### Get Peer Actor
 GET {{peer_actor}}
 Accept: application/ld+json; profile="https://www.w3.org/ns/activitystreams"
-
 
 ### Webfinger Peer
 GET {{peer}}/.well-known/webfinger?resource=acct:{{peer_user}}@{{peer_domain}} 

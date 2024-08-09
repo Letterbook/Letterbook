@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <NoWarn>
+      CS8618; <!-- Warn for null values on non-nullable properties. The SSG pipeline makes that hard to enforce. -->
+    </NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="Letterbook.Docs" />
+    <Using Include="ServiceStack" />
+    <Using Include="ServiceStack.Mvc" />
+  </ItemGroup>
+
+  <!-- dotnet watch support -->
+  <Target Name="RazorWatch" BeforeTargets="_CoreCollectWatchItems">
+    <ItemGroup>
+      <RazorWatch Include="**\*.cshtml" />
+      <Watch Include="%(RazorWatch.FullPath)" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Markdig"/>
+    <!-- See: https://github.com/dotnet/aspnetcore/issues/45725 -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.Web.LibraryManager.Build" />
+    <PackageReference Include="ServiceStack" />
+    <PackageReference Include="ServiceStack.Mvc" />
+
+    <!-- Required for Razor compilation on change: https://docs.microsoft.com/en-us/aspnet/core/mvc/views/view-compilation?view=aspnetcore-5.0 -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Blog\Index.cshtml" />
+    <_ContentIncludedByDefault Remove="Blog\Page.cshtml" />
+    <_ContentIncludedByDefault Remove="dist\meta\2021\all.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2021\videos.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2023\all.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2023\videos.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2024\all.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2024\blog.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\2024\pages.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\all.json" />
+    <_ContentIncludedByDefault Remove="dist\meta\index.json" />
+    <_ContentIncludedByDefault Remove="dist\pages\vue\bookings.json" />
+    <_ContentIncludedByDefault Remove="dist\pages\vue\metadata.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Pages\Blog\Index.cshtml" />
+    <AdditionalFiles Include="Pages\Blog\Page.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\css\font\InclusiveSans-Regular.woff" />
+    <EmbeddedResource Include="wwwroot\css\font\InclusiveSans.OFL.txt" />
+    <EmbeddedResource Include="wwwroot\css\font\ShareTechMono-Regular.woff2" />
+    <EmbeddedResource Include="wwwroot\css\font\ShareTechMono.OFL.txt" />
+  </ItemGroup>
+
+</Project>

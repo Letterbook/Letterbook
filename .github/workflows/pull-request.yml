@@ -63,6 +63,14 @@ jobs:
         run: dotnet ef migrations has-pending-model-changes
         working-directory: Letterbook.Adapter.TimescaleFeeds/
 
+      - name: Check Docs Prerender
+        working-directory: ./Letterbook.Docs
+        run: |
+          echo "Prerendering for deployment to $custom_domain"
+          dotnet run --AppTasks=prerender --BaseUrl "${{env.custom_domain}}"
+        env:
+          custom_domain: "letterbook.com"
+      
       - name: Check Generated Files
         run: |
           CHANGED=$(git status --porcelain -uno)

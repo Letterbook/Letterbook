@@ -97,6 +97,10 @@ public class FederatedActorHttpSignatureVerifier(
 		{
 			var signatureParams = signatureContext.SignatureParams;
 			var key = await GetKey(signatureParams.KeyId, cancellationToken);
+			if (key is null)
+			{
+				continue;
+			}
 
 			var verifier = GetVerifier(signatureParams.Algorithm, signatureParams.KeyId, key);
 			var input = signingContext.GetSignatureInput(signatureParams, out _);
@@ -116,7 +120,7 @@ public class FederatedActorHttpSignatureVerifier(
 
 	private async Task<SigningKey?> GetKey(string? keyId, CancellationToken cancellationToken)
 	{
-		var key = await verificationKeyProvider.GetKeyByIdAsync(keyId, cancellationToken);
+		var key = keyId == null ? default : await verificationKeyProvider.GetKeyByIdAsync(keyId, cancellationToken);
 		if (key == null)
 		{
 			_logger.LogWarning($"Unable to verify signature: key with ID {keyId} was not found");

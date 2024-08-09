@@ -42,7 +42,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		throw new NotImplementedException();
 	}
 
-	public async Task<Profile> CreateProfile(Guid ownerId, string handle)
+	public async Task<Profile> CreateProfile(Uuid7 ownerId, string handle)
 	{
 		var account = await _profiles.LookupAccount(ownerId);
 		if (account == null)
@@ -69,7 +69,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return profile;
 	}
 
-	public async Task<UpdateResponse<Profile>> UpdateDisplayName(Guid localId, string displayName)
+	public async Task<UpdateResponse<Profile>> UpdateDisplayName(Uuid7 localId, string displayName)
 	{
 		// TODO(moderation): vulgarity filters
 		var profile = await RequireProfile(localId);
@@ -92,7 +92,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	}
 
 
-	public async Task<UpdateResponse<Profile>> UpdateDescription(Guid localId, string description)
+	public async Task<UpdateResponse<Profile>> UpdateDescription(Uuid7 localId, string description)
 	{
 		var profile = await RequireProfile(localId);
 		if (profile.Description == description)
@@ -113,7 +113,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		};
 	}
 
-	public async Task<UpdateResponse<Profile>> InsertCustomField(Guid localId, int index, string key,
+	public async Task<UpdateResponse<Profile>> InsertCustomField(Uuid7 localId, int index, string key,
 		string value)
 	{
 		var profile = await RequireProfile(localId);
@@ -135,7 +135,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		};
 	}
 
-	public async Task<UpdateResponse<Profile>> RemoveCustomField(Guid localId, int index)
+	public async Task<UpdateResponse<Profile>> RemoveCustomField(Uuid7 localId, int index)
 	{
 		var profile = await RequireProfile(localId);
 		if (index >= profile.CustomFields.Length)
@@ -156,7 +156,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		};
 	}
 
-	public async Task<UpdateResponse<Profile>> UpdateCustomField(Guid localId, int index, string key,
+	public async Task<UpdateResponse<Profile>> UpdateCustomField(Uuid7 localId, int index, string key,
 		string value)
 	{
 		var profile = await RequireProfile(localId);
@@ -243,6 +243,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		self.Follow(target, FollowState.Pending);
 		self.Audiences.Add(Audience.Followers(target));
 		self.Audiences.Add(Audience.Boosts(target));
+		self.Audiences = self.Audiences.ReplaceFrom(target.Headlining);
 		await _profiles.Commit();
 		return new FollowerRelation(self, target, FollowState.Pending);
 	}
@@ -271,6 +272,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 		var self = await _profiles.SingleProfile(selfId)
 			           .WithRelation(targetId)
+			           .Include(profile => profile.Audiences.Where(audience => audience.Source!.Id == Uuid7.ToGuid(targetId)))
 			           .FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
 
@@ -291,7 +293,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await ReceiveFollowRequest(target, follower, requestId);
 	}
 
-	public async Task<FollowerRelation> ReceiveFollowRequest(Guid localId, Uri followerId, Uri? requestId)
+	public async Task<FollowerRelation> ReceiveFollowRequest(Uuid7 localId, Uri followerId, Uri? requestId)
 	{
 		var target = await RequireProfile(localId);
 		var follower = await ResolveProfile(followerId);
@@ -322,16 +324,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		}
 	}
 
-	public async Task<FollowState> ReceiveFollowReply(Uri selfId, Uri targetId, FollowState response)
+	public async Task<FollowerRelation> ReceiveFollowReply(Uuid7 selfId, Uri targetId, FollowState response)
 	{
-		if (selfId.Authority != _coreConfig.BaseUri().Authority)
-		{
-			_logger.LogWarning(
-				"Received a response to a follow request from {TargetId} concerning {SelfId}, but this is not the origin server", targetId,
-				selfId);
-			throw CoreException.WrongAuthority($"Cannot update Profile {selfId} because it has a different origin server", selfId);
-		}
-
 		var profile = await _profiles.LookupProfileWithRelation(selfId, targetId) ??
 		              throw CoreException.MissingData($"Cannot update Profile {selfId} because it could not be found", typeof(Profile),
 			              selfId);
@@ -344,15 +338,16 @@ public class ProfileService : IProfileService, IAuthzProfileService
 			case FollowState.Pending:
 				relation.State = response;
 				await _profiles.Commit();
-				return relation.State;
+				return relation;
 			case FollowState.None:
 			case FollowState.Rejected:
 			default:
 				profile.Unfollow(relation.Follows);
 				profile.LeaveAudience(relation.Follows);
 				_profiles.Delete(relation);
+				relation.State = response;
 				await _profiles.Commit();
-				return FollowState.None;
+				return relation;
 		}
 	}
 
@@ -454,12 +449,12 @@ public class ProfileService : IProfileService, IAuthzProfileService
 			.CountAsync();
 	}
 
-	public Task ReportProfile(Guid selfId, Uri profileId)
+	public Task ReportProfile(Uuid7 selfId, Uri profileId)
 	{
 		throw new NotImplementedException();
 	}
 
-	public Task ReportProfile(Guid selfId, Guid localId)
+	public Task ReportProfile(Uuid7 selfId, Uuid7 localId)
 	{
 		throw new NotImplementedException();
 	}
@@ -523,7 +518,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	}
 
 	[SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
-	private async Task<Profile> RequireProfile(Guid localId, Uri? relationId = null,
+	private async Task<Profile> RequireProfile(Uuid7 localId, Uri? relationId = null,
 		[CallerMemberName] string name = "",
 		[CallerFilePath] string path = "",
 		[CallerLineNumber] int line = -1)

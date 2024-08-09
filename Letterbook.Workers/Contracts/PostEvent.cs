@@ -13,6 +13,6 @@ public record PostEvent
 	public PostDto? PrevData { get; init; }
 	public required string Subject { get; init; }
 	public required Claim[] Claims { get; init; }
-	public string Type { get; init; }
+	public required string Type { get; init; }
 
 }
