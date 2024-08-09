@@ -44,9 +44,6 @@ jobs:
       
       - name: Build
         run: dotnet build Letterbook.sln --configuration Release
-        
-      - name: Test
-        run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --blame-crash --no-build
 
       - name: Install Playwright Browsers
         run: pwsh Letterbook.Web.Tests/bin/Release/net8.0/playwright.ps1 install
@@ -62,10 +59,10 @@ jobs:
 
       - name: Start server
         run: dotnet run --project Letterbook.Web &
+
+      - name: Test
+        run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --blame-crash --no-build
         
-      - name: E2E Test
-        run: dotnet test Letterbook.Web.Tests.E2E --no-build
-      
       - name: Docker compose down
         run: docker compose down  
         
