@@ -203,7 +203,18 @@ div.custom-block {
             font-size: 85%;
             align-self: start;
         }
+
+        details[open]::after{
+            display: none
+        }
     }
+}
+
+details[open]::after {
+  content: '';
+  height: 1px;
+  display: block;
+  background-color: var(--pico-primary-background);
 }
 
 @media screen and (min-width: 796px) {
