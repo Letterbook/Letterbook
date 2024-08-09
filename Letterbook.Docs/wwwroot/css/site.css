@@ -111,19 +111,22 @@ nav .alternate {
     font-size: 85%;
 }
 
-img.logo {
-    display: inline-block;
-    max-height: 6rem;
-    overflow: visible;
-    margin-bottom: -1rem;
-}
-
 .top-nav {
     ul {
         align-items: end;
     }
     h1 {
         margin-bottom: 0;
+    }
+    details {
+        min-width: 6em;
+    }
+    img.logo {
+        display: inline-block;
+        max-height: 6rem;
+        overflow: visible;
+        margin-bottom: -1rem;
+        min-width: 3em;
     }
 }
 
