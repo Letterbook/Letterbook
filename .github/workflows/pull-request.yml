@@ -44,9 +44,31 @@ jobs:
       
       - name: Build
         run: dotnet build Letterbook.sln --configuration Release
-      
+
       - name: Test
         run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --blame-crash --no-build
+
+      - name: Install Playwright Browsers
+        run: pwsh Letterbook.Web.Tests/bin/Release/net8.0/playwright.ps1 install
+
+      - name: Docker compose up
+        run: docker compose up -d
+
+      - name: Seed database
+        run: dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj && dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj
+
+      - name: Add host secret
+        run: dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook
+
+      - name: Start server
+        run: dotnet run --project Letterbook.Web &
+        
+      - name: E2E Test
+        if: false
+        run: dotnet test Letterbook.Web.Tests.E2E --no-build      
+      
+      - name: Docker compose down
+        run: docker compose down  
         
       - name: Save test crash report
         if: failure()
