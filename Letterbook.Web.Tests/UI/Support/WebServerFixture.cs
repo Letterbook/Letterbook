@@ -26,6 +26,7 @@ public class WebServerFixture : IAsyncLifetime
 {
 	private readonly IHost? _host;
 	private Uri BaseUrl { get; } = Settings.BaseUrl;
+	private bool Disallow { get; } = Settings.DisallowWebServerFixture;
 
 	public WebServerFixture()
 	{
@@ -35,6 +36,12 @@ public class WebServerFixture : IAsyncLifetime
 			.Enrich.WithSpan()
 			.WriteTo.Console()
 			.CreateBootstrapLogger();
+
+		if (Disallow)
+		{
+			Log.Logger.Information($"Not starting server because <{nameof(Settings.DisallowWebServerFixture)}> is on");
+			return;
+		}
 
 		if (LocalHostPortIsInUse(BaseUrl))
 		{

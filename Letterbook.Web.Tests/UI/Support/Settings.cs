@@ -6,12 +6,15 @@ namespace Letterbook.Web.Tests.UI.Support;
 static class Settings
 {
 	public const int DefaultPort = 5127;
-	public static Uri BaseUrl = new(Get(nameof(BaseUrl), $"http://localhost:{GetRandomUnusedPort()}"));
+	public static Uri BaseUrl = new(Get(nameof(BaseUrl), $"http://localhost:{Port()}"));
 	public static bool Headless => bool.Parse(Get(nameof(Headless), bool.TrueString));
 	public static bool NoSkip => bool.Parse(Get(nameof(NoSkip), bool.FalseString));
+	public static bool DisallowWebServerFixture => bool.Parse(Get(nameof(DisallowWebServerFixture), bool.FalseString));
 
 	private static string Get(string name, string @default)
 		=> Environment.GetEnvironmentVariable(name) ?? @default;
+
+	private static int Port() => DisallowWebServerFixture ? DefaultPort : GetRandomUnusedPort();
 
 	private static int GetRandomUnusedPort()
 	{
