@@ -1,3 +1,5 @@
+using System.Net.Mime;
+
 namespace Letterbook.Core.Models;
 
 /// <summary>
@@ -6,14 +8,15 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public class Note : Content
 {
-	public required string Text { get; set; }
+	public string? SourceText { get; set; }
+	public ContentType? SourceContentType { get; set; }
 	public override string Type => "Note";
 
 	public override string? GeneratePreview()
 	{
 		// TODO: implement this in a less naive way
 		// Something like first paragraph or x words/characters
-		Preview = Text[..Math.Min(Text.Length, 100)];
+		Preview = SourceText?[..Math.Min(SourceText.Length, 100)];
 		return Preview;
 	}
 
@@ -27,7 +30,7 @@ public class Note : Content
 		if (content is not Note note)
 			throw new ArgumentException($"{content.Type} is not {Type}", nameof(content));
 
-		Text = note.Text;
+		SourceText = note.SourceText;
 		base.UpdateFrom(note);
 	}
 }
