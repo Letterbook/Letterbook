@@ -62,7 +62,10 @@ jobs:
         
       - name: Test
         run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --blame-crash --no-build
-        
+
+      - name: E2E Test
+        run: dotnet test Letterbook.Web.Tests.E2E --no-build
+      
       - name: Docker compose down
         run: docker compose down  
         
