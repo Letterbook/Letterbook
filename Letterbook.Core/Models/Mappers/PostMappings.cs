@@ -26,6 +26,7 @@ public class PostMappings : AutoMapper.Profile
 		CreateMap<ContentDto, Note>(MemberList.Source)
 			.ForMember(note => note.SourceText, opt => opt.MapFrom(dto => dto.Text))
 			.ForMember(note => note.SourceContentType, opt => opt.MapFrom((dto) => dto.ContentType ?? "text/plain"))
+			.ForMember(note => note.Html, opt => opt.MapFrom(dto => dto.Text))
 			.ForSourceMember(src => src.Type, opt => opt.DoNotValidate());
 		CreateMap<ContentDto, Content>(MemberList.None)
 			.ConstructUsing((dto, ctx) =>
@@ -40,7 +41,6 @@ public class PostMappings : AutoMapper.Profile
 			{
 				ct.GeneratePreview();
 				ct.SetLocalFediId(options.Value);
-				ct.Sanitize();
 			});
 
 		CreateMap<Post, PostDto>(MemberList.Destination);
