@@ -112,7 +112,6 @@ public static class DependencyInjectionExtensions
 		services.AddScopedService<SeedAdminWorker>();
 
 		// Register Adapters
-		services.AddScoped<IActivityAdapter, ActivityAdapter>();
 		services.AddScoped<IPostAdapter, PostAdapter>();
 		services.AddSingleton<IActivityPubDocument, Document>();
 		services.AddDbAdapter(configuration);

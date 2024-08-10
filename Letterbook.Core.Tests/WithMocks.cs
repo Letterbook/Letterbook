@@ -14,10 +14,8 @@ namespace Letterbook.Core.Tests;
 
 public abstract class WithMocks
 {
-	public Mock<IActivityAdapter> ActivityAdapterMock;
 	public Mock<IPostAdapter> PostAdapterMock;
 	public Mock<IAccountProfileAdapter> AccountProfileMock;
-	public Mock<IMessageBusAdapter> MessageBusAdapterMock;
 	public Mock<IAccountEventPublisher> AccountEventServiceMock;
 	public Mock<IActivityPubClient> ActivityPubClientMock;
 	public Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock;
@@ -40,10 +38,8 @@ public abstract class WithMocks
 	protected WithMocks()
 	{
 		HttpMessageHandlerMock = new Mock<MockableMessageHandler>();
-		ActivityAdapterMock = new Mock<IActivityAdapter>();
 		PostAdapterMock = new Mock<IPostAdapter>();
 		AccountProfileMock = new Mock<IAccountProfileAdapter>();
-		MessageBusAdapterMock = new Mock<IMessageBusAdapter>();
 		AccountEventServiceMock = new Mock<IAccountEventPublisher>();
 		ActivityPubClientMock = new Mock<IActivityPubClient>();
 		ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
@@ -73,7 +69,6 @@ public abstract class WithMocks
 
 		MockedServiceCollection = new ServiceCollection();
 		MockedServiceCollection.AddScoped<IAccountProfileAdapter>(_ => AccountProfileMock.Object);
-		MockedServiceCollection.AddScoped<IMessageBusAdapter>(_ => MessageBusAdapterMock.Object);
 		MockedServiceCollection.AddScoped<IAccountEventPublisher>(_ => AccountEventServiceMock.Object);
 		MockedServiceCollection.AddScoped<IActivityPubClient>(_ => ActivityPubClientMock.Object);
 		MockedServiceCollection.AddScoped<IActivityPubAuthenticatedClient>(_ => ActivityPubAuthClientMock.Object);
