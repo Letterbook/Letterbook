@@ -1,9 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Security.Claims;
-using CloudNative.CloudEvents;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Workers.Contracts;
 using MassTransit;

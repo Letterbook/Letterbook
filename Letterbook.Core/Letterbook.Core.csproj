@@ -10,7 +10,6 @@
     <ItemGroup>
       <PackageReference Include="ActivityPub.Types" />
       <PackageReference Include="AutoMapper" />
-      <PackageReference Include="CloudNative.CloudEvents" />
       <PackageReference Include="GitHubActionsTestLogger">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
