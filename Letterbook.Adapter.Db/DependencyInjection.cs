@@ -17,7 +17,6 @@ public static class DependencyInjection
 
 		return services.AddDbContext<RelationalContext>(options => options.UseNpgsql(dataSource))
 			.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>()
-			.AddScoped<IActivityAdapter, ActivityAdapter>()
 			.AddScoped<IPostAdapter, PostAdapter>();
 	}
 
