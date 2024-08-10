@@ -14,7 +14,6 @@ namespace Letterbook.Core.Tests;
 
 public abstract class WithMocks
 {
-	public Mock<IActivityAdapter> ActivityAdapterMock;
 	public Mock<IPostAdapter> PostAdapterMock;
 	public Mock<IAccountProfileAdapter> AccountProfileMock;
 	public Mock<IAccountEventPublisher> AccountEventServiceMock;
@@ -39,7 +38,6 @@ public abstract class WithMocks
 	protected WithMocks()
 	{
 		HttpMessageHandlerMock = new Mock<MockableMessageHandler>();
-		ActivityAdapterMock = new Mock<IActivityAdapter>();
 		PostAdapterMock = new Mock<IPostAdapter>();
 		AccountProfileMock = new Mock<IAccountProfileAdapter>();
 		AccountEventServiceMock = new Mock<IAccountEventPublisher>();
