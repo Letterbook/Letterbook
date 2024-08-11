@@ -23,10 +23,11 @@ public class Note : Content
 
 	public override void Sanitize(IEnumerable<IContentSanitizer> sanitizers)
 	{
-		if (sanitizers.FirstOrDefault(s => s.ContentType.MediaType == ContentType?.MediaType) is { } sanitizer)
-			Html = sanitizer.Sanitize(Html, FediId.Authority);
-		else
-			throw CoreException.InvalidRequest("Unknown media type", "ContentType", ContentType?.MediaType ?? "unknown");
+		var (text, type) = SourceText != null && SourceContentType != null ? (SourceText, SourceContentType) : (Html, ContentType);
+		var sanitizer = sanitizers.FirstOrDefault(s => s.ContentType.MediaType == type.MediaType)
+		                ?? throw CoreException.InvalidRequest("Unknown media type", "ContentType", ContentType?.MediaType ?? "unknown");
+		Html = sanitizer.Sanitize(text, FediId.Authority);
+		ContentType = sanitizer.Result;
 	}
 
 	public override void UpdateFrom(Content content)
