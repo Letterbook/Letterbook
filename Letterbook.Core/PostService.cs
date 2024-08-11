@@ -135,6 +135,11 @@ public class PostService : IAuthzPostService, IPostService
 		if (published) previous.UpdatedDate = DateTimeOffset.UtcNow;
 		else previous.CreatedDate = DateTimeOffset.UtcNow;
 
+		foreach (var content in previous.Contents)
+		{
+			content.Sanitize(_sanitizers);
+		}
+
 
 		_posts.Update(previous);
 		await _posts.Commit();
@@ -176,6 +181,7 @@ public class PostService : IAuthzPostService, IPostService
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
 		content.SortKey ??= (post.Contents.Select(c => c.SortKey).Max() ?? -1) + 1;
+		content.Sanitize(_sanitizers);
 		post.Contents.Add(content);
 
 		if (post.PublishedDate is not null)
@@ -235,10 +241,7 @@ public class PostService : IAuthzPostService, IPostService
 		}
 
 		original.UpdateFrom(content);
-		// _posts.Update(content);
-		// post.Contents.Remove(content);
-		// post.AddContent(content);
-		// post.Contents.Add(content);
+		original.Sanitize(_sanitizers);
 
 		if (post.PublishedDate is not null)
 		{
