@@ -6,6 +6,10 @@ namespace Letterbook.Core.Models;
 
 public abstract class Content : IContent, IEquatable<Content>
 {
+	public const string PlainTextMediaType = "text/plain";
+	public const string MarkdownMediaType = "text/markdown";
+	public const string HtmlMediaType = "text/html";
+
 	private Uuid7 _id;
 
 	protected Content()
@@ -13,6 +17,7 @@ public abstract class Content : IContent, IEquatable<Content>
 		_id = Uuid7.NewUuid7();
 		FediId = default!;
 		Post = default!;
+		ContentType = new ContentType(HtmlMediaType);
 	}
 
 	public Guid Id
@@ -28,7 +33,7 @@ public abstract class Content : IContent, IEquatable<Content>
 	public Uri? Source { get; set; }
 	public int? SortKey { get; set; } = 0;
 	public abstract string Type { get; }
-	public ContentType? ContentType { get; set; }
+	public ContentType ContentType { get; set; }
 	public required string Html { get; set; }
 
 	public static Uri LocalId(IContent content, CoreOptions opts) =>
@@ -37,7 +42,7 @@ public abstract class Content : IContent, IEquatable<Content>
 	public Uuid7 GetId() => _id;
 	public string GetId25() => _id.ToId25String();
 	public abstract string? GeneratePreview();
-	public abstract void Sanitize();
+	public abstract void Sanitize(IEnumerable<IContentSanitizer> sanitizers);
 
 	public virtual void UpdateFrom(Content content)
 	{
