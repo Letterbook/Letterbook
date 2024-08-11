@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using AngleSharp.Css.Dom;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Authorization;
 using Letterbook.Core.Models.Mappers;
@@ -12,6 +13,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Xss = Ganss.Xss;
 
 namespace Letterbook.Core.Extensions;
 
@@ -32,7 +34,25 @@ public static class DependencyInjection
 			.AddScoped<MappingConfigProvider>()
 			.AddSingleton<Instrumentation>()
 			.AddSingleton<IAuthorizationService, AuthorizationService>()
-			.AddSingleton<IHostSigningKeyProvider, DevelopmentHostSigningKeyProvider>();
+			.AddSingleton<IHostSigningKeyProvider, DevelopmentHostSigningKeyProvider>()
+			.AddSingleton<IContentSanitizer, HtmlSanitizer>()
+			.AddSingleton<IContentSanitizer, TextSanitizer>()
+			// TODO: XssSanitizer config
+			.AddSingleton<Xss.IHtmlSanitizer, Xss.HtmlSanitizer>(_ => new Xss.HtmlSanitizer(new Xss.HtmlSanitizerOptions
+			{
+				AllowedTags = new HashSet<string>()
+				{
+					"a", "abbr", "address", "b", "bdi", "blockquote", "caption", "cite", "code", "col", "colgroup", "dd", "del", "dl", "dt",
+					"em", "i", "ins", "kbd", "li", "mark", "ol", "p", "pre", "q", "s", "strike", "strong", "sub", "sup", "table", "tbody",
+					"td", "tfoot", "th", "thead", "time", "tr", "tt", "ul", "var", "wbr"
+				},
+				AllowedAttributes = new HashSet<string>(){"href"},
+				AllowedCssClasses = new HashSet<string>(),
+				AllowedCssProperties = new HashSet<string>(),
+				AllowedAtRules = new HashSet<CssRuleType>(),
+				AllowCssCustomProperties = false,
+				AllowDataAttributes = false
+			}));
 
 		// Register service workers
 		services.AddScopedService<SeedAdminWorker>()

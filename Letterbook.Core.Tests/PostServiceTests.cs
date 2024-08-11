@@ -1,6 +1,7 @@
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.Core.Tests.Mocks;
 using Medo;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -21,7 +22,8 @@ public class PostServiceTests : WithMocks
 		_output = output;
 		_output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 		_service = new PostService(Mock.Of<ILogger<PostService>>(), CoreOptionsMock,
-			PostAdapterMock.Object, PostEventServiceMock.Object, ActivityPubClientMock.Object);
+			PostAdapterMock.Object, PostEventServiceMock.Object, ActivityPubClientMock.Object,
+			[new MockHtmlSanitizer(), new MockTextSanitizer()]);
 		_fakeProfile = new FakeProfile("letterbook.example");
 		_profile = _fakeProfile.Generate();
 		_post = new FakePost(_profile);

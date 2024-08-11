@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using Letterbook.Core.Exceptions;
 
 namespace Letterbook.Core.Models;
 
@@ -20,10 +21,12 @@ public class Note : Content
 		return Preview;
 	}
 
-	// TODO: proper sanitization
-	public override void Sanitize()
+	public override void Sanitize(IEnumerable<IContentSanitizer> sanitizers)
 	{
-		Html = SourceText ?? "";
+		if (sanitizers.FirstOrDefault(s => s.ContentType.MediaType == ContentType?.MediaType) is { } sanitizer)
+			Html = sanitizer.Sanitize(Html, FediId.Authority);
+		else
+			throw CoreException.InvalidRequest("Unknown media type", "ContentType", ContentType?.MediaType ?? "unknown");
 	}
 
 	public override void UpdateFrom(Content content)

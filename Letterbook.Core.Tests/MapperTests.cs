@@ -1,4 +1,5 @@
 using AutoMapper;
+using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Tests.Fakes;
@@ -54,6 +55,28 @@ public class MapperTests : WithMocks
 	[InlineData("text/markdown")]
 	[InlineData("text/html")]
 	[InlineData(null)]
+	[Theory(DisplayName = "Should map PostDto with content")]
+	public void MapPostContent(string? type)
+	{
+		var noteDto = new ContentDto
+		{
+			Type = "Note",
+			Text = "test text",
+			SourceContentType = type,
+		};
+		_postDto.Contents.Add(noteDto);
+		var actual = _postMapper.Map<Models.Post>(_postDto);
+
+		Assert.NotNull(actual);
+		var actualNote = Assert.IsType<Note>(actual.Contents.FirstOrDefault());
+		Assert.Equal(type ?? "text/plain", actualNote.SourceContentType?.MediaType);
+		Assert.Equal("text/html", actualNote.ContentType?.MediaType);
+	}
+
+	[InlineData("text/plain")]
+	[InlineData("text/markdown")]
+	[InlineData("text/html")]
+	[InlineData(null)]
 	[Theory(DisplayName = "Should map ContentDto as Note")]
 	public void MapNote(string? type)
 	{
@@ -61,13 +84,13 @@ public class MapperTests : WithMocks
 		{
 			Type = "Note",
 			Text = "test text",
-			ContentType = type,
+			SourceContentType = type,
 		};
-		_postDto.Contents.Add(noteDto);
 		var actual = _postMapper.Map<Models.Note>(noteDto);
 
 		Assert.NotNull(actual);
 		Assert.Equal(type ?? "text/plain", actual.SourceContentType?.ToString());
+		Assert.Equal("text/html", actual.ContentType?.MediaType);
 	}
 
 	[Fact(DisplayName = "Should generate an Id")]
