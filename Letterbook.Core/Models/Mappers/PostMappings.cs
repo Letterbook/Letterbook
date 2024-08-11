@@ -20,10 +20,13 @@ public class PostMappings : AutoMapper.Profile
 
 		CreateMap<Note, ContentDto>(MemberList.Destination)
 			.IncludeBase<Content, ContentDto>()
-			.ForMember(dto => dto.Text, opt => opt.MapFrom(src => src.Text));
+			.ForMember(dto => dto.Text, opt => opt.MapFrom(src => src.SourceText));
 		CreateMap<Content, ContentDto>(MemberList.Destination)
 			.ForMember(dest => dest.Text, opt => opt.Ignore());
 		CreateMap<ContentDto, Note>(MemberList.Source)
+			.ForMember(note => note.SourceText, opt => opt.MapFrom(dto => dto.Text))
+			.ForMember(note => note.SourceContentType, opt => opt.MapFrom((dto) => dto.ContentType ?? "text/plain"))
+			.ForMember(note => note.Html, opt => opt.MapFrom(dto => dto.Text))
 			.ForSourceMember(src => src.Type, opt => opt.DoNotValidate());
 		CreateMap<ContentDto, Content>(MemberList.None)
 			.ConstructUsing((dto, ctx) =>

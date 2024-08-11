@@ -8,5 +8,6 @@ public class ConfigureNote : IEntityTypeConfiguration<Note>
 {
 	public void Configure(EntityTypeBuilder<Note> builder)
 	{
+		builder.Property(note => note.SourceContentType).HasConversion<ContentTypeConverter>();
 	}
 }

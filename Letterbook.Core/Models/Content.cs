@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using Letterbook.Core.Extensions;
 using Medo;
 
@@ -27,6 +28,8 @@ public abstract class Content : IContent, IEquatable<Content>
 	public Uri? Source { get; set; }
 	public int? SortKey { get; set; } = 0;
 	public abstract string Type { get; }
+	public ContentType? ContentType { get; set; }
+	public required string Html { get; set; }
 
 	public static Uri LocalId(IContent content, CoreOptions opts) =>
 		new(opts.BaseUri(), $"{content.Type}/{content.GetId25()}");
@@ -38,6 +41,8 @@ public abstract class Content : IContent, IEquatable<Content>
 
 	public virtual void UpdateFrom(Content content)
 	{
+		Html = content.Html;
+		ContentType = content.ContentType;
 		Summary = content.Summary;
 		Source = content.Source;
 		SortKey = content.SortKey;
