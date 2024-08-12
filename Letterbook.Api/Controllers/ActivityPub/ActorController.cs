@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
+using ActivityPub.Types.AS.Extended.Object;
 using AutoMapper;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.ActivityPub.Mappers;
@@ -11,11 +12,13 @@ using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Profile = AutoMapper.Profile;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
 
@@ -26,29 +29,36 @@ namespace Letterbook.Api.Controllers.ActivityPub;
 [ApiExplorerSettings(GroupName = Docs.ActivityPubV1)]
 [ApiController]
 [Route("[controller]")]
-[Consumes("application/ld+json",
-	"application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
-	"application/activity+json")]
-// [Produces("application/ld+json",
-	// "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
-	// "application/activity+json")]
+[Consumes(
+	Core.Constants.ActivityPubAccept,
+	Core.Constants.ActivityPubAcceptShort,
+	Core.Constants.ActivityPubAcceptAlt)]
+[AcceptHeader(
+	Core.Constants.ActivityPubAccept,
+	Core.Constants.ActivityPubAcceptShort,
+	Core.Constants.ActivityPubAcceptAlt)]
+[Produces(
+	Core.Constants.ActivityPubAccept,
+	Core.Constants.ActivityPubAcceptShort,
+	Core.Constants.ActivityPubAcceptAlt)]
 [Authorize(policy: Constants.ActivityPubPolicy)]
 public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;
 	private readonly IProfileService _profileService;
+	private readonly IPostService _postService;
 	private readonly IActivityMessagePublisher _messagePublisher;
 	private readonly IActivityPubDocument _apDoc;
-	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Default);
+	private static readonly IMapper ASMapper = new Mapper(AstMapper.Default);
 
 	public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
-		IProfileService profileService, IActivityMessagePublisher messagePublisher, IActivityPubDocument apDoc)
+		IProfileService profileService, IPostService postService, IActivityMessagePublisher messagePublisher, IActivityPubDocument apDoc)
 	{
 		_logger = logger;
 		_profileService = profileService;
+		_postService = postService;
 		_messagePublisher = messagePublisher;
 		_apDoc = apDoc;
-		_logger.LogInformation("Loaded {Controller}", nameof(ActorController));
 	}
 
 
@@ -62,7 +72,7 @@ public class ActorController : ControllerBase
 
 		var profile = await _profileService.As(User.Claims).LookupProfile(uuid);
 		if (profile == null) return NotFound();
-		var actor = ActorMapper.Map<PersonActorExtension>(profile);
+		var actor = ASMapper.Map<PersonActorExtension>(profile);
 
 		return Ok(actor);
 	}
@@ -132,6 +142,21 @@ public class ActorController : ControllerBase
 			{
 				_logger.LogDebug("Inbox received: {Activity}", "Undo");
 				return await InboxUndo(id, undo);
+			}
+			if (activity.Is<CreateActivity>(out var create))
+			{
+				_logger.LogDebug("Inbox received: {Activity}", "Undo");
+				return await InboxCreate(id, create);
+			}
+			if (activity.Is<UpdateActivity>(out var update))
+			{
+				_logger.LogDebug("Inbox received: {Activity}", "Undo");
+				return await InboxUpdate(id, update);
+			}
+			if (activity.Is<DeleteActivity>(out var delete))
+			{
+				_logger.LogDebug("Inbox received: {Activity}", "Undo");
+				return await InboxDelete(id, delete);
 			}
 
 			_logger.LogWarning("Ignored unknown activity {ActivityType}", activity.GetType());
@@ -213,6 +238,55 @@ public class ActorController : ControllerBase
 		actorId = id;
 		error = default;
 		return true;
+	}
+
+	private async Task<IActionResult> InboxDelete(Uuid7 id, DeleteActivity activity)
+	{
+		await Task.CompletedTask;
+		throw new NotImplementedException();
+	}
+
+	private async Task<IActionResult> InboxUpdate(Uuid7 id, UpdateActivity activity)
+	{
+		await Task.CompletedTask;
+		throw new NotImplementedException();
+	}
+
+	private async Task<IActionResult> InboxCreate(Uuid7 id, CreateActivity activity)
+	{
+		var profiles = _profileService.As(User.Claims);
+		if (activity.Actor.SingleOrDefault()?.TryGetId(out var actorId) != true ||
+		    await profiles.LookupProfile(actorId!) is not { } actorProfile)
+			return BadRequest(ErrorMessage.InvalidActor());
+
+		var posts = _postService.As(User.Claims, actorProfile.GetId());
+		var success = 0;
+		var errors = new List<Exception>();
+		foreach (var value in activity.Object.ValueItems)
+		{
+			if (value.Is<NoteObject>(out var asNote) && ASMapper.Map<Post>(asNote) is {} note)
+			{
+				try
+				{
+					await posts.ReceiveCreate(note);
+					success++;
+				}
+				catch (Exception e)
+				{
+					_logger.LogInformation(e, "Error processing received Note {NoteId}", note.FediId);
+					errors.Add(e);
+				}
+			}
+			else
+			{
+				value.TryGetId(out var valueId);
+				errors.Add(CoreException.InvalidRequest($"Invalid object: {valueId?.ToString() ?? "Unknown ID"}", "object", value));
+			}
+		}
+
+		if (success > 0)
+			return Created();
+		return errors.Count == 1 ? BadRequest(errors.First()) : BadRequest(errors);
 	}
 
 	private async Task<IActionResult> InboxAccept(Uuid7 localId, ASActivity activity)

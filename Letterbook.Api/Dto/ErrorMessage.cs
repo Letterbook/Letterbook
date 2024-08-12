@@ -15,4 +15,6 @@ public class ErrorMessage
 		ErrorCode = $"{(uint)code:X8}";
 		Reason = message;
 	}
+
+	public static ErrorMessage InvalidActor() => new ErrorMessage(ErrorCodes.UnknownSemantics, "Activities must have exactly one actor");
 }

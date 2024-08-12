@@ -22,6 +22,29 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Media Type",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+                },
+                {
+                  "type": "string",
+                  "default": "application/ld+json"
+                },
+                {
+                  "type": "string",
+                  "default": "application/activity+json"
+                }
+              ],
+              "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+            }
           }
         ],
         "responses": {
@@ -45,6 +68,29 @@
               "pattern": "[0-9a-z]{25}",
               "type": "string",
               "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Media Type",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+                },
+                {
+                  "type": "string",
+                  "default": "application/ld+json"
+                },
+                {
+                  "type": "string",
+                  "default": "application/activity+json"
+                }
+              ],
+              "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
             }
           }
         ],
@@ -70,6 +116,29 @@
               "type": "string",
               "example": "HQqgQL5NFV4bPxZaTXhCPW"
             }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Media Type",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+                },
+                {
+                  "type": "string",
+                  "default": "application/ld+json"
+                },
+                {
+                  "type": "string",
+                  "default": "application/activity+json"
+                }
+              ],
+              "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+            }
           }
         ],
         "responses": {
@@ -93,6 +162,29 @@
               "pattern": "[0-9a-z]{25}",
               "type": "string",
               "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Media Type",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+                },
+                {
+                  "type": "string",
+                  "default": "application/ld+json"
+                },
+                {
+                  "type": "string",
+                  "default": "application/activity+json"
+                }
+              ],
+              "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
             }
           }
         ],
@@ -118,6 +210,29 @@
               "type": "string",
               "example": "HQqgQL5NFV4bPxZaTXhCPW"
             }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Media Type",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+                },
+                {
+                  "type": "string",
+                  "default": "application/ld+json"
+                },
+                {
+                  "type": "string",
+                  "default": "application/activity+json"
+                }
+              ],
+              "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+            }
           }
         ],
         "responses": {
@@ -140,16 +255,39 @@
               "type": "string",
               "example": "HQqgQL5NFV4bPxZaTXhCPW"
             }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Media Type",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+                },
+                {
+                  "type": "string",
+                  "default": "application/ld+json"
+                },
+                {
+                  "type": "string",
+                  "default": "application/activity+json"
+                }
+              ],
+              "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+            }
           }
         ],
         "requestBody": {
           "content": {
-            "application/ld+json": {
+            "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
               "schema": {
                 "$ref": "#/components/schemas/ASType"
               }
             },
-            "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
+            "application/ld+json": {
               "schema": {
                 "$ref": "#/components/schemas/ASType"
               }
@@ -165,12 +303,17 @@
           "200": {
             "description": "OK",
             "content": {
+              "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
+                "schema": {
+                  "$ref": "#/components/schemas/ASActivity"
+                }
+              },
               "application/ld+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ASActivity"
                 }
               },
-              "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
+              "application/activity+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ASActivity"
                 }
@@ -186,19 +329,19 @@
           "400": {
             "description": "Bad Request",
             "content": {
-              "text/plain": {
+              "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/ErrorMessage"
                 }
               },
-              "application/json": {
+              "application/ld+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/ErrorMessage"
                 }
               },
-              "text/json": {
+              "application/activity+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -206,19 +349,39 @@
           "403": {
             "description": "Forbidden",
             "content": {
-              "text/plain": {
+              "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
                 }
               },
-              "application/json": {
+              "application/ld+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
                 }
               },
-              "text/json": {
+              "application/activity+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              },
+              "application/ld+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
+                }
+              },
+              "application/activity+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -226,17 +389,17 @@
           "410": {
             "description": "Gone",
             "content": {
-              "text/plain": {
+              "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
                 }
               },
-              "application/json": {
+              "application/ld+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
                 }
               },
-              "text/json": {
+              "application/activity+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetails"
                 }
@@ -246,19 +409,19 @@
           "421": {
             "description": "Misdirected Request",
             "content": {
-              "text/plain": {
+              "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/ErrorMessage"
                 }
               },
-              "application/json": {
+              "application/ld+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/ErrorMessage"
                 }
               },
-              "text/json": {
+              "application/activity+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -266,19 +429,19 @@
           "422": {
             "description": "Unprocessable Content",
             "content": {
-              "text/plain": {
+              "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/ErrorMessage"
                 }
               },
-              "application/json": {
+              "application/ld+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/ErrorMessage"
                 }
               },
-              "text/json": {
+              "application/activity+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
+                  "$ref": "#/components/schemas/ErrorMessage"
                 }
               }
             }
@@ -291,14 +454,39 @@
         "tags": [
           "Actor"
         ],
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Media Type",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+                },
+                {
+                  "type": "string",
+                  "default": "application/ld+json"
+                },
+                {
+                  "type": "string",
+                  "default": "application/activity+json"
+                }
+              ],
+              "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+            }
+          }
+        ],
         "requestBody": {
           "content": {
-            "application/ld+json": {
+            "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
               "schema": {
                 "$ref": "#/components/schemas/ASType"
               }
             },
-            "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"": {
+            "application/ld+json": {
               "schema": {
                 "$ref": "#/components/schemas/ASType"
               }
@@ -332,6 +520,29 @@
               "type": "string",
               "example": "HQqgQL5NFV4bPxZaTXhCPW"
             }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Media Type",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+                },
+                {
+                  "type": "string",
+                  "default": "application/ld+json"
+                },
+                {
+                  "type": "string",
+                  "default": "application/activity+json"
+                }
+              ],
+              "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+            }
           }
         ],
         "responses": {
@@ -353,6 +564,29 @@
               "pattern": "[0-9a-z]{25}",
               "type": "string",
               "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "Media Type",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
+                },
+                {
+                  "type": "string",
+                  "default": "application/ld+json"
+                },
+                {
+                  "type": "string",
+                  "default": "application/activity+json"
+                }
+              ],
+              "default": "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
             }
           }
         ],
@@ -923,6 +1157,22 @@
             "type": "string",
             "nullable": true,
             "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ErrorMessage": {
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
           }
         },
         "additionalProperties": false
