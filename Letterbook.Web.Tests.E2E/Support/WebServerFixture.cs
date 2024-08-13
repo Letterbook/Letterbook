@@ -22,7 +22,6 @@ using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 
-// ReSharper disable once CheckNamespace
 namespace Letterbook.Web;
 
 public class WebServerFixture
@@ -118,17 +117,6 @@ public class WebServerFixture
 		builder.WebHost.UseUrls(BaseUrl.ToString());
 
 		var app = builder.Build();
-
-		// Configure the HTTP request pipeline.
-		if (!app.Environment.IsDevelopment())
-		{
-			// Not sure if this works, with mixed Razor/WebApi
-			// app.UseExceptionHandler("/Error");
-			app.UseExceptionHandler((applicationBuilder =>
-			{
-				Console.WriteLine("Error handler");
-			}));
-		}
 
 		if (!app.Environment.IsProduction())
 		{
