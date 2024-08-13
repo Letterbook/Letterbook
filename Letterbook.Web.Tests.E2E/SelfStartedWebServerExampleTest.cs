@@ -22,27 +22,13 @@ public class SelfStartedWebServerExampleTest : PageTest
 		await _webServerFixture.DisposeAsync();
 	}
 
-	/*
-
-		Included because it demonstrates that the server *is* configured and working
-
-	*/
 	[Test]
 	public async Task HomepageHasAFavicon()
 	{
 		await Page.GotoAsync($"{_webServerFixture.BaseUrl}favicon");
 	}
 
-	/*
-
-		Help wanted.
-
-		This test fails because (I think) razor pages are not able to render.
-
-		See: Letterbook.Web.Tests.E2E/Support/WebServerFixture.cs
-
-	*/
-	[Ignore("[WIP] Need help to make this work, see `WebServerFixture`")]
+	[Test]
 	public async Task HomepageHasCorrectTitleAndLinksToAdminProfile()
 	{
 		await Page.GotoAsync(_webServerFixture.BaseUrl.ToString());

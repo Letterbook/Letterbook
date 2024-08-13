@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
@@ -7,6 +8,7 @@ using Letterbook.AspNet;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Letterbook.Web.Tests.E2E.Support;
 using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
@@ -20,7 +22,8 @@ using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 
-namespace Letterbook.Web.Tests.E2E.Support;
+// ReSharper disable once CheckNamespace
+namespace Letterbook.Web;
 
 public class WebServerFixture
 {
@@ -48,14 +51,7 @@ public class WebServerFixture
 			.WriteTo.Console()
 			.CreateBootstrapLogger();
 
-		// @todo: Is there more stable way to calculate this?
-		var contentRootPath = Path.GetFullPath(Path.Combine("..", "..", "..", "..", "Letterbook.Web"));
-		var razorPagesRootDirectory = Path.Combine(contentRootPath, "Pages");
-
 		Log.Logger.Information($"Starting server at <{BaseUrl}>");
-		Log.Logger.Information($"CurrentDirectory: {Directory.GetCurrentDirectory()}");
-		Log.Logger.Information($"ContentRootPath: {contentRootPath}");
-		Log.Logger.Information($"RazorPagesRootDirectory: {razorPagesRootDirectory}");
 
 		/*
 
@@ -64,13 +60,7 @@ public class WebServerFixture
 			@todo: Try `UseStartUp` again
 
 		*/
-		var builder = WebApplication.CreateBuilder(new WebApplicationOptions
-		{
-			ContentRootPath = contentRootPath, // Letterbook/Letterbook.Web.Tests/bin/Debug/net8.0
-			WebRootPath = "wwwroot",
-			EnvironmentName = "Development",
-			Args = []
-		});
+		var builder = WebApplication.CreateBuilder();
 
 		// Pre initialize Serilog
 		Log.Logger = new LoggerConfiguration()
@@ -118,10 +108,8 @@ public class WebServerFixture
 			//
 			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
 			.AddDefaultUI();
-		builder.Services.AddRazorPages(options =>
-		{
-			options.RootDirectory = razorPagesRootDirectory;
-		});
+		builder.Services.AddRazorPages()
+			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
 		builder.Services.AddAuthorization(options =>
 		{
 			options.AddWebAuthzPolicy();
@@ -135,7 +123,11 @@ public class WebServerFixture
 		if (!app.Environment.IsDevelopment())
 		{
 			// Not sure if this works, with mixed Razor/WebApi
-			app.UseExceptionHandler("/Error");
+			// app.UseExceptionHandler("/Error");
+			app.UseExceptionHandler((applicationBuilder =>
+			{
+				Console.WriteLine("Error handler");
+			}));
 		}
 
 		if (!app.Environment.IsProduction())
