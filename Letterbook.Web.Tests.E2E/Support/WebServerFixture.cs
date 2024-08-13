@@ -69,9 +69,6 @@ public class WebServerFixture
 			.WriteTo.Console()
 			.CreateBootstrapLogger();
 
-		var coreOptions = builder.Configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
-		                  ?? throw new ConfigException(nameof(CoreOptions));
-
 		if (!builder.Environment.IsProduction())
 			builder.Configuration.AddUserSecrets<Program>();
 		// Register Serilog - Serialized Logging (configured in appsettings.json)
