@@ -64,7 +64,7 @@ jobs:
         run: pwsh Letterbook.Web.Tests/bin/Release/net8.0/playwright.ps1 install firefox
 
       - name: E2E Test
-        run: BROWSER=firefox dotnet test Letterbook.Web.Tests.E2E --no-build
+        run: BROWSER=firefox dotnet test Letterbook.Web.Tests.E2E --no-build --configuration Release
         
       - name: Save test crash report
         if: failure()
