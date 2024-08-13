@@ -59,7 +59,12 @@ public class WebServerFixture
 			@todo: Try `UseStartUp` again
 
 		*/
-		var builder = WebApplication.CreateBuilder();
+		var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+		{
+			// [!] Force the web application to read from `appsettings.Development.json`.
+			// This is required because the tests are built and run in release mode.
+			EnvironmentName = "Development"
+		});
 
 		// Pre initialize Serilog
 		Log.Logger = new LoggerConfiguration()
