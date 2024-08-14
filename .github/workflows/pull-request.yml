@@ -123,9 +123,6 @@ jobs:
       - name: Start server
         run: dotnet run --project Letterbook.Web &
 
-      - name: Install Playwright Browsers
-        run: pwsh Letterbook.Web.Tests/bin/Release/net8.0/playwright.ps1 install firefox
-
       - name: E2E Test
         run: dotnet test Letterbook.Web.Tests.E2E --no-build --configuration Release
         env:

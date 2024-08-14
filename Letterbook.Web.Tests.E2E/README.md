@@ -2,9 +2,9 @@
 
 ## Setup
 
-This test package uses [Playwright](https://playwright.dev). While most dependencies are provided automatically for you, Playwright will require you to install test browsers to run these tests.
+This test package uses [Playwright](https://playwright.dev). Browsers are automaticaly installed during the test run, but you can also install them manually.
 
-You can find out more about this at https://playwright.dev/dotnet/docs/intro
+You can find out more about this at https://playwright.dev/dotnet/docs/intro.
 
 Or use
 
