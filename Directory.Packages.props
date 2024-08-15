@@ -40,6 +40,8 @@
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.0.1" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.45.1" />
+    <PackageVersion Include="Microsoft.Playwright.NUnit" Version="1.45.1" />
     <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.3" />
     <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
     <PackageVersion Include="MockQueryable.Moq" Version="7.0.1" />
@@ -52,6 +54,12 @@
     <PackageVersion Include="NSign.AspNetCore" Version="1.0.3" />
     <PackageVersion Include="NSign.Client" Version="1.0.3" />
     <PackageVersion Include="NSign.SignatureProviders" Version="1.0.3" />
+    <PackageVersion Include="Nunit" Version="4.1.0" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.2.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageVersion>
+    <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="5.7.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.9.0-beta.2" />
