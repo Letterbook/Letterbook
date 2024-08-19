@@ -13,6 +13,7 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <PackageVersion Include="DarkLink.Web.WebFinger.Server" Version="1.0.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
+    <PackageVersion Include="HtmlSanitizer" Version="8.1.870" />
     <PackageVersion Include="ILogger.Moq" Version="1.1.10" />
     <PackageVersion Include="Markdig" Version="0.37.0" />
     <PackageVersion Include="MassTransit" Version="8.2.3" />

@@ -23,16 +23,18 @@ public class PostService : IAuthzPostService, IPostService
 	private readonly IPostAdapter _posts;
 	private readonly IPostEventPublisher _postEventPublisher;
 	private readonly IActivityPubClient _apClient;
+	private readonly IEnumerable<IContentSanitizer> _sanitizers;
 	private Uuid7 _profileId;
 	private IEnumerable<Claim> _claims = null!;
 
 	public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options,
-		IPostAdapter posts, IPostEventPublisher postEventPublisher, IActivityPubClient apClient)
+		IPostAdapter posts, IPostEventPublisher postEventPublisher, IActivityPubClient apClient, IEnumerable<IContentSanitizer> sanitizers)
 	{
 		_logger = logger;
 		_posts = posts;
 		_postEventPublisher = postEventPublisher;
 		_apClient = apClient;
+		_sanitizers = sanitizers;
 		_options = options.Value;
 	}
 
@@ -60,8 +62,6 @@ public class PostService : IAuthzPostService, IPostService
 		return await _posts.LookupThread(threadId);
 	}
 
-	// TODO: generate HTML from source
-	// also content types
 	public async Task<Post> DraftNote(Uuid7 authorId, string contentSource, Uuid7? inReplyToId = default)
 	{
 		var author = await _posts.LookupProfile(authorId)
@@ -70,7 +70,7 @@ public class PostService : IAuthzPostService, IPostService
 		var note = new Note
 		{
 			SourceText = contentSource,
-			SourceContentType = new ContentType("text/plain"),
+			SourceContentType = new ContentType(Content.PlainTextMediaType),
 			Post = post,
 			FediId = default!,
 			Html = contentSource
@@ -99,6 +99,10 @@ public class PostService : IAuthzPostService, IPostService
 			throw CoreException.MissingData<Profile>($"Couldn't find profile {_profileId}", _profileId);
 		post.Creators.Clear();
 		post.Creators.Add(author);
+		foreach (var content in post.Contents)
+		{
+			content.Sanitize(_sanitizers);
+		}
 
 		if (publish) post.PublishedDate = DateTimeOffset.UtcNow;
 		_posts.Add(post);
@@ -130,6 +134,11 @@ public class PostService : IAuthzPostService, IPostService
 		var published = previous.PublishedDate != null;
 		if (published) previous.UpdatedDate = DateTimeOffset.UtcNow;
 		else previous.CreatedDate = DateTimeOffset.UtcNow;
+
+		foreach (var content in previous.Contents)
+		{
+			content.Sanitize(_sanitizers);
+		}
 
 
 		_posts.Update(previous);
@@ -172,6 +181,7 @@ public class PostService : IAuthzPostService, IPostService
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
 		content.SortKey ??= (post.Contents.Select(c => c.SortKey).Max() ?? -1) + 1;
+		content.Sanitize(_sanitizers);
 		post.Contents.Add(content);
 
 		if (post.PublishedDate is not null)
@@ -231,10 +241,7 @@ public class PostService : IAuthzPostService, IPostService
 		}
 
 		original.UpdateFrom(content);
-		// _posts.Update(content);
-		// post.Contents.Remove(content);
-		// post.AddContent(content);
-		// post.Contents.Add(content);
+		original.Sanitize(_sanitizers);
 
 		if (post.PublishedDate is not null)
 		{
