@@ -94,7 +94,7 @@ docker-compose up -d
 
 2. Migrate the database
 ```shell
-dotnet tool retore
+dotnet tool restore
 dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj
 dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj
 ```
