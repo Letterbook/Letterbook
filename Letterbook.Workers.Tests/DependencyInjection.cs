@@ -19,6 +19,7 @@ public static class DependencyInjection
 		return services.AddScoped<IActivityPubClient>(_ => mocks.ActivityPubClientMock.Object)
 			.AddScoped<ITimelineService>(_ => mocks.TimelineServiceMock.Object)
 			.AddScoped<IProfileService>(_ => mocks.ProfileServiceMock.Object)
+			.AddScoped<IActivityMessagePublisher>(_ => mocks.ActivityPublisherMock.Object)
 			.AddSingleton<MappingConfigProvider>()
 			.AddScoped<IActivityPubDocument, Document>()
 			.AddSingleton<IOptions<CoreOptions>>(mocks.CoreOptionsMock);

@@ -17,6 +17,7 @@
         <PackageReference Include="Serilog.Settings.Configuration" />
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.File" />
+        <PackageReference Include="System.Linq.Async"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -26,7 +27,4 @@
       <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Contracts\EventBase.cs" />
-    </ItemGroup>
 </Project>
