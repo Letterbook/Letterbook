@@ -4,7 +4,7 @@ using Medo;
 
 namespace Letterbook.Core.Models;
 
-public abstract class Content : IContent, IEquatable<Content>
+public abstract class Content : IContent, IEquatable<Content>, IComparable<Content>
 {
 	public const string PlainTextMediaType = "text/plain";
 	public const string MarkdownMediaType = "text/markdown";
@@ -90,5 +90,12 @@ public abstract class Content : IContent, IEquatable<Content>
 	public static bool operator !=(Content? left, Content? right)
 	{
 		return !Equals(left, right);
+	}
+
+	public int CompareTo(Content? other)
+	{
+		if (ReferenceEquals(this, other)) return 0;
+		if (other is null) return 1;
+		return Nullable.Compare(SortKey, other.SortKey);
 	}
 }

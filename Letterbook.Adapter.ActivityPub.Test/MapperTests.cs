@@ -123,6 +123,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		public void ValidConfig()
 		{
 			Mappers.AstMapper.Default.AssertConfigurationIsValid();
+			Mappers.AstMapper.Post.AssertConfigurationIsValid();
 		}
 
 		[Fact]
