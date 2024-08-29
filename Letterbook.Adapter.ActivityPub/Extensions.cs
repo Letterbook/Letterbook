@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
+using ActivityPub.Types.AS.Extended.Link;
 using ActivityPub.Types.Util;
 
 namespace Letterbook.Adapter.ActivityPub;
@@ -73,4 +74,30 @@ public static class Extensions
 
 	public static IEnumerable<Uri> SelectIds(this IEnumerable<ASLink> links) =>
 		links.Select(o => o.HRef.Uri);
+
+	public static void Mention(this ASObject aso, Models.Mention mention)
+	{
+		var link = new MentionLink()
+		{
+			HRef = mention.Subject.FediId
+		};
+		aso.Tag.Add(link);
+		switch (mention.Visibility)
+		{
+			case Models.MentionVisibility.Bto:
+				aso.BTo.Add(new ASLink(){ HRef = mention.Subject.FediId});
+				return;
+			case Models.MentionVisibility.Bcc:
+				aso.BCC.Add(new ASLink(){ HRef = mention.Subject.FediId});
+				return;
+			case Models.MentionVisibility.To:
+				aso.To.Add(new ASLink(){ HRef = mention.Subject.FediId});
+				return;
+			case Models.MentionVisibility.Cc:
+				aso.CC.Add(new ASLink(){ HRef = mention.Subject.FediId});
+				return;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(mention), mention.Visibility, null);
+		}
+	}
 }

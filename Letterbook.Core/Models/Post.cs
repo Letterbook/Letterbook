@@ -122,6 +122,8 @@ public class Post : IFederated, IEquatable<Post>
 		FediId = content.FediId;
 	}
 
+	public Content? GetRootContent() => Contents.SingleOrDefault(c => c.FediId.Equals(ContentRootIdUri));
+
 	public override int GetHashCode()
 	{
 		return FediId.GetHashCode();

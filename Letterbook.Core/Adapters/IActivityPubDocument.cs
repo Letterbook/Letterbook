@@ -11,7 +11,7 @@ public interface IActivityPubDocument
 	AddActivity Add(Profile actor, ASObject asObject, ASObject target);
 	AnnounceActivity Announce(Profile actor, IContentRef content);
 	BlockActivity Block(Profile actor, Profile target);
-	CreateActivity Create(Profile actor, IContentRef content);
+	CreateActivity Create(Profile actor, ASObject createdObject);
 	DeleteActivity Delete(Profile actor, IContentRef content);
 	DislikeActivity Dislike(Profile actor, IContentRef content);
 	FollowActivity Follow(Profile actor, Profile target, Uri? id = null, bool implicitId = false);
@@ -21,5 +21,7 @@ public interface IActivityPubDocument
 	TentativeAcceptActivity TentativeAccept(Profile actor, ASObject asObject);
 	UndoActivity Undo(Profile actor, ASObject @object, Uri? id = null, bool implicitId = false);
 	UpdateActivity Update(Profile actor, IContentRef content);
+	ASObject FromPost(Post post);
+	ASLink ObjectId(IFederated linkable);
 	ASActivity BuildActivity(Models.ActivityType type);
 }

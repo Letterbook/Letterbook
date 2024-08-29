@@ -1,17 +1,23 @@
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
+using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Conversion;
+using AutoMapper;
+using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Models.Mappers;
 
 namespace Letterbook.Adapter.ActivityPub;
 
 public class Document : IActivityPubDocument
 {
 	private IJsonLdSerializer _serializer;
+	private readonly Mapper _postMapper;
 
 	public Document(IJsonLdSerializer serializer)
 	{
 		_serializer = serializer;
+		_postMapper = new Mapper(AstMapper.Post);
 	}
 
 	public string Serialize(ASType document)
@@ -22,7 +28,7 @@ public class Document : IActivityPubDocument
 	public AcceptActivity Accept(Models.Profile actor, ASObject asObject)
 	{
 		var doc = new AcceptActivity();
-		doc.Actor.Add(ActorLink(actor));
+		doc.Actor.Add(ObjectId(actor));
 		doc.Object.Add(asObject);
 		return doc;
 	}
@@ -42,9 +48,12 @@ public class Document : IActivityPubDocument
 		throw new NotImplementedException();
 	}
 
-	public CreateActivity Create(Models.Profile actor, Models.IContentRef content)
+	public CreateActivity Create(Models.Profile actor, ASObject createdObject)
 	{
-		throw new NotImplementedException();
+		var doc = new CreateActivity();
+		doc.Actor.Add(ObjectId(actor));
+		doc.Object.Add(createdObject);
+		return doc;
 	}
 
 	public DeleteActivity Delete(Models.Profile actor, Models.IContentRef content)
@@ -62,8 +71,8 @@ public class Document : IActivityPubDocument
 		var doc = new FollowActivity();
 		id ??= implicitId ? ImplicitId(actor.FediId, "Follow", target.FediId) : null;
 		if (id is not null) doc.Id = id.ToString();
-		doc.Actor.Add(ActorLink(actor));
-		doc.Object.Add(ActorLink(target));
+		doc.Actor.Add(ObjectId(actor));
+		doc.Object.Add(ObjectId(target));
 		return doc;
 	}
 
@@ -75,7 +84,7 @@ public class Document : IActivityPubDocument
 	public RejectActivity Reject(Models.Profile actor, ASObject asObject)
 	{
 		var doc = new RejectActivity();
-		doc.Actor.Add(ActorLink(actor));
+		doc.Actor.Add(ObjectId(actor));
 		doc.Object.Add(asObject);
 		return doc;
 	}
@@ -88,7 +97,7 @@ public class Document : IActivityPubDocument
 	public TentativeAcceptActivity TentativeAccept(Models.Profile actor, ASObject asObject)
 	{
 		var doc = new TentativeAcceptActivity();
-		doc.Actor.Add(ActorLink(actor));
+		doc.Actor.Add(ObjectId(actor));
 		doc.Object.Add(asObject);
 		return doc;
 	}
@@ -98,7 +107,7 @@ public class Document : IActivityPubDocument
 		var doc = new UndoActivity();
 		id ??= implicitId ? ImplicitId(actor.FediId, "Undo", asObject.Id) : null;
 		if (id is not null) doc.Id = id.OriginalString;
-		doc.Actor.Add(ActorLink(actor));
+		doc.Actor.Add(ObjectId(actor));
 		doc.Object.Add(asObject);
 		return doc;
 	}
@@ -106,6 +115,22 @@ public class Document : IActivityPubDocument
 	public UpdateActivity Update(Models.Profile actor, Models.IContentRef content)
 	{
 		throw new NotImplementedException();
+	}
+
+	public ASObject FromPost(Models.Post post)
+	{
+		if (post.GetRootContent() is Models.Note)
+			return _postMapper.Map<NoteObject>(post);
+
+		throw new NotImplementedException();
+	}
+
+	public ASLink ObjectId(Models.IFederated contentRef)
+	{
+		return new ASLink()
+		{
+			HRef = contentRef.FediId
+		};
 	}
 
 	private Uri ImplicitId(Uri id, string activity, Uri? targetId = null)
@@ -125,14 +150,6 @@ public class Document : IActivityPubDocument
 		return targetId is not null
 			? ImplicitId(id, activity, new Uri(targetId))
 			: ImplicitId(id, activity);
-	}
-
-	private ASLink ActorLink(Models.IFederated contentRef)
-	{
-		return new ASLink()
-		{
-			HRef = contentRef.FediId
-		};
 	}
 
 	public ASActivity BuildActivity(Models.ActivityType type)

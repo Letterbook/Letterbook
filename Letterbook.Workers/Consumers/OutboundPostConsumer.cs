@@ -1,5 +1,5 @@
-using ActivityPub.Types.AS;
 using AutoMapper;
+using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
@@ -39,31 +39,22 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 
 	public async Task Consume(ConsumeContext<PostEvent> context)
 	{
-		_logger.LogInformation("Handling PostEvent {EventType} for {PostId}", context.Message.Type, context.Message.Subject);
 		var post = _mapper.Map<Post>(context.Message.NextData);
 		if (!post.FediId.HasLocalAuthority(_config)) return;
+		_logger.LogInformation("Handling PostEvent {EventType} for {PostId}", context.Message.Type, context.Message.Subject);
 
-		var sender = context.Message.Sender is { } id ? await _profileService.As(context.Message.Claims).LookupProfile(id) : default;
+		if (context.Message.Sender is not { } id ||
+		    await _profileService.As(context.Message.Claims).LookupProfile(id) is not { } sender)
+		{
+			_logger.LogError("sender not found");
+			return;
+		}
+
 		switch (context.Message.Type)
 		{
 			case nameof(PostEventPublisher.Published):
-				var mentions = await GetMentionedProfiles(post).ToListAsync();
-				// TODO: build real doc, with tags
-				var doc = _mapper.Map<ASType>(post);
-
-				// Deliver directly to mentioned profiles
-				foreach (var mention in mentions)
-				{
-					await _messagePublisher.Deliver(mention.Inbox, doc, sender);
-				}
-
-				// Deliver to audience, but don't double post to the mentioned profiles
-				await foreach (var inbox in GetAudienceInboxes(post)
-					               .Where(inbox => !mentions.Select(mention => mention.Inbox).Contains(inbox)))
-				{
-					await _messagePublisher.Deliver(inbox, doc, sender);
-				}
-				throw new NotImplementedException();
+				await Published(post, sender);
+				break;
 			case nameof(PostEventPublisher.Updated):
 				throw new NotImplementedException();
 			case nameof(PostEventPublisher.Shared):
@@ -75,12 +66,43 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 		}
 	}
 
-	private IAsyncEnumerable<Profile> GetMentionedProfiles(Post post)
+	private async Task Published(Post post, Profile sender)
+	{
+		var mentions = await GetMentionedProfiles(post).ToListAsync();
+		var doc = _document.FromPost(post);
+
+		// Deliver directly to mentioned profiles
+		foreach (var mention in mentions)
+		{
+			var privateDoc = doc;
+			switch (mention.Visibility)
+			{
+				case MentionVisibility.Bto:
+				case MentionVisibility.Bcc:
+					privateDoc = _document.FromPost(post);
+					privateDoc.Mention(mention);
+					break;
+				case MentionVisibility.To:
+				case MentionVisibility.Cc:
+				default:
+					break;
+			}
+			await _messagePublisher.Deliver(mention.Subject.Inbox, _document.Create(sender, privateDoc), sender);
+		}
+
+		// Deliver to audience, but don't double post to the mentioned profiles
+		await foreach (var inbox in GetAudienceInboxes(post)
+			               .Where(inbox => !mentions.Select(mention => mention.Subject.Inbox).Contains(inbox)))
+		{
+			await _messagePublisher.Deliver(inbox, doc, sender);
+		}
+	}
+
+	private IAsyncEnumerable<Mention> GetMentionedProfiles(Post post)
 	{
 		return _posts.QueryFrom(post, p => p.AddressedTo)
 			.Include(mention => mention.Subject)
-			.Select(mention => mention.Subject)
-			.Where(subject => !subject.Authority.StartsWith(_config.BaseUri().GetAuthority()))
+			.Where(mention => !mention.Subject.Authority.StartsWith(_config.BaseUri().GetAuthority()))
 			.AsAsyncEnumerable();
 	}
 
