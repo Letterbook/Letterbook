@@ -1,13 +1,18 @@
+using System.Linq.Expressions;
+using ActivityPub.Types.AS;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.Core.Values;
 using Letterbook.Workers.Consumers;
 using Letterbook.Workers.Contracts;
 using Letterbook.Workers.Publishers;
 using MassTransit;
 using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using MockQueryable.Moq;
+using Moq;
 
 namespace Letterbook.Workers.Tests;
 
@@ -55,7 +60,15 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 	[Fact(DisplayName = "Should consume post events")]
 	public async Task CanConsume()
 	{
-		await _publisher.Published(_post);
-		Assert.NotNull(_harness.Consumed.Select<PostEvent>().AsEnumerable().SingleOrDefault(message => message.Exception is NotImplementedException));
+		var follower = new FakeProfile("peer.example").Generate();
+		follower.SharedInbox = null;
+		_profile.AddFollower(follower, FollowState.Accepted);
+		_post.Audience.Add(Audience.Followers(_profile));
+		PostAdapterMock.Setup(m => m.QueryFrom(_post, p => p.Audience)).Returns(_post.Audience.BuildMock());
+
+		await _publisher.Published(_post, []);
+
+		Assert.DoesNotContain(_harness.Consumed.Select<PostEvent>().AsEnumerable(), message => message.Exception != null);
+		ActivityPublisherMock.Verify(m => m.Deliver(follower.Inbox, It.IsAny<ASType>(), _profile));
 	}
 }

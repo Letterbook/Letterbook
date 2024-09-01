@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Letterbook.Core.Adapters;
 using Medo;
 using Microsoft.EntityFrameworkCore;
@@ -93,6 +94,11 @@ public class PostAdapter : IPostAdapter, IAsyncDisposable
 	public void RemoveRange(IEnumerable<Models.Post> posts) => _context.Posts.RemoveRange(posts);
 
 	public void RemoveRange(IEnumerable<Models.Content> contents) => _context.RemoveRange(contents);
+
+	public IQueryable<T> QueryFrom<T>(Models.Post post, Expression<Func<Models.Post, IEnumerable<T>>> queryExpression) where T : class
+	{
+		return _context.Entry(post).Collection(queryExpression).Query();
+	}
 
 	public Task Cancel()
 	{

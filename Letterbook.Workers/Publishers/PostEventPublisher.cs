@@ -30,44 +30,44 @@ public class PostEventPublisher : IPostEventPublisher
 	}
 
 	/// <inheritdoc />
-	public async Task Created(Post post)
+	public async Task Created(Post post, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Created), []);
+		var message = Message(post, nameof(Created), claims);
 		await _bus.Publish(message);
 	}
 
 	/// <inheritdoc />
-	public async Task Deleted(Post post)
+	public async Task Deleted(Post post, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Deleted), []);
+		var message = Message(post, nameof(Deleted), claims);
 		await _bus.Publish(message);
 	}
 
 	/// <inheritdoc />
-	public async Task Updated(Post post)
+	public async Task Updated(Post post, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Updated), []);
+		var message = Message(post, nameof(Updated), claims);
 		await _bus.Publish(message);
 	}
 
 	/// <inheritdoc />
-	public async Task Published(Post post)
+	public async Task Published(Post post, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Published), []);
+		var message = Message(post, nameof(Published), claims);
 		await _bus.Publish(message);
 	}
 
 	/// <inheritdoc />
-	public async Task Liked(Post post, Profile likedBy)
+	public async Task Liked(Post post, Profile likedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, likedBy.GetId(), nameof(Liked), []);
+		var message = Message(post, likedBy.GetId(), nameof(Liked), claims);
 		await _bus.Publish(message);
 	}
 
 	/// <inheritdoc />
-	public async Task Shared(Post post, Profile sharedBy)
+	public async Task Shared(Post post, Profile sharedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, sharedBy.GetId(), nameof(Shared), []);
+		var message = Message(post, sharedBy.GetId(), nameof(Shared), claims);
 		await _bus.Publish(message);
 	}
 
@@ -75,12 +75,12 @@ public class PostEventPublisher : IPostEventPublisher
 	 * Private methods
 	 */
 
-	private PostEvent Message(Post value, string action, ImmutableHashSet<Claim> claims) => Message(value, null, action, claims);
+	private PostEvent Message(Post value, string action, IEnumerable<Claim> claims) => Message(value, null, action, claims);
 
-	private PostEvent Message(Post value, Uuid7? sender, string action, ImmutableHashSet<Claim> claims) =>
+	private PostEvent Message(Post value, Uuid7? sender, string action, IEnumerable<Claim> claims) =>
 		Message(value, null, sender, action, claims);
 
-	private PostEvent Message(Post nextValue, Post? prevValue, Uuid7? sender, string action, ImmutableHashSet<Claim> claims) =>
+	private PostEvent Message(Post nextValue, Post? prevValue, Uuid7? sender, string action, IEnumerable<Claim> claims) =>
 		new PostEvent
 		{
 			Sender = sender,

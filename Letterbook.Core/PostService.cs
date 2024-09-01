@@ -107,8 +107,8 @@ public class PostService : IAuthzPostService, IPostService
 		if (publish) post.PublishedDate = DateTimeOffset.UtcNow;
 		_posts.Add(post);
 		await _posts.Commit();
-		await _postEventPublisher.Created(post);
-		if (publish) await _postEventPublisher.Published(post);
+		await _postEventPublisher.Created(post, _claims);
+		if (publish) await _postEventPublisher.Published(post, _claims);
 
 		return post;
 	}
@@ -143,7 +143,7 @@ public class PostService : IAuthzPostService, IPostService
 
 		_posts.Update(previous);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(previous);
+		await _postEventPublisher.Updated(previous, _claims);
 
 		return previous;
 	}
@@ -156,7 +156,7 @@ public class PostService : IAuthzPostService, IPostService
 		post.DeletedDate = DateTimeOffset.UtcNow;
 		_posts.Remove(post);
 		await _posts.Commit();
-		await _postEventPublisher.Deleted(post);
+		await _postEventPublisher.Deleted(post, _claims);
 	}
 
 	public async Task<Post> Publish(Uuid7 id, bool localOnly = false)
@@ -170,7 +170,7 @@ public class PostService : IAuthzPostService, IPostService
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Published(post);
+		await _postEventPublisher.Published(post, _claims);
 		return post;
 	}
 
@@ -187,12 +187,12 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post);
+			await _postEventPublisher.Published(post, _claims);
 		}
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post);
+		await _postEventPublisher.Updated(post, _claims);
 		return post;
 	}
 
@@ -214,13 +214,13 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post);
+			await _postEventPublisher.Published(post, _claims);
 		}
 
 		_posts.Remove(content);
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post);
+		await _postEventPublisher.Updated(post, _claims);
 		return post;
 	}
 
@@ -246,12 +246,12 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post);
+			await _postEventPublisher.Published(post, _claims);
 		}
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post);
+		await _postEventPublisher.Updated(post, _claims);
 		return post;
 	}
 
