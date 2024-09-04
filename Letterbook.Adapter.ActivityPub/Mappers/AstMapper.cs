@@ -31,9 +31,16 @@ public static class AstMapper
 	{
 		ConfigureUriTypes(cfg);
 		ConfigureDateTypes(cfg);
+		ConfigureContentTypes(cfg);
 
 		cfg.CreateMap<Content, NaturalLanguageString>(MemberList.None)
 			.ForMember(d => d.DefaultValue, opt => opt.MapFrom(s => s.Html));
+
+		cfg.CreateMap<string, NaturalLanguageString>(MemberList.None)
+			.ConstructUsing(s => new NaturalLanguageString()
+			{
+				DefaultValue = s
+			});
 
 		cfg.CreateMap<Models.Post, NoteObject>(MemberList.Destination)
 			.ForMember(d => d.Id, opt => opt.MapFrom(s => s.FediId))
@@ -42,11 +49,11 @@ public static class AstMapper
 			.ForMember(d => d.Context, opt => opt.MapFrom(s => s.Thread.FediId))
 			.ForMember(d => d.Published, opt => opt.MapFrom(s => s.PublishedDate))
 			.ForMember(d => d.Updated, opt => opt.MapFrom(s => s.UpdatedDate))
-			.ForMember(d => d.Content, opt => opt.MapFrom(s => s.Contents.SingleOrDefault(c => c.FediId == s.ContentRootIdUri)))
+			.ForMember(d => d.Content, opt => opt.MapFrom(s => s.Contents.Order().FirstOrDefault()))
 			.ForMember(d => d.MediaType,
-				opt => opt.MapFrom<MediaTypeResolver, Content?>(s => s.Contents.SingleOrDefault(c => c.FediId == s.ContentRootIdUri)))
+				opt => opt.MapFrom<MediaTypeResolver, Content?>(s => s.Contents.Order().FirstOrDefault()))
 			.ForMember(d => d.Attachment,
-				opt => opt.MapFrom<AttachedContentResolver, IEnumerable<Content>>(s => s.Contents.OrderBy(c => c.SortKey).Where(c => c.FediId != s.ContentRootIdUri)))
+				opt => opt.MapFrom<AttachedContentResolver, IEnumerable<Content>>(s => s.Contents.Order().Skip(1)))
 			.ForMember(d => d.Likes, opt => opt.MapFrom(p => p.Likes))
 			.ForMember(d => d.Replies, opt => opt.MapFrom(p => p.Replies))
 			.ForMember(d => d.Preview, opt => opt.MapFrom(p => p.Preview))
@@ -74,6 +81,17 @@ public static class AstMapper
 			.ForMember(d => d.Name, opt => opt.Ignore());
 
 	});
+
+	private static void ConfigureContentTypes(IMapperConfigurationExpression cfg)
+	{
+		cfg.CreateMap<Note, ASObject>()
+			.ConstructUsing(_ => new NoteObject())
+			.ForMember(d => d.Id, opt => opt.MapFrom(s => s.FediId))
+			.ForMember(d => d.Content, opt => opt.MapFrom(s => s.Html))
+			.ForMember(d => d.AttributedTo, opt => opt.MapFrom(s => s.Post.Creators))
+			.ForMember(d => d.Published, opt => opt.MapFrom(s => s.Post.PublishedDate))
+			.ForMember(d => d.Updated, opt => opt.MapFrom(s => s.Post.UpdatedDate));
+	}
 
 	private static void FromActor(IMapperConfigurationExpression cfg)
 	{
