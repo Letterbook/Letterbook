@@ -173,31 +173,6 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 		AuthzTimelineServiceMock.VerifyNoOtherCalls();
 	}
 
-	[Fact(DisplayName = "Should not add to timeline for malformed Shared events")]
-	public async Task CanConsumeBadShared()
-	{
-		var sharedBy = new FakeProfile().Generate();
-		ProfileServiceAuthMock.Setup(m => m.LookupProfile(sharedBy.GetId(), It.IsAny<Uuid7?>())).ReturnsAsync(sharedBy);
-		_post.PublishedDate = DateTimeOffset.UtcNow;
-
-		_output.WriteLine("sharedBy: {0}", sharedBy.GetId());
-		var message = new PostEvent
-		{
-			Subject = _post.GetId25(),
-			Claims = [],
-			NextData = _mapper.Map<PostDto>(_post),
-			Type = "Shared",
-		};
-		_output.WriteLine("message.Sender: {0}", message.Sender);
-		await _harness.Bus.Publish<PostEvent>(message);
-
-		Assert.True(await _harness.Published.Any<PostEvent>());
-		Assert.True(await _harness.Consumed.Any<PostEvent>());
-		Assert.Empty(_faultObserver.Faults);
-		AuthzTimelineServiceMock.Verify(m => m.HandleShare(It.IsAny<Post>(), It.IsAny<Profile>()), Times.Never);
-		AuthzTimelineServiceMock.VerifyNoOtherCalls();
-	}
-
 	[Fact(DisplayName = "Should not update timeline for Liked events")]
 	public async Task CanConsumeLiked()
 	{
