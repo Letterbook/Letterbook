@@ -43,10 +43,10 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 		if (!post.FediId.HasLocalAuthority(_config)) return;
 		_logger.LogInformation("Handling PostEvent {EventType} for {PostId}", context.Message.Type, context.Message.Subject);
 
-		if (context.Message.Sender is not { } id ||
-		    await _profileService.As(context.Message.Claims).LookupProfile(id) is not { } sender)
+		var svc = _profileService.As(context.Message.Claims);
+		if (await svc.LookupProfile(context.Message.Sender) is not { } sender)
 		{
-			_logger.LogError("sender not found");
+			_logger.LogError("Sender not found for {@Event}", context.Message);
 			return;
 		}
 

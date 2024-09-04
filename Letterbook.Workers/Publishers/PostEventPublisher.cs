@@ -30,44 +30,44 @@ public class PostEventPublisher : IPostEventPublisher
 	}
 
 	/// <inheritdoc />
-	public async Task Created(Post post, IEnumerable<Claim> claims)
+	public async Task Created(Post post, Uuid7 createdBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Created), claims);
+		var message = Message(post, nameof(Created), claims, createdBy);
 		await _bus.Publish(message);
 	}
 
 	/// <inheritdoc />
-	public async Task Deleted(Post post, IEnumerable<Claim> claims)
+	public async Task Deleted(Post post, Uuid7 deletedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Deleted), claims);
+		var message = Message(post, nameof(Deleted), claims, deletedBy);
 		await _bus.Publish(message);
 	}
 
 	/// <inheritdoc />
-	public async Task Updated(Post post, IEnumerable<Claim> claims)
+	public async Task Updated(Post post, Uuid7 updatedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Updated), claims);
+		var message = Message(post, nameof(Updated), claims, updatedBy);
 		await _bus.Publish(message);
 	}
 
 	/// <inheritdoc />
-	public async Task Published(Post post, IEnumerable<Claim> claims)
+	public async Task Published(Post post, Uuid7 publishedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Published), claims);
+		var message = Message(post, nameof(Published), claims, publishedBy);
 		await _bus.Publish(message);
 	}
 
 	/// <inheritdoc />
-	public async Task Liked(Post post, Profile likedBy, IEnumerable<Claim> claims)
+	public async Task Liked(Post post, Uuid7 likedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, likedBy.GetId(), nameof(Liked), claims);
+		var message = Message(post, likedBy, nameof(Liked), claims);
 		await _bus.Publish(message);
 	}
 
 	/// <inheritdoc />
-	public async Task Shared(Post post, Profile sharedBy, IEnumerable<Claim> claims)
+	public async Task Shared(Post post, Uuid7 sharedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, sharedBy.GetId(), nameof(Shared), claims);
+		var message = Message(post, sharedBy, nameof(Shared), claims);
 		await _bus.Publish(message);
 	}
 
@@ -75,12 +75,12 @@ public class PostEventPublisher : IPostEventPublisher
 	 * Private methods
 	 */
 
-	private PostEvent Message(Post value, string action, IEnumerable<Claim> claims) => Message(value, null, action, claims);
+	private PostEvent Message(Post value, string action, IEnumerable<Claim> claims, Uuid7 sender) => Message(value, sender, action, claims);
 
-	private PostEvent Message(Post value, Uuid7? sender, string action, IEnumerable<Claim> claims) =>
+	private PostEvent Message(Post value, Uuid7 sender, string action, IEnumerable<Claim> claims) =>
 		Message(value, null, sender, action, claims);
 
-	private PostEvent Message(Post nextValue, Post? prevValue, Uuid7? sender, string action, IEnumerable<Claim> claims) =>
+	private PostEvent Message(Post nextValue, Post? prevValue, Uuid7 sender, string action, IEnumerable<Claim> claims) =>
 		new PostEvent
 		{
 			Sender = sender,
