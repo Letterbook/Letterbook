@@ -1,5 +1,5 @@
-using System.Linq.Expressions;
 using ActivityPub.Types.AS;
+using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests;
@@ -10,6 +10,7 @@ using Letterbook.Workers.Contracts;
 using Letterbook.Workers.Publishers;
 using MassTransit;
 using MassTransit.Testing;
+using Medo;
 using Microsoft.Extensions.DependencyInjection;
 using MockQueryable.Moq;
 using Moq;
@@ -63,12 +64,17 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 		var follower = new FakeProfile("peer.example").Generate();
 		follower.SharedInbox = null;
 		_profile.AddFollower(follower, FollowState.Accepted);
-		_post.Audience.Add(Audience.Followers(_profile));
+		_profile.Headlining.FirstOrDefault(h => h.FediId == Audience.Followers(_profile).FediId)?
+			.Members.Add(follower);
 		PostAdapterMock.Setup(m => m.QueryFrom(_post, p => p.Audience)).Returns(_post.Audience.BuildMock());
+		PostAdapterMock.Setup(m => m.QueryFrom(_post, p => p.AddressedTo)).Returns(_post.AddressedTo.BuildMock());
+		ProfileServiceAuthMock.Setup(m => m.LookupProfile(_profile.GetId(), It.IsAny<Uuid7?>()))
+			.ReturnsAsync(_profile);
 
-		await _publisher.Published(_post, []);
+		await _publisher.Published(_post, _profile.GetId(), []);
 
-		Assert.DoesNotContain(_harness.Consumed.Select<PostEvent>().AsEnumerable(), message => message.Exception != null);
-		ActivityPublisherMock.Verify(m => m.Deliver(follower.Inbox, It.IsAny<ASType>(), _profile));
+		Assert.True(await _harness.Consumed.Any<PostEvent>());
+		Assert.Empty(_harness.Consumed.Select<PostEvent>().AsEnumerable().Select(m => m.Exception).WhereNotNull());
+		ActivityPublisherMock.Verify(m => m.Deliver(follower.Inbox, It.IsAny<ASType>(), It.Is<Profile>(profile => profile.GetId() == _profile.GetId())));
 	}
 }
