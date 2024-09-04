@@ -117,6 +117,7 @@ public sealed class FakeProfile : Faker<Profile>
 					Label = "Static test key"
 				}
 			});
+		RuleFor(p => p.Headlining, (faker, profile) => new List<Audience>() { Audience.Followers(profile) });
 	}
 
 	public FakeProfile(Uri uri, Account owner) : this(uri)

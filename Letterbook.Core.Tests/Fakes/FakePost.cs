@@ -41,7 +41,7 @@ public class FakePost : Faker<Post>
 		RuleFor(p => p.Hostname, (_, post) => post.FediId.Host);
 		RuleFor(p => p.Audience, (faker, post) =>
 		{
-			var audience = post.Creators.Select(Audience.Followers);
+			var audience = post.Creators.SelectMany(c => c.Headlining);
 			if (faker.Random.Bool())
 				audience = audience.Append(Audience.Public);
 
