@@ -64,29 +64,7 @@
               "mode": "off"
             }
           },
-          "mappings": [
-            {
-              "options": {
-                "debug": {
-                  "color": "blue",
-                  "index": 3
-                },
-                "error": {
-                  "color": "red",
-                  "index": 0
-                },
-                "info": {
-                  "color": "green",
-                  "index": 2
-                },
-                "warning": {
-                  "color": "orange",
-                  "index": 1
-                }
-              },
-              "type": "value"
-            }
-          ],
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -105,7 +83,7 @@
         "x": 0,
         "y": 0
       },
-      "id": 3,
+      "id": 4,
       "maxDataPoints": 60,
       "options": {
         "legend": {
@@ -126,13 +104,35 @@
             "uid": "P8E80F9AEF21F6940"
           },
           "editorMode": "builder",
-          "expr": "count by(level) (rate({app=\"letterbook\"} | json | level != `debug` | SourceContext = `Microsoft.AspNetCore.Hosting.Diagnostics` [$__auto]))",
+          "expr": "count by(StatusCode) (rate({app=\"letterbook\"} | json | level != `debug` | SourceContext = `Microsoft.AspNetCore.Hosting.Diagnostics` | MessageTemplate = `Request finished {Protocol} {Method} {Scheme}://{Host}{PathBase}{Path}{QueryString} - {StatusCode} {ContentLength} {ContentType} {ElapsedMilliseconds}ms` [$__auto]))",
           "legendFormat": "{{level}}",
           "queryType": "range",
           "refId": "A"
         }
       ],
       "title": "Summary",
+      "transformations": [
+        {
+          "filter": {
+            "id": "byRefId",
+            "options": ""
+          },
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "isNull",
+                  "options": {}
+                },
+                "fieldName": "Value"
+              }
+            ],
+            "match": "any",
+            "type": "exclude"
+          }
+        }
+      ],
       "type": "timeseries"
     },
     {
@@ -180,8 +180,8 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
-    "to": "now"
+    "from": "2024-09-11T01:46:22.373Z",
+    "to": "2024-09-11T02:46:22.373Z"
   },
   "timepicker": {},
   "timezone": "",
