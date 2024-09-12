@@ -10,5 +10,5 @@ public record AccountEvent
 	public Account? PrevData { get; init; }
 	public required string Subject { get; init; }
 	public required string Type { get; init; }
-	public required ImmutableHashSet<Claim> Claims { get; init; }
+	public required Claim[] Claims { get; init; }
 }

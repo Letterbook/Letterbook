@@ -10,6 +10,7 @@ using Letterbook.Workers.Contracts;
 using MassTransit;
 using Medo;
 using Microsoft.Extensions.Options;
+using Claim = System.Security.Claims.Claim;
 using Profile = Letterbook.Core.Models.Profile;
 
 namespace Letterbook.Workers.Publishers;
@@ -84,7 +85,7 @@ public class PostEventPublisher : IPostEventPublisher
 		new PostEvent
 		{
 			Sender = sender,
-			Claims = claims.ToArray(),
+			Claims = claims.Select(c => (Contracts.Claim)c).ToArray(),
 			NextData = _mapper.Map<PostDto>(nextValue),
 			PrevData = prevValue is null ? null : _mapper.Map<PostDto>(prevValue),
 			Subject = nextValue.GetId25(),

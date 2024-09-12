@@ -10,6 +10,7 @@ using Letterbook.Workers.Publishers;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Claim = System.Security.Claims.Claim;
 using Profile = Letterbook.Core.Models.Profile;
 
 namespace Letterbook.Workers.Consumers;
@@ -43,7 +44,7 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 		if (!post.FediId.HasLocalAuthority(_config)) return;
 		_logger.LogInformation("Handling PostEvent {EventType} for {PostId}", context.Message.Type, context.Message.Subject);
 
-		var svc = _profileService.As(context.Message.Claims);
+		var svc = _profileService.As(context.Message.Claims.Select(c => (Claim)c));
 		if (await svc.LookupProfile(context.Message.Sender) is not { } sender)
 		{
 			_logger.LogError("Sender not found for {@Event}", context.Message);
