@@ -104,7 +104,7 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IAccountService, AccountService>();
 		services.AddScoped<IProfileService, ProfileService>();
 		services.AddScoped<IPostService, PostService>();
-		services.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>();
+		services.AddScoped<IDataAdapter, DataAdapter>();
 		services.AddScoped<IAuthzPostService, PostService>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 

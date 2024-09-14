@@ -15,12 +15,12 @@ public class AccountService : IAccountService, IDisposable
 {
 	private readonly ILogger<AccountService> _logger;
 	private readonly CoreOptions _opts;
-	private readonly IAccountProfileAdapter _accountAdapter;
+	private readonly IDataAdapter _accountAdapter;
 	private readonly IAccountEventPublisher _eventPublisherService;
 	private readonly UserManager<Account> _identityManager;
 
 	public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options,
-		IAccountProfileAdapter accountAdapter, IAccountEventPublisher eventPublisherService,
+		IDataAdapter accountAdapter, IAccountEventPublisher eventPublisherService,
 		UserManager<Account> identityManager)
 	{
 		_logger = logger;

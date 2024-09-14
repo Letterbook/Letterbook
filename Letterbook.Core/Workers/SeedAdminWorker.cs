@@ -15,10 +15,10 @@ public class SeedAdminWorker : IScopedWorker
 	private readonly ILogger<SeedAdminWorker> _logger;
 	private readonly CoreOptions _coreOptions;
 	private readonly IAccountService _accountService;
-	private readonly IAccountProfileAdapter _accountAdapter;
+	private readonly IDataAdapter _accountAdapter;
 
 	public SeedAdminWorker(ILogger<SeedAdminWorker> logger, IOptions<CoreOptions> coreOpts,
-		IAccountService accountService, IAccountProfileAdapter accountAdapter)
+		IAccountService accountService, IDataAdapter accountAdapter)
 	{
 		_logger = logger;
 		_coreOptions = coreOpts.Value;

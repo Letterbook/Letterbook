@@ -20,7 +20,7 @@ public class PostService : IAuthzPostService, IPostService
 {
 	private readonly ILogger<PostService> _logger;
 	private readonly CoreOptions _options;
-	private readonly IPostAdapter _posts;
+	private readonly IDataAdapter _posts;
 	private readonly IPostEventPublisher _postEventPublisher;
 	private readonly IActivityPubClient _apClient;
 	private readonly IEnumerable<IContentSanitizer> _sanitizers;
@@ -28,7 +28,7 @@ public class PostService : IAuthzPostService, IPostService
 	private IEnumerable<Claim> _claims = null!;
 
 	public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options,
-		IPostAdapter posts, IPostEventPublisher postEventPublisher, IActivityPubClient apClient, IEnumerable<IContentSanitizer> sanitizers)
+		IDataAdapter posts, IPostEventPublisher postEventPublisher, IActivityPubClient apClient, IEnumerable<IContentSanitizer> sanitizers)
 	{
 		_logger = logger;
 		_posts = posts;

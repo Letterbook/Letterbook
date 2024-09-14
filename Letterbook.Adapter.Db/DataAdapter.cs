@@ -7,12 +7,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Adapter.Db;
 
-public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
+public class DataAdapter : IDataAdapter, IAsyncDisposable
 {
-	private readonly ILogger<AccountProfileAdapter> _logger;
+	private readonly ILogger<DataAdapter> _logger;
 	private readonly RelationalContext _context;
 
-	public AccountProfileAdapter(ILogger<AccountProfileAdapter> logger, RelationalContext context)
+	public DataAdapter(ILogger<DataAdapter> logger, RelationalContext context)
 	{
 		_logger = logger;
 		_context = context;
@@ -124,12 +124,6 @@ public class AccountProfileAdapter : IAccountProfileAdapter, IAsyncDisposable
 		where T : class
 	{
 		return _context.Entry(profile).Collection(queryExpression).Query();
-	}
-
-	public Task<Models.Profile?> LookupProfileWithRelation(Uri id, Uri relationId)
-	{
-		return WithRelation(_context.Profiles.Where(profile => profile.FediId == id), relationId)
-			.FirstOrDefaultAsync();
 	}
 
 	public Task<Models.Profile?> LookupProfileWithRelation(Uuid7 localId, Uri relationId)

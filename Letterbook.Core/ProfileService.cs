@@ -18,14 +18,14 @@ public class ProfileService : IProfileService, IAuthzProfileService
 {
 	private ILogger<ProfileService> _logger;
 	private CoreOptions _coreConfig;
-	private IAccountProfileAdapter _profiles;
+	private IDataAdapter _profiles;
 	private IProfileEventPublisher _profileEvents;
 	private readonly IActivityPubClient _client;
 	private readonly IHostSigningKeyProvider _hostSigningKeyProvider;
 	private readonly IActivityMessagePublisher _activity;
 
 	public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options,
-		IAccountProfileAdapter profiles, IProfileEventPublisher profileEvents, IActivityPubClient client,
+		IDataAdapter profiles, IProfileEventPublisher profileEvents, IActivityPubClient client,
 		IHostSigningKeyProvider hostSigningKeyProvider, IActivityMessagePublisher activity)
 	{
 		_logger = logger;
