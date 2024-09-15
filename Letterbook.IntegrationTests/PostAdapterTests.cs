@@ -21,7 +21,7 @@ public sealed class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTest
 
 	private readonly ITestOutputHelper _output;
 	private readonly HostFixture<PostAdapterTests> _host;
-	private PostAdapter _adapter;
+	private DataAdapter _adapter;
 	private RelationalContext _context;
 	private RelationalContext _actual;
 	private Dictionary<Profile, List<Post>> _posts;
@@ -40,7 +40,7 @@ public sealed class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTest
 
 		_context = host.CreateContext(_scope);
 		_actual = host.CreateContext(_scope);
-		_adapter = new PostAdapter(Mock.Of<ILogger<PostAdapter>>(), _context);
+		_adapter = new DataAdapter(Mock.Of<ILogger<DataAdapter>>(), _context);
 	}
 
 	static PostAdapterTests()

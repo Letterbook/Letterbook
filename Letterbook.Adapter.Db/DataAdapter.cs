@@ -83,6 +83,42 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Profiles.FirstOrDefaultAsync(profile => profile.FediId == id);
 	}
 
+	public async Task<Models.Post?> LookupPost(Uuid7 postId)
+	{
+		return await WithDefaults(_context.Posts).FirstOrDefaultAsync(post => post.Id == postId.ToGuid());
+	}
+
+	public async Task<Models.Post?> LookupPost(Uri fediId)
+	{
+		return await WithDefaults(_context.Posts).FirstOrDefaultAsync(post => post.FediId == fediId);
+	}
+
+	public async Task<Models.ThreadContext?> LookupThread(Uri threadId)
+	{
+		return await _context.Threads
+			.Include(thread => thread.Posts)
+			.FirstOrDefaultAsync(thread => thread.FediId == threadId);
+	}
+
+	public async Task<Models.ThreadContext?> LookupThread(Uuid7 threadId)
+	{
+		return await _context.Threads
+			.Include(thread => thread.Posts)
+			.FirstOrDefaultAsync(thread => thread.Id == threadId.ToGuid());
+	}
+
+	public async Task<Models.Post?> LookupPostWithThread(Uuid7 postId)
+	{
+		return await WithThread(_context.Posts)
+			.FirstOrDefaultAsync(post => post.Id == postId.ToGuid());
+	}
+
+	public async Task<Models.Post?> LookupPostWithThread(Uri postId)
+	{
+		return await WithThread(_context.Posts)
+			.FirstOrDefaultAsync(post => post.FediId == postId);
+	}
+
 	public IQueryable<Models.Profile> SingleProfile(Uuid7 id)
 	{
 		return _context.Profiles.Where(profile => profile.Id == id.ToGuid());
@@ -91,6 +127,26 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	public IQueryable<Models.Profile> SingleProfile(Uri fediId)
 	{
 		return _context.Profiles.Where(profile => profile.FediId == fediId);
+	}
+
+	public IQueryable<Models.Post> SinglePost(Uuid7 id)
+	{
+		return _context.Posts.Where(post => post.Id == id.ToGuid());
+	}
+
+	public IQueryable<Models.Post> SinglePost(Uri fediId)
+	{
+		return _context.Posts.Where(post => post.FediId == fediId);
+	}
+
+	public IQueryable<Models.ThreadContext> SingleThread(Uuid7 id)
+	{
+		return _context.Threads.Where(thread => thread.Id == id.ToGuid());
+	}
+
+	public IQueryable<Models.ThreadContext> SingleThread(Uri fediId)
+	{
+		return _context.Threads.Where(thread => thread.FediId == fediId);
 	}
 
 	public IQueryable<Models.Profile> WithAudience(IQueryable<Models.Profile> query)
@@ -126,6 +182,11 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Entry(profile).Collection(queryExpression).Query();
 	}
 
+	public IQueryable<T> QueryFrom<T>(Models.Post post, Expression<Func<Models.Post, IEnumerable<T>>> queryExpression) where T : class
+	{
+		return _context.Entry(post).Collection(queryExpression).Query();
+	}
+
 	public Task<Models.Profile?> LookupProfileWithRelation(Uuid7 localId, Uri relationId)
 	{
 		return WithRelation(_context.Profiles.Where(profile => profile.Id == localId.ToGuid()), relationId)
@@ -154,6 +215,8 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		_context.Accounts.Add(account);
 	}
 
+	public void Add(Models.Post post) => _context.Posts.Add(post);
+
 	public void AddRange(IEnumerable<Models.Profile> profile)
 	{
 		_context.Profiles.AddRange(profile);
@@ -174,6 +237,8 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		_context.Accounts.Update(account);
 	}
 
+	public void Update(Models.Post post) => _context.Posts.Update(post);
+
 	public void UpdateRange(IEnumerable<Models.Profile> profile)
 	{
 		_context.Profiles.UpdateRange(profile);
@@ -191,6 +256,10 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			entry.State = EntityState.Deleted;
 		}
 	}
+
+	public void Remove(Models.Post post) => _context.Posts.Remove(post);
+
+	public void Remove(Models.Content content) => _context.Remove(content);
 
 	public Task Cancel()
 	{
@@ -219,6 +288,16 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			_context.Database.BeginTransaction();
 		}
 	}
+
+	private static IQueryable<Models.Post> WithDefaults(IQueryable<Models.Post> query) => query
+		.Include(p => p.Creators)
+		.Include(p => p.Audience)
+		.Include(p => p.Contents);
+
+	private static IQueryable<Models.Post> WithThread(IQueryable<Models.Post> query) => WithDefaults(query)
+		.Include(post => post.Thread).ThenInclude(thread => thread.Posts).ThenInclude(p => p.Creators)
+		.Include(post => post.Thread).ThenInclude(thread => thread.Posts).ThenInclude(p => p.Contents)
+		.AsSplitQuery();
 
 	public void Dispose()
 	{

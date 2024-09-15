@@ -90,6 +90,7 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uri relationId);
 
 	/// <see cref="WithRelation(System.Linq.IQueryable{Letterbook.Core.Models.Profile},System.Uri)"/>
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uuid7 relationId);
 
 	/// <summary>
