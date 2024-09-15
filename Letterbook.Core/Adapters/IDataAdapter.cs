@@ -4,7 +4,7 @@ using Medo;
 
 namespace Letterbook.Core.Adapters;
 
-public interface IAccountProfileAdapter : IDisposable
+public interface IDataAdapter : IDisposable
 {
 	delegate IQueryable<Profile> ProfileQuery(IQueryable<Profile> querySource);
 
@@ -35,13 +35,49 @@ public interface IAccountProfileAdapter : IDisposable
 	/// </summary>
 	/// <param name="query">The query to compose onto</param>
 	/// <returns></returns>
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions")]
 	public IQueryable<Account> WithProfiles(IQueryable<Account> query);
 
 	public Task<bool> AnyProfile(string handle);
 	public Task<Profile?> LookupProfile(Uuid7 localId);
 	public Task<Profile?> LookupProfile(Uri id);
+
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
+	public Task<Post?> LookupPost(Uuid7 postId);
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
+	public Task<Post?> LookupPost(Uri fediId);
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
+	public Task<ThreadContext?> LookupThread(Uri threadId);
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
+	public Task<ThreadContext?> LookupThread(Uuid7 threadId);
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
+	public Task<Post?> LookupPostWithThread(Uuid7 postId);
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
+	public Task<Post?> LookupPostWithThread(Uri postId);
+
 	public IQueryable<Profile> SingleProfile(Uuid7 id);
 	public IQueryable<Profile> SingleProfile(Uri fediId);
+
+	/// <summary>
+	/// Query for a Post by Id
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
+	public IQueryable<Post> SinglePost(Uuid7 id);
+
+	/// <see cref="SinglePost(Medo.Uuid7)"/>
+	public IQueryable<Post> SinglePost(Uri fediId);
+
+	/// <summary>
+	/// Query for a Thread by Id
+	/// </summary>
+	/// <param name="id"></param>
+	/// <returns></returns>
+	public IQueryable<ThreadContext> SingleThread(Uuid7 id);
+	/// <see cref="SingleThread(Medo.Uuid7)"/>
+	public IQueryable<ThreadContext> SingleThread(Uri fediId);
+
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public IQueryable<Profile> WithAudience(IQueryable<Profile> query);
 
 	/// <summary>
@@ -50,13 +86,15 @@ public interface IAccountProfileAdapter : IDisposable
 	/// <param name="query"></param>
 	/// <param name="relationId"></param>
 	/// <returns></returns>
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uri relationId);
 
 	/// <see cref="WithRelation(System.Linq.IQueryable{Letterbook.Core.Models.Profile},System.Uri)"/>
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uuid7 relationId);
 
 	/// <summary>
-	/// Query for navigation entities, using the given profile as a root entity
+	/// Query for navigation entities, using the given object as a root entity
 	/// </summary>
 	/// <remarks>Consumers should be sure to set an OrderBy property</remarks>
 	/// <param name="profile"></param>
@@ -66,23 +104,27 @@ public interface IAccountProfileAdapter : IDisposable
 	public IQueryable<T> QueryFrom<T>(Profile profile, Expression<Func<Profile, IEnumerable<T>>> queryExpression)
 		where T : class;
 
-	// Lookup Profile including relations to another profile
-	[Obsolete("Use IQueryable methods", false)]
-	public Task<Profile?> LookupProfileWithRelation(Uri id, Uri relationId);
-	[Obsolete("Use IQueryable methods", false)]
+	public IQueryable<T> QueryFrom<T>(Post post, Expression<Func<Post, IEnumerable<T>>> queryExpression)
+		where T : class;
+
+	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<Profile?> LookupProfileWithRelation(Uuid7 localId, Uri relationId);
 
 	public IAsyncEnumerable<Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0);
 
 	public void Add(Profile profile);
 	public void Add(Account account);
+	public void Add(Post post);
 	public void AddRange(IEnumerable<Profile> profile);
 	public void AddRange(IEnumerable<Account> account);
 	public void Update(Profile profile);
 	public void Update(Account account);
+	public void Update(Post post);
 	public void UpdateRange(IEnumerable<Profile> profile);
 	public void UpdateRange(IEnumerable<Account> account);
 	public void Delete(object record);
+	public void Remove(Post post);
+	public void Remove(Content post);
 
 	public Task Cancel();
 	public Task Commit();

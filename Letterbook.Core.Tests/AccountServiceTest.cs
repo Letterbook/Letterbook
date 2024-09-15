@@ -28,7 +28,7 @@ public class AccountServiceTest : WithMocks
 		_fakeProfile = new FakeProfile();
 		_mockIdentityManager = new MockIdentityManager();
 
-		_accountService = new AccountService(loggerMock, CoreOptionsMock, AccountProfileMock.Object,
+		_accountService = new AccountService(loggerMock, CoreOptionsMock, DataAdapterMock.Object,
 			AccountEventServiceMock.Object, _mockIdentityManager.Create());
 
 		_account = _fakeAccount.Generate();
@@ -43,7 +43,7 @@ public class AccountServiceTest : WithMocks
 	[Fact(DisplayName = "Should Register new accounts")]
 	public async Task RegisterAccount()
 	{
-		AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
+		DataAdapterMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
 
 		var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password");
 
@@ -54,7 +54,7 @@ public class AccountServiceTest : WithMocks
 	[Fact(DisplayName = "Should publish new accounts")]
 	public async Task RegisterAccountPublish()
 	{
-		AccountProfileMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
+		DataAdapterMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
 
 		await _accountService.RegisterAccount("test@example.com", "tester", "password");
 
@@ -78,7 +78,7 @@ public class AccountServiceTest : WithMocks
 	{
 		var expected = _fakeAccount.Generate();
 		var queryable = new List<Account>() { expected }.BuildMock();
-		AccountProfileMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>())).Returns(queryable);
+		DataAdapterMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>())).Returns(queryable);
 
 		var actual = await _accountService.LookupAccount(expected.Id);
 
@@ -90,7 +90,7 @@ public class AccountServiceTest : WithMocks
 	{
 		var expected = _fakeAccount.Generate();
 		var queryable = Array.Empty<Account>().BuildMock();
-		AccountProfileMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>())).Returns(queryable);
+		DataAdapterMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>())).Returns(queryable);
 
 		var actual = await _accountService.LookupAccount(expected.Id);
 
@@ -102,7 +102,7 @@ public class AccountServiceTest : WithMocks
 	public async Task UpdateTest()
 	{
 		var account = _fakeAccount.Generate();
-		AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
+		DataAdapterMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
 		await _accountService.UpdateEmail(account.Id, "test@example.com");
 
@@ -115,7 +115,7 @@ public class AccountServiceTest : WithMocks
 		var account = _fakeAccount.Generate();
 		var profile = _fakeProfile.Generate();
 		var expected = new ProfileClaims(account, profile, [ProfileClaim.Owner]);
-		AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
+		DataAdapterMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
 		await _accountService.AddLinkedProfile(account.Id, profile, [ProfileClaim.Owner]);
 
@@ -129,7 +129,7 @@ public class AccountServiceTest : WithMocks
 		var profile = _fakeProfile.Generate();
 		var expected = new ProfileClaims(account, profile, [ProfileClaim.Owner]);
 		account.LinkedProfiles.Add(expected);
-		AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
+		DataAdapterMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
 		await _accountService.RemoveLinkedProfile(account.Id, profile);
 
@@ -143,7 +143,7 @@ public class AccountServiceTest : WithMocks
 		var profile = _fakeProfile.Generate();
 		var expected = new ProfileClaims(account, profile, [ProfileClaim.Owner]);
 		account.LinkedProfiles.Add(expected);
-		AccountProfileMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
+		DataAdapterMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
 		await _accountService.UpdateLinkedProfile(account.Id, profile, [ProfileClaim.None]);
 
@@ -155,7 +155,7 @@ public class AccountServiceTest : WithMocks
 	public async Task CanGetFirstWithProfiles()
 	{
 		var queryable = new List<Account> { _account }.BuildMock();
-		AccountProfileMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>()))
+		DataAdapterMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>()))
 			.Returns(queryable);
 
 		var actual = await _accountService.FirstAccount(_account.Email!);
@@ -169,7 +169,7 @@ public class AccountServiceTest : WithMocks
 	public async Task CanGetProfileClaims()
 	{
 		var queryable = new List<Account> { _account }.BuildMock();
-		AccountProfileMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>()))
+		DataAdapterMock.Setup(m => m.WithProfiles(It.IsAny<IQueryable<Account>>()))
 			.Returns(queryable);
 
 		var result = await _accountService.FirstAccount(_account.Email!);

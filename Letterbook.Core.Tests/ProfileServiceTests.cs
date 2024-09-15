@@ -30,7 +30,7 @@ public class ProfileServiceTests : WithMocks
 		_fakeProfile = new FakeProfile("letterbook.example");
 		CoreOptionsMock.Value.MaxCustomFields = 2;
 
-		_service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, AccountProfileMock.Object,
+		_service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, DataAdapterMock.Object,
 			Mock.Of<IProfileEventPublisher>(), ActivityPubClientMock.Object, Mock.Of<IHostSigningKeyProvider>(), ActivityPublisherMock.Object);
 		_profile = _fakeProfile.Generate();
 	}
@@ -46,8 +46,8 @@ public class ProfileServiceTests : WithMocks
 	{
 		var accountId = Uuid7.NewUuid7();
 		var expected = "testAccount";
-		AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
-		AccountProfileMock.Setup(m => m.AnyProfile(expected)).ReturnsAsync(false);
+		DataAdapterMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
+		DataAdapterMock.Setup(m => m.AnyProfile(expected)).ReturnsAsync(false);
 
 		var actual = await _service.CreateProfile(accountId, expected);
 
@@ -60,8 +60,8 @@ public class ProfileServiceTests : WithMocks
 	{
 		var accountId = Uuid7.NewUuid7();
 		var expected = "testAccount";
-		AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(default(Account));
-		AccountProfileMock.Setup(m => m.AnyProfile(expected)).ReturnsAsync(false);
+		DataAdapterMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(default(Account));
+		DataAdapterMock.Setup(m => m.AnyProfile(expected)).ReturnsAsync(false);
 
 		await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
 	}
@@ -73,8 +73,8 @@ public class ProfileServiceTests : WithMocks
 		var expected = "testAccount";
 		var existing = _fakeProfile.Generate();
 		existing.Handle = expected;
-		AccountProfileMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
-		AccountProfileMock.Setup(m => m.AnyProfile(It.IsAny<string>())).ReturnsAsync(true);
+		DataAdapterMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
+		DataAdapterMock.Setup(m => m.AnyProfile(It.IsAny<string>())).ReturnsAsync(true);
 
 		await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
 	}
@@ -85,7 +85,7 @@ public class ProfileServiceTests : WithMocks
 		var expectedId = Uuid7.NewUuid7();
 		_profile.Id = expectedId;
 		_profile.DisplayName = new Faker().Internet.UserName();
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
 			.ReturnsAsync(_profile);
 
 		var actual = await _service.UpdateDisplayName(expectedId, "Test Name");
@@ -99,7 +99,7 @@ public class ProfileServiceTests : WithMocks
 	public async Task NoUpdateDisplayNameNotExists()
 	{
 		var expectedId = Uuid7.NewUuid7();
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
 			.ReturnsAsync(default(Profile));
 
 		await Assert.ThrowsAsync<CoreException>(() => _service.UpdateDisplayName(expectedId, "Test Name"));
@@ -108,7 +108,7 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should not update the display name when the name is unchanged")]
 	public async Task NoUpdateDisplayNameUnchanged()
 	{
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
 			.ReturnsAsync(_profile);
 
 		var actual = await _service.UpdateDisplayName((Uuid7)_profile.Id!, _profile.DisplayName);
@@ -125,7 +125,7 @@ public class ProfileServiceTests : WithMocks
 		var expectedId = Uuid7.NewUuid7();
 		_profile.Id = expectedId;
 		_profile.DisplayName = new Faker().Internet.UserName();
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
 			.ReturnsAsync(_profile);
 
 		var actual = await _service.UpdateDescription(expectedId, "This is a test user bio");
@@ -138,7 +138,7 @@ public class ProfileServiceTests : WithMocks
 	public async Task NoUpdateBioNotExists()
 	{
 		var expectedId = Uuid7.NewUuid7();
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
 			.ReturnsAsync(default(Profile));
 
 		await Assert.ThrowsAsync<CoreException>(() =>
@@ -148,7 +148,7 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should not update the bio when it is unchanged")]
 	public async Task NoUpdateBioUnchanged()
 	{
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
 			.ReturnsAsync(_profile);
 
 		var actual = await _service.UpdateDescription((Uuid7)_profile.Id!, _profile.Description);
@@ -162,7 +162,7 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should insert new custom fields")]
 	public async Task InsertCustomField()
 	{
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
 			.ReturnsAsync(_profile);
 
 		var actual = await _service.InsertCustomField((Uuid7)_profile.Id!, 0, "test item", "test value");
@@ -180,7 +180,7 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should insert new custom fields at given index")]
 	public async Task InsertCustomFieldAtIndex()
 	{
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
 			.ReturnsAsync(_profile);
 
 		var actual = await _service.InsertCustomField((Uuid7)_profile.Id!, 1, "test item", "test value");
@@ -199,7 +199,7 @@ public class ProfileServiceTests : WithMocks
 	public async Task NoInsertCustomField()
 	{
 		var expectedId = Uuid7.NewUuid7();
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
 			.ReturnsAsync(default(Profile));
 
 		await Assert.ThrowsAsync<CoreException>(() =>
@@ -210,7 +210,7 @@ public class ProfileServiceTests : WithMocks
 	public async Task NoInsertCustomFieldTooMany()
 	{
 		_profile.CustomFields = _profile.CustomFields.Append(new() { Label = "item2", Value = "value2" }).ToArray();
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
 			.ReturnsAsync(_profile);
 
 		await Assert.ThrowsAsync<CoreException>(() =>
@@ -220,7 +220,7 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should update custom fields")]
 	public async Task UpdateCustomField()
 	{
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
 			.ReturnsAsync(_profile);
 
 		var actual = await _service.UpdateCustomField((Uuid7)_profile.Id!, 0, "test item", "test value");
@@ -234,7 +234,7 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should delete custom fields")]
 	public async Task DeleteCustomField()
 	{
-		AccountProfileMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
 			.ReturnsAsync(_profile);
 
 		var actual = await _service.RemoveCustomField((Uuid7)_profile.Id!, 0);
@@ -247,8 +247,8 @@ public class ProfileServiceTests : WithMocks
 	public async Task FollowLocalProfile()
 	{
 		var target = _fakeProfile.Generate();
-		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
-		AccountProfileMock.Setup(m => m.SingleProfile(target.GetId())).Returns(new List<Profile>{target}.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.GetId())).Returns(new List<Profile>{target}.BuildMock());
 
 		var actual = await _service.Follow(_profile.GetId(), target.GetId());
 
@@ -260,8 +260,8 @@ public class ProfileServiceTests : WithMocks
 	public async Task FollowLocalProfileUrl()
 	{
 		var target = _fakeProfile.Generate();
-		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
-		AccountProfileMock.Setup(m => m.SingleProfile(target.FediId)).Returns(new List<Profile>{target}.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.FediId)).Returns(new List<Profile>{target}.BuildMock());
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
 
@@ -273,8 +273,8 @@ public class ProfileServiceTests : WithMocks
 	public async Task FollowRemotePending()
 	{
 		var target = new FakeProfile().Generate();
-		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
-		AccountProfileMock.Setup(m => m.SingleProfile(target.FediId)).Returns(new List<Profile>().BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(new List<Profile>{_profile}.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.FediId)).Returns(new List<Profile>().BuildMock());
 		ActivityPubAuthClientMock.Setup(m => m.Fetch<Profile>(target.FediId)).ReturnsAsync(target);
 
 		var actual = await _service.Follow((Uuid7)_profile.Id!, target.FediId);
@@ -289,8 +289,8 @@ public class ProfileServiceTests : WithMocks
 	public async Task ReceiveFollowRequest()
 	{
 		var follower = new FakeProfile().Generate();
-		AccountProfileMock.Setup(m => m.LookupProfile(_profile.FediId)).ReturnsAsync(_profile);
-		AccountProfileMock.Setup(m => m.LookupProfile(follower.FediId)).ReturnsAsync(follower);
+		DataAdapterMock.Setup(m => m.LookupProfile(_profile.FediId)).ReturnsAsync(_profile);
+		DataAdapterMock.Setup(m => m.LookupProfile(follower.FediId)).ReturnsAsync(follower);
 
 		var actual = await _service.ReceiveFollowRequest(_profile.FediId, follower.FediId, null);
 
@@ -303,7 +303,7 @@ public class ProfileServiceTests : WithMocks
 	{
 		var target = new FakeProfile().Generate();
 		_profile.Follow(target, FollowState.Pending);
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), target.FediId)).ReturnsAsync(_profile);
+		DataAdapterMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), target.FediId)).ReturnsAsync(_profile);
 
 		var actual = await _service.ReceiveFollowReply(_profile.GetId(), target.FediId, FollowState.Accepted);
 
@@ -317,7 +317,7 @@ public class ProfileServiceTests : WithMocks
 	{
 		var target = new FakeProfile().Generate();
 		_profile.Follow(target, FollowState.Pending);
-		AccountProfileMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), target.FediId)).ReturnsAsync(_profile);
+		DataAdapterMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), target.FediId)).ReturnsAsync(_profile);
 
 		var actual = await _service.ReceiveFollowReply(_profile.GetId(), target.FediId, FollowState.Rejected);
 
@@ -335,8 +335,8 @@ public class ProfileServiceTests : WithMocks
 		var follower = new FakeProfile().Generate();
 		_profile.AddFollower(follower, FollowState.Accepted);
 		var queryable = new List<Profile> { _profile }.BuildMock();
-		AccountProfileMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryable);
-		AccountProfileMock.Setup(m => m.SingleProfile(_profile.FediId)).Returns(queryable);
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryable);
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.FediId)).Returns(queryable);
 
 		var actual = useId ? await _service.RemoveFollower(_profile.GetId(), follower.GetId())
 			:await _service.RemoveFollower(_profile.GetId(), follower.FediId);
@@ -352,9 +352,9 @@ public class ProfileServiceTests : WithMocks
 		var follower = new FakeProfile().Generate();
 		_profile.Follow(follower, FollowState.Accepted);
 		var queryable = new List<Profile> { _profile }.BuildMock();
-		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
 			.Returns(queryable);
-		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
 			.Returns(queryable);
 
 		var actual = useId ? await _service.Unfollow(_profile.GetId(), follower.GetId())
@@ -371,9 +371,9 @@ public class ProfileServiceTests : WithMocks
 		var follower = new FakeProfile().Generate();
 		_profile.AddFollower(follower, FollowState.Pending);
 		var queryable = new List<Profile> { _profile }.BuildMock();
-		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
 			.Returns(queryable);
-		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
 			.Returns(queryable);
 
 		var actual = useId ? await _service.AcceptFollower(_profile.GetId(), follower.GetId())
@@ -389,7 +389,7 @@ public class ProfileServiceTests : WithMocks
 		var follower = new FakeProfile().Generate();
 		_profile.AddFollower(follower, FollowState.None);
 		var queryable = new List<Profile> { _profile }.BuildMock();
-		AccountProfileMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
 			.Returns(queryable);
 
 		var actual = await _service.AcceptFollower(_profile.GetId(), follower.GetId());

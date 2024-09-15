@@ -16,8 +16,7 @@ public static class DependencyInjection
 		var dataSource = DataSource(dbOptions);
 
 		return services.AddDbContext<RelationalContext>(options => options.UseNpgsql(dataSource))
-			.AddScoped<IAccountProfileAdapter, AccountProfileAdapter>()
-			.AddScoped<IPostAdapter, PostAdapter>();
+			.AddScoped<IDataAdapter, DataAdapter>();
 	}
 
 	public static IOpenTelemetryBuilder AddDbTelemetry(this IOpenTelemetryBuilder builder)
