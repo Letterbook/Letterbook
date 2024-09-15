@@ -15,11 +15,11 @@ public class TimelineService : IAuthzTimelineService, ITimelineService
 	private ILogger<TimelineService> _logger;
 	private CoreOptions _options;
 	private IFeedsAdapter _feeds;
-	private IAccountProfileAdapter _profileAdapter;
+	private IDataAdapter _profileAdapter;
 	private readonly IAuthorizationService _authz;
 	private IEnumerable<Claim>? _claims;
 
-	public TimelineService(ILogger<TimelineService> logger, IOptions<CoreOptions> options, IFeedsAdapter feeds, IAccountProfileAdapter profileAdapter, IAuthorizationService authz)
+	public TimelineService(ILogger<TimelineService> logger, IOptions<CoreOptions> options, IFeedsAdapter feeds, IDataAdapter profileAdapter, IAuthorizationService authz)
 	{
 		_logger = logger;
 		_options = options.Value;

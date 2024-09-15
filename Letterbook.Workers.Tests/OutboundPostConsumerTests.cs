@@ -66,8 +66,8 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 		_profile.AddFollower(follower, FollowState.Accepted);
 		_profile.Headlining.FirstOrDefault(h => h.FediId == Audience.Followers(_profile).FediId)?
 			.Members.Add(follower);
-		PostAdapterMock.Setup(m => m.QueryFrom(_post, p => p.Audience)).Returns(_post.Audience.BuildMock());
-		PostAdapterMock.Setup(m => m.QueryFrom(_post, p => p.AddressedTo)).Returns(_post.AddressedTo.BuildMock());
+		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.Audience)).Returns(_post.Audience.BuildMock());
+		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.AddressedTo)).Returns(_post.AddressedTo.BuildMock());
 		ProfileServiceAuthMock.Setup(m => m.LookupProfile(_profile.GetId(), It.IsAny<Uuid7?>()))
 			.ReturnsAsync(_profile);
 

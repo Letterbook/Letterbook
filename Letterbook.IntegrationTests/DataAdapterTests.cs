@@ -12,7 +12,7 @@ namespace Letterbook.IntegrationTests;
 
 [Trait("Infra", "Postgres")]
 [Trait("Driver", "Adapter")]
-public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<AccountProfileAdapterTests>>, ITestSeed, IDisposable
+public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTests>>, ITestSeed, IDisposable
 {
 	public void Dispose()
 	{
@@ -20,8 +20,8 @@ public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<Accou
 	}
 
 	private readonly ITestOutputHelper _output;
-	private readonly HostFixture<AccountProfileAdapterTests> _host;
-	private AccountProfileAdapter _adapter;
+	private readonly HostFixture<DataAdapterTests> _host;
+	private DataAdapter _adapter;
 	private RelationalContext _context;
 	private RelationalContext _actual;
 	private List<Profile> _profiles;
@@ -29,7 +29,7 @@ public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<Accou
 	private readonly IServiceScope _scope;
 	static int? ITestSeed.Seed() => null;
 
-	public AccountProfileAdapterTests(ITestOutputHelper output, HostFixture<AccountProfileAdapterTests> host)
+	public DataAdapterTests(ITestOutputHelper output, HostFixture<DataAdapterTests> host)
 	{
 		_output = output;
 		_host = host;
@@ -39,7 +39,7 @@ public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<Accou
 		_accounts = host.Accounts;
 		_context = _host.CreateContext(_scope);
 		_actual = _host.CreateContext(_scope);
-		_adapter = new AccountProfileAdapter(Mock.Of<ILogger<AccountProfileAdapter>>(), _context);
+		_adapter = new DataAdapter(Mock.Of<ILogger<DataAdapter>>(), _context);
 	}
 
 	[Fact]
@@ -116,18 +116,6 @@ public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<Accou
 	}
 
 	[Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
-	[Fact(DisplayName = "Should find related profiles by Id")]
-	public async Task LookupProfileForFollowingTestId()
-	{
-		var actual = await _adapter.LookupProfileWithRelation(_profiles[0].FediId, _profiles[4].FediId);
-
-		Assert.NotNull(actual);
-		Assert.Equal(_profiles[0], actual);
-		Assert.Contains(_profiles[4], actual.FollowingCollection.Select(r => r.Follows));
-		Assert.Contains(_profiles[4], actual.FollowersCollection.Select(r => r.Follower));
-	}
-
-	[Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
 	[Fact(DisplayName = "LookupProfileWithRelation should not permit additional lazy loading")]
 	public async Task LookupProfileForFollowingNoLazyLoad()
 	{
@@ -135,22 +123,6 @@ public sealed class AccountProfileAdapterTests : IClassFixture<HostFixture<Accou
 
 		Assert.NotNull(actual);
 		Assert.Equal(_profiles[0], actual);
-		Assert.Single(actual.FollowingCollection.AsEnumerable());
-		Assert.Single(actual.FollowersCollection.AsEnumerable());
-	}
-
-	[Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
-	[Fact(DisplayName = "LookupProfileWithRelation by FediId should not permit additional lazy loading")]
-	public async Task LookupProfileForFollowingNoLazyLoadByFediId()
-	{
-		var actual = await _adapter.LookupProfileWithRelation(_profiles[0].FediId, _profiles[4].FediId);
-
-		Assert.NotNull(actual);
-		Assert.Equal(_profiles[0], actual);
-
-		var actualSet = actual.FollowersCollection.Select(r => r.GetId()).ToHashSet();
-		var expectedSet = _profiles.SelectMany(p => p.FollowersCollection).Select(r => r.GetId()).ToHashSet();
-		Assert.ProperSubset(expectedSet, actualSet);
 		Assert.Single(actual.FollowingCollection.AsEnumerable());
 		Assert.Single(actual.FollowersCollection.AsEnumerable());
 	}

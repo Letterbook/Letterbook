@@ -19,14 +19,14 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 {
 	private readonly ILogger<OutboundPostConsumer> _logger;
 	private readonly IActivityMessagePublisher _messagePublisher;
-	private readonly IPostAdapter _posts;
+	private readonly IDataAdapter _posts;
 	private readonly IProfileService _profileService;
 	private readonly IActivityPubDocument _document;
 	private readonly Mapper _mapper;
 	private readonly CoreOptions _config;
 
 	public OutboundPostConsumer(ILogger<OutboundPostConsumer> logger, IOptions<CoreOptions> coreOptions, MappingConfigProvider maps,
-		IActivityMessagePublisher messagePublisher, IPostAdapter posts, IProfileService profileService, IActivityPubDocument document)
+		IActivityMessagePublisher messagePublisher, IDataAdapter posts, IProfileService profileService, IActivityPubDocument document)
 	{
 		_logger = logger;
 		_messagePublisher = messagePublisher;

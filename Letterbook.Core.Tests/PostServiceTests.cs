@@ -22,7 +22,7 @@ public class PostServiceTests : WithMocks
 		_output = output;
 		_output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 		_service = new PostService(Mock.Of<ILogger<PostService>>(), CoreOptionsMock,
-			PostAdapterMock.Object, PostEventServiceMock.Object, ActivityPubClientMock.Object,
+			DataAdapterMock.Object, PostEventServiceMock.Object, ActivityPubClientMock.Object,
 			[new MockHtmlSanitizer(), new MockTextSanitizer()]);
 		_fakeProfile = new FakeProfile("letterbook.example");
 		_profile = _fakeProfile.Generate();
@@ -38,7 +38,7 @@ public class PostServiceTests : WithMocks
 	[Fact(DisplayName = "Should create unpublished draft notes")]
 	public async Task CanDraftNote()
 	{
-		PostAdapterMock.Setup(m => m.LookupProfile(It.IsAny<Uuid7>()))
+		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<Uuid7>()))
 			.ReturnsAsync(_profile);
 
 		var actual = await _service.DraftNote(_profile.Id, "Test content");
@@ -55,8 +55,8 @@ public class PostServiceTests : WithMocks
 	[Fact(DisplayName = "Should create unpublished reply posts")]
 	public async Task CanDraftReply()
 	{
-		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
-		PostAdapterMock.Setup(m => m.LookupProfile(It.IsAny<Uuid7>()))
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<Uuid7>()))
 			.ReturnsAsync(_profile);
 
 		var actual = await _service.DraftNote(_profile.Id, "Test content", _post.Id);
@@ -67,7 +67,7 @@ public class PostServiceTests : WithMocks
 	[Fact(DisplayName = "Should update post")]
 	public async Task CanUpdate()
 	{
-		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 		var update = new FakePost(_profile).Generate();
 		update.Id = _post.Id;
 		update.FediId = _post.FediId;
@@ -80,7 +80,7 @@ public class PostServiceTests : WithMocks
 	[Fact(DisplayName = "Update should add post content")]
 	public async Task UpdateCanAddContent()
 	{
-		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 		var update = new FakePost(_profile).Generate();
 		update.Id = _post.Id;
 		update.FediId = _post.FediId;
@@ -96,7 +96,7 @@ public class PostServiceTests : WithMocks
 	public async Task UpdateCanRemoveContent()
 	{
 		_post.Contents.Add(new Fakes.FakeNote(_post).Generate());
-		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 		var update = new FakePost(_profile).Generate();
 		update.Id = _post.Id;
 		update.FediId = _post.FediId;
@@ -113,7 +113,7 @@ public class PostServiceTests : WithMocks
 		var expectedNote = new Fakes.FakeNote(_post).Generate();
 		expectedNote.Id = before.Id;
 		_post.Contents.Add(new Fakes.FakeNote(_post).Generate());
-		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 		var update = new FakePost(_profile).Generate();
 		update.Contents.Clear();
 		update.Contents.Add(expectedNote);
@@ -131,7 +131,7 @@ public class PostServiceTests : WithMocks
 		var evilProfile = new FakeProfile("letterbook.example").Generate();
 		var evilDomain = new UriBuilder(_post.FediId);
 		evilDomain.Host = "letterbook.evil";
-		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 		var update = new FakePost(evilProfile).Generate();
 		update.Id = _post.Id;
 		update.FediId = evilDomain.Uri;
@@ -142,11 +142,11 @@ public class PostServiceTests : WithMocks
 	[Fact(DisplayName = "Should delete posts")]
 	public async Task CanDelete()
 	{
-		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
 		await _service.Delete(_post.Id);
 
-		PostAdapterMock.Verify(m => m.Remove(_post));
+		DataAdapterMock.Verify(m => m.Remove(_post));
 	}
 
 	[Fact(DisplayName = "Should publish drafted posts")]
@@ -154,7 +154,7 @@ public class PostServiceTests : WithMocks
 	{
 		_post.PublishedDate = null;
 		var expected = DateTimeOffset.Now;
-		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
 		var actual = await _service.Publish(_post.Id);
 
@@ -166,7 +166,7 @@ public class PostServiceTests : WithMocks
 	public async Task CanAddContent()
 	{
 		var content = new Fakes.FakeNote(_post).Generate();
-		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
 		var actual = await _service.AddContent(_post.Id, content);
 
@@ -182,7 +182,7 @@ public class PostServiceTests : WithMocks
 		note.FediId = _post.Contents.First().FediId;
 		note.SourceText = expected;
 		note.GeneratePreview();
-		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
 		var result = await _service.UpdateContent(_post.Id, note.Id, note);
 
@@ -195,7 +195,7 @@ public class PostServiceTests : WithMocks
 	{
 		var content = new Fakes.FakeNote(_post).Generate();
 		_post.Contents.Add(content);
-		PostAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
 		var actual = await _service.RemoveContent(_post.Id, content.Id);
 
