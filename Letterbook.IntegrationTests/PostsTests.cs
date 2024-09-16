@@ -9,6 +9,7 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Models.Mappers.Converters;
+using Letterbook.Core.Tests.Fakes;
 using Letterbook.IntegrationTests.Fixtures;
 using Medo;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -61,7 +62,9 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		};
 	}
 
-	private bool ContentComparer(ContentDto? arg1, ContentDto? arg2) => arg1 != null && arg2 != null && arg1.Type == arg2.Type && arg1.Summary == arg2.Summary;
+	private bool ContentComparer(ContentDto? arg1, ContentDto? arg2) =>
+		arg1 != null && arg2 != null && arg1.Type == arg2.Type && arg1.Summary == arg2.Summary;
+
 	private bool TimestampMsComparer(DateTimeOffset? arg1, DateTimeOffset? arg2)
 	{
 		if (arg1 == null && arg2 == null) return true;
@@ -70,17 +73,36 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		return Math.Abs((arg1.Value - arg2.Value).Milliseconds) == 0;
 	}
 
+	public class PostTheoryData : TheoryData<PostDto>
+	{
+		public PostTheoryData()
+		{
+			var profile = new FakeProfile("letterbook.example").Generate();
+			var fakeDto = new FakePostDto(profile);
+			Add(fakeDto.Generate());
+
+			var toFollowers = fakeDto.Generate();
+			toFollowers.Audience.Add(new AudienceDto { FediId = Audience.Followers(profile).FediId });
+			Add(toFollowers);
+
+			var toPublic = fakeDto.Generate();
+			toPublic.Audience.Add(new AudienceDto { FediId = Audience.Public.FediId });
+			Add(toPublic);
+		}
+	}
+
 	[Fact]
 	public void Exists()
 	{
 		Assert.NotNull(_host);
 	}
 
-	[Fact(DisplayName = "Should accept a draft post for a note")]
-	public async Task CanDraftNote()
+	[ClassData(typeof(PostTheoryData))]
+	[Theory(DisplayName = "Should accept a draft post for a note")]
+	public async Task CanDraftNote(PostDto dto)
 	{
 		var profile = _profiles[0];
-		var dto = _postDto.Generate();
+		dto.Creators = new List<MiniProfileDto> { new() { Id = profile.GetId() } };
 		var payload = JsonContent.Create(dto, options: _json);
 		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post", payload);
 
@@ -136,7 +158,6 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 			SortKey = 1,
 			Type = "Note",
 			Text = "This is additional content",
-
 		};
 		var payload = JsonContent.Create(dto, options: _json);
 		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}/content", payload);
@@ -238,7 +259,6 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 
 		Assert.Equal(post.Thread.Posts.DistinctBy(p => p.Id).Count(), actual.Count());
 	}
-
 }
 
 public class ContentTextComparer : IEqualityComparer<ContentDto>

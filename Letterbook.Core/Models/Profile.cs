@@ -19,6 +19,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	private Profile()
 	{
 		FediId = default!;
+		Authority = default!;
 		Inbox = default!;
 		Outbox = default!;
 		Followers = default!;
@@ -34,6 +35,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	{
 		_id = Uuid7.NewUuid7();
 		FediId = new Uri(baseUri, $"/actor/{_id.ToId25String()}");
+		Authority = FediId.GetAuthority();
 		Handle = string.Empty;
 		DisplayName = string.Empty;
 		Description = string.Empty;
@@ -75,7 +77,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public Uri? SharedInbox { get; set; }
 	public Uri Followers { get; set; }
 	public Uri Following { get; set; }
-	public string Authority => FediId.Authority;
+	public string Authority { get; private set; }
 	public string Handle { get; set; }
 	public string DisplayName { get; set; }
 	public string Description { get; set; }
