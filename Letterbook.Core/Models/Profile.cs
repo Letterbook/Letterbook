@@ -195,7 +195,8 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		return new Profile()
 		{
 			_id = Uuid7.NewUuid7(),
-			FediId = id
+			FediId = id,
+			Authority = id.GetAuthority()
 		};
 	}
 
