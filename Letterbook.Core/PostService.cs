@@ -104,6 +104,15 @@ public class PostService : IAuthzPostService, IPostService
 			content.Sanitize(_sanitizers);
 		}
 
+		if (post.Audience.Contains(Audience.Public))
+		{
+			post.Audience = post.Audience.ReplaceWith(post.Creators.Select(Audience.Followers).ToHashSet());
+			foreach (var audience in post.Audience)
+			{
+				_posts.Update(audience);
+			}
+		}
+
 		if (publish) post.PublishedDate = DateTimeOffset.UtcNow;
 		_posts.Add(post);
 		await _posts.Commit();

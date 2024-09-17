@@ -98,7 +98,7 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 	}
 
 	[ClassData(typeof(PostTheoryData))]
-	[Theory(DisplayName = "Should accept a draft post for a note")]
+	[Theory(DisplayName = "Should draft and publish a note")]
 	public async Task CanDraftNote(PostDto dto)
 	{
 		var profile = _profiles[0];
