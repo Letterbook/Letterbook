@@ -3,6 +3,7 @@ using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
 using ActivityPub.Types.AS.Extended.Object;
+using ActivityPub.Types.Conversion.Converters;
 using ActivityPub.Types.Util;
 using AutoMapper;
 using JetBrains.Annotations;
@@ -84,13 +85,24 @@ public static class AstMapper
 
 	private static void ConfigureContentTypes(IMapperConfigurationExpression cfg)
 	{
-		cfg.CreateMap<Note, ASObject>()
-			.ConstructUsing(_ => new NoteObject())
+		cfg.CreateMap<Content, ASObject>(MemberList.None)
 			.ForMember(d => d.Id, opt => opt.MapFrom(s => s.FediId))
-			.ForMember(d => d.Content, opt => opt.MapFrom(s => s.Html))
-			.ForMember(d => d.AttributedTo, opt => opt.MapFrom(s => s.Post.Creators))
+			.ForMember(d => d.AttributedTo, opt => opt.MapFrom<FediIdResolver, IEnumerable<Models.Profile>>(s => s.Post.Creators))
 			.ForMember(d => d.Published, opt => opt.MapFrom(s => s.Post.PublishedDate))
-			.ForMember(d => d.Updated, opt => opt.MapFrom(s => s.Post.UpdatedDate));
+			.ForMember(d => d.Updated, opt => opt.MapFrom(s => s.Post.UpdatedDate))
+			.ForMember(d => d.MediaType, opt => opt.MapFrom(s => s.ContentType))
+			.ForMember(d => d.Type, opt => opt.Ignore())
+			.ForSourceMember(s => s.Id, opt => opt.DoNotValidate())
+			.ForSourceMember(s => s.Post, opt => opt.DoNotValidate())
+			.ForSourceMember(s => s.SortKey, opt => opt.DoNotValidate());
+
+		cfg.CreateMap<Note, ASObject>(MemberList.Source)
+			.ConstructUsing(_ => new NoteObject())
+			.IncludeBase<Content, ASObject>()
+			.ForMember(d => d.Content, opt => opt.MapFrom(s => s.Html))
+			.ForSourceMember(s => s.SourceText, opt => opt.DoNotValidate())
+			.ForSourceMember(s => s.SourceContentType, opt => opt.DoNotValidate())
+			;
 	}
 
 	private static void FromActor(IMapperConfigurationExpression cfg)
@@ -252,11 +264,18 @@ public class AttachedContentResolver : IMemberValueResolver<Post, NoteObject, IE
 }
 
 [UsedImplicitly]
-public class FediIdResolver : IMemberValueResolver<Post, NoteObject, Post?, LinkableList<ASObject>?>
+public class FediIdResolver : IMemberValueResolver<Post, NoteObject, Post?, LinkableList<ASObject>?>,
+	IMemberValueResolver<Content, ASObject, IEnumerable<Models.Profile>, LinkableList<ASObject>>
 {
 	public LinkableList<ASObject>? Resolve(Post source, NoteObject destination, Post? sourceMember, LinkableList<ASObject>? destMember, ResolutionContext context)
 	{
 		return sourceMember != null ? context.Mapper.Map<LinkableList<ASObject>>(sourceMember.FediId) : default;
+	}
+
+	public LinkableList<ASObject> Resolve(Content source, ASObject destination, IEnumerable<Models.Profile> sourceMember, LinkableList<ASObject> destMember, ResolutionContext context)
+	{
+		destMember.AddRange(sourceMember.Select(each => new ASLink { HRef = each.FediId }));
+		return destMember;
 	}
 }
 

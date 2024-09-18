@@ -25,7 +25,7 @@ public class FakePost : Faker<Post>
 	public FakePost(IEnumerable<Profile> creators, int contents, CoreOptions? opts)
 	{
 		_creators = creators;
-		_authority = _creators.First().Authority;
+		_authority = _creators.First().FediId.Authority;
 		RuleFor(p => p.Id, faker => faker.Random.Guid7());
 		RuleFor(p => p.FediId, faker => faker.FediId(_authority, "post"));
 		RuleFor(p => p.Creators, () => _creators);
