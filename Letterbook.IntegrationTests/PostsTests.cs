@@ -104,6 +104,8 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		var profile = _profiles[0];
 		dto.Creators = new List<MiniProfileDto> { new() { Id = profile.GetId() } };
 		var payload = JsonContent.Create(dto, options: _json);
+		var traceId = Traces.TraceRequest(payload);
+
 		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post", payload);
 
 		Assert.NotNull(response);
@@ -112,6 +114,13 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		Assert.NotNull(body.Id);
 		Assert.NotEqual(Uuid7.Empty, body.Id);
 		Assert.Equal(dto.Contents.First(), body.Contents.FirstOrDefault(), ContentComparer);
+
+		var trace = await Traces.AssertNoErrors(traceId, _host.Spans.Where(a => a.TraceId == traceId), TimeSpan.FromMilliseconds(1000));
+		if(dto.Audience.Count > 0 || dto.AddressedTo.Count > 0)
+		{
+			const string expected = "urn:message:Letterbook.Workers.Contracts:ActivityMessage send";
+			Assert.Contains(expected, trace.Select(s => s.Source.Name));
+		}
 	}
 
 	[Fact(DisplayName = "Should publish a draft")]
