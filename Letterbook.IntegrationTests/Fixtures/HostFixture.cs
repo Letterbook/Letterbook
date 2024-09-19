@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Bogus;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
@@ -17,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using OpenTelemetry.Trace;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 using RelationalContext = Letterbook.Adapter.Db.RelationalContext;
@@ -62,12 +64,16 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	public List<Account> Accounts { get; set; } = new();
 	public Dictionary<Profile, List<Post>> Posts { get; set; } = new();
 	public List<Post> Timeline { get; set; } = new();
+
+	public IAsyncEnumerable<Activity> Spans => _spans.ToAsyncEnumerable();
+
 	private readonly IServiceScope _scope;
 
 	public readonly CoreOptions Options;
 	private NpgsqlDataSourceBuilder _ds;
 	private readonly RelationalContext _context;
 	private readonly FeedsContext _feedsContext;
+	private readonly List<Activity> _spans = new();
 
 	public HostFixture(IMessageSink sink)
 	{
@@ -192,6 +198,11 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 				{
 					options.ForwardAuthenticate = "Test";
 				});
+				services.AddOpenTelemetry()
+					.WithTracing(tracer =>
+					{
+						tracer.AddInMemoryExporter(_spans);
+					});
 			});
 
 		base.ConfigureWebHost(builder);
