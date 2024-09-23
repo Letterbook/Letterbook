@@ -211,25 +211,30 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	private void InitTestData()
 	{
 		var authority = Options.BaseUri() ?? new Uri("letterbook.example");
+		var peer = "peer.example";
 		Accounts.AddRange(new FakeAccount(false).Generate(2));
 		Profiles.AddRange(new FakeProfile(authority, Accounts[0]).Generate(3)); // P0-2
 		Profiles.Add(new FakeProfile(authority, Accounts[1]).Generate()); // P3
 		Profiles.AddRange(new FakeProfile().Generate(3)); // P4-6
 		Profiles.AddRange(new FakeProfile(authority).Generate(3)); // P7-9 (Group: Follow)
+		Profiles.AddRange(new FakeProfile(peer).Generate(3)); // P10-12 (Group: remote followers)
 
 		// P0 follows P4 and P5
 		// P4 follows P0
-		Profiles[0].Follow(Profiles[4], FollowState.Accepted);
-		Profiles[0].Follow(Profiles[5], FollowState.Accepted);
-		Profiles[0].AddFollower(Profiles[4], FollowState.Accepted);
+		Follow(Profiles[0], Profiles[4]);
+		Follow(Profiles[0], Profiles[5]);
+		Follow(Profiles[4], Profiles[0]);
 		// P1 has requested to follow P5
 		Profiles[1].FollowingCollection.Add(new FollowerRelation(Profiles[1], Profiles[5], FollowState.Pending));
 		// P9 follows P8 and P7
-		Profiles[9].Follow(Profiles[8], FollowState.Accepted);
-		Profiles[9].Follow(Profiles[7], FollowState.Accepted);
-		// P8 follows P9 (with proper audience)
-		Profiles[8].Follow(Profiles[9], FollowState.Accepted);
-		Profiles[8].Audiences.Add(Audience.Followers(Profiles[9]));
+		Follow(Profiles[0], Profiles[8]);
+		Follow(Profiles[0], Profiles[7]);
+		// P8 follows P9
+		Follow(Profiles[8], Profiles[9]);
+		// P10-12 (remote peers) follow P7
+		Follow(Profiles[10], Profiles[7]);
+		Follow(Profiles[11], Profiles[7]);
+		Follow(Profiles[12], Profiles[7]);
 
 		// Local profiles
 		// P0 creates posts 0-2
@@ -261,6 +266,12 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 			post.Audience = set;
 		}
+	}
+
+	private static void Follow(Profile self, Profile target)
+	{
+		self.Follow(target, FollowState.Accepted);
+		self.Audiences.Add(target.Headlining.First(a => a == Audience.Followers(target)));
 	}
 
 	private void InitTimelineData()

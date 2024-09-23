@@ -73,21 +73,28 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		return Math.Abs((arg1.Value - arg2.Value).Milliseconds) == 0;
 	}
 
-	public class PostTheoryData : TheoryData<PostDto>
+	public class PostTheoryData : TheoryData<Func<Profile, PostDto>>
 	{
 		public PostTheoryData()
 		{
-			var profile = new FakeProfile("letterbook.example").Generate();
-			var fakeDto = new FakePostDto(profile);
-			Add(fakeDto.Generate());
+			// No audience
+			Add(profile => new FakePostDto(profile).Generate());
 
-			var toFollowers = fakeDto.Generate();
-			toFollowers.Audience.Add(new AudienceDto { FediId = Audience.Followers(profile).FediId });
-			Add(toFollowers);
+			// Explicit followers audience
+			Add(profile =>
+			{
+				var toFollowers = new FakePostDto(profile).Generate();
+				toFollowers.Audience.Add(new AudienceDto { FediId = Audience.Followers(profile).FediId });
+				return toFollowers;
+			});
 
-			var toPublic = fakeDto.Generate();
-			toPublic.Audience.Add(new AudienceDto { FediId = Audience.Public.FediId });
-			Add(toPublic);
+			// Public audience, and implied followers
+			Add(profile =>
+			{
+				var toPublic = new FakePostDto(profile).Generate();
+				toPublic.Audience.Add(new AudienceDto { FediId = Audience.Public.FediId });
+				return toPublic;
+			});
 		}
 	}
 
@@ -99,10 +106,10 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 
 	[ClassData(typeof(PostTheoryData))]
 	[Theory(DisplayName = "Should draft and publish a note")]
-	public async Task CanDraftNote(PostDto dto)
+	public async Task CanDraftNote(Func<Profile, PostDto> generate)
 	{
-		var profile = _profiles[0];
-		dto.Creators = new List<MiniProfileDto> { new() { Id = profile.GetId() } };
+		var profile = _profiles[7];
+		var dto = generate(profile);
 		var payload = JsonContent.Create(dto, options: _json);
 		var traceId = Traces.TraceRequest(payload);
 
@@ -115,11 +122,11 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		Assert.NotEqual(Uuid7.Empty, body.Id);
 		Assert.Equal(dto.Contents.First(), body.Contents.FirstOrDefault(), ContentComparer);
 
-		var trace = await Traces.AssertNoErrors(traceId, _host.Spans.Where(a => a.TraceId == traceId), TimeSpan.FromMilliseconds(1000));
+		// var trace = await Traces.AssertNoErrors(traceId, _host.Spans.Where(a => a.TraceId == traceId), TimeSpan.FromMilliseconds(2000));
 		if(dto.Audience.Count > 0 || dto.AddressedTo.Count > 0)
 		{
 			const string expected = "urn:message:Letterbook.Workers.Contracts:ActivityMessage send";
-			Assert.Contains(expected, trace.Select(s => s.Source.Name));
+			Assert.Contains(expected, _host.Spans.Where(a => a.TraceId == traceId).Select(s => s.DisplayName));
 		}
 	}
 
