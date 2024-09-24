@@ -1,13 +1,18 @@
 using System.Diagnostics;
+using System.Net;
+using ActivityPub.Types.AS;
 using Bogus;
+using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Adapter.TimescaleFeeds.EntityModels;
 using Letterbook.AspNet.Tests.Fixtures;
 using Letterbook.Core;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.Core.Tests.Mocks;
 using Letterbook.Core.Values;
 using Letterbook.Core.Workers;
 using Microsoft.AspNetCore.Authentication;
@@ -17,6 +22,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Npgsql;
 using OpenTelemetry.Trace;
 using Xunit.Abstractions;
@@ -64,8 +70,10 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	public List<Account> Accounts { get; set; } = new();
 	public Dictionary<Profile, List<Post>> Posts { get; set; } = new();
 	public List<Post> Timeline { get; set; } = new();
-
 	public IAsyncEnumerable<Activity> Spans => _spans.ToAsyncEnumerable();
+	public Mock<MockableMessageHandler> MockClientHandler = new();
+	public Mock<IActivityPubClient> MockActivityPubClient = new();
+	public Mock<IActivityPubAuthenticatedClient> MockActivityPubClientAuth = new();
 
 	private readonly IServiceScope _scope;
 
@@ -73,10 +81,28 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	private NpgsqlDataSourceBuilder _ds;
 	private readonly RelationalContext _context;
 	private readonly FeedsContext _feedsContext;
-	private readonly List<Activity> _spans = new();
+	private readonly CollectionSubject<Activity> _spans = new();
 
 	public HostFixture(IMessageSink sink)
 	{
+		MockClientHandler.Setup(m => m.SendMessageAsync(It.Is<HttpRequestMessage>(r => r.Method == HttpMethod.Post), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.Accepted));
+		MockActivityPubClient.Setup(m => m.As(It.IsAny<IFederatedActor>()))
+			.Returns(MockActivityPubClientAuth.Object);
+		MockActivityPubClientAuth.Setup(m => m.SendDocument(It.IsAny<Uri>(), It.IsAny<string>()))
+			.ReturnsAsync(new ClientResponse<object>
+			{
+				Data = null,
+				DeliveredAddress = null,
+				StatusCode = HttpStatusCode.Accepted
+			});
+		MockActivityPubClientAuth.Setup(m => m.SendDocument(It.IsAny<Uri>(), It.IsAny<ASType>()))
+			.ReturnsAsync(new ClientResponse<object>
+			{
+				Data = null,
+				DeliveredAddress = null,
+				StatusCode = HttpStatusCode.Accepted
+			});
 		_sink = sink;
 		Options = new CoreOptions
 		{
@@ -203,6 +229,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 					{
 						tracer.AddInMemoryExporter(_spans);
 					});
+				services.AddScoped<IActivityPubClient>(_ => MockActivityPubClient.Object);
 			});
 
 		base.ConfigureWebHost(builder);

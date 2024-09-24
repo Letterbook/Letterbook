@@ -24,17 +24,18 @@ public static class Traces
 		headers.Add(name, value);
 	}
 
-	public static async Task<List<Activity>> AssertNoErrors(ActivityTraceId traceId, IAsyncEnumerable<Activity> spans, TimeSpan timeout)
+	public static void SpanIsNotError(Activity? span)
 	{
-		var list = new List<Activity>();
-		await foreach (var a in spans)
-		{
-			list.Add(a);
-			if (a.Status == ActivityStatusCode.Error)
-				Assert.Null(a);
-		}
-
-		await Task.Delay(timeout);
-		return list;
+		if (span?.Status == ActivityStatusCode.Error)
+			Assert.Fail($"""
+			             Error span
+			             Source: {span?.Source.Name}
+			             DisplayName: {span?.DisplayName}
+			             Status: {span?.Status}
+			             Duration: {span?.Duration}
+			             Kind: {span?.Kind}
+			             OperationName: {span?.OperationName}
+			             Events: {string.Join("\n\t", span?.Events.SelectMany(e => e.Tags).Select(t => $"{t.Key}: {t.Value}") ?? [] )}
+			             """);
 	}
 }

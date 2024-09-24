@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -122,11 +123,24 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		Assert.NotEqual(Uuid7.Empty, body.Id);
 		Assert.Equal(dto.Contents.First(), body.Contents.FirstOrDefault(), ContentComparer);
 
-		// var trace = await Traces.AssertNoErrors(traceId, _host.Spans.Where(a => a.TraceId == traceId), TimeSpan.FromMilliseconds(2000));
+		// Assert.Null(await _host.Spans.FirstOrDefaultAsync(span => span.Status == ActivityStatusCode.Error, cts.Token));
 		if(dto.Audience.Count > 0 || dto.AddressedTo.Count > 0)
 		{
 			const string expected = "urn:message:Letterbook.Workers.Contracts:ActivityMessage send";
 			Assert.Contains(expected, _host.Spans.Where(a => a.TraceId == traceId).Select(s => s.DisplayName));
+		}
+
+		try
+		{
+			// Wait a little while for any subsequent work to happen, then check for exceptions
+			var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+			var span = await _host.Spans
+				.Where(a => a.TraceId == traceId)
+				.FirstOrDefaultAsync(span => span.Status == ActivityStatusCode.Error, cts.Token);
+			Traces.SpanIsNotError(span);
+		}
+		catch (TaskCanceledException)
+		{
 		}
 	}
 
