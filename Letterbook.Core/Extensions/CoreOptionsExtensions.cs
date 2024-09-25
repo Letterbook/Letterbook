@@ -8,7 +8,7 @@ public static class CoreOptionsExtensions
 		core.BaseUri().Authority == id.Authority;
 
 	public static bool HasLocalAuthority(this IFederated subject, CoreOptions core) =>
-		core.BaseUri().Authority == subject.Authority;
+		core.BaseUri().Authority == subject.FediId.Authority;
 
 	public static bool HasLocalAuthority(this CoreOptions coreOptions, string domain) =>
 		coreOptions.BaseUri().Authority == domain;
