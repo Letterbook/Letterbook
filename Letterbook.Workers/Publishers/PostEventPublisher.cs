@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Security.Claims;
 using AutoMapper;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
