@@ -3,6 +3,7 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Workers.Contracts;
 using MassTransit;
+using Claim = System.Security.Claims.Claim;
 
 namespace Letterbook.Workers.Consumers;
 
@@ -26,7 +27,7 @@ public class DeliveryWorker : IConsumer<ActivityMessage>
 	{
 		Profile? profile = default;
 		if (context.Message.OnBehalfOf is { } id)
-			profile = await _profiles.As(context.Message.Claims).LookupProfile(id);
+			profile = await _profiles.As(context.Message.Claims.Select(c => (Claim)c)).LookupProfile(id);
 		else
 			_logger.LogInformation("Sending {Activity} anonymously to {Inbox}", context.Message.Activity, context.Message.Inbox);
 

@@ -10,6 +10,7 @@ using Letterbook.Workers.Contracts;
 using MassTransit;
 using Medo;
 using Microsoft.Extensions.Options;
+using Claim = Letterbook.Workers.Contracts.Claim;
 using Profile = Letterbook.Core.Models.Profile;
 
 namespace Letterbook.Workers.Publishers;
