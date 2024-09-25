@@ -26,11 +26,10 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		private FakeProfile _fakeProfile;
 		private Models.Profile _profile;
 		private readonly IJsonLdSerializer _serializer;
-#pragma warning disable CS8618
-#pragma warning disable CS0649
-		private static IMapper ModelMapper;
-#pragma warning restore CS0649
-#pragma warning restore CS8618
+		private readonly FakePost _fakePost;
+		private readonly Models.Post _post;
+		private static IMapper _modelMapper = new Mapper(Mappers.AstMapper.Default);
+		private static IMapper _postMapper = new Mapper(Mappers.AstMapper.Post);
 
 		public MapFromModelTests(ITestOutputHelper output, JsonLdSerializerFixture serializerFixture)
 		{
@@ -40,12 +39,25 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			_output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
 			_fakeProfile = new FakeProfile("letterbook.example");
 			_profile = _fakeProfile.Generate();
+			_fakePost = new FakePost(_profile);
+			_post = _fakePost.Generate();
 		}
 
-		[Fact(Skip = "Need ModelMapper")]
+		[Fact(DisplayName = "Map a simple Post to AS#Note")]
+		public void MapSingleNotePost()
+		{
+			var actual = _postMapper.Map<NoteObject>(_post);
+
+			Assert.NotNull(actual);
+			Assert.Equal(_post.FediId.ToString(), actual.Id);
+			Assert.Equal(_post.Creators.First().FediId.ToString(), actual.AttributedTo.First().Link?.HRef.ToString());
+			Assert.Equal(_post.Contents.First().Html, actual.Content?.DefaultValue);
+		}
+
+		[Fact(Skip = "Broken")]
 		public void MapProfileDefault()
 		{
-			var actual = ModelMapper.Map<PersonActorExtension>(_profile);
+			var actual = _modelMapper.Map<PersonActorExtension>(_profile);
 
 			Assert.Equal(_profile.FediId.ToString(), actual.Id);
 			Assert.Equal(_profile.Inbox.ToString(), actual.Inbox.Id);
@@ -59,7 +71,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		{
 			var expected = _profile.Keys.First().GetRsa().ExportSubjectPublicKeyInfoPem();
 
-			var actual = ModelMapper.Map<PersonActorExtension>(_profile);
+			var actual = _modelMapper.Map<PersonActorExtension>(_profile);
 
 			Assert.Equal(actual?.PublicKey?.PublicKeyPem, expected);
 			Assert.Equal(actual?.PublicKey?.Owner?.Value?.Id, _profile.FediId.ToString());
@@ -69,7 +81,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		[Fact(Skip = "Need ModelMapper")]
 		public void CanMapActorCore()
 		{
-			var actual = ModelMapper.Map<PersonActorExtension>(_profile);
+			var actual = _modelMapper.Map<PersonActorExtension>(_profile);
 
 			Assert.Equal(_profile.FediId.ToString(), actual.Id);
 			Assert.Equal(_profile.Inbox.ToString(), actual.Inbox.HRef);
@@ -85,7 +97,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		{
 			var expectedKey = _profile.Keys.First();
 			var expectedPem = expectedKey.GetRsa().ExportSubjectPublicKeyInfoPem();
-			var actual = ModelMapper.Map<PersonActorExtension>(_profile);
+			var actual = _modelMapper.Map<PersonActorExtension>(_profile);
 
 			Assert.Equal(expectedPem, actual.PublicKey?.PublicKeyPem);
 			Assert.Equal(expectedKey.FediId.ToString(), actual.PublicKey?.Id);
@@ -123,6 +135,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		public void ValidConfig()
 		{
 			Mappers.AstMapper.Default.AssertConfigurationIsValid();
+			Mappers.AstMapper.Post.AssertConfigurationIsValid();
 		}
 
 		[Fact]

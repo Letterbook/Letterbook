@@ -1,21 +1,17 @@
 using System.Security.Cryptography;
-using System.Text;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
-using ActivityPub.Types.AS.Extended.Actor;
 using ActivityPub.Types.AS.Extended.Object;
+using ActivityPub.Types.Conversion.Converters;
 using ActivityPub.Types.Util;
 using AutoMapper;
 using JetBrains.Annotations;
 using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Core.Models;
 using Medo;
-using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Utilities.IO.Pem;
 using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
-using PemWriter = Org.BouncyCastle.OpenSsl.PemWriter;
 
 namespace Letterbook.Adapter.ActivityPub.Mappers;
 
@@ -31,6 +27,83 @@ public static class AstMapper
 		FromNote(cfg);
 		FromASType(cfg);
 	});
+
+	public static MapperConfiguration Post = new(cfg =>
+	{
+		ConfigureUriTypes(cfg);
+		ConfigureDateTypes(cfg);
+		ConfigureContentTypes(cfg);
+
+		cfg.CreateMap<Content, NaturalLanguageString>(MemberList.None)
+			.ForMember(d => d.DefaultValue, opt => opt.MapFrom(s => s.Html));
+
+		cfg.CreateMap<string, NaturalLanguageString>(MemberList.None)
+			.ConstructUsing(s => new NaturalLanguageString()
+			{
+				DefaultValue = s
+			});
+
+		cfg.CreateMap<Models.Post, NoteObject>(MemberList.Destination)
+			.ForMember(d => d.Id, opt => opt.MapFrom(s => s.FediId))
+			.ForMember(d => d.AttributedTo, opt => opt.MapFrom(s => s.Creators.Select(p => p.FediId)))
+			.ForMember(d => d.Audience, opt => opt.MapFrom(s => s.Audience.Select(a => a.FediId)))
+			.ForMember(d => d.Context, opt => opt.MapFrom(s => s.Thread.FediId))
+			.ForMember(d => d.Published, opt => opt.MapFrom(s => s.PublishedDate))
+			.ForMember(d => d.Updated, opt => opt.MapFrom(s => s.UpdatedDate))
+			.ForMember(d => d.Content, opt => opt.MapFrom(s => s.Contents.Order().FirstOrDefault()))
+			.ForMember(d => d.MediaType,
+				opt => opt.MapFrom<MediaTypeResolver, Content?>(s => s.Contents.Order().FirstOrDefault()))
+			.ForMember(d => d.Attachment,
+				opt => opt.MapFrom<AttachedContentResolver, IEnumerable<Content>>(s => s.Contents.Order().Skip(1)))
+			.ForMember(d => d.Likes, opt => opt.MapFrom(p => p.Likes))
+			.ForMember(d => d.Replies, opt => opt.MapFrom(p => p.Replies))
+			.ForMember(d => d.Preview, opt => opt.MapFrom(p => p.Preview))
+			.ForMember(d => d.Shares, opt => opt.MapFrom(p => p.Shares))
+			.ForMember(d => d.To,
+				opt => opt.MapFrom(p => p.AddressedTo.Where(m => m.Visibility == MentionVisibility.To).Select(m => m.Subject.FediId)))
+			.ForMember(d => d.CC,
+				opt => opt.MapFrom(p => p.AddressedTo.Where(m => m.Visibility == MentionVisibility.Cc).Select(m => m.Subject.FediId)))
+			.ForMember(d => d.InReplyTo, opt => opt.MapFrom<FediIdResolver, Post?>(s => s.InReplyTo))
+			.ForMember(d => d.Id, opt => opt.MapFrom(s => s.FediId))
+			.ForMember(d => d.Source, opt => opt.Ignore())
+			.ForMember(d => d.BCC, opt => opt.Ignore())
+			.ForMember(d => d.BTo, opt => opt.Ignore())
+			.ForMember(d => d.Generator, opt => opt.Ignore())
+			.ForMember(d => d.Icon, opt => opt.Ignore())
+			.ForMember(d => d.Image, opt => opt.Ignore())
+			.ForMember(d => d.Location, opt => opt.Ignore())
+			.ForMember(d => d.Tag, opt => opt.Ignore())
+			.ForMember(d => d.Url, opt => opt.Ignore())
+			.ForMember(d => d.Duration, opt => opt.Ignore())
+			.ForMember(d => d.StartTime, opt => opt.Ignore())
+			.ForMember(d => d.EndTime, opt => opt.Ignore())
+			.ForMember(d => d.Type, opt => opt.Ignore())
+			.ForMember(d => d.JsonLDContext, opt => opt.Ignore())
+			.ForMember(d => d.Name, opt => opt.Ignore());
+
+	});
+
+	private static void ConfigureContentTypes(IMapperConfigurationExpression cfg)
+	{
+		cfg.CreateMap<Content, ASObject>(MemberList.None)
+			.ForMember(d => d.Id, opt => opt.MapFrom(s => s.FediId))
+			.ForMember(d => d.AttributedTo, opt => opt.MapFrom<FediIdResolver, IEnumerable<Models.Profile>>(s => s.Post.Creators))
+			.ForMember(d => d.Published, opt => opt.MapFrom(s => s.Post.PublishedDate))
+			.ForMember(d => d.Updated, opt => opt.MapFrom(s => s.Post.UpdatedDate))
+			.ForMember(d => d.MediaType, opt => opt.MapFrom(s => s.ContentType))
+			.ForMember(d => d.Type, opt => opt.Ignore())
+			.ForSourceMember(s => s.Id, opt => opt.DoNotValidate())
+			.ForSourceMember(s => s.Post, opt => opt.DoNotValidate())
+			.ForSourceMember(s => s.SortKey, opt => opt.DoNotValidate());
+
+		cfg.CreateMap<Note, ASObject>(MemberList.Source)
+			.ConstructUsing(_ => new NoteObject())
+			.IncludeBase<Content, ASObject>()
+			.ForMember(d => d.Content, opt => opt.MapFrom(s => s.Html))
+			.ForSourceMember(s => s.SourceText, opt => opt.DoNotValidate())
+			.ForSourceMember(s => s.SourceContentType, opt => opt.DoNotValidate())
+			;
+	}
 
 	private static void FromActor(IMapperConfigurationExpression cfg)
 	{
@@ -150,6 +223,68 @@ public static class AstMapper
 
 		cfg.CreateMap<NaturalLanguageString?, string?>()
 			.ConvertUsing<NaturalLanguageStringConverter>();
+	}
+
+	private static void ConfigureUriTypes(IMapperConfigurationExpression cfg)
+	{
+		cfg.CreateMap<Models.Profile, Uri>(MemberList.None)
+			.ConstructUsing(profile => profile.FediId);
+
+		cfg.CreateMap<Uri, ASObject>(MemberList.None)
+			.ConstructUsing(uri => new ASObject() { Id = uri.ToString() });
+
+		cfg.CreateMap<Uri, Linkable<ASObject>>(MemberList.None)
+			.ConstructUsing(uri => new Linkable<ASObject>(new ASLink() { HRef = uri }));
+
+		cfg.CreateMap<Uri, LinkableList<ASObject>>(MemberList.None)
+			.ConstructUsing(uri => new Linkable<ASObject>(new ASLink() { HRef = uri }));
+
+		cfg.CreateMap<IEnumerable<Uri>, LinkableList<ASObject>>(MemberList.None)
+			.ConstructUsing((list, maps) => new LinkableList<ASObject>(list.Select(each => maps.Mapper.Map<Linkable<ASObject>>(each))));
+
+		cfg.CreateMap<Audience, Uri>(MemberList.None)
+			.ConstructUsing(audience => audience.FediId);
+	}
+
+	private static void ConfigureDateTypes(IMapperConfigurationExpression cfg)
+	{
+		cfg.CreateMap<DateTime, DateTimeOffset>(MemberList.None);
+		cfg.CreateMap<DateTimeOffset, DateTime>(MemberList.None)
+			.ConstructUsing(dto => dto.Date);
+	}
+}
+
+[UsedImplicitly]
+public class AttachedContentResolver : IMemberValueResolver<Post, NoteObject, IEnumerable<Content>, LinkableList<ASObject>>
+{
+	public LinkableList<ASObject> Resolve(Post source, NoteObject destination, IEnumerable<Content> sourceMember, LinkableList<ASObject> destMember, ResolutionContext context)
+	{
+		return new LinkableList<ASObject>(sourceMember.Order().Select(context.Mapper.Map<ASObject>));
+	}
+}
+
+[UsedImplicitly]
+public class FediIdResolver : IMemberValueResolver<Post, NoteObject, Post?, LinkableList<ASObject>?>,
+	IMemberValueResolver<Content, ASObject, IEnumerable<Models.Profile>, LinkableList<ASObject>>
+{
+	public LinkableList<ASObject>? Resolve(Post source, NoteObject destination, Post? sourceMember, LinkableList<ASObject>? destMember, ResolutionContext context)
+	{
+		return sourceMember != null ? context.Mapper.Map<LinkableList<ASObject>>(sourceMember.FediId) : default;
+	}
+
+	public LinkableList<ASObject> Resolve(Content source, ASObject destination, IEnumerable<Models.Profile> sourceMember, LinkableList<ASObject> destMember, ResolutionContext context)
+	{
+		destMember.AddRange(sourceMember.Select(each => new ASLink { HRef = each.FediId }));
+		return destMember;
+	}
+}
+
+[UsedImplicitly]
+public class MediaTypeResolver : IMemberValueResolver<Post, NoteObject, Content?, string?>
+{
+	public string? Resolve(Post source, NoteObject destination, Content? sourceMember, string? destMember, ResolutionContext context)
+	{
+		return sourceMember is { } content ? content.ContentType.Name : default;
 	}
 }
 
