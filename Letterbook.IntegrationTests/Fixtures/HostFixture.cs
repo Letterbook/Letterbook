@@ -71,7 +71,6 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	public Dictionary<Profile, List<Post>> Posts { get; set; } = new();
 	public List<Post> Timeline { get; set; } = new();
 	public IAsyncEnumerable<Activity> Spans => _spans.ToAsyncEnumerable();
-	public Mock<MockableMessageHandler> MockClientHandler = new();
 	public Mock<IActivityPubClient> MockActivityPubClient = new();
 	public Mock<IActivityPubAuthenticatedClient> MockActivityPubClientAuth = new();
 
@@ -85,8 +84,6 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 	public HostFixture(IMessageSink sink)
 	{
-		MockClientHandler.Setup(m => m.SendMessageAsync(It.Is<HttpRequestMessage>(r => r.Method == HttpMethod.Post), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(new HttpResponseMessage(HttpStatusCode.Accepted));
 		MockActivityPubClient.Setup(m => m.As(It.IsAny<IFederatedActor>()))
 			.Returns(MockActivityPubClientAuth.Object);
 		MockActivityPubClientAuth.Setup(m => m.SendDocument(It.IsAny<Uri>(), It.IsAny<string>()))
@@ -229,6 +226,8 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 					{
 						tracer.AddInMemoryExporter(_spans);
 					});
+				// We mock the IActivityPubClient because setting up and managing test data across federation peers is way beyond the scope
+				// of what we can do. So we fake that part of it.
 				services.AddScoped<IActivityPubClient>(_ => MockActivityPubClient.Object);
 			});
 

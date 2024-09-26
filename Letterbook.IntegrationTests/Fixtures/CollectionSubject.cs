@@ -8,6 +8,9 @@ namespace Letterbook.IntegrationTests.Fixtures;
 /// An Observable Subject that also implements ICollection, so it can be used as the backing collection for
 /// OpenTelemetry in-memory exporter
 /// </summary>
+/// <remarks>Using an Observable for this is useful because the Observable behavior makes it easy to act on spans as they arrive. A regular
+/// Collection doesn't do that, and we would need a lot more arbitrary waits and timeouts in order to be confident we had gotten the spans
+/// we need.</remarks>
 /// <typeparam name="T"></typeparam>
 public class CollectionSubject<T> : SubjectBase<T>, ICollection<T>
 {

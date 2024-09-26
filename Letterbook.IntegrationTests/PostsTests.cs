@@ -74,6 +74,10 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		return Math.Abs((arg1.Value - arg2.Value).Milliseconds) == 0;
 	}
 
+	/// <summary>
+	/// Theory data that provides a PostDto generator function
+	/// This allows the DTO to have properly configured audience and other values, for a pre-seeded test profile
+	/// </summary>
 	public class PostTheoryData : TheoryData<Func<Profile, PostDto>>
 	{
 		public PostTheoryData()
@@ -123,7 +127,6 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		Assert.NotEqual(Uuid7.Empty, body.Id);
 		Assert.Equal(dto.Contents.First(), body.Contents.FirstOrDefault(), ContentComparer);
 
-		// Assert.Null(await _host.Spans.FirstOrDefaultAsync(span => span.Status == ActivityStatusCode.Error, cts.Token));
 		if(dto.Audience.Count > 0 || dto.AddressedTo.Count > 0)
 		{
 			const string expected = "urn:message:Letterbook.Workers.Contracts:ActivityMessage send";
@@ -133,14 +136,15 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		try
 		{
 			// Wait a little while for any subsequent work to happen, then check for exceptions
-			var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+			var otherSpans = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 			var span = await _host.Spans
 				.Where(a => a.TraceId == traceId)
-				.FirstOrDefaultAsync(span => span.Status == ActivityStatusCode.Error, cts.Token);
+				.FirstOrDefaultAsync(span => span.Status == ActivityStatusCode.Error, otherSpans.Token);
 			Traces.SpanIsNotError(span);
 		}
 		catch (TaskCanceledException)
 		{
+			// We expect the otherSpans timeout to trigger. This would mean no error spans were found, which is the desired result.
 		}
 	}
 
