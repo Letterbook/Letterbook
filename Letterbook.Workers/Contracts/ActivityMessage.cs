@@ -11,5 +11,5 @@ public record ActivityMessage
 	public required string Data { get; init; }
 	public required string Activity { get; init; }
 	public required string Type { get; init; }
-	public required ImmutableHashSet<Claim> Claims { get; init; }
+	public required Claim[] Claims { get; init; }
 }
