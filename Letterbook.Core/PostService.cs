@@ -106,10 +106,14 @@ public class PostService : IAuthzPostService, IPostService
 
 		if (post.Audience.Contains(Audience.Public))
 		{
-			post.Audience = post.Audience.ReplaceWith(post.Creators.Select(Audience.Followers).ToHashSet());
+			// Fill in the followers audience(s), if necessary. Also fixes reference equality if the audience was already included
+			post.Audience = post.Audience.ReplaceFrom(post.Creators.Select(Audience.Followers).ToHashSet());
 		}
 		foreach (var audience in post.Audience)
 		{
+			// EF Core often incorrectly assumes the audience records are new, but that should never be true in this code path
+			// Creating new audiences would be an explicit action, and the only time it happens incidentally is when creating new
+			// Profiles
 			_posts.Update(audience);
 		}
 
