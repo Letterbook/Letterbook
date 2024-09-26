@@ -1,7 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Security.Claims;
-using Letterbook.Core.Models;
-using Letterbook.Core.Models.Dto;
+﻿using Letterbook.Core.Models.Dto;
 using Medo;
 
 namespace Letterbook.Workers.Contracts;
