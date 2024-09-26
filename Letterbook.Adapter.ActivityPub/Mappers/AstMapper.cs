@@ -553,7 +553,8 @@ internal class PublicKeyConverter :
 	ITypeConverter<SigningKey?, PublicKey?>,
 	IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>,
 	IMemberValueResolver<ApplicationActorExtension, Models.InstanceActor, PublicKey?, IList<SigningKey>>,
-	ITypeConverter<string, ReadOnlyMemory<byte>>, IMemberValueResolver<Models.Profile, PersonActorExtension, SigningKey?, PublicKey?>
+	ITypeConverter<string, ReadOnlyMemory<byte>>,
+	IMemberValueResolver<Models.Profile, PersonActorExtension, SigningKey?, PublicKey?>
 {
 	public SigningKey? Convert(PublicKey? source, SigningKey? destination, ResolutionContext context)
 	{

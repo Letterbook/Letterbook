@@ -54,45 +54,21 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			Assert.Equal(_post.Contents.First().Html, actual.Content?.DefaultValue);
 		}
 
-		[Fact(Skip = "Broken")]
+		[Fact(DisplayName = "Map a profile to Actor")]
 		public void MapProfileDefault()
-		{
-			var actual = _modelMapper.Map<PersonActorExtension>(_profile);
-
-			Assert.Equal(_profile.FediId.ToString(), actual.Id);
-			Assert.Equal(_profile.Inbox.ToString(), actual.Inbox.Id);
-			Assert.Equal(_profile.Outbox.ToString(), actual.Outbox.Id);
-			Assert.Equal(_profile.Following.ToString(), actual.Following?.Id);
-			Assert.Equal(_profile.Followers.ToString(), actual.Followers?.Id);
-		}
-
-		[Fact(Skip = "Need ModelMapper")]
-		public void CanMapProfileDefaultSigningKey()
-		{
-			var expected = _profile.Keys.First().GetRsa().ExportSubjectPublicKeyInfoPem();
-
-			var actual = _modelMapper.Map<PersonActorExtension>(_profile);
-
-			Assert.Equal(actual?.PublicKey?.PublicKeyPem, expected);
-			Assert.Equal(actual?.PublicKey?.Owner?.Value?.Id, _profile.FediId.ToString());
-			Assert.Equal(actual?.PublicKey?.Id, _profile.Keys.First().FediId.ToString());
-		}
-
-		[Fact(Skip = "Need ModelMapper")]
-		public void CanMapActorCore()
 		{
 			var actual = _modelMapper.Map<PersonActorExtension>(_profile);
 
 			Assert.Equal(_profile.FediId.ToString(), actual.Id);
 			Assert.Equal(_profile.Inbox.ToString(), actual.Inbox.HRef);
 			Assert.Equal(_profile.Outbox.ToString(), actual.Outbox.HRef);
-			Assert.Equal(_profile.Following.ToString(), actual.Following?.HRef!);
-			Assert.Equal(_profile.Followers.ToString(), actual.Followers?.HRef!);
+			Assert.Equal(_profile.Following.ToString(), actual.Following?.HRef.ToString());
+			Assert.Equal(_profile.Followers.ToString(), actual.Followers?.HRef.ToString());
 			Assert.Equal(_profile.Handle, actual.PreferredUsername?.DefaultValue);
 			Assert.Equal(_profile.DisplayName, actual.Name?.DefaultValue);
 		}
 
-		[Fact(Skip = "Need ModelMapper")]
+		[Fact(DisplayName = "Need ModelMapper")]
 		public void CanMapActorExtensionsPublicKey()
 		{
 			var expectedKey = _profile.Keys.First();

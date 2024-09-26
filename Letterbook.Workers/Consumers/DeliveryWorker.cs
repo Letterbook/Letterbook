@@ -27,7 +27,7 @@ public class DeliveryWorker : IConsumer<ActivityMessage>
 	{
 		Profile? profile = default;
 		if (context.Message.OnBehalfOf is { } id)
-			profile = await _profiles.As(context.Message.Claims.Select(c => (Claim)c)).LookupProfile(id);
+			profile = await _profiles.As(context.Message.Claims.Select(Extensions.MapClaim)).LookupProfile(id);
 		else
 			_logger.LogInformation("Sending {Activity} anonymously to {Inbox}", context.Message.Activity, context.Message.Inbox);
 

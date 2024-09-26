@@ -34,30 +34,30 @@ namespace Letterbook.Workers.Consumers
 				case nameof(PostEventPublisher.Created):
 					return;
 				case nameof(PostEventPublisher.Deleted):
-					await _timelines.As(context.Message.Claims.Select(c => (Claim)c)).HandleDelete(post);
+					await _timelines.As(context.Message.Claims.Select(Extensions.MapClaim)).HandleDelete(post);
 					return;
 				case nameof(PostEventPublisher.Updated):
 					if (post.PublishedDate is null) return;
 					if (context.Message.PrevData is not null)
 					{
 						var prev = _mapper.Map<Post>(context.Message.NextData);
-						await _timelines.As(context.Message.Claims.Select(c => (Claim)c)).HandleUpdate(post, prev);
+						await _timelines.As(context.Message.Claims.Select(Extensions.MapClaim)).HandleUpdate(post, prev);
 					}
 					else
 						_logger.LogError("Couldn't update Post {PostId} in timeline due to unknown previous state", post.GetId25());
 
 					return;
 				case nameof(PostEventPublisher.Published):
-					await _timelines.As(context.Message.Claims.Select(c => (Claim)c)).HandlePublish(post);
+					await _timelines.As(context.Message.Claims.Select(Extensions.MapClaim)).HandlePublish(post);
 					return;
 				case nameof(PostEventPublisher.Liked):
 					return;
 				case nameof(PostEventPublisher.Shared):
 					_logger.LogDebug("Sender: {Id}", context.Message.Sender);
 					if (context.Message.Sender is { } senderId
-					    && await _profiles.As(context.Message.Claims.Select(c => (Claim)c)).LookupProfile(senderId) is { } sender)
+					    && await _profiles.As(context.Message.Claims.Select(Extensions.MapClaim)).LookupProfile(senderId) is { } sender)
 					{
-						await _timelines.As(context.Message.Claims.Select(c => (Claim)c)).HandleShare(post, sender);
+						await _timelines.As(context.Message.Claims.Select(Extensions.MapClaim)).HandleShare(post, sender);
 					}
 					else
 						_logger.LogError("Couldn't add shared Post {PostId} to timeline due to missing sender info for {ProfileId}",
