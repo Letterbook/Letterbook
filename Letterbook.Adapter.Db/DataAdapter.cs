@@ -239,6 +239,8 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public void Update(Models.Post post) => _context.Posts.Update(post);
 
+	public void Update(Models.Audience audience) => _context.Update(audience);
+
 	public void UpdateRange(IEnumerable<Models.Profile> profile)
 	{
 		_context.Profiles.UpdateRange(profile);

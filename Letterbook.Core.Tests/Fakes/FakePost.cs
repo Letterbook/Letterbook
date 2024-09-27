@@ -25,7 +25,7 @@ public class FakePost : Faker<Post>
 	public FakePost(IEnumerable<Profile> creators, int contents, CoreOptions? opts)
 	{
 		_creators = creators;
-		_authority = _creators.First().Authority;
+		_authority = _creators.First().FediId.Authority;
 		RuleFor(p => p.Id, faker => faker.Random.Guid7());
 		RuleFor(p => p.FediId, faker => faker.FediId(_authority, "post"));
 		RuleFor(p => p.Creators, () => _creators);
@@ -41,7 +41,7 @@ public class FakePost : Faker<Post>
 		RuleFor(p => p.Hostname, (_, post) => post.FediId.Host);
 		RuleFor(p => p.Audience, (faker, post) =>
 		{
-			var audience = post.Creators.Select(Audience.Followers);
+			var audience = post.Creators.SelectMany(c => c.Headlining);
 			if (faker.Random.Bool())
 				audience = audience.Append(Audience.Public);
 
