@@ -104,11 +104,24 @@ public class PostService : IAuthzPostService, IPostService
 			content.Sanitize(_sanitizers);
 		}
 
+		if (post.Audience.Contains(Audience.Public))
+		{
+			// Fill in the followers audience(s), if necessary. Also fixes reference equality if the audience was already included
+			post.Audience = post.Audience.ReplaceFrom(post.Creators.Select(Audience.Followers).ToHashSet());
+		}
+		foreach (var audience in post.Audience)
+		{
+			// EF Core often incorrectly assumes the audience records are new, but that should never be true in this code path
+			// Creating new audiences would be an explicit action, and the only time it happens incidentally is when creating new
+			// Profiles
+			_posts.Update(audience);
+		}
+
 		if (publish) post.PublishedDate = DateTimeOffset.UtcNow;
 		_posts.Add(post);
 		await _posts.Commit();
-		await _postEventPublisher.Created(post);
-		if (publish) await _postEventPublisher.Published(post);
+		await _postEventPublisher.Created(post, _profileId, _claims);
+		if (publish) await _postEventPublisher.Published(post, _profileId, _claims);
 
 		return post;
 	}
@@ -143,7 +156,7 @@ public class PostService : IAuthzPostService, IPostService
 
 		_posts.Update(previous);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(previous);
+		await _postEventPublisher.Updated(previous, _profileId, _claims);
 
 		return previous;
 	}
@@ -156,7 +169,7 @@ public class PostService : IAuthzPostService, IPostService
 		post.DeletedDate = DateTimeOffset.UtcNow;
 		_posts.Remove(post);
 		await _posts.Commit();
-		await _postEventPublisher.Deleted(post);
+		await _postEventPublisher.Deleted(post, _profileId, _claims);
 	}
 
 	public async Task<Post> Publish(Uuid7 id, bool localOnly = false)
@@ -170,7 +183,7 @@ public class PostService : IAuthzPostService, IPostService
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Published(post);
+		await _postEventPublisher.Published(post, _profileId, _claims);
 		return post;
 	}
 
@@ -187,12 +200,12 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post);
+			await _postEventPublisher.Published(post, _profileId, _claims);
 		}
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post);
+		await _postEventPublisher.Updated(post, _profileId, _claims);
 		return post;
 	}
 
@@ -214,13 +227,13 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post);
+			await _postEventPublisher.Published(post, _profileId, _claims);
 		}
 
 		_posts.Remove(content);
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post);
+		await _postEventPublisher.Updated(post, _profileId, _claims);
 		return post;
 	}
 
@@ -246,12 +259,12 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post);
+			await _postEventPublisher.Published(post, _profileId, _claims);
 		}
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post);
+		await _postEventPublisher.Updated(post, _profileId, _claims);
 		return post;
 	}
 

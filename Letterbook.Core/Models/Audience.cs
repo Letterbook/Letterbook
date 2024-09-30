@@ -1,3 +1,4 @@
+using Letterbook.Core.Extensions;
 using Medo;
 
 namespace Letterbook.Core.Models;
@@ -21,7 +22,7 @@ public class Audience : IEquatable<Audience>, IFederated
 
 	public Uri FediId { get; set; }
 	public Profile? Source { get; set; }
-	public string Authority => FediId.Authority;
+	public string Authority => FediId.GetAuthority();
 	public List<Profile> Members { get; set; } = new();
 
 	// TODO: This needs access controls (i.e., you can't target someone else's followers)

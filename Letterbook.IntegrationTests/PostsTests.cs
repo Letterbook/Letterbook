@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -9,6 +10,7 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Models.Mappers.Converters;
+using Letterbook.Core.Tests.Fakes;
 using Letterbook.IntegrationTests.Fixtures;
 using Medo;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -61,7 +63,9 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		};
 	}
 
-	private bool ContentComparer(ContentDto? arg1, ContentDto? arg2) => arg1 != null && arg2 != null && arg1.Type == arg2.Type && arg1.Summary == arg2.Summary;
+	private bool ContentComparer(ContentDto? arg1, ContentDto? arg2) =>
+		arg1 != null && arg2 != null && arg1.Type == arg2.Type && arg1.Summary == arg2.Summary;
+
 	private bool TimestampMsComparer(DateTimeOffset? arg1, DateTimeOffset? arg2)
 	{
 		if (arg1 == null && arg2 == null) return true;
@@ -70,18 +74,50 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		return Math.Abs((arg1.Value - arg2.Value).Milliseconds) == 0;
 	}
 
+	/// <summary>
+	/// Theory data that provides a PostDto generator function
+	/// This allows the DTO to have properly configured audience and other values, for a pre-seeded test profile
+	/// </summary>
+	public class PostTheoryData : TheoryData<Func<Profile, PostDto>>
+	{
+		public PostTheoryData()
+		{
+			// No audience
+			Add(profile => new FakePostDto(profile).Generate());
+
+			// Explicit followers audience
+			Add(profile =>
+			{
+				var toFollowers = new FakePostDto(profile).Generate();
+				toFollowers.Audience.Add(new AudienceDto { FediId = Audience.Followers(profile).FediId });
+				return toFollowers;
+			});
+
+			// Public audience, and implied followers
+			Add(profile =>
+			{
+				var toPublic = new FakePostDto(profile).Generate();
+				toPublic.Audience.Add(new AudienceDto { FediId = Audience.Public.FediId });
+				return toPublic;
+			});
+		}
+	}
+
 	[Fact]
 	public void Exists()
 	{
 		Assert.NotNull(_host);
 	}
 
-	[Fact(DisplayName = "Should accept a draft post for a note")]
-	public async Task CanDraftNote()
+	[ClassData(typeof(PostTheoryData))]
+	[Theory(DisplayName = "Should draft and publish a note")]
+	public async Task CanDraftNote(Func<Profile, PostDto> generate)
 	{
-		var profile = _profiles[0];
-		var dto = _postDto.Generate();
+		var profile = _profiles[7];
+		var dto = generate(profile);
 		var payload = JsonContent.Create(dto, options: _json);
+		var traceId = Traces.TraceRequest(payload);
+
 		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post", payload);
 
 		Assert.NotNull(response);
@@ -90,6 +126,26 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		Assert.NotNull(body.Id);
 		Assert.NotEqual(Uuid7.Empty, body.Id);
 		Assert.Equal(dto.Contents.First(), body.Contents.FirstOrDefault(), ContentComparer);
+
+		if(dto.Audience.Count > 0 || dto.AddressedTo.Count > 0)
+		{
+			const string expected = "urn:message:Letterbook.Workers.Contracts:ActivityMessage send";
+			Assert.Contains(expected, _host.Spans.Where(a => a.TraceId == traceId).Select(s => s.DisplayName));
+		}
+
+		try
+		{
+			// Wait a little while for any subsequent work to happen, then check for exceptions
+			var otherSpans = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+			var span = await _host.Spans
+				.Where(a => a.TraceId == traceId)
+				.FirstOrDefaultAsync(span => span.Status == ActivityStatusCode.Error, otherSpans.Token);
+			Traces.SpanIsNotError(span);
+		}
+		catch (TaskCanceledException)
+		{
+			// We expect the otherSpans timeout to trigger. This would mean no error spans were found, which is the desired result.
+		}
 	}
 
 	[Fact(DisplayName = "Should publish a draft")]
@@ -136,7 +192,6 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 			SortKey = 1,
 			Type = "Note",
 			Text = "This is additional content",
-
 		};
 		var payload = JsonContent.Create(dto, options: _json);
 		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}/content", payload);
@@ -238,7 +293,6 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 
 		Assert.Equal(post.Thread.Posts.DistinctBy(p => p.Id).Count(), actual.Count());
 	}
-
 }
 
 public class ContentTextComparer : IEqualityComparer<ContentDto>

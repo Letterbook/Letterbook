@@ -120,6 +120,7 @@ public interface IDataAdapter : IDisposable
 	public void Update(Profile profile);
 	public void Update(Account account);
 	public void Update(Post post);
+	public void Update(Audience audience);
 	public void UpdateRange(IEnumerable<Profile> profile);
 	public void UpdateRange(IEnumerable<Account> account);
 	public void Delete(object record);
