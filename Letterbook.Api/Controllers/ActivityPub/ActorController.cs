@@ -62,7 +62,7 @@ public class ActorController : ControllerBase
 
 		var profile = await _profileService.As(User.Claims).LookupProfile(uuid);
 		if (profile == null) return NotFound();
-		var actor = ActorMapper.Map<PersonActorExtension>(profile);
+		var actor = ActorMapper.Map<ProfileActor>(profile);
 
 		return Ok(actor);
 	}

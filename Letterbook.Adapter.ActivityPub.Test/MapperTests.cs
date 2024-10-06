@@ -28,7 +28,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		private readonly IJsonLdSerializer _serializer;
 		private readonly FakePost _fakePost;
 		private readonly Models.Post _post;
-		private static IMapper _modelMapper = new Mapper(Mappers.AstMapper.Default);
+		private static IMapper _profileMapper = new Mapper(Mappers.AstMapper.Profile);
 		private static IMapper _postMapper = new Mapper(Mappers.AstMapper.Post);
 
 		public MapFromModelTests(ITestOutputHelper output, JsonLdSerializerFixture serializerFixture)
@@ -57,15 +57,16 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		[Fact(DisplayName = "Map a profile to Actor")]
 		public void MapProfileDefault()
 		{
-			var actual = _modelMapper.Map<PersonActorExtension>(_profile);
+			var actual = _profileMapper.Map<ProfileActor>(_profile);
 
 			Assert.Equal(_profile.FediId.ToString(), actual.Id);
-			Assert.Equal(_profile.Inbox.ToString(), actual.Inbox.HRef);
-			Assert.Equal(_profile.Outbox.ToString(), actual.Outbox.HRef);
+			Assert.Equal(_profile.Inbox.ToString(), actual.Inbox);
+			Assert.Equal(_profile.Outbox.ToString(), actual.Outbox);
 			Assert.Equal(_profile.Following.ToString(), actual.Following?.HRef.ToString());
 			Assert.Equal(_profile.Followers.ToString(), actual.Followers?.HRef.ToString());
 			Assert.Equal(_profile.Handle, actual.PreferredUsername?.DefaultValue);
 			Assert.Equal(_profile.DisplayName, actual.Name?.DefaultValue);
+			Assert.True(actual.Is<ProfilePersonActor>());
 		}
 
 		[Fact(DisplayName = "Need ModelMapper")]
@@ -73,10 +74,10 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		{
 			var expectedKey = _profile.Keys.First();
 			var expectedPem = expectedKey.GetRsa().ExportSubjectPublicKeyInfoPem();
-			var actual = _modelMapper.Map<PersonActorExtension>(_profile);
+			var actual = _profileMapper.Map<ProfileActor>(_profile);
 
-			Assert.Equal(expectedPem, actual.PublicKey?.PublicKeyPem);
-			Assert.Equal(expectedKey.FediId.ToString(), actual.PublicKey?.Id);
+			Assert.Equal(expectedPem, actual.PublicKeys.First().PublicKeyPem);
+			Assert.Equal(expectedKey.FediId.ToString(), actual.PublicKeys.First().Id);
 		}
 	}
 
@@ -117,22 +118,23 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		[Fact]
 		public void CanMapLetterbookActor()
 		{
+			// TODO: Serialize a live profile
 			using var fs = TestData.Read("LetterbookActor.json");
-			var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
-			var mapped = AstMapper.Map<Models.Profile>(actor);
+			var actor = _serializer.Deserialize<ProfileActor>(fs)!;
+			var actual = AstMapper.Map<Models.Profile>(actor);
 
-			// Reading an uninitialized Uuid7 causes an exception, this verifies
-			// that it doesn't happen here
-			_ = mapped.Id;
+			Assert.NotNull(actual);
+			Assert.Equal("http://localhost:3080/users/user/inbox", actual.Inbox.ToString());
+			Assert.Equal("http://localhost:3080/users/user/outbox", actual.Outbox.ToString());
+			Assert.NotEqual(Guid.Empty, actual.Id);
 
-			Assert.NotNull(mapped);
 		}
 
 		[Fact]
 		public void CanMapMastodonActor()
 		{
 			using var fs = TestData.Read("Actor.json");
-			var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
+			var actor = _serializer.Deserialize<ProfileActor>(fs)!;
 			var mapped = AstMapper.Map<Models.Profile>(actor);
 
 			Assert.NotNull(mapped);
@@ -185,7 +187,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		public void CanMapSigningKey()
 		{
 			using var fs = TestData.Read("Actor.json");
-			var actor = _serializer.Deserialize<PersonActorExtension>(fs)!;
+			var actor = _serializer.Deserialize<ProfileActor>(fs)!;
 			var mapped = AstMapper.Map<Models.Profile>(actor);
 
 			var key = mapped.Keys[0];
