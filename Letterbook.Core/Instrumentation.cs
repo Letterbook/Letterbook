@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Letterbook.Core;
 
@@ -12,6 +13,11 @@ public class Instrumentation : IDisposable
 	public Instrumentation()
 	{
 		ActivitySource = new ActivitySource(ActivitySourceName, ActivitySourceVersion);
+	}
+
+	public Activity? Span<T>([CallerMemberName] string method = "")
+	{
+		return ActivitySource.StartActivity($"{typeof(T).FullName} {method}");
 	}
 
 	public void Dispose()

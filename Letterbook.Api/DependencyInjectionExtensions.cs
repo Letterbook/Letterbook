@@ -107,6 +107,7 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IDataAdapter, DataAdapter>();
 		services.AddScoped<IAuthzPostService, PostService>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
+		services.AddSingleton<Instrumentation>();
 
 		// Register startup workers
 		services.AddScopedService<SeedAdminWorker>();

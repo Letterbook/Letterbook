@@ -26,8 +26,9 @@ public class PostService : IAuthzPostService, IPostService
 	private readonly IEnumerable<IContentSanitizer> _sanitizers;
 	private Uuid7 _profileId;
 	private IEnumerable<Claim> _claims = null!;
+	private readonly Instrumentation _instrument;
 
-	public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options,
+	public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options, Instrumentation instrumentation,
 		IDataAdapter posts, IPostEventPublisher postEventPublisher, IActivityPubClient apClient, IEnumerable<IContentSanitizer> sanitizers)
 	{
 		_logger = logger;
@@ -36,6 +37,7 @@ public class PostService : IAuthzPostService, IPostService
 		_apClient = apClient;
 		_sanitizers = sanitizers;
 		_options = options.Value;
+		_instrument = instrumentation;
 	}
 
 	public async Task<Post?> LookupPost(Uuid7 id, bool withThread = true)
@@ -85,6 +87,8 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> Draft(Post post, Uuid7? inReplyToId = default, bool publish = false)
 	{
+		using var span = _instrument.Span<PostService>();
+
 		if (inReplyToId is { } parentId)
 		{
 			var parent = await _posts.LookupPost(parentId)
@@ -107,7 +111,15 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.Audience.Contains(Audience.Public))
 		{
 			// Fill in the followers audience(s), if necessary. Also fixes reference equality if the audience was already included
-			post.Audience = post.Audience.ReplaceFrom(post.Creators.Select(Audience.Followers).ToHashSet());
+			_logger.LogDebug("Normalizing {Audience} for followers from {Headliners}",
+				post.Audience.Select(a => a.FediId),
+				post.Creators.SelectMany(p => p.Headlining).Select(a => a.FediId));
+
+			var followers = post.Creators.Select(Audience.Followers).ToHashSet()
+				.ReplaceFrom(post.Creators.SelectMany(p => p.Headlining).ToHashSet()).ToHashSet();
+			followers.UnionWith(post.Audience);
+			post.Audience = followers;
+			_logger.LogDebug("Normalized Audience for followers {Audience}", post.Audience.Select(a => a.FediId));
 		}
 		foreach (var audience in post.Audience)
 		{
@@ -120,6 +132,8 @@ public class PostService : IAuthzPostService, IPostService
 		if (publish) post.PublishedDate = DateTimeOffset.UtcNow;
 		_posts.Add(post);
 		await _posts.Commit();
+		span?.AddTag("letterbook.post.audience", string.Join(",", post.Audience.Select(a => a.FediId)));
+		span?.AddTag("letterbook.post.mentions", string.Join(",", post.AddressedTo.Select(m => m.Id)));
 		await _postEventPublisher.Created(post, _profileId, _claims);
 		if (publish) await _postEventPublisher.Published(post, _profileId, _claims);
 
