@@ -197,11 +197,6 @@ public static class AstMapper
 				else profile.Type = ActivityActorType.Unknown;
 			});
 
-		cfg.CreateMap<ApplicationActorExtension, InstanceActor>(MemberList.Destination)
-			.ForMember(dest => dest.Id, opt => opt.Ignore())
-			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
-			.ForMember(dest => dest.Authority, opt => opt.MapFrom(MapAuthority))
-			.ForMember(dest => dest.Keys, opt => opt.MapFrom(src => src.PublicKey!));
 	}
 
 	private static void ConfigureKeyTypes(IMapperConfigurationExpression cfg)
@@ -211,11 +206,6 @@ public static class AstMapper
 		cfg.CreateMap<SigningKey, PublicKey>()
 			.ConvertUsing<PublicKeyConverter>();
 	}
-
-	private static string MapAuthority(ApplicationActorExtension actor, InstanceActor _)
-		=> actor.TryGetId(out var id)
-			? id.GetAuthority()
-			: throw CoreException.MissingData<InstanceActor>("Mapping failure, no id available");
 
 	private static string MapAuthority(ASObject actor, Models.Profile _)
 		=> actor.TryGetId(out var id)
@@ -270,17 +260,12 @@ public static class AstMapper
 	{
 		cfg.CreateMap<ASType, Models.Profile>()
 			.ConvertUsing<ASTypeConverter>();
-		cfg.CreateMap<ASType, Models.InstanceActor>()
-			.ConvertUsing<ASTypeConverter>();
 		cfg.CreateMap<ASType, Models.IFederatedActor>()
 			.ConvertUsing<ASTypeConverter>();
 	}
 
 	private static void ConfigureBaseTypes(IMapperConfigurationExpression cfg)
 	{
-		// cfg.CreateMap<ASLink, Uri>()
-			// .ConvertUsing<IdConverter>();
-
 		cfg.CreateMap<ASObject?, Uri?>()
 			.ConvertUsing<IdConverter>();
 
@@ -631,7 +616,6 @@ internal class PublicKeyConverter :
 	ITypeConverter<PublicKey, SigningKey>,
 	ITypeConverter<SigningKey, PublicKey>,
 	IMemberValueResolver<ProfileActor, Models.Profile, PublicKey?, IList<SigningKey>>,
-	IMemberValueResolver<ApplicationActorExtension, Models.InstanceActor, PublicKey?, IList<SigningKey>>,
 	ITypeConverter<string, ReadOnlyMemory<byte>>,
 	IMemberValueResolver<Models.Profile, ProfileActor, SigningKey?, PublicKey?>
 {
@@ -692,17 +676,6 @@ internal class PublicKeyConverter :
 		return destMember;
 	}
 
-	IList<SigningKey> IMemberValueResolver<ApplicationActorExtension, Models.InstanceActor, PublicKey?, IList<SigningKey>>
-		.Resolve(ApplicationActorExtension source, Models.InstanceActor destination, PublicKey? sourceMember,
-			IList<SigningKey>? destMember, ResolutionContext context)
-	{
-		var key = context.Mapper.Map<SigningKey>(sourceMember);
-		destMember ??= new List<SigningKey>();
-		if (key is not null) destMember.Add(key);
-
-		return destMember;
-	}
-
 	ReadOnlyMemory<byte> ITypeConverter<string, ReadOnlyMemory<byte>>
 		.Convert(string source, ReadOnlyMemory<byte> destination, ResolutionContext context)
 	{
@@ -744,14 +717,10 @@ public class NaturalLanguageStringConverter
 [UsedImplicitly]
 internal class ASTypeConverter :
 	ITypeConverter<ASType, Models.Profile>,
-	ITypeConverter<ASType, Models.InstanceActor>,
 	ITypeConverter<ASType, Models.IFederatedActor>
 {
 	public Models.Profile Convert(ASType source, Models.Profile? destination, ResolutionContext context)
 		=> Convert<ProfileActor, Models.Profile>(source, destination, context);
-
-	public Models.InstanceActor Convert(ASType source, Models.InstanceActor? destination, ResolutionContext context)
-		=> Convert<ApplicationActorExtension, Models.InstanceActor>(source, destination, context);
 
 	/// <summary>
 	/// This implementation allows <see cref="Client.Fetch{T}"/> to be called with IFederatedActor as the type. It will
@@ -760,19 +729,8 @@ internal class ASTypeConverter :
 	public Models.IFederatedActor Convert(ASType source, Models.IFederatedActor? destination, ResolutionContext context)
 	{
 		IFederatedActor? result = null;
-		if (source.Is<ApplicationActorExtension>())
-		{
-			result = Convert<ApplicationActorExtension, InstanceActor>(source, null, context);
-		}
-		else if (source.Is<ProfileActor>())
-		{
-			result = Convert<ProfileActor, Models.Profile>(source, null, context);
-		}
 
-		if (result is null)
-		{
-			return null!;
-		}
+		result = Convert<ProfileActor, Models.Profile>(source, null, context);
 
 		if (destination is null)
 		{

@@ -8,8 +8,8 @@ namespace Letterbook.Adapter.ActivityPub.Types;
 /// <summary>
 /// A unified actor type that implements all the actor extensions Letterbook supports
 /// </summary>
-/// <remarks>The derived types support for type checking and mapping to specific AP Actor types.</remarks>
-public class ProfileActor : APActor, IASModel<ProfileActor, ProfileActorEntity, APActor>
+/// <remarks>The derived types support type checking and mapping to specific AP Actor types.</remarks>
+public class ProfileActor : APActor, IASModel<ProfileActor, ProfileActorEntity>
 {
 	private ProfileActorEntity Entity { get; }
 
