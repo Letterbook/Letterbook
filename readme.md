@@ -84,7 +84,7 @@ All of this is just the beginning of what we have planned for Letterbook. We're 
 ## Contributing
 
 > [!TIP]
-> To get started developing, see the Quckstart section in the [Contributing Guide](./CONTRIBUTING.md)
+> To get started developing, see the Quickstart section in the [Contributing Guide](./CONTRIBUTING.md)
 
 
 Please reach out to let us know you're interested in the project! There are many ways to contribute, it's a lot more than just code. Experience in these areas would be particularly helpful, right now. And this list will only grow over time.
