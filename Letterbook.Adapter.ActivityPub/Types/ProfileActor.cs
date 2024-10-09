@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
+using ActivityPub.Types.Util;
 
 namespace Letterbook.Adapter.ActivityPub.Types;
 
@@ -9,7 +10,7 @@ namespace Letterbook.Adapter.ActivityPub.Types;
 /// A unified actor type that implements all the actor extensions Letterbook supports
 /// </summary>
 /// <remarks>The derived types support type checking and mapping to specific AP Actor types.</remarks>
-public class ProfileActor : APActor, IASModel<ProfileActor, ProfileActorEntity>
+public class ProfileActor : APActor, IASModel<ProfileActor, ProfileActorEntity, APActor>
 {
 	private ProfileActorEntity Entity { get; }
 
@@ -18,15 +19,18 @@ public class ProfileActor : APActor, IASModel<ProfileActor, ProfileActorEntity>
 	public ProfileActor(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
 		=> Entity = TypeMap.ProjectTo<ProfileActor, ProfileActorEntity>(isExtending);
 
-	public ProfileActor(ASType existingGraph) : this(existingGraph.TypeMap)
-	{
-	}
+	public ProfileActor(ASType existingGraph) : this(existingGraph.TypeMap) { }
 
 	[SetsRequiredMembers]
 	public ProfileActor(TypeMap typeMap, ProfileActorEntity? entity) : base(typeMap, null)
 		=> Entity = entity ?? typeMap.AsEntity<ProfileActor, ProfileActorEntity>();
 
 	static ProfileActor IASModel<ProfileActor>.FromGraph(TypeMap typeMap) => new(typeMap, null);
+
+	public static IJsonLDContext DefiningContext { get; } = new JsonLDContext(IJsonLDContext.ActivityStreams)
+	{
+		new JsonLDContextObject("https://w3id.org/security/v1")
+	};
 
 	public ASLink? SharedInbox
 	{
@@ -48,7 +52,10 @@ public sealed class ProfileActorEntity : ASEntity<ProfileActor, ProfileActorEnti
 	[JsonPropertyName("sharedInbox")] public ASLink? SharedInbox { get; set; }
 }
 
-public class ProfilePersonActor : ProfileActor, IASModel<ProfilePersonActor, ProfilePersonActorEntity>
+/// <summary>
+/// A Person actor with support for Letterbook's known extensions and mappings
+/// </summary>
+public class ProfilePersonActor : ProfileActor, IASModel<ProfilePersonActor, ProfilePersonActorEntity, ProfileActor>
 {
 	private const string ActorType = "Person";
 	static string IASModel<ProfilePersonActor>.ASTypeName => ActorType;
@@ -60,20 +67,19 @@ public class ProfilePersonActor : ProfileActor, IASModel<ProfilePersonActor, Pro
 	public ProfilePersonActor(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
 		=> Entity = TypeMap.ProjectTo<ProfilePersonActor, ProfilePersonActorEntity>(isExtending);
 
-	public ProfilePersonActor(ASType existingGraph) : this(existingGraph.TypeMap)
-	{
-	}
+	public ProfilePersonActor(ASType existingGraph) : this(existingGraph.TypeMap) { }
 
 	[SetsRequiredMembers]
 	public ProfilePersonActor(TypeMap typeMap, ProfilePersonActorEntity? entity) : base(typeMap, null)
 		=> Entity = entity ?? typeMap.AsEntity<ProfilePersonActor, ProfilePersonActorEntity>();
 }
 
-public sealed class ProfilePersonActorEntity : ASEntity<ProfilePersonActor, ProfilePersonActorEntity>
-{
-}
+public sealed class ProfilePersonActorEntity : ASEntity<ProfilePersonActor, ProfilePersonActorEntity> { }
 
-public class ProfileApplicationActor : ProfileActor, IASModel<ProfileApplicationActor, ProfileApplicationActorEntity>
+/// <summary>
+/// An Application actor with support for Letterbook's known extensions and mappings
+/// </summary>
+public class ProfileApplicationActor : ProfileActor, IASModel<ProfileApplicationActor, ProfileApplicationActorEntity, ProfileActor>
 {
 	private const string ModelType = "Application";
 	static string IASModel<ProfileApplicationActor>.ASTypeName => ModelType;
@@ -85,20 +91,19 @@ public class ProfileApplicationActor : ProfileActor, IASModel<ProfileApplication
 	public ProfileApplicationActor(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
 		=> Entity = TypeMap.ProjectTo<ProfileApplicationActor, ProfileApplicationActorEntity>(isExtending);
 
-	public ProfileApplicationActor(ASType existingGraph) : this(existingGraph.TypeMap)
-	{
-	}
+	public ProfileApplicationActor(ASType existingGraph) : this(existingGraph.TypeMap) { }
 
 	[SetsRequiredMembers]
 	public ProfileApplicationActor(TypeMap typeMap, ProfileApplicationActorEntity? entity) : base(typeMap, null)
 		=> Entity = entity ?? typeMap.AsEntity<ProfileApplicationActor, ProfileApplicationActorEntity>();
 }
 
-public sealed class ProfileApplicationActorEntity : ASEntity<ProfileApplicationActor, ProfileApplicationActorEntity>
-{
-}
+public sealed class ProfileApplicationActorEntity : ASEntity<ProfileApplicationActor, ProfileApplicationActorEntity> { }
 
-public class ProfileServiceActor : ProfileActor, IASModel<ProfileServiceActor, ProfileServiceActorEntity>
+/// <summary>
+/// A Service actor with support for Letterbook's known extensions and mappings
+/// </summary>
+public class ProfileServiceActor : ProfileActor, IASModel<ProfileServiceActor, ProfileServiceActorEntity, ProfileActor>
 {
 	private const string ModelType = "Service";
 	static string IASModel<ProfileServiceActor>.ASTypeName => ModelType;
@@ -110,20 +115,19 @@ public class ProfileServiceActor : ProfileActor, IASModel<ProfileServiceActor, P
 	public ProfileServiceActor(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
 		=> Entity = TypeMap.ProjectTo<ProfileServiceActor, ProfileServiceActorEntity>(isExtending);
 
-	public ProfileServiceActor(ASType existingGraph) : this(existingGraph.TypeMap)
-	{
-	}
+	public ProfileServiceActor(ASType existingGraph) : this(existingGraph.TypeMap) { }
 
 	[SetsRequiredMembers]
 	public ProfileServiceActor(TypeMap typeMap, ProfileServiceActorEntity? entity) : base(typeMap, null)
 		=> Entity = entity ?? typeMap.AsEntity<ProfileServiceActor, ProfileServiceActorEntity>();
 }
 
-public sealed class ProfileServiceActorEntity : ASEntity<ProfileServiceActor, ProfileServiceActorEntity>
-{
-}
+public sealed class ProfileServiceActorEntity : ASEntity<ProfileServiceActor, ProfileServiceActorEntity> { }
 
-public class ProfileGroupActor : ProfileActor, IASModel<ProfileGroupActor, ProfileGroupActorEntity>
+/// <summary>
+/// A Group actor with support for Letterbook's known extensions and mappings
+/// </summary>
+public class ProfileGroupActor : ProfileActor, IASModel<ProfileGroupActor, ProfileGroupActorEntity, ProfileActor>
 {
 	private const string ModelType = "Group";
 	static string IASModel<ProfileGroupActor>.ASTypeName => ModelType;
@@ -135,20 +139,19 @@ public class ProfileGroupActor : ProfileActor, IASModel<ProfileGroupActor, Profi
 	public ProfileGroupActor(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
 		=> Entity = TypeMap.ProjectTo<ProfileGroupActor, ProfileGroupActorEntity>(isExtending);
 
-	public ProfileGroupActor(ASType existingGraph) : this(existingGraph.TypeMap)
-	{
-	}
+	public ProfileGroupActor(ASType existingGraph) : this(existingGraph.TypeMap) { }
 
 	[SetsRequiredMembers]
 	public ProfileGroupActor(TypeMap typeMap, ProfileGroupActorEntity? entity) : base(typeMap, null)
 		=> Entity = entity ?? typeMap.AsEntity<ProfileGroupActor, ProfileGroupActorEntity>();
 }
 
-public sealed class ProfileGroupActorEntity : ASEntity<ProfileGroupActor, ProfileGroupActorEntity>
-{
-}
+public sealed class ProfileGroupActorEntity : ASEntity<ProfileGroupActor, ProfileGroupActorEntity> { }
 
-public class ProfileOrganizationActor : ProfileActor, IASModel<ProfileOrganizationActor, ProfileOrganizationActorEntity>
+/// <summary>
+/// An Organization actor with support for Letterbook's known extensions and mappings
+/// </summary>
+public class ProfileOrganizationActor : ProfileActor, IASModel<ProfileOrganizationActor, ProfileOrganizationActorEntity, ProfileActor>
 {
 	private const string ModelType = "Organization";
 	static string IASModel<ProfileOrganizationActor>.ASTypeName => ModelType;
@@ -160,15 +163,11 @@ public class ProfileOrganizationActor : ProfileActor, IASModel<ProfileOrganizati
 	public ProfileOrganizationActor(TypeMap typeMap, bool isExtending = true) : base(typeMap, false)
 		=> Entity = TypeMap.ProjectTo<ProfileOrganizationActor, ProfileOrganizationActorEntity>(isExtending);
 
-	public ProfileOrganizationActor(ASType existingGraph) : this(existingGraph.TypeMap)
-	{
-	}
+	public ProfileOrganizationActor(ASType existingGraph) : this(existingGraph.TypeMap) { }
 
 	[SetsRequiredMembers]
 	public ProfileOrganizationActor(TypeMap typeMap, ProfileOrganizationActorEntity? entity) : base(typeMap, null)
 		=> Entity = entity ?? typeMap.AsEntity<ProfileOrganizationActor, ProfileOrganizationActorEntity>();
 }
 
-public sealed class ProfileOrganizationActorEntity : ASEntity<ProfileOrganizationActor, ProfileOrganizationActorEntity>
-{
-}
+public sealed class ProfileOrganizationActorEntity : ASEntity<ProfileOrganizationActor, ProfileOrganizationActorEntity> { }
