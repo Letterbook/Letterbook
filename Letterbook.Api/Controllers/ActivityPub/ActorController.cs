@@ -39,7 +39,7 @@ public class ActorController : ControllerBase
 	private readonly IProfileService _profileService;
 	private readonly IActivityMessagePublisher _messagePublisher;
 	private readonly IActivityPubDocument _apDoc;
-	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Default);
+	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Profile);
 
 	public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
 		IProfileService profileService, IActivityMessagePublisher messagePublisher, IActivityPubDocument apDoc)
@@ -62,7 +62,7 @@ public class ActorController : ControllerBase
 
 		var profile = await _profileService.As(User.Claims).LookupProfile(uuid);
 		if (profile == null) return NotFound();
-		var actor = ActorMapper.Map<PersonActorExtension>(profile);
+		var actor = ActorMapper.Map<ProfileActor>(profile);
 
 		return Ok(actor);
 	}

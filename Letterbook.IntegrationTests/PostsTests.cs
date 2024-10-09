@@ -129,23 +129,34 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 
 		if(dto.Audience.Count > 0 || dto.AddressedTo.Count > 0)
 		{
+			var cancel = new CancellationTokenSource(TimeSpan.FromMilliseconds(1000));
+			var stop = false;
+
 			const string expected = "urn:message:Letterbook.Workers.Contracts:ActivityMessage send";
-			Assert.Contains(expected, _host.Spans.Where(a => a.TraceId == traceId).Select(s => s.DisplayName));
+			var spans = await _host.Spans.Where(a => a.TraceId == traceId).TakeWhile(s =>
+			{
+				if (stop) return false;
+				if (s.DisplayName == expected)
+					stop = true;
+				return true;
+			}).ToListAsync(cancel.Token);
+			Assert.Contains(expected, spans.Select(s => s.DisplayName));
 		}
 
 		try
 		{
 			// Wait a little while for any subsequent work to happen, then check for exceptions
-			var otherSpans = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+			var otherSpans = new CancellationTokenSource(TimeSpan.FromMilliseconds(350));
 			var span = await _host.Spans
 				.Where(a => a.TraceId == traceId)
 				.FirstOrDefaultAsync(span => span.Status == ActivityStatusCode.Error, otherSpans.Token);
 			Traces.SpanIsNotError(span);
 		}
+		// We expect the otherSpans timeout to trigger. This would mean no error spans were found, which is the desired result.
 		catch (TaskCanceledException)
-		{
-			// We expect the otherSpans timeout to trigger. This would mean no error spans were found, which is the desired result.
-		}
+		{}
+		catch (OperationCanceledException)
+		{}
 	}
 
 	[Fact(DisplayName = "Should publish a draft")]

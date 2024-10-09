@@ -2,12 +2,14 @@ using System.Security.Cryptography;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
+using ActivityPub.Types.AS.Extended.Actor;
 using ActivityPub.Types.AS.Extended.Object;
-using ActivityPub.Types.Conversion.Converters;
 using ActivityPub.Types.Util;
 using AutoMapper;
 using JetBrains.Annotations;
 using Letterbook.Adapter.ActivityPub.Types;
+using Letterbook.Core.Exceptions;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Medo;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -20,14 +22,21 @@ namespace Letterbook.Adapter.ActivityPub.Mappers;
 /// </summary>
 public static class AstMapper
 {
+	/// <summary>
+	/// Map from AS types to Model types
+	/// </summary>
 	public static MapperConfiguration Default = new(cfg =>
 	{
 		ConfigureBaseTypes(cfg);
+		ConfigureKeyTypes(cfg);
 		FromActor(cfg);
 		FromNote(cfg);
 		FromASType(cfg);
 	});
 
+	/// <summary>
+	/// Map Posts and Content to AS types
+	/// </summary>
 	public static MapperConfiguration Post = new(cfg =>
 	{
 		ConfigureUriTypes(cfg);
@@ -80,8 +89,41 @@ public static class AstMapper
 			.ForMember(d => d.Type, opt => opt.Ignore())
 			.ForMember(d => d.JsonLDContext, opt => opt.Ignore())
 			.ForMember(d => d.Name, opt => opt.Ignore());
-
 	});
+
+	/// <summary>
+	/// Map Profiles to AS types
+	/// </summary>
+	public static MapperConfiguration Profile = new(cfg =>
+	{
+		ConfigureUriTypes(cfg);
+		ConfigureDateTypes(cfg);
+		ConfigureKeyTypes(cfg);
+		ConfigureProfile(cfg);
+	});
+
+	private static void ConfigureProfile(IMapperConfigurationExpression cfg)
+	{
+		cfg.CreateMap<Models.Profile, ProfileActor>(MemberList.None)
+			.ConstructUsing((profile, _) => profile.Type switch
+			{
+				ActivityActorType.Application => new ProfileApplicationActor { Inbox = profile.Inbox, Outbox = profile.Outbox },
+				ActivityActorType.Group => new ProfileGroupActor { Inbox = profile.Inbox, Outbox = profile.Outbox },
+				ActivityActorType.Organization => new ProfileOrganizationActor { Inbox = profile.Inbox, Outbox = profile.Outbox },
+				ActivityActorType.Person => new ProfilePersonActor { Inbox = profile.Inbox, Outbox = profile.Outbox },
+				ActivityActorType.Service => new ProfileServiceActor { Inbox = profile.Inbox, Outbox = profile.Outbox },
+				ActivityActorType.Unknown => new ProfilePersonActor { Inbox = profile.Inbox, Outbox = profile.Outbox },
+				_ => new ProfilePersonActor { Inbox = profile.Inbox, Outbox = profile.Outbox },
+			})
+			.ForMember(d => d.Id, opt => opt.MapFrom(s => s.FediId))
+			.ForMember(d => d.Updated, opt => opt.MapFrom(s => s.Updated))
+			.ForMember(d => d.Published, opt => opt.MapFrom(s => s.Created))
+			.ForMember(d => d.Summary, opt => opt.MapFrom(s => s.Description))
+			.ForMember(d => d.PreferredUsername, opt => opt.MapFrom(s => s.Handle))
+			.ForMember(d => d.Name, opt => opt.MapFrom(s => s.DisplayName))
+			.ForMember(d => d.SharedInbox, opt => opt.MapFrom(s => s.SharedInbox))
+			.ForMember(d => d.PublicKeys, opt => opt.MapFrom(s => s.Keys));
+	}
 
 	private static void ConfigureContentTypes(IMapperConfigurationExpression cfg)
 	{
@@ -107,13 +149,24 @@ public static class AstMapper
 
 	private static void FromActor(IMapperConfigurationExpression cfg)
 	{
-		cfg.CreateMap<PersonActorExtension, Models.Profile>(MemberList.Destination)
+		cfg.CreateMap<ProfilePersonActor, Models.Profile>()
+			.IncludeBase<ProfileActor, Models.Profile>();
+		cfg.CreateMap<ProfileApplicationActor, Models.Profile>()
+			.IncludeBase<ProfileActor, Models.Profile>();
+		cfg.CreateMap<ProfileServiceActor, Models.Profile>()
+			.IncludeBase<ProfileActor, Models.Profile>();
+		cfg.CreateMap<ProfileGroupActor, Models.Profile>()
+			.IncludeBase<ProfileActor, Models.Profile>();
+		cfg.CreateMap<ProfileOrganizationActor, Models.Profile>()
+			.IncludeBase<ProfileActor, Models.Profile>();
+
+		cfg.CreateMap<ProfileActor, Models.Profile>(MemberList.Destination)
 			.ConstructUsing(_ => Models.Profile.CreateEmpty(Uuid7.NewUuid7()))
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
-			.ForMember(dest => dest.Authority, opt => opt.Ignore())
+			.ForMember(dest => dest.Authority, opt => opt.MapFrom(MapAuthority))
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
 			.ForMember(dest => dest.Type, opt => opt.Ignore())
-			.ForMember(dest => dest.SharedInbox, opt => opt.Ignore())
+			.ForMember(dest => dest.SharedInbox, opt => opt.MapFrom(src => src.SharedInbox))
 			.ForMember(dest => dest.OwnedBy, opt => opt.Ignore())
 			.ForMember(dest => dest.Accessors, opt => opt.Ignore())
 			.ForMember(dest => dest.Audiences, opt => opt.Ignore())
@@ -128,27 +181,36 @@ public static class AstMapper
 			.ForMember(dest => dest.CustomFields, opt => opt.Ignore())
 			.ForMember(dest => dest.Inbox, opt => opt.MapFrom(src => src.Inbox))
 			.ForMember(dest => dest.Outbox, opt => opt.MapFrom(src => src.Outbox))
+			.ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Published))
 			.ForMember(dest => dest.Updated, opt => opt.MapFrom(src => src.Updated))
 			.ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers))
 			.ForMember(dest => dest.Following, opt => opt.MapFrom(src => src.Following))
-			.ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!))
-			.AfterMap((_, profile) => { profile.Type = ActivityActorType.Person; })
-			.ReverseMap()
-			.ForMember(
-				dest => dest.PublicKey,
-				opt => opt.MapFrom<PublicKeyConverter, SigningKey?>(src => src.Keys.FirstOrDefault()));
+			.ForMember(d => d.Keys, opt => opt.MapFrom(s => s.PublicKeys))
+			// .ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, List<PublicKey>>(src => src.PublicKey!))
+			.AfterMap((profileActor, profile) =>
+			{
+				if (profileActor.Is<PersonActor>()) profile.Type = ActivityActorType.Person;
+				else if (profileActor.Is<ApplicationActor>()) profile.Type = ActivityActorType.Application;
+				else if (profileActor.Is<GroupActor>()) profile.Type = ActivityActorType.Group;
+				else if (profileActor.Is<ServiceActor>()) profile.Type = ActivityActorType.Service;
+				else if (profileActor.Is<OrganizationActor>()) profile.Type = ActivityActorType.Organization;
+				else profile.Type = ActivityActorType.Unknown;
+			});
 
-		cfg.CreateMap<ApplicationActorExtension, InstanceActor>(MemberList.Destination)
-			.ForMember(dest => dest.Id, opt => opt.Ignore())
-			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
-			.ForMember(dest => dest.Authority, opt => opt.Ignore())
-			.ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, PublicKey?>(src => src.PublicKey!));
+	}
 
-		cfg.CreateMap<PublicKey?, SigningKey?>()
+	private static void ConfigureKeyTypes(IMapperConfigurationExpression cfg)
+	{
+		cfg.CreateMap<PublicKey, SigningKey>()
 			.ConvertUsing<PublicKeyConverter>();
-		cfg.CreateMap<SigningKey?, PublicKey?>()
+		cfg.CreateMap<SigningKey, PublicKey>()
 			.ConvertUsing<PublicKeyConverter>();
 	}
+
+	private static string MapAuthority(ASObject actor, Models.Profile _)
+		=> actor.TryGetId(out var id)
+			? id.GetAuthority()
+			: throw CoreException.MissingData<Models.Profile>("Mapping failure, no id available");
 
 	private static void FromNote(IMapperConfigurationExpression cfg)
 	{
@@ -194,21 +256,16 @@ public static class AstMapper
 				opt => opt.MapFrom<AudienceResolver, LinkableList<ASObject>>(src => src.Audience));
 	}
 
-    private static void FromASType(IMapperConfigurationExpression cfg)
-    {
-	    cfg.CreateMap<ASType, Models.Profile>()
-		    .ConvertUsing<ASTypeConverter>();
-	    cfg.CreateMap<ASType, Models.InstanceActor>()
-		    .ConvertUsing<ASTypeConverter>();
-	    cfg.CreateMap<ASType, Models.IFederatedActor>()
-		    .ConvertUsing<ASTypeConverter>();
-    }
+	private static void FromASType(IMapperConfigurationExpression cfg)
+	{
+		cfg.CreateMap<ASType, Models.Profile>()
+			.ConvertUsing<ASTypeConverter>();
+		cfg.CreateMap<ASType, Models.IFederatedActor>()
+			.ConvertUsing<ASTypeConverter>();
+	}
 
 	private static void ConfigureBaseTypes(IMapperConfigurationExpression cfg)
 	{
-		cfg.CreateMap<ASLink, Uri>()
-			.ConvertUsing<IdConverter>();
-
 		cfg.CreateMap<ASObject?, Uri?>()
 			.ConvertUsing<IdConverter>();
 
@@ -257,7 +314,8 @@ public static class AstMapper
 [UsedImplicitly]
 public class AttachedContentResolver : IMemberValueResolver<Post, NoteObject, IEnumerable<Content>, LinkableList<ASObject>>
 {
-	public LinkableList<ASObject> Resolve(Post source, NoteObject destination, IEnumerable<Content> sourceMember, LinkableList<ASObject> destMember, ResolutionContext context)
+	public LinkableList<ASObject> Resolve(Post source, NoteObject destination, IEnumerable<Content> sourceMember,
+		LinkableList<ASObject> destMember, ResolutionContext context)
 	{
 		return new LinkableList<ASObject>(sourceMember.Order().Select(context.Mapper.Map<ASObject>));
 	}
@@ -267,12 +325,14 @@ public class AttachedContentResolver : IMemberValueResolver<Post, NoteObject, IE
 public class FediIdResolver : IMemberValueResolver<Post, NoteObject, Post?, LinkableList<ASObject>?>,
 	IMemberValueResolver<Content, ASObject, IEnumerable<Models.Profile>, LinkableList<ASObject>>
 {
-	public LinkableList<ASObject>? Resolve(Post source, NoteObject destination, Post? sourceMember, LinkableList<ASObject>? destMember, ResolutionContext context)
+	public LinkableList<ASObject>? Resolve(Post source, NoteObject destination, Post? sourceMember, LinkableList<ASObject>? destMember,
+		ResolutionContext context)
 	{
 		return sourceMember != null ? context.Mapper.Map<LinkableList<ASObject>>(sourceMember.FediId) : default;
 	}
 
-	public LinkableList<ASObject> Resolve(Content source, ASObject destination, IEnumerable<Models.Profile> sourceMember, LinkableList<ASObject> destMember, ResolutionContext context)
+	public LinkableList<ASObject> Resolve(Content source, ASObject destination, IEnumerable<Models.Profile> sourceMember,
+		LinkableList<ASObject> destMember, ResolutionContext context)
 	{
 		destMember.AddRange(sourceMember.Select(each => new ASLink { HRef = each.FediId }));
 		return destMember;
@@ -406,8 +466,8 @@ internal class PostContextConverter : IMemberValueResolver<ASObject, Post, Linka
 	private static ThreadContext NewThread(ASObject src, Post post)
 	{
 		if (src.Context?.TryGetValue(out var ctx) == true
-			&& ctx.Is<ASCollection>()
-			&& ctx.TryGetId(out var ctxId))
+		    && ctx.Is<ASCollection>()
+		    && ctx.TryGetId(out var ctxId))
 		{
 			return Result(ctxId);
 		}
@@ -484,23 +544,26 @@ internal interface IMentionDiscriminator
 {
 	public MentionVisibility Value();
 }
+
 internal class To : IMentionDiscriminator
 {
 	public MentionVisibility Value() => MentionVisibility.To;
 }
+
 internal class Cc : IMentionDiscriminator
 {
 	public MentionVisibility Value() => MentionVisibility.Cc;
 }
+
 internal class BTo : IMentionDiscriminator
 {
 	public MentionVisibility Value() => MentionVisibility.Bto;
 }
+
 internal class Bcc : IMentionDiscriminator
 {
 	public MentionVisibility Value() => MentionVisibility.Bcc;
 }
-
 
 [UsedImplicitly]
 internal class MentionsResolver<T> : IMemberValueResolver<ASObject, Post, LinkableList<ASObject>, ICollection<Mention>>
@@ -521,7 +584,8 @@ internal class MentionsResolver<T> : IMemberValueResolver<ASObject, Post, Linkab
 }
 
 [UsedImplicitly]
-internal class IdConverter : ITypeConverter<ASLink, Uri>,
+internal class IdConverter :
+	ITypeConverter<ASLink, Uri>,
 	ITypeConverter<ASObject?, Uri?>,
 	ITypeConverter<Linkable<ASObject>?, Uri?>,
 	ITypeConverter<Linkable<ASCollection>?, Uri?>
@@ -549,16 +613,15 @@ internal class IdConverter : ITypeConverter<ASLink, Uri>,
 
 [UsedImplicitly]
 internal class PublicKeyConverter :
-	ITypeConverter<PublicKey?, SigningKey?>,
-	ITypeConverter<SigningKey?, PublicKey?>,
-	IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>,
-	IMemberValueResolver<ApplicationActorExtension, Models.InstanceActor, PublicKey?, IList<SigningKey>>,
+	ITypeConverter<PublicKey, SigningKey>,
+	ITypeConverter<SigningKey, PublicKey>,
+	IMemberValueResolver<ProfileActor, Models.Profile, PublicKey?, IList<SigningKey>>,
 	ITypeConverter<string, ReadOnlyMemory<byte>>,
-	IMemberValueResolver<Models.Profile, PersonActorExtension, SigningKey?, PublicKey?>
+	IMemberValueResolver<Models.Profile, ProfileActor, SigningKey?, PublicKey?>
 {
-	public SigningKey? Convert(PublicKey? source, SigningKey? destination, ResolutionContext context)
+	public SigningKey Convert(PublicKey source, SigningKey _, ResolutionContext context)
 	{
-		if (source is null) return default;
+		// if (source is null) return default;
 		using TextReader tr = new StringReader(source.PublicKeyPem);
 
 		var reader = new PemReader(tr);
@@ -571,21 +634,19 @@ internal class PublicKeyConverter :
 			_ => SigningKey.KeyFamily.Unknown
 		};
 
-		destination ??= SigningKey.CreateEmpty(Uuid7.NewUuid7(), new Uri(source.Id));
+		var result = SigningKey.CreateEmpty(Uuid7.NewUuid7(), new Uri(source.Id));
 
-		destination.FediId = new Uri(source.Id);
-		destination.Label = "From federation peer";
-		destination.PublicKey = context.Mapper.Map<ReadOnlyMemory<byte>>(source.PublicKeyPem);
-		destination.Family = alg;
-		destination.Created = DateTimeOffset.UtcNow;
+		result.FediId = new Uri(source.Id);
+		result.Label = "From federation peer";
+		result.PublicKey = context.Mapper.Map<ReadOnlyMemory<byte>>(source.PublicKeyPem);
+		result.Family = alg;
+		result.Created = DateTimeOffset.UtcNow;
 
-		return destination;
+		return result;
 	}
 
-	public PublicKey? Convert(SigningKey? source, PublicKey? destination, ResolutionContext context)
+	public PublicKey Convert(SigningKey source, PublicKey _, ResolutionContext context)
 	{
-		if (source is null) return default;
-
 		AsymmetricAlgorithm? algo = source.Family switch
 		{
 			SigningKey.KeyFamily.Rsa => source.GetRsa(),
@@ -594,29 +655,18 @@ internal class PublicKeyConverter :
 			_ => null
 		};
 
-		destination ??= new PublicKey()
+		var result = new PublicKey()
 		{
 			Id = source.FediId.ToString(),
 			Owner = default!,
 			PublicKeyPem = algo?.ExportSubjectPublicKeyInfoPem() ?? ""
 		};
 
-		return destination;
+		return result;
 	}
 
-	IList<SigningKey> IMemberValueResolver<PersonActorExtension, Models.Profile, PublicKey?, IList<SigningKey>>
-		.Resolve(PersonActorExtension source, Models.Profile destination, PublicKey? sourceMember,
-			IList<SigningKey>? destMember, ResolutionContext context)
-	{
-		var key = context.Mapper.Map<SigningKey>(sourceMember);
-		destMember ??= new List<SigningKey>();
-		if (key is not null) destMember.Add(key);
-
-		return destMember;
-	}
-
-	IList<SigningKey> IMemberValueResolver<ApplicationActorExtension, Models.InstanceActor, PublicKey?, IList<SigningKey>>
-		.Resolve(ApplicationActorExtension source, Models.InstanceActor destination, PublicKey? sourceMember,
+	IList<SigningKey> IMemberValueResolver<ProfileActor, Models.Profile, PublicKey?, IList<SigningKey>>
+		.Resolve(ProfileActor source, Models.Profile destination, PublicKey? sourceMember,
 			IList<SigningKey>? destMember, ResolutionContext context)
 	{
 		var key = context.Mapper.Map<SigningKey>(sourceMember);
@@ -636,7 +686,7 @@ internal class PublicKeyConverter :
 		return System.Convert.FromBase64String(b64);
 	}
 
-	public PublicKey Resolve(Models.Profile source, PersonActorExtension destination, SigningKey? sourceMember, PublicKey? destMember,
+	public PublicKey Resolve(Models.Profile source, ProfileActor destination, SigningKey? sourceMember, PublicKey? destMember,
 		ResolutionContext context)
 	{
 		if (destMember != null)
@@ -667,14 +717,10 @@ public class NaturalLanguageStringConverter
 [UsedImplicitly]
 internal class ASTypeConverter :
 	ITypeConverter<ASType, Models.Profile>,
-	ITypeConverter<ASType, Models.InstanceActor>,
 	ITypeConverter<ASType, Models.IFederatedActor>
 {
 	public Models.Profile Convert(ASType source, Models.Profile? destination, ResolutionContext context)
-		=> Convert<PersonActorExtension, Models.Profile>(source, destination, context);
-
-	public Models.InstanceActor Convert(ASType source, Models.InstanceActor? destination, ResolutionContext context)
-		=> Convert<ApplicationActorExtension, Models.InstanceActor>(source, destination, context);
+		=> Convert<ProfileActor, Models.Profile>(source, destination, context);
 
 	/// <summary>
 	/// This implementation allows <see cref="Client.Fetch{T}"/> to be called with IFederatedActor as the type. It will
@@ -683,19 +729,8 @@ internal class ASTypeConverter :
 	public Models.IFederatedActor Convert(ASType source, Models.IFederatedActor? destination, ResolutionContext context)
 	{
 		IFederatedActor? result = null;
-		if (source.Is<ApplicationActorExtension>())
-		{
-			result = Convert<ApplicationActorExtension, InstanceActor>(source, null, context);
-		}
-		else if (source.Is<PersonActorExtension>())
-		{
-			result = Convert<PersonActorExtension, Models.Profile>(source, null, context);
-		}
 
-		if (result is null)
-		{
-			return null!;
-		}
+		result = Convert<ProfileActor, Models.Profile>(source, null, context);
 
 		if (destination is null)
 		{

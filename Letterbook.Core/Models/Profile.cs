@@ -82,6 +82,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public string DisplayName { get; set; }
 	public string Description { get; set; }
 	public CustomField[] CustomFields { get; set; } = [];
+	public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 	public DateTime Updated { get; set; } = DateTime.UtcNow;
 	public Account? OwnedBy { get; set; }
 	public ICollection<ProfileClaims> Accessors { get; set; } = new HashSet<ProfileClaims>();

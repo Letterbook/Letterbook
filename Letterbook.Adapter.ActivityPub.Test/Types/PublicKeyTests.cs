@@ -37,11 +37,11 @@ public class PublicKeyTests : IClassFixture<JsonLdSerializerFixture>
                      }
                    }
                    """;
-		var actual = _serializer.Deserialize<PersonActorExtension>(json);
+		var actual = _serializer.Deserialize<ProfileActor>(json);
 
 		Assert.NotNull(actual);
-		Assert.NotNull(actual.PublicKey);
-		Assert.NotNull(actual.PublicKey.Id);
+		Assert.NotEmpty(actual.PublicKeys);
+		Assert.Equal("https://example.com/key", actual.PublicKeys.First().Id);
 	}
 
 	[Fact(Skip = "Needs APSharp#152")]
