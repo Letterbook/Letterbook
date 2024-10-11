@@ -149,7 +149,7 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 		var query = _adapter.QueryFrom(_profiles[0], profile => profile.Audiences);
 		var actual = await query.ToListAsync();
 
-		Assert.Equal(5, actual.Count);
+		Assert.Equal(7, actual.Count);
 	}
 
 	[Trait("AccountProfileAdapter", "QueryFrom")]

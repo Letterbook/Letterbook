@@ -223,14 +223,6 @@ public class ProfileService : IProfileService, IAuthzProfileService
 			// TODO(moderation): Check for blocks
 			// TODO(moderation): Check for requiresApproval
 			var relation = self.Follow(target, FollowState.Accepted);
-			var joining = new HashSet<Audience>();
-
-			joining.Add(subscribeOnly ? Audience.Subscribers(target) : Audience.Followers(target));
-			joining.Add(Audience.Boosts(target));
-			foreach (var audience in joining.ReplaceFrom(target.Headlining))
-			{
-				self.Audiences.Add(audience);
-			}
 
 			await _profiles.Commit();
 			return relation;
@@ -303,7 +295,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	private async Task<FollowerRelation> ReceiveFollowRequest(Profile target, Profile follower, Uri? requestId)
 	{
-		var relation = target.AddFollower(follower, FollowState.Accepted);
+		var relation = follower.Follow(target, FollowState.Accepted);
 		await _profiles.Commit();
 
 		var actor = target;

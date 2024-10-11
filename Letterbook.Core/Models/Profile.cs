@@ -140,6 +140,16 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		var relation = new FollowerRelation(this, following, state);
 		FollowingCollection.Add(relation);
 		following.FollowersCollection.Add(relation);
+
+		var joining = new HashSet<Audience>();
+
+		joining.Add(Audience.Followers(following));
+		joining.Add(Audience.Boosts(following));
+		foreach (var audience in joining.ReplaceFrom(following.Headlining))
+		{
+			following.Audiences.Add(audience);
+		}
+
 		return relation;
 	}
 
