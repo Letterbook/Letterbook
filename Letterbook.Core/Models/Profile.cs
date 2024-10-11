@@ -141,6 +141,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		FollowingCollection.Add(relation);
 		following.FollowersCollection.Add(relation);
 
+		if (state != FollowState.Accepted) return relation;
 		var joining = new HashSet<Audience>();
 
 		joining.Add(Audience.Followers(following));

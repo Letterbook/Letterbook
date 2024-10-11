@@ -231,11 +231,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		// TODO(moderation): Check for blocks
 		// TODO(moderation): Check for requiresApproval
 		await _activity.Follow(target.Inbox, target, self);
-
 		self.Follow(target, FollowState.Pending);
-		self.Audiences.Add(Audience.Followers(target));
-		self.Audiences.Add(Audience.Boosts(target));
-		self.Audiences = self.Audiences.ReplaceFrom(target.Headlining);
+
 		await _profiles.Commit();
 		return new FollowerRelation(self, target, FollowState.Pending);
 	}
