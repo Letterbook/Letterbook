@@ -21,8 +21,9 @@ public static class DependencyInjection
 			.AddScoped<IProfileService>(_ => mocks.ProfileServiceMock.Object)
 			.AddScoped<IActivityMessagePublisher>(_ => mocks.ActivityPublisherMock.Object)
 			.AddScoped<IDataAdapter>(_ => mocks.DataAdapterMock.Object)
-			.AddSingleton<MappingConfigProvider>()
 			.AddScoped<IActivityPubDocument, Document>()
+			.AddSingleton<Instrumentation>()
+			.AddSingleton<MappingConfigProvider>()
 			.AddSingleton<IOptions<CoreOptions>>(mocks.CoreOptionsMock);
 	}
 

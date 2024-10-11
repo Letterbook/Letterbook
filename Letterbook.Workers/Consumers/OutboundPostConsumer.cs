@@ -18,6 +18,7 @@ namespace Letterbook.Workers.Consumers;
 public class OutboundPostConsumer : IConsumer<PostEvent>
 {
 	private readonly ILogger<OutboundPostConsumer> _logger;
+	private readonly Instrumentation _instrumentation;
 	private readonly IActivityMessagePublisher _messagePublisher;
 	private readonly IDataAdapter _posts;
 	private readonly IProfileService _profileService;
@@ -26,9 +27,11 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 	private readonly CoreOptions _config;
 
 	public OutboundPostConsumer(ILogger<OutboundPostConsumer> logger, IOptions<CoreOptions> coreOptions, MappingConfigProvider maps,
-		IActivityMessagePublisher messagePublisher, IDataAdapter posts, IProfileService profileService, IActivityPubDocument document)
+		Instrumentation instrumentation, IActivityMessagePublisher messagePublisher, IDataAdapter posts, IProfileService profileService,
+		IActivityPubDocument document)
 	{
 		_logger = logger;
+		_instrumentation = instrumentation;
 		_messagePublisher = messagePublisher;
 		_posts = posts;
 		_profileService = profileService;
@@ -69,7 +72,10 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 
 	private async Task Published(Post post, Profile sender)
 	{
+		using var span = _instrumentation.Span<OutboundPostConsumer>();
 		var mentions = await GetMentionedProfiles(post).ToListAsync();
+		span?.AddTag("audience.ids", string.Join(", ", post.Audience.Select(a => a.FediId)));
+		span?.AddTag("mentions.inboxes", string.Join(", ", mentions.Select(m => m.Subject.Inbox)));
 		var doc = _document.FromPost(post);
 
 		// Deliver directly to mentioned profiles
