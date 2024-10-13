@@ -148,7 +148,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		joining.Add(Audience.Boosts(following));
 		foreach (var audience in joining.ReplaceFrom(following.Headlining))
 		{
-			following.Audiences.Add(audience);
+			Audiences.Add(audience);
 		}
 
 		return relation;
