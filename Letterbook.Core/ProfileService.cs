@@ -17,6 +17,7 @@ namespace Letterbook.Core;
 public class ProfileService : IProfileService, IAuthzProfileService
 {
 	private ILogger<ProfileService> _logger;
+	private readonly Instrumentation _instrumentation;
 	private CoreOptions _coreConfig;
 	private IDataAdapter _profiles;
 	private IProfileEventPublisher _profileEvents;
@@ -24,11 +25,12 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private readonly IHostSigningKeyProvider _hostSigningKeyProvider;
 	private readonly IActivityMessagePublisher _activity;
 
-	public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options,
+	public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options, Instrumentation instrumentation,
 		IDataAdapter profiles, IProfileEventPublisher profileEvents, IActivityPubClient client,
 		IHostSigningKeyProvider hostSigningKeyProvider, IActivityMessagePublisher activity)
 	{
 		_logger = logger;
+		_instrumentation = instrumentation;
 		_coreConfig = options.Value;
 		_profiles = profiles;
 		_profileEvents = profileEvents;
@@ -270,6 +272,10 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> ReceiveFollowRequest(Uri targetId, Uri followerId, Uri? requestId)
 	{
+		using var span = _instrumentation.Span<ProfileService>();
+		span?.AddTag("targetId", targetId);
+		span?.AddTag("followerId", followerId);
+		span?.AddTag("requestId", requestId);
 		if (targetId.Authority != _coreConfig.BaseUri().Authority)
 		{
 			_logger.LogWarning("Profile {FollowerId} tried to follow {TargetId}, but this is not the origin server", followerId, targetId);
@@ -284,7 +290,11 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> ReceiveFollowRequest(Uuid7 localId, Uri followerId, Uri? requestId)
 	{
-		var target = await RequireProfile(localId);
+		using var span = _instrumentation.Span<ProfileService>();
+		span?.AddTag("localId", localId);
+		span?.AddTag("followerId", followerId);
+		span?.AddTag("requestId", requestId);
+		var target = await RequireProfile(localId, followerId);
 		var follower = await ResolveProfile(followerId);
 
 		return await ReceiveFollowRequest(target, follower, requestId);
@@ -292,8 +302,16 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	private async Task<FollowerRelation> ReceiveFollowRequest(Profile target, Profile follower, Uri? requestId)
 	{
-		var relation = follower.Follow(target, FollowState.Accepted);
-		await _profiles.Commit();
+		using var span = Activity.Current;
+		span?.AddTag("targetProfile.headlining", string.Join(", ", target.Headlining.Select(a => a.FediId)));
+
+		// Check for existing relationship, in case we get duplicate requests
+		var relation = target.FollowersCollection.FirstOrDefault(r => r.Follower == follower);
+		if (relation is null)
+		{
+			relation = follower.Follow(target, FollowState.Accepted);
+			await _profiles.Commit();
+		}
 
 		var actor = target;
 		var inbox = follower.Inbox;
@@ -512,9 +530,12 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		[CallerFilePath] string path = "",
 		[CallerLineNumber] int line = -1)
 	{
+		var query = _profiles.SingleProfile(localId)
+			.Include(p => p.Headlining);
+
 		var profile = relationId != null
-			? await _profiles.LookupProfileWithRelation(localId, relationId)
-			: await _profiles.LookupProfile(localId);
+			? await query.WithRelation(relationId).FirstOrDefaultAsync()
+			: await query.Include(p => p.Keys).AsSplitQuery().FirstOrDefaultAsync();
 		if (profile != null) return profile;
 
 		_logger.LogError("Cannot update Profile {ProfileId} because it could not be found", localId);
@@ -529,7 +550,10 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		[CallerFilePath] string path = "",
 		[CallerLineNumber] int line = -1)
 	{
-		var profile = await _profiles.LookupProfile(profileId);
+		var profile = await _profiles.SingleProfile(profileId)
+			.Include(p => p.Headlining)
+			.FirstOrDefaultAsync();
+
 		if (profile != null
 		    && !profile.HasLocalAuthority(_coreConfig)
 		    && profile.Updated.Add(TimeSpan.FromHours(12)) >= DateTime.UtcNow) return profile;

@@ -30,8 +30,9 @@ public class ProfileServiceTests : WithMocks
 		_fakeProfile = new FakeProfile("letterbook.example");
 		CoreOptionsMock.Value.MaxCustomFields = 2;
 
-		_service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, DataAdapterMock.Object,
-			Mock.Of<IProfileEventPublisher>(), ActivityPubClientMock.Object, Mock.Of<IHostSigningKeyProvider>(), ActivityPublisherMock.Object);
+		_service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, Mock.Of<Instrumentation>(),
+			DataAdapterMock.Object, Mock.Of<IProfileEventPublisher>(), ActivityPubClientMock.Object, Mock.Of<IHostSigningKeyProvider>(),
+			ActivityPublisherMock.Object);
 		_profile = _fakeProfile.Generate();
 	}
 
