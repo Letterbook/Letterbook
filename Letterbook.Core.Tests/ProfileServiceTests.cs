@@ -86,8 +86,8 @@ public class ProfileServiceTests : WithMocks
 		var expectedId = Uuid7.NewUuid7();
 		_profile.Id = expectedId;
 		_profile.DisplayName = new Faker().Internet.UserName();
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
-			.ReturnsAsync(_profile);
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryProfile);
 
 		var actual = await _service.UpdateDisplayName(expectedId, "Test Name");
 
@@ -100,8 +100,8 @@ public class ProfileServiceTests : WithMocks
 	public async Task NoUpdateDisplayNameNotExists()
 	{
 		var expectedId = Uuid7.NewUuid7();
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
-			.ReturnsAsync(default(Profile));
+		var queryProfile = ((List<Profile>)[]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(expectedId)).Returns(queryProfile);
 
 		await Assert.ThrowsAsync<CoreException>(() => _service.UpdateDisplayName(expectedId, "Test Name"));
 	}
@@ -109,10 +109,10 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should not update the display name when the name is unchanged")]
 	public async Task NoUpdateDisplayNameUnchanged()
 	{
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
-			.ReturnsAsync(_profile);
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryProfile);
 
-		var actual = await _service.UpdateDisplayName((Uuid7)_profile.Id!, _profile.DisplayName);
+		var actual = await _service.UpdateDisplayName(_profile.GetId(), _profile.DisplayName);
 
 		Assert.Null(actual.Updated);
 		Assert.Equal(_profile, actual.Original);
@@ -126,8 +126,8 @@ public class ProfileServiceTests : WithMocks
 		var expectedId = Uuid7.NewUuid7();
 		_profile.Id = expectedId;
 		_profile.DisplayName = new Faker().Internet.UserName();
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
-			.ReturnsAsync(_profile);
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryProfile);
 
 		var actual = await _service.UpdateDescription(expectedId, "This is a test user bio");
 
@@ -139,8 +139,8 @@ public class ProfileServiceTests : WithMocks
 	public async Task NoUpdateBioNotExists()
 	{
 		var expectedId = Uuid7.NewUuid7();
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
-			.ReturnsAsync(default(Profile));
+		var queryProfile = ((List<Profile>)[]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(expectedId)).Returns(queryProfile);
 
 		await Assert.ThrowsAsync<CoreException>(() =>
 			_service.UpdateDescription(expectedId, "This is a test user bio"));
@@ -149,10 +149,10 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should not update the bio when it is unchanged")]
 	public async Task NoUpdateBioUnchanged()
 	{
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
-			.ReturnsAsync(_profile);
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryProfile);
 
-		var actual = await _service.UpdateDescription((Uuid7)_profile.Id!, _profile.Description);
+		var actual = await _service.UpdateDescription(_profile.GetId(), _profile.Description);
 
 		Assert.Null(actual.Updated);
 		Assert.Equal(_profile, actual.Original);
@@ -163,8 +163,8 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should insert new custom fields")]
 	public async Task InsertCustomField()
 	{
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
-			.ReturnsAsync(_profile);
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryProfile);
 
 		var actual = await _service.InsertCustomField((Uuid7)_profile.Id!, 0, "test item", "test value");
 		// var (original, actual) = await _service.InsertCustomField((Uuid7)_profile.LocalId!, 0, "test item", "test value");
@@ -181,8 +181,8 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should insert new custom fields at given index")]
 	public async Task InsertCustomFieldAtIndex()
 	{
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
-			.ReturnsAsync(_profile);
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryProfile);
 
 		var actual = await _service.InsertCustomField((Uuid7)_profile.Id!, 1, "test item", "test value");
 		// var (original, actual) = await _service.InsertCustomField((Uuid7)_profile.LocalId!, 1, "test item", "test value");
@@ -199,20 +199,19 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should not insert custom fields when the profile doesn't exist")]
 	public async Task NoInsertCustomField()
 	{
-		var expectedId = Uuid7.NewUuid7();
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == expectedId)))
-			.ReturnsAsync(default(Profile));
+		var queryProfile = ((List<Profile>)[]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryProfile);
 
 		await Assert.ThrowsAsync<CoreException>(() =>
-			_service.InsertCustomField((Uuid7)_profile.Id!, 0, "test item", "test value"));
+			_service.InsertCustomField(_profile.GetId(), 0, "test item", "test value"));
 	}
 
 	[Fact(DisplayName = "Should not insert custom fields when the list is already full")]
 	public async Task NoInsertCustomFieldTooMany()
 	{
 		_profile.CustomFields = _profile.CustomFields.Append(new() { Label = "item2", Value = "value2" }).ToArray();
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
-			.ReturnsAsync(_profile);
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryProfile);
 
 		await Assert.ThrowsAsync<CoreException>(() =>
 			_service.InsertCustomField((Uuid7)_profile.Id!, 0, "test item", "test value"));
@@ -221,8 +220,8 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should update custom fields")]
 	public async Task UpdateCustomField()
 	{
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
-			.ReturnsAsync(_profile);
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryProfile);
 
 		var actual = await _service.UpdateCustomField((Uuid7)_profile.Id!, 0, "test item", "test value");
 
@@ -235,8 +234,8 @@ public class ProfileServiceTests : WithMocks
 	[Fact(DisplayName = "Should delete custom fields")]
 	public async Task DeleteCustomField()
 	{
-		DataAdapterMock.Setup(m => m.LookupProfile(It.Is<Uuid7>(given => given == _profile.Id)))
-			.ReturnsAsync(_profile);
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.GetId())).Returns(queryProfile);
 
 		var actual = await _service.RemoveCustomField((Uuid7)_profile.Id!, 0);
 
@@ -290,8 +289,10 @@ public class ProfileServiceTests : WithMocks
 	public async Task ReceiveFollowRequest()
 	{
 		var follower = new FakeProfile().Generate();
-		DataAdapterMock.Setup(m => m.LookupProfile(_profile.FediId)).ReturnsAsync(_profile);
-		DataAdapterMock.Setup(m => m.LookupProfile(follower.FediId)).ReturnsAsync(follower);
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		var queryFollower = ((List<Profile>)[follower]).BuildMock();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.FediId)).Returns(queryProfile);
+		DataAdapterMock.Setup(m => m.SingleProfile(follower.FediId)).Returns(queryFollower);
 
 		var actual = await _service.ReceiveFollowRequest(_profile.FediId, follower.FediId, null);
 
