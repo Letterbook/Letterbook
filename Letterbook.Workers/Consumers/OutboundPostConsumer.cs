@@ -76,32 +76,28 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 		var mentions = await GetMentionedProfiles(post).ToListAsync();
 		span?.AddTag("audience.ids", string.Join(", ", post.Audience.Select(a => a.FediId)));
 		span?.AddTag("mentions.inboxes", string.Join(", ", mentions.Select(m => m.Subject.Inbox)));
-		var doc = _document.FromPost(post);
 
 		// Deliver directly to mentioned profiles
 		foreach (var mention in mentions)
 		{
-			var privateDoc = doc;
 			switch (mention.Visibility)
 			{
 				case MentionVisibility.Bto:
 				case MentionVisibility.Bcc:
-					privateDoc = _document.FromPost(post);
-					privateDoc.Mention(mention);
+					await _messagePublisher.Publish(mention.Subject.Inbox, post, sender, mention);
 					break;
 				case MentionVisibility.To:
 				case MentionVisibility.Cc:
 				default:
 					break;
 			}
-			await _messagePublisher.Deliver(mention.Subject.Inbox, _document.Create(sender, privateDoc), sender);
 		}
 
 		// Deliver to audience, but don't double post to the mentioned profiles
 		await foreach (var inbox in GetAudienceInboxes(post)
 			               .Where(inbox => !mentions.Select(mention => mention.Subject.Inbox).Contains(inbox)))
 		{
-			await _messagePublisher.Deliver(inbox, doc, sender);
+			await _messagePublisher.Publish(inbox, post, sender);
 		}
 	}
 
