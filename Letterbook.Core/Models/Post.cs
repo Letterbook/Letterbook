@@ -52,21 +52,23 @@ public class Post : IFederated, IEquatable<Post>
 	/// </summary>
 	/// <param name="opts"></param>
 	[SetsRequiredMembers]
-	public Post(CoreOptions opts)
+	public Post(CoreOptions opts) : this()
 	{
 		var builder = new UriBuilder(opts.BaseUri());
-		_id = Uuid7.NewUuid7();
 		ContentRootIdUri = default!;
 
 		builder.Path += $"post/{_id.ToId25String()}";
+		var path = builder.Path;
 		FediId = builder.Uri;
 
 		builder.Path += "/replies";
-		Thread = new ThreadContext
-		{
-			FediId = builder.Uri,
-			RootId = Id,
-		};
+		Replies = builder.Uri;
+		builder.Path = path + "/likes";
+		Likes = builder.Uri;
+		builder.Path = path + "/shares";
+		Shares = builder.Uri;
+
+		Thread = new ThreadContext(Id, opts);
 		Thread.Posts.Add(this);
 		Authority = FediId.GetAuthority();
 		Hostname = FediId.Host;
@@ -75,7 +77,7 @@ public class Post : IFederated, IEquatable<Post>
 	public Guid Id
 	{
 		get => _id.ToGuid();
-		set => _id = Uuid7.FromGuid(value);
+		init => _id = Uuid7.FromGuid(value);
 	}
 
 	public Uri? ContentRootIdUri { get; set; }
@@ -119,7 +121,6 @@ public class Post : IFederated, IEquatable<Post>
 	public void SetRootContent(Content content)
 	{
 		ContentRootIdUri = content.FediId;
-		FediId = content.FediId;
 	}
 
 	public Content? GetRootContent() => Contents.Order().FirstOrDefault();

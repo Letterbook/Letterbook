@@ -53,6 +53,7 @@ public class PostMappings : AutoMapper.Profile
 			.ForMember(post => post.Id, opt => opt.PreCondition(dto => dto.Id != null))
 			.ForMember(post => post.Id, opt => opt.MapFrom(dto => dto.Id))
 			.ForMember(post => post.FediId, opt => opt.PreCondition(dto => dto.FediId != null))
+			.ForMember(post => post.FediId, opt => opt.MapFrom(dto => dto.FediId))
 			.ForMember(post => post.CreatedDate, opt => opt.ConvertUsing<DateTimeOffsetMapper, DateTimeOffset?>())
 			.ForMember(post => post.PublishedDate, opt => opt.ConvertUsing<DateTimeOffsetMapper, DateTimeOffset?>())
 			.ForMember(post => post.UpdatedDate, opt => opt.ConvertUsing<DateTimeOffsetMapper, DateTimeOffset?>())

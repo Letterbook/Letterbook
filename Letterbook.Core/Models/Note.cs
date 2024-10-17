@@ -7,7 +7,7 @@ namespace Letterbook.Core.Models;
 /// A short, single page, textual post content. Corresponds to AS:NoteObject.
 /// Posts that include a Note should usually serialize as a Note in AP documents
 /// </summary>
-public class Note : Content
+public class Note : Content, IContent
 {
 	public string? SourceText { get; set; }
 	public ContentType? SourceContentType { get; set; }

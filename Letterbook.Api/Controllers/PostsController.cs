@@ -51,7 +51,8 @@ public class PostsController : ControllerBase
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
-		dto.Id = Uuid7.NewUuid7();
+		dto.Id = null;
+
 		if (_mapper.Map<Post>(dto) is not { } post)
 			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
 		foreach (var content in post.Contents)
