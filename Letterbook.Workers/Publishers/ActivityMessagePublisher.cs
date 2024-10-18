@@ -34,6 +34,32 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 	}
 
 	/// <inheritdoc />
+	public async Task Publish(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default)
+	{
+		var doc = _document.FromPost(post);
+		switch (extraMention?.Visibility)
+		{
+			case MentionVisibility.Bto:
+				doc.BTo.Add(extraMention.Subject.FediId);
+				break;
+			case MentionVisibility.Bcc:
+				doc.BCC.Add(extraMention.Subject.FediId);
+				break;
+			case MentionVisibility.To:
+				doc.To.Add(extraMention.Subject.FediId);
+				break;
+			case MentionVisibility.Cc:
+				doc.CC.Add(extraMention.Subject.FediId);
+				break;
+			case null:
+			default:
+				break;
+		}
+		var activity = _document.Create(onBehalfOf, doc);
+		await Deliver(inbox, activity, onBehalfOf);
+	}
+
+	/// <inheritdoc />
 	public async Task Follow(Uri inbox, Profile target, Profile actor)
 	{
 		var document = _document.Follow(actor, target, implicitId: true);

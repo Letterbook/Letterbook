@@ -17,7 +17,7 @@ public class Instrumentation : IDisposable
 
 	public Activity? Span<T>([CallerMemberName] string method = "")
 	{
-		return ActivitySource.StartActivity($"{typeof(T).FullName} {method}");
+		return ActivitySource.StartActivity($"{typeof(T).Name} {method}");
 	}
 
 	public void Dispose()

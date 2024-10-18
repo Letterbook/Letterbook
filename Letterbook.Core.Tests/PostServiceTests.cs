@@ -46,10 +46,17 @@ public class PostServiceTests : WithMocks
 		var expected = DateTimeOffset.Now;
 		Assert.NotNull(actual);
 		Assert.NotEmpty(actual.Contents);
-		Assert.Equal("Test content", actual.Contents.First().Preview);
 		Assert.True((actual.CreatedDate - expected).Duration() <= TimeSpan.FromSeconds(1));
 		Assert.Null(actual.PublishedDate);
 		Assert.Empty(actual.Audience);
+		Assert.Equal($"/post/{actual.GetId25()}/replies", actual.Replies?.AbsolutePath);
+		Assert.Equal($"/post/{actual.GetId25()}/likes", actual.Likes?.AbsolutePath);
+		Assert.Equal($"/post/{actual.GetId25()}/shares", actual.Shares?.AbsolutePath);
+		Assert.Equal($"/post/{actual.GetId25()}", actual.FediId.AbsolutePath);
+
+		var note = actual.Contents.First();
+		Assert.Equal("Test content", note.Preview);
+		Assert.Equal($"/Note/{note.GetId25()}", note.FediId.AbsolutePath);
 	}
 
 	[Fact(DisplayName = "Should create unpublished reply posts")]

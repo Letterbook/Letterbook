@@ -1,5 +1,4 @@
 using ActivityPub.Types.AS;
-using Letterbook.Core.Events;
 using Letterbook.Core.Models;
 
 namespace Letterbook.Core.Adapters;
@@ -10,7 +9,7 @@ namespace Letterbook.Core.Adapters;
 /// This allows ActivityPub Http requests (and responses) to be processed outside the current Asp action, for example.
 /// This also enables messages to easily be retried on certain kinds of delivery failure.
 /// </summary>
-public interface IActivityMessagePublisher : IEventChannel
+public interface IActivityMessagePublisher
 {
 	/// <summary>
 	/// Deliver an arbitrary AP document to the inbox
@@ -20,6 +19,17 @@ public interface IActivityMessagePublisher : IEventChannel
 	/// <param name="onBehalfOf"></param>
 	/// <returns></returns>
 	public Task Deliver(Uri inbox, ASType activity, Profile? onBehalfOf);
+
+	/// <summary>
+	/// Deliver a Post that's been published.
+	/// </summary>
+	/// <remarks>The Post will be wrapped in a Create activity</remarks>
+	/// <param name="inbox"></param>
+	/// <param name="post"></param>
+	/// <param name="onBehalfOf"></param>
+	/// <param name="extraMention"></param>
+	/// <returns></returns>
+	public Task Publish(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default);
 
 	/// <summary>
 	/// Construct an AP document representing a request to follow the target and send it to the specified inbox

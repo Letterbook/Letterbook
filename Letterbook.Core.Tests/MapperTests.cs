@@ -43,6 +43,20 @@ public class MapperTests : WithMocks
 		_mappingConfig.Profiles.AssertConfigurationIsValid();
 	}
 
+	[Fact(DisplayName = "Should round trip Post IDs")]
+	public void MapRoundTrip()
+	{
+		var expected = new FakePost(CoreOptionsMock.Value.DomainName).Generate();
+		var intermediate = _postMapper.Map<PostDto>(expected);
+		var actual = _postMapper.Map<Post>(intermediate);
+
+		Assert.Equal(expected.GetId(), actual.GetId());
+		Assert.Equal(expected.FediId, actual.FediId);
+		Assert.Equal(expected.Replies, actual.Replies);
+		Assert.Equal(expected.Likes, actual.Likes);
+		Assert.Equal(expected.Shares, actual.Shares);
+	}
+
 	[Fact(DisplayName = "Should map PostDto")]
 	public void MapPost()
 	{
@@ -109,6 +123,7 @@ public class MapperTests : WithMocks
 		var actual = _postMapper.Map<Models.Post>(_postDto);
 
 		Assert.Equal(expected, actual.GetId());
+		// Assert.Equal();
 	}
 
 	[Fact(DisplayName = "Should map Creators")]
