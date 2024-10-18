@@ -77,7 +77,7 @@ public class Post : IFederated, IEquatable<Post>
 	public Guid Id
 	{
 		get => _id.ToGuid();
-		init => _id = Uuid7.FromGuid(value);
+		set => _id = Uuid7.FromGuid(value);
 	}
 
 	public Uri? ContentRootIdUri { get; set; }

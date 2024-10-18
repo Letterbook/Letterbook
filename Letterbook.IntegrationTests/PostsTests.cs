@@ -111,7 +111,7 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 
 	[ClassData(typeof(PostTheoryData))]
 	[Theory(DisplayName = "Should draft and publish a note")]
-	public async Task CanDraftNote(Func<Profile, PostDto> generate)
+	public async Task CanPublishNote(Func<Profile, PostDto> generate)
 	{
 		var profile = _profiles[7];
 		var dto = generate(profile);
@@ -157,6 +157,23 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		{}
 		catch (OperationCanceledException)
 		{}
+	}
+
+	[Fact]
+	public async Task CanDraftNote()
+	{
+		var dto = _postDto.Generate();
+		var payload = JsonContent.Create(dto, options: _json);
+
+		var response = await _client.PostAsync($"/lb/v1/posts/{_profiles[0].GetId25()}/post?draft=true", payload);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert.IsType<PostDto>(await response.Content.ReadFromJsonAsync<PostDto>(_json));
+		Assert.NotNull(actual.Replies);
+		Assert.Equal($"/post/{actual.Id?.ToId25String()}/replies", actual.Replies?.AbsolutePath);
+		Assert.Equal($"/post/{actual.Id?.ToId25String()}/likes", actual.Likes?.AbsolutePath);
+		Assert.Equal($"/post/{actual.Id?.ToId25String()}/shares", actual.Shares?.AbsolutePath);
 	}
 
 	[Fact(DisplayName = "Should publish a draft")]

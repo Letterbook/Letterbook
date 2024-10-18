@@ -52,6 +52,18 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			Assert.Equal(_post.FediId.ToString(), actual.Id);
 			Assert.Equal(_post.Creators.First().FediId.ToString(), actual.AttributedTo.First().Link?.HRef.ToString());
 			Assert.Equal(_post.Contents.First().Html, actual.Content?.DefaultValue);
+
+			Assert.NotNull(actual.Replies);
+			Assert.True(actual.Replies.TryGetId(out var replies));
+			Assert.Equal(_post.Replies, replies);
+
+			Assert.NotNull(actual.Likes);
+			Assert.True(actual.Likes.TryGetId(out var likes));
+			Assert.Equal(_post.Likes, likes);
+
+			Assert.NotNull(actual.Shares);
+			Assert.True(actual.Shares.TryGetId(out var shares));
+			Assert.Equal(_post.Shares, shares);
 		}
 
 		[Fact(DisplayName = "Map a profile to Actor")]
