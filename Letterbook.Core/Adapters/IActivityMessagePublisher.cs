@@ -63,6 +63,15 @@ public interface IActivityMessagePublisher
 	public Task Share(Uri inbox, Post post, Profile onBehalfOf);
 
 	/// <summary>
+	/// Send a Like message regarding a Post.
+	/// </summary>
+	/// <param name="inbox"></param>
+	/// <param name="post"></param>
+	/// <param name="onBehalfOf"></param>
+	/// <returns></returns>
+	public Task Like(Uri inbox, Post post, Profile onBehalfOf);
+
+	/// <summary>
 	/// Construct an AP document representing a request to follow the target and send it to the specified inbox
 	/// </summary>
 	/// <remarks>This will be represented as a simple Follow activity</remarks>

@@ -76,6 +76,12 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 				}
 				await DeliverAudience(post, sender, _messagePublisher.Delete);
 				break;
+			case nameof(PostEventPublisher.Liked):
+				await foreach (var inbox in GetAuthorsInboxes(post))
+				{
+					await _messagePublisher.Like(inbox, post, sender);
+				}
+				break;
 			default:
 				span?.AddEvent(new("unhandledEvent", DateTime.UtcNow, new ActivityTagsCollection
 				{
@@ -158,6 +164,18 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 		return _posts.QueryFrom(post, p => p.AddressedTo)
 			.Include(mention => mention.Subject)
 			.Where(mention => !mention.Subject.Authority.StartsWith(_config.BaseUri().GetAuthority()))
+			.TagWithCallSite()
+			.TagWith(nameof(GetMentionedProfiles))
+			.AsAsyncEnumerable();
+	}
+
+	private IAsyncEnumerable<Uri> GetAuthorsInboxes(Post post)
+	{
+		return _posts.QueryFrom(post, p => p.Creators)
+			.Where(profile => !profile.Authority.StartsWith(_config.BaseUri().GetAuthority()))
+			.Select(profile => profile.Inbox)
+			.TagWithCallSite()
+			.TagWith(nameof(GetAuthorsInboxes))
 			.AsAsyncEnumerable();
 	}
 
@@ -165,12 +183,14 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 	{
 		_logger.LogDebug("Getting inboxes for {Audiences}", post.Audience.Select(a => a.FediId));
 		return _posts.QueryFrom(post, p => p.Audience)
-				.Include(audience => audience.Members)
-				.SelectMany(audience => audience.Members)
-				.Where(member => !member.Authority.StartsWith(_config.BaseUri().GetAuthority()))
-				.Select(member => member.SharedInbox ?? member.Inbox)
-				.Distinct()
-				.AsAsyncEnumerable();
+			.Include(audience => audience.Members)
+			.SelectMany(audience => audience.Members)
+			.Where(member => !member.Authority.StartsWith(_config.BaseUri().GetAuthority()))
+			.Select(member => member.SharedInbox ?? member.Inbox)
+			.Distinct()
+			.TagWithCallSite()
+			.TagWith(nameof(GetAudienceInboxes))
+			.AsAsyncEnumerable();
 	}
 
 	private IAsyncEnumerable<Uri> GetFollowerInboxes(Profile profile)
@@ -183,6 +203,8 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 			.Where(member => !member.Authority.StartsWith(_config.BaseUri().GetAuthority()))
 			.Select(member => member.SharedInbox ?? member.Inbox)
 			.Distinct()
+			.TagWithCallSite()
+			.TagWith(nameof(GetFollowerInboxes))
 			.AsAsyncEnumerable();
 	}
 }

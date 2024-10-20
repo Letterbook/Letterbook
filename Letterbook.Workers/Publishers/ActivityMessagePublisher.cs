@@ -36,27 +36,38 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 	/// <inheritdoc />
 	public async Task Publish(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default)
 	{
-		var doc = AsObject(post, extraMention);
+		var doc = PopulateMentions(post, extraMention);
 		var activity = _document.Create(onBehalfOf, doc);
 		await Deliver(inbox, activity, onBehalfOf);
 	}
 
+	/// <inheritdoc />
 	public async Task Update(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default)
 	{
-		var doc = AsObject(post, extraMention);
+		var doc = PopulateMentions(post, extraMention);
 		var activity = _document.Update(onBehalfOf, doc);
 		await Deliver(inbox, activity, onBehalfOf);
 	}
 
+	/// <inheritdoc />
 	public async Task Delete(Uri inbox, Post post, Profile onBehalfOf)
 	{
 		var activity = _document.Delete(onBehalfOf, post.FediId);
 		await Deliver(inbox, activity, onBehalfOf);
 	}
 
-	public Task Share(Uri inbox, Post post, Profile onBehalfOf)
+	/// <inheritdoc />
+	public async Task Share(Uri inbox, Post post, Profile onBehalfOf)
 	{
-		throw new NotImplementedException();
+		var activity = _document.Announce(onBehalfOf, post.FediId);
+		await Deliver(inbox, activity, onBehalfOf);
+	}
+
+	/// <inheritdoc />
+	public async Task Like(Uri inbox, Post post, Profile onBehalfOf)
+	{
+		var activity = _document.Like(onBehalfOf, post.FediId);
+		await Deliver(inbox, activity, onBehalfOf);
 	}
 
 	/// <inheritdoc />
@@ -96,7 +107,7 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 		await Deliver(inbox, document, actor);
 	}
 
-	private ASObject AsObject(Post post, Mention? extraMention)
+	private ASObject PopulateMentions(Post post, Mention? extraMention)
 	{
 		var doc = _document.FromPost(post);
 		switch (extraMention?.Visibility)

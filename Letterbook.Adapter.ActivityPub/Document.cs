@@ -38,9 +38,12 @@ public class Document : IActivityPubDocument
 		throw new NotImplementedException();
 	}
 
-	public AnnounceActivity Announce(Models.Profile actor, Models.IContentRef content)
+	public AnnounceActivity Announce(Models.Profile actor, Uri content)
 	{
-		throw new NotImplementedException();
+		var doc = new AnnounceActivity();
+		doc.Actor.Add(ObjectId(actor));
+		doc.Object.Add(content);
+		return doc;
 	}
 
 	public BlockActivity Block(Models.Profile actor, Models.Profile target)
@@ -79,7 +82,7 @@ public class Document : IActivityPubDocument
 		return doc;
 	}
 
-	public LikeActivity Like(Models.Profile actor, Models.IContentRef content)
+	public LikeActivity Like(Models.Profile actor, Uri content)
 	{
 		throw new NotImplementedException();
 	}
