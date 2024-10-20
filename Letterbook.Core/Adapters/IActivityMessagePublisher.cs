@@ -32,6 +32,37 @@ public interface IActivityMessagePublisher
 	public Task Publish(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default);
 
 	/// <summary>
+	/// Deliver a Post that's been updated.
+	/// </summary>
+	/// <remarks>The Post will be wrapped in an Update activity</remarks>
+	/// <param name="inbox"></param>
+	/// <param name="post"></param>
+	/// <param name="onBehalfOf"></param>
+	/// <param name="extraMention"></param>
+	/// <returns></returns>
+	public Task Update(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default);
+
+	/// <summary>
+	/// Deliver a Post that's been deleted.
+	/// </summary>
+	/// <remarks>The Post will be sent as an ID only, in a Delete activity</remarks>
+	/// <param name="inbox"></param>
+	/// <param name="post"></param>
+	/// <param name="onBehalfOf"></param>
+	/// <returns></returns>
+	public Task Delete(Uri inbox, Post post, Profile onBehalfOf);
+
+	/// <summary>
+	/// Share a previously published Post.
+	/// </summary>
+	/// <remarks>The Post will be sent as an ID only, in an Announce activity</remarks>
+	/// <param name="inbox"></param>
+	/// <param name="post"></param>
+	/// <param name="onBehalfOf"></param>
+	/// <returns></returns>
+	public Task Share(Uri inbox, Post post, Profile onBehalfOf);
+
+	/// <summary>
 	/// Construct an AP document representing a request to follow the target and send it to the specified inbox
 	/// </summary>
 	/// <remarks>This will be represented as a simple Follow activity</remarks>

@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Security.Claims;
-using AutoMapper;
+﻿using AutoMapper;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
@@ -11,7 +9,6 @@ using MassTransit;
 using Medo;
 using Microsoft.Extensions.Options;
 using Claim = System.Security.Claims.Claim;
-using Profile = Letterbook.Core.Models.Profile;
 
 namespace Letterbook.Workers.Publishers;
 

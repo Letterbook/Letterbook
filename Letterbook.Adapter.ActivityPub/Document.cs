@@ -56,9 +56,12 @@ public class Document : IActivityPubDocument
 		return doc;
 	}
 
-	public DeleteActivity Delete(Models.Profile actor, Models.IContentRef content)
+	public DeleteActivity Delete(Models.Profile actor, Uri content)
 	{
-		throw new NotImplementedException();
+		var doc = new DeleteActivity();
+		doc.Actor.Add(ObjectId(actor));
+		doc.Object.Add(content);
+		return doc;
 	}
 
 	public DislikeActivity Dislike(Models.Profile actor, Models.IContentRef content)
@@ -112,9 +115,12 @@ public class Document : IActivityPubDocument
 		return doc;
 	}
 
-	public UpdateActivity Update(Models.Profile actor, Models.IContentRef content)
+	public UpdateActivity Update(Models.Profile actor, ASObject content)
 	{
-		throw new NotImplementedException();
+		var doc = new UpdateActivity();
+		doc.Actor.Add(ObjectId(actor));
+		doc.Object.Add(content);
+		return doc;
 	}
 
 	public ASObject FromPost(Models.Post post)

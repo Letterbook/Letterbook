@@ -1,4 +1,3 @@
-using ActivityPub.Types.AS;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
@@ -78,7 +77,7 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
 		Assert.Empty(_harness.Consumed.Select<PostEvent>().AsEnumerable().Select(m => m.Exception).WhereNotNull());
 		ActivityPublisherMock.Verify(m =>
-			m.Deliver(follower.Inbox, It.IsAny<ASType>(), It.Is<Profile>(profile => profile.GetId() == _profile.GetId())));
+			m.Publish(follower.Inbox, It.IsAny<Post>(), It.Is<Profile>(profile => profile.GetId() == _profile.GetId()), null));
 	}
 
 	[Fact(DisplayName = "Should send on Publish")]
@@ -96,5 +95,39 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
 		ActivityPublisherMock.Verify(m => m.Publish(recipient.Inbox, _post, _profile, null));
+	}
+
+	[Fact(DisplayName = "Should send on Update")]
+	public async Task CanDeliverUpdate()
+	{
+		var recipient = new FakeProfile("https://peer.example").Generate();
+		recipient.SharedInbox = null;
+		var audience = Audience.Followers(_profile);
+		audience.Members.Add(recipient);
+
+		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.Audience)).Returns(new List<Audience> { audience }.BuildMock());
+		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.AddressedTo)).Returns(new List<Mention>().BuildMock());
+
+		await _publisher.Updated(_post, _profile.GetId(), []);
+
+		Assert.True(await _harness.Consumed.Any<PostEvent>());
+		ActivityPublisherMock.Verify(m => m.Update(recipient.Inbox, _post, _profile, null));
+	}
+
+	[Fact(DisplayName = "Should send on Delete")]
+	public async Task CanDeliverDelete()
+	{
+		var recipient = new FakeProfile("https://peer.example").Generate();
+		recipient.SharedInbox = null;
+		var audience = Audience.Followers(_profile);
+		audience.Members.Add(recipient);
+
+		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.Audience)).Returns(new List<Audience> { audience }.BuildMock());
+		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.AddressedTo)).Returns(new List<Mention>().BuildMock());
+
+		await _publisher.Deleted(_post, _profile.GetId(), []);
+
+		Assert.True(await _harness.Consumed.Any<PostEvent>());
+		ActivityPublisherMock.Verify(m => m.Delete(recipient.Inbox, _post, _profile));
 	}
 }
