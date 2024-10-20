@@ -48,8 +48,6 @@ public class PostMappings : AutoMapper.Profile
 		CreateMap<Post, PostDto>(MemberList.Destination);
 		CreateMap<PostDto, Post>(MemberList.Source)
 			.ConstructUsing(_ => NewPost(options.Value))
-			.ForMember(post => post.Thread, opt => opt.Ignore())
-			.ForMember(post => post.InReplyTo, opt => opt.Condition(dto => dto.InReplyTo != null))
 			.ForMember(post => post.Id, opt => opt.Condition(dto => dto.Id != null))
 			.ForMember(post => post.FediId, opt => opt.Condition(dto => dto.FediId != null))
 			.ForMember(post => post.CreatedDate, opt => opt.ConvertUsing<DateTimeOffsetMapper, DateTimeOffset?>())
@@ -58,6 +56,9 @@ public class PostMappings : AutoMapper.Profile
 			.ForMember(post => post.Replies, opt => opt.Condition(dto => dto.Replies != null && dto.Id != null))
 			.ForMember(post => post.Shares, opt => opt.Condition(dto => dto.Shares != null && dto.Id != null))
 			.ForMember(post => post.Likes, opt => opt.Condition(dto => dto.Likes != null && dto.Id != null))
+			// We can't reliably map the thread from the InReplyTo Post, so we have to handle that in service code
+			.ForMember(post => post.Thread, opt => opt.Ignore())
+			.ForMember(post => post.InReplyTo, opt => opt.Ignore())
 			.ForSourceMember(src => src.InReplyTo, opt => opt.DoNotValidate())
 			.ForSourceMember(src => src.Thread, opt => opt.DoNotValidate());
 
