@@ -56,7 +56,7 @@ public class PostMappings : AutoMapper.Profile
 			.ForMember(post => post.Replies, opt => opt.Condition(dto => dto.Replies != null && dto.Id != null))
 			.ForMember(post => post.Shares, opt => opt.Condition(dto => dto.Shares != null && dto.Id != null))
 			.ForMember(post => post.Likes, opt => opt.Condition(dto => dto.Likes != null && dto.Id != null))
-			// We can't reliably map the thread from the InReplyTo Post, so we have to handle that in service code
+			// We can't reliably map threads, including threads for the InReplyTo Post, so we have to handle that in service code
 			.ForMember(post => post.Thread, opt => opt.Ignore())
 			.ForMember(post => post.InReplyTo, opt => opt.Ignore())
 			.ForSourceMember(src => src.InReplyTo, opt => opt.DoNotValidate())

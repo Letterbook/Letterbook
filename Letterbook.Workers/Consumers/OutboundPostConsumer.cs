@@ -43,9 +43,8 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 
 	public async Task Consume(ConsumeContext<PostEvent> context)
 	{
-		var span = Activity.Current;
+		using var span = Activity.Current;
 		var post = _mapper.Map<Post>(context.Message.NextData);
-		span?.AddTag("audience.ids", string.Join(", ", post.Audience.Select(a => a.FediId)));
 
 		if (!post.FediId.HasLocalAuthority(_config)) return;
 		_logger.LogInformation("Handling PostEvent {EventType} for {PostId}", context.Message.Type, context.Message.Subject);
@@ -101,7 +100,7 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 	/// <param name="fn">A function that will schedule the relevant delivery type</param>
 	private async Task DeliverAudienceAndMentions(Post post, Profile sender, Func<Uri, Post, Profile, Mention?, Task> fn)
 	{
-		using var span = Activity.Current;
+		using var span = _instrumentation.Span<OutboundPostConsumer>();
 		var mentions = await GetMentionedProfiles(post).ToListAsync();
 		span?.AddTag("mentions.inboxes", string.Join(", ", mentions.Select(m => m.Subject.Inbox)));
 
@@ -153,7 +152,12 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 		using var span = Activity.Current;
 		span?.AddTag("audience.ids", string.Join(", ", post.Audience.Select(a => a.FediId)));
 
-		await foreach (var inbox in GetAudienceInboxes(post))
+		var inboxes = await GetAudienceInboxes(post).ToListAsync();
+		span?.AddEvent(new ActivityEvent("inboxes", DateTimeOffset.UtcNow, new ActivityTagsCollection()
+		{
+			{"count", inboxes.Count}
+		}));
+		foreach (var inbox in inboxes)
 		{
 			await fn(inbox, post, sender);
 		}
@@ -166,6 +170,8 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 			.Where(mention => !mention.Subject.Authority.StartsWith(_config.BaseUri().GetAuthority()))
 			.TagWithCallSite()
 			.TagWith(nameof(GetMentionedProfiles))
+			.AsNoTracking()
+			.AsSplitQuery()
 			.AsAsyncEnumerable();
 	}
 
@@ -176,20 +182,23 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 			.Select(profile => profile.Inbox)
 			.TagWithCallSite()
 			.TagWith(nameof(GetAuthorsInboxes))
+			.AsNoTracking()
+			.AsSplitQuery()
 			.AsAsyncEnumerable();
 	}
 
 	private IAsyncEnumerable<Uri> GetAudienceInboxes(Post post)
 	{
 		_logger.LogDebug("Getting inboxes for {Audiences}", post.Audience.Select(a => a.FediId));
-		return _posts.QueryFrom(post, p => p.Audience)
+		return _posts.QueryAudience()
+			.Where(audience => post.Audience.Select(a => a.FediId).Contains(audience.FediId))
 			.Include(audience => audience.Members)
-			.SelectMany(audience => audience.Members)
-			.Where(member => !member.Authority.StartsWith(_config.BaseUri().GetAuthority()))
+			.SelectMany(profile => profile.Members)
 			.Select(member => member.SharedInbox ?? member.Inbox)
 			.Distinct()
-			.TagWithCallSite()
 			.TagWith(nameof(GetAudienceInboxes))
+			.AsNoTracking()
+			.AsSplitQuery()
 			.AsAsyncEnumerable();
 	}
 
@@ -205,6 +214,8 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 			.Distinct()
 			.TagWithCallSite()
 			.TagWith(nameof(GetFollowerInboxes))
+			.AsNoTracking()
+			.AsSplitQuery()
 			.AsAsyncEnumerable();
 	}
 }

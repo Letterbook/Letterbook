@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -10,11 +9,11 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Models.Mappers.Converters;
-using Letterbook.Core.Tests.Fakes;
 using Letterbook.IntegrationTests.Fixtures;
 using Medo;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit.Abstractions;
 using Profile = Letterbook.Core.Models.Profile;
 
 namespace Letterbook.IntegrationTests;
@@ -29,6 +28,7 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 	}
 
 	private readonly HostFixture<PostsTests> _host;
+	private readonly ITestOutputHelper _output;
 	private readonly HttpClient _client;
 	private readonly List<Profile> _profiles;
 	private readonly FakePostDto _postDto;
@@ -39,9 +39,10 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 	private readonly IServiceScope _scope;
 	static int? ITestSeed.Seed() => null;
 
-	public PostsTests(HostFixture<PostsTests> host)
+	public PostsTests(HostFixture<PostsTests> host, ITestOutputHelper output)
 	{
 		_host = host;
+		_output = output;
 		_scope = host.CreateScope();
 		var clientOptions = new WebApplicationFactoryClientOptions
 		{
@@ -116,7 +117,7 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		var profile = _profiles[7];
 		var dto = generate(profile);
 		var payload = JsonContent.Create(dto, options: _json);
-		var traceId = Traces.TraceRequest(payload);
+		var traceId = Traces.TraceRequest(payload.Headers);
 
 		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post", payload);
 
@@ -129,37 +130,14 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 
 		if(dto.Audience.Count > 0 || dto.AddressedTo.Count > 0)
 		{
-			var cancel = new CancellationTokenSource(TimeSpan.FromMilliseconds(1000));
-			var stop = false;
-
 			const string expected = "urn:message:Letterbook.Workers.Contracts:ActivityMessage send";
-			var spans = await _host.Spans.Where(a => a.TraceId == traceId).TakeWhile(s =>
-			{
-				if (stop) return false;
-				if (s.DisplayName == expected)
-					stop = true;
-				return true;
-			}).ToListAsync(cancel.Token);
-			Assert.Contains(expected, spans.Select(s => s.DisplayName));
+			await Traces.AssertSpan(traceId, _host.Spans, expected);
 		}
 
-		try
-		{
-			// Wait a little while for any subsequent work to happen, then check for exceptions
-			var otherSpans = new CancellationTokenSource(TimeSpan.FromMilliseconds(350));
-			var span = await _host.Spans
-				.Where(a => a.TraceId == traceId)
-				.FirstOrDefaultAsync(span => span.Status == ActivityStatusCode.Error, otherSpans.Token);
-			Traces.SpanIsNotError(span);
-		}
-		// We expect the otherSpans timeout to trigger. This would mean no error spans were found, which is the desired result.
-		catch (TaskCanceledException)
-		{}
-		catch (OperationCanceledException)
-		{}
+		await Traces.AssertNoTraceErrors(traceId, _host.Spans);
 	}
 
-	[Fact]
+	[Fact(DisplayName = "Should draft a note without publishing")]
 	public async Task CanDraftNote()
 	{
 		var dto = _postDto.Generate();
@@ -181,13 +159,18 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 	{
 		var profile = _profiles[2];
 		var post = _posts[profile][1];
-		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}", new StringContent(""));
+		var payload = new StringContent("");
+		var traceId = Traces.TraceRequest(payload.Headers);
+		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}", payload);
 
 		Assert.NotNull(response);
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 		var body = Assert.IsType<PostDto>(await response.Content.ReadFromJsonAsync<PostDto>(_json));
 		Assert.Equal(post.GetId(), body.Id);
 		Assert.NotNull(body.PublishedDate);
+
+		const string expected = "urn:message:Letterbook.Workers.Contracts:ActivityMessage send";
+		await Traces.AssertNoSpans(traceId, _host.Spans, expected);
 	}
 
 	[Fact(DisplayName = "Should update an existing post")]
@@ -277,12 +260,18 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 	{
 		var profile = _profiles[1];
 		var post = _posts[profile][2];
+		var payload = new HttpRequestMessage(HttpMethod.Delete, $"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}");
+		var traceId = Traces.TraceRequest(payload.Headers);
+		_output.WriteLine($"traceId: {traceId}");
 
-		var response = await _client
-			.DeleteAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}");
+		var response = await _client.SendAsync(payload);
+
+		await Traces.AssertSpan(traceId, _host.Spans, "urn:message:Letterbook.Workers.Contracts:ActivityMessage send");
 
 		Assert.NotNull(response);
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+		await Traces.AssertNoTraceErrors(traceId, _host.Spans);
 	}
 
 	[Theory(DisplayName = "Should lookup a post by Id")]
