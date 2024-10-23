@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
 using AutoMapper;
@@ -110,8 +111,14 @@ public class ActorController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status410Gone)]
 	[ProducesResponseType(StatusCodes.Status421MisdirectedRequest)]
 	[ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-	public async Task<IActionResult> PostInbox(Uuid7 id, ASType activity)
+	public async Task<IActionResult> PostInbox(Uuid7 id, ASActivity activity)
 	{
+		if (!activity.Actor.First().TryGetId(out var actorId))
+			return BadRequest();
+		if (!User.Identities.SelectMany(claimId => claimId.Claims)
+			    .Any(claim => claim.Type == ClaimTypes.Name && claim.Value == actorId.ToString()))
+			return Unauthorized();
+
 		try
 		{
 			if (activity.Is<AcceptActivity>(out var accept))
@@ -132,6 +139,12 @@ public class ActorController : ControllerBase
 			{
 				_logger.LogDebug("Inbox received: {Activity}", "Undo");
 				return await InboxUndo(id, undo);
+			}
+
+			if (activity.Is<CreateActivity>(out var create))
+			{
+				_logger.LogDebug("Inbox received: {Activity}", "Create");
+				return await InboxCreate(id, create);
 			}
 
 			_logger.LogWarning("Ignored unknown activity {ActivityType}", activity.GetType());
@@ -213,6 +226,15 @@ public class ActorController : ControllerBase
 		actorId = id;
 		error = default;
 		return true;
+	}
+
+	private async Task<IActionResult> InboxCreate(Uuid7 id, CreateActivity activity)
+	{
+		await Task.CompletedTask;
+		if (!TryUnwrapActivity(activity, "Create", out var activityObject, out var actorId, out var error))
+			return error;
+
+		throw new NotImplementedException();
 	}
 
 	private async Task<IActionResult> InboxAccept(Uuid7 localId, ASActivity activity)
