@@ -153,7 +153,7 @@
         "prettifyLogMessage": false,
         "showCommonLabels": false,
         "showLabels": false,
-        "showTime": false,
+        "showTime": true,
         "sortOrder": "Descending",
         "wrapLogMessage": false
       },
@@ -164,7 +164,7 @@
             "uid": "P8E80F9AEF21F6940"
           },
           "editorMode": "builder",
-          "expr": "{app=\"letterbook\"} | json",
+          "expr": "{app=\"letterbook\"} | json | line_format `[{{.SourceContext}}]  {{.Message}}`",
           "queryType": "range",
           "refId": "A"
         }
@@ -180,8 +180,8 @@
     "list": []
   },
   "time": {
-    "from": "2024-09-11T01:46:22.373Z",
-    "to": "2024-09-11T02:46:22.373Z"
+    "from": "now-12h",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "",

@@ -45,10 +45,10 @@
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
-        "prettifyLogMessage": false,
+        "prettifyLogMessage": true,
         "showCommonLabels": false,
-        "showLabels": true,
-        "showTime": false,
+        "showLabels": false,
+        "showTime": true,
         "sortOrder": "Descending",
         "wrapLogMessage": false
       },
@@ -89,7 +89,7 @@
         "uid": "tempo"
       },
       "gridPos": {
-        "h": 12,
+        "h": 20,
         "w": 12,
         "x": 12,
         "y": 0
@@ -110,107 +110,6 @@
       ],
       "title": "Trace",
       "type": "traces"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 12
-      },
-      "id": 3,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "exemplar": false,
-          "expr": "topk(20, rate(pg_stat_user_tables_seq_scan[$__rate_interval]))",
-          "format": "time_series",
-          "fullMetaSearch": false,
-          "includeNullMetadata": false,
-          "instant": false,
-          "legendFormat": "{{schemaname}}.{{relname}}",
-          "range": true,
-          "refId": "A",
-          "useBackend": false
-        }
-      ],
-      "title": "Top 20 tables Seq Scan",
-      "type": "timeseries"
     }
   ],
   "schemaVersion": 39,
@@ -220,19 +119,19 @@
       {
         "current": {
           "selected": false,
-          "text": "970ad27aea83b05f26a8442bffd07bc2",
-          "value": "970ad27aea83b05f26a8442bffd07bc2"
+          "text": "7fcc7df0e09e8b9720c164f903a2bfb6",
+          "value": "7fcc7df0e09e8b9720c164f903a2bfb6"
         },
         "hide": 0,
         "name": "TraceID",
         "options": [
           {
             "selected": true,
-            "text": "970ad27aea83b05f26a8442bffd07bc2",
-            "value": "970ad27aea83b05f26a8442bffd07bc2"
+            "text": "7fcc7df0e09e8b9720c164f903a2bfb6",
+            "value": "7fcc7df0e09e8b9720c164f903a2bfb6"
           }
         ],
-        "query": "970ad27aea83b05f26a8442bffd07bc2",
+        "query": "7fcc7df0e09e8b9720c164f903a2bfb6",
         "skipUrlSync": false,
         "type": "textbox"
       }
