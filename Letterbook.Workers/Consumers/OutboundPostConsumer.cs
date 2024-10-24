@@ -1,5 +1,5 @@
+using System.Diagnostics;
 using AutoMapper;
-using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
@@ -43,7 +43,9 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 
 	public async Task Consume(ConsumeContext<PostEvent> context)
 	{
+		using var span = Activity.Current;
 		var post = _mapper.Map<Post>(context.Message.NextData);
+
 		if (!post.FediId.HasLocalAuthority(_config)) return;
 		_logger.LogInformation("Handling PostEvent {EventType} for {PostId}", context.Message.Type, context.Message.Subject);
 
@@ -57,51 +59,107 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 		switch (context.Message.Type)
 		{
 			case nameof(PostEventPublisher.Published):
-				await Published(post, sender);
+				await DeliverAudienceAndMentions(post, sender, _messagePublisher.Publish);
 				break;
 			case nameof(PostEventPublisher.Updated):
-				throw new NotImplementedException();
+				await DeliverAudienceAndMentions(post, sender, _messagePublisher.Update);
+				break;
 			case nameof(PostEventPublisher.Shared):
-				throw new NotImplementedException();
+				await DeliverFollowers(post, sender, _messagePublisher.Share);
+				break;
 			case nameof(PostEventPublisher.Deleted):
-				throw new NotImplementedException();
+				var mentions = await GetMentionedProfiles(post).ToListAsync();
+				foreach (var mention in mentions)
+				{
+					await _messagePublisher.Delete(mention.Subject.Inbox, post, sender);
+				}
+				await DeliverAudience(post, sender, _messagePublisher.Delete);
+				break;
+			case nameof(PostEventPublisher.Liked):
+				await foreach (var inbox in GetAuthorsInboxes(post))
+				{
+					await _messagePublisher.Like(inbox, post, sender);
+				}
+				break;
 			default:
+				span?.AddEvent(new("unhandledEvent", DateTime.UtcNow, new ActivityTagsCollection
+				{
+					{"Type", context.Message.Type}
+				}));
 				return;
 		}
 	}
 
-	private async Task Published(Post post, Profile sender)
+	/// <summary>
+	/// Schedule delivery to a Post's Audience members and mentions.
+	/// </summary>
+	/// <remarks>The message is delivered individually to the direct mentions, with customization to preserve the privacy
+	/// of blind mentions.</remarks>
+	/// <param name="post"></param>
+	/// <param name="sender"></param>
+	/// <param name="fn">A function that will schedule the relevant delivery type</param>
+	private async Task DeliverAudienceAndMentions(Post post, Profile sender, Func<Uri, Post, Profile, Mention?, Task> fn)
 	{
 		using var span = _instrumentation.Span<OutboundPostConsumer>();
 		var mentions = await GetMentionedProfiles(post).ToListAsync();
-		span?.AddTag("audience.ids", string.Join(", ", post.Audience.Select(a => a.FediId)));
 		span?.AddTag("mentions.inboxes", string.Join(", ", mentions.Select(m => m.Subject.Inbox)));
-		var doc = _document.FromPost(post);
 
 		// Deliver directly to mentioned profiles
 		foreach (var mention in mentions)
 		{
-			var privateDoc = doc;
 			switch (mention.Visibility)
 			{
 				case MentionVisibility.Bto:
 				case MentionVisibility.Bcc:
-					privateDoc = _document.FromPost(post);
-					privateDoc.Mention(mention);
+					await fn(mention.Subject.Inbox, post, sender, mention);
 					break;
 				case MentionVisibility.To:
 				case MentionVisibility.Cc:
+					await fn(mention.Subject.Inbox, post, sender, null);
+					break;
 				default:
 					break;
 			}
-			await _messagePublisher.Deliver(mention.Subject.Inbox, _document.Create(sender, privateDoc), sender);
 		}
 
 		// Deliver to audience, but don't double post to the mentioned profiles
 		await foreach (var inbox in GetAudienceInboxes(post)
 			               .Where(inbox => !mentions.Select(mention => mention.Subject.Inbox).Contains(inbox)))
 		{
-			await _messagePublisher.Deliver(inbox, doc, sender);
+			await fn(inbox, post, sender, null);
+		}
+	}
+
+	private async Task DeliverFollowers(Post post, Profile sender, Func<Uri, Post, Profile, Task> fn)
+	{
+		using var span = Activity.Current;
+		span?.AddTag("audience.ids", string.Join(", ", post.Audience.Select(a => a.FediId)));
+
+		await foreach (var inbox in GetFollowerInboxes(sender))
+		{
+			await fn(inbox, post, sender);
+		}
+	}
+
+	/// <summary>
+	/// Schedule delivery to a Post's Audience members
+	/// </summary>
+	/// <param name="post"></param>
+	/// <param name="sender"></param>
+	/// <param name="fn">A function that will schedule the relevant delivery type</param>
+	private async Task DeliverAudience(Post post, Profile sender, Func<Uri, Post, Profile, Task> fn)
+	{
+		using var span = Activity.Current;
+		span?.AddTag("audience.ids", string.Join(", ", post.Audience.Select(a => a.FediId)));
+
+		var inboxes = await GetAudienceInboxes(post).ToListAsync();
+		span?.AddEvent(new ActivityEvent("inboxes", DateTimeOffset.UtcNow, new ActivityTagsCollection()
+		{
+			{"count", inboxes.Count}
+		}));
+		foreach (var inbox in inboxes)
+		{
+			await fn(inbox, post, sender);
 		}
 	}
 
@@ -110,18 +168,54 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 		return _posts.QueryFrom(post, p => p.AddressedTo)
 			.Include(mention => mention.Subject)
 			.Where(mention => !mention.Subject.Authority.StartsWith(_config.BaseUri().GetAuthority()))
+			.TagWithCallSite()
+			.TagWith(nameof(GetMentionedProfiles))
+			.AsNoTracking()
+			.AsSplitQuery()
+			.AsAsyncEnumerable();
+	}
+
+	private IAsyncEnumerable<Uri> GetAuthorsInboxes(Post post)
+	{
+		return _posts.QueryFrom(post, p => p.Creators)
+			.Where(profile => !profile.Authority.StartsWith(_config.BaseUri().GetAuthority()))
+			.Select(profile => profile.Inbox)
+			.TagWithCallSite()
+			.TagWith(nameof(GetAuthorsInboxes))
+			.AsNoTracking()
+			.AsSplitQuery()
 			.AsAsyncEnumerable();
 	}
 
 	private IAsyncEnumerable<Uri> GetAudienceInboxes(Post post)
 	{
 		_logger.LogDebug("Getting inboxes for {Audiences}", post.Audience.Select(a => a.FediId));
-		return _posts.QueryFrom(post, p => p.Audience)
-				.Include(audience => audience.Members)
-				.SelectMany(audience => audience.Members)
-				.Where(member => !member.Authority.StartsWith(_config.BaseUri().GetAuthority()))
-				.Select(member => member.SharedInbox ?? member.Inbox)
-				.Distinct()
-				.AsAsyncEnumerable();
+		return _posts.QueryAudience()
+			.Where(audience => post.Audience.Select(a => a.FediId).Contains(audience.FediId))
+			.Include(audience => audience.Members)
+			.SelectMany(profile => profile.Members)
+			.Select(member => member.SharedInbox ?? member.Inbox)
+			.Distinct()
+			.TagWith(nameof(GetAudienceInboxes))
+			.AsNoTracking()
+			.AsSplitQuery()
+			.AsAsyncEnumerable();
+	}
+
+	private IAsyncEnumerable<Uri> GetFollowerInboxes(Profile profile)
+	{
+		_logger.LogDebug("Getting follower inboxes for {Profile}", profile.GetId25());
+		return _posts.QueryFrom(profile, p => p.Headlining)
+			.Where(audience => audience.FediId == Audience.Followers(profile).FediId)
+			.Include(audience => audience.Members)
+			.SelectMany(audience => audience.Members)
+			.Where(member => !member.Authority.StartsWith(_config.BaseUri().GetAuthority()))
+			.Select(member => member.SharedInbox ?? member.Inbox)
+			.Distinct()
+			.TagWithCallSite()
+			.TagWith(nameof(GetFollowerInboxes))
+			.AsNoTracking()
+			.AsSplitQuery()
+			.AsAsyncEnumerable();
 	}
 }

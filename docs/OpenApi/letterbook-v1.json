@@ -1991,6 +1991,12 @@
           "inReplyTo": {
             "$ref": "#/components/schemas/PostDto"
           },
+          "replies": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+          },
           "repliesCollection": {
             "type": "array",
             "items": {
@@ -1998,12 +2004,24 @@
             },
             "nullable": true
           },
+          "likes": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+          },
           "likesCollection": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MiniProfileDto"
             },
             "nullable": true
+          },
+          "shares": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
           },
           "sharesCollection": {
             "type": "array",

@@ -1,9 +1,8 @@
-using Letterbook.Core.Events;
 using Letterbook.Core.Models;
 
 namespace Letterbook.Core.Adapters;
 
-public interface IProfileEventPublisher : IEventChannel
+public interface IProfileEventPublisher
 {
 	public Task Created(Profile profile);
 	public Task Deleted(Profile profile);
