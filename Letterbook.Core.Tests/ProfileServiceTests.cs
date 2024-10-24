@@ -8,7 +8,7 @@ using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.Extensions.Logging;
-using MockQueryable.Moq;
+using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 

@@ -12,7 +12,7 @@ using MassTransit;
 using MassTransit.Testing;
 using Medo;
 using Microsoft.Extensions.DependencyInjection;
-using MockQueryable.Moq;
+using MockQueryable;
 using Moq;
 
 namespace Letterbook.Workers.Tests;
