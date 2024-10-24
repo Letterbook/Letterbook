@@ -3,7 +3,7 @@ using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using MockQueryable.Moq;
+using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 

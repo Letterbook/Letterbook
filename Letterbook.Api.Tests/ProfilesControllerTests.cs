@@ -8,7 +8,7 @@ using Letterbook.Core.Values;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MockQueryable.Moq;
+using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 
