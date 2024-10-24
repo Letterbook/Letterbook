@@ -11,7 +11,7 @@ using MassTransit;
 using MassTransit.Testing;
 using Medo;
 using Microsoft.Extensions.DependencyInjection;
-using MockQueryable.Moq;
+using MockQueryable;
 using Moq;
 using Audience = Letterbook.Core.Models.Audience;
 
