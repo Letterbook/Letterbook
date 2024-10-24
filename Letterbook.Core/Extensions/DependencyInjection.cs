@@ -46,7 +46,7 @@ public static class DependencyInjection
 					"em", "i", "ins", "kbd", "li", "mark", "ol", "p", "pre", "q", "s", "strike", "strong", "sub", "sup", "table", "tbody",
 					"td", "tfoot", "th", "thead", "time", "tr", "tt", "ul", "var", "wbr"
 				},
-				AllowedAttributes = new HashSet<string>(){"href"},
+				AllowedAttributes = new HashSet<string>() { "href" },
 				AllowedCssClasses = new HashSet<string>(),
 				AllowedCssProperties = new HashSet<string>(),
 				AllowedAtRules = new HashSet<CssRuleType>(),
@@ -73,18 +73,35 @@ public static class DependencyInjection
 		return builder.WithMetrics(metrics =>
 			{
 				metrics.AddHttpClientInstrumentation();
-				metrics.AddPrometheusExporter(o =>
-				{
-					o.DisableTotalNameSuffixForCounters = true;
-				});
+				metrics.AddPrometheusExporter(o => { o.DisableTotalNameSuffixForCounters = true; });
 			})
 			.WithTracing(tracing =>
 			{
 				tracing.AddSource(["Letterbook", "Letterbook.*"]);
-				tracing.AddHttpClientInstrumentation();
+				tracing.AddHttpClientInstrumentation(options =>
+				{
+					options.EnrichWithHttpRequestMessage = (activity, message) =>
+					{
+						activity.SetTag("http.request.header.accept", message.Headers.Accept);
+						activity.SetTag("http.request.header.date", message.Headers.Date);
+						if (message.Headers.TryGetValues("signature", out var signature))
+							activity.SetTag("http.request.header.signature", string.Join("; ", signature));
+						if (message.Headers.TryGetValues("signature-input", out var signatureInput))
+							activity.SetTag("http.request.header.signature-input", string.Join("; ", signatureInput));
+						if (message.Headers.TryGetValues("content-digest", out var contentDigest))
+							activity.SetTag("http.request.header.content-digest", contentDigest.FirstOrDefault());
+					};
+					options.EnrichWithHttpResponseMessage = (activity, message) =>
+					{
+						activity.SetTag("http.response.header.content-type", message.Headers.GetValues("content-type").FirstOrDefault());
+						activity.SetTag("http.response.header.content-length",
+							message.Headers.GetValues("content-length").FirstOrDefault());
+					};
+				});
 				tracing.AddOtlpExporter();
 			});
 	}
+
 	public static IOpenTelemetryBuilder AddClientTelemetry(this IOpenTelemetryBuilder builder)
 	{
 		return builder

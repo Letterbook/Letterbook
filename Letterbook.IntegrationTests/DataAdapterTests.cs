@@ -146,10 +146,12 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 	[Fact(DisplayName = "Query from profiles")]
 	public async Task QueryFromProfile()
 	{
-		var query = _adapter.QueryFrom(_profiles[0], profile => profile.Audiences);
+		// We used to check audience, but that's likely to change as more features and test scenarios are added
+		// Headlining is more stable
+		var query = _adapter.QueryFrom(_profiles[0], profile => profile.Headlining);
 		var actual = await query.ToListAsync();
 
-		Assert.Equal(5, actual.Count);
+		Assert.Equal(3, actual.Count);
 	}
 
 	[Trait("AccountProfileAdapter", "QueryFrom")]
