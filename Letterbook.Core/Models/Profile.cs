@@ -1,9 +1,11 @@
-using System.Collections;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
+using Letterbook.Generators;
 using Medo;
 
 namespace Letterbook.Core.Models;
+
+public partial record struct ProfileId(Uuid7 Id) : ITypedId<Uuid7>;
 
 /// <summary>
 /// A Profile is the externally visible representation of an account on the network. In ActivityPub terms, it should map
@@ -15,6 +17,7 @@ namespace Letterbook.Core.Models;
 public class Profile : IFederatedActor, IEquatable<Profile>
 {
 	private Uuid7 _id;
+	private ProfileId _profileId;
 
 	private Profile()
 	{
@@ -34,6 +37,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	private Profile(Uri baseUri) : this()
 	{
 		_id = Uuid7.NewUuid7();
+		_profileId = new ProfileId(_id);
 		FediId = new Uri(baseUri, $"/actor/{_id.ToId25String()}");
 		Authority = FediId.GetAuthority();
 		Handle = string.Empty;

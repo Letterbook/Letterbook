@@ -1,0 +1,6 @@
+namespace Letterbook.Generators;
+
+public interface ITypedId<T>
+{
+	T Id { get; set; }
+}

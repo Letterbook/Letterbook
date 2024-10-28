@@ -35,4 +35,8 @@
       <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Letterbook.Generators\Letterbook.Generators\Letterbook.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true"/>
+    </ItemGroup>
+
 </Project>
