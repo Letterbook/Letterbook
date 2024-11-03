@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using AngleSharp.Css.Dom;
 using Letterbook.Core.Adapters;
@@ -6,6 +7,7 @@ using Letterbook.Core.Authorization;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Models.Mappers.Converters;
 using Letterbook.Core.Workers;
+using Letterbook.Generators;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -120,6 +122,14 @@ public static class DependencyInjection
 	{
 		options.Converters.Add(new Uuid7JsonConverter());
 		options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+
+		foreach (var converterType in Assembly.GetExecutingAssembly().GetTypes()
+			.Where(type => type.GetCustomAttributes().Any(attribute => attribute.GetType() == typeof(TypedIdJsonConverterAttribute))))
+		{
+			var converter = Activator.CreateInstance(converterType);
+			if (converter is JsonConverter jsonConverter)
+				options.Converters.Add(jsonConverter);
+		}
 
 		return options;
 	}

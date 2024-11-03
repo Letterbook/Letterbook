@@ -1,29 +1,48 @@
-# Roslyn Source Generators Sample
+# Letterbook.Generators
 
-A set of three projects that illustrates Roslyn source generators. Enjoy this template to learn from and modify source generators for your own needs.
+Letterbook uses source code generators to facilitate using explicitly typed IDs. The basic idea is to wrap the actual
+primitive identifier in a record with a more meaningful type. This gives us better compile time type safety,
+particularly in situations where we're handling different kinds of domain models, but which have the same underlying
+primary or secondary ID type. For instance, Posts and Threads, or Posts and Profiles. All of those are identifiable as a
+UUIDv7, or as a Uri. That makes it easy to mix up values and create confusing bugs.
 
-## Content
-### Letterbook.Generators
-A .NET Standard project with implementations of sample source generators.
-**You must build this project to see the result (generated code) in the IDE.**
+Now the compiler protects us in many of those scenarios.
 
-- [SampleSourceGenerator.cs](SampleSourceGenerator.cs): A source generator that creates C# classes based on a text file (in this case, Domain Driven Design ubiquitous language registry).
-- [SampleIncrementalSourceGenerator.cs](SampleIncrementalSourceGenerator.cs): A source generator that creates a custom report based on class properties. The target class should be annotated with the `Generators.ReportAttribute` attribute.
+## Source Code Generation
 
-### Letterbook.Generators.Sample
-A project that references source generators. Note the parameters of `ProjectReference` in [Letterbook.Generators.Sample.csproj](../Letterbook.Generators.Sample/Letterbook.Generators.Sample.csproj), they make sure that the project is referenced as a set of source generators. 
+For clarity and performance, we prefer to use `record struct` as the wrapper type for our `TypedId` fields. Structs
+can't inherit from a base type, which makes it harder to share logic between them. That leads to lots of boilerplate
+that is highly redundant. This boilerplate is necessary to permit these types to serialize properly in various contexts.
+So, we use source code generators to remove the boilerplate. We need this in three general contexts:
 
-### Letterbook.Generators.Tests
-Unit tests for source generators. The easiest way to develop language-related features is to start with unit tests.
+1. ASP.Net model binding. The `TypedId` structs are annotated directly with a converter attribute to support this.
+2. Json serialization. The serializer for each `TypedId` is annotated with an attribute, and that attribute is used to locate and construct JsonConverter objects to add to the serializer context.
+3. Entity Framework. The type converter for each `TypedId` is annotated with an attribute. That attribute is used to locate the type converter class and register it with EFCore during startup configuration. 
 
-## How To?
-### How to debug?
-- Use the [launchSettings.json](Properties/launchSettings.json) profile.
-- Debug tests.
+To create a `TypedId` type, you must define a partial record struct which implements `ITypedId<T>` where T is the type
+of the underlying identifier. The interface is pretty minimal, but it does require some implemented methods. The
+implementation is provided by generated code. So, usually all you need to do to define a new model and corresponding
+`TypedId` is this:
 
-### How can I determine which syntax nodes I should expect?
-Consider installing the Roslyn syntax tree viewer plugin [Rossynt](https://plugins.jetbrains.com/plugin/16902-rossynt/).
+```csharp
+public partial record struct SomeModelId(Uuid7 id) : ITypedId<Uuid7> { }
 
-### How to learn more about wiring source generators?
-Watch the walkthrough video: [Let’s Build an Incremental Source Generator With Roslyn, by Stefan Pölz](https://youtu.be/azJm_Y2nbAI)
-The complete set of information is available in [Source Generators Cookbook](https://github.com/dotnet/roslyn/blob/main/docs/features/source-generators.cookbook.md).
+public class SomeModel
+{
+    public SomeModelId id {get; set;}
+}
+```
+
+Or similar, for other underlying types.
+
+## Testing Source Generators
+
+There are a few unit tests for the source generators. The generated code is not particularly complex, so we don't
+currently bother with high fidelity tests of the generated code itself. Instead, we just test that the generator
+produces the expected source files.
+
+## Generated Output
+
+At the moment, we do not emit generated source files back to the solution. They're generated on the fly when building
+`Letterbook.Core`, and included in the build output directory. This hides all the boilerplate during normal development.
+It does make them somewhat harder to review, however. If that becomes a problem, we can change it.
