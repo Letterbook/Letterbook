@@ -65,7 +65,7 @@ public static class AstMapper
 			.ForMember(d => d.Attachment,
 				opt => opt.MapFrom<AttachedContentResolver, IEnumerable<Content>>(s => s.Contents.Order().Skip(1)))
 			.ForMember(d => d.Likes, opt => opt.MapFrom(p => p.Likes))
-			.ForMember(d => d.Replies, opt => opt.MapFrom(p => p.Replies))
+			.ForMember(d => d.Replies, opt => opt.MapFrom<PostRepliesResolver, Uri?>(p => p.Replies))
 			.ForMember(d => d.Preview, opt => opt.MapFrom(p => p.Preview))
 			.ForMember(d => d.Shares, opt => opt.MapFrom(p => p.Shares))
 			.ForMember(d => d.To,
@@ -307,7 +307,24 @@ public static class AstMapper
 	{
 		cfg.CreateMap<DateTime, DateTimeOffset>(MemberList.None);
 		cfg.CreateMap<DateTimeOffset, DateTime>(MemberList.None)
-			.ConstructUsing(dto => dto.Date);
+			.ConstructUsing(dto => dto.DateTime);
+	}
+}
+
+/// <summary>
+/// Resolve the Replies collection as part of a Post object
+/// </summary>
+public class PostRepliesResolver : IMemberValueResolver<Post, NoteObject, Uri?, ASCollection?>
+{
+	public ASCollection? Resolve(Post source, NoteObject destination, Uri? sourceMember, ASCollection? destMember, ResolutionContext context)
+	{
+		var result = new ASCollection
+		{
+			Id = sourceMember?.ToString(),
+			First = sourceMember == null ? null : new Linkable<ASCollectionPage>(new ASLink{HRef = sourceMember}),
+			TotalItems = source.RepliesCollection.Count,
+		};
+		return result;
 	}
 }
 
