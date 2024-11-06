@@ -47,6 +47,9 @@ public class FakePost : Faker<Post>
 
 			return audience.ToList();
 		});
+		RuleFor(p => p.Likes, (_, post) => new Uri(post.FediId + "/likes"));
+		RuleFor(p => p.Replies, (_, post) => new Uri(post.FediId + "/replies"));
+		RuleFor(p => p.Shares, (_, post) => new Uri(post.FediId + "/shares"));
 
 		FinishWith((_, post) =>
 		{

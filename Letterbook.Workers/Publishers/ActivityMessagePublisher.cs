@@ -34,6 +34,43 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 	}
 
 	/// <inheritdoc />
+	public async Task Publish(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default)
+	{
+		var doc = PopulateMentions(post, extraMention);
+		var activity = _document.Create(onBehalfOf, doc);
+		await Deliver(inbox, activity, onBehalfOf);
+	}
+
+	/// <inheritdoc />
+	public async Task Update(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default)
+	{
+		var doc = PopulateMentions(post, extraMention);
+		var activity = _document.Update(onBehalfOf, doc);
+		await Deliver(inbox, activity, onBehalfOf);
+	}
+
+	/// <inheritdoc />
+	public async Task Delete(Uri inbox, Post post, Profile onBehalfOf)
+	{
+		var activity = _document.Delete(onBehalfOf, post.FediId);
+		await Deliver(inbox, activity, onBehalfOf);
+	}
+
+	/// <inheritdoc />
+	public async Task Share(Uri inbox, Post post, Profile onBehalfOf)
+	{
+		var activity = _document.Announce(onBehalfOf, post.FediId);
+		await Deliver(inbox, activity, onBehalfOf);
+	}
+
+	/// <inheritdoc />
+	public async Task Like(Uri inbox, Post post, Profile onBehalfOf)
+	{
+		var activity = _document.Like(onBehalfOf, post.FediId);
+		await Deliver(inbox, activity, onBehalfOf);
+	}
+
+	/// <inheritdoc />
 	public async Task Follow(Uri inbox, Profile target, Profile actor)
 	{
 		var document = _document.Follow(actor, target, implicitId: true);
@@ -69,6 +106,32 @@ public class ActivityMessagePublisher : IActivityMessagePublisher
 		var document = _document.TentativeAccept(actor, _document.Follow(target, actor));
 		await Deliver(inbox, document, actor);
 	}
+
+	private ASObject PopulateMentions(Post post, Mention? extraMention)
+	{
+		var doc = _document.FromPost(post);
+		switch (extraMention?.Visibility)
+		{
+			case MentionVisibility.Bto:
+				doc.BTo.Add(extraMention.Subject.FediId);
+				break;
+			case MentionVisibility.Bcc:
+				doc.BCC.Add(extraMention.Subject.FediId);
+				break;
+			case MentionVisibility.To:
+				doc.To.Add(extraMention.Subject.FediId);
+				break;
+			case MentionVisibility.Cc:
+				doc.CC.Add(extraMention.Subject.FediId);
+				break;
+			case null:
+			default:
+				break;
+		}
+
+		return doc;
+	}
+
 
 	private ActivityMessage FormatMessage(Uri inbox, ASType activity, Profile? onBehalfOf)
 	{
