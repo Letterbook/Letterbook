@@ -71,7 +71,7 @@ public class Profile : PageModel
 			return NotFound();
 
 		_profile = profile;
-		if (SelfId is { } id && await _profiles.LookupProfile(Uuid7.FromId25String(id), profile.GetId()) is { } self)
+		if (SelfId is { } id && await _profiles.LookupProfile((Models.ProfileId)Uuid7.FromId25String(id), (Models.ProfileId?)profile.GetId()) is { } self)
 		{
 			_self = self;
 		}

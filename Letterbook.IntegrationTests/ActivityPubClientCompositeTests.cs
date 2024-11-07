@@ -50,6 +50,6 @@ public class ActivityPubClientCompositeTests : IClassFixture<HostFixture<Activit
 
 		var profileService = scope.ServiceProvider.GetRequiredService<IProfileService>();
 
-		var result = await profileService.As(Enumerable.Empty<Claim>()).Follow((Guid)profile.Id!, remote);
+		var result = await profileService.As(Enumerable.Empty<Claim>()).Follow(profile.Id, remote);
 	}
 }

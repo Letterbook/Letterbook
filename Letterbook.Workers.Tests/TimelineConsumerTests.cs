@@ -151,7 +151,7 @@ public sealed class TimelineConsumerTests : WithMocks, IAsyncDisposable
 	public async Task CanConsumeShared()
 	{
 		var sharedBy = new FakeProfile().Generate();
-		ProfileServiceAuthMock.Setup(m => m.LookupProfile(sharedBy.GetId(), It.IsAny<Uuid7?>())).ReturnsAsync(sharedBy);
+		ProfileServiceAuthMock.Setup(m => m.LookupProfile((ProfileId)sharedBy.GetId(), (ProfileId?)It.IsAny<Uuid7?>())).ReturnsAsync(sharedBy);
 		_post.PublishedDate = DateTimeOffset.UtcNow;
 
 		_output.WriteLine("sharedBy: {0}", sharedBy.GetId());

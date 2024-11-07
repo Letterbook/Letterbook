@@ -8,6 +8,7 @@ using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Fixtures;
+using Medo;
 using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.ActivityPub.Test;
@@ -126,7 +127,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			Assert.NotNull(actual);
 			Assert.Equal("http://localhost:3080/users/user/inbox", actual.Inbox.ToString());
 			Assert.Equal("http://localhost:3080/users/user/outbox", actual.Outbox.ToString());
-			Assert.NotEqual(Guid.Empty, actual.Id);
+			Assert.NotEqual(new Models.ProfileId(Uuid7.Empty), actual.Id);
 
 		}
 

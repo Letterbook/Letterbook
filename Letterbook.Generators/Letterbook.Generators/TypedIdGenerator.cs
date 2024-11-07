@@ -216,6 +216,9 @@ public class TypedIdGenerator : ISourceGenerator
 			      {
 			          public override string ToString() => Id.{{toStringFn}};
 			          public static {{idType}} FromString(string s) => {{fromStringFn}};
+
+			          public static explicit operator {{idType}}({{typeName}} id) => id.Id;
+			          public static implicit operator {{typeName}}({{idType}} id) => new {{typeName}}(id);
 			      }
 			  }
 			  """;

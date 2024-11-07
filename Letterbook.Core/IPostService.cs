@@ -15,8 +15,8 @@ public interface IAuthzPostService
 	public Task<Post?> LookupPost(Uri id, bool withThread = true);
 	public Task<ThreadContext?> LookupThread(Uuid7 id);
 	public Task<ThreadContext?> LookupThread(Uri id);
-	public Task<Post> DraftNote(Uuid7 authorId, string contentSource, Uuid7? inReplyToId = default);
-	public Task<Post> Draft(Post post, Uuid7? inReplyToId = default, bool publish = false);
+	public Task<Post> DraftNote(ProfileId authorId, string contentSource, Uuid7? inReplyToId = default);
+	public Task<Post> Draft(ProfileId _profileId, Post post, Uuid7? inReplyToId = default, bool publish = false);
 	public Task<Post> Update(Uuid7 postId, Post post);
 	public Task Delete(Uuid7 id);
 	/// <summary>

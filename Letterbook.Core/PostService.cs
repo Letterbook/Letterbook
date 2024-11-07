@@ -64,7 +64,7 @@ public class PostService : IAuthzPostService, IPostService
 		return await _posts.LookupThread(threadId);
 	}
 
-	public async Task<Post> DraftNote(Uuid7 authorId, string contentSource, Uuid7? inReplyToId = default)
+	public async Task<Post> DraftNote(ProfileId authorId, string contentSource, Uuid7? inReplyToId = default)
 	{
 		var author = await _posts.LookupProfile(authorId)
 					 ?? throw CoreException.MissingData($"Couldn't find profile {authorId}", typeof(Profile), authorId);
@@ -82,10 +82,10 @@ public class PostService : IAuthzPostService, IPostService
 		note.GeneratePreview();
 		post.AddContent(note);
 
-		return await Draft(post, inReplyToId);
+		return await Draft(authorId, post, inReplyToId);
 	}
 
-	public async Task<Post> Draft(Post post, Uuid7? inReplyToId = default, bool publish = false)
+	public async Task<Post> Draft(ProfileId profileId, Post post, Uuid7? inReplyToId = default, bool publish = false)
 	{
 		using var span = _instrument.Span<PostService>();
 
@@ -99,8 +99,8 @@ public class PostService : IAuthzPostService, IPostService
 			post.Thread.Posts.Add(post);
 		}
 
-		if (await _posts.LookupProfile(_profileId) is not { } author)
-			throw CoreException.MissingData<Profile>($"Couldn't find profile {_profileId}", _profileId);
+		if (await _posts.LookupProfile(profileId) is not { } author)
+			throw CoreException.MissingData<Profile>($"Couldn't find profile {profileId}", profileId);
 		post.Creators.Clear();
 		post.Creators.Add(author);
 		foreach (var content in post.Contents)
@@ -134,8 +134,8 @@ public class PostService : IAuthzPostService, IPostService
 		await _posts.Commit();
 		span?.AddTag("letterbook.post.audience", string.Join(",", post.Audience.Select(a => a.FediId)));
 		span?.AddTag("letterbook.post.mentions", string.Join(",", post.AddressedTo.Select(m => m.Id)));
-		await _postEventPublisher.Created(post, _profileId, _claims);
-		if (publish) await _postEventPublisher.Published(post, _profileId, _claims);
+		await _postEventPublisher.Created(post, (Uuid7)profileId, _claims);
+		if (publish) await _postEventPublisher.Published(post, (Uuid7)profileId, _claims);
 
 		return post;
 	}

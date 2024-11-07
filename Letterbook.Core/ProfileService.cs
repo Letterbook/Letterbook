@@ -71,7 +71,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return profile;
 	}
 
-	public async Task<UpdateResponse<Profile>> UpdateDisplayName(Uuid7 localId, string displayName)
+	public async Task<UpdateResponse<Profile>> UpdateDisplayName(ProfileId localId, string displayName)
 	{
 		// TODO(moderation): vulgarity filters
 		var profile = await RequireProfile(localId);
@@ -94,7 +94,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	}
 
 
-	public async Task<UpdateResponse<Profile>> UpdateDescription(Uuid7 localId, string description)
+	public async Task<UpdateResponse<Profile>> UpdateDescription(ProfileId localId, string description)
 	{
 		var profile = await RequireProfile(localId);
 		if (profile.Description == description)
@@ -115,7 +115,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		};
 	}
 
-	public async Task<UpdateResponse<Profile>> InsertCustomField(Uuid7 localId, int index, string key,
+	public async Task<UpdateResponse<Profile>> InsertCustomField(ProfileId localId, int index, string key,
 		string value)
 	{
 		var profile = await RequireProfile(localId);
@@ -137,7 +137,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		};
 	}
 
-	public async Task<UpdateResponse<Profile>> RemoveCustomField(Uuid7 localId, int index)
+	public async Task<UpdateResponse<Profile>> RemoveCustomField(ProfileId localId, int index)
 	{
 		var profile = await RequireProfile(localId);
 		if (index >= profile.CustomFields.Length)
@@ -158,7 +158,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		};
 	}
 
-	public async Task<UpdateResponse<Profile>> UpdateCustomField(Uuid7 localId, int index, string key,
+	public async Task<UpdateResponse<Profile>> UpdateCustomField(ProfileId localId, int index, string key,
 		string value)
 	{
 		var profile = await RequireProfile(localId);
@@ -189,7 +189,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		throw new NotImplementedException();
 	}
 
-	public async Task<Profile?> LookupProfile(Uuid7 profileId, Uuid7? relatedProfile)
+	public async Task<Profile?> LookupProfile(ProfileId profileId, ProfileId? relatedProfile)
 	{
 		var query = _profiles.SingleProfile(profileId);
 		query = relatedProfile.HasValue ? _profiles.WithRelation(query, relatedProfile.Value) : query.Include(p => p.Keys);
@@ -197,7 +197,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await query.FirstOrDefaultAsync();
 	}
 
-	public async Task<Profile?> LookupProfile(Uri fediId, Uuid7? relatedProfile)
+	public async Task<Profile?> LookupProfile(Uri fediId, ProfileId? relatedProfile)
 	{
 		var query = _profiles.SingleProfile(fediId);
 		query = relatedProfile.HasValue ? _profiles.WithRelation(query, relatedProfile.Value) : query;
@@ -239,7 +239,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return new FollowerRelation(self, target, FollowState.Pending);
 	}
 
-	public async Task<FollowerRelation> Follow(Uuid7 selfId, Uri targetId)
+	public async Task<FollowerRelation> Follow(ProfileId selfId, Uri targetId)
 	{
 		var self = await _profiles.SingleProfile(selfId).WithRelation(targetId).FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
@@ -253,7 +253,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await Follow(self, target, false);
 	}
 
-	public async Task<FollowerRelation> Follow(Uuid7 selfId, Uuid7 targetId)
+	public async Task<FollowerRelation> Follow(ProfileId selfId, ProfileId targetId)
 	{
 		var target = await _profiles.SingleProfile(targetId)
 			             .WithRelation(selfId)
@@ -263,7 +263,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 		var self = await _profiles.SingleProfile(selfId)
 			           .WithRelation(targetId)
-			           .Include(profile => profile.Audiences.Where(audience => audience.Source!.Id == Uuid7.ToGuid(targetId)))
+			           .Include(profile => profile.Audiences.Where(audience => audience.Source!.Id == targetId))
 			           .FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
 
@@ -288,7 +288,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await ReceiveFollowRequest(target, follower, requestId);
 	}
 
-	public async Task<FollowerRelation> ReceiveFollowRequest(Uuid7 localId, Uri followerId, Uri? requestId)
+	public async Task<FollowerRelation> ReceiveFollowRequest(ProfileId localId, Uri followerId, Uri? requestId)
 	{
 		using var span = _instrumentation.Span<ProfileService>();
 		span?.AddTag("localId", localId);
@@ -331,7 +331,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		}
 	}
 
-	public async Task<FollowerRelation> ReceiveFollowReply(Uuid7 selfId, Uri targetId, FollowState response)
+	public async Task<FollowerRelation> ReceiveFollowReply(ProfileId selfId, Uri targetId, FollowState response)
 	{
 		var profile = await _profiles.LookupProfileWithRelation(selfId, targetId) ??
 		              throw CoreException.MissingData($"Cannot update Profile {selfId} because it could not be found", typeof(Profile),
@@ -370,7 +370,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return relation;
 	}
 
-	public async Task<FollowerRelation> RemoveFollower(Uuid7 selfId, Uri followerId)
+	public async Task<FollowerRelation> RemoveFollower(ProfileId selfId, Uri followerId)
 	{
 		var self = await _profiles.SingleProfile(selfId).WithRelation(followerId).FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
@@ -381,13 +381,13 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await RemoveFollower(self, relation);
 	}
 
-	public async Task<FollowerRelation> RemoveFollower(Uuid7 selfId, Uuid7 followerId)
+	public async Task<FollowerRelation> RemoveFollower(ProfileId selfId, ProfileId followerId)
 	{
 		var self = await _profiles.SingleProfile(selfId)
 			.WithRelation(followerId)
 			.FirstOrDefaultAsync() ?? throw CoreException.MissingData<Profile>(selfId);
 		var relation = self.FollowersCollection
-			.FirstOrDefault(p => p.Follower.GetId() == followerId);
+			.FirstOrDefault(p => p.Follower.Id == followerId);
 
 		if (relation is null) return new FollowerRelation(Profile.CreateEmpty(followerId), self, FollowState.None);
 		return await RemoveFollower(self, relation);
@@ -416,7 +416,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return relation;
 	}
 
-	public async Task<FollowerRelation> Unfollow(Uuid7 selfId, Uri targetId)
+	public async Task<FollowerRelation> Unfollow(ProfileId selfId, Uri targetId)
 	{
 		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), targetId)
 			           .Include(profile => profile.Audiences.Where(
@@ -430,15 +430,15 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await Unfollow(self, relation);
 	}
 
-	public async Task<FollowerRelation?> Unfollow(Uuid7 selfId, Uuid7 targetId)
+	public async Task<FollowerRelation?> Unfollow(ProfileId selfId, ProfileId targetId)
 	{
 		var self = await _profiles.WithRelation(_profiles.SingleProfile(selfId), targetId)
 			           .Include(profile => profile.Audiences.Where(
-				           audience => audience.Source != null && audience.Source.Id == Uuid7.ToGuid(targetId)))
+				           audience => audience.Source != null && audience.Source.Id == targetId))
 			           .FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
 		var relation = self!.FollowingCollection
-			.FirstOrDefault(p => p.Follows.GetId() == targetId);
+			.FirstOrDefault(p => p.Follows.Id == targetId);
 
 		if (relation is null) return new FollowerRelation(self, Profile.CreateEmpty(targetId), FollowState.None);
 		return await Unfollow(self, relation);
@@ -466,7 +466,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		throw new NotImplementedException();
 	}
 
-	public async Task<IQueryable<Profile>> LookupFollowing(Uuid7 profileId, DateTimeOffset? followedBefore, int limit)
+	public async Task<IQueryable<Profile>> LookupFollowing(ProfileId profileId, DateTimeOffset? followedBefore, int limit)
 	{
 		var profile = await _profiles.LookupProfile(profileId)
 		              ?? throw CoreException.MissingData<Profile>(profileId);
@@ -478,7 +478,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 			.Select(relation => relation.Follows);
 	}
 
-	public async Task<IQueryable<Profile>> LookupFollowers(Uuid7 profileId, DateTimeOffset? followedBefore, int limit)
+	public async Task<IQueryable<Profile>> LookupFollowers(ProfileId profileId, DateTimeOffset? followedBefore, int limit)
 	{
 		var profile = await _profiles.LookupProfile(profileId)
 		              ?? throw CoreException.MissingData<Profile>(profileId);
@@ -502,7 +502,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return relation;
 	}
 
-	public async Task<FollowerRelation> AcceptFollower(Uuid7 profileId, Uri followerId)
+	public async Task<FollowerRelation> AcceptFollower(ProfileId profileId, Uri followerId)
 	{
 		var self = await _profiles.WithRelation(_profiles.SingleProfile(profileId), followerId).FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(profileId);
@@ -513,19 +513,19 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await AcceptFollower(self, relation);
 	}
 
-	public async Task<FollowerRelation> AcceptFollower(Uuid7 profileId, Uuid7 followerId)
+	public async Task<FollowerRelation> AcceptFollower(ProfileId profileId, ProfileId followerId)
 	{
 		var self = await _profiles.WithRelation(_profiles.SingleProfile(profileId), followerId).FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(profileId);
 		var relation = self.FollowersCollection
-			.FirstOrDefault(p => p.Follower.GetId() == followerId);
+			.FirstOrDefault(p => p.Follower.Id == followerId);
 
 		if (relation is null) return new FollowerRelation(Profile.CreateEmpty(followerId), self, FollowState.None);
 		return await AcceptFollower(self, relation);
 	}
 
 	[SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
-	private async Task<Profile> RequireProfile(Uuid7 localId, Uri? relationId = null,
+	private async Task<Profile> RequireProfile(ProfileId localId, Uri? relationId = null,
 		[CallerMemberName] string name = "",
 		[CallerFilePath] string path = "",
 		[CallerLineNumber] int line = -1)

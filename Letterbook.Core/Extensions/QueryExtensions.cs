@@ -15,10 +15,10 @@ public static class QueryExtensions
 			.Include(profile => profile.Audiences)
 			.AsSplitQuery();
 
-	public static IQueryable<Profile> WithRelation(this IQueryable<Profile> query, Uuid7 relationId) =>
-		query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId.ToGuid()))
+	public static IQueryable<Profile> WithRelation(this IQueryable<Profile> query, ProfileId relationId) =>
+		query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId))
 			.ThenInclude(relation => relation.Follows)
-			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId.ToGuid()))
+			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
 			.ThenInclude(relation => relation.Follower)
 			.Include(profile => profile.Keys)
 			.Include(profile => profile.Audiences)
