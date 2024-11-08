@@ -40,13 +40,16 @@ public class RelationalContext : DbContext
 
 	private static void AddTypedIdConversions(ModelConfigurationBuilder configurationBuilder)
 	{
-		foreach (var converterType in Assembly.GetExecutingAssembly().GetTypes()
-			         .Where(type => type.GetCustomAttributes().Any(attribute => attribute.GetType() == typeof(TypedIdEfConverterAttribute))))
+		var allTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes());
+		var converterTypes = allTypes.Where(type => type.GetCustomAttributes().Any(t => t is TypedIdEfConverterAttribute));
+		foreach (var converterType in converterTypes)
 		{
 			foreach (var attribute in converterType.GetCustomAttributes())
 			{
 				if (attribute is TypedIdEfConverterAttribute converterAttribute)
-					configurationBuilder.Properties(converterAttribute.IdType).HaveConversion(converterType);
+				{
+					configurationBuilder.Properties(converterAttribute.IdType).HaveConversion(converterType);//, converterAttribute.ComparerType);
+				}
 			}
 		}
 	}
