@@ -11,14 +11,14 @@ public interface IPostService
 
 public interface IAuthzPostService
 {
-	public Task<Post?> LookupPost(Uuid7 id, bool withThread = true);
+	public Task<Post?> LookupPost(PostId id, bool withThread = true);
 	public Task<Post?> LookupPost(Uri id, bool withThread = true);
 	public Task<ThreadContext?> LookupThread(Uuid7 id);
 	public Task<ThreadContext?> LookupThread(Uri id);
-	public Task<Post> DraftNote(ProfileId authorId, string contentSource, Uuid7? inReplyToId = default);
-	public Task<Post> Draft(ProfileId _profileId, Post post, Uuid7? inReplyToId = default, bool publish = false);
-	public Task<Post> Update(Uuid7 postId, Post post);
-	public Task Delete(Uuid7 id);
+	public Task<Post> DraftNote(ProfileId authorId, string contentSource, PostId? inReplyToId = default);
+	public Task<Post> Draft(ProfileId _profileId, Post post, PostId? inReplyToId = default, bool publish = false);
+	public Task<Post> Update(PostId postId, Post post);
+	public Task Delete(PostId id);
 	/// <summary>
 	/// Boost, reblog, repost, etc. Share a post with a new audience
 	/// </summary>
@@ -26,9 +26,9 @@ public interface IAuthzPostService
 	/// <returns></returns>
 	public Task Share(Uuid7 id);
 	public Task Like(Uuid7 id);
-	public Task<Post> AddContent(Uuid7 postId, Content content);
-	public Task<Post> RemoveContent(Uuid7 postId, Uuid7 contentId);
-	public Task<Post> UpdateContent(Uuid7 postId, Uuid7 contentId, Content content);
+	public Task<Post> AddContent(PostId postId, Content content);
+	public Task<Post> RemoveContent(PostId postId, Uuid7 contentId);
+	public Task<Post> UpdateContent(PostId postId, Uuid7 contentId, Content content);
 
 	/// <summary>
 	/// Publish a draft post
@@ -36,7 +36,7 @@ public interface IAuthzPostService
 	/// <param name="id"></param>
 	/// <param name="localOnly"></param>
 	/// <returns></returns>
-	public Task<Post> Publish(Uuid7 id, bool localOnly = false);
+	public Task<Post> Publish(PostId id, bool localOnly = false);
 
 	/// <summary>
 	/// Handle an inbound Create activity on a post

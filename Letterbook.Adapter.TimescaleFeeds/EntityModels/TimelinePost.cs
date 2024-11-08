@@ -29,7 +29,7 @@ public class TimelinePost
 	/// <summary>
 	/// Id of the Post
 	/// </summary>
-	public required Guid PostId { get; set; }
+	public required PostId PostId { get; set; }
 
 	/// <summary>Same as <see cref="Post"/></summary>
 	public required string Preview { get; set; }
@@ -47,7 +47,7 @@ public class TimelinePost
 	public required DateTimeOffset UpdatedDate { get; set; }
 
 	/// PostId of the InReplyTo Post <summary>Same as <see cref="Post"/></summary>
-	public Guid? InReplyToId { get; set; }
+	public PostId? InReplyToId { get; set; }
 
 	/// <summary>
 	/// Posts can be shared by multiple profiles, but each share would result in at-most one addition to the timeline.

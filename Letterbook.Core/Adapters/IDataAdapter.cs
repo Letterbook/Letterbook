@@ -43,7 +43,7 @@ public interface IDataAdapter : IDisposable
 	public Task<Profile?> LookupProfile(Uri id);
 
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPost(Uuid7 postId);
+	public Task<Post?> LookupPost(PostId postId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<Post?> LookupPost(Uri fediId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
@@ -51,7 +51,7 @@ public interface IDataAdapter : IDisposable
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<ThreadContext?> LookupThread(Uuid7 threadId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPostWithThread(Uuid7 postId);
+	public Task<Post?> LookupPostWithThread(PostId postId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<Post?> LookupPostWithThread(Uri postId);
 
@@ -63,7 +63,7 @@ public interface IDataAdapter : IDisposable
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns></returns>
-	public IQueryable<Post> SinglePost(Uuid7 id);
+	public IQueryable<Post> SinglePost(PostId id);
 
 	/// <see cref="SinglePost(Medo.Uuid7)"/>
 	public IQueryable<Post> SinglePost(Uri fediId);

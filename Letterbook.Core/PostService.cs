@@ -40,7 +40,7 @@ public class PostService : IAuthzPostService, IPostService
 		_instrument = instrumentation;
 	}
 
-	public async Task<Post?> LookupPost(Uuid7 id, bool withThread = true)
+	public async Task<Post?> LookupPost(PostId id, bool withThread = true)
 	{
 		return withThread
 			? await _posts.LookupPostWithThread(id)
@@ -64,7 +64,7 @@ public class PostService : IAuthzPostService, IPostService
 		return await _posts.LookupThread(threadId);
 	}
 
-	public async Task<Post> DraftNote(ProfileId authorId, string contentSource, Uuid7? inReplyToId = default)
+	public async Task<Post> DraftNote(ProfileId authorId, string contentSource, PostId? inReplyToId = default)
 	{
 		var author = await _posts.LookupProfile(authorId)
 					 ?? throw CoreException.MissingData($"Couldn't find profile {authorId}", typeof(Profile), authorId);
@@ -85,7 +85,7 @@ public class PostService : IAuthzPostService, IPostService
 		return await Draft(authorId, post, inReplyToId);
 	}
 
-	public async Task<Post> Draft(ProfileId profileId, Post post, Uuid7? inReplyToId = default, bool publish = false)
+	public async Task<Post> Draft(ProfileId profileId, Post post, PostId? inReplyToId = default, bool publish = false)
 	{
 		using var span = _instrument.Span<PostService>();
 
@@ -140,7 +140,7 @@ public class PostService : IAuthzPostService, IPostService
 		return post;
 	}
 
-	public async Task<Post> Update(Uuid7 postId, Post post)
+	public async Task<Post> Update(PostId postId, Post post)
 	{
 		// TODO: authz
 		// I think authz can be conveyed around the app with just a list of claims, as long as one of the claims is
@@ -150,7 +150,7 @@ public class PostService : IAuthzPostService, IPostService
 						   typeof(Post), postId);
 
 		if (!(previous as IFederated).StrictEqual(post))
-			throw CoreException.InvalidRequest("Input IDs don't match", $"{postId.ToId25String()}", post);
+			throw CoreException.InvalidRequest("Input IDs don't match", $"{postId}", post);
 		// var decision = _authz.Update(Enumerable.Empty<Claim>(), previous) // TODO: authz
 		previous.Client = post.Client; // probably should come from an authz claim
 		previous.InReplyTo = post.InReplyTo;
@@ -175,7 +175,7 @@ public class PostService : IAuthzPostService, IPostService
 		return previous;
 	}
 
-	public async Task Delete(Uuid7 id)
+	public async Task Delete(PostId id)
 	{
 		var post = await _posts.LookupPost(id);
 		if (post is null) return;
@@ -186,7 +186,7 @@ public class PostService : IAuthzPostService, IPostService
 		await _postEventPublisher.Deleted(post, _profileId, _claims);
 	}
 
-	public async Task<Post> Publish(Uuid7 id, bool localOnly = false)
+	public async Task<Post> Publish(PostId id, bool localOnly = false)
 	{
 		var post = await _posts.LookupPost(id);
 		if (post is null) throw CoreException.MissingData<Post>($"Can't find post {id} to publish", id);
@@ -201,7 +201,7 @@ public class PostService : IAuthzPostService, IPostService
 		return post;
 	}
 
-	public async Task<Post> AddContent(Uuid7 postId, Content content)
+	public async Task<Post> AddContent(PostId postId, Content content)
 	{
 		var post = await _posts.LookupPost(postId)
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
@@ -223,7 +223,7 @@ public class PostService : IAuthzPostService, IPostService
 		return post;
 	}
 
-	public async Task<Post> RemoveContent(Uuid7 postId, Uuid7 contentId)
+	public async Task<Post> RemoveContent(PostId postId, Uuid7 contentId)
 	{
 		var post = await _posts.LookupPost(postId)
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to remove content", postId);
@@ -251,7 +251,7 @@ public class PostService : IAuthzPostService, IPostService
 		return post;
 	}
 
-	public async Task<Post> UpdateContent(Uuid7 postId, Uuid7 contentId, Content content)
+	public async Task<Post> UpdateContent(PostId postId, Uuid7 contentId, Content content)
 	{
 		var post = await _posts.LookupPost(postId)
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
