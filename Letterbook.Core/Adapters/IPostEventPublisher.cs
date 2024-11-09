@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Letterbook.Core.Events;
 using Letterbook.Core.Models;
 using Medo;
 
@@ -8,7 +7,7 @@ namespace Letterbook.Core.Adapters;
 /// <summary>
 /// Events and a corresponding channel related to <see cref="Post">Posts</see>
 /// </summary>
-public interface IPostEventPublisher : IEventChannel
+public interface IPostEventPublisher
 {
 	/// <summary>
 	/// the post was created

@@ -187,6 +187,11 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Entry(post).Collection(queryExpression).Query();
 	}
 
+	public IQueryable<Models.Audience> QueryAudience()
+	{
+		return _context.Audience.AsQueryable();
+	}
+
 	public Task<Models.Profile?> LookupProfileWithRelation(Models.ProfileId localId, Uri relationId)
 	{
 		return WithRelation(_context.Profiles.Where(profile => profile.Id == localId), relationId)

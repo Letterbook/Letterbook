@@ -191,7 +191,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<Profile?> LookupProfile(ProfileId profileId, ProfileId? relatedProfile)
 	{
-		var query = _profiles.SingleProfile(profileId);
+		var query = _profiles.SingleProfile(profileId)
+			.TagWithCallSite()
+			.TagWith(nameof(LookupProfile));
 		query = relatedProfile.HasValue ? _profiles.WithRelation(query, relatedProfile.Value) : query.Include(p => p.Keys);
 
 		return await query.FirstOrDefaultAsync();
@@ -199,7 +201,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<Profile?> LookupProfile(Uri fediId, ProfileId? relatedProfile)
 	{
-		var query = _profiles.SingleProfile(fediId);
+		var query = _profiles.SingleProfile(fediId)
+			.TagWithCallSite()
+			.TagWith(nameof(LookupProfile));
 		query = relatedProfile.HasValue ? _profiles.WithRelation(query, relatedProfile.Value) : query;
 
 		return await query.FirstOrDefaultAsync();

@@ -19,6 +19,7 @@ public class RelationalContext : DbContext
 	public DbSet<Account> Accounts { get; set; }
 	public DbSet<Post> Posts { get; set; }
 	public DbSet<ThreadContext> Threads { get; set; }
+	public DbSet<Audience> Audience { get; set; }
 
 	public RelationalContext(DbContextOptions<RelationalContext> context) : base(context)
 	{

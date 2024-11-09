@@ -15,7 +15,7 @@
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
     <PackageVersion Include="HtmlSanitizer" Version="8.1.870" />
     <PackageVersion Include="ILogger.Moq" Version="1.1.10" />
-    <PackageVersion Include="Markdig" Version="0.37.0" />
+    <PackageVersion Include="Markdig" Version="0.38.0" />
     <PackageVersion Include="MassTransit" Version="8.3.0" />
     <PackageVersion Include="MassTransit.Abstractions" Version="8.3.0" />
     <PackageVersion Include="Medo.Uuid7" Version="2.1.0" />
@@ -42,8 +42,8 @@
     <PackageVersion Include="Microsoft.Extensions.Identity.Core" Version="8.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Identity.Stores" Version="8.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.1" />
-    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.1.2" />
-    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.1.2" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.2.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.2.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.48.0" />
     <PackageVersion Include="Microsoft.Playwright.NUnit" Version="1.48.0" />

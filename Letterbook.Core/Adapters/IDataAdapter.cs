@@ -107,6 +107,8 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<T> QueryFrom<T>(Post post, Expression<Func<Post, IEnumerable<T>>> queryExpression)
 		where T : class;
 
+	public IQueryable<Audience> QueryAudience();
+
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<Profile?> LookupProfileWithRelation(ProfileId localId, Uri relationId);
 

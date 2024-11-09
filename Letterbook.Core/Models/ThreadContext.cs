@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using Letterbook.Core.Extensions;
 using Medo;
 
 namespace Letterbook.Core.Models;
@@ -22,6 +24,17 @@ public class ThreadContext
 	public required Uri FediId { get; set; }
 	public ICollection<Post> Posts { get; set; } = new HashSet<Post>();
 	public Heuristics? Heuristics { get; init; }
+
+	public ThreadContext() { }
+
+	[SetsRequiredMembers]
+	public ThreadContext(PostId rootId, CoreOptions opts)
+	{
+		var builder = new UriBuilder(opts.BaseUri());
+		builder.Path += $"thread/{_id.ToId25String()}";
+		FediId = builder.Uri;
+		RootId = rootId;
+	}
 
 	public Uuid7 GetId() => _id;
 	public string GetId25() => _id.ToId25String();
@@ -64,4 +77,3 @@ public class Heuristics
 		Timeline
 	}
 }
-
