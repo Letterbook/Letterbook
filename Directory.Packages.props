@@ -17,8 +17,8 @@
     <PackageVersion Include="ILogger.Moq" Version="1.1.10" />
     <PackageVersion Include="Letterbook.Uuid7" Version="2.1.1-patch.12" />
     <PackageVersion Include="Markdig" Version="0.38.0" />
-    <PackageVersion Include="MassTransit" Version="8.3.0" />
-    <PackageVersion Include="MassTransit.Abstractions" Version="8.3.0" />
+    <PackageVersion Include="MassTransit" Version="8.3.1" />
+    <PackageVersion Include="MassTransit.Abstractions" Version="8.3.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.10" />
@@ -51,7 +51,7 @@
     <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
     <PackageVersion Include="MockQueryable.Moq" Version="7.0.3" />
     <PackageVersion Include="Moq" Version="4.18.4" />
-    <PackageVersion Include="Neovolve.Logging.Xunit" Version="6.1.0" />
+    <PackageVersion Include="Neovolve.Logging.Xunit" Version="6.2.0" />
     <PackageVersion Include="Npgsql" Version="8.0.5" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
     <PackageVersion Include="Npgsql.OpenTelemetry" Version="8.0.5" />
