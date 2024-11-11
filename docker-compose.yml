@@ -17,7 +17,7 @@ services:
     restart: always
   letterbook_db:
     container_name: postgres
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     command:
       - postgres
       - -c

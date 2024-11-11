@@ -69,7 +69,7 @@ services:
       - MASTODON_REDIS_HOST=mastodon_redis
       - MASTODON_DATABASE_HOST=mastodon_db
   mastodon_db:
-    image: docker.io/bitnami/postgresql:16
+    image: docker.io/bitnami/postgresql:17
     networks:
       - mastodon
     volumes:
