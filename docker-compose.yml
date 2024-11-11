@@ -5,7 +5,7 @@ services:
   # Services required for Letterbook operation
   timescale:
     container_name: timescale
-    image: timescale/timescaledb:2.15.3-pg15-oss
+    image: timescale/timescaledb:2.17.2-pg15-oss
     environment:
       - POSTGRES_USER=letterbook
       - POSTGRES_PASSWORD=letterbookpw
@@ -55,7 +55,7 @@ services:
       - prometheus
       - tempo
     container_name: grafana
-    image: grafana/grafana-oss:11.1.0
+    image: grafana/grafana-oss:11.3.0
     ports:
       - "3000:3000"
     volumes:
@@ -64,7 +64,7 @@ services:
     
   prometheus:
     container_name: prometheus
-    image: prom/prometheus:v2.53.1
+    image: prom/prometheus:v2.55.1
     ports:
       - "9090:9090"
     volumes:
@@ -73,7 +73,7 @@ services:
     
   tempo:
     container_name: tempo
-    image: &tempo-image grafana/tempo:2.5.0
+    image: &tempo-image grafana/tempo:2.6.1
     command: [ "-config.file=/etc/tempo.yaml" ]
     depends_on:
       - tempo-init
