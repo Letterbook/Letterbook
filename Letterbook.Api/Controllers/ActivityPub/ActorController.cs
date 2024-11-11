@@ -11,6 +11,7 @@ using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.AspNetCore.Authorization;
@@ -110,7 +111,7 @@ public class ActorController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status410Gone)]
 	[ProducesResponseType(StatusCodes.Status421MisdirectedRequest)]
 	[ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-	public async Task<IActionResult> PostInbox(Uuid7 id, ASType activity)
+	public async Task<IActionResult> PostInbox(ProfileId id, ASType activity)
 	{
 		try
 		{
@@ -230,7 +231,7 @@ public class ActorController : ControllerBase
 		return Accepted();
 	}
 
-	private async Task<IActionResult> InboxReject(Uuid7 localId, RejectActivity rejectActivity)
+	private async Task<IActionResult> InboxReject(ProfileId localId, RejectActivity rejectActivity)
 	{
 		_logger.LogDebug("Inbox received: {Activity}", "Reject");
 		if (!TryUnwrapActivity(rejectActivity, "Reject", out var activityObject, out var actorId, out var error))
@@ -238,7 +239,7 @@ public class ActorController : ControllerBase
 
 		if (activityObject.Is<FollowActivity>(out var followActivity))
 		{
-			if (actorId.ToString().Contains(localId.ToId25String())
+			if (actorId.ToString().Contains(localId.ToString())
 				&& rejectActivity.Actor.SingleOrDefault()?.TryGetId(out var targetId) == true)
 			{
 				await _profileService.As(User.Claims).ReceiveFollowReply(localId, targetId, FollowState.Rejected);
@@ -252,7 +253,7 @@ public class ActorController : ControllerBase
 		return Accepted();
 	}
 
-	private async Task<IActionResult> InboxUndo(Uuid7 id, ASActivity activity)
+	private async Task<IActionResult> InboxUndo(ProfileId id, ASActivity activity)
 	{
 		if (!TryUnwrapActivity(activity, "Undo", out var activityObject, out var undoActorId, out var error))
 			return error;
@@ -266,7 +267,7 @@ public class ActorController : ControllerBase
 			_logger.LogDebug("Undo activity: {Object}", "Follow");
 			if (followActivity.Object.SingleOrDefault() is not {} target
 			    || !target.TryGetId(out var targetId)
-			    || !targetId.ToString().Contains(id.ToId25String()))
+			    || !targetId.ToString().Contains(id.ToString()))
 				return BadRequest();
 			if (followActivity.Actor.SingleOrDefault() is not {} actor
 				|| !actor.TryGetId(out var followerId))
@@ -282,7 +283,7 @@ public class ActorController : ControllerBase
 		return new AcceptedResult();
 	}
 
-	private async Task<IActionResult> InboxFollow(Uuid7 localId, ASActivity followRequest)
+	private async Task<IActionResult> InboxFollow(ProfileId localId, ASActivity followRequest)
 	{
 		if (followRequest.Actor.Count > 1) return BadRequest(new ErrorMessage(ErrorCodes.None, "Only one Actor can follow at a time"));
 		var actor = followRequest.Actor.First();

@@ -71,7 +71,7 @@ public class PostsControllerTests : WithMockContext
 	public async Task CanPublishDraft()
 	{
 		_dto.Id = _post.GetId();
-		PostServiceAuthMock.Setup(m => m.Publish(_post.GetId(), It.IsAny<bool>()))
+		PostServiceAuthMock.Setup(m => m.Publish(It.IsAny<Models.ProfileId>(), _post.GetId(), It.IsAny<bool>()))
 			.ReturnsAsync(_post);
 
 		var result = await _controller.Publish(_profile.GetId(), _post.GetId());
@@ -90,7 +90,7 @@ public class PostsControllerTests : WithMockContext
 	public async Task CanUpdatePosts()
 	{
 		_dto.Id = _post.GetId();
-		PostServiceAuthMock.Setup(m => m.Update(_post.GetId(), _post))
+		PostServiceAuthMock.Setup(m => m.Update(It.IsAny<Models.ProfileId>(), _post.GetId(), _post))
 			.ReturnsAsync(_post);
 
 		var result = await _controller.Update(_profile.GetId(), _post.GetId(), _dto);
@@ -109,7 +109,7 @@ public class PostsControllerTests : WithMockContext
 	public async Task CanAttachContent()
 	{
 		var dto = new FakeContentDto().Generate();
-		PostServiceAuthMock.Setup(m => m.AddContent(_post.GetId(), It.Is<Models.Content>(c => c.GetId() == dto.Id)))
+		PostServiceAuthMock.Setup(m => m.AddContent(It.IsAny<Models.ProfileId>(), _post.GetId(), It.Is<Models.Content>(c => c.GetId() == dto.Id)))
 			.ReturnsAsync(_post);
 
 		var result = await _controller.Attach(_profile.GetId(), _post.GetId(), dto);
@@ -129,7 +129,7 @@ public class PostsControllerTests : WithMockContext
 		var dto = new FakeContentDto().Generate();
 		var id = _post.Contents.First().GetId();
 		dto.Id = id;
-		PostServiceAuthMock.Setup(m => m.UpdateContent(_post.GetId(), id, It.Is<Models.Content>(c => c.GetId() == dto.Id)))
+		PostServiceAuthMock.Setup(m => m.UpdateContent(It.IsAny<Models.ProfileId>(), _post.GetId(), id, It.Is<Models.Content>(c => c.GetId() == dto.Id)))
 			.ReturnsAsync(_post);
 
 		var result = await _controller.Edit(_profile.GetId(), _post.GetId(), id, dto);
@@ -146,7 +146,7 @@ public class PostsControllerTests : WithMockContext
 	[Fact(DisplayName = "Should remove content in an existing post")]
 	public async Task CanRemoveContent()
 	{
-		PostServiceAuthMock.Setup(m => m.RemoveContent(_post.GetId(), It.IsAny<Uuid7>()))
+		PostServiceAuthMock.Setup(m => m.RemoveContent(It.IsAny<Models.ProfileId>(), _post.GetId(), It.IsAny<Uuid7>()))
 			.ReturnsAsync(_post);
 
 		var result = await _controller.Remove(_profile.GetId(), _post.GetId(), _post.Contents.First().GetId());
@@ -163,7 +163,7 @@ public class PostsControllerTests : WithMockContext
 	[Fact(DisplayName = "Should delete an existing post")]
 	public async Task CanDeletePost()
 	{
-		PostServiceAuthMock.Setup(m => m.Delete(_post.GetId()))
+		PostServiceAuthMock.Setup(m => m.Delete(It.IsAny<Models.ProfileId>(), _post.GetId()))
 			.Returns(Task.CompletedTask);
 
 		var result = await _controller.Delete(_profile.GetId(), _post.GetId());
@@ -179,7 +179,7 @@ public class PostsControllerTests : WithMockContext
 	[InlineData([false])]
 	public async Task CanGetPost(bool withThread)
 	{
-		PostServiceAuthMock.Setup(m => m.LookupPost(_post.GetId(), withThread))
+		PostServiceAuthMock.Setup(m => m.LookupPost(It.IsAny<Models.ProfileId>(), _post.GetId(), withThread))
 			.ReturnsAsync(_post);
 
 		var result = await _controller.Get(_profile.GetId(), _post.GetId(), withThread);
@@ -196,7 +196,7 @@ public class PostsControllerTests : WithMockContext
 	[Fact(DisplayName = "Should lookup a thread of posts by Id")]
 	public async Task CanGetThread()
 	{
-		PostServiceAuthMock.Setup(m => m.LookupThread(_post.Thread.GetId()))
+		PostServiceAuthMock.Setup(m => m.LookupThread(It.IsAny<Models.ProfileId>(), _post.Thread.GetId()))
 			.ReturnsAsync(_post.Thread);
 
 		var result = await _controller.GetThread(_profile.GetId(), _post.Thread.GetId());

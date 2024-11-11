@@ -54,7 +54,7 @@ public abstract class WithMocks
 		ActivityPublisherMock = new Mock<IActivityMessagePublisher>();
 
 		ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
-		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>(), It.IsAny<Uuid7>())).Returns(PostServiceAuthMock.Object);
+		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(PostServiceAuthMock.Object);
 		ProfileServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(ProfileServiceAuthMock.Object);
 		TimelineServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(AuthzTimelineServiceMock.Object);
 		var mockOptions = new CoreOptions

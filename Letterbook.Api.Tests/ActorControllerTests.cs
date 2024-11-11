@@ -62,7 +62,7 @@ public class ActorControllerTests : WithMockContext
 				service.ReceiveFollowRequest(_profile.Id.Id, _remoteProfile.FediId, It.IsAny<Uri?>()))
 			.ReturnsAsync(BuildRelation(FollowState.Accepted));
 
-		var response = await _controller.PostInbox(_profile.GetId(), activity);
+		var response = await _controller.PostInbox(_profile.Id, activity);
 
 		Assert.IsType<AcceptedResult>(response);
 	}
@@ -74,10 +74,10 @@ public class ActorControllerTests : WithMockContext
 		activity.Object.Add(_profile.FediId);
 
 		ProfileServiceAuthMock.Setup(service =>
-				service.ReceiveFollowRequest(_profile.GetId(), _remoteProfile.FediId, It.IsAny<Uri?>()))
+				service.ReceiveFollowRequest(_profile.Id, _remoteProfile.FediId, It.IsAny<Uri?>()))
 			.ReturnsAsync(BuildRelation(FollowState.Pending));
 
-		var response = await _controller.PostInbox(_profile.GetId(), activity);
+		var response = await _controller.PostInbox(_profile.Id, activity);
 
 		Assert.IsType<AcceptedResult>(response);
 	}
@@ -92,7 +92,7 @@ public class ActorControllerTests : WithMockContext
 				service.ReceiveFollowRequest(_profile.Id.Id, _remoteProfile.FediId, null))
 			.ReturnsAsync(BuildRelation(FollowState.Rejected));
 
-		var response = await _controller.PostInbox(_profile.GetId(), activity);
+		var response = await _controller.PostInbox(_profile.Id, activity);
 
 		Assert.IsType<AcceptedResult>(response);
 	}

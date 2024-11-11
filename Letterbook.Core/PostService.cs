@@ -24,7 +24,6 @@ public class PostService : IAuthzPostService, IPostService
 	private readonly IPostEventPublisher _postEventPublisher;
 	private readonly IActivityPubClient _apClient;
 	private readonly IEnumerable<IContentSanitizer> _sanitizers;
-	private Uuid7 _profileId;
 	private IEnumerable<Claim> _claims = null!;
 	private readonly Instrumentation _instrument;
 
@@ -40,34 +39,34 @@ public class PostService : IAuthzPostService, IPostService
 		_instrument = instrumentation;
 	}
 
-	public async Task<Post?> LookupPost(PostId id, bool withThread = true)
+	public async Task<Post?> LookupPost(ProfileId asProfile, PostId id, bool withThread = true)
 	{
 		return withThread
 			? await _posts.LookupPostWithThread(id)
 			: await _posts.LookupPost(id);
 	}
 
-	public async Task<Post?> LookupPost(Uri fediId, bool withThread = true)
+	public async Task<Post?> LookupPost(ProfileId asProfile, Uri fediId, bool withThread = true)
 	{
 		return withThread
 			? await _posts.LookupPostWithThread(fediId)
 			: await _posts.LookupPost(fediId);
 	}
 
-	public async Task<ThreadContext?> LookupThread(Uuid7 threadId)
+	public async Task<ThreadContext?> LookupThread(ProfileId asProfile, Uuid7 threadId)
 	{
 		return await _posts.LookupThread(threadId);
 	}
 
-	public async Task<ThreadContext?> LookupThread(Uri threadId)
+	public async Task<ThreadContext?> LookupThread(ProfileId asProfile, Uri threadId)
 	{
 		return await _posts.LookupThread(threadId);
 	}
 
-	public async Task<Post> DraftNote(ProfileId authorId, string contentSource, PostId? inReplyToId = default)
+	public async Task<Post> DraftNote(ProfileId asProfile, string contentSource, PostId? inReplyToId = default)
 	{
-		var author = await _posts.LookupProfile(authorId)
-					 ?? throw CoreException.MissingData($"Couldn't find profile {authorId}", typeof(Profile), authorId);
+		var author = await _posts.LookupProfile(asProfile)
+					 ?? throw CoreException.MissingData($"Couldn't find profile {asProfile}", typeof(Profile), asProfile);
 		var post = new Post(_options);
 		var note = new Note
 		{
@@ -82,10 +81,10 @@ public class PostService : IAuthzPostService, IPostService
 		note.GeneratePreview();
 		post.AddContent(note);
 
-		return await Draft(authorId, post, inReplyToId);
+		return await Draft(asProfile, post, inReplyToId);
 	}
 
-	public async Task<Post> Draft(ProfileId profileId, Post post, PostId? inReplyToId = default, bool publish = false)
+	public async Task<Post> Draft(ProfileId asProfile, Post post, PostId? inReplyToId = default, bool publish = false)
 	{
 		using var span = _instrument.Span<PostService>();
 
@@ -99,8 +98,8 @@ public class PostService : IAuthzPostService, IPostService
 			post.Thread.Posts.Add(post);
 		}
 
-		if (await _posts.LookupProfile(profileId) is not { } author)
-			throw CoreException.MissingData<Profile>($"Couldn't find profile {profileId}", profileId);
+		if (await _posts.LookupProfile(asProfile) is not { } author)
+			throw CoreException.MissingData<Profile>($"Couldn't find profile {asProfile}", asProfile);
 		post.Creators.Clear();
 		post.Creators.Add(author);
 		foreach (var content in post.Contents)
@@ -134,13 +133,13 @@ public class PostService : IAuthzPostService, IPostService
 		await _posts.Commit();
 		span?.AddTag("letterbook.post.audience", string.Join(",", post.Audience.Select(a => a.FediId)));
 		span?.AddTag("letterbook.post.mentions", string.Join(",", post.AddressedTo.Select(m => m.Id)));
-		await _postEventPublisher.Created(post, (Uuid7)profileId, _claims);
-		if (publish) await _postEventPublisher.Published(post, (Uuid7)profileId, _claims);
+		await _postEventPublisher.Created(post, (Uuid7)asProfile, _claims);
+		if (publish) await _postEventPublisher.Published(post, (Uuid7)asProfile, _claims);
 
 		return post;
 	}
 
-	public async Task<Post> Update(PostId postId, Post post)
+	public async Task<Post> Update(ProfileId asProfile, PostId postId, Post post)
 	{
 		// TODO: authz
 		// I think authz can be conveyed around the app with just a list of claims, as long as one of the claims is
@@ -170,12 +169,12 @@ public class PostService : IAuthzPostService, IPostService
 
 		_posts.Update(previous);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(previous, _profileId, _claims);
+		await _postEventPublisher.Updated(previous, (Uuid7)asProfile, _claims);
 
 		return previous;
 	}
 
-	public async Task Delete(PostId id)
+	public async Task Delete(ProfileId asProfile, PostId id)
 	{
 		var post = await _posts.LookupPost(id);
 		if (post is null) return;
@@ -183,10 +182,10 @@ public class PostService : IAuthzPostService, IPostService
 		post.DeletedDate = DateTimeOffset.UtcNow;
 		_posts.Remove(post);
 		await _posts.Commit();
-		await _postEventPublisher.Deleted(post, _profileId, _claims);
+		await _postEventPublisher.Deleted(post, (Uuid7)asProfile, _claims);
 	}
 
-	public async Task<Post> Publish(PostId id, bool localOnly = false)
+	public async Task<Post> Publish(ProfileId asProfile, PostId id, bool localOnly = false)
 	{
 		var post = await _posts.LookupPost(id);
 		if (post is null) throw CoreException.MissingData<Post>($"Can't find post {id} to publish", id);
@@ -197,11 +196,11 @@ public class PostService : IAuthzPostService, IPostService
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Published(post, _profileId, _claims);
+		await _postEventPublisher.Published(post, (Uuid7)asProfile, _claims);
 		return post;
 	}
 
-	public async Task<Post> AddContent(PostId postId, Content content)
+	public async Task<Post> AddContent(ProfileId asProfile, PostId postId, Content content)
 	{
 		var post = await _posts.LookupPost(postId)
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
@@ -214,16 +213,16 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post, _profileId, _claims);
+			await _postEventPublisher.Published(post, (Uuid7)asProfile, _claims);
 		}
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post, _profileId, _claims);
+		await _postEventPublisher.Updated(post, (Uuid7)asProfile, _claims);
 		return post;
 	}
 
-	public async Task<Post> RemoveContent(PostId postId, Uuid7 contentId)
+	public async Task<Post> RemoveContent(ProfileId asProfile, PostId postId, Uuid7 contentId)
 	{
 		var post = await _posts.LookupPost(postId)
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to remove content", postId);
@@ -241,17 +240,17 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post, _profileId, _claims);
+			await _postEventPublisher.Published(post, (Uuid7)asProfile, _claims);
 		}
 
 		_posts.Remove(content);
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post, _profileId, _claims);
+		await _postEventPublisher.Updated(post, (Uuid7)asProfile, _claims);
 		return post;
 	}
 
-	public async Task<Post> UpdateContent(PostId postId, Uuid7 contentId, Content content)
+	public async Task<Post> UpdateContent(ProfileId asProfile, PostId postId, Uuid7 contentId, Content content)
 	{
 		var post = await _posts.LookupPost(postId)
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
@@ -273,12 +272,12 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post, _profileId, _claims);
+			await _postEventPublisher.Published(post, (Uuid7)asProfile, _claims);
 		}
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post, _profileId, _claims);
+		await _postEventPublisher.Updated(post, (Uuid7)asProfile, _claims);
 		return post;
 	}
 
@@ -327,12 +326,12 @@ public class PostService : IAuthzPostService, IPostService
 		throw new NotImplementedException();
 	}
 
-	public async Task Share(Uuid7 id)
+	public async Task Share(ProfileId asProfile, PostId id)
 	{
 		throw new NotImplementedException();
 	}
 
-	public async Task Like(Uuid7 id)
+	public async Task Like(ProfileId asProfile, PostId id)
 	{
 		throw new NotImplementedException();
 	}
@@ -407,9 +406,8 @@ public class PostService : IAuthzPostService, IPostService
 		}
 	}
 
-	public IAuthzPostService As(IEnumerable<Claim> claims, Uuid7 profileId)
+	public IAuthzPostService As(IEnumerable<Claim> claims)
 	{
-		_profileId = profileId;
 		_claims = claims;
 
 		return this;
