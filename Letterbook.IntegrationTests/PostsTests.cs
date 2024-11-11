@@ -13,6 +13,7 @@ using Letterbook.IntegrationTests.Fixtures;
 using Medo;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit.Abstractions;
 using Profile = Letterbook.Core.Models.Profile;
 
 namespace Letterbook.IntegrationTests;
@@ -27,6 +28,7 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 	}
 
 	private readonly HostFixture<PostsTests> _host;
+	private readonly ITestOutputHelper _output;
 	private readonly HttpClient _client;
 	private readonly List<Profile> _profiles;
 	private readonly FakePostDto _postDto;
@@ -37,16 +39,19 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 	private readonly IServiceScope _scope;
 	static int? ITestSeed.Seed() => null;
 
-	public PostsTests(HostFixture<PostsTests> host)
+	public PostsTests(HostFixture<PostsTests> host, ITestOutputHelper output)
 	{
 		_host = host;
+		_output = output;
 		_scope = host.CreateScope();
-		_client = _host.Options == null
-			? _host.CreateClient()
-			: _host.CreateClient(new WebApplicationFactoryClientOptions()
-			{
-				BaseAddress = _host.Options.BaseUri()
-			});
+		var clientOptions = new WebApplicationFactoryClientOptions
+		{
+			BaseAddress = _host.Options?.BaseUri() ?? new Uri("localhost:5127"),
+			AllowAutoRedirect = false
+		};
+		_client = _host.CreateClient(clientOptions);
+		_client.DefaultRequestHeaders.Authorization = new("Test", $"{_host.Accounts[0].Id}");
+
 		_profiles = _host.Profiles;
 		_posts = _host.Posts;
 		_postDto = new FakePostDto(_profiles[0]);
@@ -59,7 +64,9 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		};
 	}
 
-	private bool ContentComparer(ContentDto? arg1, ContentDto? arg2) => arg1 != null && arg2 != null && arg1.Type == arg2.Type && arg1.Summary == arg2.Summary;
+	private bool ContentComparer(ContentDto? arg1, ContentDto? arg2) =>
+		arg1 != null && arg2 != null && arg1.Type == arg2.Type && arg1.Summary == arg2.Summary;
+
 	private bool TimestampMsComparer(DateTimeOffset? arg1, DateTimeOffset? arg2)
 	{
 		if (arg1 == null && arg2 == null) return true;
@@ -68,18 +75,50 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		return Math.Abs((arg1.Value - arg2.Value).Milliseconds) == 0;
 	}
 
+	/// <summary>
+	/// Theory data that provides a PostDto generator function
+	/// This allows the DTO to have properly configured audience and other values, for a pre-seeded test profile
+	/// </summary>
+	public class PostTheoryData : TheoryData<Func<Profile, PostDto>>
+	{
+		public PostTheoryData()
+		{
+			// No audience
+			Add(profile => new FakePostDto(profile).Generate());
+
+			// Explicit followers audience
+			Add(profile =>
+			{
+				var toFollowers = new FakePostDto(profile).Generate();
+				toFollowers.Audience.Add(new AudienceDto { FediId = Audience.Followers(profile).FediId });
+				return toFollowers;
+			});
+
+			// Public audience, and implied followers
+			Add(profile =>
+			{
+				var toPublic = new FakePostDto(profile).Generate();
+				toPublic.Audience.Add(new AudienceDto { FediId = Audience.Public.FediId });
+				return toPublic;
+			});
+		}
+	}
+
 	[Fact]
 	public void Exists()
 	{
 		Assert.NotNull(_host);
 	}
 
-	[Fact(DisplayName = "Should accept a draft post for a note")]
-	public async Task CanDraftNote()
+	[ClassData(typeof(PostTheoryData))]
+	[Theory(DisplayName = "Should draft and publish a note")]
+	public async Task CanPublishNote(Func<Profile, PostDto> generate)
 	{
-		var profile = _profiles[0];
-		var dto = _postDto.Generate();
+		var profile = _profiles[7];
+		var dto = generate(profile);
 		var payload = JsonContent.Create(dto, options: _json);
+		var traceId = Traces.TraceRequest(payload.Headers);
+
 		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post", payload);
 
 		Assert.NotNull(response);
@@ -88,6 +127,31 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		Assert.NotNull(body.Id);
 		Assert.NotEqual(Uuid7.Empty, body.Id);
 		Assert.Equal(dto.Contents.First(), body.Contents.FirstOrDefault(), ContentComparer);
+
+		if(dto.Audience.Count > 0 || dto.AddressedTo.Count > 0)
+		{
+			const string expected = "urn:message:Letterbook.Workers.Contracts:ActivityMessage send";
+			await Traces.AssertSpan(traceId, _host.Spans, expected);
+		}
+
+		await Traces.AssertNoTraceErrors(traceId, _host.Spans);
+	}
+
+	[Fact(DisplayName = "Should draft a note without publishing")]
+	public async Task CanDraftNote()
+	{
+		var dto = _postDto.Generate();
+		var payload = JsonContent.Create(dto, options: _json);
+
+		var response = await _client.PostAsync($"/lb/v1/posts/{_profiles[0].GetId25()}/post?draft=true", payload);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert.IsType<PostDto>(await response.Content.ReadFromJsonAsync<PostDto>(_json));
+		Assert.NotNull(actual.Replies);
+		Assert.Equal($"/post/{actual.Id?.ToId25String()}/replies", actual.Replies?.AbsolutePath);
+		Assert.Equal($"/post/{actual.Id?.ToId25String()}/likes", actual.Likes?.AbsolutePath);
+		Assert.Equal($"/post/{actual.Id?.ToId25String()}/shares", actual.Shares?.AbsolutePath);
 	}
 
 	[Fact(DisplayName = "Should publish a draft")]
@@ -95,13 +159,18 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 	{
 		var profile = _profiles[2];
 		var post = _posts[profile][1];
-		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}", new StringContent(""));
+		var payload = new StringContent("");
+		var traceId = Traces.TraceRequest(payload.Headers);
+		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}", payload);
 
 		Assert.NotNull(response);
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 		var body = Assert.IsType<PostDto>(await response.Content.ReadFromJsonAsync<PostDto>(_json));
 		Assert.Equal(post.GetId(), body.Id);
 		Assert.NotNull(body.PublishedDate);
+
+		const string expected = "urn:message:Letterbook.Workers.Contracts:ActivityMessage send";
+		await Traces.AssertNoSpans(traceId, _host.Spans, expected);
 	}
 
 	[Fact(DisplayName = "Should update an existing post")]
@@ -134,7 +203,6 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 			SortKey = 1,
 			Type = "Note",
 			Text = "This is additional content",
-
 		};
 		var payload = JsonContent.Create(dto, options: _json);
 		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}/content", payload);
@@ -192,12 +260,18 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 	{
 		var profile = _profiles[1];
 		var post = _posts[profile][2];
+		var payload = new HttpRequestMessage(HttpMethod.Delete, $"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}");
+		var traceId = Traces.TraceRequest(payload.Headers);
+		_output.WriteLine($"traceId: {traceId}");
 
-		var response = await _client
-			.DeleteAsync($"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}");
+		var response = await _client.SendAsync(payload);
+
+		await Traces.AssertSpan(traceId, _host.Spans, "urn:message:Letterbook.Workers.Contracts:ActivityMessage send");
 
 		Assert.NotNull(response);
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+		await Traces.AssertNoTraceErrors(traceId, _host.Spans);
 	}
 
 	[Theory(DisplayName = "Should lookup a post by Id")]
@@ -236,7 +310,6 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 
 		Assert.Equal(post.Thread.Posts.DistinctBy(p => p.Id).Count(), actual.Count());
 	}
-
 }
 
 public class ContentTextComparer : IEqualityComparer<ContentDto>

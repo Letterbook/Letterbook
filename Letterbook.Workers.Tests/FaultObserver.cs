@@ -6,30 +6,35 @@ public class FaultObserver : IReceiveObserver
 {
 	public List<FaultSummary> Faults = new();
 
-	public async Task PreReceive(ReceiveContext context)
+	public Task PreReceive(ReceiveContext context)
 	{
 		Assert.True(true);
+		return Task.CompletedTask;
 	}
 
-	public async Task PostReceive(ReceiveContext context)
+	public Task PostReceive(ReceiveContext context)
 	{
 		Assert.True(true);
+		return Task.CompletedTask;
 	}
 
-	public async Task PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
+	public Task PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType) where T : class
 	{
+		return Task.CompletedTask;
 	}
 
-	public async Task ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+	public Task ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
 		where T : class
 	{
 		Faults.Add(new FaultSummary("Consume", context.ReceiveContext.GetMessageTypes(),
 			context.ReceiveContext.GetMessageId() ?? Guid.Empty, exception));
+		return Task.CompletedTask;
 	}
 
-	public async Task ReceiveFault(ReceiveContext context, Exception exception)
+	public Task ReceiveFault(ReceiveContext context, Exception exception)
 	{
 		Faults.Add(new FaultSummary("Receive", context.GetMessageTypes(), context.GetMessageId() ?? Guid.Empty, exception));
+		return Task.CompletedTask;
 	}
 
 	public record FaultSummary

@@ -5,6 +5,7 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['host.docker.internal:5127'] # host.docker.internal maps the host machine to the internal docker network
+      - targets: ['tunnel:3000']
   - job_name: 'postgres-letterbook'
     metrics_path: /probe # This uses Prometheus multi-targeting: https://prometheus.io/docs/guides/multi-target-exporter/
     static_configs:

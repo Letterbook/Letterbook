@@ -11,7 +11,7 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly SignInManager<Models.Account> _signInManager;
-        private readonly UserManager<Models.Account> _userManager;
+        private readonly IAccountService _accounts;
         private readonly ILogger<LoginModel> _logger;
 
         public required IList<AuthenticationScheme> ExternalLogins { get; set; } = null!;
@@ -24,10 +24,10 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
         public required string ErrorMessage { get; set; } = null!;
 
         [SetsRequiredMembers]
-        public LoginModel(ILogger<LoginModel> logger, SignInManager<Models.Account> signInManager, UserManager<Models.Account> userManager)
+        public LoginModel(ILogger<LoginModel> logger, SignInManager<Models.Account> signInManager, IAccountService accounts)
         {
             _signInManager = signInManager;
-            _userManager = userManager;
+            _accounts = accounts;
             _logger = logger;
         }
 
@@ -72,34 +72,34 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
             {
                 // This is less than ideal, from a security perspective.
                 // It leaks whether an email address is in use.
-                var user = await _userManager.FindByEmailAsync(Input.Email);
+                // Consider login with username?
+                var user = await _accounts.FirstAccount(Input.Email);
                 if (user is null)
                 {
-	                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+	                ModelState.AddModelError(string.Empty, "Invalid username or password");
 	                return Page();
                 }
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(user, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
+
+                var result = await _signInManager.PasswordSignInAsync(user, Input.Password, Input.RememberMe, true);
+                if(result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+	                if (user.TwoFactorEnabled)
+	                {
+		                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+	                }
+
+	                _logger.LogDebug("Account {Name} has effective claims {Claims}", User.Identity?.Name, User.Claims);
+	                return LocalRedirect(returnUrl);
                 }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                }
+
                 if (result.IsLockedOut)
                 {
-                    _logger.LogWarning("User account locked out.");
+                    _logger.LogWarning("Account {Name} locked out for repeated failed logins", user.UserName);
                     return RedirectToPage("./Lockout");
                 }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
-                }
+
+                ModelState.AddModelError(string.Empty, "Invalid username or password");
+                return Page();
             }
 
             // If we got this far, something failed, redisplay form

@@ -31,7 +31,7 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 	public ClientTests(ITestOutputHelper output, JsonLdSerializerFixture fixture)
 	{
 		var httpClient = new HttpClient(HttpMessageHandlerMock.Object);
-		_client = new Client(Mock.Of<ILogger<Client>>(), httpClient, fixture.JsonLdSerializer, new Document());
+		_client = new Client(Mock.Of<ILogger<Client>>(), httpClient, fixture.JsonLdSerializer, new Document(fixture.JsonLdSerializer));
 		_output = output;
 
 		_output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
@@ -44,99 +44,6 @@ public class ClientTests : WithMocks, IClassFixture<JsonLdSerializerFixture>
 	public void Exists()
 	{
 		Assert.NotNull(_client);
-	}
-
-	[Fact(DisplayName = "Should send a Follow")]
-	public async Task ShouldFollow()
-	{
-		HttpMessageHandlerMock.SetupResponse(HttpStatusCode.OK);
-
-		var actual = await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile);
-
-		Assert.Equal(FollowState.Pending, actual.Data);
-		HttpMessageHandlerMock.Verify(
-			h => h.SendMessageAsync(
-				It.IsAny<HttpRequestMessage>(),
-				It.IsAny<CancellationToken>()),
-			Times.Once());
-	}
-
-	[Fact(DisplayName = "Should handle unauthorized")]
-	public async Task ShouldHandle401()
-	{
-		HttpMessageHandlerMock.SetupResponse(HttpStatusCode.Unauthorized);
-
-		var ex = await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
-		Assert.Matches(new Regex(@"Couldn't [\w\s]+ AP resource \(.*\)"), ex.Message);
-	}
-
-	[Fact(DisplayName = "Should handle forbidden")]
-	public async Task ShouldHandle403()
-	{
-		HttpMessageHandlerMock.SetupResponse(HttpStatusCode.Forbidden);
-
-		var ex = await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
-		Assert.Matches(new Regex(@"Couldn't [\w\s]+ AP resource \(.*\)"), ex.Message);
-	}
-
-	[Fact(DisplayName = "Should handle server errors")]
-	public async Task ShouldHandleServerErrors()
-	{
-		var response = """
-                       {"Error": "This is not an ActivityPub object, so it shouldn't parse as one"}
-                       """;
-		HttpMessageHandlerMock.SetupResponse(r =>
-			{
-				r.StatusCode = HttpStatusCode.InternalServerError;
-				r.Content = new StringContent(response);
-			});
-
-		await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
-	}
-
-	[Fact(DisplayName = "Should handle client errors returned from peer servers")]
-	public async Task ShouldHandleClientErrors()
-	{
-		var response = """
-                       {"Error": "This is not an ActivityPub object, so it shouldn't parse as one"}
-                       """;
-		HttpMessageHandlerMock.SetupResponse(r =>
-		{
-			r.StatusCode = HttpStatusCode.BadRequest;
-			r.Content = new StringContent(response);
-		});
-
-		await Assert.ThrowsAsync<ClientException>(async () => await _client.As(_profile).SendFollow(_targetProfile.Inbox, _targetProfile));
-	}
-
-	[Fact(DisplayName = "Should send an Accept:Follow")]
-	public async Task SendAcceptFollow()
-	{
-		HttpRequestMessage? message = default;
-
-		HttpMessageHandlerMock
-			.SetupResponse(HttpStatusCode.Accepted)
-			.Callback((HttpRequestMessage m, CancellationToken _) => message = m);
-
-		await _client.As(_profile).SendAccept(_targetProfile.Inbox, Models.ActivityType.Follow,
-			_targetProfile.FediId, _profile.FediId);
-
-		Assert.NotNull(message?.Content);
-
-		var payload = await message.Content.ReadAsStringAsync();
-		var actualAccept = JsonNode.Parse(payload);
-
-		// Assert on the outer Accept activity
-		Assert.NotNull(actualAccept);
-		Assert.Equal("Accept", actualAccept["type"]!.GetValue<string>());
-		Assert.Equal(_profile.FediId.ToString(), actualAccept["actor"]!.GetValue<string>());
-
-		// Assert on the inner Follow activity
-		var actualFollow = actualAccept["object"];
-		Assert.NotNull(actualFollow);
-		Assert.Equal("Follow", actualFollow["type"]!.GetValue<string>());
-		Assert.Equal(_targetProfile.FediId.ToString(), actualFollow["actor"]!.GetValue<string>());
-		Assert.Equal(_profile.FediId.ToString(), actualFollow["object"]!.GetValue<string>());
 	}
 
 	[Fact(DisplayName = "Should fetch a profile and successfully deserialize it")]

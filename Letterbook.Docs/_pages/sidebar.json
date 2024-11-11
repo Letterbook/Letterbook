@@ -1,0 +1,33 @@
+[
+  {
+    "text": "Introduction",
+    "link": "/",
+    "children": [
+      {
+        "text": "What is Letterbook?",
+        "link": "/what-is-letterbook"
+      }
+    ]
+  },
+  {
+    "text": "Run Your Instance",
+    "children": [
+      {
+        "text": "Dockerized Deployments",
+        "link": "/deploy"
+      }, {
+        "text": "Observability",
+        "link": "/observability"
+      }
+    ]
+  },
+  {
+    "text": "Other",
+    "children": [
+      {
+        "text": "Contribute",
+        "link": "/contribute"
+      }
+    ]
+  }
+]

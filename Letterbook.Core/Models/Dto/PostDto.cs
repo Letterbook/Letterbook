@@ -18,7 +18,10 @@ public class PostDto
 	public ICollection<AudienceDto> Audience { get; set; } = new HashSet<AudienceDto>();
 	public ICollection<MentionDto> AddressedTo { get; set; } = new HashSet<MentionDto>();
 	public PostDto? InReplyTo { get; set; }
+	public Uri? Replies { get; set; }
 	public IList<PostDto>? RepliesCollection { get; set; } = new List<PostDto>();
+	public Uri? Likes { get; set; }
 	public IList<MiniProfileDto>? LikesCollection { get; set; } = new List<MiniProfileDto>();
+	public Uri? Shares { get; set; }
 	public IList<MiniProfileDto>? SharesCollection { get; set; } = new List<MiniProfileDto>();
 }

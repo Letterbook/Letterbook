@@ -5,6 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>5932fff5-e723-4c65-90fc-ec9f045b4119</UserSecretsId>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,6 +17,7 @@
         <PackageReference Include="Serilog.Settings.Configuration" />
         <PackageReference Include="Serilog.Sinks.Console" />
         <PackageReference Include="Serilog.Sinks.File" />
+        <PackageReference Include="System.Linq.Async"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -25,7 +27,4 @@
       <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Contracts\EventBase.cs" />
-    </ItemGroup>
 </Project>

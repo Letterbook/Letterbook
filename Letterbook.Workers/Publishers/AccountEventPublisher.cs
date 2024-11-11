@@ -1,13 +1,12 @@
 ﻿using System.Collections.Immutable;
 using System.Security.Claims;
-using CloudNative.CloudEvents;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Workers.Contracts;
 using MassTransit;
 using Microsoft.Extensions.Options;
+using Claim = System.Security.Claims.Claim;
 
 namespace Letterbook.Workers.Publishers;
 
@@ -59,7 +58,7 @@ public class AccountEventPublisher : IAccountEventPublisher
 		return new AccountEvent
 		{
 			Subject = nextValue.Id.ToString(),
-			Claims = claims.ToImmutableHashSet(),
+			Claims = claims.Select(c => (Contracts.Claim)c).ToArray(),
 			Type = action,
 			NextData = nextValue,
 			PrevData = prevValue

@@ -15,11 +15,11 @@ public class TimelineService : IAuthzTimelineService, ITimelineService
 	private ILogger<TimelineService> _logger;
 	private CoreOptions _options;
 	private IFeedsAdapter _feeds;
-	private IAccountProfileAdapter _profileAdapter;
+	private IDataAdapter _profileAdapter;
 	private readonly IAuthorizationService _authz;
 	private IEnumerable<Claim>? _claims;
 
-	public TimelineService(ILogger<TimelineService> logger, IOptions<CoreOptions> options, IFeedsAdapter feeds, IAccountProfileAdapter profileAdapter, IAuthorizationService authz)
+	public TimelineService(ILogger<TimelineService> logger, IOptions<CoreOptions> options, IFeedsAdapter feeds, IDataAdapter profileAdapter, IAuthorizationService authz)
 	{
 		_logger = logger;
 		_options = options.Value;
@@ -99,12 +99,6 @@ public class TimelineService : IAuthzTimelineService, ITimelineService
 		result.UnionWith(post.Audience);
 		result.UnionWith(post.AddressedTo.Where(
 			m => m.Subject.HasLocalAuthority(_options)).Select(m => Audience.FromMention(m.Subject)));
-
-		// The "public audience" would be equivalent to Mastodon's federated global feed
-		// That's not the same thing as putting posts into follower's feeds.
-		// This ensures we include public posts in the followers audience in case the sender doesn't specify it
-		if (!result.Contains(Audience.Public)) return result;
-		result.UnionWith(post.Creators.Select(Audience.Followers));
 
 		return result;
 	}

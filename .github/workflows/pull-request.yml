@@ -63,6 +63,14 @@ jobs:
         run: dotnet ef migrations has-pending-model-changes
         working-directory: Letterbook.Adapter.TimescaleFeeds/
 
+      - name: Check Docs Prerender
+        working-directory: ./Letterbook.Docs
+        run: |
+          echo "Prerendering for deployment to $custom_domain"
+          dotnet run --AppTasks=prerender --BaseUrl "${{env.custom_domain}}"
+        env:
+          custom_domain: "letterbook.com"
+      
       - name: Check Generated Files
         run: |
           CHANGED=$(git status --porcelain -uno)
@@ -72,3 +80,57 @@ jobs:
             exit 1
           fi
         shell: bash
+        
+  end-to-end-test:
+    runs-on: ubuntu-latest
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Package Cache
+        id: package-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{env.NUGET_PACKAGES}}
+          key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
+
+      - name: Restore Packages
+        if: steps.package-cache.outputs.cache-hit != 'true'
+        run: dotnet restore
+
+      - name: Restore Tools
+        run: dotnet tool restore
+
+      - name: Build
+        run: dotnet build Letterbook.sln --configuration Release
+
+      - name: Run docker-compose
+        uses: hoverkraft-tech/compose-action@v2.0.1
+
+      - name: Seed database
+        run:
+          dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj &&
+          dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj &&
+          dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook
+
+      - name: Start server
+        run: dotnet run --project Letterbook.Web &
+
+      - name: E2E Test
+        run: dotnet test Letterbook.Web.Tests.E2E --no-build --configuration Release
+        env:
+          BROWSER: firefox
+
+      - name: Save test crash report
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: TestResults
+          path: '**/TestResults/'

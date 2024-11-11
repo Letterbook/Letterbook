@@ -16,7 +16,7 @@ public class RequiredHeaders : IOperationFilter
 			context.ApiDescription.ActionDescriptor.ActionConstraints?
 				.Where(c => c is AcceptHeaderAttribute)
 				.SelectMany(attr => (attr as AcceptHeaderAttribute)?.ContentTypes!)
-				.Where(x => !x.IsNullOrEmpty())
+				.Where(x => !string.IsNullOrEmpty(x))
 				.ToList();
 		if (contentTypes?.Any() == true)
 		{

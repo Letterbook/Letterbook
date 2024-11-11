@@ -1,9 +1,11 @@
-using System.Collections;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
+using Letterbook.Generators;
 using Medo;
 
 namespace Letterbook.Core.Models;
+
+public partial record struct ProfileId(Uuid7 Id) : ITypedId<Uuid7>;
 
 /// <summary>
 /// A Profile is the externally visible representation of an account on the network. In ActivityPub terms, it should map
@@ -14,11 +16,10 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public class Profile : IFederatedActor, IEquatable<Profile>
 {
-	private Uuid7 _id;
-
 	private Profile()
 	{
 		FediId = default!;
+		Authority = default!;
 		Inbox = default!;
 		Outbox = default!;
 		Followers = default!;
@@ -32,8 +33,9 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	// Constructor for local profiles
 	private Profile(Uri baseUri) : this()
 	{
-		_id = Uuid7.NewUuid7();
-		FediId = new Uri(baseUri, $"/actor/{_id.ToId25String()}");
+		Id = new(Uuid7.NewUuid7());
+		FediId = new Uri(baseUri, $"/actor/{Id}");
+		Authority = FediId.GetAuthority();
 		Handle = string.Empty;
 		DisplayName = string.Empty;
 		Description = string.Empty;
@@ -57,17 +59,13 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		SharedInbox = builder.Uri;
 
 		builder.Path = basePath;
-		builder.Fragment = "public_keys/0";
+		builder.Fragment = "key-0";
 		Keys.Add(SigningKey.Rsa(0, builder.Uri));
-		builder.Fragment = "public_keys/1";
+		builder.Fragment = "key-1";
 		Keys.Add(SigningKey.EcDsa(1, builder.Uri));
 	}
 
-	public Guid Id
-	{
-		get => _id.ToGuid();
-		set => _id = Uuid7.FromGuid(value);
-	}
+	public ProfileId Id { get; set; }
 
 	public Uri FediId { get; set; }
 	public Uri Inbox { get; set; }
@@ -75,22 +73,24 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public Uri? SharedInbox { get; set; }
 	public Uri Followers { get; set; }
 	public Uri Following { get; set; }
-	public string Authority => FediId.Authority;
+	public string Authority { get; private set; }
 	public string Handle { get; set; }
 	public string DisplayName { get; set; }
 	public string Description { get; set; }
 	public CustomField[] CustomFields { get; set; } = [];
+	public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 	public DateTime Updated { get; set; } = DateTime.UtcNow;
 	public Account? OwnedBy { get; set; }
-	public ICollection<ProfileAccess> Accessors { get; set; } = new HashSet<ProfileAccess>();
+	public ICollection<ProfileClaims> Accessors { get; set; } = new HashSet<ProfileClaims>();
 	public ActivityActorType Type { get; set; }
+	public ICollection<Audience> Headlining { get; set; } = new HashSet<Audience>();
 	public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
 	public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
 	public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
 	public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
 
-	public Uuid7 GetId() => _id;
-	public string GetId25() => _id.ToId25String();
+	public Uuid7 GetId() => Id.Id;
+	public string GetId25() => Id.ToString();
 	public Profile ShallowClone() => (Profile)MemberwiseClone();
 
 	public Profile ShallowCopy(Profile? copyFrom)
@@ -136,6 +136,17 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		var relation = new FollowerRelation(this, following, state);
 		FollowingCollection.Add(relation);
 		following.FollowersCollection.Add(relation);
+
+		if (state != FollowState.Accepted) return relation;
+		var joining = new HashSet<Audience>();
+
+		joining.Add(Audience.Followers(following));
+		joining.Add(Audience.Boosts(following));
+		foreach (var audience in joining.ReplaceFrom(following.Headlining))
+		{
+			Audiences.Add(audience);
+		}
+
 		return relation;
 	}
 
@@ -181,6 +192,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 			DisplayName = handle,
 		};
 		profile.Audiences.Add(Audience.FromMention(profile));
+		profile.Headlining.Add(Audience.Followers(profile));
 		return profile;
 	}
 
@@ -190,13 +202,14 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	{
 		return new Profile()
 		{
-			_id = Uuid7.NewUuid7(),
-			FediId = id
+			Id = new(Uuid7.NewUuid7()),
+			FediId = id,
+			Authority = id.GetAuthority()
 		};
 	}
 
-	public static Profile CreateEmpty(Uuid7 id) => new() { _id = id };
-	public static Profile CreateEmpty(Uuid7 id, Uri fediId) => new() { _id = id, FediId = fediId };
+	public static Profile CreateEmpty(ProfileId id) => new() { Id = id };
+	public static Profile CreateEmpty(ProfileId id, Uri fediId) => new() { Id = id, FediId = fediId };
 
 	public bool Equals(Profile? other)
 	{

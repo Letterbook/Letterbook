@@ -4,11 +4,13 @@ using Letterbook.Core;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Medo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Letterbook.Api.Controllers;
 
+[Authorize(Policy = Constants.ApiPolicy)]
 [ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 [Route("/lb/v1/[controller]")]
 public class TimelinesController : ControllerBase

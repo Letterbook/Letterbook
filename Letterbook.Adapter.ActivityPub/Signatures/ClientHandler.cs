@@ -26,7 +26,7 @@ public class ClientHandler : DelegatingHandler
 				new HttpRequestOptionsKey<IEnumerable<Models.SigningKey>>(IClientSigner.SigningKeysOptionsId),
 				out IEnumerable<Models.SigningKey>? keys))
 		{
-			_logger.LogWarning("Can's sign request because no keys were available");
+			_logger.LogWarning("Can't sign request because no keys were available");
 			_logger.LogDebug("Couldn't sign request to {Destination}", request.RequestUri);
 			return base.SendAsync(request, cancellationToken);
 		}

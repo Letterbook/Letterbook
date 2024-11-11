@@ -1,5 +1,7 @@
 # Letterbook
 
+![Letterbook logo](./docs/letterbook-banner-dark.png)
+
 [![Build status badge](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml/badge.svg?branch=main)](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml)
 [![Good first issues badge](https://img.shields.io/github/issues-search/letterbook/letterbook?query=is%3Aissue%20is%3Aopen%20label%3A%22ready%20to%20start%22%2C%22good%20first%20issue%22%20&style=flat&logo=github&label=Good%20first%20issue&labelColor=%23404951&color=%2333CB56)](https://github.com/Letterbook/Letterbook/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22%2C%22ready+to+start%22)
 
@@ -82,7 +84,7 @@ All of this is just the beginning of what we have planned for Letterbook. We're 
 ## Contributing
 
 > [!TIP]
-> To get started developing, see the Quckstart section in the [Contributing Guide](./CONTRIBUTING.md)
+> To get started developing, see the Quickstart section in the [Contributing Guide](./CONTRIBUTING.md)
 
 
 Please reach out to let us know you're interested in the project! There are many ways to contribute, it's a lot more than just code. Experience in these areas would be particularly helpful, right now. And this list will only grow over time.
@@ -123,7 +125,7 @@ Please note that this roadmap is only updated ocassionally. The project's Github
 
 * [@jenniferplusplus@hachyderm.io](https://hachyderm.io/@jenniferplusplus)
 * [@runewake2@hachyderm.io](https://hachyderm.io/@runewake2)
-* [@hazel@koehlercode.dev](https://hachyderm.io/@hazel@koehlercode.dev)
+* [@hazelnoot@enby.life](https://enby.life/@hazelnoot)
 
 
 [sup-board]: https://github.com/orgs/Letterbook/projects/5/views/4

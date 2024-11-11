@@ -22,7 +22,7 @@ public class FollowerRelation : IEquatable<FollowerRelation>
 	/// </summary>
 	public Profile Follows { get; set; }
 	public FollowState State { get; set; }
-	public DateTime Date { get; set; }
+	public DateTimeOffset Date { get; set; }
 
 	private FollowerRelation()
 	{

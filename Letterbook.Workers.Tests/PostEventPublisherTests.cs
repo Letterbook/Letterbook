@@ -49,7 +49,7 @@ public sealed class PostEventPublisherTests : WithMocks, IAsyncDisposable
 	public async Task CanPublishCreated()
 	{
 		await _harness.Start();
-		await _publisher.Created(_post);
+		await _publisher.Created(_post, _profile.GetId(), []);
 
 		Assert.True(await _harness.Published.Any<PostEvent>(msg => msg.Context.Message.Type == "Created"));
 	}
@@ -58,7 +58,7 @@ public sealed class PostEventPublisherTests : WithMocks, IAsyncDisposable
 	public async Task CanPublishDeleted()
 	{
 		await _harness.Start();
-		await _publisher.Deleted(_post);
+		await _publisher.Deleted(_post, _profile.GetId(), []);
 
 		Assert.True(await _harness.Published.Any<PostEvent>(msg => msg.Context.Message.Type == "Deleted"));
 	}
@@ -67,7 +67,7 @@ public sealed class PostEventPublisherTests : WithMocks, IAsyncDisposable
 	public async Task CanPublishUpdated()
 	{
 		await _harness.Start();
-		await _publisher.Updated(_post);
+		await _publisher.Updated(_post, _profile.GetId(), []);
 
 		Assert.True(await _harness.Published.Any<PostEvent>(msg => msg.Context.Message.Type == "Updated"));
 	}
@@ -76,7 +76,7 @@ public sealed class PostEventPublisherTests : WithMocks, IAsyncDisposable
 	public async Task CanPublishPublished()
 	{
 		await _harness.Start();
-		await _publisher.Published(_post);
+		await _publisher.Published(_post, _profile.GetId(), []);
 
 		Assert.True(await _harness.Published.Any<PostEvent>(msg => msg.Context.Message.Type == "Published"));
 	}
@@ -85,7 +85,7 @@ public sealed class PostEventPublisherTests : WithMocks, IAsyncDisposable
 	public async Task CanPublishLiked()
 	{
 		await _harness.Start();
-		await _publisher.Liked(_post, _profile);
+		await _publisher.Liked(_post, _profile.GetId(), []);
 
 		Assert.True(await _harness.Published.Any<PostEvent>(msg => msg.Context.Message.Type == "Liked"));
 	}
@@ -94,7 +94,7 @@ public sealed class PostEventPublisherTests : WithMocks, IAsyncDisposable
 	public async Task CanPublishShared()
 	{
 		await _harness.Start();
-		await _publisher.Shared(_post, _profile);
+		await _publisher.Shared(_post, _profile.GetId(), []);
 
 		Assert.True(await _harness.Published.Any<PostEvent>(msg => msg.Context.Message.Type == "Shared"));
 	}

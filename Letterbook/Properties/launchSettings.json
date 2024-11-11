@@ -14,7 +14,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:5127",
+      "applicationUrl": "https://host.castle",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Sandcastle"
       }

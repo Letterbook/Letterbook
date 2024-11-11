@@ -1,0 +1,28 @@
+﻿@page "/"
+@model Letterbook.Docs.Pages.Index
+
+@implements IRenderStatic<Index>
+
+@functions {
+
+    public List<Index> GetStaticProps(RenderContext ctx)
+    {
+        var page = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownCategories>>();
+        return [new Index(page)];
+    }
+
+}
+
+@{
+    if (Model.Source == null)
+    {
+        Response.Redirect("/404");
+        return;
+    }
+
+
+    Response.StatusCode = 200;
+    ViewData["Title"] = Model.Source.Title;
+}
+
+@Model.Html

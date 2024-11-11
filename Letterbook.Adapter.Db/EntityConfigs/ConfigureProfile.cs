@@ -10,6 +10,7 @@ public class ConfigureProfile : IEntityTypeConfiguration<Models.Profile>
 		builder.Property(profile => profile.Id)
 			.ValueGeneratedNever();
 		builder.HasIndex(profile => profile.FediId);
+		builder.HasIndex(profile => profile.Authority);
 		builder.HasOne<Models.Account>(profile => profile.OwnedBy);
 		builder.Property(profile => profile.CustomFields).HasColumnType("jsonb");
 		builder.HasMany(profile => profile.Keys);

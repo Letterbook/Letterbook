@@ -2,7 +2,7 @@ namespace Letterbook.Api.Authentication.HttpSignature.Infrastructure;
 
 public class HttpSignatureFeature
 {
-	private IList<Uri> _validatedSignatures;
+	private IList<Uri> _validatedSignatures = new List<Uri>();
 
 	public void Add(IEnumerable<Uri> validatedSignatures)
 	{

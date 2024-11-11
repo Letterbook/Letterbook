@@ -13,4 +13,5 @@ public class ContentDto
 
 	/// <summary>Required for Notes. The text of the Note.</summary>
 	public string? Text { get; set; }
+	public string? SourceContentType { get; set; }
 }

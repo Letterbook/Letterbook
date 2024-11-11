@@ -1,6 +1,8 @@
+using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Util;
+using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests;
@@ -27,12 +29,15 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 
 	public DeliveryWorkerTests(ITestOutputHelper output)
 	{
-		_provider = new ServiceCollection()
+		var services = new ServiceCollection()
 			.AddSingleton(output.BuildLoggerFactory(LogLevel.Debug))
 			.AddMocks(this)
 			.AddScoped<IActivityMessagePublisher, ActivityMessagePublisher>()
-			.AddMassTransitTestHarness(bus => { bus.AddConsumer<DeliveryWorker>(); })
-			.BuildServiceProvider();
+			.AddScoped<IActivityPubDocument, Document>()
+			.AddMassTransitTestHarness(bus => { bus.AddConsumer<DeliveryWorker>(); });
+		services.TryAddTypesModule();
+
+		_provider = services.BuildServiceProvider();
 		_publisher = _provider.GetRequiredService<IActivityMessagePublisher>();
 		_consumer = _provider.GetRequiredService<DeliveryWorker>();
 		_harness = _provider.GetRequiredService<ITestHarness>();
@@ -52,7 +57,7 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	}
 
 	[Theory(DisplayName = "Should send ASDocs to their destination")]
-	[MemberData(nameof(GenerateDoc))]
+	[MemberData(nameof(GenerateDoc), 50)]
 	public async Task CanSend(ASObject asDoc, Uri inbox)
 	{
 		await _publisher.Deliver(inbox, asDoc, _profile);
@@ -68,10 +73,10 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	 * Support methods
 	 */
 
-	public static IEnumerable<object[]> GenerateDoc()
+	public static IEnumerable<object[]> GenerateDoc(int count)
 	{
 		var faker = new FakeProfile();
-		foreach (var profile in faker.Generate(50))
+		foreach (var profile in faker.Generate(count))
 		{
 			yield return
 			[

@@ -15,5 +15,5 @@ public interface IContent
 	public Uuid7 GetId();
 	public string GetId25();
 	public string? GeneratePreview();
-	public void Sanitize();
+	public void Sanitize(IEnumerable<IContentSanitizer> sanitizers);
 }

@@ -11,6 +11,7 @@ public class ConfigureAudience : IEntityTypeConfiguration<Models.Audience>
 		builder.HasMany<Models.Profile>(audience => audience.Members)
 			.WithMany(profile => profile.Audiences)
 			.UsingEntity("AudienceProfileMembers");
-		builder.HasOne<Models.Profile>(audience => audience.Source);
+		builder.HasOne<Models.Profile>(audience => audience.Source)
+			.WithMany(profile => profile.Headlining);
 	}
 }

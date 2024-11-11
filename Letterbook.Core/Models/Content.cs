@@ -1,10 +1,15 @@
+using System.Net.Mime;
 using Letterbook.Core.Extensions;
 using Medo;
 
 namespace Letterbook.Core.Models;
 
-public abstract class Content : IContent, IEquatable<Content>
+public abstract class Content : IContent, IEquatable<Content>, IComparable<Content>
 {
+	public const string PlainTextMediaType = "text/plain";
+	public const string MarkdownMediaType = "text/markdown";
+	public const string HtmlMediaType = "text/html";
+
 	private Uuid7 _id;
 
 	protected Content()
@@ -12,6 +17,7 @@ public abstract class Content : IContent, IEquatable<Content>
 		_id = Uuid7.NewUuid7();
 		FediId = default!;
 		Post = default!;
+		ContentType = new ContentType(HtmlMediaType);
 	}
 
 	public Guid Id
@@ -27,6 +33,8 @@ public abstract class Content : IContent, IEquatable<Content>
 	public Uri? Source { get; set; }
 	public int? SortKey { get; set; } = 0;
 	public abstract string Type { get; }
+	public ContentType ContentType { get; set; }
+	public required string Html { get; set; }
 
 	public static Uri LocalId(IContent content, CoreOptions opts) =>
 		new(opts.BaseUri(), $"{content.Type}/{content.GetId25()}");
@@ -34,10 +42,12 @@ public abstract class Content : IContent, IEquatable<Content>
 	public Uuid7 GetId() => _id;
 	public string GetId25() => _id.ToId25String();
 	public abstract string? GeneratePreview();
-	public abstract void Sanitize();
+	public abstract void Sanitize(IEnumerable<IContentSanitizer> sanitizers);
 
 	public virtual void UpdateFrom(Content content)
 	{
+		Html = content.Html;
+		ContentType = content.ContentType;
 		Summary = content.Summary;
 		Source = content.Source;
 		SortKey = content.SortKey;
@@ -80,5 +90,12 @@ public abstract class Content : IContent, IEquatable<Content>
 	public static bool operator !=(Content? left, Content? right)
 	{
 		return !Equals(left, right);
+	}
+
+	public int CompareTo(Content? other)
+	{
+		if (ReferenceEquals(this, other)) return 0;
+		if (other is null) return 1;
+		return Nullable.Compare(SortKey, other.SortKey);
 	}
 }

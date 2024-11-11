@@ -8,6 +8,7 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Medo;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Annotations;
@@ -15,6 +16,7 @@ using IAuthorizationService = Letterbook.Core.IAuthorizationService;
 
 namespace Letterbook.Api.Controllers;
 
+[Authorize(Policy = Constants.ApiPolicy)]
 [ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 [Route("lb/v1/[controller]")]
 public class PostsController : ControllerBase
@@ -49,7 +51,8 @@ public class PostsController : ControllerBase
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
-		dto.Id = Uuid7.NewUuid7();
+		dto.Id = null;
+
 		if (_mapper.Map<Post>(dto) is not { } post)
 			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
 		foreach (var content in post.Contents)
@@ -65,7 +68,7 @@ public class PostsController : ControllerBase
 		if (!draft && !pubDecision.Allowed)
 			return Unauthorized(pubDecision);
 
-		var result = await _post.As(User.Claims, profileId).Draft(post, post.InReplyTo?.GetId(), !draft);
+		var result = await _post.As(User.Claims, profileId).Draft(profileId, post, post.InReplyTo?.GetId(), !draft);
 		return Ok(_mapper.Map<PostDto>(result));
 	}
 

@@ -25,8 +25,8 @@ public class FakePost : Faker<Post>
 	public FakePost(IEnumerable<Profile> creators, int contents, CoreOptions? opts)
 	{
 		_creators = creators;
-		_authority = _creators.First().Authority;
-		RuleFor(p => p.Id, faker => faker.Random.Guid7());
+		_authority = _creators.First().FediId.Authority;
+		RuleFor(p => p.Id, faker => new PostId(faker.Random.Guid7()));
 		RuleFor(p => p.FediId, faker => faker.FediId(_authority, "post"));
 		RuleFor(p => p.Creators, () => _creators);
 		RuleFor(p => p.CreatedDate, faker => faker.Date.Recent().ToUniversalTime());
@@ -41,12 +41,15 @@ public class FakePost : Faker<Post>
 		RuleFor(p => p.Hostname, (_, post) => post.FediId.Host);
 		RuleFor(p => p.Audience, (faker, post) =>
 		{
-			var audience = post.Creators.Select(Audience.Followers);
+			var audience = post.Creators.SelectMany(c => c.Headlining);
 			if (faker.Random.Bool())
 				audience = audience.Append(Audience.Public);
 
 			return audience.ToList();
 		});
+		RuleFor(p => p.Likes, (_, post) => new Uri(post.FediId + "/likes"));
+		RuleFor(p => p.Replies, (_, post) => new Uri(post.FediId + "/replies"));
+		RuleFor(p => p.Shares, (_, post) => new Uri(post.FediId + "/shares"));
 
 		FinishWith((_, post) =>
 		{

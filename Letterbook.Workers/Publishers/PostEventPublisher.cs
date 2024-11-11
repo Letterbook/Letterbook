@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Security.Claims;
-using AutoMapper;
+﻿using AutoMapper;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
@@ -10,7 +8,7 @@ using Letterbook.Workers.Contracts;
 using MassTransit;
 using Medo;
 using Microsoft.Extensions.Options;
-using Profile = Letterbook.Core.Models.Profile;
+using Claim = System.Security.Claims.Claim;
 
 namespace Letterbook.Workers.Publishers;
 
@@ -30,61 +28,66 @@ public class PostEventPublisher : IPostEventPublisher
 	}
 
 	/// <inheritdoc />
-	public async Task Created(Post post)
+	public async Task Created(Post post, Uuid7 createdBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Created), []);
-		await _bus.Publish(message);
+		var message = Message(post, nameof(Created), claims, createdBy);
+		await _bus.Publish(message, c => Headers(c, nameof(Created)));
 	}
 
 	/// <inheritdoc />
-	public async Task Deleted(Post post)
+	public async Task Deleted(Post post, Uuid7 deletedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Deleted), []);
-		await _bus.Publish(message);
+		var message = Message(post, nameof(Deleted), claims, deletedBy);
+		await _bus.Publish(message, c => Headers(c, nameof(Deleted)));
 	}
 
 	/// <inheritdoc />
-	public async Task Updated(Post post)
+	public async Task Updated(Post post, Uuid7 updatedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Updated), []);
-		await _bus.Publish(message);
+		var message = Message(post, nameof(Updated), claims, updatedBy);
+		await _bus.Publish(message, c => Headers(c, nameof(Updated)));
 	}
 
 	/// <inheritdoc />
-	public async Task Published(Post post)
+	public async Task Published(Post post, Uuid7 publishedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, nameof(Published), []);
-		await _bus.Publish(message);
+		var message = Message(post, nameof(Published), claims, publishedBy);
+		await _bus.Publish(message, c => Headers(c, nameof(Published)));
 	}
 
 	/// <inheritdoc />
-	public async Task Liked(Post post, Profile likedBy)
+	public async Task Liked(Post post, Uuid7 likedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, likedBy.GetId(), nameof(Liked), []);
-		await _bus.Publish(message);
+		var message = Message(post, likedBy, nameof(Liked), claims);
+		await _bus.Publish(message, c => Headers(c, nameof(Liked)));
 	}
 
 	/// <inheritdoc />
-	public async Task Shared(Post post, Profile sharedBy)
+	public async Task Shared(Post post, Uuid7 sharedBy, IEnumerable<Claim> claims)
 	{
-		var message = Message(post, sharedBy.GetId(), nameof(Shared), []);
-		await _bus.Publish(message);
+		var message = Message(post, sharedBy, nameof(Shared), claims);
+		await _bus.Publish(message, c => Headers(c, nameof(Shared)));
 	}
 
 	/*
 	 * Private methods
 	 */
 
-	private PostEvent Message(Post value, string action, ImmutableHashSet<Claim> claims) => Message(value, null, action, claims);
+	private static void Headers(PublishContext<PostEvent> context, string value)
+	{
+		context.Headers.Set(Workers.Headers.Event, value);
+	}
 
-	private PostEvent Message(Post value, Uuid7? sender, string action, ImmutableHashSet<Claim> claims) =>
+	private PostEvent Message(Post value, string action, IEnumerable<Claim> claims, Uuid7 sender) => Message(value, sender, action, claims);
+
+	private PostEvent Message(Post value, Uuid7 sender, string action, IEnumerable<Claim> claims) =>
 		Message(value, null, sender, action, claims);
 
-	private PostEvent Message(Post nextValue, Post? prevValue, Uuid7? sender, string action, ImmutableHashSet<Claim> claims) =>
+	private PostEvent Message(Post nextValue, Post? prevValue, Uuid7 sender, string action, IEnumerable<Claim> claims) =>
 		new PostEvent
 		{
 			Sender = sender,
-			Claims = claims.ToArray(),
+			Claims = claims.Select(c => (Contracts.Claim)c).ToArray(),
 			NextData = _mapper.Map<PostDto>(nextValue),
 			PrevData = prevValue is null ? null : _mapper.Map<PostDto>(prevValue),
 			Subject = nextValue.GetId25(),

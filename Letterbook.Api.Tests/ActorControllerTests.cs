@@ -1,10 +1,7 @@
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Api.Controllers.ActivityPub;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Events;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
-using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +25,7 @@ public class ActorControllerTests : WithMockContext
 	{
 		_output = output;
 		_controller = new ActorController(CoreOptionsMock, Mock.Of<ILogger<ActorController>>(),
-			ProfileServiceMock.Object, Mock.Of<IActivityMessagePublisher>(), new Document())
+			ProfileServiceMock.Object, Mock.Of<IActivityMessagePublisher>(), new Document(JsonLdSerializerMock.Object))
 		{
 			ControllerContext = new ControllerContext()
 			{
@@ -41,7 +38,7 @@ public class ActorControllerTests : WithMockContext
 		_fakeRemoteProfile = new FakeProfile();
 		_profile = _fakeProfile.Generate();
 		_remoteProfile = _fakeRemoteProfile.Generate();
-		_document = new Document();
+		_document = new Document(JsonLdSerializerMock.Object);
 	}
 
 	private FollowerRelation BuildRelation(FollowState state)
@@ -62,10 +59,10 @@ public class ActorControllerTests : WithMockContext
 		activity.Object.Add(_profile.FediId);
 
 		ProfileServiceAuthMock.Setup(service =>
-				service.ReceiveFollowRequest(_profile.Id, _remoteProfile.FediId, It.IsAny<Uri?>()))
+				service.ReceiveFollowRequest(_profile.Id.Id, _remoteProfile.FediId, It.IsAny<Uri?>()))
 			.ReturnsAsync(BuildRelation(FollowState.Accepted));
 
-		var response = await _controller.PostInbox(_profile.GetId25(), activity);
+		var response = await _controller.PostInbox(_profile.GetId(), activity);
 
 		Assert.IsType<AcceptedResult>(response);
 	}
@@ -80,7 +77,7 @@ public class ActorControllerTests : WithMockContext
 				service.ReceiveFollowRequest(_profile.GetId(), _remoteProfile.FediId, It.IsAny<Uri?>()))
 			.ReturnsAsync(BuildRelation(FollowState.Pending));
 
-		var response = await _controller.PostInbox(_profile.GetId25(), activity);
+		var response = await _controller.PostInbox(_profile.GetId(), activity);
 
 		Assert.IsType<AcceptedResult>(response);
 	}
@@ -92,10 +89,10 @@ public class ActorControllerTests : WithMockContext
 		activity.Object.Add(_profile.FediId);
 
 		ProfileServiceAuthMock.Setup(service =>
-				service.ReceiveFollowRequest(_profile.Id, _remoteProfile.FediId, null))
+				service.ReceiveFollowRequest(_profile.Id.Id, _remoteProfile.FediId, null))
 			.ReturnsAsync(BuildRelation(FollowState.Rejected));
 
-		var response = await _controller.PostInbox(_profile.GetId25(), activity);
+		var response = await _controller.PostInbox(_profile.GetId(), activity);
 
 		Assert.IsType<AcceptedResult>(response);
 	}

@@ -1,7 +1,7 @@
+using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Events;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
@@ -20,23 +20,27 @@ public class PostService : IAuthzPostService, IPostService
 {
 	private readonly ILogger<PostService> _logger;
 	private readonly CoreOptions _options;
-	private readonly IPostAdapter _posts;
+	private readonly IDataAdapter _posts;
 	private readonly IPostEventPublisher _postEventPublisher;
 	private readonly IActivityPubClient _apClient;
+	private readonly IEnumerable<IContentSanitizer> _sanitizers;
 	private Uuid7 _profileId;
 	private IEnumerable<Claim> _claims = null!;
+	private readonly Instrumentation _instrument;
 
-	public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options,
-		IPostAdapter posts, IPostEventPublisher postEventPublisher, IActivityPubClient apClient)
+	public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options, Instrumentation instrumentation,
+		IDataAdapter posts, IPostEventPublisher postEventPublisher, IActivityPubClient apClient, IEnumerable<IContentSanitizer> sanitizers)
 	{
 		_logger = logger;
 		_posts = posts;
 		_postEventPublisher = postEventPublisher;
 		_apClient = apClient;
+		_sanitizers = sanitizers;
 		_options = options.Value;
+		_instrument = instrumentation;
 	}
 
-	public async Task<Post?> LookupPost(Uuid7 id, bool withThread = true)
+	public async Task<Post?> LookupPost(PostId id, bool withThread = true)
 	{
 		return withThread
 			? await _posts.LookupPostWithThread(id)
@@ -60,27 +64,31 @@ public class PostService : IAuthzPostService, IPostService
 		return await _posts.LookupThread(threadId);
 	}
 
-	public async Task<Post> DraftNote(Uuid7 authorId, string contentSource, Uuid7? inReplyToId = default)
+	public async Task<Post> DraftNote(ProfileId authorId, string contentSource, PostId? inReplyToId = default)
 	{
 		var author = await _posts.LookupProfile(authorId)
 					 ?? throw CoreException.MissingData($"Couldn't find profile {authorId}", typeof(Profile), authorId);
 		var post = new Post(_options);
 		var note = new Note
 		{
-			Text = contentSource,
+			SourceText = contentSource,
+			SourceContentType = new ContentType(Content.PlainTextMediaType),
 			Post = post,
-			FediId = default!
+			FediId = default!,
+			Html = contentSource
 		};
 		post.Creators.Add(author);
 		note.SetLocalFediId(_options);
 		note.GeneratePreview();
 		post.AddContent(note);
 
-		return await Draft(post, inReplyToId);
+		return await Draft(authorId, post, inReplyToId);
 	}
 
-	public async Task<Post> Draft(Post post, Uuid7? inReplyToId = default, bool publish = false)
+	public async Task<Post> Draft(ProfileId profileId, Post post, PostId? inReplyToId = default, bool publish = false)
 	{
+		using var span = _instrument.Span<PostService>();
+
 		if (inReplyToId is { } parentId)
 		{
 			var parent = await _posts.LookupPost(parentId)
@@ -91,21 +99,48 @@ public class PostService : IAuthzPostService, IPostService
 			post.Thread.Posts.Add(post);
 		}
 
-		if (await _posts.LookupProfile(_profileId) is not { } author)
-			throw CoreException.MissingData<Profile>($"Couldn't find profile {_profileId}", _profileId);
+		if (await _posts.LookupProfile(profileId) is not { } author)
+			throw CoreException.MissingData<Profile>($"Couldn't find profile {profileId}", profileId);
 		post.Creators.Clear();
 		post.Creators.Add(author);
+		foreach (var content in post.Contents)
+		{
+			content.Sanitize(_sanitizers);
+		}
+
+		if (post.Audience.Contains(Audience.Public))
+		{
+			// Fill in the followers audience(s), if necessary. Also fixes reference equality if the audience was already included
+			_logger.LogDebug("Normalizing {Audience} for followers from {Headliners}",
+				post.Audience.Select(a => a.FediId),
+				post.Creators.SelectMany(p => p.Headlining).Select(a => a.FediId));
+
+			var followers = post.Creators.Select(Audience.Followers).ToHashSet()
+				.ReplaceFrom(post.Creators.SelectMany(p => p.Headlining).ToHashSet()).ToHashSet();
+			followers.UnionWith(post.Audience);
+			post.Audience = followers;
+			_logger.LogDebug("Normalized Audience for followers {Audience}", post.Audience.Select(a => a.FediId));
+		}
+		foreach (var audience in post.Audience)
+		{
+			// EF Core often incorrectly assumes the audience records are new, but that should never be true in this code path
+			// Creating new audiences would be an explicit action, and the only time it happens incidentally is when creating new
+			// Profiles
+			_posts.Update(audience);
+		}
 
 		if (publish) post.PublishedDate = DateTimeOffset.UtcNow;
 		_posts.Add(post);
 		await _posts.Commit();
-		await _postEventPublisher.Created(post);
-		if (publish) await _postEventPublisher.Published(post);
+		span?.AddTag("letterbook.post.audience", string.Join(",", post.Audience.Select(a => a.FediId)));
+		span?.AddTag("letterbook.post.mentions", string.Join(",", post.AddressedTo.Select(m => m.Id)));
+		await _postEventPublisher.Created(post, (Uuid7)profileId, _claims);
+		if (publish) await _postEventPublisher.Published(post, (Uuid7)profileId, _claims);
 
 		return post;
 	}
 
-	public async Task<Post> Update(Uuid7 postId, Post post)
+	public async Task<Post> Update(PostId postId, Post post)
 	{
 		// TODO: authz
 		// I think authz can be conveyed around the app with just a list of claims, as long as one of the claims is
@@ -115,7 +150,7 @@ public class PostService : IAuthzPostService, IPostService
 						   typeof(Post), postId);
 
 		if (!(previous as IFederated).StrictEqual(post))
-			throw CoreException.InvalidRequest("Input IDs don't match", $"{postId.ToId25String()}", post);
+			throw CoreException.InvalidRequest("Input IDs don't match", $"{postId}", post);
 		// var decision = _authz.Update(Enumerable.Empty<Claim>(), previous) // TODO: authz
 		previous.Client = post.Client; // probably should come from an authz claim
 		previous.InReplyTo = post.InReplyTo;
@@ -127,15 +162,20 @@ public class PostService : IAuthzPostService, IPostService
 		if (published) previous.UpdatedDate = DateTimeOffset.UtcNow;
 		else previous.CreatedDate = DateTimeOffset.UtcNow;
 
+		foreach (var content in previous.Contents)
+		{
+			content.Sanitize(_sanitizers);
+		}
+
 
 		_posts.Update(previous);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(previous);
+		await _postEventPublisher.Updated(previous, _profileId, _claims);
 
 		return previous;
 	}
 
-	public async Task Delete(Uuid7 id)
+	public async Task Delete(PostId id)
 	{
 		var post = await _posts.LookupPost(id);
 		if (post is null) return;
@@ -143,10 +183,10 @@ public class PostService : IAuthzPostService, IPostService
 		post.DeletedDate = DateTimeOffset.UtcNow;
 		_posts.Remove(post);
 		await _posts.Commit();
-		await _postEventPublisher.Deleted(post);
+		await _postEventPublisher.Deleted(post, _profileId, _claims);
 	}
 
-	public async Task<Post> Publish(Uuid7 id, bool localOnly = false)
+	public async Task<Post> Publish(PostId id, bool localOnly = false)
 	{
 		var post = await _posts.LookupPost(id);
 		if (post is null) throw CoreException.MissingData<Post>($"Can't find post {id} to publish", id);
@@ -157,32 +197,33 @@ public class PostService : IAuthzPostService, IPostService
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Published(post);
+		await _postEventPublisher.Published(post, _profileId, _claims);
 		return post;
 	}
 
-	public async Task<Post> AddContent(Uuid7 postId, Content content)
+	public async Task<Post> AddContent(PostId postId, Content content)
 	{
 		var post = await _posts.LookupPost(postId)
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
 		content.SortKey ??= (post.Contents.Select(c => c.SortKey).Max() ?? -1) + 1;
+		content.Sanitize(_sanitizers);
 		post.Contents.Add(content);
 
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post);
+			await _postEventPublisher.Published(post, _profileId, _claims);
 		}
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post);
+		await _postEventPublisher.Updated(post, _profileId, _claims);
 		return post;
 	}
 
-	public async Task<Post> RemoveContent(Uuid7 postId, Uuid7 contentId)
+	public async Task<Post> RemoveContent(PostId postId, Uuid7 contentId)
 	{
 		var post = await _posts.LookupPost(postId)
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to remove content", postId);
@@ -200,17 +241,17 @@ public class PostService : IAuthzPostService, IPostService
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post);
+			await _postEventPublisher.Published(post, _profileId, _claims);
 		}
 
 		_posts.Remove(content);
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post);
+		await _postEventPublisher.Updated(post, _profileId, _claims);
 		return post;
 	}
 
-	public async Task<Post> UpdateContent(Uuid7 postId, Uuid7 contentId, Content content)
+	public async Task<Post> UpdateContent(PostId postId, Uuid7 contentId, Content content)
 	{
 		var post = await _posts.LookupPost(postId)
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
@@ -227,20 +268,17 @@ public class PostService : IAuthzPostService, IPostService
 		}
 
 		original.UpdateFrom(content);
-		// _posts.Update(content);
-		// post.Contents.Remove(content);
-		// post.AddContent(content);
-		// post.Contents.Add(content);
+		original.Sanitize(_sanitizers);
 
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
-			await _postEventPublisher.Published(post);
+			await _postEventPublisher.Published(post, _profileId, _claims);
 		}
 
 		_posts.Update(post);
 		await _posts.Commit();
-		await _postEventPublisher.Updated(post);
+		await _postEventPublisher.Updated(post, _profileId, _claims);
 		return post;
 	}
 

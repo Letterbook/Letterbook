@@ -1,14 +1,7 @@
 using System.Reflection;
-using Letterbook.Adapter.Db.EntityConfigs;
 using Letterbook.Core.Models;
-using Medo;
-using Microsoft.AspNetCore.Identity;
+using Letterbook.Generators;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Npgsql;
-
-#pragma warning disable CS8618
-// EntityFramework does the right thing
 
 namespace Letterbook.Adapter.Db;
 
@@ -26,6 +19,7 @@ public class RelationalContext : DbContext
 	public DbSet<Account> Accounts { get; set; }
 	public DbSet<Post> Posts { get; set; }
 	public DbSet<ThreadContext> Threads { get; set; }
+	public DbSet<Audience> Audience { get; set; }
 
 	public RelationalContext(DbContextOptions<RelationalContext> context) : base(context)
 	{
@@ -35,10 +29,29 @@ public class RelationalContext : DbContext
 	{
 		base.OnModelCreating(modelBuilder);
 		modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+		modelBuilder.Entity<ProfileClaims>().Navigation(claims => claims.Profile).AutoInclude();
 	}
 
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
 		configurationBuilder.Properties<Uri>().HaveConversion<UriIdConverter, UriIdComparer>();
+		AddTypedIdConversions(configurationBuilder);
+	}
+
+	private static void AddTypedIdConversions(ModelConfigurationBuilder configurationBuilder)
+	{
+		var allTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes());
+		var converterTypes = allTypes.Where(type => type.GetCustomAttributes().Any(t => t is TypedIdEfConverterAttribute));
+		foreach (var converterType in converterTypes)
+		{
+			foreach (var attribute in converterType.GetCustomAttributes())
+			{
+				if (attribute is TypedIdEfConverterAttribute converterAttribute)
+				{
+					configurationBuilder.Properties(converterAttribute.IdType).HaveConversion(converterType);//, converterAttribute.ComparerType);
+				}
+			}
+		}
 	}
 }

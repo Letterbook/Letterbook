@@ -1,19 +1,30 @@
+using System.Diagnostics;
+using System.Net;
+using ActivityPub.Types.AS;
 using Bogus;
+using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Adapter.TimescaleFeeds.EntityModels;
+using Letterbook.AspNet.Tests.Fixtures;
 using Letterbook.Core;
+using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
+using Letterbook.Core.Tests.Mocks;
 using Letterbook.Core.Values;
 using Letterbook.Core.Workers;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Npgsql;
+using OpenTelemetry.Trace;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 using RelationalContext = Letterbook.Adapter.Db.RelationalContext;
@@ -59,15 +70,36 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	public List<Account> Accounts { get; set; } = new();
 	public Dictionary<Profile, List<Post>> Posts { get; set; } = new();
 	public List<Post> Timeline { get; set; } = new();
+	public IAsyncEnumerable<Activity> Spans => _spans.ToAsyncEnumerable();
+	public Mock<IActivityPubClient> MockActivityPubClient = new();
+	public Mock<IActivityPubAuthenticatedClient> MockActivityPubClientAuth = new();
+
 	private readonly IServiceScope _scope;
 
 	public readonly CoreOptions Options;
 	private NpgsqlDataSourceBuilder _ds;
 	private readonly RelationalContext _context;
 	private readonly FeedsContext _feedsContext;
+	private readonly CollectionSubject<Activity> _spans = new();
 
 	public HostFixture(IMessageSink sink)
 	{
+		MockActivityPubClient.Setup(m => m.As(It.IsAny<IFederatedActor>()))
+			.Returns(MockActivityPubClientAuth.Object);
+		MockActivityPubClientAuth.Setup(m => m.SendDocument(It.IsAny<Uri>(), It.IsAny<string>()))
+			.ReturnsAsync(new ClientResponse<object>
+			{
+				Data = null,
+				DeliveredAddress = null,
+				StatusCode = HttpStatusCode.Accepted
+			});
+		MockActivityPubClientAuth.Setup(m => m.SendDocument(It.IsAny<Uri>(), It.IsAny<ASType>()))
+			.ReturnsAsync(new ClientResponse<object>
+			{
+				Data = null,
+				DeliveredAddress = null,
+				StatusCode = HttpStatusCode.Accepted
+			});
 		_sink = sink;
 		Options = new CoreOptions
 		{
@@ -115,6 +147,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_sink.OnMessage(new DiagnosticMessage("Bogus Seed: {0}", Init.WithSeed(T.Seed())));
 		InitTestData();
 		InitTimelineData();
+		DataCleanupRefs();
 
 		_context.Database.EnsureDeleted();
 		_context.Database.Migrate();
@@ -123,13 +156,35 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_context.SaveChanges();
 
 		_context.Posts.AddRange(Posts.SelectMany(pair => pair.Value));
-		_context.Posts.AddRange(Timeline);
 		_context.SaveChanges();
 
 		_feedsContext.Database.EnsureDeleted();
 		_feedsContext.Database.Migrate();
 		_feedsContext.AddRange(Timeline.Select(p => TimelinePost.Denormalize(p)).SelectMany(p => p));
 		_feedsContext.SaveChanges();
+	}
+
+	private void DataCleanupRefs()
+	{
+		var allAudience = Profiles.SelectMany(profile => profile.Headlining).ToHashSet();
+		allAudience.UnionWith(Profiles.SelectMany(profile => profile.Audiences));
+		allAudience.UnionWith(Posts.SelectMany(pair => pair.Value).SelectMany(post => post.Audience));
+
+		foreach (var p in Profiles)
+		{
+			p.Audiences = p.Audiences.ReplaceFrom(allAudience);
+			p.Headlining = p.Headlining.ReplaceFrom(allAudience);
+		}
+
+		foreach (var post in Timeline)
+		{
+			post.Audience = post.Audience.ReplaceFrom(allAudience);
+		}
+
+		foreach (var post in Posts.SelectMany(pair => pair.Value))
+		{
+			post.Audience = post.Audience.ReplaceFrom(allAudience);
+		}
 	}
 
 	protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -153,8 +208,27 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 				var seedDescriptor = services.SingleOrDefault(d => d.ImplementationType == typeof(WorkerScope<SeedAdminWorker>));
 
 				if (seedDescriptor != null) services.Remove(seedDescriptor);
-				// services.AddSingleton<RelationalContext>();
-				// services.AddSingleton<FeedsContext>();
+
+				services.AddAuthentication("Test")
+					.AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
+				services.AddAuthorization(options =>
+				{
+					options.DefaultPolicy = new AuthorizationPolicyBuilder("Test")
+						.RequireAuthenticatedUser()
+						.Build();
+				});
+				services.ConfigureApplicationCookie(options =>
+				{
+					options.ForwardAuthenticate = "Test";
+				});
+				services.AddOpenTelemetry()
+					.WithTracing(tracer =>
+					{
+						tracer.AddInMemoryExporter(_spans);
+					});
+				// We mock the IActivityPubClient because setting up and managing test data across federation peers is way beyond the scope
+				// of what we can do. So we fake that part of it.
+				services.AddScoped<IActivityPubClient>(_ => MockActivityPubClient.Object);
 			});
 
 		base.ConfigureWebHost(builder);
@@ -163,16 +237,30 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	private void InitTestData()
 	{
 		var authority = Options.BaseUri() ?? new Uri("letterbook.example");
+		var peer = "peer.example";
 		Accounts.AddRange(new FakeAccount(false).Generate(2));
-		Profiles.AddRange(new FakeProfile(authority, Accounts[0]).Generate(3));
-		Profiles.Add(new FakeProfile(authority, Accounts[1]).Generate());
-		Profiles.AddRange(new FakeProfile().Generate(3));
+		Profiles.AddRange(new FakeProfile(authority, Accounts[0]).Generate(3)); // P0-2
+		Profiles.Add(new FakeProfile(authority, Accounts[1]).Generate()); // P3
+		Profiles.AddRange(new FakeProfile().Generate(3)); // P4-6
+		Profiles.AddRange(new FakeProfile(authority).Generate(3)); // P7-9 (Group: Follow)
+		Profiles.AddRange(new FakeProfile(peer).Generate(3)); // P10-12 (Group: remote followers)
 
 		// P0 follows P4 and P5
 		// P4 follows P0
-		Profiles[0].Follow(Profiles[4], FollowState.Accepted);
-		Profiles[0].Follow(Profiles[5], FollowState.Accepted);
-		Profiles[0].AddFollower(Profiles[4], FollowState.Accepted);
+		Follow(Profiles[0], Profiles[4]);
+		Follow(Profiles[0], Profiles[5]);
+		Follow(Profiles[4], Profiles[0]);
+		// P1 has requested to follow P5
+		Profiles[1].FollowingCollection.Add(new FollowerRelation(Profiles[1], Profiles[5], FollowState.Pending));
+		// P9 follows P8 and P7
+		Follow(Profiles[0], Profiles[8]);
+		Follow(Profiles[0], Profiles[7]);
+		// P8 follows P9
+		Follow(Profiles[8], Profiles[9]);
+		// P10-12 (remote peers) follow P7
+		Follow(Profiles[10], Profiles[7]);
+		Follow(Profiles[11], Profiles[7]);
+		Follow(Profiles[12], Profiles[7]);
 
 		// Local profiles
 		// P0 creates posts 0-2
@@ -206,6 +294,12 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		}
 	}
 
+	private static void Follow(Profile self, Profile target)
+	{
+		self.Follow(target, FollowState.Accepted);
+		self.Audiences.Add(target.Headlining.First(a => a == Audience.Followers(target)));
+	}
+
 	private void InitTimelineData()
 	{
 		var authority = Options.BaseUri() ?? new Uri("letterbook.example");
@@ -234,20 +328,6 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 			}
 
 			Timeline.AddRange(GeneratePosts(creator));
-		}
-
-		var allAudience = Posts
-			.SelectMany(pair => pair.Value)
-			.SelectMany(post => post.Audience)
-			.ToHashSet();
-		allAudience.UnionWith(Timeline.SelectMany(post => post.Audience));
-
-		foreach (var post in Timeline)
-		{
-			var set = new HashSet<Audience>(allAudience);
-			set.IntersectWith(post.Audience);
-
-			post.Audience = set;
 		}
 
 		return;

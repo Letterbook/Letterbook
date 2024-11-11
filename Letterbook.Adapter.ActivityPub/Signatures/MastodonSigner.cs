@@ -46,7 +46,7 @@ public class MastodonSigner : IClientSigner
 		var signature = SignRsa(signingKey.GetRsa(), builder.SigningDocument);
 
 		var headerValue =
-			$"keyId=\"{signingKey.FediId}\",headers=\"{builder.SigningDocumentSpec}\",signature=\"{Convert.ToBase64String(signature)}\"";
+			$"keyId=\"{signingKey.FediId}\",algorithm=\"rsa-sha256\",headers=\"{builder.SigningDocumentSpec}\",signature=\"{Convert.ToBase64String(signature)}\"";
 		message.Headers.Add(Headers.SignatureInput, $"mastodon={builder.SigningDocumentSpec}");
 		message.Headers.Add(Headers.Signature, headerValue);
 

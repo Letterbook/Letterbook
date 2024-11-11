@@ -1,32 +1,36 @@
 ﻿# Contributing to Letterbook
 
-- [Code of Conduct](#code-of-conduct)
-  - [Responsible "AI" Contributions](#responsible-ai-contributions)
-- [Collaboration](#collaboration)
-  - [Getting started](#getting-started)
-  - [More than code](#more-than-code)
-- [Documentation](#documentation)
-  - [Useful links](#useful-links)
-- [Development](#development)
-  - [Quick Start](#quick-start)
-  - [Navigating the Codebase](#navigating-the-codebase)
-    - [Start with `Letterbook.Core`](#start-with-letterbookcore)
-    - [Work on the UI](#work-on-the-ui)
-    - [Work on the first-party or third-party (mastodon) API](#work-on-the-first-party-or-third-party-mastodon-api)
-    - [Work on ActivityPub handling](#work-on-activitypub-handling)
-    - [Work on message queue workers](#work-on-message-queue-workers)
-    - [Work on other features](#work-on-other-features)
-  - [Running the Server](#running-the-server)
-  - [Running tests](#running-tests)
-  - [Using VS Code](#using-vs-code)
-  - [Using Jetbrains Rider and VisualStudio](#using-jetbrains-rider-and-visualstudio)
-  - [Dependencies](#dependencies)
-    - [~~Docker~~](#docker)
-    - [Postgresql](#postgresql)
-    - [Host secrets](#host-secrets)
-    - [MacOS OpenSSL](#macos-openssl)
-  - [Debugging Federation](#debugging-federation)
-- [License](#license)
+- [Contributing to Letterbook](#contributing-to-letterbook)
+  - [Code of Conduct](#code-of-conduct)
+    - [Responsible "AI" Contributions](#responsible-ai-contributions)
+  - [Collaboration](#collaboration)
+    - [Getting started](#getting-started)
+    - [More than code](#more-than-code)
+  - [Documentation](#documentation)
+    - [Useful links](#useful-links)
+  - [Development](#development)
+    - [Quick Start](#quick-start)
+    - [Navigating the Codebase](#navigating-the-codebase)
+      - [Start with `Letterbook.Core`](#start-with-letterbookcore)
+      - [Work on the UI](#work-on-the-ui)
+      - [Work on the first-party or third-party (mastodon) API](#work-on-the-first-party-or-third-party-mastodon-api)
+      - [Work on ActivityPub handling](#work-on-activitypub-handling)
+      - [Work on message queue workers](#work-on-message-queue-workers)
+      - [Work on other features](#work-on-other-features)
+    - [Running the Server](#running-the-server)
+    - [Running tests](#running-tests)
+    - [Using VS Code](#using-vs-code)
+    - [Using Jetbrains Rider and VisualStudio](#using-jetbrains-rider-and-visualstudio)
+    - [Dependencies](#dependencies)
+      - [~~_Docker_~~](#docker)
+      - [Postgresql](#postgresql)
+      - [Host secrets](#host-secrets)
+      - [MacOS OpenSSL](#macos-openssl)
+    - [Debugging](#debugging)
+      - [Telemetry](#telemetry)
+      - [Rootless Docker](#rootless-docker)
+      - [Debugging Federation](#debugging-federation)
+  - [License](#license)
 
 
 ## Code of Conduct
@@ -90,7 +94,7 @@ docker-compose up -d
 
 2. Migrate the database
 ```shell
-dotnet tool retore
+dotnet tool restore
 dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj
 dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj
 ```
@@ -179,7 +183,7 @@ Tests can be run from the built-in test runner.
 
 ### Dependencies
 
-#### ~~Docker~~
+#### ~~_Docker_~~
 Docker is _not_ actually a dependency for Letterbook. We use docker as a convenient way to manage our other dependencies in development, but you can use other methods if you prefer. To do that, you should read on to the following sections. We don't plan to ever introduce a real dependency on Docker, although we will likely (eventually) publish a docker container image for admins who prefer that option.
 
 #### Postgresql
@@ -187,7 +191,7 @@ Letterbook depends on a Postgres database. It attempts to seed an initial admini
 
 If it's your first time setting up the database you will need to apply the Database migrations by running the entity framework tools.
 
-This processes is documented in more detail at [Letterbook.Adapter.Db](Letterbook.Adapter.Db/readme.md).
+This process is documented in more detail at [Letterbook.Adapter.Db](Letterbook.Adapter.Db/readme.md).
 
 #### Host secrets
 Letterbook depends on a host secret which comes from a secret provider in order to mint and validate authentication tokens. In development, you can use Dotnet user secrets. (We don't have a production solution, yet 😅). In the interest of developing good security practice, this is not something we can provide in the repository. You have to generate your own secret.
@@ -227,8 +231,37 @@ Settings -> Build, Execution, Deployment -> Unit Testing -> Test Runner
 
 ![Screenshot of an example Rider test runner configuration that specifies the library path](docs/rider-macos-openssl-test-runner.png)
 
+### Debugging
 
-### Debugging Federation
+![Screenshot of a grafana dashboard showing a distributed trace with correlated logs](docs/grafana-trace-detail.png)
+
+#### Telemetry
+
+Letterbook is normally very debuggable. You can just pick a launch profile and run it with debugging enabled. But, it's still a good idea to use and get familiar with the telemetry. At some point, there will be Letterbook instances running in production, and simply attaching a debugger will no longer be an option. We provide some observability backends to in docker compose, to use during development. Using our own telemetry during development helps us to make that telemetry more useful. It also generally makes it more apparent what the server is doing.
+
+This is all provided using tools from Grafana, because they align with the [high level development philosophy][adr-01] for the project. In particular, Grafana tools are both self-hostable, and available as managed services. In addition, Grafana has a useful free tier on their hosted cloud suite. Using those tools during development means that it should be a nearly drop-in replacement to monitor production instances. We have a few dashboards already, and you're encouraged to expand those or add more, as you discover the need for them.
+
+When you have the docker compose project up, you can access Grafana dashboards at http://localhost:3000
+
+#### Rootless Docker
+
+One of the backends we provide is Prometheus, a very popular metrics database. By default, Prometheus works by periodically scraping HTTP metrics endpoints on the applications you're monitoring. Normally that's very simple, but it's a problem if you're running it in rootless Docker (the docker daemon doesn't have root privileges). It's very difficult to allow rootless containers to access the host's network namespace, which means that Prometheus won't be able to scrape Letterbook while its running on your host system.
+
+The solution that seems to work best is to tunnel those connections through a unix domain socket. So, if you're running rootless docker on linux, and you want the full range of telemetry data for your dashboards, there are a couple of extra steps.
+
+1. Add the `rootless.yml` overlay to the docker-compose.yml file  
+```shell
+docker compose -f docker-compose.yml -f rootless.yml up -d
+```  
+  
+This will set up a socat container in the docker networking namespace, listening on port 3000 and forwarding to a socket that is mounted as a volume in the container. Prometheus will scrape this endpoint instead of the special docker host domain.  
+  
+2. Use `socat` on the host to listen on the same socket and then forward to Letterbook    
+```shell
+./scripts/socket.sh
+```  
+  
+#### Debugging Federation
 
 In addition to Letterbook's own dependencies, you may find it useful to have a 3rd party system to exercise federation. The [Letterbook Sandcastles project][sandcastles] provides pre-configured instances of some other fediverse software. We encourage you to make use of that, and to contribute configurations for any other federated peers you're familiar with.
 
@@ -248,4 +281,5 @@ Letterbook is licensed under the [AGPL, version 3.0][license]. The maintainers m
 [license]: https://github.com/Letterbook/Letterbook/blob/main/LICENSE
 [adr-what]: https://www.redhat.com/architect/architecture-decision-records
 [adr]: https://github.com/Letterbook/Letterbook/tree/main/docs/decisions
+[adr-01]: https://github.com/Letterbook/Letterbook/tree/main/docs/decisions/01-system-design-guidance.md
 [sandcastles]: https://github.com/Letterbook/Sandcastles

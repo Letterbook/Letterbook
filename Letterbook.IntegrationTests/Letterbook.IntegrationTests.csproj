@@ -17,6 +17,8 @@
         </PackageReference>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="OpenTelemetry.Exporter.InMemory" />
+        <PackageReference Include="System.Reactive.Async" />
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -31,6 +33,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds.Tests\Letterbook.Adapter.TimescaleFeeds.Tests.csproj" />
       <ProjectReference Include="..\Letterbook.Api.Tests\Letterbook.Api.Tests.csproj" />
+      <ProjectReference Include="..\Letterbook.AspNet.Tests\Letterbook.AspNet.Tests.csproj" />
       <ProjectReference Include="..\Letterbook.Core.Tests\Letterbook.Core.Tests.csproj" />
       <ProjectReference Include="..\Letterbook\Letterbook.csproj" />
     </ItemGroup>
