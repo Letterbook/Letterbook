@@ -354,7 +354,7 @@ public class ProfileServiceTests : WithMocks
 		var follower = new FakeProfile().Generate();
 		_profile.Follow(follower, FollowState.Accepted);
 		var queryable = new List<Profile> { _profile }.BuildMock();
-		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<ProfileId>()))
 			.Returns(queryable);
 		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
 			.Returns(queryable);
@@ -373,7 +373,7 @@ public class ProfileServiceTests : WithMocks
 		var follower = new FakeProfile().Generate();
 		_profile.AddFollower(follower, FollowState.Pending);
 		var queryable = new List<Profile> { _profile }.BuildMock();
-		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<ProfileId>()))
 			.Returns(queryable);
 		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
 			.Returns(queryable);
@@ -391,7 +391,7 @@ public class ProfileServiceTests : WithMocks
 		var follower = new FakeProfile().Generate();
 		_profile.AddFollower(follower, FollowState.None);
 		var queryable = new List<Profile> { _profile }.BuildMock();
-		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uuid7>()))
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<ProfileId>()))
 			.Returns(queryable);
 
 		var actual = await _service.AcceptFollower(_profile.GetId(), follower.GetId());

@@ -13,7 +13,7 @@ public class TimelineProfile
 
 	public static explicit operator TimelineProfile(Profile p) => new TimelineProfile
 	{
-		Id = p.Id,
+		Id = (Uuid7)p.Id,
 		FediId = p.FediId,
 		DisplayName = p.DisplayName,
 		Authority = p.Authority

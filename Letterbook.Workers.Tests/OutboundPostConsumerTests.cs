@@ -51,7 +51,7 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 
 		MockAuthorizeAllowAll();
 
-		ProfileServiceAuthMock.Setup(m => m.LookupProfile(_profile.GetId(), It.IsAny<Uuid7?>()))
+		ProfileServiceAuthMock.Setup(m => m.LookupProfile(_profile.Id, It.IsAny<ProfileId?>()))
 			.ReturnsAsync(_profile);
 	}
 
@@ -72,6 +72,8 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.Audience)).Returns(_post.Audience.BuildMock());
 		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.AddressedTo)).Returns(_post.AddressedTo.BuildMock());
 		DataAdapterMock.Setup(m => m.QueryAudience()).Returns(_post.Audience.BuildMock());
+		//ProfileServiceAuthMock.Setup(m => m.LookupProfile(_profile.Id, It.IsAny<ProfileId?>()))
+		//	.ReturnsAsync(_profile);
 
 		await _publisher.Published(_post, _profile.GetId(), []);
 

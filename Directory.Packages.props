@@ -15,10 +15,10 @@
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
     <PackageVersion Include="HtmlSanitizer" Version="8.1.870" />
     <PackageVersion Include="ILogger.Moq" Version="1.1.10" />
+    <PackageVersion Include="Letterbook.Uuid7" Version="2.1.1-patch.12" />
     <PackageVersion Include="Markdig" Version="0.38.0" />
     <PackageVersion Include="MassTransit" Version="8.3.1" />
     <PackageVersion Include="MassTransit.Abstractions" Version="8.3.1" />
-    <PackageVersion Include="Medo.Uuid7" Version="2.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.10" />
@@ -26,8 +26,14 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageVersion>
+    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.8.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.8.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing.XUnit" Version="1.1.2" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.8.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10" />

@@ -1,6 +1,7 @@
 using System.Reflection;
 using Letterbook.Adapter.TimescaleFeeds.EntityModels;
 using Letterbook.Core.Models;
+using Letterbook.Generators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -25,6 +26,23 @@ public class FeedsContext : DbContext
 	protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
 	{
 		configurationBuilder.Properties<Uri>().HaveConversion<UriIdConverter, UriIdComparer>();
+		AddTypedIdConversions(configurationBuilder);
+	}
+
+	private static void AddTypedIdConversions(ModelConfigurationBuilder configurationBuilder)
+	{
+		var allTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(assembly => assembly.GetTypes());
+		var converterTypes = allTypes.Where(type => type.GetCustomAttributes().Any(t => t is TypedIdEfConverterAttribute));
+		foreach (var converterType in converterTypes)
+		{
+			foreach (var attribute in converterType.GetCustomAttributes())
+			{
+				if (attribute is TypedIdEfConverterAttribute converterAttribute)
+				{
+					configurationBuilder.Properties(converterAttribute.IdType).HaveConversion(converterType);//, converterAttribute.ComparerType);
+				}
+			}
+		}
 	}
 
 	internal class UriIdConverter : ValueConverter<Uri, string>

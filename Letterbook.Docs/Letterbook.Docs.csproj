@@ -27,6 +27,7 @@
     <PackageReference Include="Markdig"/>
     <!-- See: https://github.com/dotnet/aspnetcore/issues/45725 -->
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
     <PackageReference Include="Microsoft.Web.LibraryManager.Build" />
     <PackageReference Include="ServiceStack" />
     <PackageReference Include="ServiceStack.Mvc" />

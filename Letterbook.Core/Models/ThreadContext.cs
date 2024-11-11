@@ -15,10 +15,10 @@ public class ThreadContext
 		set => _id = Uuid7.FromGuid(value);
 	}
 
-	public required Guid RootId
+	public required PostId RootId
 	{
-		get => _rootId.ToGuid();
-		set => _rootId = Uuid7.FromGuid(value);
+		get => _rootId;
+		set => _rootId = value.Id;
 	}
 
 	public required Uri FediId { get; set; }
@@ -28,7 +28,7 @@ public class ThreadContext
 	public ThreadContext() { }
 
 	[SetsRequiredMembers]
-	public ThreadContext(Guid rootId, CoreOptions opts)
+	public ThreadContext(PostId rootId, CoreOptions opts)
 	{
 		var builder = new UriBuilder(opts.BaseUri());
 		builder.Path += $"thread/{_id.ToId25String()}";

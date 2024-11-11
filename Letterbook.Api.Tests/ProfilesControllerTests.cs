@@ -47,7 +47,7 @@ public class ProfilesControllerTests : WithMockContext
 	[Fact(DisplayName = "Should get a profile by ID")]
 	public async Task CanGetProfile()
 	{
-		ProfileServiceAuthMock.Setup(m => m.LookupProfile(_profile.GetId(), It.IsAny<Uuid7?>())).ReturnsAsync(_profile);
+		ProfileServiceAuthMock.Setup(m => m.LookupProfile(_profile.Id, (Models.ProfileId?)It.IsAny<Models.ProfileId?>())).ReturnsAsync(_profile);
 
 		var result = await _controller.Get(_profile.GetId());
 

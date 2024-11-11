@@ -70,12 +70,12 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Profiles.AnyAsync(profile => profile.FediId == id);
 	}
 
-	public Task<Models.Profile?> LookupProfile(Uuid7 localId)
+	public Task<Models.Profile?> LookupProfile(Models.ProfileId localId)
 	{
 		return _context.Profiles
 			.Include(profile => profile.Keys)
 			.AsSplitQuery()
-			.FirstOrDefaultAsync(profile => profile.Id == localId.ToGuid());
+			.FirstOrDefaultAsync(profile => profile.Id == localId);
 	}
 
 	public Task<Models.Profile?> LookupProfile(Uri id)
@@ -83,9 +83,9 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Profiles.FirstOrDefaultAsync(profile => profile.FediId == id);
 	}
 
-	public async Task<Models.Post?> LookupPost(Uuid7 postId)
+	public async Task<Models.Post?> LookupPost(Models.PostId postId)
 	{
-		return await WithDefaults(_context.Posts).FirstOrDefaultAsync(post => post.Id == postId.ToGuid());
+		return await WithDefaults(_context.Posts).FirstOrDefaultAsync(post => post.Id == postId);
 	}
 
 	public async Task<Models.Post?> LookupPost(Uri fediId)
@@ -107,10 +107,10 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			.FirstOrDefaultAsync(thread => thread.Id == threadId.ToGuid());
 	}
 
-	public async Task<Models.Post?> LookupPostWithThread(Uuid7 postId)
+	public async Task<Models.Post?> LookupPostWithThread(Models.PostId postId)
 	{
 		return await WithThread(_context.Posts)
-			.FirstOrDefaultAsync(post => post.Id == postId.ToGuid());
+			.FirstOrDefaultAsync(post => post.Id == postId);
 	}
 
 	public async Task<Models.Post?> LookupPostWithThread(Uri postId)
@@ -119,9 +119,9 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			.FirstOrDefaultAsync(post => post.FediId == postId);
 	}
 
-	public IQueryable<Models.Profile> SingleProfile(Uuid7 id)
+	public IQueryable<Models.Profile> SingleProfile(Models.ProfileId id)
 	{
-		return _context.Profiles.Where(profile => profile.Id == id.ToGuid());
+		return _context.Profiles.Where(profile => profile.Id == id);
 	}
 
 	public IQueryable<Models.Profile> SingleProfile(Uri fediId)
@@ -129,9 +129,9 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Profiles.Where(profile => profile.FediId == fediId);
 	}
 
-	public IQueryable<Models.Post> SinglePost(Uuid7 id)
+	public IQueryable<Models.Post> SinglePost(Models.PostId id)
 	{
-		return _context.Posts.Where(post => post.Id == id.ToGuid());
+		return _context.Posts.Where(post => post.Id == id);
 	}
 
 	public IQueryable<Models.Post> SinglePost(Uri fediId)
@@ -165,11 +165,11 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			.AsSplitQuery();
 	}
 
-	public IQueryable<Models.Profile> WithRelation(IQueryable<Models.Profile> query, Uuid7 relationId)
+	public IQueryable<Models.Profile> WithRelation(IQueryable<Models.Profile> query, Models.ProfileId relationId)
 	{
-		return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId.ToGuid()))
+		return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId))
 			.ThenInclude(relation => relation.Follows)
-			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId.ToGuid()))
+			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
 			.ThenInclude(relation => relation.Follower)
 			.Include(profile => profile.Keys)
 			.Include(profile => profile.Audiences)
@@ -192,9 +192,9 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Audience.AsQueryable();
 	}
 
-	public Task<Models.Profile?> LookupProfileWithRelation(Uuid7 localId, Uri relationId)
+	public Task<Models.Profile?> LookupProfileWithRelation(Models.ProfileId localId, Uri relationId)
 	{
-		return WithRelation(_context.Profiles.Where(profile => profile.Id == localId.ToGuid()), relationId)
+		return WithRelation(_context.Profiles.Where(profile => profile.Id == localId), relationId)
 			.FirstOrDefaultAsync();
 	}
 

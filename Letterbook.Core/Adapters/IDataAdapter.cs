@@ -39,11 +39,11 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<Account> WithProfiles(IQueryable<Account> query);
 
 	public Task<bool> AnyProfile(string handle);
-	public Task<Profile?> LookupProfile(Uuid7 localId);
+	public Task<Profile?> LookupProfile(ProfileId localId);
 	public Task<Profile?> LookupProfile(Uri id);
 
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPost(Uuid7 postId);
+	public Task<Post?> LookupPost(PostId postId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<Post?> LookupPost(Uri fediId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
@@ -51,11 +51,11 @@ public interface IDataAdapter : IDisposable
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<ThreadContext?> LookupThread(Uuid7 threadId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPostWithThread(Uuid7 postId);
+	public Task<Post?> LookupPostWithThread(PostId postId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<Post?> LookupPostWithThread(Uri postId);
 
-	public IQueryable<Profile> SingleProfile(Uuid7 id);
+	public IQueryable<Profile> SingleProfile(ProfileId id);
 	public IQueryable<Profile> SingleProfile(Uri fediId);
 
 	/// <summary>
@@ -63,7 +63,7 @@ public interface IDataAdapter : IDisposable
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns></returns>
-	public IQueryable<Post> SinglePost(Uuid7 id);
+	public IQueryable<Post> SinglePost(PostId id);
 
 	/// <see cref="SinglePost(Medo.Uuid7)"/>
 	public IQueryable<Post> SinglePost(Uri fediId);
@@ -91,7 +91,7 @@ public interface IDataAdapter : IDisposable
 
 	/// <see cref="WithRelation(System.Linq.IQueryable{Letterbook.Core.Models.Profile},System.Uri)"/>
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uuid7 relationId);
+	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, ProfileId relationId);
 
 	/// <summary>
 	/// Query for navigation entities, using the given object as a root entity
@@ -110,7 +110,7 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<Audience> QueryAudience();
 
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Profile?> LookupProfileWithRelation(Uuid7 localId, Uri relationId);
+	public Task<Profile?> LookupProfileWithRelation(ProfileId localId, Uri relationId);
 
 	public IAsyncEnumerable<Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0);
 

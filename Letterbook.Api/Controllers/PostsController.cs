@@ -68,7 +68,7 @@ public class PostsController : ControllerBase
 		if (!draft && !pubDecision.Allowed)
 			return Unauthorized(pubDecision);
 
-		var result = await _post.As(User.Claims, profileId).Draft(post, post.InReplyTo?.GetId(), !draft);
+		var result = await _post.As(User.Claims, profileId).Draft(profileId, post, post.InReplyTo?.GetId(), !draft);
 		return Ok(_mapper.Map<PostDto>(result));
 	}
 

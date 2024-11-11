@@ -16,7 +16,7 @@ public class BaseMappings : AutoMapper.Profile
 		CreateMap<Models.ThreadContext, Uuid7>()
 			.ConvertUsing<IdUuid7Converter>();
 		CreateMap<Uuid7, Models.Profile>(MemberList.None)
-			.ConstructUsing(uuid7 => Models.Profile.CreateEmpty(uuid7));
+			.ConstructUsing(uuid7 => Models.Profile.CreateEmpty(new ProfileId(uuid7)));
 		CreateMap<Uuid7, Models.Post>(MemberList.None);
 		CreateMap<Uuid7, Guid>().ConstructUsing(uuid7 => uuid7.ToGuid());
 		CreateMap<Guid, Uuid7>().ConstructUsing(guid => Uuid7.FromGuid(guid));
@@ -24,7 +24,7 @@ public class BaseMappings : AutoMapper.Profile
 		CreateMap<string?, Uuid7>().ConstructUsing(str => str == null ? Uuid7.NewUuid7() : Uuid7.FromId25String(str));
 		CreateMap<string?, Guid>().ConstructUsing(str => str == null ? Uuid7.NewUuid7().ToGuid() : Uuid7.FromId25String(str).ToGuid());
 		CreateMap<string, Models.Profile>(MemberList.None)
-			.ConstructUsing(s => Models.Profile.CreateEmpty(Uuid7.FromId25String(s)));
+			.ConstructUsing(s => Models.Profile.CreateEmpty(new ProfileId(ProfileId.FromString(s))));
 
 		CreateMap<DateTimeOffset?, DateTimeOffset?>()
 			.ConvertUsing<DateTimeOffsetMapper>();

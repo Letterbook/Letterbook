@@ -107,6 +107,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Docs", "Letterbo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Web.Tests.E2E", "Letterbook.Web.Tests.E2E\Letterbook.Web.Tests.E2E.csproj", "{2585EF85-3590-4C4D-8701-9B135D8BB229}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Generators", "Letterbook.Generators\Letterbook.Generators\Letterbook.Generators.csproj", "{9D241327-F2EB-4E2C-BF42-15083D316DF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Generators.Tests", "Letterbook.Generators\Letterbook.Generators.Tests\Letterbook.Generators.Tests.csproj", "{9D7EF624-6BA8-44BB-AA66-3AC7A5C3C6FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -200,6 +204,14 @@ Global
 		{2585EF85-3590-4C4D-8701-9B135D8BB229}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2585EF85-3590-4C4D-8701-9B135D8BB229}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2585EF85-3590-4C4D-8701-9B135D8BB229}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D241327-F2EB-4E2C-BF42-15083D316DF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D241327-F2EB-4E2C-BF42-15083D316DF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D241327-F2EB-4E2C-BF42-15083D316DF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D241327-F2EB-4E2C-BF42-15083D316DF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D7EF624-6BA8-44BB-AA66-3AC7A5C3C6FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D7EF624-6BA8-44BB-AA66-3AC7A5C3C6FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D7EF624-6BA8-44BB-AA66-3AC7A5C3C6FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D7EF624-6BA8-44BB-AA66-3AC7A5C3C6FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}

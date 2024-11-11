@@ -97,7 +97,7 @@ public class ProfileControllerTests : WithMockContext
 		_selfProfile.AddFollower(_profile, FollowState.Accepted);
 
 		MockHttpContext.SetupGet(ctx => ctx.User).Returns(_principal);
-		ProfileServiceAuthMock.Setup(m => m.LookupProfile(_selfProfile.GetId(), _profile.GetId()))
+		ProfileServiceAuthMock.Setup(m => m.LookupProfile((Models.ProfileId)_selfProfile.GetId(), (Models.ProfileId?)_profile.GetId()))
 			.ReturnsAsync(_selfProfile);
 
 		await _page.OnGet(_profile.Handle);

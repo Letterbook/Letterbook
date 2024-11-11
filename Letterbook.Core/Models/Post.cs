@@ -1,16 +1,17 @@
 using System.Diagnostics.CodeAnalysis;
 using Letterbook.Core.Extensions;
+using Letterbook.Generators;
 using Medo;
 
 namespace Letterbook.Core.Models;
 
+public partial record struct PostId(Uuid7 Id) : ITypedId<Uuid7>;
+
 public class Post : IFederated, IEquatable<Post>
 {
-	private Uuid7 _id;
-
 	public Post()
 	{
-		_id = Uuid7.NewUuid7();
+		Id = Uuid7.NewUuid7();
 		ContentRootIdUri = default!;
 		FediId = default!;
 		Thread = default!;
@@ -55,9 +56,10 @@ public class Post : IFederated, IEquatable<Post>
 	public Post(CoreOptions opts) : this()
 	{
 		var builder = new UriBuilder(opts.BaseUri());
+		Id = Uuid7.NewUuid7();
 		ContentRootIdUri = default!;
 
-		builder.Path += $"post/{_id.ToId25String()}";
+		builder.Path += $"post/{Id}";
 		var path = builder.Path;
 		FediId = builder.Uri;
 
@@ -74,11 +76,7 @@ public class Post : IFederated, IEquatable<Post>
 		Hostname = FediId.Host;
 	}
 
-	public Guid Id
-	{
-		get => _id.ToGuid();
-		set => _id = Uuid7.FromGuid(value);
-	}
+	public PostId Id { get; set; }
 
 	public Uri? ContentRootIdUri { get; set; }
 	public Uri FediId { get; set; }
@@ -106,8 +104,8 @@ public class Post : IFederated, IEquatable<Post>
 	public Uri? Shares { get; set; }
 	public IList<Profile> SharesCollection { get; set; } = new List<Profile>();
 
-	public Uuid7 GetId() => _id;
-	public string GetId25() => _id.ToId25String();
+	public Uuid7 GetId() => Id.Id;
+	public string GetId25() => Id.ToString();
 	public Post ShallowClone() => (Post)MemberwiseClone();
 
 	public T AddContent<T>(T content) where T : Content
@@ -134,7 +132,7 @@ public class Post : IFederated, IEquatable<Post>
 	{
 		if (ReferenceEquals(null, other)) return false;
 		if (ReferenceEquals(this, other)) return true;
-		return _id.Equals(other._id);
+		return Id.Equals(other.Id);
 	}
 
 	public override bool Equals(object? obj)

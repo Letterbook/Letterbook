@@ -1,9 +1,11 @@
-using System.Collections;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
+using Letterbook.Generators;
 using Medo;
 
 namespace Letterbook.Core.Models;
+
+public partial record struct ProfileId(Uuid7 Id) : ITypedId<Uuid7>;
 
 /// <summary>
 /// A Profile is the externally visible representation of an account on the network. In ActivityPub terms, it should map
@@ -14,8 +16,6 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public class Profile : IFederatedActor, IEquatable<Profile>
 {
-	private Uuid7 _id;
-
 	private Profile()
 	{
 		FediId = default!;
@@ -33,8 +33,8 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	// Constructor for local profiles
 	private Profile(Uri baseUri) : this()
 	{
-		_id = Uuid7.NewUuid7();
-		FediId = new Uri(baseUri, $"/actor/{_id.ToId25String()}");
+		Id = new(Uuid7.NewUuid7());
+		FediId = new Uri(baseUri, $"/actor/{Id}");
 		Authority = FediId.GetAuthority();
 		Handle = string.Empty;
 		DisplayName = string.Empty;
@@ -65,11 +65,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		Keys.Add(SigningKey.EcDsa(1, builder.Uri));
 	}
 
-	public Guid Id
-	{
-		get => _id.ToGuid();
-		set => _id = Uuid7.FromGuid(value);
-	}
+	public ProfileId Id { get; set; }
 
 	public Uri FediId { get; set; }
 	public Uri Inbox { get; set; }
@@ -93,8 +89,8 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
 	public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
 
-	public Uuid7 GetId() => _id;
-	public string GetId25() => _id.ToId25String();
+	public Uuid7 GetId() => Id.Id;
+	public string GetId25() => Id.ToString();
 	public Profile ShallowClone() => (Profile)MemberwiseClone();
 
 	public Profile ShallowCopy(Profile? copyFrom)
@@ -206,14 +202,14 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	{
 		return new Profile()
 		{
-			_id = Uuid7.NewUuid7(),
+			Id = new(Uuid7.NewUuid7()),
 			FediId = id,
 			Authority = id.GetAuthority()
 		};
 	}
 
-	public static Profile CreateEmpty(Uuid7 id) => new() { _id = id };
-	public static Profile CreateEmpty(Uuid7 id, Uri fediId) => new() { _id = id, FediId = fediId };
+	public static Profile CreateEmpty(ProfileId id) => new() { Id = id };
+	public static Profile CreateEmpty(ProfileId id, Uri fediId) => new() { Id = id, FediId = fediId };
 
 	public bool Equals(Profile? other)
 	{
