@@ -234,5 +234,15 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 
 			Assert.NotNull(mapped);
 		}
+
+		[Fact(DisplayName = "Should handle mapping non-post-like objects")]
+		public void CanMapPostFromArbitraryObject()
+		{
+			var apObject = new ASObject() { Id = "https://example.com/some_object" };
+			var post = AstMapper.Map<Models.Post>(apObject);
+
+			Assert.NotNull(post);
+			Assert.Empty(post.Contents);
+		}
 	}
 }

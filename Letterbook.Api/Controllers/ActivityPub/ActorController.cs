@@ -38,15 +38,18 @@ public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;
 	private readonly IProfileService _profileService;
+	private readonly IPostService _postService;
 	private readonly IActivityMessagePublisher _messagePublisher;
 	private readonly IActivityPubDocument _apDoc;
 	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Profile);
+	private static readonly IMapper Mapper = new Mapper(AstMapper.Default);
 
 	public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
-		IProfileService profileService, IActivityMessagePublisher messagePublisher, IActivityPubDocument apDoc)
+		IProfileService profileService, IPostService postService, IActivityMessagePublisher messagePublisher, IActivityPubDocument apDoc)
 	{
 		_logger = logger;
 		_profileService = profileService;
+		_postService = postService;
 		_messagePublisher = messagePublisher;
 		_apDoc = apDoc;
 		_logger.LogInformation("Loaded {Controller}", nameof(ActorController));
@@ -135,6 +138,11 @@ public class ActorController : ControllerBase
 				return await InboxUndo(id, undo);
 			}
 
+			if (activity.Is<CreateActivity>(out var create))
+			{
+				return await InboxCreate(id, create);
+			}
+
 			_logger.LogWarning("Ignored unknown activity {ActivityType}", activity.GetType());
 			_logger.LogDebug("Ignored unknown activity details {@Activity}", activity);
 			return Accepted();
@@ -216,7 +224,26 @@ public class ActorController : ControllerBase
 		return true;
 	}
 
-	private async Task<IActionResult> InboxAccept(Uuid7 localId, ASActivity activity)
+	private async Task<IActionResult> InboxCreate(ProfileId id, CreateActivity activity)
+	{
+		var posts = activity.Object.ValueItems.Select(Mapper.Map<Post>);
+		foreach (var post in posts)
+		{
+			await _postService.As(User.Claims).ReceiveCreate(post);
+		}
+		foreach (var value in activity.Object.ValueItems)
+		{
+			// check for post-like types
+			// TODO: article, audio, image, video, question
+			if (Mapper.Map<Post>(value) is {} post)
+			{
+			}
+			// TODO: events
+		}
+		throw new NotImplementedException();
+	}
+
+	private async Task<IActionResult> InboxAccept(ProfileId localId, ASActivity activity)
 	{
 		if (!TryUnwrapActivity(activity, "Accept", out var activityObject, out var actorId, out var error))
 			return error;

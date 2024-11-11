@@ -34,6 +34,7 @@ public static class AstMapper
 		FromASType(cfg);
 	});
 
+
 	/// <summary>
 	/// Map Posts and Content to AS types
 	/// </summary>
@@ -214,12 +215,13 @@ public static class AstMapper
 
 	private static void FromNote(IMapperConfigurationExpression cfg)
 	{
-		cfg.CreateMap<NoteObject, Post>(MemberList.Destination)
+		// cfg.CreateMap<NoteObject, Post>(MemberList.Destination)
+		cfg.CreateMap<ASObject, Post>(MemberList.Destination)
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
 			.ForMember(dest => dest.Authority, opt => opt.Ignore())
 			.ForMember(dest => dest.Hostname, opt => opt.Ignore())
 			.ForMember(dest => dest.Contents,
-				opt => opt.MapFrom<NoteContentResolver, NaturalLanguageString?>(src => src.Content))
+				opt => opt.MapFrom<ContentResolver, NaturalLanguageString?>(src => src.Content))
 			.ForMember(dest => dest.Creators,
 				opt => opt.MapFrom<ProfileResolver, LinkableList<ASObject>>(src => src.AttributedTo))
 			.ForMember(dest => dest.InReplyTo,
@@ -367,10 +369,10 @@ public class MediaTypeResolver : IMemberValueResolver<Post, NoteObject, Content?
 
 [UsedImplicitly]
 internal class ProfileResolver :
-	IMemberValueResolver<NoteObject, Post, LinkableList<ASObject>, ICollection<Models.Profile>>,
-	IMemberValueResolver<NoteObject, Post, Linkable<ASCollection>?, IList<Models.Profile>>
+	IMemberValueResolver<ASObject, Post, LinkableList<ASObject>, ICollection<Models.Profile>>,
+	IMemberValueResolver<ASObject, Post, Linkable<ASCollection>?, IList<Models.Profile>>
 {
-	public ICollection<Models.Profile> Resolve(NoteObject source, Post destination, LinkableList<ASObject> sourceMember,
+	public ICollection<Models.Profile> Resolve(ASObject source, Post destination, LinkableList<ASObject> sourceMember,
 		ICollection<Models.Profile> destMember,
 		ResolutionContext context)
 	{
@@ -389,7 +391,7 @@ internal class ProfileResolver :
 		return destMember;
 	}
 
-	public IList<Models.Profile> Resolve(NoteObject source, Post destination, Linkable<ASCollection>? sourceMember,
+	public IList<Models.Profile> Resolve(ASObject source, Post destination, Linkable<ASCollection>? sourceMember,
 		IList<Models.Profile> destMember, ResolutionContext context)
 	{
 		if (sourceMember is null) return destMember;
@@ -406,7 +408,7 @@ internal class ProfileResolver :
 [UsedImplicitly]
 internal class PostResolver :
 	IMemberValueResolver<ASObject, Post, LinkableList<ASObject>?, Post?>,
-	IMemberValueResolver<NoteObject, Post, ASCollection?, IList<Post>>
+	IMemberValueResolver<ASObject, Post, ASCollection?, IList<Post>>
 {
 	public Post? Resolve(ASObject source, Post destination, LinkableList<ASObject>? sourceMember, Post? destMember,
 		ResolutionContext context)
@@ -417,7 +419,7 @@ internal class PostResolver :
 		return new Post(id, destination.Thread);
 	}
 
-	public IList<Post> Resolve(NoteObject source, Post destination, ASCollection? sourceMember, IList<Post> destMember,
+	public IList<Post> Resolve(ASObject source, Post destination, ASCollection? sourceMember, IList<Post> destMember,
 		ResolutionContext context)
 	{
 		if (sourceMember is null) return destMember;
@@ -440,9 +442,9 @@ internal class PostResolver :
 }
 
 [UsedImplicitly]
-internal class AudienceResolver : IMemberValueResolver<NoteObject, Post, LinkableList<ASObject>, ICollection<Audience>>
+internal class AudienceResolver : IMemberValueResolver<ASObject, Post, LinkableList<ASObject>, ICollection<Audience>>
 {
-	public ICollection<Audience> Resolve(NoteObject src, Post post, LinkableList<ASObject> srcAudience,
+	public ICollection<Audience> Resolve(ASObject src, Post post, LinkableList<ASObject> srcAudience,
 		ICollection<Audience> postAudience,
 		ResolutionContext mappingContext)
 	{
@@ -532,26 +534,25 @@ internal class PostContextConverter : IMemberValueResolver<ASObject, Post, Linka
 
 [UsedImplicitly]
 internal class
-	NoteContentResolver : IMemberValueResolver<NoteObject, Post, NaturalLanguageString?, ICollection<Content>>
+	ContentResolver : IMemberValueResolver<ASObject, Post, NaturalLanguageString?, ICollection<Content>>
 {
-	ICollection<Content> IMemberValueResolver<NoteObject, Post, NaturalLanguageString?, ICollection<Content>>
-		.Resolve(NoteObject source, Post post, NaturalLanguageString? sourceContent,
+	ICollection<Content> IMemberValueResolver<ASObject, Post, NaturalLanguageString?, ICollection<Content>>
+		.Resolve(ASObject source, Post post, NaturalLanguageString? sourceContent,
 			ICollection<Content>? dest, ResolutionContext context)
 	{
 		if (!source.TryGetId(out var id)) return post.Contents;
-		var note = new Note
-		{
-			FediId = id,
-			Post = post,
-			// TODO: multiple languages
-			// or even just single languages, but with knowledge of what language is specified
-			Html = sourceContent?.DefaultValue ?? ""
-		};
+		// TODO: use explicit type mappers for more robust mapping
+		// like context.Mapper.Map<Note>(noteObject);
+		// TODO(content types): map additional content types here
+		var content = source.Is<NoteObject>() ? new Note() { FediId = id, Post = post, Html = sourceContent?.DefaultValue ?? ""}
+			: default(Content);
+
+		if (content == null) return post.Contents;
 		if (source.Preview?.TryGetValue(out var value) == true)
-			note.Preview = context.Mapper.Map<string>(value);
+			content.Preview = context.Mapper.Map<string>(value);
 		else
-			note.GeneratePreview();
-		post.AddContent(note);
+			content.GeneratePreview();
+		post.AddContent(content);
 
 		return post.Contents;
 	}
