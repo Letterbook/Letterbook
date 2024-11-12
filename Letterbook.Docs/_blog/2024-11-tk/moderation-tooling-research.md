@@ -11,9 +11,7 @@ More than ever, it's imperative to [provide safe places](https://www.wrecka.ge/s
 
 For the last ten years or so, my work has focused on interface design for highly technical and often nuanced things, across a variety of domains. I've learned a lot of things through this work, but perhaps the most important is: when you are designing for practitioners, _you need to listen to the people doing the work_. So we talked to a small handful of people doing moderation work at a variety of scales and contexts: instances large & small, people moderating discord servers, people doing trust & safety work professionaly at scale.
 
-This article is a summary of what we've learned through our interviews, and focuses on the areas where the tooling for people doing moderation work could be improved, and what obstacles are involved to someone seeking to improve that tooling. I have some basic recommendations which people developing server software could implment to help their moderation tooling, but I'm still a ways off from having cohesive designs. We feel these learnings are worth sharing with others doing similar work in the fediverse.
-
-- Glossary
+This article is a summary of what we've learned through our interviews, and focuses on the areas where the tooling for people doing moderation work could be improved, and what obstacles are involved to someone seeking to improve that tooling. I have some basic ideas from which people developing server software could use to help their moderation tooling, but I'm still a ways off from having cohesive designs. We feel these learnings are worth sharing with others doing similar work in the fediverse.
 
 # Context is Social, Context is Information
 
@@ -22,6 +20,7 @@ Moderation is partly a game of context-keeping, and context is primarily social:
 Context is also, often, information. _Who are the people involved?_ can become _What do we know about the people involved?_ Providing access to this kind of information is a common problem point, and one that tooling could often do a much better job of helping with: One instance admin described giving their mod team read-only access to the database along with a library of queries to get at information their server software doesn't make available. There's lots of room for improvement here!
 
 ## Reports
+
 The main case for a moderator gathering information is in dealing with reports. Challenges in evaluating a report can stem from the server software's design, its data architecture decisions, the design of ActivityPub, differences between fedi sofrwares, and/or the distributed nature of federation. Social information plays an important role, too.
 
 From a design & data standpoint, many questions arise that are difficult to answer: What is the history of a user who is the subject of a report -- what reports have been filed against them previously? What is the history of the user filing the report? Is this user receiving a lot of other reports at the same time? Who are the accounts doing the reporting? 
@@ -96,21 +95,23 @@ Different server instances also have different rules, but these are expressed as
 
 Legal issues also extend into published resources such as blocklists; one of the reasons why it would be useful to have labels & notes on blocklist entries even though you might have public-facing information in #fediblock or elsewhere is it gets into legal issues. If you're blocking a server for rampant illegal content such as CSAM, saying so publicly exposes you to legal actions, and while you might be able to prove this in court, doing so is a drain on time and money, so it's better to keep that note private.
 
+Finally, most moderators are not experts in their softare. Moderation in the fediverse is largely a volunteer effort, and training tends to be on the job. Communicating with a moderator on another instance about how to get at certain information poses challenges due to differences in how server software's interfaces work. If you're trying to help another moderator out, you can't assume they're using the same software as you, or even the same *version* of softare as you. Their interface might be different, and this poses a communication challenge.
+
 # Obstacles
-## Product Values
-## Protocol Issues
-- many undefined behaviors, work needed to build common patterns
-- AP data model is not coherent, and is centered around the *account*, which causes problems
-- purist views by figureheads; specification lacking vs implementation details
-## Data Retention
-- a _very_ delicate & thorny issue with legal & social consequences
-- GDPR is the elephant in the room, but a welcome one
+
+There are a handful of obstacles to improving moderation tooling, but the biggest one is getting people with influence to care. Large technology projects require collaboration and vision. In private companies, this is provided by the business, and typically rests in the hands of someone with a "Product" title, who acts as the arbiter of values that go into making the software what it is. Open source projects tend to instead have figureheads, people who spearheaded a project's technical foundation and continue to reign over the project's direction and values as it gains in popularity.
+
+The fediverse has many of these, for both the ActivityPub protocol and the various server softwares. In talking with people doing moderation work, I got an overwhelming sense of frustration that some of the people with the biggest influence in the direction of the fediverse simply don't value trust & safety, yet to provide a safe federated space equivalent to popular commercial platforms, we need the people involved in both the protocol and server software to care.
+
+Improving the protocol is the more important challenge -- the fediverse is not Mastodon, and ultimately any initiative to improve trust and safety between server instances will require improvements and clarifications to the protocol. There are efforts to route around figureheads with purist views, but this sort of collaboration and consensus-building takes time and a variety of perspectives.
+
+I was also surprised to find that data retention policy poses a set of obstacles to moderation work in the fediverse. Federating posts over ActivityPub is, to some degree, a data processing agreement. Retention is a very delicate and thorny issue with a lot of legal, social, and ethical consequences; one that many volunteer or amateur administrators are not ready to deal with. The GDPR is the elephant in the room, but it can also provide some guidance on good defaults for server software to set for its retention policies.
 
 # Recommendations
 - polymorphic linkable notes
 - "disposition labels" for everything
 - community collaboration is very important
-- moderation plugin ecosystem
+- moderation plugin ecosystem ideas -- CAPABILITIES and REGRESSION PREVIEWS
 - qualitative info for server rules
 
 # Conclusion
