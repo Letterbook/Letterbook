@@ -31,6 +31,7 @@ public abstract class WithMocks
 	public Mock<IAccountService> AccountServiceMock;
 	public Mock<IJsonLdSerializer> JsonLdSerializerMock;
 	public Mock<IActivityMessagePublisher> ActivityPublisherMock;
+	public Mock<IApCrawlerScheduler> ApCrawlerSchedulerMock;
 
 	public ServiceCollection MockedServiceCollection;
 
@@ -52,6 +53,7 @@ public abstract class WithMocks
 		AccountServiceMock = new Mock<IAccountService>();
 		JsonLdSerializerMock = new Mock<IJsonLdSerializer>();
 		ActivityPublisherMock = new Mock<IActivityMessagePublisher>();
+		ApCrawlerSchedulerMock = new Mock<IApCrawlerScheduler>();
 
 		ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
 		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(PostServiceAuthMock.Object);

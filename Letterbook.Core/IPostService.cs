@@ -45,15 +45,15 @@ public interface IAuthzPostService
 	/// Handle an inbound Create activity on a post
 	/// </summary>
 	/// <param name="post"></param>
-	/// <returns></returns>
-	public Task<Post> ReceiveCreate(Post post);
+	/// <returns>The resultant Post if it could be handled in-band, otherwise null</returns>
+	public Task<Post?> ReceiveCreate(Post post);
 
 	/// <summary>
 	/// Handle an inbound Update activity on a post
 	/// </summary>
 	/// <param name="post"></param>
-	/// <returns></returns>
-	public Task<Post> ReceiveUpdate(Post post);
+	/// <returns>The resultant Post if it could be handled in-band, otherwise null</returns>
+	public Task<Post?> ReceiveUpdate(Post post);
 
 	/// <summary>
 	/// Handle an inbound Update activity on a post

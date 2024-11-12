@@ -281,12 +281,12 @@ public class PostService : IAuthzPostService, IPostService
 		return post;
 	}
 
-	public async Task<Post> ReceiveCreate(Post post)
+	public async Task<Post?> ReceiveCreate(Post post)
 	{
 		throw new NotImplementedException();
 	}
 
-	public async Task<Post> ReceiveUpdate(Post post)
+	public async Task<Post?> ReceiveUpdate(Post post)
 	{
 		throw new NotImplementedException();
 	}

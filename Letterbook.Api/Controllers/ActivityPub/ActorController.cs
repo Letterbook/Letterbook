@@ -16,7 +16,6 @@ using Letterbook.Core.Values;
 using Medo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
 
@@ -39,19 +38,17 @@ public class ActorController : ControllerBase
 	private readonly ILogger<ActorController> _logger;
 	private readonly IProfileService _profileService;
 	private readonly IPostService _postService;
-	private readonly IActivityMessagePublisher _messagePublisher;
-	private readonly IActivityPubDocument _apDoc;
+	private readonly IApCrawlerScheduler _apCrawler;
 	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Profile);
 	private static readonly IMapper Mapper = new Mapper(AstMapper.Default);
 
-	public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
-		IProfileService profileService, IPostService postService, IActivityMessagePublisher messagePublisher, IActivityPubDocument apDoc)
+	public ActorController(ILogger<ActorController> logger,
+		IProfileService profileService, IPostService postService, IApCrawlerScheduler apCrawler)
 	{
 		_logger = logger;
 		_profileService = profileService;
 		_postService = postService;
-		_messagePublisher = messagePublisher;
-		_apDoc = apDoc;
+		_apCrawler = apCrawler;
 		_logger.LogInformation("Loaded {Controller}", nameof(ActorController));
 	}
 
@@ -227,20 +224,26 @@ public class ActorController : ControllerBase
 	private async Task<IActionResult> InboxCreate(ProfileId id, CreateActivity activity)
 	{
 		var posts = activity.Object.ValueItems.Select(Mapper.Map<Post>);
+		var inBand = true;
 		foreach (var post in posts)
 		{
-			await _postService.As(User.Claims).ReceiveCreate(post);
-		}
-		foreach (var value in activity.Object.ValueItems)
-		{
-			// check for post-like types
-			// TODO: article, audio, image, video, question
-			if (Mapper.Map<Post>(value) is {} post)
+			if (post.Contents.Count == 0)
 			{
+				_logger.LogWarning("Create: object {Id} does not appear to be a Post", post.FediId);
+				continue;
 			}
-			// TODO: events
+
+			var created = await _postService.As(User.Claims).ReceiveCreate(post);
+			if (created == null) inBand = false;
 		}
-		throw new NotImplementedException();
+
+		if (activity.Object.LinkItems.Any()) inBand = false;
+		foreach (var link in activity.Object.LinkItems)
+		{
+			await _apCrawler.CrawlPost(id, link.HRef);
+		}
+
+		return inBand ? Ok() : Accepted();
 	}
 
 	private async Task<IActionResult> InboxAccept(ProfileId localId, ASActivity activity)
