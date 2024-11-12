@@ -70,11 +70,11 @@ Moderation is also about working with other people: your users, your co-moderato
 
 To my surprise, a common frustration is the difficulty for admin staff to communicate privately with their own users. "Direct" / "Mentioned Only" messages only work so well, and email is a more reliable method of communication, but getting at a user's email address from the context it's needed is often many clicks & page loads away. That communication then lives outside the instance's records, and unless the moderation staff have a shared email inbox, is private between the individual moderator and the user.
 
-Moderation teams often make good use of tools outside their server software to coordinate: Wikis, chat services (often in private Discord servers), web-based database query tooling, follow-the-sun scheduling tools, incident response management tooling. Many expressed a desire for some of this within their server software itself, though it seems teams are able to find external tooling that works well enough for them.
+Moderation teams often make good use of tools outside their server software to coordinate: Wikis, chat services (often in private Discord servers), spreadsheets, web-based database query tooling, follow-the-sun scheduling tools, and incident response management tooling. Many expressed a desire for some of this within their server software itself, though it seems teams are able to find external tooling that works well enough for them.
 
 A common frustration and major use-case for private wikis is for coordinating across time with your past & future selves: Why were decisions made? Having searchable notes with labels and bidirectional page links goes a long way in making this easier. But while tooling that helps with this sort of thing exists in some server software, it's not pervasive enough and should be applied to more things such as instance block records (more on this below).
 
-## Within Your Instance -- Automation
+## Within Your Instance -- Automation & Shared Resources
 
 Also to my surprise, the people we spoke to were overwhelmingly in favor of using automated tooling to support a proactive approach to moderation, especially in how it can offset the human cost of performing this work.
 
@@ -86,7 +86,13 @@ Some moderators use automated reporting, especially for the sorts of things ment
 
 ## Coordination Between Instances
 
+Not surprisingly, coordination between instances yields some of the biggest and thorniest problems with moderation and admin work in the fediverse. Some of these are due to the nature of federation: lack of visible info for remote accounts, the broad set of social contexts and norms that exist, the variety of server software in use, and the clash of egos, budgets, and governance philosophies that co-exist. 
 
+These problems aren't intractable -- many require collaboration towards standards, but not without careful tiptoeing around potential legal issues. The short of these problems is that distributed trust is a hard problem.
+
+For reporting, a common complaint is about the technical difficulty in sharing data relevant to a report between instances, even when all parties are willing, which also gets back to the poorly-defined data structure that makes for a report to begin with. But data-sharing can sometimes involve legal issues.
+
+Different server instances also have different rules, but these are expressed as freeform text, as opposed to any kind of semantic labels. In addition to making it more difficult for someone evaluating "which server should I join?" because they have to read through all the various texts, it makes it more difficult and laborious for a moderator evaluating a report or determining if they should defederate to understand the alignment of rules between servers. Machine-parseable community standard labels for rules such as "Don't be an asshole", "Don't deadname people" or the like would go a very long way in reducing the human cost of moderation, but these sorts of things require social and technical consensus.
 
 - reports
 - fediblock; lacking the _why_
@@ -94,10 +100,6 @@ Some moderators use automated reporting, especially for the sorts of things ment
 - server's rules are text, not data
 - difficult to coordinate *data* between instances
 - distributing trust is _hard_
-## Coordination between an admin and automated tooling
-- stuff in use: auto-image-classification tooling; discord bots
-- problems/challenges; pulling from fedi-block; incremental capabilities
-- examples of benefits; offsetting human costs
 
 # Obstacles
 ## Product Values
@@ -110,10 +112,11 @@ Some moderators use automated reporting, especially for the sorts of things ment
 - GDPR is the elephant in the room, but a welcome one
 
 # Recommendations
-- polymorphic linkable notes, 
-- "disposition labels" over hashtags
+- polymorphic linkable notes
+- "disposition labels" for everything
 - community collaboration is very important
 - moderation plugin ecosystem
+- qualitative info for server rules
 
 # Conclusion
 - where I'm going with this next
