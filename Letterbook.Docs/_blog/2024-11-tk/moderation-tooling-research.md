@@ -7,7 +7,7 @@ authors:
 # Intro
 - 1❡: What We Learned
 
-More than ever, it's imperative to [providing safe places](https://www.wrecka.ge/safer-places-now/), and good moderation tooling can better help right-minded people. Moderation tooling hasn't been a major priority for a lot of the server softwares common in the fediverse, and that's unfortunate, if understandable; oftentimes priorities and efforts for open source projects focus on technical aspects more than interface design.
+More than ever, it's imperative to [provide safe places](https://www.wrecka.ge/safer-places-now/), and good moderation tooling can better help right-minded people. Moderation tooling hasn't been a major priority for a lot of the server softwares common in the fediverse, and that's unfortunate, if understandable; oftentimes priorities and efforts for open source projects focus on technical aspects more than interface design.
 
 For the last ten years or so, my work has focused on interface design for highly technical and often nuanced things, across a variety of domains. I've learned a lot of things through this work, but perhaps the most important is: when you are designing for practitioners, _you need to listen to the people doing the work_. So we talked to a small handful of people doing moderation work at a variety of scales and contexts: instances large & small, people moderating discord servers, people doing trust & safety work professionaly at scale.
 
