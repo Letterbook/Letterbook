@@ -76,9 +76,13 @@ A common frustration and major use-case for private wikis is for coordinating ac
 
 ## Within Your Instance -- Automation
 
-Also to my surprise, the people we spoke to were overwhelmingly in favor of using automated tooling to support a proactive approach to moderation. People cited existing examples such as [Akkoma's Message Rewriting Facility](https://docs.akkoma.dev/stable/configuration/mrf/), which allows instance admins to run incoming messages through both arbitrary & predefined Elixir code, tools which automatically scan incoming images for CSAM, and a near-universal love for Discord Bots.
+Also to my surprise, the people we spoke to were overwhelmingly in favor of using automated tooling to support a proactive approach to moderation, especially in how it can offset the human cost of performing this work.
 
-The biggest hesitation with introducing automated tooling is with mistake-proofing and guardrails against misunderstood behavior, and trustworthiness of third-party code.
+People cited existing examples such as [Akkoma's Message Rewriting Facility](https://docs.akkoma.dev/stable/configuration/mrf/), which allows instance admins to run incoming messages through both arbitrary & predefined Elixir code, tools which automatically scan incoming images for CSAM, and a near-universal love for Discord Bots.
+
+The biggest hesitation with introducing automated tooling is with providing guardrails against misunderstood behavior (mistake-proofing), and trustworthiness of third-party code. These concerns are also present when integrating community resrouces such as shared blocklists: Are these tools going to do what I think they're going to do? Do I want to allow them to do everything they say they're going to do?
+
+Some moderators use automated reporting, especially for the sorts of things mentioned earlier about useful dashboard information, as another tool in their pro-active moderation toolbox, but this usually involves external tooling and complex database queries.
 
 ## Coordination Between Instances
 
@@ -108,7 +112,8 @@ The biggest hesitation with introducing automated tooling is with mistake-proofi
 # Recommendations
 - polymorphic linkable notes, 
 - "disposition labels" over hashtags
-- 
+- community collaboration is very important
+- moderation plugin ecosystem
 
 # Conclusion
 - where I'm going with this next
