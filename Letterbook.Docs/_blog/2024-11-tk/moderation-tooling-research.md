@@ -6,11 +6,13 @@ authors:
 
 # Intro
 - 1❡: What We Learned
-- What we want to accomplish
-- Moderator tooling is generally not a priority
-- General overview of who we talked to
-- What I do, How I do it
-- What this report is & isn't
+
+More than ever, it's imperative to [providing safe places](https://www.wrecka.ge/safer-places-now/), and good moderation tooling can better help right-minded people. Moderation tooling hasn't been a major priority for a lot of the server softwares common in the fediverse, and that's unfortunate, if understandable; oftentimes priorities and efforts for open source projects focus on technical aspects more than interface design.
+
+For the last ten years or so, my work has focused on interface design for highly technical and often nuanced things, across a variety of domains. I've learned a lot of things through this work, but perhaps the most important is: when you are designing for practitioners, _you need to listen to the people doing the work_. So we talked to a small handful of people doing moderation work at a variety of scales and contexts: instances large & small, people moderating discord servers, people doing trust & safety work professionaly at scale.
+
+This article is a summary of what we've learned through our interviews, and focuses on the areas where the tooling for people doing moderation work could be improved, and what obstacles are involved to someone seeking to improve that tooling. I'm not yet ready to make any kinds of recommendations, let alone designs, but we feel these learnings are worth sharing with others doing similar work in the fediverse.
+
 - Glossary
 
 # Context is Social, Context is Information
@@ -43,7 +45,15 @@ Managing federation ties is another area where queries become tricky. I've heard
 
 A common theme in my work of this sort is [poka-yoke](https://en.wikipedia.org/wiki/Poka-yoke) or _mistake-proofing_, and there is certainly a lot of room for improvement in Fedi server software to better help admins avoid mistakes, particularly though clearly explaining what the result of an action will be. Just as with defederating, it may not be immediately obvious that "suspending" a user on a particular server software will in fact irrevocably delete that user's account and all of their content, but it's happened.
 
-# Roles
+# Roles & Abilities
+
+Many server softwares don't distinguish between admin and moderation roles, but some that do make a mess of it by eschewing role-based controls for what could best be described as "capability templates" which provide a set of actions the users they are applied to can take. Where this falls apart is that if a template is updated, it doesn't update the user accounts to which the template had been applied. 
+
+This may seem obvious to someone who thinks about it when I describe the data model this way, but the server software doesn't describe the data model this way and most people aren't going to think about it. This results in "ability drift" unless someone were to go through and update each users' permissions, which then requires keeping track of which person is supposed to have which permission set.
+
+To my horror, an incident was described to me whereby the sole remaining admin for an instance had managed to remove their own admin bit. I place no blame on the person who did this, rather on the design of the software. 
+
+Another problem from this approach to user capabilities was an inconsistent user interface, where the moderator would be presented with affordances (buttons, links, etc) for actions which they didn't have permission to perform.
 
 # Operational Visibility
 - operational visibility: what's happening that needs attention? actionable data vs "oh, neat?"
