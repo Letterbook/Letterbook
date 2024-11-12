@@ -94,12 +94,7 @@ For reporting, a common complaint is about the technical difficulty in sharing d
 
 Different server instances also have different rules, but these are expressed as freeform text, as opposed to any kind of semantic labels. In addition to making it more difficult for someone evaluating "which server should I join?" because they have to read through all the various texts, it makes it more difficult and laborious for a moderator evaluating a report or determining if they should defederate to understand the alignment of rules between servers. Machine-parseable community standard labels for rules such as "Don't be an asshole", "Don't deadname people" or the like would go a very long way in reducing the human cost of moderation, but these sorts of things require social and technical consensus.
 
-- reports
-- fediblock; lacking the _why_
-- inconsistencies between fedi software interfaces can cause problems
-- server's rules are text, not data
-- difficult to coordinate *data* between instances
-- distributing trust is _hard_
+Legal issues also extend into published resources such as blocklists; one of the reasons why it would be useful to have labels & notes on blocklist entries even though you might have public-facing information in #fediblock or elsewhere is it gets into legal issues. If you're blocking a server for rampant illegal content such as CSAM, saying so publicly exposes you to legal actions, and while you might be able to prove this in court, doing so is a drain on time and money, so it's better to keep that note private.
 
 # Obstacles
 ## Product Values
