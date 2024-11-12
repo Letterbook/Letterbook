@@ -21,36 +21,32 @@ Context is also, often, information. _Who are the people involved?_ can become _
 ## Reports
 The main case for a moderator gathering information is in dealing with reports. Challenges in evaluating a report can stem from the server software's design, its data architecture decisions, the design of ActivityPub, differences between fedi sofrwares, and/or the distributed nature of federation. Social information plays an important role, too.
 
-From a design & data standpoint, many questions arise that are difficult to answer: What is the history of a user who is the subject of a report -- what reports have been filed against them previously? What is the history of the user filing the report? Is this user receiving a lot of other reports at the same time? Who are the accounts doing the reporting? If the report creator is remote, what information can you get about them? What is the recent or overall history of report exchanges between your instance and the remote instance? It can be hard to distinguish situations where someone is a bad actor compared to someone who is under attack by sockpuppet accounts.
+From a design & data standpoint, many questions arise that are difficult to answer: What is the history of a user who is the subject of a report -- what reports have been filed against them previously? What is the history of the user filing the report? Is this user receiving a lot of other reports at the same time? Who are the accounts doing the reporting? 
 
-Sometimes a post that is part of a report is a response to a post that's been deleted, and since the server software deletes those posts immediately, the full thread is gone. It's completely possible for a report to become "un-solveable" by a reasonable standard, but the model around ActivityPub flags don't allow for this.
+If the report creator is remote, what information can you get about them? What is the recent or overall history of report exchanges between your instance and the remote instance? It can be hard to distinguish situations where someone is a bad actor compared to someone who is under attack by sockpuppet accounts, especially as there is much less contextual information about users, such as the domains their email addresses are from, their IP ranges, etc.
 
-From a protocol standpoint, the ActivityPub `Flag` activity used for reporting has loose semantic definitions for its fields, and there is little guidance on what fields are supposed to indicate. This leaves implementors to define that, which causes problems from an interoperability standpoint. The ActivityPub Trust and Safety group is working to define this better.
+Sometimes a post that is part of a report is a response to a post that's been deleted, and since the server software deletes those posts immediately, the full thread is gone. It's completely possible for a report to become "un-solveable" by any reasonable standard, but the model around ActivityPub flags don't allow for this.
+
+Sometimes it's a permissions issue, where posts not visible to the public (either "metioned people only" or "followers only") are either the subject of a report or part of the evaluation context for one. However, some server software applies the standard visibility rules to admins, so the moderator can't see these non-public posts that are part of the larger evaluation context.
+
+And sometimes it's the little things. For example, Mastodon doesn't make it easy to communicate directly with a user under review; an admin who wants to email a user has to click through to their profile page to get their email address.
+
+From a protocol standpoint, the ActivityPub `Flag` activity used for reporting has loose semantic definitions for its fields, and there is little guidance on what fields are supposed to indicate. This leaves implementors to define that, which causes problems from an interoperability standpoint. The [ActivityPub Trust and Safety group](https://github.com/swicg/activitypub-trust-and-safety/) is working to define this better.
 
 Server software treats reporting between instances differently as well, some software sends inter-instance reports straight to the remote admins, some require the local admins to forward it, and some don't let the local admins forward.
 
-Socially, a common concern & problem is understanding the context in which a report is taking place. Language shifts between cultures, marginalized groups reclaim slurs, and it can be hard to keep track of that.  
+Socially, a common concern & problem is understanding the context in which a report is taking place. Language shifts between cultures, marginalized groups reclaim slurs, and it can be hard to keep track of that. What resources exist to help a moderator evaluate these sorts of things for a community they're not a part of?
 
-# De/Federating & Blocking
+# De/Federating & Mistake Proofing
 
+Managing federation ties is another area where queries become tricky. I've heard many stories of instances defederating from each other over some spat between their admins, and their users get caught up in this when the relationships across the two servers get severed as part of the defederation. But even if someone _wanted_ to be more careful in managing their inter-server ties, it's difficult to find out how many relationships would be affected by defederating with another server or blocking a remote user. How many people on either server will be affected? Is it possible to inform them of those relationships being lost? Is it possible to restore them should the inter-server ties become restored?
 
+A common theme in my work of this sort is [poka-yoke](https://en.wikipedia.org/wiki/Poka-yoke) or _mistake-proofing_, and there is certainly a lot of room for improvement in Fedi server software to better help admins avoid mistakes, particularly though clearly explaining what the result of an action will be. Just as with defederating, it may not be immediately obvious that "suspending" a user on a particular server software will in fact irrevocably delete that user's account and all of their content, but it's happened.
 
-# Mistake-Proofing, Roles
+# Roles
 
 # Operational Visibility
-
-## Context is Social
-- Who are people involved? What are their norms? What are their rules? 
-- easier at small scale, harder at large scale
-## Context is Data
-- who said what, when? What related information is needed? What patterns can't I see?
-- data visibility; RBAC, deletions, not stored
-- what are the consequences of an action I'm going to take?
-  - accidental deletions from suspending users
-  - releationships severed due to defederation
-- protocol makes coherent data model a problem
 - operational visibility: what's happening that needs attention? actionable data vs "oh, neat?"
-- trust profiles for an account (history, posts, email/ips/links)
 
 # Coordination
 ## Coordination on their own instance
