@@ -44,9 +44,9 @@ public interface IAuthzPostService
 	/// <summary>
 	/// Handle an inbound Create activity on a post
 	/// </summary>
-	/// <param name="post"></param>
+	/// <param name="posts"></param>
 	/// <returns>The resultant Post if it could be handled in-band, otherwise null</returns>
-	public Task<Post?> ReceiveCreate(Post post);
+	public Task<IEnumerable<Post>> ReceiveCreate(IEnumerable<Post> posts);
 
 	/// <summary>
 	/// Handle an inbound Update activity on a post

@@ -223,27 +223,22 @@ public class ActorController : ControllerBase
 
 	private async Task<IActionResult> InboxCreate(ProfileId id, CreateActivity activity)
 	{
-		var posts = activity.Object.ValueItems.Select(Mapper.Map<Post>);
-		var inBand = true;
-		foreach (var post in posts)
+		var posts = activity.Object.ValueItems.Select(Mapper.Map<Post>)
+			.Where(p => p.Contents.Count != 0)
+			.ToList();
+		if (posts.Count == 0)
 		{
-			if (post.Contents.Count == 0)
-			{
-				_logger.LogWarning("Create: object {Id} does not appear to be a Post", post.FediId);
-				continue;
-			}
-
-			var created = await _postService.As(User.Claims).ReceiveCreate(post);
-			if (created == null) inBand = false;
+			_logger.LogWarning("Create Activity does not appear to contain any posts");
+			return BadRequest();
 		}
+		var created = await _postService.As(User.Claims).ReceiveCreate(posts);
+		if (created.Count() == posts.Count && !activity.Object.LinkItems.Any()) return Ok();
 
-		if (activity.Object.LinkItems.Any()) inBand = false;
 		foreach (var link in activity.Object.LinkItems)
 		{
 			await _apCrawler.CrawlPost(id, link.HRef);
 		}
-
-		return inBand ? Ok() : Accepted();
+		return Accepted();
 	}
 
 	private async Task<IActionResult> InboxAccept(ProfileId localId, ASActivity activity)
