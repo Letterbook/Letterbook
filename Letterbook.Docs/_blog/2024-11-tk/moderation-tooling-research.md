@@ -108,11 +108,25 @@ Improving the protocol is the more important challenge -- the fediverse is not M
 I was also surprised to find that data retention policy poses a set of obstacles to moderation work in the fediverse. Federating posts over ActivityPub is, to some degree, a data processing agreement. Retention is a very delicate and thorny issue with a lot of legal, social, and ethical consequences; one that many volunteer or amateur administrators are not ready to deal with. The GDPR is the elephant in the room, but it can also provide some guidance on good defaults for server software to set for its retention policies.
 
 # Recommendations
-- polymorphic linkable notes
-- "disposition labels" for everything
-- community collaboration is very important
-- moderation plugin ecosystem ideas -- CAPABILITIES and REGRESSION PREVIEWS
-- qualitative info for server rules
+
+Based on these conversations, I can make a handful of recommendations to developers who want to help improve trust & safety in the fediverse:
+
+1. Get involved in improving the protocol. I get it -- consensus-building is hard work, and talking with people isn't as fun as writing code. It is important work, it is important to push back against people with influence who don't value this work, and I believe it will yield the best long-term results. 
+
+2. Get involved in defining qualitative community labeling efforts. Commonly understood qualitative, semantic codes for specific rules, offenses, governance methods, and other things can go a long way in reducing the human cost of understanding how servers align in their philosophies and why a post might have been flagged.
+
+3. To help in keeping context about things that happened or things that are happening, notes and labels for everything, even some things you don't think need them. 
+
+  Notes can be aggregatable text fields similar to comments, about some ... thing, such as a post, a flag activity, a user account, a block action, etc. It should be easy to get notes for things related to a thing you're looking at.
+
+  Labels are something more than hashtags: Where a hashtag might be `#status/investigating`, a label could be `status: investigating`, which then allows one to more easily enumerate (and limit) the `status` types, and find things by those. By far and away this is the most common thing in my notes from these conversations.
+
+4. Building query & reporting tools into server software can go a long way towards helping proactive moderation; but also building out resources to share and translate these queries across server software. 
+
+5. Think more about context in your admin & moderation interfaces. 
+
+6. Think about what shareable automation tooling would look like.
+
 
 # Conclusion
 - where I'm going with this next
