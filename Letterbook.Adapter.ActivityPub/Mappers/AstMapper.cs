@@ -491,9 +491,10 @@ internal class PostContextConverter : IMemberValueResolver<ASObject, Post, Linka
 			return Result(ctxId);
 		}
 
-		return Result(new Uri(src.Replies?.Id ?? src.Id!));
+		var srcId = src.Replies?.Id ?? src.Id;
+		return Result(srcId is null ? null : new Uri(srcId));
 
-		ThreadContext Result(Uri id)
+		ThreadContext Result(Uri? id)
 		{
 			var result = new ThreadContext
 			{
@@ -516,11 +517,8 @@ internal class PostContextConverter : IMemberValueResolver<ASObject, Post, Linka
 			NewThread = false
 		};
 
-		if (src.Context?.TryGetValue(out var ctx) == true && ctx.Is<ASCollection>(out var ctxCollection))
-			heuristic.Context = ctxCollection.Id is not null ? new Uri(ctxCollection.Id) : null;
-
-		if (src.Context?.TryGetLink(out var link) == true && link.Is<ASLink>(out var ctxLink))
-			heuristic.Root = ctxLink.HRef;
+		if (src.Context?.TryGetId(out var id) == true)
+			heuristic.Context = id;
 
 		return new ThreadContext
 		{

@@ -21,7 +21,7 @@ public class ThreadContext
 		set => _rootId = value.Id;
 	}
 
-	public required Uri FediId { get; set; }
+	public Uri? FediId { get; set; }
 	public ICollection<Post> Posts { get; set; } = new HashSet<Post>();
 	public Heuristics? Heuristics { get; init; }
 

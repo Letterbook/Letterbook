@@ -45,4 +45,13 @@ public static class CollectionExtensions
 
 		return result;
 	}
+
+	public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) where T : class =>
+		source.Where<T?>(TestNotNull)!;
+
+	public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) where T : struct =>
+		source.Where(x => x.HasValue).Select(x => x!.Value);
+
+	private static readonly Func<object?, bool> TestNotNull = x => x is not null;
+
 }
