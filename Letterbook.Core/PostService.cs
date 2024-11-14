@@ -293,25 +293,31 @@ public class PostService : IAuthzPostService, IPostService
 		var knownPosts = await _posts.ListPosts(postIds)
 			.Include(post => post.Thread)
 			.ToDictionaryAsync(p => p.FediId);
-		var pendingPosts = posts.Where(p => !knownPosts.ContainsKey(p.FediId));
+		var pendingPosts = posts.Where(p => !knownPosts.ContainsKey(p.FediId)).ToDictionary(post => post.FediId);
 
-		var threadIds = posts.Select(p => p.Thread.Heuristics?.Root)
+		var possibleThreadIds = posts.Select(p => p.Thread.Heuristics?.Root)
 			.Concat(posts.Select(p => p.Thread.Heuristics?.Context))
 			.Concat(posts.Select(p => p.Thread.Heuristics?.Target))
 			.WhereNotNull()
 			.ToArray();
-		var knownThreads = await _posts.Threads(threadIds).ToDictionaryAsync(context => context.FediId!);
+		var pendingThreads = posts.Select(p => p.Thread).Where(t => t.FediId != null).ToDictionary(t => t.FediId!);
+		var knownThreads = await _posts.Threads(possibleThreadIds).ToDictionaryAsync(context => context.FediId!);
 
 		// lookup profiles we already know about, and fetch any that are new
-		var profileIds = pendingPosts.SelectMany(post => post.Creators).Select(prof => prof.FediId)
-			.Concat(pendingPosts.SelectMany(post => post.AddressedTo).Select(m => m.Subject).Select(prof => prof.FediId))
-			.ToList();
-		var knownProfiles = await _posts.ListProfiles(profileIds).ToDictionaryAsync(p => p.FediId);
-		var pendingProfileIds = profileIds.Where(p => !knownProfiles.ContainsKey(p));
+		var pendingProfiles = pendingPosts.Values.SelectMany(p => p.Creators)
+			.Concat(pendingPosts.Values.SelectMany(p => p.AddressedTo).Select(m => m.Subject))
+			.ToDictionary(p => p.FediId);
+		var knownProfiles = await _posts.ListProfiles(pendingProfiles.Keys).ToDictionaryAsync(p => p.FediId);
+		foreach (var id in knownProfiles.Keys)
+		{
+			pendingProfiles.Remove(id);
+		}
 
-		foreach (var post in pendingPosts)
+		foreach (var post in pendingPosts.Values)
 		{
 			if (post.InReplyTo != null && knownPosts.TryGetValue(post.InReplyTo.FediId, out var value))
+				post.InReplyTo = value;
+			else if (post.InReplyTo != null && pendingPosts.TryGetValue(post.InReplyTo.FediId, out value))
 				post.InReplyTo = value;
 
 			post.Creators = post.Creators.ReplaceFrom(knownProfiles.Values);
@@ -319,11 +325,19 @@ public class PostService : IAuthzPostService, IPostService
 			{
 				if (knownProfiles.TryGetValue(mention.Subject.FediId, out var mentioned))
 					mention.Subject = mentioned;
+				else if (pendingProfiles.TryGetValue(mention.Subject.FediId, out mentioned))
+					mention.Subject = mentioned;
 			}
 
 			var threadHeuristics = post.Thread.Heuristics ?? new Heuristics();
 			if (threadHeuristics.NewThread)
+			{
+				if (post.Thread.FediId is { } id && knownThreads.TryGetValue(id, out var thread))
+					post.Thread = thread;
+				else if (post.Thread.FediId is { } idP && pendingThreads.TryGetValue(idP, out thread))
+					post.Thread = thread;
 				continue;
+			}
 			var threadId = threadHeuristics.Root ?? threadHeuristics.Context ?? threadHeuristics.Target ?? post.Replies;
 
 			// TODO: reply controls here
@@ -339,7 +353,6 @@ public class PostService : IAuthzPostService, IPostService
 			}
 			else if (threadId is not null)
 				post.Thread.FediId ??= threadId;
-
 		}
 
 		// save
