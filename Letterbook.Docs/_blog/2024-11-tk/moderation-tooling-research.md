@@ -107,7 +107,7 @@ Based on these conversations, I can make a handful of recommendations to develop
 
 2. Get involved in defining qualitative community labeling efforts. Commonly understood qualitative, semantic codes for specific rules, offenses, governance methods, and other things can go a long way in reducing the human cost of understanding how servers align in their philosophies and why a post might have been flagged.
 
-3. To help in keeping context about things that happened or things that are happening, notes and labels for everything, even some things you don't think need them. 
+3. Having the ability to add notes and labels for *everything* (even things you don't think need them) and the ability to query those, would go a long way in helping both keep context across time into the future and provide ways to understand trends for what's happening now.
 
   Notes can be aggregatable text fields similar to comments, about some ... thing, such as a post, a flag activity, a user account, a block action, a blocklist entry, etc. It should be easy to get notes for things related to a thing you're looking at.
 
@@ -121,10 +121,10 @@ Based on these conversations, I can make a handful of recommendations to develop
   - How can I know that this plugin isn't going to do anything nefarious? Maybe a plugin needs network access to check an image fingerprint against known illegal content list. Maybe a plugin needs to read everything by a specific user. I think a capability-based permission system makes sense for this sort of thing.
   - How can I know that this plugin is going to do what I think it's going to do? Look at interfaces for creating email fitlers, across more clients than just the one you regularly use -- After setting some sorts of rules for selecting messages to act on, you're typically offered a preview of messages you currently have which would be selected by these rules. This helps you know that your selection logic is correct. A plugin meant to help reject incoming spam messages from other instances should offer a regression preview to illustrate how it would have handled previous messages, to provide confidence that it will behave the way the admin expects it to behave.
 
-7. Work to develop suggestions for data retention policies that support both trust & safety needs as well as legal needs. This is outside the expertize of almost everyone working in moderation.
+7. Work to develop suggestions for data retention policies that support both trust & safety needs as well as legal needs, and work to help people understand what good defaults server software should adopt. This is outside the expertize of almost everyone working in moderation.
 
 8. I think it would be useful to have a commonly understood set of things moderators need to do during the course of their work, and HOWTO-style guides for accomplishing those for different server softwares.
 
 # Conclusion
 
-From here, I'm moving into exploring ideas for interfaces for managing federation and dealing with reports. I don't work with static mockup tools such as Figma -- for this type of work I prefer to create working prototype web pages, often locally-runnable using fixture data generated to match a variety of scenarios that came about during the initial research discussions. This approach tends to involve more work but I've seen it repeatedly short-circuit assumptions and miscommunications people have when looking at static images. I have a few "challenging moderation scenarios" in mind to replicate, but I'm still looking for a few more. 
+From here, I'm moving into exploring ideas for interfaces for managing federation and dealing with reports. I don't work with static mockup tools such as Figma -- for this type of work I prefer to create working prototype web pages, often locally-runnable using fixture data generated to match a variety of scenarios that came about during the initial research discussions. This approach tends to involve more work but I've seen it repeatedly short-circuit assumptions and miscommunications people have when looking at static images. I have a few "challenging moderation scenarios" in mind to replicate, but I'm still looking for a few more. If you've done moderation work and think I've missed something, please don't hesitate to reach out!
