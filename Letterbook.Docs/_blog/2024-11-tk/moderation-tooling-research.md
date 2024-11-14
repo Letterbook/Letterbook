@@ -5,23 +5,21 @@ authors:
 ---
 
 # Intro
-- 1❡: What We Learned
+More than ever, it's imperative to [provide safe places](https://www.wrecka.ge/safer-places-now/). Moderation tooling hasn't been a major priority for a lot of the server softwares common in the fediverse, and that's unfortunate, if understandable -- oftentimes priorities and efforts for open source projects focus on technical aspects more than interface design.
 
-More than ever, it's imperative to [provide safe places](https://www.wrecka.ge/safer-places-now/), and good moderation tooling can better help right-minded people. Moderation tooling hasn't been a major priority for a lot of the server softwares common in the fediverse, and that's unfortunate, if understandable; oftentimes priorities and efforts for open source projects focus on technical aspects more than interface design.
+For the last ten years or so, my work has focused on interface design for highly technical and often nuanced things, across a variety of domains (and I often have to remind people what the "I" is in API). I've learned a lot of things through this work, but perhaps the most important is: when you are designing for practitioners, _you need to listen to the people doing the work_. We talked to a small handful of people doing moderation work at a variety of scales and contexts: instances large & small, people moderating discord servers, people doing trust & safety work professionaly at scale. We talked about trust & safety as it relates to administering and moderating servers; while there is much worthwhile work which could empower individual users in these regards, our conversations focused on the admin/moderation roles.
 
-For the last ten years or so, my work has focused on interface design for highly technical and often nuanced things, across a variety of domains (and I often have to remind people what the "I" is in API). I've learned a lot of things through this work, but perhaps the most important is: when you are designing for practitioners, _you need to listen to the people doing the work_. So we talked to a small handful of people doing moderation work at a variety of scales and contexts: instances large & small, people moderating discord servers, people doing trust & safety work professionaly at scale. We talked about trust & safety as it relates to administering and moderating servers; while there is additional work which could empower individual users in these regards, our conversations focused on the admin/moderation roles.
+This article is a summary of what we've learned through our interviews: the problems faced by people doing moderation work, and the obstacles to solving those problems. I also have some recommendations for technically-minded people who want to work to improve trust & safety tooling in the fediverse.
 
-This article is a summary of what we've learned through our interviews, and focuses on the areas where the tooling for people doing moderation work could be improved, and what obstacles are involved to someone seeking to improve that tooling. I have some basic ideas from which people developing server software could use to help their moderation tooling, but I'm still a ways off from having cohesive designs. We feel these learnings are worth sharing with others doing similar work in the fediverse.
-
-# Context is Social, Context is Information
+# Problems: Keeping Context
 
 Moderation is partly a game of context-keeping, and context is primarily social: who are the people involved in a situation? What are their histories, how are they trusted, what are the social norms & rules in which a dispute are occuring? This is often easier in smaller communities, but federation brings its problems, as does an increase in instance size; keeping track of these things becomes a problem.
 
-Context is also, often, information. _Who are the people involved?_ can become _What do we know about the people involved?_ Providing access to this kind of information is a common problem point, and one that tooling could often do a much better job of helping with: One instance admin described giving their mod team read-only access to the database along with a library of queries to get at information their server software doesn't make available. There's lots of room for improvement here!
+Context is also, often, information. _Who are the people involved?_ can become _What do we know about the people involved?_ Providing access to this kind of information is a common frustration point, and it's where I see the biggest opportunities for better-designed tooling to make access to relevant information eaiser, or even possible.  One instance admin described giving their mod team read-only access to the database along with a library of queries to get at information their server software doesn't make available. There's lots of room for improvement here!
 
-## Reports
+## Flag Activities & Reports
 
-The main case for a moderator gathering information is in dealing with reports. Challenges in evaluating a report can stem from the server software's design, its data architecture decisions, the design of ActivityPub, differences between fedi sofrwares, and/or the distributed nature of federation. Social information plays an important role, too.
+The main case for a moderator gathering information is in dealing with flag activities, also known as reports. [Hachyderm did a great write-up on how these work](https://community.hachyderm.io/blog/2024/09/01/hachyderms-introduction-to-mastodon-moderation-the-report-feature-and-moderator-actions/). Challenges in evaluating a report can stem from the server software's design, its data architecture decisions, the design of ActivityPub, differences between fedi sofrwares, and/or the distributed nature of federation. Social information plays an important role, too.
 
 From a design & data standpoint, many questions arise that are difficult to answer: What is the history of a user who is the subject of a report -- what reports have been filed against them previously? What is the history of the user filing the report? Is this user receiving a lot of other reports at the same time? Who are the accounts doing the reporting? 
 
@@ -43,13 +41,11 @@ Socially, a common concern & problem is understanding the context in which a rep
 
 Managing federation ties is another area where queries become tricky. I've heard many stories of instances defederating from each other over some spat between their admins, and their users get caught up in this when the relationships across the two servers get severed as part of the defederation. But even if someone _wanted_ to be more careful in managing their inter-server ties, it's difficult to find out how many relationships would be affected by defederating with another server or blocking a remote user. How many people on either server will be affected? Is it possible to inform them of those relationships being lost? Is it possible to restore them should the inter-server ties become restored?
 
-Many server softwares don't distinguish between admin and moderation roles, but some that do make a mess of it by eschewing role-based controls for what could best be described as "capability templates" which provide a set of actions the users they are applied to can take. Where this falls apart is that if a template is updated, it doesn't update the user accounts to which the template had been applied. 
+Many server softwares don't distinguish between admin and moderation roles, but some that do make a mess of it by eschewing role-based controls for what I will describe as "capability templates" which provide a set of actions the users they are applied to can take. Where this falls apart is that if a template is updated, it doesn't update the user accounts to which the template had been applied, so their moderator team has different permissions than what the admin thinks they have.
 
-This may seem obvious to someone who thinks about it when I describe the data model this way, but the server software doesn't describe the data model this way and most people aren't going to think about it. This results in "ability drift" unless someone were to go through and update each users' permissions, which then requires keeping track of which person is supposed to have which permission set.
+This approach causes problems: One admin described an incident where the sole remaining admin for an instance had managed to remove their own admin bit. I place no blame on the person who did this, rather on the design of the software. It also resulted in an inconsistent user interface, where the moderator would be presented with affordances (buttons, links, etc) for actions which they didn't have permission to perform.
 
-To my horror, an incident was described to me whereby the sole remaining admin for an instance had managed to remove their own admin bit. I place no blame on the person who did this, rather on the design of the software. Another problem from this approach to user capabilities was an inconsistent user interface, where the moderator would be presented with affordances (buttons, links, etc) for actions which they didn't have permission to perform.
-
-A common theme in my work of this sort is [poka-yoke](https://en.wikipedia.org/wiki/Poka-yoke) or _mistake-proofing_, and there is certainly a lot of room for improvement in Fedi server software to better help admins avoid mistakes, particularly though clearly explaining what the result of an action will be. Just as with defederating, it may not be immediately obvious that "suspending" a user on a particular server software will in fact irrevocably delete that user's account and all of their content, but it's happened. 
+A common theme in my work of this sort is [poka-yoke](https://en.wikipedia.org/wiki/Poka-yoke) or _mistake-proofing_, and there is certainly a lot of room for improvement in Fedi server software to better help admins avoid mistakes, particularly though clearly explaining what the result of an action will be. Just as with defederating, it may not be immediately obvious that "suspending" a user on a particular server software will actually due to how that server software behaves, irrevocably delete that user's account and all of their content.
 
 There's a lot of places where simple safeguards (are you sure? type the profile name to suspend) would go a long way towards preventing mistakes, and others where notes about special cases (this user is a frequent target of harassment, be super careful) would go further.
 
@@ -59,9 +55,9 @@ Adjacent but related to moderation, many we talked to complained about operation
 
 The main complaint is that surfaced metrics often aren't _actionable_; for example, showing a number or chart of "new account signups" might result in an "oh, neat" or "huh, ok" response, but there's no way to dig deeper into this data. Who are these new signups? Is there any trend in weird domain names or IP blocks that the administrator should know about? How many of these accounts fill out any parts of their profile, make posts, or follow patterns indicative of spam, abuse, sockpuppeting, or becoming a sleeper account for a future harassment campaign? 
 
-There's often no way to know any of this without resorting to complex database queries, yet this information is vital to moderators who want to take a pro-active approach to keeping their instance safe.
+There's often no way to know any of this without resorting to complex database queries, yet this sort of information is vital to moderators who want to take a pro-active approach to keeping their instance safe.
 
-# Coordination
+# Problems: Coordination
 
 Moderation is also about working with other people: your users, your co-moderators, other instance's moderators, themselves in the future, and automated tooling. There are a lot of further problems people face in this realm, some of which are very thorny and require people working together to define standards, and others which fedi server software can work to handle on its own.
 
@@ -69,19 +65,17 @@ Moderation is also about working with other people: your users, your co-moderato
 
 To my surprise, a common frustration is the difficulty for admin staff to communicate privately with their own users. "Direct" / "Mentioned Only" messages only work so well, and email is a more reliable method of communication, but getting at a user's email address from the context it's needed is often many clicks & page loads away. That communication then lives outside the instance's records, and unless the moderation staff have a shared email inbox, is private between the individual moderator and the user.
 
-Moderation teams often make good use of tools outside their server software to coordinate: Wikis, chat services (often in private Discord servers), spreadsheets, web-based database query tooling, follow-the-sun scheduling tools, and incident response management tooling. Many expressed a desire for some of this within their server software itself, though it seems teams are able to find external tooling that works well enough for them.
+Moderation teams often make good use of tools outside their server software to coordinate: Wikis, chat services (often private Discord servers), spreadsheets, web-based database query tooling, follow-the-sun scheduling tools, and incident response management tooling. Many expressed a desire for some of this within their server software itself, though it seems teams are able to find external tooling that works well enough for them.
 
 A common frustration and major use-case for private wikis is for coordinating across time with your past & future selves: Why were decisions made? Having searchable notes with labels and bidirectional page links goes a long way in making this easier. But while tooling that helps with this sort of thing exists in some server software, it's not pervasive enough and should be applied to more things such as instance block records (more on this below).
 
 ## Within Your Instance -- Automation & Shared Resources
 
-Also to my surprise, the people we spoke to were overwhelmingly in favor of using automated tooling to support a proactive approach to moderation, especially in how it can offset the human cost of performing this work.
+Also to my surprise, the people we spoke to were enthusiastic about using automated tooling to support a proactive approach to moderation, especially in how it can offset the human cost of performing this work, citing  examples such as [Akkoma's Message Rewriting Facility](https://docs.akkoma.dev/stable/configuration/mrf/), which allows instance admins to run incoming messages through both arbitrary & predefined Elixir code, tools which automatically scan incoming images for CSAM, and a love for Discord's Bots.
 
-People cited existing examples such as [Akkoma's Message Rewriting Facility](https://docs.akkoma.dev/stable/configuration/mrf/), which allows instance admins to run incoming messages through both arbitrary & predefined Elixir code, tools which automatically scan incoming images for CSAM, and a near-universal love for Discord Bots.
+The biggest hesitation with introducing automated tooling is developing trust with third party code and integrating community resources like blocklists, both from a "is this code trustworthy?" standpoint as well as "will this do what I think it's going to do?"
 
-The biggest hesitation with introducing automated tooling is with providing guardrails against misunderstood behavior (mistake-proofing), and trustworthiness of third-party code. These concerns are also present when integrating community resrouces such as shared blocklists: Are these tools going to do what I think they're going to do? Do I want to allow them to do everything they say they're going to do?
-
-Some moderators use automated reporting, especially for the sorts of things mentioned earlier about useful dashboard information, as another tool in their pro-active moderation toolbox, but this usually involves external tooling and complex database queries.
+Some moderators use external tooling for automated reporting of the sorts I mentioned previously about operational visibility, but this typically requires great technical knowledge to setup the services and develop the right queries.
 
 ## Coordination Between Instances
 
@@ -89,21 +83,21 @@ Not surprisingly, coordination between instances yields some of the biggest and 
 
 These problems aren't intractable -- many require collaboration towards standards, but not without careful tiptoeing around potential legal issues. The short of these problems is that distributed trust is a hard problem.
 
-For reporting, a common complaint is about the technical difficulty in sharing data relevant to a report between instances, even when all parties are willing, which also gets back to the poorly-defined data structure that makes for a report to begin with. But data-sharing can sometimes involve legal issues.
+For reporting, a common complaint is about the technical difficulty in sharing data relevant to a report between instances, even when all parties are willing, which also gets back to the poorly-defined data structure that makes for a report to begin with. Data-sharing sometimes involves legal issues as well.
 
 Different server instances also have different rules, but these are expressed as freeform text, as opposed to any kind of semantic labels. In addition to making it more difficult for someone evaluating "which server should I join?" because they have to read through all the various texts, it makes it more difficult and laborious for a moderator evaluating a report or determining if they should defederate to understand the alignment of rules between servers. Machine-parseable community standard labels for rules such as "Don't be an asshole", "Don't deadname people" or the like would go a very long way in reducing the human cost of moderation, but these sorts of things require social and technical consensus.
 
-Legal issues also extend into published resources such as blocklists; one of the reasons why it would be useful to have labels & notes on blocklist entries even though you might have public-facing information in #fediblock or elsewhere is it gets into legal issues. If you're blocking a server for rampant illegal content such as CSAM, saying so publicly exposes you to legal actions, and while you might be able to prove this in court, doing so is a drain on time and money, so it's better to keep that note private.
+Legal issues can extend into published resources such as blocklists; one of the reasons why it would be useful to have labels & notes on blocklist entries even though you might have public-facing information in #fediblock or elsewhere is it gets into libel & liability. If you're blocking a server for rampant illegal content such as CSAM, saying so publicly exposes you to legal action. While you might be able to prove this in court, doing so is a drain on time, money, and emotions, so it's easier to keep that note private.
 
 Finally, most moderators are not experts in their softare. Moderation in the fediverse is largely a volunteer effort, and training tends to be on the job. Communicating with a moderator on another instance about how to get at certain information poses challenges due to differences in how server software's interfaces work. If you're trying to help another moderator out, you can't assume they're using the same software as you, or even the same *version* of softare as you. Their interface might be different, and this poses a communication challenge.
 
 # Obstacles
 
-There are a handful of obstacles to improving moderation tooling, but the biggest one is getting people with influence to care. Large technology projects require collaboration and vision. In private companies, this is provided by the business, and typically rests in the hands of someone with a "Product" title, who acts as the arbiter of values that go into making the software what it is. Open source projects tend to instead have figureheads, people who spearheaded a project's technical foundation and continue to reign over the project's direction and values as it gains in popularity.
+There are a handful of obstacles to improving moderation tooling, but the biggest one is getting people with influence to care. Large technology projects require collaboration and vision. In private companies, this typically rests in the hands of someone with a "Product" title, who acts as the arbiter of values that go into making the software what it is. Open source projects tend to instead have figureheads who spearheaded a project's technical foundation and steer the project's direction and values as it gains in popularity.
 
-The fediverse has many of these, for both the ActivityPub protocol and the various server softwares. In talking with people doing moderation work, I got an overwhelming sense of frustration that some of the people with the biggest influence in the direction of the fediverse simply don't value trust & safety, yet to provide a safe federated space equivalent to popular commercial platforms, we need the people involved in both the protocol and server software to care.
+In talking with people doing moderation work, I got an overwhelming sense of frustration that people with influence over the software and protocols haven't prioritized this work. If we are to provide a safe federated space equivalent to popular commercial platforms, we need the people involved in both the protocol and server software to pay attention.
 
-Improving the protocol is the more important challenge -- the fediverse is not Mastodon, and ultimately any initiative to improve trust and safety between server instances will require improvements and clarifications to the protocol. There are efforts to route around figureheads with purist views, but this sort of collaboration and consensus-building takes time and a variety of perspectives.
+Improving the protocol is the more important challenge -- the fediverse is not *just* Mastodon, and ultimately any initiative to improve trust and safety between server instances will require improvements and clarifications to the protocol so the plethora of server softwares people use can continue to interoperate. This sort of collaboration and consensus-building takes time and a variety of perspectives.
 
 I was also surprised to find that data retention policy poses a set of obstacles to moderation work in the fediverse. Federating posts over ActivityPub is, to some degree, a data processing agreement. Retention is a very delicate and thorny issue with a lot of legal, social, and ethical consequences; one that many volunteer or amateur administrators are not ready to deal with. The GDPR is the elephant in the room, but it can also provide some guidance on good defaults for server software to set for its retention policies.
 
@@ -117,9 +111,9 @@ Based on these conversations, I can make a handful of recommendations to develop
 
 3. To help in keeping context about things that happened or things that are happening, notes and labels for everything, even some things you don't think need them. 
 
-  Notes can be aggregatable text fields similar to comments, about some ... thing, such as a post, a flag activity, a user account, a block action, etc. It should be easy to get notes for things related to a thing you're looking at.
+  Notes can be aggregatable text fields similar to comments, about some ... thing, such as a post, a flag activity, a user account, a block action, a blocklist entry, etc. It should be easy to get notes for things related to a thing you're looking at.
 
-  Labels are something more than hashtags: Where a hashtag might be `#status/investigating`, a label could be `status: investigating`, which then allows one to more easily enumerate (and limit) the `status` types, and find things by those. By far and away this is the most common thing in my notes from these conversations. 
+  Labels are something more than hashtags: Where a hashtag might be `#status/investigating`, a label could be `status: investigating`, which then allows one to more easily enumerate (and limit) the `status` types, and find things by those. By far and away this is the most common thing in my notes from these conversations, as I think it could be used for a wide variety of cases in helping to keep context both across time and across the aggregate of what's happening now.
 
 4. Building Query/Reporting tools into server software can go a long way towards helping proactive moderation; but also building out resources to share and translate these queries across server software. These queries should help with spotting patterns: What are the common email domains that signed up recently? What instances are submitting the most reports? What _types_ of reports are coming in?
 
@@ -129,6 +123,10 @@ Based on these conversations, I can make a handful of recommendations to develop
   - How can I know that this plugin isn't going to do anything nefarious? Maybe a plugin needs network access to check an image fingerprint against known illegal content list. Maybe a plugin needs to read everything by a specific user. I think a capability-based permission system makes sense for this sort of thing.
   - How can I know that this plugin is going to do what I think it's going to do? Look at interfaces for creating email fitlers, across more clients than just the one you regularly use -- After setting some sorts of rules for selecting messages to act on, you're typically offered a preview of messages you currently have which would be selected by these rules. This helps you know that your selection logic is correct. A plugin meant to help reject incoming spam messages from other instances should offer a regression preview to illustrate how it would have handled previous messages, to provide confidence that it will behave the way the admin expects it to behave.
 
+7. Work to develop suggestions for data retention policies that support both trust & safety needs as well as legal needs. This is outside the expertize of almost everyone working in moderation.
+
+8. I think it would be useful to have a commonly understood set of things moderators need to do during the course of their work, and HOWTO-style guides for accomplishing those for different server softwares.
+
 # Conclusion
-- where I'm going with this next
-- some challenges involved
+
+From here, I'm moving into exploring ideas for interfaces for managing federation and dealing with reports. I don't work with static mockup tools such as Figma -- for this type of work I prefer to create working prototype web pages, often locally-runnable using fixture data generated to match a variety of scenarios that came about during the initial research discussions. This approach tends to involve more work but I've seen it repeatedly short-circuit assumptions and miscommunications people have when looking at static images. I have a few "challenging moderation scenarios" in mind to replicate, but I'm still looking for a few more. 
