@@ -27,9 +27,7 @@ If the report creator is remote, what information can you get about them? What i
 
 Sometimes a post that is part of a report is a response to a post that's been deleted, and since the server software deletes those posts immediately, the full thread is gone. It's completely possible for a report to become "un-solveable" by any reasonable standard, but the model around ActivityPub flags don't allow for this.
 
-Sometimes it's a permissions issue, where posts not visible to the public (either "metioned people only" or "followers only") are either the subject of a report or part of the evaluation context for one. However, some server software applies the standard visibility rules to admins, so the moderator can't see these non-public posts that are part of the larger evaluation context.
-
-And sometimes it's the little things. For example, Mastodon doesn't make it easy to communicate directly with a user under review; an admin who wants to email a user has to click through to their profile page to get their email address.
+And sometimes it's a permissions issue, where posts not visible to the public (either "metioned people only" or "followers only") are either the subject of a report or part of the evaluation context for one. However, some server software applies the standard visibility rules to admins, so the moderator can't see these non-public posts that are part of the larger evaluation context.
 
 From a protocol standpoint, the ActivityPub `Flag` activity used for reporting has loose semantic definitions for its fields, and there is little guidance on what fields are supposed to indicate. This leaves implementors to define that, which causes problems from an interoperability standpoint. The [ActivityPub Trust and Safety group](https://github.com/swicg/activitypub-trust-and-safety/) is working to define this better.
 
