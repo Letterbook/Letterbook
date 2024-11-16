@@ -254,6 +254,11 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		_context.Accounts.AddRange(account);
 	}
 
+	public void AddRange(IEnumerable<Models.Post> posts)
+	{
+		_context.Posts.AddRange(posts);
+	}
+
 	public void Update(Models.Profile profile)
 	{
 		_context.Profiles.Update(profile);

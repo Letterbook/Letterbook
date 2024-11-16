@@ -125,6 +125,7 @@ public interface IDataAdapter : IDisposable
 	public void Add(Post post);
 	public void AddRange(IEnumerable<Profile> profile);
 	public void AddRange(IEnumerable<Account> account);
+	public void AddRange(IEnumerable<Post> posts);
 	public void Update(Profile profile);
 	public void Update(Account account);
 	public void Update(Post post);

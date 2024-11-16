@@ -22,8 +22,8 @@ public class PostServiceTests : WithMocks
 		_output = output;
 		_output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 		_service = new PostService(Mock.Of<ILogger<PostService>>(), CoreOptionsMock, Mock.Of<Instrumentation>(),
-			DataAdapterMock.Object, PostEventServiceMock.Object, ActivityPubClientMock.Object,
-			[new MockHtmlSanitizer(), new MockTextSanitizer()]);
+			DataAdapterMock.Object, PostEventServiceMock.Object, ProfileEventServiceMock.Object,
+			ApCrawlerSchedulerMock.Object, [new MockHtmlSanitizer(), new MockTextSanitizer()]);
 		_fakeProfile = new FakeProfile("letterbook.example");
 		_profile = _fakeProfile.Generate();
 		_post = new FakePost(_profile);

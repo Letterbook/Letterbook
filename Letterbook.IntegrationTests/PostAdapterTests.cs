@@ -110,7 +110,7 @@ public sealed class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTest
 	public async Task CanLookupThreadByFediId()
 	{
 		var expected = _posts[_profiles[0]][0].Thread;
-		var actual = await _adapter.LookupThread(expected.FediId);
+		var actual = await _adapter.LookupThread(expected.FediId!);
 
 		Assert.NotNull(actual);
 		Assert.Equal(expected.GetId(), actual.GetId());

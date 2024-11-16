@@ -173,7 +173,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			_simpleNote.Context = new Linkable<ASObject>(new ASLink() { HRef = expected });
 			var actual = AstMapper.Map<Models.Post>(_simpleNote);
 
-			Assert.Equal(expected, actual.Thread.FediId.ToString());
+			Assert.Equal(expected, actual.Thread.FediId?.ToString());
 		}
 
 		[Fact]
@@ -183,7 +183,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			_simpleNote.Replies = new ASCollection { Id = expected };
 			var actual = AstMapper.Map<Models.Post>(_simpleNote);
 
-			Assert.Equal(expected, actual.Thread.FediId.ToString());
+			Assert.Equal(expected, actual.Thread.FediId?.ToString());
 		}
 		[Fact]
 		public void CanMapThreadPreferContext()
@@ -193,7 +193,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			_simpleNote.Context = new Linkable<ASObject>(new ASLink() { HRef = "https://note.example/note/3" });
 			var actual = AstMapper.Map<Models.Post>(_simpleNote);
 
-			Assert.Equal(expected, actual.Thread.FediId.ToString());
+			Assert.Equal(expected, actual.Thread.FediId?.ToString());
 		}
 
 		[Fact]

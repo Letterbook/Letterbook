@@ -229,6 +229,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 				// We mock the IActivityPubClient because setting up and managing test data across federation peers is way beyond the scope
 				// of what we can do. So we fake that part of it.
 				services.AddScoped<IActivityPubClient>(_ => MockActivityPubClient.Object);
+
+				// TODO (crawler): unmock when this service is implemented
+				services.AddSingleton<IApCrawlerScheduler>(_ => Mock.Of<IApCrawlerScheduler>());
 			});
 
 		base.ConfigureWebHost(builder);
