@@ -29,19 +29,36 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		private readonly IJsonLdSerializer _serializer;
 		private readonly FakePost _fakePost;
 		private readonly Models.Post _post;
+		private readonly Document _document;
 		private static IMapper _profileMapper = new Mapper(Mappers.AstMapper.Profile);
-		private static IMapper _postMapper = new Mapper(Mappers.AstMapper.Post);
+		private static IMapper _postMapper = new Mapper(Mappers.AstMapper.FromPost);
+		private static IMapper _mapper = new Mapper(Mappers.AstMapper.Default);
+
 
 		public MapFromModelTests(ITestOutputHelper output, JsonLdSerializerFixture serializerFixture)
 		{
 			_output = output;
 			_serializer = serializerFixture.JsonLdSerializer;
+			_document = new Document(_serializer);
 
 			_output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
 			_fakeProfile = new FakeProfile("letterbook.example");
 			_profile = _fakeProfile.Generate();
 			_fakePost = new FakePost(_profile);
 			_post = _fakePost.Generate();
+		}
+
+		[Fact(DisplayName = "Map a post round trip")]
+		public void MapDocumentFromPost()
+		{
+			var post = _document.FromPost(_post);
+			var actual = _mapper.Map<Models.Post>(post);
+
+			Assert.NotNull(actual);
+			Assert.NotNull(actual.Contents.FirstOrDefault());
+
+			Assert.Equal(_post.FediId, actual.FediId);
+			Assert.Equal(_post.Contents.First().Html, actual.Contents.First().Html);
 		}
 
 		[Fact(DisplayName = "Map a simple Post to AS#Note")]
@@ -125,7 +142,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		public void ValidConfig()
 		{
 			Mappers.AstMapper.Default.AssertConfigurationIsValid();
-			Mappers.AstMapper.Post.AssertConfigurationIsValid();
+			Mappers.AstMapper.FromPost.AssertConfigurationIsValid();
 		}
 
 		[Fact]

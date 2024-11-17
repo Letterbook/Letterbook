@@ -38,7 +38,7 @@ public static class AstMapper
 	/// <summary>
 	/// Map Posts and Content to AS types
 	/// </summary>
-	public static MapperConfiguration Post = new(cfg =>
+	public static MapperConfiguration FromPost = new(cfg =>
 	{
 		ConfigureUriTypes(cfg);
 		ConfigureDateTypes(cfg);
@@ -414,6 +414,7 @@ internal class PostResolver :
 		ResolutionContext context)
 	{
 		if (sourceMember is null) return default;
+		if (!sourceMember.Any()) return default;
 		if (!sourceMember.First().TryGetId(out var id)) return default;
 
 		return new Post(id, destination.Thread);

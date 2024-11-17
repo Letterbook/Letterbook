@@ -1,3 +1,6 @@
+using ActivityPub.Types.AS;
+using ActivityPub.Types.AS.Extended.Object;
+using ActivityPub.Types.Util;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Api.Controllers.ActivityPub;
 using Letterbook.Core.Adapters;
@@ -20,6 +23,7 @@ public class ActorControllerTests : WithMockContext
 	private Profile _profile;
 	private Profile _remoteProfile;
 	private IActivityPubDocument _document;
+	private readonly FakePost _fakePost;
 
 	public ActorControllerTests(ITestOutputHelper output)
 	{
@@ -39,6 +43,7 @@ public class ActorControllerTests : WithMockContext
 		_profile = _fakeProfile.Generate();
 		_remoteProfile = _fakeRemoteProfile.Generate();
 		_document = new Document(JsonLdSerializerMock.Object);
+		_fakePost = new FakePost(_profile);
 	}
 
 	private FollowerRelation BuildRelation(FollowState state)
@@ -91,6 +96,50 @@ public class ActorControllerTests : WithMockContext
 		ProfileServiceAuthMock.Setup(service =>
 				service.ReceiveFollowRequest(_profile.Id.Id, _remoteProfile.FediId, null))
 			.ReturnsAsync(BuildRelation(FollowState.Rejected));
+
+		var response = await _controller.PostInbox(_profile.Id, activity);
+
+		Assert.IsType<AcceptedResult>(response);
+	}
+
+	[Fact(DisplayName = "Should create posts")]
+	public async Task TestCreate()
+	{
+		var post = _fakePost.Generate();
+		var activity = _document.Create(_profile, _document.FromPost(post));
+
+		PostServiceAuthMock.Setup(service => service.ReceiveCreate(It.IsAny<IEnumerable<Post>>()))
+			.ReturnsAsync([post]);
+
+		var response = await _controller.PostInbox(_profile.Id, activity);
+
+		Assert.IsType<OkResult>(response);
+	}
+
+	[Fact(DisplayName = "Should crawl linked posts")]
+	public async Task TestCreate_CrawlLinked()
+	{
+		var post = _fakePost.Generate();
+		var activity = _document.Create(_profile, _document.FromPost(post));
+		activity.Object.Add(new ASLink(){HRef = "https://letterbook.example/post/1"});
+
+		PostServiceAuthMock.Setup(service => service.ReceiveCreate(It.IsAny<IEnumerable<Post>>()))
+			.ReturnsAsync([post]);
+
+		var response = await _controller.PostInbox(_profile.Id, activity);
+
+		Assert.IsType<AcceptedResult>(response);
+		ApCrawlerSchedulerMock.Verify(m => m.CrawlPost(It.IsAny<ProfileId>(), new Uri("https://letterbook.example/post/1"), It.IsAny<int>()));
+	}
+
+	[Fact(DisplayName = "Should accept posts that cannot be created immediately")]
+	public async Task TestCreate_AcceptPartial()
+	{
+		var post = _fakePost.Generate();
+		var activity = _document.Create(_profile, _document.FromPost(post));
+
+		PostServiceAuthMock.Setup(service => service.ReceiveCreate(It.IsAny<IEnumerable<Post>>()))
+			.ReturnsAsync([]);
 
 		var response = await _controller.PostInbox(_profile.Id, activity);
 

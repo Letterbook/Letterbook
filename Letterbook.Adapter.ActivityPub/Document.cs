@@ -17,7 +17,7 @@ public class Document : IActivityPubDocument
 	public Document(IJsonLdSerializer serializer)
 	{
 		_serializer = serializer;
-		_postMapper = new Mapper(AstMapper.Post);
+		_postMapper = new Mapper(AstMapper.FromPost);
 	}
 
 	public string Serialize(ASType document)
