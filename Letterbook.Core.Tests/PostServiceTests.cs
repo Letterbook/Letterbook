@@ -1,9 +1,12 @@
+using System.Collections;
+using System.Security.Claims;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
 using Medo;
 using Microsoft.Extensions.Logging;
+using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 
@@ -16,6 +19,8 @@ public class PostServiceTests : WithMocks
 	private readonly Profile _profile;
 	private readonly Post _post;
 	private readonly FakeProfile _fakeProfile;
+	private readonly FakeProfile _fakeActor;
+	private readonly Profile _actor;
 
 	public PostServiceTests(ITestOutputHelper output)
 	{
@@ -25,7 +30,9 @@ public class PostServiceTests : WithMocks
 			DataAdapterMock.Object, PostEventServiceMock.Object, ProfileEventServiceMock.Object,
 			ApCrawlerSchedulerMock.Object, [new MockHtmlSanitizer(), new MockTextSanitizer()]);
 		_fakeProfile = new FakeProfile("letterbook.example");
+		_fakeActor = new FakeProfile("peer.example");
 		_profile = _fakeProfile.Generate();
+		_actor = _fakeActor.Generate();
 		_post = new FakePost(_profile);
 	}
 

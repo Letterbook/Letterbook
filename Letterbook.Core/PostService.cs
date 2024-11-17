@@ -292,12 +292,12 @@ public class PostService : IAuthzPostService, IPostService
 		{
 			foreach (var post in posts)
 			{
-				await _crawler.CrawlPost(default, post.FediId);
+				await _crawler.CrawlPost(default, post.FediId, 1);
 			}
 
 			return [];
 		}
-		if(await _data.LookupProfile(new Uri(actorId)) is not { } actor)
+		if(await _data.SingleProfile(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
 		{
 			await _crawler.CrawlProfile(default, new Uri(actorId));
 			foreach (var post in posts)
@@ -319,6 +319,7 @@ public class PostService : IAuthzPostService, IPostService
 			.DistinctBy(p => p.FediId)
 			.ToList();
 		var knownProfiles = await ConvergeProfiles(profiles);
+
 		var pendingPosts = posts.Where(p => !knownPosts.ContainsKey(p.FediId))
 			.DistinctBy(p => p.FediId)
 			.ToDictionary(post => post.FediId);
@@ -352,9 +353,15 @@ public class PostService : IAuthzPostService, IPostService
 		foreach (var profile in profiles.Where(p => !knownProfiles.ContainsKey(p.FediId)))
 		{
 			await _profileEvents.Created(profile);
+			await _crawler.CrawlProfile(default, profile.FediId);
 		}
 
-		return pendingPosts.Values.Concat(knownPosts.Values);
+		foreach (var referencedPost in pendingPosts.Select(p => p.Value.InReplyTo).WhereNotNull().Where(p => !knownPosts.ContainsKey(p.FediId)))
+		{
+			await _crawler.CrawlPost(default, referencedPost.FediId);
+		}
+
+		return pendingPosts.Values.Concat(knownPosts.Values.Where(p => posts.Contains(p)));
 	}
 
 	public async Task<Post?> ReceiveUpdate(Post post)
@@ -426,7 +433,8 @@ public class PostService : IAuthzPostService, IPostService
 	private async Task<Dictionary<Uri, Post>> ConvergePosts(IEnumerable<Post> posts)
 	{
 		var postIds = posts.Select(p => p.FediId)
-			.Concat(posts.Select(p => p.InReplyTo).WhereNotNull().Select(p => p.FediId));
+			.Concat(posts.Select(p => p.InReplyTo).WhereNotNull().Select(p => p.FediId))
+			.ToList();
 		return await _data.ListPosts(postIds)
 			.Include(post => post.Thread)
 			.ToDictionaryAsync(p => p.FediId);
@@ -439,14 +447,7 @@ public class PostService : IAuthzPostService, IPostService
 	/// <returns></returns>
 	private async Task<Dictionary<Uri, Profile>> ConvergeProfiles(IEnumerable<Profile> profiles)
 	{
-		var pendingProfiles = profiles.ToDictionary(p => p.FediId);
-		var knownProfiles = await _data.ListProfiles(pendingProfiles.Keys).ToListAsync();
-		foreach (var profile in knownProfiles)
-		{
-			pendingProfiles[profile.FediId] = profile;
-		}
-
-		return pendingProfiles;
+		return await _data.ListProfiles(profiles.Select(p => p.FediId)).ToDictionaryAsync(p => p.FediId);
 	}
 
 	/// <summary>
