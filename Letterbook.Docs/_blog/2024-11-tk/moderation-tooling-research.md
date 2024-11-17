@@ -87,7 +87,7 @@ Different server instances also have different rules, but these are expressed as
 
 Legal issues can extend into published resources such as blocklists; one of the reasons why it would be useful to have labels & notes on blocklist entries even though you might have public-facing information in #fediblock or elsewhere is it gets into libel & liability. If you're blocking a server for rampant illegal content such as CSAM, saying so publicly exposes you to legal action. While you might be able to prove this in court, doing so is a drain on time, money, and emotions, so it's easier to keep that note private.
 
-Finally, most moderators are not experts in their softare. Moderation in the fediverse is largely a volunteer effort, and training tends to be on the job. Communicating with a moderator on another instance about how to get at certain information poses challenges due to differences in how server software's interfaces work. If you're trying to help another moderator out, you can't assume they're using the same software as you, or even the same *version* of softare as you. Their interface might be different, and this poses a communication challenge.
+Finally, most moderators are volunteers. They tend to get little or no training, and have limited time available. They can't be expected to become experts in their software. Getting assistance from peers is complicated by differences in how server software's interfaces work. If you're trying to help another moderator out, you can't assume they're using the same software as you, or even the same *version* of softare as you. Their interface might be different, and this poses a communication challenge.
 
 # Obstacles
 
