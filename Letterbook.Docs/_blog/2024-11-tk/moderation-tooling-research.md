@@ -91,7 +91,7 @@ Finally, most moderators are volunteers. They tend to get little or no training,
 
 # Obstacles
 
-There are a handful of obstacles to improving moderation tooling, but the biggest one is getting people with influence to care. Large technology projects require collaboration and vision. In private companies, this typically rests in the hands of someone with a "Product" title, who acts as the arbiter of values that go into making the software what it is. Open source projects tend to instead have figureheads who spearheaded a project's technical foundation and steer the project's direction and values as it gains in popularity.
+There are a handful of obstacles to improving moderation tooling, but the biggest one is getting people with influence to prioritize moderation tools. Large technology projects require collaboration and vision. In private companies, this typically rests in the hands of someone with a "Product" title, who acts as the arbiter of values that go into making the software what it is. Open source projects tend to instead have core maintiners who spearheaded a project's technical foundation and steer the project's direction and values as it gains in popularity.
 
 In talking with people doing moderation work, I got an overwhelming sense of frustration that people with influence over the software and protocols haven't prioritized this work. If we are to provide a safe federated space equivalent to popular commercial platforms, we need the people involved in both the protocol and server software to pay attention.
 
