@@ -23,13 +23,13 @@ public class PostService : IAuthzPostService, IPostService
 	private readonly IDataAdapter _data;
 	private readonly IPostEventPublisher _postEvents;
 	private readonly IProfileEventPublisher _profileEvents;
-	private readonly IApCrawlerScheduler _crawler;
+	private readonly IApCrawlScheduler _crawler;
 	private readonly IEnumerable<IContentSanitizer> _sanitizers;
 	private IEnumerable<Claim> _claims = null!;
 	private readonly Instrumentation _instrument;
 
 	public PostService(ILogger<PostService> logger, IOptions<CoreOptions> options, Instrumentation instrumentation, IDataAdapter data,
-		IPostEventPublisher postEvents, IProfileEventPublisher profileEvents, IApCrawlerScheduler crawler,
+		IPostEventPublisher postEvents, IProfileEventPublisher profileEvents, IApCrawlScheduler crawler,
 		IEnumerable<IContentSanitizer> sanitizers)
 	{
 		_logger = logger;

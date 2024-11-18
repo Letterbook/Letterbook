@@ -38,12 +38,12 @@ public class ActorController : ControllerBase
 	private readonly ILogger<ActorController> _logger;
 	private readonly IProfileService _profileService;
 	private readonly IPostService _postService;
-	private readonly IApCrawlerScheduler _apCrawler;
+	private readonly IApCrawlScheduler _apCrawler;
 	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Profile);
 	private static readonly IMapper Mapper = new Mapper(AstMapper.Default);
 
 	public ActorController(ILogger<ActorController> logger,
-		IProfileService profileService, IPostService postService, IApCrawlerScheduler apCrawler)
+		IProfileService profileService, IPostService postService, IApCrawlScheduler apCrawler)
 	{
 		_logger = logger;
 		_profileService = profileService;

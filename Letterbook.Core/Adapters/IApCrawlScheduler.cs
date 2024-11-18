@@ -5,7 +5,7 @@ namespace Letterbook.Core.Adapters;
 /// <summary>
 /// Schedule AP objects to be crawled and processed
 /// </summary>
-public interface IApCrawlerScheduler
+public interface IApCrawlScheduler
 {
 	/// <summary>
 	/// Crawl a post-like object
