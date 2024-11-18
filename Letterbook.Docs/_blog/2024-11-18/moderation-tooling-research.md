@@ -49,7 +49,7 @@ There's a lot of places where simple safeguards (are you sure? type the profile 
 
 ## Community Awareness
 
-Adjacent but related to moderation, many we talked to complained about operational visibility, dashboards, and getting a sense of "what's happening in my instance?" People who've run public-facing products at scale know how important this is, but I got the overwhelming sense that fedi server software could use improvement in this realm as well. 
+Adjacent but related to moderation, many we talked to wanted to get a better sense of "what's happening with the accounts in my instance?" People who've run public-facing products at scale know how important this is, but I got the overwhelming sense that fedi server software could use improvement in this realm as well. 
 
 The main complaint is that surfaced metrics often aren't _actionable_; for example, showing a number or chart of "new account signups" might result in an "oh, neat" or "huh, ok" response, but there's no way to dig deeper into this data. Who are these new signups? Is there any trend in weird domain names or IP blocks that the administrator should know about? How many of these accounts fill out any parts of their profile, make posts, or follow patterns indicative of spam, abuse, sockpuppeting, or becoming a sleeper account for a future harassment campaign? 
 
