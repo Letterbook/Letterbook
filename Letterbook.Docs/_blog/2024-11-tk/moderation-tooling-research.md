@@ -47,7 +47,7 @@ A common theme in my work of this sort is [poka-yoke](https://en.wikipedia.org/w
 
 There's a lot of places where simple safeguards (are you sure? type the profile name to suspend) would go a long way towards preventing mistakes, and others where notes about special cases (this user is a frequent target of harassment, be super careful) would go further.
 
-## Operational Visibility
+## Community Awareness
 
 Adjacent but related to moderation, many we talked to complained about operational visibility, dashboards, and getting a sense of "what's happening in my instance?" People who've run public-facing products at scale know how important this is, but I got the overwhelming sense that fedi server software could use improvement in this realm as well. 
 
@@ -111,7 +111,7 @@ Based on these conversations, I can make a handful of recommendations to develop
 
   Notes can be aggregatable text fields similar to comments, about some ... thing, such as a post, a flag activity, a user account, a block action, a blocklist entry, etc. It should be easy to get notes for things related to a thing you're looking at.
 
-  Labels are something more than hashtags: Where a hashtag might be `#status/investigating`, a label could be `status: investigating`, which then allows one to more easily enumerate (and limit) the `status` types, and find things by those. By far and away this is the most common thing in my notes from these conversations, as I think it could be used for a wide variety of cases in helping to keep context both across time and across the aggregate of what's happening now.
+  Labels are something more than hashtags: Where a hashtag might be `#status/investigating`, a label could be `status: investigating`, which then allows one to more easily enumerate (and limit) the `status` types, and find things by those. By far and away this is the most common thing in my notes from these conversations, as I think it could be used for a wide variety of cases in helping to keep context both across time and across the aggregate of what's happening now. 
 
 4. Building Query/Reporting tools into server software can go a long way towards helping proactive moderation; but also building out resources to share and translate these queries across server software. These queries should help with spotting patterns: What are the common email domains that signed up recently? What instances are submitting the most reports? What _types_ of reports are coming in?
 
@@ -123,8 +123,10 @@ Based on these conversations, I can make a handful of recommendations to develop
 
 7. Work to develop suggestions for data retention policies that support both trust & safety needs as well as legal needs, and work to help people understand what good defaults server software should adopt. This is outside the expertize of almost everyone working in moderation.
 
-8. I think it would be useful to have a commonly understood set of things moderators need to do during the course of their work, and HOWTO-style guides for accomplishing those for different server softwares.
+8. In a broader sense, I think it would be useful to have a commonly understood set of things moderators need to do during the course of their work, a sort of shared training guide, and HOWTO-style guides for accomplishing those for different server softwares. 
 
 # Conclusion
+
+One of our biggest impressions from these interviews is that the people doing this work really care about their communities. The work of trust and safety is never-ending, and for people doing it on a volunteer basis it seems to be a labor of love. 
 
 From here, I'm moving into exploring ideas for interfaces for managing federation and dealing with reports. I don't work with static mockup tools such as Figma -- for this type of work I prefer to create working prototype web pages, often locally-runnable using fixture data generated to match a variety of scenarios that came about during the initial research discussions. This approach tends to involve more work but I've seen it repeatedly short-circuit assumptions and miscommunications people have when looking at static images. I have a few "challenging moderation scenarios" in mind to replicate, but I'm still looking for a few more. If you've done moderation work and think I've missed something, please don't hesitate to reach out!
