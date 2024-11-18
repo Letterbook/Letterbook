@@ -69,11 +69,11 @@ A common frustration and major use-case for private wikis is for coordinating ac
 
 ## Within Your Instance -- Automation & Shared Resources
 
-Also to my surprise, the people we spoke to were enthusiastic about using automated tooling to support a proactive approach to moderation, especially in how it can offset the human cost of performing this work, citing  examples such as [Akkoma's Message Rewriting Facility](https://docs.akkoma.dev/stable/configuration/mrf/), which allows instance admins to run incoming messages through both arbitrary & predefined Elixir code, tools which automatically scan incoming images for CSAM, and a love for Discord's Bots.
+Also to my surprise, the people we spoke to were enthusiastic about using automated tooling to support a proactive approach to moderation, especially in how it can offset the human cost of performing this work, citing  examples such as [Akkoma's Message Rewriting Facility](https://docs.akkoma.dev/stable/configuration/mrf/), which allows instance admins to run incoming messages through both arbitrary & predefined Elixir code, tools which [automatically classify incoming content](https://about.iftas.org/activities/moderation-as-a-service/content-classification-service/), and a love for Discord's Bots.
 
 The biggest hesitation with introducing automated tooling is developing trust with third party code and integrating community resources like blocklists, both from a "is this code trustworthy?" standpoint as well as "will this do what I think it's going to do?"
 
-Some moderators use external tooling for automated reporting of the sorts I mentioned previously about operational visibility, but this typically requires great technical knowledge to setup the services and develop the right queries.
+Some moderators use external tooling for automated reporting of the sorts I mentioned previously about community awareness, but this typically requires great technical knowledge to setup the services and develop the right queries.
 
 ## Coordination Between Instances
 
@@ -95,9 +95,9 @@ There are a handful of obstacles to improving moderation tooling, but the bigges
 
 In talking with people doing moderation work, I got an overwhelming sense of frustration that people with influence over the software and protocols haven't prioritized this work. If we are to provide a safe federated space equivalent to popular commercial platforms, we need the people involved in both the protocol and server software to pay attention.
 
-Improving the protocol is the more important challenge -- the fediverse is not *just* Mastodon, and ultimately any initiative to improve trust and safety between server instances will require improvements and clarifications to the protocol so the plethora of server softwares people use can continue to interoperate. This sort of collaboration and consensus-building takes time and a variety of perspectives.
+Improving the protocol is a pressing challenge -- the fediverse is not *just* Mastodon, and ultimately any initiative to improve trust and safety between server instances will require improvements and clarifications to the protocol so the plethora of server softwares people use can continue to interoperate. This sort of collaboration and consensus-building takes time and a variety of perspectives.
 
-I was also surprised to find that data retention policy poses a set of obstacles to moderation work in the fediverse. Federating posts over ActivityPub is, to some degree, a data processing agreement. Retention is a very delicate and thorny issue with a lot of legal, social, and ethical consequences; one that many volunteer or amateur administrators are not ready to deal with. The GDPR is the elephant in the room, but it can also provide some guidance on good defaults for server software to set for its retention policies.
+I was also surprised to find that data retention policy poses a set of obstacles to moderation work in the fediverse. Federating posts over ActivityPub is, to some degree, a data processing arrangement, but without any kind of formal agreements in place. Retention is a very delicate and thorny issue with a lot of legal, social, and ethical consequences; one that many volunteer or amateur administrators are not ready to deal with. The GDPR is the elephant in the room, but it can also provide some guidance on good defaults for server software to set for its retention policies.
 
 # Recommendations
 
@@ -107,23 +107,25 @@ Based on these conversations, I can make a handful of recommendations to develop
 
 2. Get involved in defining qualitative community labeling efforts. Commonly understood qualitative, semantic codes for specific rules, offenses, governance methods, and other things can go a long way in reducing the human cost of understanding how servers align in their philosophies and why a post might have been flagged.
 
-3. Having the ability to add notes and labels for *everything* (even things you don't think need them) and the ability to query those, would go a long way in helping both keep context across time into the future and provide ways to understand trends for what's happening now.
+3. It would be useful to have a library of reference samples for the kinds of messages that software will send and expect to receive. This would help give implementors examples to work against, and further conversation about protocol issues by providing concrete examples to talk about.
+
+4. Having the ability to add notes and labels for *everything* (even things you don't think need them) and the ability to query those, would go a long way in helping both keep context across time into the future and provide ways to understand trends for what's happening now.
 
   Notes can be aggregatable text fields similar to comments, about some ... thing, such as a post, a flag activity, a user account, a block action, a blocklist entry, etc. It should be easy to get notes for things related to a thing you're looking at.
 
   Labels are something more than hashtags: Where a hashtag might be `#status/investigating`, a label could be `status: investigating`, which then allows one to more easily enumerate (and limit) the `status` types, and find things by those. By far and away this is the most common thing in my notes from these conversations, as I think it could be used for a wide variety of cases in helping to keep context both across time and across the aggregate of what's happening now. 
 
-4. Building Query/Reporting tools into server software can go a long way towards helping proactive moderation; but also building out resources to share and translate these queries across server software. These queries should help with spotting patterns: What are the common email domains that signed up recently? What instances are submitting the most reports? What _types_ of reports are coming in?
+5. Building Query/Reporting tools into server software can go a long way towards helping proactive moderation; but also building out resources to share and translate these queries across server software. These queries should help with spotting patterns: What are the common email domains that signed up recently? What instances are submitting the most reports? What _types_ of reports are coming in?
 
-5. Think more about surrounding context in your admin & moderation interfaces. This builds on Notes/Labels and Query/Reporting tools previously, but also requires getting out of the "this screen shows a database entry" frame-of-mind that often pervades webapp development. Consider the questions someone might ask, and make them easier to answer, with fewer steps to answer them. Let's say you're looking at a report of flagged content. What sorts of reports come in against this account? What sorts of reports come in from the submitting user, or remote server? Gathering all this information into one place, and sharing it for discussion, is a frustrating and difficult aspect of coordinating with other moderators.
+6. Think more about surrounding context in your admin & moderation interfaces. This builds on Notes/Labels and Query/Reporting tools previously, but also requires getting out of the "this screen shows a database entry" frame-of-mind that often pervades webapp development. Consider the questions someone might ask, and make them easier to answer, with fewer steps to answer them. Let's say you're looking at a report of flagged content. What sorts of reports come in against this account? What sorts of reports come in from the submitting user, or remote server? Gathering all this information into one place, and sharing it for discussion, is a frustrating and difficult aspect of coordinating with other moderators.
 
-6. Think about what shareable automation tooling would look like. There are very few places where "working code wins arguments" should apply, and this is very much NOT one of them. There are a *lot* of considerations, but I think the most important ones are:
+7. Think about what shareable automation tooling would look like. There are very few places where "working code wins arguments" should apply, and this is very much NOT one of them. There are a *lot* of considerations, but I think the most important ones are:
   - How can I know that this plugin isn't going to do anything nefarious? Maybe a plugin needs network access to check an image fingerprint against known illegal content list. Maybe a plugin needs to read everything by a specific user. I think a capability-based permission system makes sense for this sort of thing.
   - How can I know that this plugin is going to do what I think it's going to do? Look at interfaces for creating email fitlers, across more clients than just the one you regularly use -- After setting some sorts of rules for selecting messages to act on, you're typically offered a preview of messages you currently have which would be selected by these rules. This helps you know that your selection logic is correct. A plugin meant to help reject incoming spam messages from other instances should offer a regression preview to illustrate how it would have handled previous messages, to provide confidence that it will behave the way the admin expects it to behave.
 
-7. Work to develop suggestions for data retention policies that support both trust & safety needs as well as legal needs, and work to help people understand what good defaults server software should adopt. This is outside the expertize of almost everyone working in moderation.
+8. Work to develop suggestions for data retention policies that support both trust & safety needs as well as legal needs, and work to help people understand what good defaults server software should adopt. This is outside the expertize of almost everyone working in moderation.
 
-8. In a broader sense, I think it would be useful to have a commonly understood set of things moderators need to do during the course of their work, a sort of shared training guide, and HOWTO-style guides for accomplishing those for different server softwares. 
+9. In a broader sense, I think it would be useful to have a commonly understood set of things moderators need to do during the course of their work, a sort of shared training guide, and HOWTO-style guides for accomplishing those for different server softwares. 
 
 # Conclusion
 
