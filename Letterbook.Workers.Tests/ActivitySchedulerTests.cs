@@ -12,18 +12,18 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Workers.Tests;
 
-public class ActivityPublisherTests : WithMockBus<IActivityMessagePublisher, ActivityMessagePublisher>
+public class ActivitySchedulerTests : WithMockBus<IActivityScheduler, ActivityScheduler>
 {
-	private readonly IActivityMessagePublisher _publisher;
+	private readonly IActivityScheduler _publisher;
 	private readonly DeliveryWorker _consumer;
 	private readonly Profile _actor;
 	private readonly Profile _target;
 
-	public ActivityPublisherTests(ITestOutputHelper output)
+	public ActivitySchedulerTests(ITestOutputHelper output)
 	{
 		Services.AddScoped<IActivityPubDocument, Document>();
 
-		_publisher = Provider.GetRequiredService<IActivityMessagePublisher>();
+		_publisher = Provider.GetRequiredService<IActivityScheduler>();
 		_consumer = Provider.GetRequiredService<DeliveryWorker>();
 
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");

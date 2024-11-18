@@ -25,7 +25,7 @@ public class ActorControllerTests : WithMockContext
 	{
 		_output = output;
 		_controller = new ActorController(CoreOptionsMock, Mock.Of<ILogger<ActorController>>(),
-			ProfileServiceMock.Object, Mock.Of<IActivityMessagePublisher>(), new Document(JsonLdSerializerMock.Object))
+			ProfileServiceMock.Object, Mock.Of<IActivityScheduler>(), new Document(JsonLdSerializerMock.Object))
 		{
 			ControllerContext = new ControllerContext()
 			{

@@ -23,11 +23,11 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private IProfileEventPublisher _profileEvents;
 	private readonly IActivityPubClient _client;
 	private readonly IHostSigningKeyProvider _hostSigningKeyProvider;
-	private readonly IActivityMessagePublisher _activity;
+	private readonly IActivityScheduler _activity;
 
 	public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options, Instrumentation instrumentation,
 		IDataAdapter profiles, IProfileEventPublisher profileEvents, IActivityPubClient client,
-		IHostSigningKeyProvider hostSigningKeyProvider, IActivityMessagePublisher activity)
+		IHostSigningKeyProvider hostSigningKeyProvider, IActivityScheduler activity)
 	{
 		_logger = logger;
 		_instrumentation = instrumentation;

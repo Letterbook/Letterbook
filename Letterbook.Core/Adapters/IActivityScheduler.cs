@@ -9,7 +9,7 @@ namespace Letterbook.Core.Adapters;
 /// This allows ActivityPub Http requests (and responses) to be processed outside the current Asp action, for example.
 /// This also enables messages to easily be retried on certain kinds of delivery failure.
 /// </summary>
-public interface IActivityMessagePublisher
+public interface IActivityScheduler
 {
 	/// <summary>
 	/// Deliver an arbitrary AP document to the inbox
