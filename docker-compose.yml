@@ -30,7 +30,8 @@ services:
       - "5432:5432"
     volumes:
       - letterbook_db_data:/var/lib/postgresql/data
-      - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf:z
+      - ./volumes/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf:z
     restart: always
 
   # Optional debug tools
@@ -59,7 +60,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - "./Letterbook.Dashboards/Grafana/provisioning:/etc/grafana/provisioning"
+      - "./Letterbook.Dashboards/Grafana/provisioning:/etc/grafana/provisioning:z"
     restart: unless-stopped
     
   prometheus:
@@ -68,7 +69,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - "./Letterbook.Dashboards/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "./Letterbook.Dashboards/Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:z"
     restart: unless-stopped
     
   tempo:
@@ -78,7 +79,7 @@ services:
     depends_on:
       - tempo-init
     volumes:
-      - ./Letterbook.Dashboards/Tempo/tempo.yaml:/etc/tempo.yaml
+      - ./Letterbook.Dashboards/Tempo/tempo.yaml:/etc/tempo.yaml:z
       - letterbook_tempo_data:/tmp/tempo
     ports:
       - "9095:9095" # tempo grpc
@@ -105,7 +106,7 @@ services:
     ports:
       - 9187:9187
     volumes:
-      - "./Letterbook.Dashboards/Postgres/Prometheus/postgres_exporter.yml:/postgres_exporter.yml"
+      - "./Letterbook.Dashboards/Postgres/Prometheus/postgres_exporter.yml:/postgres_exporter.yml:z"
     restart: unless-stopped
 
 volumes:
