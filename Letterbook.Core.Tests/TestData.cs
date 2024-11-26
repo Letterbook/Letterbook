@@ -11,4 +11,9 @@ public static class TestData
 	{
 		return new FileStream(Path.Join(DataDir, fileName), FileMode.Open, FileAccess.Read, FileShare.Read);
 	}
+
+	public static string ReadAllText(string filename)
+	{
+		return File.ReadAllText(Path.Join(DataDir, filename));
+	}
 }

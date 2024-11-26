@@ -218,8 +218,9 @@ public static class AstMapper
 		// cfg.CreateMap<NoteObject, Post>(MemberList.Destination)
 		cfg.CreateMap<ASObject, Post>(MemberList.Destination)
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
-			.ForMember(dest => dest.Authority, opt => opt.Ignore())
-			.ForMember(dest => dest.Hostname, opt => opt.Ignore())
+			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
+			.ForMember(dest => dest.Authority, opt => opt.MapFrom((_, post) => post.FediId.GetAuthority()))
+			.ForMember(dest => dest.Hostname, opt => opt.MapFrom((_, post) => post.FediId.Host))
 			.ForMember(dest => dest.Contents,
 				opt => opt.MapFrom<ContentResolver, NaturalLanguageString?>(src => src.Content))
 			.ForMember(dest => dest.Creators,
@@ -248,7 +249,6 @@ public static class AstMapper
 				opt => opt.MapFrom<ProfileResolver, Linkable<ASCollection>?>(src => src.Shares))
 			.ForMember(dest => dest.Shares, opt => opt.MapFrom(src => src.Shares))
 			.ForMember(dest => dest.ContentRootIdUri, opt => opt.Ignore())
-			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
 			.ForMember(dest => dest.Thread,
 				opt => opt.MapFrom<PostContextConverter, LinkableList<ASObject>?>(src => src.InReplyTo))
 			.ForMember(dest => dest.RepliesCollection,

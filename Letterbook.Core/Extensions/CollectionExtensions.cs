@@ -46,6 +46,12 @@ public static class CollectionExtensions
 		return result;
 	}
 
+	public static ICollection<T> ReplaceFrom<T>(this ICollection<T> source, ICollection<T> from, IEqualityComparer<T> compare)
+	{
+		var result = from.Intersect(source, compare).Union(source, compare);
+		return result.ToHashSet();
+	}
+
 	public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) where T : class =>
 		source.Where<T?>(TestNotNull)!;
 

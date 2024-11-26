@@ -38,4 +38,19 @@
       <ProjectReference Include="..\Letterbook\Letterbook.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Data\mastodon_post.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Data\mastodon_post_delete.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Data\mastodon_post_reply.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Data\mastodon_post_update.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

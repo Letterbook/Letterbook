@@ -319,6 +319,7 @@ public class PostService : IAuthzPostService, IPostService
 			.DistinctBy(p => p.FediId)
 			.ToList();
 		var knownProfiles = await ConvergeProfiles(profiles);
+		var knownAudience = await ConvergeAudience(posts);
 
 		var pendingPosts = posts.Where(p => !knownPosts.ContainsKey(p.FediId))
 			.DistinctBy(p => p.FediId)
@@ -331,7 +332,7 @@ public class PostService : IAuthzPostService, IPostService
 			else if (post.InReplyTo != null && pendingPosts.TryGetValue(post.InReplyTo.FediId, out value))
 				post.InReplyTo = value;
 
-			post.Creators = post.Creators.ReplaceFrom(knownProfiles.Values);
+			post.Creators = post.Creators.ReplaceFrom(knownProfiles.Values, FediIdCompare.Instance);
 			foreach (var mention in post.AddressedTo)
 			{
 				if (knownProfiles.TryGetValue(mention.Subject.FediId, out var mentioned))
@@ -341,7 +342,12 @@ public class PostService : IAuthzPostService, IPostService
 			SelectThreadHeuristically(post, threads, knownPosts);
 		}
 
-		_data.AddRange(pendingPosts.Values);
+		foreach (var pendingPost in pendingPosts.Values)
+		{
+			_data.Add(pendingPost);
+			if (pendingPost.Audience.Contains(Audience.Public))
+				_data.Update(pendingPost.Audience.First(a => a == Audience.Public));
+		}
 		await _data.Commit();
 
 		foreach (var post in pendingPosts.Values)
@@ -472,6 +478,39 @@ public class PostService : IAuthzPostService, IPostService
 		}
 
 		return threads;
+	}
+
+	private async Task<Dictionary<Uri, Audience>> ConvergeAudience(IEnumerable<Post> posts)
+	{
+		var audienceIds = posts.SelectMany(p => p.Audience).Select(a => a.FediId)
+			.Concat(posts.SelectMany(p => p.AddressedTo).Select(m => m.Subject.FediId));
+		var knownAudience = await _data.QueryAudience()
+			.Where(a => audienceIds.Contains(a.FediId))
+			.Distinct()
+			.ToDictionaryAsync(a => a.FediId);
+		foreach (var post in posts)
+		{
+			FixupAudience(post, knownAudience);
+		}
+
+
+		return knownAudience;
+	}
+
+	/// <summary>
+	/// Find audience refs in mentions and move them to Audience where they belong
+	/// </summary>
+	/// <param name="post"></param>
+	/// <exception cref="NotImplementedException"></exception>
+	private void FixupAudience(Post post, Dictionary<Uri, Audience> audiences)
+	{
+		var found = post.AddressedTo.Where(m => audiences.ContainsKey(m.Subject.FediId)).ToList();
+		post.AddressedTo = post.AddressedTo.Where(m => !found.Contains(m)).ToHashSet();
+		post.Audience = post.Audience.ReplaceFrom(audiences.Values);
+		foreach (var mentionedAudience in found)
+		{
+			post.Audience.Add(audiences[mentionedAudience.Subject.FediId]);
+		}
 	}
 
 	private static void SelectThreadHeuristically(Post post, Dictionary<Uri, ThreadContext> threads,
