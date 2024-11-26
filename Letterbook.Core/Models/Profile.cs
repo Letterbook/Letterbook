@@ -204,7 +204,16 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		{
 			Id = new(Uuid7.NewUuid7()),
 			FediId = id,
-			Authority = id.GetAuthority()
+			Authority = id.GetAuthority(),
+			Handle = "",
+			DisplayName = "",
+			Description = "",
+			// TODO: this is a hack, not all profiles will have AP collections
+			// Need to come up with non-null zero values for these
+			Inbox = id,
+			Outbox = id,
+			Followers = id,
+			Following = id
 		};
 	}
 
