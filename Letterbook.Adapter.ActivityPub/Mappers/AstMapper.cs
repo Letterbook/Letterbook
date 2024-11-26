@@ -233,14 +233,7 @@ public static class AstMapper
 			.ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => src.Updated))
 			.ForMember(dest => dest.LastSeenDate, opt => opt.Ignore())
 			.ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
-			.ForMember(dest => dest.AddressedTo,
-				opt => opt.MapFrom<MentionsResolver<To>, LinkableList<ASObject>>(src => src.To))
-			.ForMember(dest => dest.AddressedTo,
-				opt => opt.MapFrom<MentionsResolver<Cc>, LinkableList<ASObject>>(src => src.CC))
-			.ForMember(dest => dest.AddressedTo,
-				opt => opt.MapFrom<MentionsResolver<BTo>, LinkableList<ASObject>>(src => src.BTo))
-			.ForMember(dest => dest.AddressedTo,
-				opt => opt.MapFrom<MentionsResolver<Bcc>, LinkableList<ASObject>>(src => src.BCC))
+			.ForMember(dest => dest.AddressedTo, opt => opt.ConvertUsing<MentionsConverter, ASObject>(src => src))
 			.ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Generator))
 			.ForMember(dest => dest.LikesCollection,
 				opt => opt.MapFrom<ProfileResolver, Linkable<ASCollection>?>(src => src.Likes))
@@ -310,6 +303,32 @@ public static class AstMapper
 		cfg.CreateMap<DateTime, DateTimeOffset>(MemberList.None);
 		cfg.CreateMap<DateTimeOffset, DateTime>(MemberList.None)
 			.ConstructUsing(dto => dto.DateTime);
+	}
+}
+
+internal class MentionsConverter : IValueConverter<ASObject, ICollection<Mention>>
+{
+	public ICollection<Mention> Convert(ASObject sourceMember, ResolutionContext context)
+	{
+		var result = new HashSet<Mention>();
+		foreach (var l in sourceMember.To)
+		{
+			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.To));
+		}
+		foreach (var l in sourceMember.BTo)
+		{
+			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Bto));
+		}
+		foreach (var l in sourceMember.CC)
+		{
+			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Cc));
+		}
+		foreach (var l in sourceMember.BCC)
+		{
+			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Bcc));
+		}
+
+		return result;
 	}
 }
 
@@ -554,49 +573,6 @@ internal class
 		post.AddContent(content);
 
 		return post.Contents;
-	}
-}
-
-internal interface IMentionDiscriminator
-{
-	public MentionVisibility Value();
-}
-
-internal class To : IMentionDiscriminator
-{
-	public MentionVisibility Value() => MentionVisibility.To;
-}
-
-internal class Cc : IMentionDiscriminator
-{
-	public MentionVisibility Value() => MentionVisibility.Cc;
-}
-
-internal class BTo : IMentionDiscriminator
-{
-	public MentionVisibility Value() => MentionVisibility.Bto;
-}
-
-internal class Bcc : IMentionDiscriminator
-{
-	public MentionVisibility Value() => MentionVisibility.Bcc;
-}
-
-[UsedImplicitly]
-internal class MentionsResolver<T> : IMemberValueResolver<ASObject, Post, LinkableList<ASObject>, ICollection<Mention>>
-	where T : class, IMentionDiscriminator
-{
-	private readonly T _visibility = Activator.CreateInstance<T>();
-
-	public ICollection<Mention> Resolve(ASObject src, Post dest, LinkableList<ASObject> srcMember,
-		ICollection<Mention> destMember, ResolutionContext context)
-	{
-		foreach (var id in srcMember.ValueItems.SelectIds().Concat(srcMember.LinkItems.SelectIds()))
-		{
-			destMember.Add(new Mention(Models.Profile.CreateEmpty(id), _visibility.Value()));
-		}
-
-		return destMember;
 	}
 }
 

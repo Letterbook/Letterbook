@@ -184,6 +184,46 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		}
 
 		[Fact]
+		public void CanMapNote_MentionTo()
+		{
+			_simpleNote.To.Add("https://example.com/actor");
+			var actual = AstMapper.Map<Models.Post>(_simpleNote);
+
+			Assert.Single(actual.AddressedTo);
+			Assert.Equal(Models.MentionVisibility.To, actual.AddressedTo.First().Visibility);
+		}
+
+		[Fact]
+		public void CanMapNote_MentionBto()
+		{
+			_simpleNote.BTo.Add("https://example.com/actor");
+			var actual = AstMapper.Map<Models.Post>(_simpleNote);
+
+			Assert.Single(actual.AddressedTo);
+			Assert.Equal(Models.MentionVisibility.Bto, actual.AddressedTo.First().Visibility);
+		}
+
+		[Fact]
+		public void CanMapNote_MentionBcc()
+		{
+			_simpleNote.BCC.Add("https://example.com/actor");
+			var actual = AstMapper.Map<Models.Post>(_simpleNote);
+
+			Assert.Single(actual.AddressedTo);
+			Assert.Equal(Models.MentionVisibility.Bcc, actual.AddressedTo.First().Visibility);
+		}
+
+		[Fact]
+		public void CanMapNote_MentionCc()
+		{
+			_simpleNote.CC.Add("https://example.com/actor");
+			var actual = AstMapper.Map<Models.Post>(_simpleNote);
+
+			Assert.Single(actual.AddressedTo);
+			Assert.Equal(Models.MentionVisibility.Cc, actual.AddressedTo.First().Visibility);
+		}
+
+		[Fact]
 		public void CanMapThreadFromContext()
 		{
 			var expected = "https://note.example/note/1/thread/";
