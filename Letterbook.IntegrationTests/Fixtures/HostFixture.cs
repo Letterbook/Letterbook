@@ -30,6 +30,14 @@ using RelationalContext = Letterbook.Adapter.Db.RelationalContext;
 
 namespace Letterbook.IntegrationTests.Fixtures;
 
+/// <summary>
+/// A Class fixture to manage the application under test, and its test data, with isolation per-test class
+/// </summary>
+/// <remarks>
+/// Reminder: do not dispose this object. It will be disposed by XUnit, after the test class has finished running.
+/// Disposing early will break other tests, because it will shut down the application.
+/// </remarks>
+/// <typeparam name="T"></typeparam>
 public class HostFixture<T> : WebApplicationFactory<Program>
 	where T : ITestSeed
 {
@@ -38,6 +46,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		if (disposing)
 		{
 			_scope.Dispose();
+			_context.Dispose();
+			_feedsContext.Dispose();
+			_spans.Dispose();
 		}
 
 		base.Dispose(disposing);

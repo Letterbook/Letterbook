@@ -18,10 +18,14 @@ public class SignatureAuthHandler : AuthenticationHandler<HttpSignatureAuthentic
 
 	protected override Task<AuthenticateResult> HandleAuthenticateAsync()
 	{
-		Context.Request.Headers.TryGetValue("Authorization", out var actorId);
+		if (!Context.Request.Headers.TryGetValue("Authorization", out var authz))
+			return Task.FromResult(AuthenticateResult.NoResult());
+		var parts = authz[0]!.Split(' ');
+		if (parts[0] != "Signed")
+			return Task.FromResult(AuthenticateResult.NoResult());
 		var claims = new[]
 		{
-			new Claim(ApplicationClaims.Actor, actorId[0]!.Split(' ')[1]!)
+			new Claim(ApplicationClaims.Actor, parts[1]!)
 		};
 		var identity = new ClaimsIdentity(claims, "Test");
 		var principal = new ClaimsPrincipal(identity);

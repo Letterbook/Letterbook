@@ -17,10 +17,18 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
 	protected override Task<AuthenticateResult> HandleAuthenticateAsync()
 	{
-		Context.Request.Headers.TryGetValue("Authorization", out var id);
+		if (!Context.Request.Headers.TryGetValue("Authorization", out var id))
+		{
+			return Task.FromResult(AuthenticateResult.NoResult());
+		}
+
+		var parts = id[0]!.Split(' ');
+		if (parts[0] != "Test")
+			return Task.FromResult(AuthenticateResult.NoResult());
+
 		var claims = new[]
 		{
-			new Claim(JwtRegisteredClaimNames.Sub, id[0]!.Split(' ')[1]),
+			new Claim(JwtRegisteredClaimNames.Sub, parts[1]),
 			new Claim(JwtRegisteredClaimNames.PreferredUsername, "Test user"),
 			new Claim(JwtRegisteredClaimNames.Email, "Test@example.com"),
 		};
