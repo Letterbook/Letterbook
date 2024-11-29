@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Npgsql;
 using OpenTelemetry.Trace;
@@ -292,6 +293,10 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		// P2 creates post 0, and draft 1
 		Posts.Add(Profiles[2], new FakePost(Profiles[2]).Generate(1));
 		Posts[Profiles[2]].Add(new FakePost(Profiles[2], draft: true).Generate());
+		// P8 creates post 0
+		Posts.Add(Profiles[8], new FakePost(Profiles[8]).Generate(1));
+		// P13 creates posts 0-1
+		Posts.Add(Profiles[13], new FakePost(Profiles[13]).Generate(2));
 
 		// Remote profiles
 		// P4 creates post 0, as reply to post P0:3

@@ -111,8 +111,14 @@ public class ActorController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status410Gone)]
 	[ProducesResponseType(StatusCodes.Status421MisdirectedRequest)]
 	[ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-	public async Task<IActionResult> PostInbox(ProfileId id, ASType activity)
+	public async Task<IActionResult> PostInbox(ProfileId id, ASType asType)
 	{
+		if (!asType.Is<ASActivity>(out var activity))
+			return BadRequest(new {Reason = "Input was not an Activity"});
+		if (activity.Actor.SingleOrDefault()?.TryGetId(out var actorId) != true)
+			return Unauthorized(new {Reason = "Could not determine the Actor"});
+		if (actorId!.ToString() != User.Claims.FirstOrDefault(c => c.Type == ApplicationClaims.Actor)?.Value)
+			return Unauthorized(new {Reason = "Activity was not signed by the Actor"});
 		try
 		{
 			if (activity.Is<AcceptActivity>(out var accept))
@@ -139,6 +145,10 @@ public class ActorController : ControllerBase
 			{
 				return await InboxCreate(id, create);
 			}
+
+			if (activity.Is<DeleteActivity>(out var delete))
+				return await InboxDelete(id, delete);
+
 
 			_logger.LogWarning("Ignored unknown activity {ActivityType}", activity.GetType());
 			_logger.LogDebug("Ignored unknown activity details {@Activity}", activity);
@@ -221,6 +231,24 @@ public class ActorController : ControllerBase
 		return true;
 	}
 
+	private async Task<IActionResult> InboxDelete(ProfileId id, DeleteActivity delete)
+	{
+		var items = delete.Object.Select(each =>
+		{
+			each.TryGetId(out var id);
+			return id;
+		}).WhereNotNull().ToList();
+		if (items.Count == 0)
+		{
+			_logger.LogInformation("Delete Activity does not appear to contain any records");
+			return BadRequest();
+		}
+		await _postService.As(User.Claims).ReceiveDelete(items);
+
+		return Accepted();
+		// var deletedProfiles = _profileService.As(User.Claims).ReceiveDelete(items);
+	}
+
 	private async Task<IActionResult> InboxCreate(ProfileId id, CreateActivity activity)
 	{
 		var posts = activity.Object.ValueItems.Select(Mapper.Map<Post>)
@@ -228,7 +256,7 @@ public class ActorController : ControllerBase
 			.ToList();
 		if (posts.Count == 0)
 		{
-			_logger.LogWarning("Create Activity does not appear to contain any posts");
+			_logger.LogInformation("Create Activity does not appear to contain any posts");
 			return BadRequest();
 		}
 		var created = await _postService.As(User.Claims).ReceiveCreate(posts);

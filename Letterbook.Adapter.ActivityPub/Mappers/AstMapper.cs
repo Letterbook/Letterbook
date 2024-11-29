@@ -540,10 +540,11 @@ internal class PostContextConverter : IMemberValueResolver<ASObject, Post, Linka
 		if (src.Context?.TryGetId(out var id) == true)
 			heuristic.Context = id;
 
+		var threadId = Extensions.NotNull(src.Replies?.Id, src.Context?.Value?.Id,
+			src.Context?.Link?.HRef.ToString(), src.Id);
 		return new ThreadContext
 		{
-			FediId = new Uri(Extensions.NotNull(src.Replies?.Id, src.Context?.Value?.Id,
-				src.Context?.Link?.HRef.ToString(), src.Id)),
+			FediId = new Uri(threadId),
 			RootId = post.Id,
 			Heuristics = heuristic
 		};

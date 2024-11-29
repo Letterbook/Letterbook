@@ -308,6 +308,7 @@ public class PostService : IAuthzPostService, IPostService
 		}
 
 		posts = posts.ToList();
+		// posts = posts.Concat(posts.Select(p => p.InReplyTo).WhereNotNull()).ToList();
 		// TODO: authorization
 
 		// lookup posts we already know about, because it's very likely for new posts to reference old objects
@@ -321,7 +322,8 @@ public class PostService : IAuthzPostService, IPostService
 		var knownProfiles = await ConvergeProfiles(profiles);
 		var knownAudience = await ConvergeAudience(posts);
 
-		var pendingPosts = posts.Where(p => !knownPosts.ContainsKey(p.FediId))
+		var pendingPosts = posts.Concat(posts.Select(p => p.InReplyTo).WhereNotNull())
+			.Where(p => !knownPosts.ContainsKey(p.FediId))
 			.DistinctBy(p => p.FediId)
 			.ToDictionary(post => post.FediId);
 
@@ -380,9 +382,29 @@ public class PostService : IAuthzPostService, IPostService
 		throw new NotImplementedException();
 	}
 
-	public async Task<Post> ReceiveDelete(Uri post)
+	public async Task<IEnumerable<Post>> ReceiveDelete(IEnumerable<Uri> items)
 	{
-		throw new NotImplementedException();
+		// If we don't recognize this actor then there's definitely nothing for us to do
+		if (_claims.FirstOrDefault(c => c.Type == ApplicationClaims.Actor)?.Value is not { } actorId)
+			return [];
+		if (await _data.SingleProfile(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
+			return [];
+
+		var posts = new List<Post>(items.Count());
+		await foreach (var post in _data.ListPosts(items).AsAsyncEnumerable())
+		{
+			post.DeletedDate ??= DateTimeOffset.UtcNow;
+			posts.Add(post);
+		}
+
+		await _data.Commit();
+
+		foreach (var post in posts)
+		{
+			await _postEvents.Deleted(post, (Uuid7)actor.Id, _claims);
+		}
+
+		return posts;
 	}
 
 	public async Task<Post> ReceiveAnnounce(Post post, Uri announcedBy)
@@ -463,9 +485,35 @@ public class PostService : IAuthzPostService, IPostService
 	/// <returns></returns>
 	private async Task<Dictionary<Uri, ThreadContext>> ConvergeThreads(IEnumerable<Post> posts)
 	{
-		var possibleThreadIds = posts.Select(p => p.Thread.Heuristics?.Root)
-			.Concat(posts.Select(p => p.Thread.Heuristics?.Context))
-			.Concat(posts.Select(p => p.Thread.Heuristics?.Target))
+		var relatives = posts.ToDictionary(p => p, p => new List<Post>());
+		foreach (var post in posts)
+		{
+			if (post.InReplyTo is not { } replyParent) continue;
+			if (!relatives.TryGetValue(replyParent, out var list))
+			{
+				list = [];
+				relatives[replyParent] = list;
+			}
+			list.Add(post);
+		}
+
+		foreach (var (post, list) in relatives)
+		{
+			// This can happen when the post was scaffolded from just a Uri, likely because it was referenced in a reply
+			// ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+			post.Thread ??= list.Select(p => p.Thread).WhereNotNull().FirstOrDefault() ?? new ThreadContext
+			{
+				RootId = post.Id,
+				FediId = post.FediId,
+			};
+		}
+
+		var _threads = posts.Select(p => p.Thread).ToList();
+		var possibleThreadIds = _threads.Select(t => t.Heuristics?.Root)
+			.Concat(_threads.Select(t => t.Heuristics?.Context))
+			.Concat(_threads.Select(t => t.Heuristics?.Target))
+			.Concat(_threads.Select(t => t.FediId))
+			.Distinct()
 			.WhereNotNull()
 			.ToArray();
 		var threads = posts.Select(p => p.Thread).Where(t => t.FediId != null)
@@ -523,7 +571,7 @@ public class PostService : IAuthzPostService, IPostService
 				post.Thread = thread;
 			return;
 		}
-		var threadId = threadHeuristics.Root ?? threadHeuristics.Context ?? threadHeuristics.Target ?? post.Replies;
+		var threadId = threadHeuristics.Root ?? threadHeuristics.Context ?? threadHeuristics.Target ?? post.Thread.FediId;
 
 		// TODO: reply controls here
 		if (threadId is { } cId && threads.TryGetValue(cId, out var c))

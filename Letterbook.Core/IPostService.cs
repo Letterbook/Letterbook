@@ -65,9 +65,9 @@ public interface IAuthzPostService
 	/// <summary>
 	/// Handle an inbound Delete activity on a post
 	/// </summary>
-	/// <param name="post"></param>
+	/// <param name="items"></param>
 	/// <returns></returns>
-	public Task<Post> ReceiveDelete(Uri post);
+	public Task<IEnumerable<Post>> ReceiveDelete(IEnumerable<Uri> items);
 
 	/// <summary>
 	/// Handle an inbound Announce activity on a post
