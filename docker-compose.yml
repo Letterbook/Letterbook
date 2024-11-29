@@ -17,7 +17,7 @@ services:
     restart: always
   letterbook_db:
     container_name: postgres
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     command:
       - postgres
       - -c
@@ -64,7 +64,7 @@ services:
     
   prometheus:
     container_name: prometheus
-    image: prom/prometheus:v2.55.1
+    image: prom/prometheus:v3.0.1
     ports:
       - "9090:9090"
     volumes:
