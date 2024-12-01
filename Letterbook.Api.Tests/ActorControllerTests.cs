@@ -1,8 +1,10 @@
+using System.Security.Claims;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Util;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Api.Controllers.ActivityPub;
+using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
@@ -28,6 +30,18 @@ public class ActorControllerTests : WithMockContext
 	public ActorControllerTests(ITestOutputHelper output)
 	{
 		_output = output;
+
+		_output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
+		_fakeProfile = new FakeProfile("letterbook.example");
+		_fakeRemoteProfile = new FakeProfile("peer.example");
+		_profile = _fakeProfile.Generate();
+		_remoteProfile = _fakeRemoteProfile.Generate();
+		_document = new Document(JsonLdSerializerMock.Object);
+		_fakePost = new FakePost(_profile);
+
+		// Claims.Add(new Claim(ApplicationClaims.Actor, _profile.FediId.ToString()));
+		var user = Auth(new Claim(ApplicationClaims.Actor, _remoteProfile.FediId.ToString()));
+
 		_controller = new ActorController(Mock.Of<ILogger<ActorController>>(), ProfileServiceMock.Object,
 			PostServiceMock.Object, ApCrawlerSchedulerMock.Object)
 		{
@@ -36,14 +50,6 @@ public class ActorControllerTests : WithMockContext
 				HttpContext = MockHttpContext.Object
 			}
 		};
-
-		_output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
-		_fakeProfile = new FakeProfile("http://letterbook.example");
-		_fakeRemoteProfile = new FakeProfile();
-		_profile = _fakeProfile.Generate();
-		_remoteProfile = _fakeRemoteProfile.Generate();
-		_document = new Document(JsonLdSerializerMock.Object);
-		_fakePost = new FakePost(_profile);
 	}
 
 	private FollowerRelation BuildRelation(FollowState state)
@@ -106,7 +112,7 @@ public class ActorControllerTests : WithMockContext
 	public async Task TestCreate()
 	{
 		var post = _fakePost.Generate();
-		var activity = _document.Create(_profile, _document.FromPost(post));
+		var activity = _document.Create(_remoteProfile, _document.FromPost(post));
 
 		PostServiceAuthMock.Setup(service => service.ReceiveCreate(It.IsAny<IEnumerable<Post>>()))
 			.ReturnsAsync([post]);
@@ -120,7 +126,7 @@ public class ActorControllerTests : WithMockContext
 	public async Task TestCreate_CrawlLinked()
 	{
 		var post = _fakePost.Generate();
-		var activity = _document.Create(_profile, _document.FromPost(post));
+		var activity = _document.Create(_remoteProfile, _document.FromPost(post));
 		activity.Object.Add(new ASLink(){HRef = "https://letterbook.example/post/1"});
 
 		PostServiceAuthMock.Setup(service => service.ReceiveCreate(It.IsAny<IEnumerable<Post>>()))
@@ -136,7 +142,7 @@ public class ActorControllerTests : WithMockContext
 	public async Task TestCreate_AcceptPartial()
 	{
 		var post = _fakePost.Generate();
-		var activity = _document.Create(_profile, _document.FromPost(post));
+		var activity = _document.Create(_remoteProfile, _document.FromPost(post));
 
 		PostServiceAuthMock.Setup(service => service.ReceiveCreate(It.IsAny<IEnumerable<Post>>()))
 			.ReturnsAsync([]);

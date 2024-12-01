@@ -8,23 +8,36 @@ namespace Letterbook.Api.Tests;
 
 public abstract class WithMockContext : WithMocks
 {
-	protected List<Claim> Claims;
-	protected ClaimsIdentity Identity;
-	protected ClaimsPrincipal ClaimsPrincipal;
-	protected Mock<IPrincipal> MockPrincipal;
+	// protected List<Claim> Claims;
+	// protected ClaimsIdentity Identity;
+	// protected ClaimsPrincipal ClaimsPrincipal;
+	// protected Mock<IPrincipal> MockPrincipal;
 	protected Mock<HttpContext> MockHttpContext;
 
 	public WithMockContext()
 	{
-		Claims = new List<Claim>();
-		Identity = new ClaimsIdentity(Claims, "MockContext");
-		ClaimsPrincipal = new ClaimsPrincipal(Identity);
+		// Claims = new List<Claim>();
+		// Identity = new ClaimsIdentity(Claims, "MockContext");
+		// ClaimsPrincipal = new ClaimsPrincipal(Identity);
 
-		MockPrincipal = new Mock<IPrincipal>();
-		MockPrincipal.Setup(x => x.Identity).Returns(Identity);
-		MockPrincipal.Setup(x => x.IsInRole(It.IsAny<string>())).Returns(true);
+		// MockPrincipal = new Mock<IPrincipal>();
+		// MockPrincipal.Setup(x => x.Identity).Returns(Identity);
+		// MockPrincipal.Setup(x => x.IsInRole(It.IsAny<string>())).Returns(true);
 
 		MockHttpContext = new Mock<HttpContext>();
-		MockHttpContext.Setup(m => m.User).Returns(ClaimsPrincipal);
+		// MockHttpContext.Setup(m => m.User).Returns(ClaimsPrincipal);
+	}
+
+	public ClaimsPrincipal Auth(params Claim[] claims)
+	{
+		var identity = new ClaimsIdentity(claims, "MockContenxt");
+		var principal = new ClaimsPrincipal(identity);
+
+		// MockPrincipal.Setup(x => x.Identity).Returns(identity);
+		// MockPrincipal.Setup(x => x.IsInRole(It.IsAny<string>())).Returns(true);
+
+		MockHttpContext.Setup(m => m.User).Returns(principal);
+
+		return principal;
 	}
 }

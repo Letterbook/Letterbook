@@ -28,6 +28,7 @@ public class PostsControllerTests : WithMockContext
 	public PostsControllerTests(ITestOutputHelper output)
 	{
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
+		Auth();
 		_controller = new PostsController(Mock.Of<ILogger<PostsController>>(), CoreOptionsMock, PostServiceMock.Object,
 			ProfileServiceMock.Object, AuthorizationServiceMock.Object, new MappingConfigProvider(CoreOptionsMock))
 		{
