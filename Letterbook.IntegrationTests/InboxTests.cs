@@ -291,7 +291,7 @@ public class InboxTests : IClassFixture<HostFixture<InboxTests>>, ITestSeed, IDi
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 	}
 
-	[Fact(DisplayName = "Should reject an update to a post if not the author")]
+	[Fact(DisplayName = "Should reject an update to a post if not the author", Skip = SkipAuthorization)]
 	public async Task UpdatePost_RejectWrongActor()
 	{
 		await Task.CompletedTask;

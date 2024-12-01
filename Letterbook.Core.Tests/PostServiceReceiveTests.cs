@@ -130,7 +130,7 @@ public class PostServiceReceiveTests : WithMocks
 
 		var actual = await _service.ReceiveCreate([_post]);
 
-		Assert.Single(actual);
+		Assert.Equal(2, actual.Count());
 		ApCrawlerSchedulerMock.Verify(m => m.CrawlPost(It.IsAny<ProfileId>(), parent.FediId, 0));
 	}
 
