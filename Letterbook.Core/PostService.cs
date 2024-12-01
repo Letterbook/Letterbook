@@ -372,9 +372,92 @@ public class PostService : IAuthzPostService, IPostService
 		return pendingPosts.Values.Concat(knownPosts.Values.Where(p => posts.Contains(p)));
 	}
 
-	public async Task<Post?> ReceiveUpdate(Post post)
+	public async Task<IEnumerable<Post>> ReceiveUpdate(IEnumerable<Post> posts)
 	{
-		throw new NotImplementedException();
+		if (_claims.FirstOrDefault(c => c.Type == ApplicationClaims.Actor)?.Value is not { } actorId)
+		{
+			foreach (var post in posts)
+			{
+				await _crawler.CrawlPost(default, post.FediId, 1);
+			}
+
+			return [];
+		}
+		if(await _data.SingleProfile(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
+		{
+			await _crawler.CrawlProfile(default, new Uri(actorId));
+			foreach (var post in posts)
+			{
+				await _crawler.CrawlPost(default, post.FediId);
+			}
+			return [];
+		}
+
+		posts = posts.ToList();
+		var knownPosts = await _data.ListPosts(posts.Select(p => p.FediId))
+			.Include(p => p.Thread)
+			.Include(p => p.InReplyTo)
+			.Include(p => p.Audience)
+			.Include(p => p.AddressedTo).ThenInclude(m => m.Subject)
+			.Include(p => p.Contents)
+			.Include(p => p.Creators)
+			.AsSplitQuery()
+			.ToDictionaryAsync(p => p.FediId);
+		// Unknown posts need to go through create logic
+		var updatedPosts = (await ReceiveCreate(posts.Where(post => !knownPosts.ContainsKey(post.FediId)))).ToList();
+
+		var pendingPosts = posts.Where(p => knownPosts.ContainsKey(p.FediId)).ToList();
+		if (pendingPosts.Count == 0)
+			return updatedPosts;
+
+		var profiles = posts.SelectMany(p => p.Creators)
+			.Concat(posts.SelectMany(p => p.AddressedTo).Select(m => m.Subject))
+			.DistinctBy(p => p.FediId)
+			.ToList();
+		var knownProfiles = await ConvergeProfiles(profiles);
+		var knownAudience = await ConvergeAudience(pendingPosts);
+		var pendingCrawl = pendingPosts.Where(p => !knownProfiles.ContainsKey(p.FediId)).ToList();
+		pendingCrawl.AddRange(pendingPosts.Where(p => p.AddressedTo.Select(m => m.Subject).Any(pr => !knownProfiles.ContainsKey(pr.FediId))));
+		pendingCrawl.AddRange(pendingPosts.Where(p => p.Audience.Any(a => !knownAudience.ContainsKey(a.FediId))));
+		pendingCrawl = pendingCrawl.Distinct().ToList();
+
+		foreach (var pending in pendingPosts.Except(pendingCrawl))
+		{
+			var post = knownPosts[pending.FediId];
+
+			foreach (var mention in pending.AddressedTo)
+			{
+				mention.Subject = knownProfiles[mention.Subject.FediId];
+			}
+			post.AddressedTo = pending.AddressedTo;
+
+			post.Audience = pending.Audience.ReplaceFrom(knownAudience.Values);
+
+			post.Contents = pending.Contents.ReplaceFrom(post.Contents);
+
+			post.InReplyTo = pending.InReplyTo == null ? null : post.InReplyTo;
+			post.UpdatedDate = pending.UpdatedDate;
+			post.Client = pending.Client;
+			post.Summary = pending.Summary;
+			post.Preview = pending.Preview;
+			post.Likes = pending.Likes;
+			post.Replies = pending.Replies;
+			post.Shares = pending.Shares;
+		}
+
+		await _data.Commit();
+
+		foreach (var post in pendingPosts.Except(pendingCrawl))
+		{
+			await _postEvents.Updated(post, (Uuid7)actor.Id, _claims);
+		}
+
+		foreach (var post in pendingCrawl)
+		{
+			await _crawler.CrawlPost(default, post.FediId);
+		}
+
+		return updatedPosts.Concat(pendingPosts.Except(pendingCrawl));
 	}
 
 	public async Task<Post> ReceiveUpdate(Uri post)

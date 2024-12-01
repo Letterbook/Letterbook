@@ -1,7 +1,5 @@
 using System.Security.Claims;
 using ActivityPub.Types.AS;
-using ActivityPub.Types.AS.Extended.Object;
-using ActivityPub.Types.Util;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Api.Controllers.ActivityPub;
 using Letterbook.Core;

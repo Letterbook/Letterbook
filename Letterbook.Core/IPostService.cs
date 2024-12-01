@@ -53,7 +53,7 @@ public interface IAuthzPostService
 	/// </summary>
 	/// <param name="post"></param>
 	/// <returns>The resultant Post if it could be handled in-band, otherwise null</returns>
-	public Task<Post?> ReceiveUpdate(Post post);
+	public Task<IEnumerable<Post>> ReceiveUpdate(IEnumerable<Post> posts);
 
 	/// <summary>
 	/// Handle an inbound Update activity on a post

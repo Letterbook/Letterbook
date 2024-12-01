@@ -149,6 +149,9 @@ public class ActorController : ControllerBase
 			if (activity.Is<DeleteActivity>(out var delete))
 				return await InboxDelete(id, delete);
 
+			if (activity.Is<UpdateActivity>(out var update))
+				return await InboxUpdate(id, update);
+
 
 			_logger.LogWarning("Ignored unknown activity {ActivityType}", activity.GetType());
 			_logger.LogDebug("Ignored unknown activity details {@Activity}", activity);
@@ -231,6 +234,26 @@ public class ActorController : ControllerBase
 		return true;
 	}
 
+	private async Task<IActionResult> InboxUpdate(ProfileId id, UpdateActivity activity)
+	{
+		var posts = activity.Object.ValueItems.Select(Mapper.Map<Post>)
+			.Where(p => p.Contents.Count != 0)
+			.ToList();
+		if (posts.Count == 0)
+		{
+			_logger.LogInformation("Create Activity does not appear to contain any posts");
+			return BadRequest();
+		}
+		var created = await _postService.As(User.Claims).ReceiveUpdate(posts);
+		if (created.Count() == posts.Count && !activity.Object.LinkItems.Any()) return Ok();
+
+		foreach (var link in activity.Object.LinkItems)
+		{
+			await _apCrawler.CrawlPost(id, link.HRef);
+		}
+		return Accepted();
+	}
+
 	private async Task<IActionResult> InboxDelete(ProfileId id, DeleteActivity delete)
 	{
 		var items = delete.Object.Select(each =>
@@ -246,7 +269,6 @@ public class ActorController : ControllerBase
 		await _postService.As(User.Claims).ReceiveDelete(items);
 
 		return Accepted();
-		// var deletedProfiles = _profileService.As(User.Claims).ReceiveDelete(items);
 	}
 
 	private async Task<IActionResult> InboxCreate(ProfileId id, CreateActivity activity)
