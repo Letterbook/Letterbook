@@ -416,7 +416,7 @@ public class PostService : IAuthzPostService, IPostService
 			.ToList();
 		var knownProfiles = await ConvergeProfiles(profiles);
 		var knownAudience = await ConvergeAudience(pendingPosts);
-		var pendingCrawl = pendingPosts.Where(p => !knownProfiles.ContainsKey(p.FediId)).ToList();
+		var pendingCrawl = pendingPosts.Where(p => !knownPosts.ContainsKey(p.FediId)).ToList();
 		pendingCrawl.AddRange(pendingPosts.Where(p => p.AddressedTo.Select(m => m.Subject).Any(pr => !knownProfiles.ContainsKey(pr.FediId))));
 		pendingCrawl.AddRange(pendingPosts.Where(p => p.Audience.Any(a => !knownAudience.ContainsKey(a.FediId))));
 		pendingCrawl = pendingCrawl.Distinct().ToList();
