@@ -44,12 +44,7 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		_host = host;
 		_output = output;
 		_scope = host.CreateScope();
-		var clientOptions = new WebApplicationFactoryClientOptions
-		{
-			BaseAddress = _host.Options?.BaseUri() ?? new Uri("localhost:5127"),
-			AllowAutoRedirect = false
-		};
-		_client = _host.CreateClient(clientOptions);
+		_client = _host.CreateClient(_host.DefaultOptions);
 		_client.DefaultRequestHeaders.Authorization = new("Test", $"{_host.Accounts[0].Id}");
 
 		_profiles = _host.Profiles;

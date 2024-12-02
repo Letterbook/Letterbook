@@ -25,6 +25,7 @@ public class ProfilesControllerTests : WithMockContext
 	{
 		_output = output;
 		_output.WriteLine($"Bogus seed: {Init.WithSeed()}");
+		Auth();
 		_controller = new ProfilesController(Mock.Of<ILogger<ProfilesController>>(), CoreOptionsMock, ProfileServiceMock.Object,
 			new MappingConfigProvider(CoreOptionsMock), AuthorizationServiceMock.Object)
 		{

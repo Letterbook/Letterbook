@@ -1,0 +1,65 @@
+{
+  "type": "Create",
+  "@context": [
+    "https://www.w3.org/ns/activitystreams",
+    {
+      "ostatus": "http://ostatus.org#",
+      "atomUri": "ostatus:atomUri",
+      "inReplyToAtomUri": "ostatus:inReplyToAtomUri",
+      "conversation": "ostatus:conversation",
+      "sensitive": "as:sensitive",
+      "toot": "http://joinmastodon.org/ns#",
+      "votersCount": "toot:votersCount"
+    }
+  ],
+  "actor": "https://mastodon.castle/users/user",
+  "published": "2024-10-23T01:47:33Z",
+  "to": [
+    "https://www.w3.org/ns/activitystreams#Public"
+  ],
+  "cc": [
+    "https://mastodon.castle/users/user/followers"
+  ],
+  "object": {
+    "id": "https://mastodon.castle/users/user/statuses/113354214820743598",
+    "type": "Note",
+    "summary": null,
+    "inReplyTo": null,
+    "published": "2024-10-23T01:47:33Z",
+    "url": "https://mastodon.castle/@user/113354214820743598",
+    "attributedTo": "https://mastodon.castle/users/user",
+    "to": [
+      "https://www.w3.org/ns/activitystreams#Public"
+    ],
+    "cc": [
+      "https://mastodon.castle/users/user/followers"
+    ],
+    "sensitive": false,
+    "atomUri": "https://mastodon.castle/users/user/statuses/113354214820743598",
+    "inReplyToAtomUri": null,
+    "conversation": "tag:localhost:3000,2024-10-23:objectId=4:objectType=Conversation",
+    "content": "\u003Cp\u003Esent from mastodon\u003C/p\u003E",
+    "contentMap": {
+      "en": "\u003Cp\u003Esent from mastodon\u003C/p\u003E"
+    },
+    "attachment": [],
+    "tag": [],
+    "replies": {
+      "id": "https://mastodon.castle/users/user/statuses/113354214820743598/replies",
+      "type": "Collection",
+      "first": {
+        "type": "CollectionPage",
+        "next": "https://mastodon.castle/users/user/statuses/113354214820743598/replies?only_other_accounts=true\u0026page=true",
+        "partOf": "https://mastodon.castle/users/user/statuses/113354214820743598/replies",
+        "items": []
+      }
+    }
+  },
+  "signature": {
+    "type": "RsaSignature2017",
+    "creator": "https://mastodon.castle/users/user#main-key",
+    "created": "2024-10-23T01:47:33Z",
+    "signatureValue": "LlBBom4HalT9ObqKZpfwexV6RmJoOpix0EQPgkG0Ajaazh3cJlJ1ctEa9T96vwoZtzYCeffZuzVuwEZ0wx8ycpkp1IPmZNDr6Ewg0PXCPs1Iuc6jBy086mokxzI1f\u002BLer6Q2nrXih6x3d5KsEO2xBTRQDiQwNF\u002BWSP0\u002BgJBk02WWiLUD4ww7PrisVc2jl3R6goigcEKhpN2X6MCL94LG3VKeIjc6omoJeD9whJLPI00sMZHwNYSwQdkG1U/sirxPPvLyCJT9XgQhzzVW4XosbLItuOYe\u002BHfkvKmIX2kAPmRsDso6bdaCjpmLQuGbWg\u002BPmTSmVVdi6tkI7qMZ5XO5hA=="
+  },
+  "id": "https://mastodon.castle/users/user/statuses/113354214820743598/activity"
+}

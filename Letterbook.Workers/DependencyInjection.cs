@@ -21,6 +21,7 @@ public static class DependencyInjection
 	public static IServiceCollection AddPublishers(this IServiceCollection services)
 	{
 		return services.AddScoped<IActivityMessagePublisher, ActivityMessagePublisher>()
+			.AddSingleton<IApCrawlScheduler, ApCrawlScheduler>()
 			.AddScoped<IAccountEventPublisher, AccountEventPublisher>()
 			.AddScoped<IPostEventPublisher, PostEventPublisher>()
 			.AddScoped<IProfileEventPublisher, ProfileEventPublisher>();
