@@ -7,11 +7,15 @@ namespace Letterbook.Docs;
 
 public static class DependencyInjection
 {
-	public static IServiceCollection AddMarkdown<T>(this IServiceCollection services) where T : class, IMarkdownFiles
+	public static IServiceCollection AddMarkdown(this IServiceCollection services)
 	{
 		return services.AddSingleton<LoaderFactory>()
-			.AddSingleton<IMarkdownMeta, LoaderFactory>()
-			.AddTransient<T>();
+			.AddSingleton<IMarkdownMeta, LoaderFactory>();
+	}
+
+	public static IServiceCollection AddMarkdownLoader<T>(this IServiceCollection services) where T : class, IMarkdownFiles
+	{
+		return services.AddTransient<T>();
 	}
 
 	public static IServiceCollection AddProjectFiles(this IServiceCollection services)

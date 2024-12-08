@@ -1,12 +1,5 @@
-using System.Reflection;
 using Letterbook.Docs.Markdown;
-using Markdig;
-using Markdig.Extensions.CustomContainers;
-using Markdig.Renderers;
-using Markdig.Renderers.Html;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using ServiceStack.IO;
-using ServiceStack.Text;
 
 [assembly: HostingStartup(typeof(Letterbook.Docs.ConfigureSsg))]
 
@@ -21,8 +14,10 @@ public class ConfigureSsg : IHostingStartup
             services.AddSingleton(AppConfig.Instance);
             services.AddSingleton<RazorPagesEngine>();
 
-            services.AddMarkdown<LoadDate>()
-	            .AddMarkdown<LoadCategories>()
+            services.AddMarkdown()
+	            .AddMarkdownLoader<LoadDate>()
+	            .AddMarkdownLoader<LoadDirectory>()
+	            .AddMarkdownLoader<LoadCategories>()
 				.AddProjectFiles();
             services.AddMarkdig()
 	            .UseCustomContainers(extensions =>
