@@ -7,7 +7,7 @@
     public List<Page> GetStaticProps(RenderContext ctx)
     {
         var docs = ctx.Resolve<Markdown.LoaderFactory<Markdown.LoadCategories>>();
-        return docs.GetMarkdown("_pages").GetAll()
+        return docs.LoadFrom("_pages").GetAll()
             .Where(each => each.Category != null && each.Slug != "index")
             .OrderBy(each => each.Category ?? each.Slug)
             .ThenBy(each => each.Order)

@@ -6,5 +6,5 @@ namespace Letterbook.Docs.Pages.Docs;
 
 public class Index([FromServices] LoaderFactory<LoadCategories> categories) : PageModel
 {
-	public LoadCategories Categories { get; set; } = categories.GetMarkdown("_pages");
+	public LoadCategories Categories { get; set; } = categories.LoadFrom("_pages");
 }

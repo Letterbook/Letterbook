@@ -13,7 +13,7 @@ public class Page([FromServices] LoaderFactory<LoadCategories> categories) : Pag
 	[FromRoute]
 	public required string Slug { get; set; }
 
-	public LoadCategories Categories { get; set; } = categories.GetMarkdown("_pages");
+	public LoadCategories Categories { get; set; } = categories.LoadFrom("_pages");
 	public MarkdownCategory? Source => Categories.GetByCategory(Category == "page" ? null : Category, Slug);
 	public HtmlString Html => new(Source?.Html);
 

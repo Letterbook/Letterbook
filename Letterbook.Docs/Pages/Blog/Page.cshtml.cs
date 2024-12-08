@@ -19,7 +19,7 @@ public class Page([FromServices] LoaderFactory<LoadDate> blog) : PageModel
 	[FromRoute]
 	public int Day { get; set; }
 
-	public LoadDate Blog { get; set; } = blog.GetMarkdown("_blog");
+	public LoadDate Blog { get; set; } = blog.LoadFrom("_blog");
 
 	public MarkdownDoc? Source =>  Blog.GetByDate(new DateTime(Year, Month, Day), Slug);
 

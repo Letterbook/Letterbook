@@ -7,7 +7,7 @@
 
     public List<Index> GetStaticProps(RenderContext ctx)
     {
-        var page = ctx.Resolve<Markdown.LoaderFactory<Markdown.LoadCategories>>();
+        var page = ctx.Resolve<Markdown.LoaderFactory>();
         return [new Index(page)];
     }
 

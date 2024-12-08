@@ -7,7 +7,7 @@ namespace Letterbook.Docs.Pages.Blog;
 
 public class Index([FromServices] LoaderFactory<Markdown.LoadDate> blog) : PageModel
 {
-	public Markdown.LoadDate Blog { get; set; } = blog.GetMarkdown("_blog");
+	public Markdown.LoadDate Blog { get; set; } = blog.LoadFrom("_blog");
 
 	public List<Index> GetStaticProps(RenderContext ctx)
 	{

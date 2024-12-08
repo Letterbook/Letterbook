@@ -8,7 +8,7 @@
     public List<Page> GetStaticProps(RenderContext ctx)
     {
         var blog = ctx.Resolve<Markdown.LoaderFactory<Markdown.LoadDate>>();
-        return blog.GetMarkdown("_blog").GetAll()
+        return blog.LoadFrom("_blog").GetAll()
             .Select(p => new Page(blog)
             {
                 Slug = p.Slug,
