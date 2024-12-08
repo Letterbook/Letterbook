@@ -12,7 +12,7 @@ ViewData["Brand"] = "Architecture";
 @functions {
     public List<Index> GetStaticProps(RenderContext ctx)
     {
-        var docs = ctx.Resolve<Markdown.MarkdownLoaderFactory<LoadDirectory>>();
+        var docs = ctx.Resolve<LoaderFactory>();
         return [new Index(docs)];
     }
 }

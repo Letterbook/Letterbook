@@ -41,6 +41,18 @@ public class MarkdownDoc
 	}
 }
 
+public class AdrStatus
+{
+	public required string Status { get; set; }
+	public required DateTimeOffset Date { get; set; }
+}
+
+public class MarkdownAdr : MarkdownDoc
+{
+	public string? DiscussionUrl { get; set; }
+	public AdrStatus[] StatusHistory { get; set; } = [];
+}
+
 public class MarkdownAuthor : MarkdownDoc
 {
 	public required string Id { get; set; }
