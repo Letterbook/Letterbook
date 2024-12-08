@@ -1,13 +1,14 @@
 @page "/docs/{Category}/{Slug}"
 @model Letterbook.Docs.Pages.Docs.Page
 
+@using Letterbook.Docs.Markdown
 @implements IRenderStatic<Page>
 @functions
 {
     public List<Page> GetStaticProps(RenderContext ctx)
     {
-        var docs = ctx.Resolve<Markdown.LoaderFactory<Markdown.LoadCategories>>();
-        return docs.LoadFrom("_pages").GetAll()
+        var docs = ctx.Resolve<Markdown.LoaderFactory>();
+        return docs.LoadFrom<Markdown.LoadCategories, MarkdownCategory>("_pages").GetAll<MarkdownCategory>()
             .Where(each => each.Category != null && each.Slug != "index")
             .OrderBy(each => each.Category ?? each.Slug)
             .ThenBy(each => each.Order)

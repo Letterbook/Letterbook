@@ -13,7 +13,7 @@
 
     public List<Index> GetStaticProps(RenderContext ctx)
     {
-        var blog = ctx.Resolve<Markdown.LoaderFactory<Markdown.LoadDate>>();
+        var blog = ctx.Resolve<Markdown.LoaderFactory>();
         return [new Index(blog)];
     }
 

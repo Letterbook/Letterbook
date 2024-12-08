@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Letterbook.Docs.Pages.Docs;
 
-public class Index([FromServices] LoaderFactory<LoadCategories> categories) : PageModel
+public class Index([FromServices] LoaderFactory categories) : PageModel
 {
-	public LoadCategories Categories { get; set; } = categories.LoadFrom("_pages");
+	public LoadCategories Categories { get; set; } = categories.LoadFrom<LoadCategories, MarkdownCategory>("_pages");
 }

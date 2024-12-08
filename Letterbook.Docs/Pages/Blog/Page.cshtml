@@ -1,14 +1,15 @@
 ﻿@page "/blog/post/{Year}/{Month}/{Day}/{Slug}"
 @model Letterbook.Docs.Pages.Blog.Page
 
+@using Letterbook.Docs.Markdown
 @implements IRenderStatic<Page>
 
 @functions {
 
     public List<Page> GetStaticProps(RenderContext ctx)
     {
-        var blog = ctx.Resolve<Markdown.LoaderFactory<Markdown.LoadDate>>();
-        return blog.LoadFrom("_blog").GetAll()
+        var blog = ctx.Resolve<Markdown.LoaderFactory>();
+        return blog.LoadFrom<Markdown.LoadDate, MarkdownDoc>("_blog").GetAll()
             .Select(p => new Page(blog)
             {
                 Slug = p.Slug,
