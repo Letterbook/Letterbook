@@ -1,0 +1,23 @@
+@page "/architecture/"
+@model Letterbook.Docs.Pages.Architecture.Index
+
+@{
+ViewData["Title"] = "Letterbook Architecture";
+ViewData["Brand"] = "Architecture";
+}
+
+@using Letterbook.Docs.Markdown
+@implements IRenderStatic<Index>
+
+@functions {
+    public List<Index> GetStaticProps(RenderContext ctx)
+    {
+        var docs = ctx.Resolve<Markdown.MarkdownLoaderFactory<LoadDirectory>>();
+        return [new Index(docs)];
+    }
+}
+
+@foreach (var doc in Model.Docs.GetAll<MarkdownAdr>())
+{
+    
+}

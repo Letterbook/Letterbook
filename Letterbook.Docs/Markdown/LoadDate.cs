@@ -9,8 +9,8 @@ namespace Letterbook.Docs.Markdown;
 /// Markdown loader for files organized into chronological subdirectories
 /// <remarks>subdirectories must be named in the yyyy-MM-dd format</remarks>
 /// </summary>
-public class MarkdownDate(ILogger<MarkdownDate> log, IWebHostEnvironment env, IProjectFiles fs, MarkdownPipeline pipeline) :
-	MarkdownBase<MarkdownDoc>(env, pipeline), IMarkdownFiles
+public class LoadDate(ILogger<LoadDate> log, IWebHostEnvironment env, IProjectFiles fs, MarkdownPipeline pipeline) :
+	LoaderBase<MarkdownDoc>(env, pipeline), IMarkdownFiles
 {
 	public List<MarkdownDoc> Files { get; set; } = new();
 

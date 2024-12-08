@@ -7,7 +7,7 @@
 
     public List<Page> GetStaticProps(RenderContext ctx)
     {
-        var blog = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownDate>>();
+        var blog = ctx.Resolve<Markdown.LoaderFactory<Markdown.LoadDate>>();
         return blog.GetMarkdown("_blog").GetAll()
             .Select(p => new Page(blog)
             {

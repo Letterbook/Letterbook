@@ -1,6 +1,6 @@
 namespace Letterbook.Docs.Markdown;
 
-public class MarkdownFilesFactory<T>(IServiceProvider services) : IMarkdownMeta where T : IMarkdownFiles
+public class LoaderFactory<T>(IServiceProvider services) : IMarkdownMeta where T : IMarkdownFiles
 {
 	private readonly Lazy<Dictionary<string, T>> _map = new();
 	private Dictionary<string, T> Map => _map.Value;

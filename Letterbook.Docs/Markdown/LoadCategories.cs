@@ -8,8 +8,8 @@ namespace Letterbook.Docs.Markdown;
 /// Markdown loader for files organized into categories by subdirectory
 /// <remarks>categories </remarks>
 /// </summary>
-public class MarkdownCategories(ILogger<MarkdownCategories> log, IWebHostEnvironment env, IProjectFiles fs, MarkdownPipeline pipeline) :
-	MarkdownBase<MarkdownCategory>(env, pipeline), IMarkdownFiles
+public class LoadCategories(ILogger<LoadCategories> log, IWebHostEnvironment env, IProjectFiles fs, MarkdownPipeline pipeline) :
+	LoaderBase<MarkdownCategory>(env, pipeline), IMarkdownFiles
 {
 	public List<MarkdownCategory> Files { get; set; } = new();
 

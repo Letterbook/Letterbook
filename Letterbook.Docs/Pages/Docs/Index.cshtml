@@ -10,7 +10,7 @@
 
     public List<Index> GetStaticProps(RenderContext ctx)
     {
-        var categories = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownCategories>>();
+        var categories = ctx.Resolve<Markdown.LoaderFactory<Markdown.LoadCategories>>();
         return [new Index(categories)];
     }
 

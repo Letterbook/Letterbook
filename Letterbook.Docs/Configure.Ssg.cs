@@ -21,8 +21,8 @@ public class ConfigureSsg : IHostingStartup
             services.AddSingleton(AppConfig.Instance);
             services.AddSingleton<RazorPagesEngine>();
 
-            services.AddMarkdown<MarkdownDate>()
-	            .AddMarkdown<MarkdownCategories>()
+            services.AddMarkdown<LoadDate>()
+	            .AddMarkdown<LoadCategories>()
 				.AddProjectFiles();
             services.AddMarkdig()
 	            .UseCustomContainers(extensions =>

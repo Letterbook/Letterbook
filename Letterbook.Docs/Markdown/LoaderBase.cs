@@ -7,7 +7,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Letterbook.Docs.Markdown;
 
-public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownPipeline pipeline) where T : MarkdownDoc
+public abstract partial class LoaderBase<T>(IWebHostEnvironment env, MarkdownPipeline pipeline) where T : MarkdownDoc
 {
 	[GeneratedRegex(@"(?<!^)(?=[A-Z\s\d])")]
 	private static partial Regex SlugRegex();

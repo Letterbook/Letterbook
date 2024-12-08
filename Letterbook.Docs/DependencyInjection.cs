@@ -9,8 +9,8 @@ public static class DependencyInjection
 {
 	public static IServiceCollection AddMarkdown<T>(this IServiceCollection services) where T : class, IMarkdownFiles
 	{
-		return services.AddSingleton<MarkdownFilesFactory<T>>()
-			.AddSingleton<IMarkdownMeta, MarkdownFilesFactory<T>>()
+		return services.AddSingleton<LoaderFactory<T>>()
+			.AddSingleton<IMarkdownMeta, LoaderFactory<T>>()
 			.AddTransient<T>();
 	}
 
