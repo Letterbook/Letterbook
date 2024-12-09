@@ -3,13 +3,13 @@
   "isRoot": true,
   "tools": {
     "dotnet-ef": {
-      "version": "8.0.10",
+      "version": "9.0.0",
       "commands": [
         "dotnet-ef"
       ]
     },
     "swashbuckle.aspnetcore.cli": {
-      "version": "6.9.0",
+      "version": "7.1.0",
       "commands": [
         "swagger"
       ]
