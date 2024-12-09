@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Letterbook.Api.Authentication.HttpSignature.Infrastructure;
+using Letterbook.Core;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -36,7 +37,7 @@ public class HttpSignatureAuthenticationHandler : AuthenticationHandler<HttpSign
 				.Select(i =>
 					new ClaimsIdentity(new[]
 					{
-						new Claim(ClaimTypes.Name, i.ToString())
+						new Claim(ApplicationClaims.Actor, i.ToString())
 					}, HttpSignatureAuthenticationDefaults.Scheme)
 				);
 

@@ -2,17 +2,16 @@ using System.Diagnostics;
 using System.Net;
 using ActivityPub.Types.AS;
 using Bogus;
-using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Adapter.TimescaleFeeds.EntityModels;
+using Letterbook.Api.Authentication.HttpSignature.Handler;
 using Letterbook.AspNet.Tests.Fixtures;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
-using Letterbook.Core.Tests.Mocks;
 using Letterbook.Core.Values;
 using Letterbook.Core.Workers;
 using Microsoft.AspNetCore.Authentication;
@@ -22,6 +21,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Npgsql;
 using OpenTelemetry.Trace;
@@ -31,6 +31,14 @@ using RelationalContext = Letterbook.Adapter.Db.RelationalContext;
 
 namespace Letterbook.IntegrationTests.Fixtures;
 
+/// <summary>
+/// A Class fixture to manage the application under test, and its test data, with isolation per-test class
+/// </summary>
+/// <remarks>
+/// Reminder: do not dispose this object. It will be disposed by XUnit, after the test class has finished running.
+/// Disposing early will break other tests, because it will shut down the application.
+/// </remarks>
+/// <typeparam name="T"></typeparam>
 public class HostFixture<T> : WebApplicationFactory<Program>
 	where T : ITestSeed
 {
@@ -39,6 +47,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		if (disposing)
 		{
 			_scope.Dispose();
+			_context.Dispose();
+			_feedsContext.Dispose();
+			_spans.Dispose();
 		}
 
 		base.Dispose(disposing);
@@ -73,6 +84,11 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	public IAsyncEnumerable<Activity> Spans => _spans.ToAsyncEnumerable();
 	public Mock<IActivityPubClient> MockActivityPubClient = new();
 	public Mock<IActivityPubAuthenticatedClient> MockActivityPubClientAuth = new();
+	public WebApplicationFactoryClientOptions DefaultOptions => new()
+	{
+		BaseAddress = Options?.BaseUri() ?? new Uri("localhost:5127"),
+		AllowAutoRedirect = false
+	};
 
 	private readonly IServiceScope _scope;
 
@@ -210,12 +226,16 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 				if (seedDescriptor != null) services.Remove(seedDescriptor);
 
 				services.AddAuthentication("Test")
-					.AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
+					.AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { })
+					.AddScheme<HttpSignatureAuthenticationOptions, SignatureAuthHandler>(Api.Constants.ActivityPubPolicy, _ => { });
 				services.AddAuthorization(options =>
 				{
 					options.DefaultPolicy = new AuthorizationPolicyBuilder("Test")
 						.RequireAuthenticatedUser()
 						.Build();
+					options.AddPolicy(Api.Constants.ActivityPubPolicy, new AuthorizationPolicyBuilder(Api.Constants.ActivityPubPolicy)
+						.RequireAuthenticatedUser()
+						.Build());
 				});
 				services.ConfigureApplicationCookie(options =>
 				{
@@ -243,7 +263,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		Profiles.Add(new FakeProfile(authority, Accounts[1]).Generate()); // P3
 		Profiles.AddRange(new FakeProfile().Generate(3)); // P4-6
 		Profiles.AddRange(new FakeProfile(authority).Generate(3)); // P7-9 (Group: Follow)
-		Profiles.AddRange(new FakeProfile(peer).Generate(3)); // P10-12 (Group: remote followers)
+		Profiles.AddRange(new FakeProfile(peer).Generate(4)); // P10-13 (Group: remote followers)
 
 		// P0 follows P4 and P5
 		// P4 follows P0
@@ -255,8 +275,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		// P9 follows P8 and P7
 		Follow(Profiles[0], Profiles[8]);
 		Follow(Profiles[0], Profiles[7]);
-		// P8 follows P9
+		// P8 follows P9 (local) and P13 (remote)
 		Follow(Profiles[8], Profiles[9]);
+		Follow(Profiles[8], Profiles[13]);
 		// P10-12 (remote peers) follow P7
 		Follow(Profiles[10], Profiles[7]);
 		Follow(Profiles[11], Profiles[7]);
@@ -272,6 +293,10 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		// P2 creates post 0, and draft 1
 		Posts.Add(Profiles[2], new FakePost(Profiles[2]).Generate(1));
 		Posts[Profiles[2]].Add(new FakePost(Profiles[2], draft: true).Generate());
+		// P8 creates post 0
+		Posts.Add(Profiles[8], new FakePost(Profiles[8]).Generate(1));
+		// P13 creates posts 0-1
+		Posts.Add(Profiles[13], new FakePost(Profiles[13]).Generate(2));
 
 		// Remote profiles
 		// P4 creates post 0, as reply to post P0:3

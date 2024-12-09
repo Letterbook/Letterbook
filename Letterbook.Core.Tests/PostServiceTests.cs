@@ -1,9 +1,12 @@
+using System.Collections;
+using System.Security.Claims;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
 using Medo;
 using Microsoft.Extensions.Logging;
+using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 
@@ -16,16 +19,20 @@ public class PostServiceTests : WithMocks
 	private readonly Profile _profile;
 	private readonly Post _post;
 	private readonly FakeProfile _fakeProfile;
+	private readonly FakeProfile _fakeActor;
+	private readonly Profile _actor;
 
 	public PostServiceTests(ITestOutputHelper output)
 	{
 		_output = output;
 		_output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 		_service = new PostService(Mock.Of<ILogger<PostService>>(), CoreOptionsMock, Mock.Of<Instrumentation>(),
-			DataAdapterMock.Object, PostEventServiceMock.Object, ActivityPubClientMock.Object,
-			[new MockHtmlSanitizer(), new MockTextSanitizer()]);
+			DataAdapterMock.Object, PostEventServiceMock.Object, ProfileEventServiceMock.Object,
+			ApCrawlerSchedulerMock.Object, [new MockHtmlSanitizer(), new MockTextSanitizer()]);
 		_fakeProfile = new FakeProfile("letterbook.example");
+		_fakeActor = new FakeProfile("peer.example");
 		_profile = _fakeProfile.Generate();
+		_actor = _fakeActor.Generate();
 		_post = new FakePost(_profile);
 	}
 
@@ -80,7 +87,7 @@ public class PostServiceTests : WithMocks
 		update.FediId = _post.FediId;
 		update.Audience.Add(Audience.Public);
 
-		var actual = await _service.Update(_post.GetId(), update);
+		var actual = await _service.Update(_profile.Id, _post.GetId(), update);
 		Assert.Contains(Audience.Public, actual.Audience);
 	}
 
@@ -94,7 +101,7 @@ public class PostServiceTests : WithMocks
 		var note = new Fakes.FakeNote(update).Generate();
 		update.Contents.Add(note);
 
-		var actual = await _service.Update(_post.GetId(), update);
+		var actual = await _service.Update(_profile.Id, _post.GetId(), update);
 		Assert.Equal(update.Contents.First().Summary, actual.Contents.First().Summary);
 		Assert.Equal(2, update.Contents.Count);
 	}
@@ -108,7 +115,7 @@ public class PostServiceTests : WithMocks
 		update.Id = _post.Id;
 		update.FediId = _post.FediId;
 
-		var actual = await _service.Update(_post.GetId(), update);
+		var actual = await _service.Update(_profile.Id, _post.GetId(), update);
 		Assert.Single(actual.Contents);
 		Assert.Contains(update.Contents.First(), actual.Contents);
 	}
@@ -127,7 +134,7 @@ public class PostServiceTests : WithMocks
 		update.Id = _post.Id;
 		update.FediId = _post.FediId;
 
-		var actual = await _service.Update(_post.GetId(), update);
+		var actual = await _service.Update(_profile.Id, _post.GetId(), update);
 		var actualNote = Assert.IsType<Note>(actual.Contents.First());
 		Assert.Equal(expectedNote.SourceText, actualNote.SourceText);
 	}
@@ -143,7 +150,7 @@ public class PostServiceTests : WithMocks
 		update.Id = _post.Id;
 		update.FediId = evilDomain.Uri;
 
-		await Assert.ThrowsAsync<CoreException>(() => _service.Update(_post.GetId(), update));
+		await Assert.ThrowsAsync<CoreException>(() => _service.Update(_profile.Id, _post.GetId(), update));
 	}
 
 	[Fact(DisplayName = "Should delete posts")]
@@ -151,7 +158,7 @@ public class PostServiceTests : WithMocks
 	{
 		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
-		await _service.Delete(_post.Id);
+		await _service.Delete(_profile.Id, _post.Id);
 
 		DataAdapterMock.Verify(m => m.Remove(_post));
 	}
@@ -163,7 +170,7 @@ public class PostServiceTests : WithMocks
 		var expected = DateTimeOffset.Now;
 		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
-		var actual = await _service.Publish(_post.Id);
+		var actual = await _service.Publish(_profile.Id, _post.Id);
 
 		var published = Assert.NotNull(actual.PublishedDate);
 		Assert.InRange(published, expected, DateTimeOffset.Now);
@@ -175,7 +182,7 @@ public class PostServiceTests : WithMocks
 		var content = new Fakes.FakeNote(_post).Generate();
 		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
-		var actual = await _service.AddContent(_post.Id, content);
+		var actual = await _service.AddContent(_profile.Id, _post.Id, content);
 
 		Assert.Contains(content, actual.Contents);
 	}
@@ -191,7 +198,7 @@ public class PostServiceTests : WithMocks
 		note.GeneratePreview();
 		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
-		var result = await _service.UpdateContent(_post.Id, note.Id, note);
+		var result = await _service.UpdateContent(_profile.Id, _post.Id, note.Id, note);
 
 		var actual = Assert.IsType<Note>(result.Contents.FirstOrDefault());
 		Assert.Equal(expected, actual.SourceText);
@@ -204,7 +211,7 @@ public class PostServiceTests : WithMocks
 		_post.Contents.Add(content);
 		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 
-		var actual = await _service.RemoveContent(_post.Id, content.Id);
+		var actual = await _service.RemoveContent(_profile.Id, _post.Id, content.Id);
 
 		Assert.DoesNotContain(content, actual.Contents);
 	}

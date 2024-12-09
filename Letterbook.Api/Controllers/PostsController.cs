@@ -68,44 +68,44 @@ public class PostsController : ControllerBase
 		if (!draft && !pubDecision.Allowed)
 			return Unauthorized(pubDecision);
 
-		var result = await _post.As(User.Claims, profileId).Draft(profileId, post, post.InReplyTo?.GetId(), !draft);
+		var result = await _post.As(User.Claims).Draft(profileId, post, post.InReplyTo?.GetId(), !draft);
 		return Ok(_mapper.Map<PostDto>(result));
 	}
 
 	[HttpPost("{profileId}/post/{postId}")]
 	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Publish", "Publish an existing draft post")]
-	public async Task<IActionResult> Publish(Uuid7 profileId, Uuid7 postId)
+	public async Task<IActionResult> Publish(ProfileId profileId, Uuid7 postId)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
 
-		var result = await _post.As(User.Claims, profileId).Publish(postId);
+		var result = await _post.As(User.Claims).Publish(profileId, postId);
 		return Ok(_mapper.Map<PostDto>(result));
 	}
 
 	[HttpPut("{profileId}/post/{postId}")]
 	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Update", "Update an entire post, including all contents")]
-	public async Task<IActionResult> Update(Uuid7 profileId, Uuid7 postId, [FromBody] PostDto dto)
+	public async Task<IActionResult> Update(ProfileId profileId, Uuid7 postId, [FromBody] PostDto dto)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
 		if (_mapper.Map<Post>(dto) is not { } post)
 			return BadRequest();
 
-		var decision = _authz.Publish(User.Claims, post, profileId);
+		var decision = _authz.Publish(User.Claims, post, (Uuid7)profileId);
 		if (!decision.Allowed)
 			return Unauthorized(decision);
 
-		var result = await _post.As(User.Claims, profileId).Update(postId, post);
+		var result = await _post.As(User.Claims).Update(profileId, postId, post);
 		return Ok(_mapper.Map<PostDto>(result));
 	}
 
 	[HttpPost("{profileId}/post/{postId}/content")]
 	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Attach", "Attach additional content to a post")]
-	public async Task<IActionResult> Attach(Uuid7 profileId, Uuid7 postId, [FromBody] ContentDto dto)
+	public async Task<IActionResult> Attach(ProfileId profileId, Uuid7 postId, [FromBody] ContentDto dto)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
@@ -113,57 +113,57 @@ public class PostsController : ControllerBase
 		if (_mapper.Map<Content>(dto) is not { } content)
 			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
 
-		var result = await _post.As(User.Claims, profileId).AddContent(postId, content);
+		var result = await _post.As(User.Claims).AddContent(profileId, postId, content);
 		return Ok(_mapper.Map<PostDto>(result));
 	}
 
 	[HttpPut("{profileId}/post/{postId}/content/{contentId}")]
 	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Edit", "Edit the content of a post")]
-	public async Task<IActionResult> Edit(Uuid7 profileId, Uuid7 postId, Uuid7 contentId, [FromBody] ContentDto dto)
+	public async Task<IActionResult> Edit(ProfileId profileId, Uuid7 postId, Uuid7 contentId, [FromBody] ContentDto dto)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
 		if (_mapper.Map<Content>(dto) is not { } content)
 			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(PostDto)}"));
 
-		var result = await _post.As(User.Claims, profileId).UpdateContent(postId, contentId, content);
+		var result = await _post.As(User.Claims).UpdateContent(profileId, postId, contentId, content);
 		return Ok(_mapper.Map<PostDto>(result));
 	}
 
 	[HttpDelete("{profileId}/post/{postId}/content/{contentId}")]
 	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Remove", "Remove content from a post")]
-	public async Task<IActionResult> Remove(Uuid7 profileId, Uuid7 postId, Uuid7 contentId)
+	public async Task<IActionResult> Remove(ProfileId profileId, Uuid7 postId, Uuid7 contentId)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
 
-		var result = await _post.As(User.Claims, profileId).RemoveContent(postId, contentId);
+		var result = await _post.As(User.Claims).RemoveContent(profileId, postId, contentId);
 		return Ok(_mapper.Map<PostDto>(result));
 	}
 
 	[HttpDelete("{profileId}/post/{postId}")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[SwaggerOperation("Delete", "Delete a post")]
-	public async Task<IActionResult> Delete(Uuid7 profileId, Uuid7 postId)
+	public async Task<IActionResult> Delete(ProfileId profileId, Uuid7 postId)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
 
-		await _post.As(User.Claims, profileId).Delete(postId);
+		await _post.As(User.Claims).Delete(profileId, postId);
 		return Ok();
 	}
 
 	[HttpGet("{profileId}/post/{postId}")]
 	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Get", "Get a post")]
-	public async Task<IActionResult> Get(Uuid7 profileId, Uuid7 postId, [FromQuery] bool withThread = false)
+	public async Task<IActionResult> Get(ProfileId profileId, Uuid7 postId, [FromQuery] bool withThread = false)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
 
-		var result = await _post.As(User.Claims, profileId).LookupPost(postId, withThread);
+		var result = await _post.As(User.Claims).LookupPost(profileId, postId, withThread);
 		return Ok(_mapper.Map<PostDto>(result));
 	}
 
@@ -196,12 +196,12 @@ public class PostsController : ControllerBase
 	[HttpGet("{profileId}/thread/{threadId}")]
 	[ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Thread", "Get a thread by id")]
-	public async Task<IActionResult> GetThread(Uuid7 profileId, Uuid7 threadId)
+	public async Task<IActionResult> GetThread(ProfileId profileId, Uuid7 threadId)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
 
-		var result = await _post.As(User.Claims, profileId).LookupThread(threadId);
+		var result = await _post.As(User.Claims).LookupThread(profileId, threadId);
 		if (result is not null && result.Posts.Count != 0)
 			return Ok(_mapper.Map<IEnumerable<PostDto>>(result.Posts));
 		return NotFound();

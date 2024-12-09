@@ -34,10 +34,11 @@ public static class AstMapper
 		FromASType(cfg);
 	});
 
+
 	/// <summary>
 	/// Map Posts and Content to AS types
 	/// </summary>
-	public static MapperConfiguration Post = new(cfg =>
+	public static MapperConfiguration FromPost = new(cfg =>
 	{
 		ConfigureUriTypes(cfg);
 		ConfigureDateTypes(cfg);
@@ -214,12 +215,13 @@ public static class AstMapper
 
 	private static void FromNote(IMapperConfigurationExpression cfg)
 	{
-		cfg.CreateMap<NoteObject, Post>(MemberList.Destination)
+		cfg.CreateMap<ASObject, Post>(MemberList.Destination)
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
-			.ForMember(dest => dest.Authority, opt => opt.Ignore())
-			.ForMember(dest => dest.Hostname, opt => opt.Ignore())
+			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
+			.ForMember(dest => dest.Authority, opt => opt.MapFrom((_, post) => post.FediId.GetAuthority()))
+			.ForMember(dest => dest.Hostname, opt => opt.MapFrom((_, post) => post.FediId.Host))
 			.ForMember(dest => dest.Contents,
-				opt => opt.MapFrom<NoteContentResolver, NaturalLanguageString?>(src => src.Content))
+				opt => opt.MapFrom<ContentResolver, NaturalLanguageString?>(src => src.Content))
 			.ForMember(dest => dest.Creators,
 				opt => opt.MapFrom<ProfileResolver, LinkableList<ASObject>>(src => src.AttributedTo))
 			.ForMember(dest => dest.InReplyTo,
@@ -230,14 +232,7 @@ public static class AstMapper
 			.ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => src.Updated))
 			.ForMember(dest => dest.LastSeenDate, opt => opt.Ignore())
 			.ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
-			.ForMember(dest => dest.AddressedTo,
-				opt => opt.MapFrom<MentionsResolver<To>, LinkableList<ASObject>>(src => src.To))
-			.ForMember(dest => dest.AddressedTo,
-				opt => opt.MapFrom<MentionsResolver<Cc>, LinkableList<ASObject>>(src => src.CC))
-			.ForMember(dest => dest.AddressedTo,
-				opt => opt.MapFrom<MentionsResolver<BTo>, LinkableList<ASObject>>(src => src.BTo))
-			.ForMember(dest => dest.AddressedTo,
-				opt => opt.MapFrom<MentionsResolver<Bcc>, LinkableList<ASObject>>(src => src.BCC))
+			.ForMember(dest => dest.AddressedTo, opt => opt.ConvertUsing<MentionsConverter, ASObject>(src => src))
 			.ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Generator))
 			.ForMember(dest => dest.LikesCollection,
 				opt => opt.MapFrom<ProfileResolver, Linkable<ASCollection>?>(src => src.Likes))
@@ -246,7 +241,6 @@ public static class AstMapper
 				opt => opt.MapFrom<ProfileResolver, Linkable<ASCollection>?>(src => src.Shares))
 			.ForMember(dest => dest.Shares, opt => opt.MapFrom(src => src.Shares))
 			.ForMember(dest => dest.ContentRootIdUri, opt => opt.Ignore())
-			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
 			.ForMember(dest => dest.Thread,
 				opt => opt.MapFrom<PostContextConverter, LinkableList<ASObject>?>(src => src.InReplyTo))
 			.ForMember(dest => dest.RepliesCollection,
@@ -311,6 +305,32 @@ public static class AstMapper
 	}
 }
 
+internal class MentionsConverter : IValueConverter<ASObject, ICollection<Mention>>
+{
+	public ICollection<Mention> Convert(ASObject sourceMember, ResolutionContext context)
+	{
+		var result = new HashSet<Mention>();
+		foreach (var l in sourceMember.To)
+		{
+			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.To));
+		}
+		foreach (var l in sourceMember.BTo)
+		{
+			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Bto));
+		}
+		foreach (var l in sourceMember.CC)
+		{
+			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Cc));
+		}
+		foreach (var l in sourceMember.BCC)
+		{
+			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Bcc));
+		}
+
+		return result;
+	}
+}
+
 /// <summary>
 /// Resolve the Replies collection as part of a Post object
 /// </summary>
@@ -367,10 +387,10 @@ public class MediaTypeResolver : IMemberValueResolver<Post, NoteObject, Content?
 
 [UsedImplicitly]
 internal class ProfileResolver :
-	IMemberValueResolver<NoteObject, Post, LinkableList<ASObject>, ICollection<Models.Profile>>,
-	IMemberValueResolver<NoteObject, Post, Linkable<ASCollection>?, IList<Models.Profile>>
+	IMemberValueResolver<ASObject, Post, LinkableList<ASObject>, ICollection<Models.Profile>>,
+	IMemberValueResolver<ASObject, Post, Linkable<ASCollection>?, IList<Models.Profile>>
 {
-	public ICollection<Models.Profile> Resolve(NoteObject source, Post destination, LinkableList<ASObject> sourceMember,
+	public ICollection<Models.Profile> Resolve(ASObject source, Post destination, LinkableList<ASObject> sourceMember,
 		ICollection<Models.Profile> destMember,
 		ResolutionContext context)
 	{
@@ -389,7 +409,7 @@ internal class ProfileResolver :
 		return destMember;
 	}
 
-	public IList<Models.Profile> Resolve(NoteObject source, Post destination, Linkable<ASCollection>? sourceMember,
+	public IList<Models.Profile> Resolve(ASObject source, Post destination, Linkable<ASCollection>? sourceMember,
 		IList<Models.Profile> destMember, ResolutionContext context)
 	{
 		if (sourceMember is null) return destMember;
@@ -406,18 +426,19 @@ internal class ProfileResolver :
 [UsedImplicitly]
 internal class PostResolver :
 	IMemberValueResolver<ASObject, Post, LinkableList<ASObject>?, Post?>,
-	IMemberValueResolver<NoteObject, Post, ASCollection?, IList<Post>>
+	IMemberValueResolver<ASObject, Post, ASCollection?, IList<Post>>
 {
 	public Post? Resolve(ASObject source, Post destination, LinkableList<ASObject>? sourceMember, Post? destMember,
 		ResolutionContext context)
 	{
 		if (sourceMember is null) return default;
+		if (!sourceMember.Any()) return default;
 		if (!sourceMember.First().TryGetId(out var id)) return default;
 
 		return new Post(id, destination.Thread);
 	}
 
-	public IList<Post> Resolve(NoteObject source, Post destination, ASCollection? sourceMember, IList<Post> destMember,
+	public IList<Post> Resolve(ASObject source, Post destination, ASCollection? sourceMember, IList<Post> destMember,
 		ResolutionContext context)
 	{
 		if (sourceMember is null) return destMember;
@@ -440,9 +461,9 @@ internal class PostResolver :
 }
 
 [UsedImplicitly]
-internal class AudienceResolver : IMemberValueResolver<NoteObject, Post, LinkableList<ASObject>, ICollection<Audience>>
+internal class AudienceResolver : IMemberValueResolver<ASObject, Post, LinkableList<ASObject>, ICollection<Audience>>
 {
-	public ICollection<Audience> Resolve(NoteObject src, Post post, LinkableList<ASObject> srcAudience,
+	public ICollection<Audience> Resolve(ASObject src, Post post, LinkableList<ASObject> srcAudience,
 		ICollection<Audience> postAudience,
 		ResolutionContext mappingContext)
 	{
@@ -489,9 +510,10 @@ internal class PostContextConverter : IMemberValueResolver<ASObject, Post, Linka
 			return Result(ctxId);
 		}
 
-		return Result(new Uri(src.Replies?.Id ?? src.Id!));
+		var srcId = src.Replies?.Id ?? src.Id;
+		return Result(srcId is null ? null : new Uri(srcId));
 
-		ThreadContext Result(Uri id)
+		ThreadContext Result(Uri? id)
 		{
 			var result = new ThreadContext
 			{
@@ -514,16 +536,14 @@ internal class PostContextConverter : IMemberValueResolver<ASObject, Post, Linka
 			NewThread = false
 		};
 
-		if (src.Context?.TryGetValue(out var ctx) == true && ctx.Is<ASCollection>(out var ctxCollection))
-			heuristic.Context = ctxCollection.Id is not null ? new Uri(ctxCollection.Id) : null;
+		if (src.Context?.TryGetId(out var id) == true)
+			heuristic.Context = id;
 
-		if (src.Context?.TryGetLink(out var link) == true && link.Is<ASLink>(out var ctxLink))
-			heuristic.Root = ctxLink.HRef;
-
+		var threadId = Extensions.NotNull(src.Replies?.Id, src.Context?.Value?.Id,
+			src.Context?.Link?.HRef.ToString(), src.Id);
 		return new ThreadContext
 		{
-			FediId = new Uri(Extensions.NotNull(src.Replies?.Id, src.Context?.Value?.Id,
-				src.Context?.Link?.HRef.ToString(), src.Id)),
+			FediId = new Uri(threadId),
 			RootId = post.Id,
 			Heuristics = heuristic
 		};
@@ -532,71 +552,27 @@ internal class PostContextConverter : IMemberValueResolver<ASObject, Post, Linka
 
 [UsedImplicitly]
 internal class
-	NoteContentResolver : IMemberValueResolver<NoteObject, Post, NaturalLanguageString?, ICollection<Content>>
+	ContentResolver : IMemberValueResolver<ASObject, Post, NaturalLanguageString?, ICollection<Content>>
 {
-	ICollection<Content> IMemberValueResolver<NoteObject, Post, NaturalLanguageString?, ICollection<Content>>
-		.Resolve(NoteObject source, Post post, NaturalLanguageString? sourceContent,
+	ICollection<Content> IMemberValueResolver<ASObject, Post, NaturalLanguageString?, ICollection<Content>>
+		.Resolve(ASObject source, Post post, NaturalLanguageString? sourceContent,
 			ICollection<Content>? dest, ResolutionContext context)
 	{
 		if (!source.TryGetId(out var id)) return post.Contents;
-		var note = new Note
-		{
-			FediId = id,
-			Post = post,
-			// TODO: multiple languages
-			// or even just single languages, but with knowledge of what language is specified
-			Html = sourceContent?.DefaultValue ?? ""
-		};
+		// TODO: use explicit type mappers for more robust mapping
+		// like context.Mapper.Map<Note>(noteObject);
+		// TODO(content types): map additional content types here
+		var content = source.Is<NoteObject>() ? new Note() { FediId = id, Post = post, Html = sourceContent?.DefaultValue ?? ""}
+			: default(Content);
+
+		if (content == null) return post.Contents;
 		if (source.Preview?.TryGetValue(out var value) == true)
-			note.Preview = context.Mapper.Map<string>(value);
+			content.Preview = context.Mapper.Map<string>(value);
 		else
-			note.GeneratePreview();
-		post.AddContent(note);
+			content.GeneratePreview();
+		post.AddContent(content);
 
 		return post.Contents;
-	}
-}
-
-internal interface IMentionDiscriminator
-{
-	public MentionVisibility Value();
-}
-
-internal class To : IMentionDiscriminator
-{
-	public MentionVisibility Value() => MentionVisibility.To;
-}
-
-internal class Cc : IMentionDiscriminator
-{
-	public MentionVisibility Value() => MentionVisibility.Cc;
-}
-
-internal class BTo : IMentionDiscriminator
-{
-	public MentionVisibility Value() => MentionVisibility.Bto;
-}
-
-internal class Bcc : IMentionDiscriminator
-{
-	public MentionVisibility Value() => MentionVisibility.Bcc;
-}
-
-[UsedImplicitly]
-internal class MentionsResolver<T> : IMemberValueResolver<ASObject, Post, LinkableList<ASObject>, ICollection<Mention>>
-	where T : class, IMentionDiscriminator
-{
-	private readonly T _visibility = Activator.CreateInstance<T>();
-
-	public ICollection<Mention> Resolve(ASObject src, Post dest, LinkableList<ASObject> srcMember,
-		ICollection<Mention> destMember, ResolutionContext context)
-	{
-		foreach (var id in srcMember.ValueItems.SelectIds().Concat(srcMember.LinkItems.SelectIds()))
-		{
-			destMember.Add(new Mention(Models.Profile.CreateEmpty(id), _visibility.Value()));
-		}
-
-		return destMember;
 	}
 }
 

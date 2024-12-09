@@ -1,0 +1,65 @@
+{
+  "type": "Create",
+  "@context": [
+    "https://www.w3.org/ns/activitystreams",
+    {
+      "ostatus": "http://ostatus.org#",
+      "atomUri": "ostatus:atomUri",
+      "inReplyToAtomUri": "ostatus:inReplyToAtomUri",
+      "conversation": "ostatus:conversation",
+      "sensitive": "as:sensitive",
+      "toot": "http://joinmastodon.org/ns#",
+      "votersCount": "toot:votersCount"
+    }
+  ],
+  "actor": "https://mastodon.castle/users/user",
+  "published": "2024-10-23T02:49:59Z",
+  "to": [
+    "https://mastodon.castle/users/user/followers"
+  ],
+  "cc": [
+    "https://host.castle/actor/06e769cxim3gjfy0s1027ty87"
+  ],
+  "object": {
+    "id": "https://mastodon.castle/users/user/statuses/113354460334200392",
+    "type": "Note",
+    "summary": null,
+    "inReplyTo": "https://host.castle/post/06e7znuhnhyamw7nnoae9t59u",
+    "published": "2024-10-23T02:49:59Z",
+    "url": "https://mastodon.castle/@user/113354460334200392",
+    "attributedTo": "https://mastodon.castle/users/user",
+    "to": [
+      "https://mastodon.castle/users/user/followers"
+    ],
+    "cc": [
+      "https://host.castle/actor/06e769cxim3gjfy0s1027ty87"
+    ],
+    "sensitive": false,
+    "atomUri": "https://mastodon.castle/users/user/statuses/113354460334200392",
+    "inReplyToAtomUri": "https://host.castle/post/06e7znuhnhyamw7nnoae9t59u",
+    "conversation": "tag:localhost:3000,2024-10-15:objectId=3:objectType=Conversation",
+    "content": "\u003Cp\u003E\u003Cspan class=\u0022h-card\u0022 translate=\u0022no\u0022\u003E\u003Ca href=\u0022https://host.castle/actor/06e769cxim3gjfy0s1027ty87\u0022 class=\u0022u-url mention\u0022\u003E@\u003Cspan\u003Eadmin\u003C/span\u003E\u003C/a\u003E\u003C/span\u003E reply from mastodon\u003C/p\u003E",
+    "contentMap": {
+      "en": "\u003Cp\u003E\u003Cspan class=\u0022h-card\u0022 translate=\u0022no\u0022\u003E\u003Ca href=\u0022https://host.castle/actor/06e769cxim3gjfy0s1027ty87\u0022 class=\u0022u-url mention\u0022\u003E@\u003Cspan\u003Eadmin\u003C/span\u003E\u003C/a\u003E\u003C/span\u003E reply from mastodon\u003C/p\u003E"
+    },
+    "attachment": [],
+    "tag": [
+      {
+        "type": "Mention",
+        "href": "https://host.castle/actor/06e769cxim3gjfy0s1027ty87",
+        "name": "@admin@host.castle"
+      }
+    ],
+    "replies": {
+      "id": "https://mastodon.castle/users/user/statuses/113354460334200392/replies",
+      "type": "Collection",
+      "first": {
+        "type": "CollectionPage",
+        "next": "https://mastodon.castle/users/user/statuses/113354460334200392/replies?only_other_accounts=true\u0026page=true",
+        "partOf": "https://mastodon.castle/users/user/statuses/113354460334200392/replies",
+        "items": []
+      }
+    }
+  },
+  "id": "https://mastodon.castle/users/user/statuses/113354460334200392/activity"
+}

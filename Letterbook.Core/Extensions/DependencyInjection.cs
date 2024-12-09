@@ -95,7 +95,8 @@ public static class DependencyInjection
 					};
 					options.EnrichWithHttpResponseMessage = (activity, message) =>
 					{
-						activity.SetTag("http.response.header.content-type", message.Headers.GetValues("content-type").FirstOrDefault());
+						message.Headers.TryGetValues("content-type", out var contentType);
+						activity.SetTag("http.response.header.content-type", contentType?.FirstOrDefault() ?? "unkown");
 						activity.SetTag("http.response.header.content-length",
 							message.Headers.GetValues("content-length").FirstOrDefault());
 					};

@@ -3,6 +3,7 @@ using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
 using ActivityPub.Types.AS.Extended.Link;
 using ActivityPub.Types.Util;
+using Letterbook.Core.Extensions;
 
 namespace Letterbook.Adapter.ActivityPub;
 
@@ -58,12 +59,6 @@ public static class Extensions
 		id = default;
 		return false;
 	}
-
-	public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) where T : class =>
-		source.Where((Func<T?, bool>)TestNotNull)!;
-
-	public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) where T : struct =>
-		source.Where(x => x.HasValue).Select(x => x!.Value);
 
 	public static string NotNull(params string?[] args) =>
 		args.FirstOrDefault(s => TestNotNull(s))

@@ -59,11 +59,13 @@ public abstract class Content : IContent, IEquatable<Content>, IComparable<Conte
 		FediId = LocalId(this, opts);
 	}
 
+	public bool Equivalent(Content other) => Html.Equals(other.Html, StringComparison.InvariantCulture);
+
 	public bool Equals(Content? other)
 	{
 		if (ReferenceEquals(null, other)) return false;
 		if (ReferenceEquals(this, other)) return true;
-		return Id.Equals(other.Id) && FediId.Equals(other.FediId);
+		return FediId.Equals(other.FediId);
 	}
 
 	public override bool Equals(object? obj)
@@ -77,7 +79,7 @@ public abstract class Content : IContent, IEquatable<Content>, IComparable<Conte
 	public override int GetHashCode()
 	{
 		var hashCode = new HashCode();
-		hashCode.Add(Id);
+		// hashCode.Add(Id);
 		hashCode.Add(FediId);
 		return hashCode.ToHashCode();
 	}
