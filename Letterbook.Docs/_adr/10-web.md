@@ -1,13 +1,16 @@
-﻿# Razor Pages
+﻿---
+title: Razor Pages
+code: adr-10
+order: 10
+discussionUrl: https://github.com/Letterbook/Letterbook/pull/213
+statusHistory:
+- status: decided
+  date: 2024-05-05
+---
+
+# Razor Pages
 
 Adding a razor web project 
-
-## Status
-
-- [x] Decided (2024-05-05)
-- [ ] Decided Against
-- [ ] Deferred
-- [ ] Superseded
 
 # Decision
 

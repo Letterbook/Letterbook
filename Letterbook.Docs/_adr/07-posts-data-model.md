@@ -1,13 +1,15 @@
-﻿# Data Model for Generic Posts
+﻿---
+title: Data Model for Generic Posts
+code: adr-7
+order: 7
+statusHistory:
+- status: decided
+  date: 2024-01-02
+---
+
+# Data Model for Generic Posts
 
 We can expect almost any of the ActivityStreams Object types to federate in a way that resembles a post. And we will want to do the same eventually; we don't need to limit ourselves to just Notes. This offers a way to represent posts in a timeline, thread, etc independently of their specific content.
-
-## Status
-
-- [x] Decided (2024-01-02)
-- [ ] Decided Against 
-- [ ] Deferred 
-- [ ] Superseded 
 
 # Decision
 

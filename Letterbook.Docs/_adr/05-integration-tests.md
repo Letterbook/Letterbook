@@ -1,13 +1,15 @@
-﻿# Integration Tests
+﻿---
+title: Integration Tests
+code: adr-5
+order: 5
+statusHistory:
+- status: decided
+  date: 2023-12-27
+---
+
+# Integration Tests
 
 Guidance on how, when, and why to use integration tests.
-
-## Status
-
-- [x] Decided (2023-12-27)
-- [ ] Decided Against
-- [ ] Deferred
-- [ ] Superseded
 
 # Decision
 

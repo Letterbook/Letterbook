@@ -51,6 +51,7 @@ public class MarkdownAdr : MarkdownDoc
 {
 	public string? DiscussionUrl { get; set; }
 	public AdrStatus[] StatusHistory { get; set; } = [];
+	public required string Code { get; set; }
 }
 
 public class MarkdownAuthor : MarkdownDoc

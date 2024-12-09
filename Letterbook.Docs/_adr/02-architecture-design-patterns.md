@@ -1,13 +1,17 @@
-﻿# Architecture and Design Patterns
+﻿---
+title: Architecture and Design Patterns
+code: adr-2
+order: 2
+statusHistory:
+- status: decided
+  date: 2023-07-24
+- status: superseded
+  date: 2024-02-16
+---
+
+# Architecture and Design Patterns
 
 Using a hexagonal architecture for the overall application. And using query objects as the general pattern to manage db access.
-
-## Status
-
-- [x] Decided (2023-07-04)
-- [ ] Decided Against
-- [ ] Deferred
-- [x] Superseded ([2024-02-16][adr-08])
 
 # Decision
 
