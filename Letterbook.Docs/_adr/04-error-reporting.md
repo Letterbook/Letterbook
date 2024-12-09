@@ -11,13 +11,6 @@ statusHistory:
 
 Patterns and guidance to build consistent Exceptions with useful reporting and debugging information
 
-## Status
-
-- [ ] Decided
-- [ ] Decided Against
-- [x] Deferred (2023-12-30)
-- [ ] Superseded
-
 # Decision
 
 In general, Letterbook has a set of application-defined Exceptions that all inherit from `Letterbook.Core.CoreException`. In addition, these exceptions should use a builder pattern to facilitate collecting extra information and including it in a standard way on our Exceptions.

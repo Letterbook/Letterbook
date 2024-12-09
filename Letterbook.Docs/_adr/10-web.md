@@ -10,7 +10,7 @@ statusHistory:
 
 # Razor Pages
 
-Adding a razor web project 
+Build our own UI, using Razor Pages, instead of depending primarily on the Mastodon API.
 
 # Decision
 

@@ -1,19 +1,53 @@
-@page
+@page "/docs/adr/{Slug}"
+@using Letterbook.Docs.Markdown
+@using Microsoft.AspNetCore.Html
 @model Page
+@implements IRenderStatic<Page>
 
-@{
-    Layout = null;
+@functions {
+    public List<Page> GetStaticProps(RenderContext ctx)
+    {
+        var loader = ctx.Resolve<LoaderFactory>();
+        var docs = loader.LoadFrom<LoadDirectory, MarkdownAdr>("_adr");
+        return docs.GetAll<MarkdownAdr>().Select(d => new Page(loader)
+        {
+            Slug = d.Slug
+        }).ToList();
+    }
 }
 
-<!DOCTYPE html>
+@if (Model.Doc is not { } doc)
+{
+    Response.Redirect("/404");
+    return;
+}
+@{
+    var status = doc.StatusHistory.OrderByDescending(r => r.Date)
+        .Select(r => r.Status)
+        .First(s => !s.Equals("revised", StringComparison.InvariantCultureIgnoreCase));
+}
 
-<html>
-<head>
-    <title></title>
-</head>
-<body>
-<div>
-    
+<div class="adr-info">
+    <table>
+        <thead>
+        <tr>
+            <td colspan="@(doc.DiscussionUrl == null ? "2" : "1")">@doc.Code: @status</td>
+            @if (doc.DiscussionUrl is { } url)
+            {
+                <td><a href="@url">Discussion</a></td>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var revision in doc.StatusHistory.OrderByDescending(r => r.Date))
+        {
+            <tr>
+                <td>@revision.Status</td>
+                <td>@revision.Date.ToString("yyyy-MM-dd")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
 </div>
-</body>
-</html>
+
+@(new HtmlString(doc.Html))

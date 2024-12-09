@@ -18,6 +18,8 @@ public class LoadDirectory(ILogger<LoadDirectory> log, IWebHostEnvironment env, 
 		.Cast<T>()
 		.ToList();
 
+	public T? GetBySlug<T>(string slug) where T : MarkdownDoc => GetAll<T>().FirstOrDefault(d => d.Slug == slug);
+
 	public void LoadFrom<T>(string dir) where T : MarkdownDoc
 	{
 		Files.Clear();
