@@ -37,7 +37,6 @@ public class ActorControllerTests : WithMockContext
 		_document = new Document(JsonLdSerializerMock.Object);
 		_fakePost = new FakePost(_profile);
 
-		// Claims.Add(new Claim(ApplicationClaims.Actor, _profile.FediId.ToString()));
 		var user = Auth(new Claim(ApplicationClaims.Actor, _remoteProfile.FediId.ToString()));
 
 		_controller = new ActorController(Mock.Of<ILogger<ActorController>>(), ProfileServiceMock.Object,

@@ -215,7 +215,6 @@ public static class AstMapper
 
 	private static void FromNote(IMapperConfigurationExpression cfg)
 	{
-		// cfg.CreateMap<NoteObject, Post>(MemberList.Destination)
 		cfg.CreateMap<ASObject, Post>(MemberList.Destination)
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
