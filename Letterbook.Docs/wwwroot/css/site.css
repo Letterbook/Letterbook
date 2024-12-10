@@ -207,6 +207,12 @@ div.custom-block {
 }
 
 @media screen and (min-width: 796px) {
+    .adr-info {
+        width: 40%;
+        position: relative;
+        float: right;
+    }
+    
     .blog-grid {
         grid-template-columns: 3fr minmax(12rem, 1fr);
         grid-column-gap: 1rem;

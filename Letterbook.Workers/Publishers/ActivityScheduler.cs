@@ -8,14 +8,14 @@ using Microsoft.Extensions.Options;
 
 namespace Letterbook.Workers.Publishers;
 
-public class ActivityMessagePublisher : IActivityMessagePublisher
+public class ActivityScheduler : IActivityScheduler
 {
 	private readonly CoreOptions _options;
-	private readonly ILogger<ActivityMessagePublisher> _logger;
+	private readonly ILogger<ActivityScheduler> _logger;
 	private readonly IActivityPubDocument _document;
 	private readonly IBus _bus;
 
-	public ActivityMessagePublisher(ILogger<ActivityMessagePublisher> logger, IOptions<CoreOptions> options, IActivityPubDocument document, IBus bus)
+	public ActivityScheduler(ILogger<ActivityScheduler> logger, IOptions<CoreOptions> options, IActivityPubDocument document, IBus bus)
 	{
 		_options = options.Value;
 		_bus = bus;

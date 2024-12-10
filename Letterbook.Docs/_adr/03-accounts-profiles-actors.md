@@ -1,13 +1,16 @@
+---
+title: Accounts vs Profiles vs Actors
+code: adr-3
+order: 3
+discussionUrl: https://github.com/Letterbook/Letterbook/pull/37
+statusHistory:
+- status: decided
+  date: 2023-07-10
+---
+
 # Accounts vs Profiles vs Actors
 
 Clarifying the difference between these concepts, and the value of having them be different.
-
-## Status
-
-- [x] Decided (2023-07-10)
-- [ ] Decided Against
-- [ ] Deferred
-- [ ] Superseded
 
 # Decision
 

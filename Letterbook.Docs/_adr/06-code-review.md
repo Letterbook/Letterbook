@@ -1,13 +1,15 @@
-﻿# The Purpose of Code Review
+﻿---
+title: The Purpose of Code Review
+code: adr-6
+order: 6
+statusHistory:
+- status: decided
+  date: 2023-12-27
+---
+
+# The Purpose of Code Review
 
 Informational discussion of the role code review should play in the project.
-
-## Status
-
-- [x] Decided (2023-12-27)
-- [ ] Decided Against
-- [ ] Deferred
-- [ ] Superseded
 
 # Decision
 

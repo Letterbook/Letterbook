@@ -37,17 +37,12 @@ public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;
 	private readonly IProfileService _profileService;
-	private readonly IActivityMessagePublisher _messagePublisher;
-	private readonly IActivityPubDocument _apDoc;
 	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Profile);
 
-	public ActorController(IOptions<CoreOptions> config, ILogger<ActorController> logger,
-		IProfileService profileService, IActivityMessagePublisher messagePublisher, IActivityPubDocument apDoc)
+	public ActorController(ILogger<ActorController> logger, IProfileService profileService)
 	{
 		_logger = logger;
 		_profileService = profileService;
-		_messagePublisher = messagePublisher;
-		_apDoc = apDoc;
 		_logger.LogInformation("Loaded {Controller}", nameof(ActorController));
 	}
 

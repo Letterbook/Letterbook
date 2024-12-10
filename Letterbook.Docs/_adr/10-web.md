@@ -1,13 +1,16 @@
-﻿# Razor Pages
+﻿---
+title: Razor Pages
+code: adr-10
+order: 10
+discussionUrl: https://github.com/Letterbook/Letterbook/pull/213
+statusHistory:
+- status: decided
+  date: 2024-05-05
+---
 
-Adding a razor web project 
+# Razor Pages
 
-## Status
-
-- [x] Decided (2024-05-05)
-- [ ] Decided Against
-- [ ] Deferred
-- [ ] Superseded
+Build our own UI, using Razor Pages, instead of depending primarily on the Mastodon API.
 
 # Decision
 

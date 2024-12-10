@@ -8,17 +8,17 @@ namespace Letterbook.Docs.Markdown;
 /// Markdown loader for files organized into categories by subdirectory
 /// <remarks>categories </remarks>
 /// </summary>
-public class MarkdownCategories(ILogger<MarkdownCategories> log, IWebHostEnvironment env, IProjectFiles fs, MarkdownPipeline pipeline) :
-	MarkdownBase<MarkdownCategory>(env, pipeline), IMarkdownFiles
+public class LoadCategories(ILogger<LoadCategories> log, IWebHostEnvironment env, IProjectFiles fs, MarkdownPipeline pipeline) :
+	LoaderBase(env, pipeline), IMarkdownFiles
 {
-	public List<MarkdownCategory> Files { get; set; } = new();
+	public List<MarkdownDoc> Files { get; set; } = new();
 
-	public List<MarkdownCategory> GetAll() => Files.Where(IsVisible)
+	public List<MarkdownDoc> GetAll() => Files.Where(IsVisible)
 		.OrderBy(f => f.Date).ThenBy(f => f.Order).ThenBy(f => f.FileName).ToList();
 
-	List<T> IMarkdownFiles.GetAll<T>() => GetAll().Cast<T>().ToList();
+	public List<T> GetAll<T>() where T : MarkdownDoc => GetAll().Cast<T>().ToList();
 
-	public void LoadFrom(string path)
+	public void LoadFrom<T>(string path) where T : MarkdownDoc
 	{
 		Files.Clear();
 		var uncategorized = fs.GetFiles(path).ToList();
@@ -44,7 +44,7 @@ public class MarkdownCategories(ILogger<MarkdownCategories> log, IWebHostEnviron
 
 	private MarkdownCategory? Load(IFileInfo file, string? category)
 	{
-		var doc = Load(file);
+		var doc = Load<MarkdownCategory>(file);
 		if (doc != null)
 		{
 			doc.Category = category;
@@ -53,13 +53,11 @@ public class MarkdownCategories(ILogger<MarkdownCategories> log, IWebHostEnviron
 		return doc;
 	}
 
-	MarkdownDoc IMarkdownFiles.Reload(MarkdownDoc doc) => Reload(new MarkdownCategory(doc));
-
-	public override MarkdownCategory Reload(MarkdownCategory doc) => Load(fs.GetMarkdownDoc(doc)) ?? doc;
+	public T Reload<T>(T doc) where T : MarkdownDoc => Load<T>(fs.GetMarkdownDoc(doc)) ?? doc;
 
 	public MarkdownCategory? GetByCategory(string? category, string slug)
 	{
-		var doc = GetAll().Where(IsVisible).Where(x => x.Category == category).FirstOrDefault(x => x.Slug == slug.Trim('/'));
+		var doc = GetAll<MarkdownCategory>().Where(IsVisible).Where(x => x.Category == category).FirstOrDefault(x => x.Slug == slug.Trim('/'));
 		return doc != null ? Reload(doc) : doc;
 	}
 }

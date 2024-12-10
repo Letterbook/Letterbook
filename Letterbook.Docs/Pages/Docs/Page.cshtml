@@ -1,36 +1,53 @@
-@page "/docs/{Category}/{Slug}"
-@model Letterbook.Docs.Pages.Docs.Page
-
+@page "/docs/adr/{Slug}"
+@using Letterbook.Docs.Markdown
+@using Microsoft.AspNetCore.Html
+@model Page
 @implements IRenderStatic<Page>
-@functions
-{
+
+@functions {
     public List<Page> GetStaticProps(RenderContext ctx)
     {
-        var docs = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownCategories>>();
-        return docs.GetMarkdown("_pages").GetAll()
-            .Where(each => each.Category != null && each.Slug != "index")
-            .OrderBy(each => each.Category ?? each.Slug)
-            .ThenBy(each => each.Order)
-            .ThenBy(each => each.Slug)
-            .Select(each => new Page(docs)
-            {
-                Category = each.Category?.ToLowerInvariant() ?? "page",
-                Slug = each.Slug
-            }).ToList();
+        var loader = ctx.Resolve<LoaderFactory>();
+        var docs = loader.LoadFrom<LoadDirectory, MarkdownAdr>("_adr");
+        return docs.GetAll<MarkdownAdr>().Select(d => new Page(loader)
+        {
+            Slug = d.Slug
+        }).ToList();
     }
-
 }
 
+@if (Model.Doc is not { } doc)
+{
+    Response.Redirect("/404");
+    return;
+}
 @{
-    if (Model.Source == null)
-    {
-        Response.Redirect("/404");
-        return;
-    }
-
-
-    Response.StatusCode = 200;
-    ViewData["Title"] = Model.Source.Title;
+    var status = doc.StatusHistory.OrderByDescending(r => r.Date)
+        .Select(r => r.Status)
+        .First(s => !s.Equals("revised", StringComparison.InvariantCultureIgnoreCase));
 }
 
-@Model.Html
+<div class="adr-info">
+    <table>
+        <thead>
+        <tr>
+            <td colspan="@(doc.DiscussionUrl == null ? "2" : "1")">@doc.Code: @status</td>
+            @if (doc.DiscussionUrl is { } url)
+            {
+                <td><a href="@url">Discussion</a></td>
+            }
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var revision in doc.StatusHistory.OrderByDescending(r => r.Date))
+        {
+            <tr>
+                <td>@revision.Status</td>
+                <td>@revision.Date.ToString("yyyy-MM-dd")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@(new HtmlString(doc.Html))

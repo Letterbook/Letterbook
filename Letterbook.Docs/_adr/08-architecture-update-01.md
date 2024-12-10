@@ -1,13 +1,16 @@
-﻿# Architecture Update
+﻿---
+title: Architecture Update
+code: adr-8
+order: 8
+discussionUrl: https://github.com/Letterbook/Letterbook/pull/170
+statusHistory:
+- status: decided
+  date: 2024-02-25
+---
+
+# Architecture Update
 
 A summary of the current architecture of the application
-
-## Status
-
-- [ ] Decided
-- [ ] Decided Against
-- [ ] Deferred
-- [ ] Superseded
 
 # Decision
 
