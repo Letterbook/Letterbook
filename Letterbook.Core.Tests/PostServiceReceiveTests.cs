@@ -45,6 +45,7 @@ public class PostServiceReceiveTests : WithMocks
 		public int GetHashCode(Uri obj) => obj.ToString().GetHashCode();
 	}
 
+	[Trait("Activity", "Create")]
 	[Fact(DisplayName = "Should create new received posts")]
 	public async Task ShouldReceiveCreate()
 	{
@@ -56,6 +57,7 @@ public class PostServiceReceiveTests : WithMocks
 		Assert.Single(actual);
 	}
 
+	[Trait("Activity", "Create")]
 	[Fact(DisplayName = "Should create multiple received posts")]
 	public async Task ShouldReceiveCreate_Multiple()
 	{
@@ -68,6 +70,7 @@ public class PostServiceReceiveTests : WithMocks
 		Assert.Equal(2, actual.Count());
 	}
 
+	[Trait("Activity", "Create")]
 	[Fact(DisplayName = "Should create new received posts in reply to known posts")]
 	public async Task ShouldReceiveCreate_Reply()
 	{
@@ -85,6 +88,7 @@ public class PostServiceReceiveTests : WithMocks
 		ApCrawlerSchedulerMock.Verify(m => m.CrawlPost(It.IsAny<ProfileId>(), parent.FediId, 0), Times.Never);
 	}
 
+	[Trait("Activity", "Create")]
 	[Fact(DisplayName = "Should create new received posts that mention known profiles")]
 	public async Task ShouldReceiveCreate_Mention()
 	{
@@ -102,6 +106,7 @@ public class PostServiceReceiveTests : WithMocks
 		DataAdapterMock.Verify(m => m.ListProfiles(It.Is<IEnumerable<Uri>>(l => l.Contains(peer.FediId))), Times.Once);
 	}
 
+	[Trait("Activity", "Create")]
 	[Fact(DisplayName = "Should crawl unknown Profiles from received create")]
 	public async Task ShouldReceiveCreate_MentionUnknown()
 	{
@@ -119,6 +124,7 @@ public class PostServiceReceiveTests : WithMocks
 		ApCrawlerSchedulerMock.Verify(m => m.CrawlProfile(It.IsAny<ProfileId>(), peer.FediId, 0));
 	}
 
+	[Trait("Activity", "Create")]
 	[Fact(DisplayName = "Should crawl unknown Posts from received create")]
 	public async Task ShouldReceiveCreate_ReferenceUnknown()
 	{
@@ -134,6 +140,7 @@ public class PostServiceReceiveTests : WithMocks
 		ApCrawlerSchedulerMock.Verify(m => m.CrawlPost(It.IsAny<ProfileId>(), parent.FediId, 0));
 	}
 
+	[Trait("Activity", "Create")]
 	[Fact(DisplayName = "Should crawl posts instead of create from unknown actors")]
 	public async Task CreateShouldCrawlUnknownActors()
 	{
@@ -144,6 +151,7 @@ public class PostServiceReceiveTests : WithMocks
 		ApCrawlerSchedulerMock.Verify(m => m.CrawlPost(It.IsAny<ProfileId>(), _post.FediId, 0));
 	}
 
+	[Trait("Activity", "Create")]
 	[Fact(DisplayName = "Should crawl posts instead of create from invalid actors")]
 	public async Task CreateShouldCrawlInvalidActors()
 	{
