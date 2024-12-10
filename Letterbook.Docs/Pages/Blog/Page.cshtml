@@ -47,7 +47,10 @@
 {
     <figure>
         <img src="@image.Href" alt="@image.Alt"/>
-        <figcaption><a hrref="@image.Attribution">Source</a></figcaption>
+        @if (image.Attribution != null)
+        {
+            <figcaption><a href="@image.Attribution">Source</a></figcaption>
+        }
     </figure>
 }
 
