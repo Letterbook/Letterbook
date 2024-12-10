@@ -46,7 +46,7 @@
             <ul>
                 @foreach (var entry in Model.Doc.Socials)
                 {
-                    <li><a href="@entry.Value">@entry.Label</a></li>
+                    <li><a href="@entry.Value" rel="me">@entry.Label</a></li>
                 }
             </ul>
         </div>
@@ -56,32 +56,18 @@
     </div>
 </section>
 <section>
-<h1>Articles</h1>
-@foreach (var article in Model.Articles)
-{
-    int y = article.Date.Year;
-    int m = article.Date.Month;
-    int d = article.Date.Day;
-    <dl class="author-snippet">
-        <dt><a href=@($"/blog/post/{y}/{m}/{d}/{article.Slug}.html")>@article.Title</a></dt>
-        <dd>
-            <time datetime="@article.Date.ToString("yyyy-MM-dd")">@article.Date.ToString("MMMM dd, yyyy")</time>
-            @(new HtmlString(article.HtmlLede))
-        </dd>
-    </dl>
-    @* <article > *@
-    @*     <header> *@
-    @*         <h3 > *@
-    @*             <a href=@($"/blog/post/{y}/{m}/{d}/{article.Slug}.html")>@article.Title</a> *@
-    @*         </h3> *@
-    @*     </header> *@
-    @*     $1$ @(new HtmlString(article.HtmlLede)) #1# *@
-    @*     <footer><time datetime="@article.Date.ToString("yyyy-MM-dd")">@article.Date.ToString("D")</time> *@
-    @*         @if (article.Authors.Any()) *@
-    @*         { *@
-    @*             <p class="authors">By @(string.Join(", ", article.Authors))</p> *@
-    @*         } *@
-    @*     </footer> *@
-    @* </article> *@
-}
+    <h1>Articles</h1>
+    @foreach (var article in Model.Articles)
+    {
+        int y = article.Date.Year;
+        int m = article.Date.Month;
+        int d = article.Date.Day;
+        <dl class="author-snippet">
+            <dt><a href=@($"/blog/post/{y}/{m}/{d}/{article.Slug}.html")>@article.Title</a></dt>
+            <dd>
+                <time datetime="@article.Date.ToString("yyyy-MM-dd")">@article.Date.ToString("MMMM dd, yyyy")</time>
+                @(new HtmlString(article.HtmlLede))
+            </dd>
+        </dl>
+    }
 </section>

@@ -103,6 +103,11 @@ nav .alternate {
     }
 }
 
+time {
+    font-size: calc(1em * 0.8);
+    color: var(--pico-muted-color);
+}
+
 .text-lg {
     font-size: 110%;
 }
@@ -217,6 +222,25 @@ div.custom-block {
     text-overflow: ellipsis;
     img {
         border-radius: 1rem;
+        object-fit: cover;
+    }
+}
+
+.blog-pfp {
+    height: 4rem;
+    width: 4rem;
+    border-radius: 0.5rem;
+    float: left;
+    position: relative;
+    object-fit: cover;
+}
+
+.blog-byline {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: var(--pico-block-spacing-vertical);
+    picture {
+        margin: 0 0.5rem 0 0
     }
 }
 

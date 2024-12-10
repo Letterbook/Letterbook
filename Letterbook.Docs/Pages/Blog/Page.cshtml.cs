@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Letterbook.Docs.Pages.Blog;
 
-public class Page([FromServices] LoaderFactory blog) : PageModel
+public class Page([FromServices] LoaderFactory loader) : PageModel
 {
 	[FromRoute]
 	public string Slug { get; set; }
@@ -19,9 +19,15 @@ public class Page([FromServices] LoaderFactory blog) : PageModel
 	[FromRoute]
 	public int Day { get; set; }
 
-	public LoadDate Blog { get; set; } = blog.LoadFrom<LoadDate, MarkdownDoc>("_blog");
+	public LoadDate Blog { get; set; } = loader.LoadFrom<LoadDate, MarkdownDoc>("_blog");
+
+	public LoadDirectory Authors { get; set; } = loader.LoadFrom<LoadDirectory, MarkdownAuthor>("_authors");
 
 	public MarkdownDoc? Source =>  Blog.GetByDate<MarkdownDoc>(new DateTime(Year, Month, Day), Slug);
+
+	public Dictionary<string, MarkdownAuthor> SourceAuthors => Source != null
+		? Authors.GetAll<MarkdownAuthor>().ToDictionary(a => a.Id)
+		: new Dictionary<string, MarkdownAuthor>(0);
 
 	public HtmlString Html => new(Source?.Html);
 }
