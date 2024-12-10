@@ -1,15 +1,15 @@
 @page "/blog/author/{Slug}"
-@model Letterbook.Docs.Pages.Blog.Author
+@model Page
 
 @using Letterbook.Docs.Markdown
 @using Microsoft.AspNetCore.Html
-@implements IRenderStatic<Author>
+@implements IRenderStatic<Page>
 @functions {
-    public List<Author> GetStaticProps(RenderContext ctx)
+    public List<Page> GetStaticProps(RenderContext ctx)
     {
-        var blog = ctx.Resolve<Markdown.LoaderFactory>();
-        return blog.LoadFrom<Markdown.LoadDate, MarkdownAuthor>("_author").GetAll()
-            .Select(p => new Author(blog) { Slug = p.Slug, })
+        var blog = ctx.Resolve<LoaderFactory>();
+        return blog.LoadFrom<LoadDirectory, MarkdownAuthor>("_authors").GetAll<MarkdownAuthor>()
+            .Select(p => new Page(blog) { Slug = p.Slug, })
             .ToList();
     }
 }

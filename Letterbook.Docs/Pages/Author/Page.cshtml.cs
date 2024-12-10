@@ -2,9 +2,9 @@ using Letterbook.Docs.Markdown;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Letterbook.Docs.Pages.Blog;
+namespace Letterbook.Docs.Pages.Author;
 
-public class Author([FromServices] LoaderFactory loader) : PageModel
+public class Page([FromServices] LoaderFactory loader) : PageModel
 {
 	public LoadDate Blog { get; set; } = loader.LoadFrom<LoadDate, MarkdownDoc>("_blog");
 	public LoadDirectory Authors { get; set; } = loader.LoadFrom<LoadDirectory, MarkdownAuthor>("_authors");
