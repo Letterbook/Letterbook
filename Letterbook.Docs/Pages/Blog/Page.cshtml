@@ -2,6 +2,7 @@
 @model Letterbook.Docs.Pages.Blog.Page
 
 @using Letterbook.Docs.Markdown
+@using Microsoft.AspNetCore.Html
 @implements IRenderStatic<Page>
 
 @functions {
@@ -34,20 +35,60 @@
     ViewData["Title"] = Model.Source.Title;
 }
 
-@foreach (var author in Model.Source.Authors)
+@{
+    var time = new HtmlString($"""<br/><time class="blog-time" datetime="{Model.Source.Date:yyyy-MM-dd}">{Model.Source.Date:D}</time>""");
+}
+
+@switch (Model.Source.Authors.Count)
 {
-    <p>From @author</p>
-    @if (Model.Source.Canonical is { } canonical && new Uri(canonical) is {} href && href.IsAbsoluteUri)
+    case > 1:
     {
-        <cite>Originally published at <a href="@href.ToString()">@href.ToString()</a></cite>
+        <span class="authors">By
+            @foreach (var id in Model.Source.Authors)
+            {
+                if (Model.SourceAuthors.TryGetValue(id, out var author))
+                {
+                    <a href="/blog/author/@author.Slug" rel="author">@author.DisplayName</a> 
+                }
+                else { @id }
+            }
+        @time
+        </span>
+        break;
     }
+    case 1:
+    {
+            @if (Model.SourceAuthors.TryGetValue(Model.Source.Authors.First(), out var author))
+            {
+                <div class="blog-byline">
+                    @if (author.Image != null)
+                    {
+                        <picture>
+                            <img class="blog-pfp" src="@author.Image.Href" alt="@author.Image.Alt"/>
+                        </picture>
+                    }
+                    <span>By <a href="/blog/author/@author.Slug" rel="author">@author.DisplayName</a>@time</span>
+                </div>
+            }
+            else { <span>By @Model.Source.Authors.First()@time</span> }
+        break;
+    }
+}
+
+
+@if (Model.Source.Canonical is { } canonical && new Uri(canonical) is { } href && href.IsAbsoluteUri)
+{
+    <cite>Originally published at <a href="@href.ToString()">@href.ToString()</a></cite>
 }
 
 @if (Model.Source.Image is { } image)
 {
     <figure>
         <img src="@image.Href" alt="@image.Alt"/>
-        <figcaption><a hrref="@image.Attribution">Source</a></figcaption>
+        @if (image.Attribution != null)
+        {
+            <figcaption><a href="@image.Attribution">Source</a></figcaption>
+        }
     </figure>
 }
 

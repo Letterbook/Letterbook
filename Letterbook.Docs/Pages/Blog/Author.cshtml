@@ -1,0 +1,73 @@
+@page "/blog/author/{Slug}"
+@model Letterbook.Docs.Pages.Blog.Author
+
+@using Letterbook.Docs.Markdown
+@using Microsoft.AspNetCore.Html
+@implements IRenderStatic<Author>
+@functions {
+    public List<Author> GetStaticProps(RenderContext ctx)
+    {
+        var blog = ctx.Resolve<Markdown.LoaderFactory>();
+        return blog.LoadFrom<Markdown.LoadDate, MarkdownAuthor>("_author").GetAll()
+            .Select(p => new Author(blog) { Slug = p.Slug, })
+            .ToList();
+    }
+}
+
+@{
+    if (Model.Doc == null)
+    {
+        Response.Redirect("/404");
+        return;
+    }
+
+    Response.StatusCode = 200;
+    ViewData["Title"] = Model.Doc.Title;
+}
+
+<section class="author-grid">
+    <div class="author-bio">
+        @if (Model.Doc.Image != null)
+        {
+            <figure class="author-pfp">
+                <img src="@Model.Doc.Image.Href" alt="@Model.Doc.Image.Alt"/>
+                @if (Model.Doc.Image.Attribution != null)
+                {
+                    <figcaption><a href="@Model.Doc.Image.Attribution">Source</a></figcaption>
+                }
+            </figure>
+        }
+        <div>
+            @if (Model.Doc.Url != null)
+            {
+                <p><a href="@Model.Doc.Url">Website</a></p>
+            }
+            <span>Social media</span>
+            <ul>
+                @foreach (var entry in Model.Doc.Socials)
+                {
+                    <li><a href="@entry.Value" rel="me">@entry.Label</a></li>
+                }
+            </ul>
+        </div>
+    </div>
+    <div>
+        @(new HtmlString(Model.Doc.Html))
+    </div>
+</section>
+<section>
+    <h1>Articles</h1>
+    @foreach (var article in Model.Articles)
+    {
+        int y = article.Date.Year;
+        int m = article.Date.Month;
+        int d = article.Date.Day;
+        <dl class="author-snippet">
+            <dt><a href=@($"/blog/post/{y}/{m}/{d}/{article.Slug}.html")>@article.Title</a></dt>
+            <dd>
+                <time datetime="@article.Date.ToString("yyyy-MM-dd")">@article.Date.ToString("MMMM dd, yyyy")</time>
+                @(new HtmlString(article.HtmlLede))
+            </dd>
+        </dl>
+    }
+</section>

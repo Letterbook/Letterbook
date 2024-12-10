@@ -54,19 +54,25 @@ public class MarkdownAdr : MarkdownDoc
 	public required string Code { get; set; }
 }
 
+public class LabelledValue
+{
+	public required string Label { get; set; }
+	public required string Value { get; set; }
+}
+
 public class MarkdownAuthor : MarkdownDoc
 {
 	public required string Id { get; set; }
 	public required string DisplayName { get; set; }
-	public required string Url { get; set; }
-	public required List<KeyValuePair<string, string>> Socials { get; set; }
+	public string? Url { get; set; }
+	public List<LabelledValue> Socials { get; set; } = [];
 }
 
 public class MarkdownImage
 {
 	public required string Href { get; set; }
 	public required string Alt { get; set; }
-	public required string Attribution { get; set; }
+	public string? Attribution { get; set; }
 }
 
 public class MarkdownCategory : MarkdownDoc

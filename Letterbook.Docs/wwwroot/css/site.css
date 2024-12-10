@@ -79,6 +79,10 @@
     --pico-contrast-focus: var(--lb-color-contrast-light);
 }
 
+figcaption {
+    display: inline;
+}
+
 code, pre, .letterbook-brand {
     --pico-font-family: "Share Tech Mono", monospace;
 }
@@ -97,6 +101,11 @@ nav .alternate {
     :hover {
         color: var(--lb-color-secondary-light);
     }
+}
+
+time {
+    font-size: calc(1em * 0.8);
+    color: var(--pico-muted-color);
 }
 
 .text-lg {
@@ -206,6 +215,51 @@ div.custom-block {
     }
 }
 
+.author-pfp {
+    height: 12rem;
+    width: 12rem;
+    text-align: center;
+    text-overflow: ellipsis;
+    img {
+        border-radius: 1rem;
+        object-fit: cover;
+    }
+}
+
+.blog-pfp {
+    height: 4rem;
+    width: 4rem;
+    border-radius: 0.5rem;
+    float: left;
+    position: relative;
+    object-fit: cover;
+}
+
+.blog-byline {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: var(--pico-block-spacing-vertical);
+    picture {
+        margin: 0 0.5rem 0 0
+    }
+}
+
+.author-bio {
+    grid-template-columns: fit-content(100%) 1fr;
+    grid-column-gap: 1rem;
+    display: grid;
+    margin-bottom: var(--pico-block-spacing-vertical);
+}
+
+.author-snippet p {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    word-break: break-word;
+}
+
 @media screen and (min-width: 796px) {
     .adr-info {
         width: 40%;
@@ -220,5 +274,11 @@ div.custom-block {
         aside {
             grid-column: 2;
         }
+    }
+    
+    .author-grid {
+        grid-template-columns: minmax(22rem, 1fr) 1fr;
+        grid-column-gap: 1rem;
+        display: grid;
     }
 }
