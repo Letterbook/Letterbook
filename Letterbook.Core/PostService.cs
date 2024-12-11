@@ -416,25 +416,20 @@ public class PostService : IAuthzPostService, IPostService
 			.ToList();
 		var knownProfiles = await ConvergeProfiles(profiles);
 		var knownAudience = await ConvergeAudience(pendingPosts);
-		var pendingCrawl = pendingPosts.Where(p => !knownPosts.ContainsKey(p.FediId)).ToList();
-		pendingCrawl.AddRange(pendingPosts.Where(p => p.AddressedTo.Select(m => m.Subject).Any(pr => !knownProfiles.ContainsKey(pr.FediId))));
-		pendingCrawl.AddRange(pendingPosts.Where(p => p.Audience.Any(a => !knownAudience.ContainsKey(a.FediId))));
-		pendingCrawl = pendingCrawl.Distinct().ToList();
 
-		foreach (var pending in pendingPosts.Except(pendingCrawl))
+		foreach (var pending in pendingPosts)
 		{
 			var post = knownPosts[pending.FediId];
 
 			foreach (var mention in pending.AddressedTo)
 			{
-				mention.Subject = knownProfiles[mention.Subject.FediId];
+				mention.Subject = !knownProfiles.TryGetValue(mention.Subject.FediId, out var knownSubject)
+					? mention.Subject
+					: knownSubject;
 			}
 			post.AddressedTo = pending.AddressedTo;
-
 			post.Audience = pending.Audience.ReplaceFrom(knownAudience.Values);
-
 			post.Contents = pending.Contents.ReplaceFrom(post.Contents);
-
 			post.InReplyTo = pending.InReplyTo == null ? null : post.InReplyTo;
 			post.UpdatedDate = pending.UpdatedDate;
 			post.Client = pending.Client;
@@ -447,17 +442,17 @@ public class PostService : IAuthzPostService, IPostService
 
 		await _data.Commit();
 
-		foreach (var post in pendingPosts.Except(pendingCrawl))
+		foreach (var post in pendingPosts)
 		{
 			await _postEvents.Updated(post, (Uuid7)actor.Id, _claims);
 		}
 
-		foreach (var post in pendingCrawl)
+		foreach (var pending in profiles.Except(knownProfiles.Values))
 		{
-			await _crawler.CrawlPost(default, post.FediId);
+			await _crawler.CrawlProfile(default, pending.FediId);
 		}
 
-		return updatedPosts.Concat(pendingPosts.Except(pendingCrawl));
+		return updatedPosts.Concat(pendingPosts);
 	}
 
 	public async Task<Post> ReceiveUpdate(Uri post)
