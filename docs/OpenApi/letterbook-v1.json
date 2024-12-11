@@ -92,9 +92,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": "[0-9a-z]{25}",
-              "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "$ref": "#/components/schemas/ProfileId"
             }
           },
           {
@@ -143,9 +141,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": "[0-9a-z]{25}",
-              "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "$ref": "#/components/schemas/ProfileId"
             }
           },
           {
@@ -213,9 +209,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": "[0-9a-z]{25}",
-              "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "$ref": "#/components/schemas/ProfileId"
             }
           },
           {
@@ -247,9 +241,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": "[0-9a-z]{25}",
-              "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "$ref": "#/components/schemas/ProfileId"
             }
           },
           {
@@ -308,9 +300,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": "[0-9a-z]{25}",
-              "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "$ref": "#/components/schemas/ProfileId"
             }
           },
           {
@@ -380,9 +370,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": "[0-9a-z]{25}",
-              "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "$ref": "#/components/schemas/ProfileId"
             }
           },
           {
@@ -460,9 +448,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": "[0-9a-z]{25}",
-              "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "$ref": "#/components/schemas/ProfileId"
             }
           },
           {
@@ -637,9 +623,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": "[0-9a-z]{25}",
-              "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "$ref": "#/components/schemas/ProfileId"
             }
           },
           {
@@ -2029,6 +2013,17 @@
               "$ref": "#/components/schemas/MiniProfileDto"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProfileId": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "[0-9a-z]{25}",
+            "type": "string",
+            "example": "HQqgQL5NFV4bPxZaTXhCPW"
           }
         },
         "additionalProperties": false
