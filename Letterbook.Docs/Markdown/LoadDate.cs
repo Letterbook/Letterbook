@@ -9,23 +9,23 @@ namespace Letterbook.Docs.Markdown;
 /// Markdown loader for files organized into chronological subdirectories
 /// <remarks>subdirectories must be named in the yyyy-MM-dd format</remarks>
 /// </summary>
-public class MarkdownDate(ILogger<MarkdownDate> log, IWebHostEnvironment env, IProjectFiles fs, MarkdownPipeline pipeline) :
-	MarkdownBase<MarkdownDoc>(env, pipeline), IMarkdownFiles
+public class LoadDate(ILogger<LoadDate> log, IWebHostEnvironment env, IProjectFiles fs, MarkdownPipeline pipeline) :
+	LoaderBase(env, pipeline), IMarkdownFiles
 {
 	public List<MarkdownDoc> Files { get; set; } = new();
 
-	List<T> IMarkdownFiles.GetAll<T>() => GetAll().Cast<T>().ToList();
+	public List<T> GetAll<T>() where T : MarkdownDoc => GetAll().Cast<T>().ToList();
 	public List<MarkdownDoc> GetAll() => Files.Where(IsVisible)
 		.OrderByDescending(f => f.Date).ThenBy(f => f.Order).ThenBy(f => f.FileName).ToList();
 
-	public void LoadFrom(string path)
+	public void LoadFrom<T>(string path) where T : MarkdownDoc
 	{
 		Files.Clear();
 		var files = fs.GetSubdirectories(path).Then(fs.GetFiles).Where(f => f.PhysicalPath != null).ToList();
 		log.LogInformation("Found {Count} files", files.Count);
 		foreach (var file in files)
 		{
-			if (Load(file) is { } doc)
+			if (Load<T>(file) is { } doc)
 			{
 				Files.Add(doc);
 				log.LogInformation("Loaded {Path}", file.PhysicalPath);
@@ -37,12 +37,12 @@ public class MarkdownDate(ILogger<MarkdownDate> log, IWebHostEnvironment env, IP
 		}
 	}
 
-	public override MarkdownDoc? Load(IFileInfo file)
+	public override T? Load<T>(IFileInfo file) where T : class
 	{
 		if (!TryGetDate(out var date))
 			return default;
 
-		var doc = base.Load(file);
+		var doc = base.Load<T>(file);
 		if (doc == null) return doc;
 		doc.Date = date;
 
@@ -62,11 +62,11 @@ public class MarkdownDate(ILogger<MarkdownDate> log, IWebHostEnvironment env, IP
 		}
 	}
 
-	public override MarkdownDoc Reload(MarkdownDoc doc) => Load(fs.GetMarkdownDoc(doc)) ?? doc;
+	public T Reload<T>(T doc) where T : MarkdownDoc => Load<T>(fs.GetMarkdownDoc(doc)) ?? doc;
 
-	public MarkdownDoc? GetByDate(DateTime date, string slug)
+	public T? GetByDate<T>(DateTime date, string slug) where T : MarkdownDoc
 	{
-		var doc = GetAll().Where(IsVisible).Where(x => x.Date == date).FirstOrDefault(x => x.Slug == slug.Trim('/'));
+		var doc = GetAll<T>().Where(IsVisible).Where(x => x.Date == date).FirstOrDefault(x => x.Slug == slug.Trim('/'));
 		return doc != null ? Reload(doc) : doc;
 	}
 }

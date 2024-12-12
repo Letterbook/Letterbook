@@ -65,4 +65,10 @@
     <EmbeddedResource Include="wwwroot\css\font\ShareTechMono.OFL.txt" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\img\authors\jennierplusplus.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

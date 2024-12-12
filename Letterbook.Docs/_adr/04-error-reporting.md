@@ -1,13 +1,15 @@
-﻿# Subject
+﻿---
+title: Error Reporting
+code: adr-4
+order: 4
+statusHistory:
+- status: deferred
+  date: 2023-12-30
+---
+
+# Subject
 
 Patterns and guidance to build consistent Exceptions with useful reporting and debugging information
-
-## Status
-
-- [ ] Decided
-- [ ] Decided Against
-- [x] Deferred (2023-12-30)
-- [ ] Superseded
 
 # Decision
 

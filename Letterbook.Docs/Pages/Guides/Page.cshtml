@@ -1,0 +1,37 @@
+@page "/guides/{Category}/{Slug}"
+@model Letterbook.Docs.Pages.Guides.Page
+
+@using Letterbook.Docs.Markdown
+@implements IRenderStatic<Page>
+@functions
+{
+    public List<Page> GetStaticProps(RenderContext ctx)
+    {
+        var docs = ctx.Resolve<Markdown.LoaderFactory>();
+        return docs.LoadFrom<Markdown.LoadCategories, MarkdownCategory>("_pages").GetAll<MarkdownCategory>()
+            .Where(each => each.Category != null && each.Slug != "index")
+            .OrderBy(each => each.Category ?? each.Slug)
+            .ThenBy(each => each.Order)
+            .ThenBy(each => each.Slug)
+            .Select(each => new Page(docs)
+            {
+                Category = each.Category?.ToLowerInvariant() ?? "page",
+                Slug = each.Slug
+            }).ToList();
+    }
+
+}
+
+@{
+    if (Model.Source == null)
+    {
+        Response.Redirect("/404");
+        return;
+    }
+
+
+    Response.StatusCode = 200;
+    ViewData["Title"] = Model.Source.Title;
+}
+
+@Model.Html

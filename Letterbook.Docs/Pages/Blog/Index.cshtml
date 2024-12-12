@@ -3,8 +3,7 @@
 @model Letterbook.Docs.Pages.Blog.Index
 
 @{
-    ViewData["Title"] = "Letterbook Blog";
-    ViewData["Brand"] = "Blog";
+    ViewData["Title"] = "Blog";
 }
 
 @implements IRenderStatic<Index>
@@ -13,7 +12,7 @@
 
     public List<Index> GetStaticProps(RenderContext ctx)
     {
-        var blog = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownDate>>();
+        var blog = ctx.Resolve<Markdown.LoaderFactory>();
         return [new Index(blog)];
     }
 

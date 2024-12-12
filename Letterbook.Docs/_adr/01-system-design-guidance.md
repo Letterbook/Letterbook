@@ -1,15 +1,18 @@
-﻿# System Design Guidance
+﻿---
+title: System Design Guidance
+code: adr-1
+order: 1
+discussionUrl: https://github.com/Letterbook/Letterbook/pull/1
+statusHistory:
+  - status: decided
+    date: 2023-06-20
+  - status: revised
+    date: 2024-07-26
+---
+
+# System Design Guidance
 
 Priorities for the project, and some guidance on how to balance those priorities when making high level architectural decisions.
-
-## Status
-
-- [x] Decided (2023-06-20)
-- [ ] Decided Against
-- [ ] Deferred
-- [ ] Superseded
-
-Updated 2024-07-26
 
 # Decision
 

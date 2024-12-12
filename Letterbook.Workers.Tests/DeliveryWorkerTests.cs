@@ -22,7 +22,7 @@ namespace Letterbook.Workers.Tests;
 public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 {
 	private readonly ServiceProvider _provider;
-	private readonly IActivityMessagePublisher _publisher;
+	private readonly IActivityScheduler _publisher;
 	private readonly DeliveryWorker _consumer;
 	private readonly ITestHarness _harness;
 	private readonly Profile _profile;
@@ -32,13 +32,13 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 		var services = new ServiceCollection()
 			.AddSingleton(output.BuildLoggerFactory(LogLevel.Debug))
 			.AddMocks(this)
-			.AddScoped<IActivityMessagePublisher, ActivityMessagePublisher>()
+			.AddScoped<IActivityScheduler, ActivityScheduler>()
 			.AddScoped<IActivityPubDocument, Document>()
 			.AddMassTransitTestHarness(bus => { bus.AddConsumer<DeliveryWorker>(); });
 		services.TryAddTypesModule();
 
 		_provider = services.BuildServiceProvider();
-		_publisher = _provider.GetRequiredService<IActivityMessagePublisher>();
+		_publisher = _provider.GetRequiredService<IActivityScheduler>();
 		_consumer = _provider.GetRequiredService<DeliveryWorker>();
 		_harness = _provider.GetRequiredService<ITestHarness>();
 

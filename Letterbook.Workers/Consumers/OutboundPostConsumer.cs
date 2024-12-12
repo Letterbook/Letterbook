@@ -19,7 +19,7 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 {
 	private readonly ILogger<OutboundPostConsumer> _logger;
 	private readonly Instrumentation _instrumentation;
-	private readonly IActivityMessagePublisher _messagePublisher;
+	private readonly IActivityScheduler _scheduler;
 	private readonly IDataAdapter _posts;
 	private readonly IProfileService _profileService;
 	private readonly IActivityPubDocument _document;
@@ -27,12 +27,12 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 	private readonly CoreOptions _config;
 
 	public OutboundPostConsumer(ILogger<OutboundPostConsumer> logger, IOptions<CoreOptions> coreOptions, MappingConfigProvider maps,
-		Instrumentation instrumentation, IActivityMessagePublisher messagePublisher, IDataAdapter posts, IProfileService profileService,
+		Instrumentation instrumentation, IActivityScheduler scheduler, IDataAdapter posts, IProfileService profileService,
 		IActivityPubDocument document)
 	{
 		_logger = logger;
 		_instrumentation = instrumentation;
-		_messagePublisher = messagePublisher;
+		_scheduler = scheduler;
 		_posts = posts;
 		_profileService = profileService;
 		_document = document;
@@ -59,26 +59,26 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 		switch (context.Message.Type)
 		{
 			case nameof(PostEventPublisher.Published):
-				await DeliverAudienceAndMentions(post, sender, _messagePublisher.Publish);
+				await DeliverAudienceAndMentions(post, sender, _scheduler.Publish);
 				break;
 			case nameof(PostEventPublisher.Updated):
-				await DeliverAudienceAndMentions(post, sender, _messagePublisher.Update);
+				await DeliverAudienceAndMentions(post, sender, _scheduler.Update);
 				break;
 			case nameof(PostEventPublisher.Shared):
-				await DeliverFollowers(post, sender, _messagePublisher.Share);
+				await DeliverFollowers(post, sender, _scheduler.Share);
 				break;
 			case nameof(PostEventPublisher.Deleted):
 				var mentions = await GetMentionedProfiles(post).ToListAsync();
 				foreach (var mention in mentions)
 				{
-					await _messagePublisher.Delete(mention.Subject.Inbox, post, sender);
+					await _scheduler.Delete(mention.Subject.Inbox, post, sender);
 				}
-				await DeliverAudience(post, sender, _messagePublisher.Delete);
+				await DeliverAudience(post, sender, _scheduler.Delete);
 				break;
 			case nameof(PostEventPublisher.Liked):
 				await foreach (var inbox in GetAuthorsInboxes(post))
 				{
-					await _messagePublisher.Like(inbox, post, sender);
+					await _scheduler.Like(inbox, post, sender);
 				}
 				break;
 			default:

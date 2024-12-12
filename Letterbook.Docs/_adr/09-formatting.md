@@ -1,13 +1,16 @@
+---
+title: Code Style
+code: adr-9
+order: 9
+discussionUrl: https://github.com/Letterbook/Letterbook/pull/180
+statusHistory:
+- status: decided
+  date: 2024-03-07
+---
+
 # Formatting
 
 Establishing some minimal style enforcement
-
-## Status
-
-- [x] Decided (2024-03-07)
-- [ ] Decided Against
-- [ ] Deferred
-- [ ] Superseded
 
 # Decision
 

@@ -7,7 +7,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace Letterbook.Docs.Markdown;
 
-public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownPipeline pipeline) where T : MarkdownDoc
+public abstract partial class LoaderBase(IWebHostEnvironment env, MarkdownPipeline pipeline)
 {
 	[GeneratedRegex(@"(?<!^)(?=[A-Z\s\d])")]
 	private static partial Regex SlugRegex();
@@ -17,13 +17,13 @@ public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownP
 		return string.Join('-', SlugRegex().Split(filename).Where(static s => s != ""));
 	}
 
-	public virtual T? Load(IFileInfo file)
+	public virtual T? Load<T>(IFileInfo file) where T : MarkdownDoc
 	{
 		if (Path.GetFileNameWithoutExtension(file.PhysicalPath) is not { } filename
 		    || Path.GetExtension(file.PhysicalPath) != ".md"
 		    || File.ReadAllText(file.PhysicalPath!) is not { } content)
 			return default;
-		var doc = CreateDocument(content);
+		var doc = CreateDocument<T>(content);
 
 		doc.Title ??= filename;
 		doc.Path = file.PhysicalPath!;
@@ -33,8 +33,7 @@ public abstract partial class MarkdownBase<T>(IWebHostEnvironment env, MarkdownP
 		return doc;
 	}
 
-	public abstract T Reload(T doc);
-	public virtual T CreateDocument(string content)
+	public virtual T CreateDocument<T>(string content) where T : MarkdownDoc
 	{
 		var writer = new StringWriter();
 		var ledeWriter = new StringWriter();

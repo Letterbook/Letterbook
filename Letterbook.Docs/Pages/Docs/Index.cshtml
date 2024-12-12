@@ -1,24 +1,42 @@
 @page "/docs/"
 @model Letterbook.Docs.Pages.Docs.Index
+
 @{
-    ViewData["Title"] = "Docs";
+ViewData["Title"] = "Docs";
 }
 
+@using Letterbook.Docs.Markdown
+@using Microsoft.AspNetCore.Html
 @implements IRenderStatic<Index>
 
-@functions {
+@if (Model.DocsPage is not {} page)
+{
+    Response.Redirect("404");
+    return;
+}
 
+@(new HtmlString(page.Html))
+
+@functions {
     public List<Index> GetStaticProps(RenderContext ctx)
     {
-        var categories = ctx.Resolve<Markdown.MarkdownFilesFactory<Markdown.MarkdownCategories>>();
-        return [new Index(categories)];
+        var docs = ctx.Resolve<LoaderFactory>();
+        return [new Index(docs)];
     }
-
 }
-
-<ul>
-@foreach (var p in Model.Categories.GetAll())
-{
-    <li><a href=@($"docs/{p.Category ?? "page"}/{p.Slug}")>@p.Slug</a></li>
-}
-</ul>
+<table>
+    <thead>
+    <td>ADR</td><td>Title</td><td>Status</td><td>Date</td>
+    </thead>
+    <tbody>
+    @foreach (var doc in Model.Docs.GetAll<MarkdownAdr>())
+    {
+        <tr>
+            <td>@doc.Code</td>
+            <td><a href="/docs/adr/@doc.Slug">@doc.Title</a></td>
+            <td>@doc.StatusHistory.OrderByDescending(s => s.Date).Select(s => s.Status).FirstOrDefault("")</td>
+            <td>@doc.StatusHistory.OrderByDescending(s => s.Date).Select(s => s.Date).FirstOrDefault().ToString("yyyy-MM-dd")</td>
+        </tr>
+    }
+    </tbody>
+</table>
