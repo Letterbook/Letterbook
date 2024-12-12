@@ -29,19 +29,36 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		private readonly IJsonLdSerializer _serializer;
 		private readonly FakePost _fakePost;
 		private readonly Models.Post _post;
+		private readonly Document _document;
 		private static IMapper _profileMapper = new Mapper(Mappers.AstMapper.Profile);
-		private static IMapper _postMapper = new Mapper(Mappers.AstMapper.Post);
+		private static IMapper _postMapper = new Mapper(Mappers.AstMapper.FromPost);
+		private static IMapper _mapper = new Mapper(Mappers.AstMapper.Default);
+
 
 		public MapFromModelTests(ITestOutputHelper output, JsonLdSerializerFixture serializerFixture)
 		{
 			_output = output;
 			_serializer = serializerFixture.JsonLdSerializer;
+			_document = new Document(_serializer);
 
 			_output.WriteLine($"Bogus Seed: {Init.WithSeed()}");
 			_fakeProfile = new FakeProfile("letterbook.example");
 			_profile = _fakeProfile.Generate();
 			_fakePost = new FakePost(_profile);
 			_post = _fakePost.Generate();
+		}
+
+		[Fact(DisplayName = "Map a post round trip")]
+		public void MapDocumentFromPost()
+		{
+			var post = _document.FromPost(_post);
+			var actual = _mapper.Map<Models.Post>(post);
+
+			Assert.NotNull(actual);
+			Assert.NotNull(actual.Contents.FirstOrDefault());
+
+			Assert.Equal(_post.FediId, actual.FediId);
+			Assert.Equal(_post.Contents.First().Html, actual.Contents.First().Html);
 		}
 
 		[Fact(DisplayName = "Map a simple Post to AS#Note")]
@@ -125,7 +142,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		public void ValidConfig()
 		{
 			Mappers.AstMapper.Default.AssertConfigurationIsValid();
-			Mappers.AstMapper.Post.AssertConfigurationIsValid();
+			Mappers.AstMapper.FromPost.AssertConfigurationIsValid();
 		}
 
 		[Fact]
@@ -167,13 +184,53 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		}
 
 		[Fact]
+		public void CanMapNote_MentionTo()
+		{
+			_simpleNote.To.Add("https://example.com/actor");
+			var actual = AstMapper.Map<Models.Post>(_simpleNote);
+
+			Assert.Single(actual.AddressedTo);
+			Assert.Equal(Models.MentionVisibility.To, actual.AddressedTo.First().Visibility);
+		}
+
+		[Fact]
+		public void CanMapNote_MentionBto()
+		{
+			_simpleNote.BTo.Add("https://example.com/actor");
+			var actual = AstMapper.Map<Models.Post>(_simpleNote);
+
+			Assert.Single(actual.AddressedTo);
+			Assert.Equal(Models.MentionVisibility.Bto, actual.AddressedTo.First().Visibility);
+		}
+
+		[Fact]
+		public void CanMapNote_MentionBcc()
+		{
+			_simpleNote.BCC.Add("https://example.com/actor");
+			var actual = AstMapper.Map<Models.Post>(_simpleNote);
+
+			Assert.Single(actual.AddressedTo);
+			Assert.Equal(Models.MentionVisibility.Bcc, actual.AddressedTo.First().Visibility);
+		}
+
+		[Fact]
+		public void CanMapNote_MentionCc()
+		{
+			_simpleNote.CC.Add("https://example.com/actor");
+			var actual = AstMapper.Map<Models.Post>(_simpleNote);
+
+			Assert.Single(actual.AddressedTo);
+			Assert.Equal(Models.MentionVisibility.Cc, actual.AddressedTo.First().Visibility);
+		}
+
+		[Fact]
 		public void CanMapThreadFromContext()
 		{
 			var expected = "https://note.example/note/1/thread/";
 			_simpleNote.Context = new Linkable<ASObject>(new ASLink() { HRef = expected });
 			var actual = AstMapper.Map<Models.Post>(_simpleNote);
 
-			Assert.Equal(expected, actual.Thread.FediId.ToString());
+			Assert.Equal(expected, actual.Thread.FediId?.ToString());
 		}
 
 		[Fact]
@@ -183,7 +240,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			_simpleNote.Replies = new ASCollection { Id = expected };
 			var actual = AstMapper.Map<Models.Post>(_simpleNote);
 
-			Assert.Equal(expected, actual.Thread.FediId.ToString());
+			Assert.Equal(expected, actual.Thread.FediId?.ToString());
 		}
 		[Fact]
 		public void CanMapThreadPreferContext()
@@ -193,7 +250,7 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			_simpleNote.Context = new Linkable<ASObject>(new ASLink() { HRef = "https://note.example/note/3" });
 			var actual = AstMapper.Map<Models.Post>(_simpleNote);
 
-			Assert.Equal(expected, actual.Thread.FediId.ToString());
+			Assert.Equal(expected, actual.Thread.FediId?.ToString());
 		}
 
 		[Fact]
@@ -233,6 +290,16 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 			var mapped = AstMapper.Map<Models.IFederatedActor>(actor);
 
 			Assert.NotNull(mapped);
+		}
+
+		[Fact(DisplayName = "Should handle mapping non-post-like objects")]
+		public void CanMapPostFromArbitraryObject()
+		{
+			var apObject = new ASObject() { Id = "https://example.com/some_object" };
+			var post = AstMapper.Map<Models.Post>(apObject);
+
+			Assert.NotNull(post);
+			Assert.Empty(post.Contents);
 		}
 	}
 }

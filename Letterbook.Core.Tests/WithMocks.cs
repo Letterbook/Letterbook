@@ -20,6 +20,7 @@ public abstract class WithMocks
 	public Mock<IActivityPubAuthenticatedClient> ActivityPubAuthClientMock;
 	public Mock<IProfileService> ProfileServiceMock;
 	public Mock<IAuthzProfileService> ProfileServiceAuthMock;
+	public Mock<IProfileEventPublisher> ProfileEventServiceMock;
 	public IOptions<CoreOptions> CoreOptionsMock;
 	public Mock<MockableMessageHandler> HttpMessageHandlerMock;
 	public Mock<IPostEventPublisher> PostEventServiceMock;
@@ -31,6 +32,7 @@ public abstract class WithMocks
 	public Mock<IAccountService> AccountServiceMock;
 	public Mock<IJsonLdSerializer> JsonLdSerializerMock;
 	public Mock<IActivityScheduler> ActivityPublisherMock;
+	public Mock<IApCrawlScheduler> ApCrawlerSchedulerMock;
 
 	public ServiceCollection MockedServiceCollection;
 
@@ -43,6 +45,7 @@ public abstract class WithMocks
 		ActivityPubAuthClientMock = new Mock<IActivityPubAuthenticatedClient>();
 		ProfileServiceMock = new Mock<IProfileService>();
 		ProfileServiceAuthMock = new Mock<IAuthzProfileService>();
+		ProfileEventServiceMock = new Mock<IProfileEventPublisher>();
 		PostEventServiceMock = new Mock<IPostEventPublisher>();
 		PostServiceMock = new Mock<IPostService>();
 		PostServiceAuthMock = new Mock<IAuthzPostService>();
@@ -52,9 +55,10 @@ public abstract class WithMocks
 		AccountServiceMock = new Mock<IAccountService>();
 		JsonLdSerializerMock = new Mock<IJsonLdSerializer>();
 		ActivityPublisherMock = new Mock<IActivityScheduler>();
+		ApCrawlerSchedulerMock = new Mock<IApCrawlScheduler>();
 
 		ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
-		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>(), It.IsAny<Uuid7>())).Returns(PostServiceAuthMock.Object);
+		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(PostServiceAuthMock.Object);
 		ProfileServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(ProfileServiceAuthMock.Object);
 		TimelineServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(AuthzTimelineServiceMock.Object);
 		var mockOptions = new CoreOptions

@@ -58,6 +58,9 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<Profile> SingleProfile(ProfileId id);
 	public IQueryable<Profile> SingleProfile(Uri fediId);
 
+	public IQueryable<Profile> ListProfiles(IEnumerable<ProfileId> profileIds);
+	public IQueryable<Profile> ListProfiles(IEnumerable<Uri> profileIds);
+
 	/// <summary>
 	/// Query for a Post by Id
 	/// </summary>
@@ -68,14 +71,17 @@ public interface IDataAdapter : IDisposable
 	/// <see cref="SinglePost(Medo.Uuid7)"/>
 	public IQueryable<Post> SinglePost(Uri fediId);
 
+	public IQueryable<Post> ListPosts(IEnumerable<PostId> postIds);
+	public IQueryable<Post> ListPosts(IEnumerable<Uri> postIds);
+
 	/// <summary>
 	/// Query for a Thread by Id
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns></returns>
-	public IQueryable<ThreadContext> SingleThread(Uuid7 id);
-	/// <see cref="SingleThread(Medo.Uuid7)"/>
-	public IQueryable<ThreadContext> SingleThread(Uri fediId);
+	public IQueryable<ThreadContext> Threads(Uuid7 id);
+	/// <see cref="Threads(Medo.Uuid7)"/>
+	public IQueryable<ThreadContext> Threads(params Uri[] threadIds);
 
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public IQueryable<Profile> WithAudience(IQueryable<Profile> query);
@@ -119,6 +125,7 @@ public interface IDataAdapter : IDisposable
 	public void Add(Post post);
 	public void AddRange(IEnumerable<Profile> profile);
 	public void AddRange(IEnumerable<Account> account);
+	public void AddRange(IEnumerable<Post> posts);
 	public void Update(Profile profile);
 	public void Update(Account account);
 	public void Update(Post post);

@@ -129,6 +129,16 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Profiles.Where(profile => profile.FediId == fediId);
 	}
 
+	public IQueryable<Models.Profile> ListProfiles(IEnumerable<Models.ProfileId> profileIds)
+	{
+		return _context.Profiles.Where(post => profileIds.Contains(post.Id));
+	}
+
+	public IQueryable<Models.Profile> ListProfiles(IEnumerable<Uri> profileIds)
+	{
+		return _context.Profiles.Where(post => profileIds.Contains(post.FediId));
+	}
+
 	public IQueryable<Models.Post> SinglePost(Models.PostId id)
 	{
 		return _context.Posts.Where(post => post.Id == id);
@@ -139,14 +149,26 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Posts.Where(post => post.FediId == fediId);
 	}
 
-	public IQueryable<Models.ThreadContext> SingleThread(Uuid7 id)
+	public IQueryable<Models.Post> ListPosts(IEnumerable<Models.PostId> postIds)
+	{
+		return _context.Posts.Where(post => postIds.Contains(post.Id));
+	}
+
+	public IQueryable<Models.Post> ListPosts(IEnumerable<Uri> postIds)
+	{
+		return _context.Posts.Where(post => postIds.Contains(post.FediId));
+	}
+
+	public IQueryable<Models.ThreadContext> Threads(Uuid7 id)
 	{
 		return _context.Threads.Where(thread => thread.Id == id.ToGuid());
 	}
 
-	public IQueryable<Models.ThreadContext> SingleThread(Uri fediId)
+	public IQueryable<Models.ThreadContext> Threads(params Uri[] threadIds)
 	{
-		return _context.Threads.Where(thread => thread.FediId == fediId);
+		return threadIds.Length == 1
+			? _context.Threads.Where(thread => thread.FediId == threadIds[0])
+			: _context.Threads.Where(thread => threadIds.Contains(thread.FediId));
 	}
 
 	public IQueryable<Models.Profile> WithAudience(IQueryable<Models.Profile> query)
@@ -230,6 +252,11 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	public void AddRange(IEnumerable<Models.Account> account)
 	{
 		_context.Accounts.AddRange(account);
+	}
+
+	public void AddRange(IEnumerable<Models.Post> posts)
+	{
+		_context.Posts.AddRange(posts);
 	}
 
 	public void Update(Models.Profile profile)

@@ -11,11 +11,11 @@ using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Letterbook.Core.Models;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace Letterbook.Api.Controllers.ActivityPub;
 
@@ -37,12 +37,18 @@ public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;
 	private readonly IProfileService _profileService;
+	private readonly IPostService _postService;
+	private readonly IApCrawlScheduler _apCrawler;
 	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Profile);
+	private static readonly IMapper Mapper = new Mapper(AstMapper.Default);
 
-	public ActorController(ILogger<ActorController> logger, IProfileService profileService)
+	public ActorController(ILogger<ActorController> logger,
+		IProfileService profileService, IPostService postService, IApCrawlScheduler apCrawler)
 	{
 		_logger = logger;
 		_profileService = profileService;
+		_postService = postService;
+		_apCrawler = apCrawler;
 		_logger.LogInformation("Loaded {Controller}", nameof(ActorController));
 	}
 
@@ -105,8 +111,14 @@ public class ActorController : ControllerBase
 	[ProducesResponseType(StatusCodes.Status410Gone)]
 	[ProducesResponseType(StatusCodes.Status421MisdirectedRequest)]
 	[ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
-	public async Task<IActionResult> PostInbox(Uuid7 id, ASType activity)
+	public async Task<IActionResult> PostInbox(ProfileId id, ASType asType)
 	{
+		if (!asType.Is<ASActivity>(out var activity))
+			return BadRequest(new {Reason = "Input was not an Activity"});
+		if (activity.Actor.SingleOrDefault()?.TryGetId(out var actorId) != true)
+			return Unauthorized(new {Reason = "Could not determine the Actor"});
+		if (actorId!.ToString() != User.Claims.FirstOrDefault(c => c.Type == ApplicationClaims.Actor)?.Value)
+			return Unauthorized(new {Reason = "Activity was not signed by the Actor"});
 		try
 		{
 			if (activity.Is<AcceptActivity>(out var accept))
@@ -128,6 +140,18 @@ public class ActorController : ControllerBase
 				_logger.LogDebug("Inbox received: {Activity}", "Undo");
 				return await InboxUndo(id, undo);
 			}
+
+			if (activity.Is<CreateActivity>(out var create))
+			{
+				return await InboxCreate(id, create);
+			}
+
+			if (activity.Is<DeleteActivity>(out var delete))
+				return await InboxDelete(id, delete);
+
+			if (activity.Is<UpdateActivity>(out var update))
+				return await InboxUpdate(id, update);
+
 
 			_logger.LogWarning("Ignored unknown activity {ActivityType}", activity.GetType());
 			_logger.LogDebug("Ignored unknown activity details {@Activity}", activity);
@@ -210,7 +234,64 @@ public class ActorController : ControllerBase
 		return true;
 	}
 
-	private async Task<IActionResult> InboxAccept(Uuid7 localId, ASActivity activity)
+	private async Task<IActionResult> InboxUpdate(ProfileId id, UpdateActivity activity)
+	{
+		var posts = activity.Object.ValueItems.Select(Mapper.Map<Post>)
+			.Where(p => p.Contents.Count != 0)
+			.ToList();
+		if (posts.Count == 0)
+		{
+			_logger.LogInformation("Create Activity does not appear to contain any posts");
+			return BadRequest();
+		}
+		var created = await _postService.As(User.Claims).ReceiveUpdate(posts);
+		if (created.Count() == posts.Count && !activity.Object.LinkItems.Any()) return Ok();
+
+		foreach (var link in activity.Object.LinkItems)
+		{
+			await _apCrawler.CrawlPost(id, link.HRef);
+		}
+		return Accepted();
+	}
+
+	private async Task<IActionResult> InboxDelete(ProfileId id, DeleteActivity delete)
+	{
+		var items = delete.Object.Select(each =>
+		{
+			each.TryGetId(out var id);
+			return id;
+		}).WhereNotNull().ToList();
+		if (items.Count == 0)
+		{
+			_logger.LogInformation("Delete Activity does not appear to contain any records");
+			return BadRequest();
+		}
+		await _postService.As(User.Claims).ReceiveDelete(items);
+
+		return Accepted();
+	}
+
+	private async Task<IActionResult> InboxCreate(ProfileId id, CreateActivity activity)
+	{
+		var posts = activity.Object.ValueItems.Select(Mapper.Map<Post>)
+			.Where(p => p.Contents.Count != 0)
+			.ToList();
+		if (posts.Count == 0)
+		{
+			_logger.LogInformation("Create Activity does not appear to contain any posts");
+			return BadRequest();
+		}
+		var created = await _postService.As(User.Claims).ReceiveCreate(posts);
+		if (created.Count() == posts.Count && !activity.Object.LinkItems.Any()) return Ok();
+
+		foreach (var link in activity.Object.LinkItems)
+		{
+			await _apCrawler.CrawlPost(id, link.HRef);
+		}
+		return Accepted();
+	}
+
+	private async Task<IActionResult> InboxAccept(ProfileId localId, ASActivity activity)
 	{
 		if (!TryUnwrapActivity(activity, "Accept", out var activityObject, out var actorId, out var error))
 			return error;
@@ -225,7 +306,7 @@ public class ActorController : ControllerBase
 		return Accepted();
 	}
 
-	private async Task<IActionResult> InboxReject(Uuid7 localId, RejectActivity rejectActivity)
+	private async Task<IActionResult> InboxReject(ProfileId localId, RejectActivity rejectActivity)
 	{
 		_logger.LogDebug("Inbox received: {Activity}", "Reject");
 		if (!TryUnwrapActivity(rejectActivity, "Reject", out var activityObject, out var actorId, out var error))
@@ -233,7 +314,7 @@ public class ActorController : ControllerBase
 
 		if (activityObject.Is<FollowActivity>(out var followActivity))
 		{
-			if (actorId.ToString().Contains(localId.ToId25String())
+			if (actorId.ToString().Contains(localId.ToString())
 				&& rejectActivity.Actor.SingleOrDefault()?.TryGetId(out var targetId) == true)
 			{
 				await _profileService.As(User.Claims).ReceiveFollowReply(localId, targetId, FollowState.Rejected);
@@ -247,7 +328,7 @@ public class ActorController : ControllerBase
 		return Accepted();
 	}
 
-	private async Task<IActionResult> InboxUndo(Uuid7 id, ASActivity activity)
+	private async Task<IActionResult> InboxUndo(ProfileId id, ASActivity activity)
 	{
 		if (!TryUnwrapActivity(activity, "Undo", out var activityObject, out var undoActorId, out var error))
 			return error;
@@ -261,7 +342,7 @@ public class ActorController : ControllerBase
 			_logger.LogDebug("Undo activity: {Object}", "Follow");
 			if (followActivity.Object.SingleOrDefault() is not {} target
 			    || !target.TryGetId(out var targetId)
-			    || !targetId.ToString().Contains(id.ToId25String()))
+			    || !targetId.ToString().Contains(id.ToString()))
 				return BadRequest();
 			if (followActivity.Actor.SingleOrDefault() is not {} actor
 				|| !actor.TryGetId(out var followerId))
@@ -277,7 +358,7 @@ public class ActorController : ControllerBase
 		return new AcceptedResult();
 	}
 
-	private async Task<IActionResult> InboxFollow(Uuid7 localId, ASActivity followRequest)
+	private async Task<IActionResult> InboxFollow(ProfileId localId, ASActivity followRequest)
 	{
 		if (followRequest.Actor.Count > 1) return BadRequest(new ErrorMessage(ErrorCodes.None, "Only one Actor can follow at a time"));
 		var actor = followRequest.Actor.First();

@@ -136,9 +136,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "pattern": "[0-9a-z]{25}",
-              "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "$ref": "#/components/schemas/ProfileId"
             }
           }
         ],
@@ -1160,6 +1158,17 @@
           }
         },
         "additionalProperties": { }
+      },
+      "ProfileId": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "[0-9a-z]{25}",
+            "type": "string",
+            "example": "HQqgQL5NFV4bPxZaTXhCPW"
+          }
+        },
+        "additionalProperties": false
       }
     },
     "securitySchemes": {

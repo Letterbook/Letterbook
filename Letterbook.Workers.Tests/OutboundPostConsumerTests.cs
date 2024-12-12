@@ -1,5 +1,5 @@
-using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
@@ -9,7 +9,6 @@ using Letterbook.Workers.Contracts;
 using Letterbook.Workers.Publishers;
 using MassTransit;
 using MassTransit.Testing;
-using Medo;
 using Microsoft.Extensions.DependencyInjection;
 using MockQueryable;
 using Moq;

@@ -1,0 +1,26 @@
+{
+  "type": "Delete",
+  "@context": [
+    "https://www.w3.org/ns/activitystreams",
+    {
+      "ostatus": "http://ostatus.org#",
+      "atomUri": "ostatus:atomUri"
+    }
+  ],
+  "actor": "https://mastodon.castle/users/user",
+  "to": [
+    "https://www.w3.org/ns/activitystreams#Public"
+  ],
+  "object": {
+    "id": "https://mastodon.castle/users/user/statuses/113354214820743598",
+    "type": "Tombstone",
+    "atomUri": "https://mastodon.castle/users/user/statuses/113354214820743598"
+  },
+  "signature": {
+    "type": "RsaSignature2017",
+    "creator": "https://mastodon.castle/users/user#main-key",
+    "created": "2024-10-23T02:46:59Z",
+    "signatureValue": "jlgXbtfHmskpLg6eLgyYV2s9LyBRm4kFCUzypKvga\u002Bn/xay9agLnt/HryN5SO185fxK1cW6dy4WKcHT35yivl\u002BjnR/70S4dR9c1AksXdhI78JZZ1x8JQjO002nB\u002BuBctVmq0L/deOj/dEGEuO8w1FL\u002BcneNQ6CNF1B8i8dX2PfY1eO1aLDT7eDeKNpc98jo9zN1f4IY\u002ByySt3Rkxt1BVKAEs5z9VHGM\u002BSKTs5q4P2/9WlgHP0LD5hN\u002BhP8drwOV1KtfGJ\u002Bt3PLb7nkBShTYjVpZj5oA0cQ48sx09vfd0SzGJOPr4StqvReLXK8oNZnGfxziEp3Cmlp7RpcpuIKSLYA=="
+  },
+  "id": "https://mastodon.castle/users/user/statuses/113354214820743598#delete"
+}
