@@ -1,3 +1,6 @@
+using Markdig.Extensions.CustomContainers;
+using Markdig.Renderers;
+using Markdig.Renderers.Html;
 using Letterbook.Docs.Markdown;
 using ServiceStack.IO;
 
@@ -8,44 +11,12 @@ namespace Letterbook.Docs;
 public class ConfigureSsg : IHostingStartup
 {
     public void Configure(IWebHostBuilder builder) => builder
-        .ConfigureServices((context,services) =>
-        {
-            context.Configuration.GetSection(nameof(AppConfig)).Bind(AppConfig.Instance);
-            services.AddSingleton(AppConfig.Instance);
-            services.AddSingleton<RazorPagesEngine>();
-
-            services.AddMarkdown()
-	            .AddMarkdownLoader<LoadDate>()
-	            .AddMarkdownLoader<LoadDirectory>()
-	            .AddMarkdownLoader<LoadCategories>()
-				.AddProjectFiles();
-            services.AddMarkdig()
-	            .UseCustomContainers(extensions =>
-	            {
-		            extensions.AddBlockContainer("YouTube", new YouTubeContainer());
-		            extensions.AddBlockContainer("Mastodon", new MastodonContainer());
-		            extensions.AddInlineContainer("YouTube", new YouTubeInlineContainer());
-		            extensions.AddInlineContainer("Mastodon", new MastodonInlineContainer());
-		            extensions.AddBlockContainer("Tip", new CustomInfoRenderer());
-		            extensions.AddBlockContainer("Info", new CustomInfoRenderer(){
-			            Class = "info",
-			            Title = "INFO",
-		            });
-		            extensions.AddBlockContainer("Warning", new CustomInfoRenderer(){
-			            Class = "warning",
-			            Title = "WARNING",
-		            });
-		            extensions.AddBlockContainer("Danger", new CustomInfoRenderer()
-		            {
-			            Class = "danger",
-			            Title = "DANGER",
-		            });
-	            });
-        })
+        .ConfigureServices(DependencyInjection.ConfigureServices)
         .ConfigureAppHost(
             appHost => appHost.Plugins.Add(new CleanUrlsFeature()),
             afterPluginsLoaded: appHost =>
             {
+	            // MarkdigConfig.Set
 	            AppConfig.Instance.GitPagesBaseUrl = "https://github.com/Letterbook/Letterbook";
             },
             afterAppHostInit: appHost =>
