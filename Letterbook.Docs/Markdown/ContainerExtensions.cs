@@ -9,9 +9,13 @@ namespace Letterbook.Docs.Markdown;
 
 public class ContainerExtensions : IMarkdownExtension
 {
+	public static ContainerExtensions Instance = new();
+
 	public Dictionary<string, Func<CodeBlockRenderer?, HtmlObjectRenderer<CodeBlock>>> CodeBlocks { get; set; } = new();
 	public Dictionary<string, HtmlObjectRenderer<CustomContainer>> BlockContainers { get; set; } = new();
 	public Dictionary<string, HtmlObjectRenderer<CustomContainerInline>> InlineContainers { get; set; } = new();
+
+	private ContainerExtensions() { }
 
 	public void AddCodeBlock(string name, Func<CodeBlockRenderer?, HtmlObjectRenderer<CodeBlock>> fenceCodeBlock) =>
 		CodeBlocks[name] = fenceCodeBlock;
@@ -89,5 +93,18 @@ public class ContainerExtensions : IMarkdownExtension
 	}
 
 	public void Setup(MarkdownPipeline pipeline, IMarkdownRenderer renderer)
-	{ }
+	{
+		if (renderer is HtmlRenderer htmlRenderer)
+		{
+			if (!htmlRenderer.ObjectRenderers.Contains<CustomContainerRenderers>())
+			{
+				// Must be inserted before CodeBlockRenderer
+				htmlRenderer.ObjectRenderers.Insert(0, new CustomContainerRenderers(this));
+			}
+
+			// htmlRenderer.ObjectRenderers.TryRemove<HtmlCustomContainerInlineRenderer>();
+			// Must be inserted before EmphasisRenderer
+			// htmlRenderer.ObjectRenderers.Insert(0, new CustomContainerInlineRenderers(this));
+		}
+	}
 }

@@ -150,9 +150,9 @@ div.custom-block {
 }
 
 .custom-block.tip {
-    border-color: var(--lb-color-accent);
+    border-color: var(--lb-color-accent-dark);
     p.custom-block-title {
-        color: var(--lb-color-accent);
+        color: var(--lb-color-accent-dark);
     }
 }
 .custom-block.info {
@@ -205,7 +205,7 @@ div.custom-block {
         justify-self: stretch;
         
         >:first-child {
-            border-color: var(--lb-color-accent);
+            border-color: var(--lb-color-contrast);
             border-width: 1px;
             padding: 0.75rem;
             border-style: inset;

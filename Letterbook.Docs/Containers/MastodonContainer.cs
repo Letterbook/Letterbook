@@ -1,9 +1,9 @@
-﻿using Markdig.Extensions.CustomContainers;
+﻿using Markdig;
+using Markdig.Extensions.CustomContainers;
 using Markdig.Renderers;
 using Markdig.Renderers.Html;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace Letterbook.Docs;
+namespace Letterbook.Docs.Containers;
 
 // This won't work for all Mastodon servers, they must host an embed.js script to make it all work completely. iframe's may still function without that but in a limited state.
 public class MastodonContainer : HtmlObjectRenderer<CustomContainer>
@@ -13,6 +13,10 @@ public class MastodonContainer : HtmlObjectRenderer<CustomContainer>
 		if (obj.Arguments == null)
 		{
 			renderer.WriteLine($"Missing Mastodon Post, Usage :::{obj.Info} <postUrl>");
+			return;
+		}
+		else if (obj.Arguments == "")
+		{
 			return;
 		}
 

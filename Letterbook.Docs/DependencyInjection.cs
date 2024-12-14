@@ -1,3 +1,4 @@
+using Letterbook.Docs.Containers;
 using Letterbook.Docs.Files;
 using Letterbook.Docs.Markdown;
 using Markdig;
@@ -26,9 +27,12 @@ public static class DependencyInjection
 	public static MarkdownPipelineBuilder AddMarkdig(this IServiceCollection services)
 	{
 		var builder = new MarkdownPipelineBuilder()
+			.UseAutoIdentifiers()
 			.UseYamlFrontMatter()
-			.UseAdvancedExtensions();
-		services.AddSingleton<MarkdownPipeline>(_ => builder.Build());
+			.UseAdvancedExtensions()
+			.Use(ContainerExtensions.Instance);
+		services
+			.AddSingleton<MarkdownPipeline>(_ => builder.Build());
 
 		return builder;
 	}
@@ -36,9 +40,32 @@ public static class DependencyInjection
 	public static MarkdownPipelineBuilder UseCustomContainers(this MarkdownPipelineBuilder pipeline,
 		Action<ContainerExtensions>? configure = null)
 	{
-		var ext = new ContainerExtensions();
+		var ext = ContainerExtensions.Instance;
 		configure?.Invoke(ext);
 		pipeline.Extensions.AddIfNotAlready(ext);
 		return pipeline;
+	}
+
+	public static void ConfigureServices(WebHostBuilderContext context, IServiceCollection services)
+	{
+		context.Configuration.GetSection(nameof(AppConfig)).Bind(AppConfig.Instance);
+		services.AddSingleton(AppConfig.Instance);
+		services.AddSingleton<RazorPagesEngine>();
+
+		services.AddMarkdown()
+			.AddMarkdownLoader<LoadDate>()
+			.AddMarkdownLoader<LoadDirectory>()
+			.AddMarkdownLoader<LoadCategories>()
+			.AddProjectFiles();
+		services.AddMarkdig()
+			.UseCustomContainers(extensions =>
+			{
+				// extensions.AddBlockContainer("YouTube", new YouTubeContainer());
+				extensions.AddBlockContainer("Mastodon", new MastodonContainer());
+				extensions.AddBlockContainer("Tip", new CustomInfoRenderer());
+				extensions.AddBlockContainer("Info", new CustomInfoRenderer() { Class = "info", Title = "INFO", });
+				extensions.AddBlockContainer("Warning", new CustomInfoRenderer() { Class = "warning", Title = "WARNING", });
+				extensions.AddBlockContainer("Danger", new CustomInfoRenderer() { Class = "danger", Title = "DANGER", });
+			});
 	}
 }
