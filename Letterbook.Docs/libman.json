@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "defaultProvider": "jsdelivr",
+  "defaultProvider": "unpkg",
   "libraries": [
     {
       "library": "@picocss/pico@2.0.6",
@@ -8,6 +8,14 @@
       "files": [
         "css/pico.min.css",
         "LICENSE.md"
+      ]
+    },
+    {
+      "library": "mermaid@11.4.1",
+      "destination": "wwwroot/lib/mermaid",
+      "files": [
+        "dist/mermaid.min.js",
+        "LICENSE"
       ]
     }
   ]
