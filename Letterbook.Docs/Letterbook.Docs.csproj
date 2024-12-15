@@ -51,6 +51,8 @@
     <_ContentIncludedByDefault Remove="dist\meta\index.json" />
     <_ContentIncludedByDefault Remove="dist\pages\vue\bookings.json" />
     <_ContentIncludedByDefault Remove="dist\pages\vue\metadata.json" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\picocss\css\pico.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\lib\picocss\LICENSE.md" />
   </ItemGroup>
 
   <ItemGroup>
