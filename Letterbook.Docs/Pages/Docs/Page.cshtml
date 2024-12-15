@@ -22,6 +22,7 @@
     return;
 }
 @{
+    ViewData["Title"] = Model.Doc.Title;
     var status = doc.StatusHistory.OrderByDescending(r => r.Date)
         .Select(r => r.Status)
         .First(s => !s.Equals("revised", StringComparison.InvariantCultureIgnoreCase));
