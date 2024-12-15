@@ -17,4 +17,8 @@ public class Page([FromServices] LoaderFactory categories) : PageModel
 	public MarkdownCategory? Source => Categories.GetByCategory(Category == "page" ? null : Category, Slug);
 	public HtmlString Html => new(Source?.Html);
 
+	public void OnGet()
+	{
+		Categories.Reload(Source);
+	}
 }
