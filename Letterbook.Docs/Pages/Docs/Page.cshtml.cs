@@ -12,4 +12,9 @@ public class Page([FromServices] LoaderFactory factory) : PageModel
 	public LoadDirectory Docs { get; set; } = factory.LoadFrom<LoadDirectory, MarkdownAdr>("_adr");
 
 	public MarkdownAdr? Doc => Docs.GetBySlug<MarkdownAdr>(Slug);
+
+	public void OnGet()
+	{
+		Docs.Reload(Doc);
+	}
 }

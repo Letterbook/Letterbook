@@ -15,4 +15,9 @@ public class Page([FromServices] LoaderFactory loader) : PageModel
 	public MarkdownAuthor? Doc => Authors.GetBySlug<MarkdownAuthor>(Slug);
 
 	public IEnumerable<MarkdownDoc> Articles => Doc != null ? Blog.GetAll<MarkdownDoc>().Where(d => d.Authors.Contains(Doc.Id)) : [];
+
+	public void OnGet()
+	{
+		Authors.Reload(Doc);
+	}
 }

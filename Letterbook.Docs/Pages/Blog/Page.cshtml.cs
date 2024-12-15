@@ -30,4 +30,9 @@ public class Page([FromServices] LoaderFactory loader) : PageModel
 		: new Dictionary<string, MarkdownAuthor>(0);
 
 	public HtmlString Html => new(Source?.Html);
+
+	public void OnGet()
+	{
+		Blog.Reload(Source);
+	}
 }
