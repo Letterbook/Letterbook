@@ -5,5 +5,6 @@ public enum FollowState : int
 	None,
 	Accepted,
 	Pending,
-	Rejected
+	Rejected,
+	Blocked
 }
