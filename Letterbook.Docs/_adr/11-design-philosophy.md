@@ -4,8 +4,8 @@ code: adr-11
 order: 11
 discussionUrl: https://github.com/Letterbook/Letterbook/
 statusHistory:
-  - status: proposed
-    date: 2024-12-13
+  - status: decided
+    date: 2024-12-16
 ---
 
 # Design Philosophy
