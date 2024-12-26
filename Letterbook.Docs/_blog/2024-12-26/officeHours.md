@@ -6,7 +6,7 @@ authors:
 
 # Office Hours
 
-This is a very small update, to announce I'll be holding maintainer office hours December 26, 2024 at 12pm US Central time (6pm UTC). [Details on the calendar][office-hours-cal]. And you can use [this link to join the video call][jitsi].
+This is a very small update, to announce I'll be holding maintainer office hours December 27, 2024 at 12pm US Central time (6pm UTC). [Details on the calendar][office-hours-cal]. And you can use [this link to join the video call][jitsi].
 
 Between the holidays and some encroaching burnout, progress on Letterbook has been slow for the last month or two. But, I'm doing better, and I'd like to get back to it. So, join me, if you can!
 
