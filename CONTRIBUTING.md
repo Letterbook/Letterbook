@@ -107,7 +107,7 @@ dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Lett
 4. Run Letterbook (in watch mode)
 ```shell
 dotnet restore Letterbook.sln
-dotnet watch run --project Letterbook.Web
+dotnet watch run --project Letterbook --launch-profile dev
 ```
 
 5. Open the UI http://localhost:5127  
