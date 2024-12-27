@@ -11,7 +11,7 @@
       "groupName": "dev dependencies"
     },
     {
-      "matchDepNames": ["dotnet-sdk"],
+      "matchDepNames": ["dotnet-sdk", "dotnet-runtime"],
       "updateTypes": ["patch"],
       "enabled": false
     },
