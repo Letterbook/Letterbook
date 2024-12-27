@@ -44,7 +44,7 @@
     {
       "enabled": false,
       "matchDepNames": [
-        "Microsoft.CodeAnalysis{/,}**"
+        "Microsoft.CodeAnalysis**"
       ]
     }
   ]
