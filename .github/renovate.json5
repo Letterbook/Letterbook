@@ -3,7 +3,8 @@
   "ignoreDeps": [
     "Moq",
     "dotnet-sdk",
-    "dotnet-runtime"
+    "dotnet-runtime",
+    "dotnet-ef"
   ],
   "packageRules": [
     {
@@ -13,8 +14,7 @@
         "Microsoft.AspNetCore**",
         "System.Text.Json",
         "Serilog**",
-        "Npgsql**",
-        "dotnet-ef"
+        "Npgsql**"
       ],
       "matchUpdateTypes": ["minor", "patch"]
     },
