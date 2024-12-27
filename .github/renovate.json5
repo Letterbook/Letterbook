@@ -13,7 +13,8 @@
         "Microsoft.AspNetCore**",
         "System.Text.Json",
         "Serilog**",
-        "Npgsql**"
+        "Npgsql**",
+        "dotnet-ef"
       ],
       "matchUpdateTypes": ["minor", "patch"]
     },
