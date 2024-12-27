@@ -16,9 +16,9 @@
     <PackageVersion Include="HtmlSanitizer" Version="8.1.870" />
     <PackageVersion Include="ILogger.Moq" Version="1.1.10" />
     <PackageVersion Include="Letterbook.Uuid7" Version="2.1.1-patch.12" />
-    <PackageVersion Include="Markdig" Version="0.38.0" />
-    <PackageVersion Include="MassTransit" Version="8.3.3" />
-    <PackageVersion Include="MassTransit.Abstractions" Version="8.3.3" />
+    <PackageVersion Include="Markdig" Version="0.39.1" />
+    <PackageVersion Include="MassTransit" Version="8.3.4" />
+    <PackageVersion Include="MassTransit.Abstractions" Version="8.3.4" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.11" />
@@ -53,7 +53,7 @@
     <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
     <PackageVersion Include="MockQueryable.Moq" Version="7.0.3" />
     <PackageVersion Include="Moq" Version="4.18.4" />
-    <PackageVersion Include="Neovolve.Logging.Xunit" Version="6.2.0" />
+    <PackageVersion Include="Neovolve.Logging.Xunit" Version="6.3.0" />
     <PackageVersion Include="Npgsql" Version="8.0.6" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
     <PackageVersion Include="Npgsql.OpenTelemetry" Version="8.0.6" />
@@ -61,8 +61,8 @@
     <PackageVersion Include="NSign.AspNetCore" Version="1.1.1" />
     <PackageVersion Include="NSign.Client" Version="1.1.1" />
     <PackageVersion Include="NSign.SignatureProviders" Version="1.1.1" />
-    <PackageVersion Include="Nunit" Version="4.3.0" />
-    <PackageVersion Include="NUnit.Analyzers" Version="4.4.0">
+    <PackageVersion Include="Nunit" Version="4.3.1" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.5.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
@@ -94,6 +94,6 @@
     <PackageVersion Include="System.Reactive.Async" Version="6.0.0-alpha.18" />
     <PackageVersion Include="xunit" Version="2.9.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
-    <PackageVersion Include="YamlDotNet" Version="16.2.1" />
+    <PackageVersion Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 </Project>
