@@ -11,5 +11,7 @@ public class ConfigureFollowerRelations : IEntityTypeConfiguration<Models.Follow
 		builder.Property(relation => relation.Id)
 			.ValueGeneratedNever();
 		builder.HasIndex(relation => relation.Date);
+		// builder.OwnsMany(relation => relation.Conditions);
+		builder.Property(relation => relation.Conditions).HasColumnType("jsonb");
 	}
 }
