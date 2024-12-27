@@ -64,7 +64,7 @@ services:
       - prometheus
       - tempo
     container_name: grafana
-    image: grafana/grafana-oss:11.3.0
+    image: grafana/grafana-oss:11.4.0
     ports:
       - "3000:3000"
     volumes:

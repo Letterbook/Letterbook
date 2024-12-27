@@ -1,18 +1,44 @@
 ﻿{
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "ignoreDeps": ["Moq"],
+  "ignoreDeps": [
+    "Moq",
+    "dotnet-sdk",
+    "dotnet-runtime",
+    "dotnet-ef"
+  ],
   "packageRules": [
     {
-      "matchCategories": ["dotnet"],
+      "matchPackageNames": [
+        "Microsoft.Extensions**",
+        "Microsoft.EntityFramework**",
+        "Microsoft.AspNetCore**",
+        "System.Text.Json",
+        "Serilog**",
+        "Npgsql**"
+      ],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "matchCategories": [
+        "dotnet"
+      ],
       "groupName": "dotnet packages"
     },
     {
-      "matchCategories": ["github-actions", "docker"],
+      "matchCategories": [
+        "github-actions",
+        "docker"
+      ],
       "groupName": "dev dependencies"
     },
     {
-      "matchDepNames": ["dotnet-sdk"],
-      "updateTypes": ["patch"],
+      "matchDepNames": [
+        "dotnet-sdk",
+        "dotnet-runtime"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
       "enabled": false
     },
     {
