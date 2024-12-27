@@ -42,10 +42,8 @@
       "enabled": false
     },
     {
-      "enabled": false,
-      "matchDepNames": [
-        "Microsoft.CodeAnalysis**"
-      ]
+      "matchDepPrefixes": ["Microsoft.CodeAnalysis"],
+      "enabled": false
     }
   ]
 }
