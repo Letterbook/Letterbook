@@ -35,8 +35,14 @@
       <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\Letterbook.Generators\Letterbook.Generators\Letterbook.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true"/>
+    <ItemGroup Condition="'$(MSBuildRuntimeType)' != 'Full'"> <!-- Building using dotnet tooling. -->
+      <ProjectReference Include="..\Letterbook.Generators\Letterbook.Generators\Letterbook.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" SetTargetFramework="TargetFramework=$(TargetFramework)" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Full'"> <!-- Building inside Visual Studio. -->
+      <!-- Letterbook.Generators must be built for netstandard2.0 for its generators and analyzers to be usable inside Visual Studio -->
+      <ProjectReference Include="..\Letterbook.Generators\Letterbook.Generators\Letterbook.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" />
+      <!-- Letterbook.Generators must be built targeting the same framework as this project to allow the use of runtime features such as static abstract members on interfaces -->
+      <ProjectReference Include="..\Letterbook.Generators\Letterbook.Generators\Letterbook.Generators.csproj" ReferenceOutputAssembly="true" SetTargetFramework="TargetFramework=$(TargetFramework)" />
     </ItemGroup>
 
 </Project>
