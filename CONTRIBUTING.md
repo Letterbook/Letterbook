@@ -107,7 +107,7 @@ dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Lett
 4. Run Letterbook (in watch mode)
 ```shell
 dotnet restore Letterbook.sln
-dotnet watch run --project Letterbook.Web
+dotnet watch run --project Letterbook --launch-profile dev
 ```
 
 5. Open the UI http://localhost:5127  
@@ -177,7 +177,7 @@ Tests can be run from the suggested test explorer extension.
 
 ### Using Jetbrains Rider and VisualStudio
 
-There are `launchSettings.json` targets configured in the repo. Open Letterbook.sln and then run the `Letterbook: http` configuration.
+There are `launchSettings.json` targets configured in the repo. Open Letterbook.sln and then run the `Letterbook: dev` profile.
 
 Tests can be run from the built-in test runner.
 
