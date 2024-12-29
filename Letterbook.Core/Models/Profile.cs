@@ -88,6 +88,10 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
 	public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
 	public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
+	/// This Profile was the subject of these Reports
+	public ICollection<ModerationReport> ReportSubject = new HashSet<ModerationReport>();
+	/// This Profile submitted these Reports
+	public ICollection<ModerationReport> Reports = new HashSet<ModerationReport>();
 
 	public Uuid7 GetId() => Id.Id;
 	public string GetId25() => Id.ToString();
