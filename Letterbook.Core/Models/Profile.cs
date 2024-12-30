@@ -92,6 +92,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public ICollection<ModerationReport> ReportSubject = new HashSet<ModerationReport>();
 	/// This Profile submitted these Reports
 	public ICollection<ModerationReport> Reports = new HashSet<ModerationReport>();
+	public IDictionary<Restrictions, DateTimeOffset> Restrictions { get; set; } = new Dictionary<Restrictions, DateTimeOffset>();
 
 	public Uuid7 GetId() => Id.Id;
 	public string GetId25() => Id.ToString();
