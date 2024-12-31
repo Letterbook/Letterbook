@@ -14,4 +14,10 @@ public class Peer
 		Hostname = address.Authority;
 		Authority = address.GetAuthority();
 	}
+
+	private Peer()
+	{
+		Hostname = default!;
+		Authority = default!;
+	}
 }
