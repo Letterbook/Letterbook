@@ -172,6 +172,9 @@ public static class AstMapper
 			.ForMember(dest => dest.Accessors, opt => opt.Ignore())
 			.ForMember(dest => dest.Audiences, opt => opt.Ignore())
 			.ForMember(dest => dest.Headlining, opt => opt.Ignore())
+			.ForMember(dest => dest.Restrictions, opt => opt.Ignore())
+			.ForMember(dest => dest.Reports, opt => opt.Ignore())
+			.ForMember(dest => dest.ReportSubject, opt => opt.Ignore())
 			.ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
 			.ForMember(dest => dest.FollowingCollection, opt => opt.Ignore())
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
@@ -217,6 +220,7 @@ public static class AstMapper
 	{
 		cfg.CreateMap<ASObject, Post>(MemberList.Destination)
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
+			.ForMember(dest => dest.RelatedReports, opt => opt.Ignore())
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
 			.ForMember(dest => dest.Authority, opt => opt.MapFrom((_, post) => post.FediId.GetAuthority()))
 			.ForMember(dest => dest.Hostname, opt => opt.MapFrom((_, post) => post.FediId.Host))
