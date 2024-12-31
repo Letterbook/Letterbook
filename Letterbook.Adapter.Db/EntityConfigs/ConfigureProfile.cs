@@ -20,5 +20,6 @@ public class ConfigureProfile : IEntityTypeConfiguration<Models.Profile>
 		builder.HasMany<Models.FollowerRelation>(profile => profile.FollowersCollection)
 			.WithOne(relation => relation.Follows)
 			.IsRequired();
+		builder.Property(profile => profile.Restrictions).HasColumnType("jsonb");
 	}
 }

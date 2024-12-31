@@ -5,6 +5,7 @@ using Letterbook.Adapter.Db;
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -13,9 +14,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    partial class RelationalContextModelSnapshot : ModelSnapshot
+    [Migration("20241229215247_ModerationDataModels")]
+    partial class ModerationDataModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -279,24 +282,6 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.ToTable("ModerationReport");
                 });
 
-            modelBuilder.Entity("Letterbook.Core.Models.Peer", b =>
-                {
-                    b.Property<string>("Authority")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Hostname")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<IDictionary<Restrictions, DateTimeOffset>>("Restrictions")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
-                    b.HasKey("Authority");
-
-                    b.ToTable("Peers");
-                });
-
             modelBuilder.Entity("Letterbook.Core.Models.Post", b =>
                 {
                     b.Property<Guid>("Id")
@@ -422,10 +407,6 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.Property<Guid?>("OwnedById")
                         .HasColumnType("uuid");
-
-                    b.Property<IDictionary<Restrictions, DateTimeOffset>>("Restrictions")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
 
                     b.Property<string>("SharedInbox")
                         .HasColumnType("text");

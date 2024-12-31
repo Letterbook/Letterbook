@@ -55,6 +55,8 @@
       <Compile Remove="Migrations\Identity\IdentityContextModelSnapshot.cs" />
       <Compile Remove="Migrations\20240525051736_FixAudienceKey.cs" />
       <Compile Remove="Migrations\20240525051736_FixAudienceKey.Designer.cs" />
+      <Compile Remove="Migrations\20241229210036_ModerationDataModels.cs" />
+      <Compile Remove="Migrations\20241229210036_ModerationDataModels.Designer.cs" />
     </ItemGroup>
 
 </Project>

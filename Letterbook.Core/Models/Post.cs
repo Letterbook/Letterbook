@@ -103,6 +103,7 @@ public class Post : IFederated, IEquatable<Post>
 	public IList<Profile> LikesCollection { get; set; } = new List<Profile>();
 	public Uri? Shares { get; set; }
 	public IList<Profile> SharesCollection { get; set; } = new List<Profile>();
+	public IEnumerable<ModerationReport> RelatedReports { get; set; } = new HashSet<ModerationReport>();
 
 	public Uuid7 GetId() => Id.Id;
 	public string GetId25() => Id.ToString();
