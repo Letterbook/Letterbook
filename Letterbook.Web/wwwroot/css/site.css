@@ -118,6 +118,7 @@ header {
         align-items: initial;
 
         /* *-of-type pseudo classes are needed for specificity */
+
         ul, ul:first-of-type, ul:last-of-type {
             line-height: 1.5rlh;
             display: flex;
@@ -161,9 +162,20 @@ main {
     article {
         --pico-font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
     }
-    grid-column: 2;
-    grid-row-start: 1;
-    grid-row-end: 4;
+    grid-area: 1 / 2 / 4;
+}
+
+.box {
+    clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%);
+    position: relative;
+}
+
+.box:before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(var(--lb-color-primary), var(--lb-color-contrast), var(--lb-color-accent), var(--lb-color-secondary));
+    clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%, 0 2em, 4px calc(2em + 1.66px), 4px calc(100% - 4px), calc(100% - 2em - 1.66px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2em - 1.66px), calc(100% - 4px) 4px, calc(2em + 1.66px) 4px, 4px calc(2em + 1.66px));
 }
 
 @media screen and (min-width: 796px) {
