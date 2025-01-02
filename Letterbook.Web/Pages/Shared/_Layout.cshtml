@@ -9,33 +9,33 @@
     <link rel="stylesheet" href="/css/site.css" asp-append-version="true"/>
 </head>
 <body class="container">
-<div class="sidebar">
-    <header>
-        <nav>
-            <h1 class="letterbook-brand"><a asp-page="/Index">Letterbook</a></h1>
-            <ul>
-                <li><a asp-area="" asp-page="/Notifications">Notifications</a></li>
-                <li><a asp-area="" asp-page="/Search">Search</a></li>
-                <li><a asp-area="" asp-page="/Settings">Settings</a></li>
-                <li></li>
-                <li ><a asp-page="Profile" asp-route-handle="admin">Admin profile</a></li>
-            </ul>
-            @* <partial name="_LoginPartial"/> *@
-        </nav>
-    </header>
-    @await RenderSectionAsync("Sidebar", required: false)
-    <footer>
-        <span>Powered by <a href="https://letterbook.com">Letterbook</a> v0.0</span>
+<header>
+    <nav>
+        <h1 class="letterbook-brand"><a asp-page="/Index">Letterbook</a></h1>
         <ul>
-            <li><a asp-area="" asp-page="/About">About</a></li>
-            <li><a asp-area="" asp-page="/Moderation">Moderation policy</a></li>
-            <li><a asp-area="" asp-page="/Privacy">Privacy policy</a></li>
+            <li><a asp-area="" asp-page="/Notifications">Notifications</a></li>
+            <li><a asp-area="" asp-page="/Search">Search</a></li>
+            <li><a asp-area="" asp-page="/Settings">Settings</a></li>
+            <li></li>
+            <li ><a asp-page="Profile" asp-route-handle="admin">Admin profile</a></li>
         </ul>
-    </footer>
+        @* <partial name="_LoginPartial"/> *@
+    </nav>
+</header>
+<div class="sidebar">
+@await RenderSectionAsync("Sidebar", required: false)
 </div>
 <main role="main">
     @RenderBody()
 </main>
+<footer>
+    <span>Powered by <a href="https://letterbook.com">Letterbook</a> v0.0</span>
+    <ul>
+        <li><a asp-area="" asp-page="/About">About</a></li>
+        <li><a asp-area="" asp-page="/Moderation">Moderation policy</a></li>
+        <li><a asp-area="" asp-page="/Privacy">Privacy policy</a></li>
+    </ul>
+</footer>
 
 <script src="~/js/site.js" asp-append-version="true"></script>
 
