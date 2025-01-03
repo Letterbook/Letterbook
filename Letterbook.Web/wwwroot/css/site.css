@@ -108,14 +108,13 @@ body {
 
 footer {
     grid-column: 1;
-    grid-row-start: 2;
     font-size: 0.75rem;
-    align-content: end;
 }
 
 header {
     font-size: 1.25rem;
     --pico-font-weight: 700;
+    flex-grow: 1;
 
     nav {
         display: flex;
@@ -141,6 +140,10 @@ header {
 
 
 .sidebar {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     padding-block: var(--pico-block-spacing-vertical);
 }
 
