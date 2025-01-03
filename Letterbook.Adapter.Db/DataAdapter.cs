@@ -56,6 +56,7 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	{
 		return query
 			.Include(account => account.LinkedProfiles)
+			.ThenInclude(l => l.Profile)
 			.AsSplitQuery();
 	}
 

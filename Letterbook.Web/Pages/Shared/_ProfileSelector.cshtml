@@ -1,0 +1,13 @@
+@using Letterbook.Core
+@using Microsoft.IdentityModel.JsonWebTokens
+@inject IAccountService AccountService
+@{
+    var profileId = User.Claims.FirstOrDefault(c => c.Type == "activeProfile")?.Value;
+    var accountId = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+    var account = accountId != null ? await AccountService.LookupAccount(Guid.Parse(accountId)) : null;
+    var profile = account?.LinkedProfiles.Select(l => l.Profile).FirstOrDefault(p => p.Id.ToString() == profileId);
+    
+    if (profile == null)
+        return;
+}
+<span><a asp-page="Profile" asp-route-handle="@profile.Handle"><img src="/img/letterbook-square.svg"/>Profile</a></span>

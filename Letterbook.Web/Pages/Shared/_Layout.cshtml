@@ -13,17 +13,28 @@
     <nav>
         <h1 class="letterbook-brand"><a asp-page="/Index">Letterbook</a></h1>
         <ul>
-            <li><a asp-area="" asp-page="/Notifications">Notifications</a></li>
-            <li><a asp-area="" asp-page="/Search">Search</a></li>
-            <li><a asp-area="" asp-page="/Settings">Settings</a></li>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <li>
+                    <partial name="_ProfileSelector"/>
+                </li>
+                <li><a asp-area="" asp-page="/Notifications">Notifications</a></li>
+                <li><a asp-area="" asp-page="/Search">Search</a></li>
+                <li><a asp-area="" asp-page="/Settings">Settings</a></li>
+            }
+            else
+            {
+                <li>
+                    <partial name="_LoginPartial"/>
+                </li>
+            }
             <li></li>
-            <li ><a asp-page="Profile" asp-route-handle="admin">Admin profile</a></li>
+            <li><a asp-page="Profile" asp-route-handle="admin">Admin profile</a></li>
         </ul>
-        @* <partial name="_LoginPartial"/> *@
     </nav>
 </header>
 <section class="sidebar">
-@await RenderSectionAsync("Sidebar", required: false)
+    @await RenderSectionAsync("Sidebar", required: false)
 </section>
 <main role="main">
     @RenderBody()
@@ -34,6 +45,15 @@
         <li><a asp-area="" asp-page="/About">About</a></li>
         <li><a asp-area="" asp-page="/Moderation">Moderation policy</a></li>
         <li><a asp-area="" asp-page="/Privacy">Privacy policy</a></li>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <li>
+                <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
+                      asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
+                    <button id="logout" type="submit" class="btn-link color-secondary">Logout</button>
+                </form>
+            </li>
+        }
     </ul>
 </footer>
 
