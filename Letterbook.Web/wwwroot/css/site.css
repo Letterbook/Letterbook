@@ -101,20 +101,27 @@ html {
 
 body {
     display: grid;
-    min-height: 100vh;
+    grid-template-areas:
+        "header main" 
+        "footer main";
     grid-template-columns: 1fr 3fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 1fr auto;
+    height: 100%;
+/*     display: grid; */
+/*     min-height: 100vh; */
+/*     grid-template-columns: 1fr 3fr; */
+/*     grid-template-rows: auto 1fr; */
 }
 
 footer {
-    grid-column: 1;
+    grid-area: footer;
     font-size: 0.75rem;
 }
 
 header {
     font-size: 1.25rem;
     --pico-font-weight: 700;
-    flex-grow: 1;
+    grid-area: header;
 
     nav {
         display: flex;
@@ -168,7 +175,7 @@ main {
     article {
         --pico-font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
     }
-    grid-area: 1 / 2 / 2;
+    grid-area: main;
 }
 
 img {
