@@ -10,7 +10,7 @@
     <PackageVersion Include="AutoMapper.Collection" Version="10.0.0" />
     <PackageVersion Include="Bogus" Version="35.6.1" />
     <PackageVersion Include="BouncyCastle.Cryptography" Version="2.5.0" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.3" />
     <PackageVersion Include="DarkLink.Web.WebFinger.Server" Version="1.0.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
     <PackageVersion Include="HtmlSanitizer" Version="8.1.870" />
@@ -62,7 +62,7 @@
     <PackageVersion Include="NSign.AspNetCore" Version="1.1.1" />
     <PackageVersion Include="NSign.Client" Version="1.1.1" />
     <PackageVersion Include="NSign.SignatureProviders" Version="1.1.1" />
-    <PackageVersion Include="Nunit" Version="4.3.1" />
+    <PackageVersion Include="Nunit" Version="4.3.2" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.5.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
