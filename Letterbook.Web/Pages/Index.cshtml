@@ -6,4 +6,12 @@
 
 <div>
     <h1>Home</h1>
+    <p>
+        <a asp-page="Profile" asp-route-handle="admin">Admin profile</a>
+    </p>
+    <p>And now some content, to demonstrate scrolling behavior</p>
+    @foreach (var number in Enumerable.Range(1, 20))
+    {
+        <p>@number</p>
+    }
 </div>

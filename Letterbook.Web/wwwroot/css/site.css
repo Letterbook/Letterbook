@@ -106,11 +106,7 @@ body {
         "footer main";
     grid-template-columns: 1fr 3fr;
     grid-template-rows: 1fr auto;
-    height: 100%;
-/*     display: grid; */
-/*     min-height: 100vh; */
-/*     grid-template-columns: 1fr 3fr; */
-/*     grid-template-rows: auto 1fr; */
+    height: 100vh;
 }
 
 footer {
@@ -122,15 +118,15 @@ header {
     font-size: 1.25rem;
     --pico-font-weight: 700;
     grid-area: header;
+    justify-content: stretch;
 
     nav {
         display: flex;
         flex-direction: column;
         align-items: initial;
 
-        /* *-of-type pseudo classes are needed for specificity */
-
         ul, ul:first-of-type, ul:last-of-type {
+            /* *-of-type pseudo classes are needed for specificity */
             line-height: 1.5rlh;
             display: flex;
             flex-direction: column;
@@ -175,7 +171,9 @@ main {
     article {
         --pico-font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
     }
+
     grid-area: main;
+    overflow: scroll;
 }
 
 img {
