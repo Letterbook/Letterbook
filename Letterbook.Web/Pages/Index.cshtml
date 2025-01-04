@@ -1,12 +1,17 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    <br/>
-    <a asp-page="Profile" asp-route-handle="admin">Admin profile</a>
+<div>
+    <h1>Home</h1>
+    <p>
+        <a asp-page="Profile" asp-route-handle="admin">Admin profile</a>
+    </p>
+    <p>And now some content, to demonstrate scrolling behavior</p>
+    @foreach (var number in Enumerable.Range(1, 20))
+    {
+        <p>@number</p>
+    }
 </div>

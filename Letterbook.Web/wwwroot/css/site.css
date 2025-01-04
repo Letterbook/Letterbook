@@ -1,22 +1,100 @@
+/* Font used for user content (except monospaced) */
+@font-face {
+    font-family: inclusve_sans;
+    src: url("font/InclusiveSans-Regular.woff") format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* The wordmark font */
+@font-face {
+    font-family: "Share Tech Mono";
+    src: url("font/ShareTechMono-Regular.woff2") format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    /* Main color "Aero" */
+    --lb-color-primary: hsla(187, 96%, 44%, 1);
+    --lb-color-primary-dark: hsl(180, 100%, 27.1%);
+    --lb-color-primary-light: hsl(180, 84.9%, 63.7%);
+
+    /* Secondary color "Hollywood Cerise" */
+    --lb-color-secondary: hsla(321, 99%, 46%, 1);
+    --lb-color-secondary-dark: hsl(325, 100%, 35.9%);
+    --lb-color-secondary-light: hsl(325, 92%, 65.7%);
+
+    /* Contrast color "Safety Orange" */
+    --lb-color-contrast: hsla(29, 100%, 50%, 1);
+    --lb-color-contrast-dark: hsl(27, 100%, 45.3%);
+    --lb-color-contrast-light: hsl(27, 100%, 67.5%);
+
+    /* Accent color "Spring Bud" */
+    --lb-color-accent: hsla(77, 89%, 49%, 1);
+    --lb-color-accent-dark: hsl(79, 89%, 42.4%);
+    --lb-color-accent-light: hsla(77, 89%, 49%, 1);
+
+    /* Background colors */
+    --charcoal: hsla(204, 19%, 26%, 1);
+    --cool-paper: hsl(210, 16.7%, 95.3%);
+}
+
+/* Light color scheme (Default) */
+/* Can be forced with data-theme="light" */
+[data-theme="light"],
+:root:not([data-theme="dark"]) {
+    --pico-background-color: var(--cool-paper);
+    --pico-primary: var(--lb-color-primary);
+    --pico-primary-focus: var(--lb-color-primary-light);
+    --pico-secondary: var(--lb-color-secondary);
+    --pico-secondary-focus: var(--lb-color-secondary-light);
+    --pico-contrast: var(--lb-color-contrast);
+    --pico-contrast-focus: var(--lb-color-contrast-light);
+}
+
+/* Dark color scheme (Auto) */
+/* Automatically enabled if user has Dark mode enabled */
+@media only screen and (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+        --pico-background-color: var(--charcoal);
+        --pico-primary: var(--lb-color-primary);
+        --pico-primary-focus: var(--lb-color-primary-light);
+        --pico-secondary: var(--lb-color-secondary);
+        --pico-secondary-focus: var(--lb-color-secondary-light);
+        --pico-contrast: var(--lb-color-contrast);
+        --pico-contrast-focus: var(--lb-color-contrast-light);
+    }
+}
+
+/* Dark color scheme (Forced) */
+/* Enabled if forced with data-theme="dark" */
+[data-theme="dark"] {
+    --pico-background-color: var(--charcoal);
+    --pico-primary: var(--lb-color-primary);
+    --pico-primary-focus: var(--lb-color-primary-light);
+    --pico-secondary: var(--lb-color-secondary);
+    --pico-secondary-focus: var(--lb-color-secondary-light);
+    --pico-contrast: var(--lb-color-contrast);
+    --pico-contrast-focus: var(--lb-color-contrast-light);
+}
+
+.color-secondary {
+    color: var(--pico-secondary);
+}
+
+figcaption {
+    display: inline;
+}
+
+code, pre, .letterbook-brand {
+    --pico-font-family: "Share Tech Mono", monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+}
+
+.letterbook-brand a:not(:hover) {
+    text-decoration: none;
+}
+
 html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
+    height: 100vh;
 }

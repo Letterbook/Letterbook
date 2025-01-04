@@ -42,6 +42,7 @@
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
         <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
+        <PackageReference Include="Microsoft.Web.LibraryManager.Build" />
 <!--        <PackageReference Include="NSign.AspNetCore" />-->
         <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
         <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
