@@ -7,8 +7,9 @@
     <link rel="icon" type="image/svg" href="/img/letterbook-square.svg">
     <link rel="stylesheet" href="/lib/picocss/css/pico.min.css"/>
     <link rel="stylesheet" href="/css/site.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="/css/app.css" asp-append-version="true"/>
 </head>
-<body class="container">
+<body class="container app">
 <header>
     <nav>
         <h1 class="letterbook-brand"><a asp-page="/Index">Letterbook</a></h1>
@@ -18,9 +19,9 @@
                 <li>
                     <partial name="_ProfileSelector"/>
                 </li>
-                <li><a asp-area="" asp-page="/Notifications">Notifications</a></li>
-                <li><a asp-area="" asp-page="/Search">Search</a></li>
-                <li><a asp-area="" asp-page="/Settings">Settings</a></li>
+                <li><span ><a asp-area="" asp-page="/Notifications"><img alt="notification icon" src="/img/noun-inbox-6760588.svg"/><span class="min-md">Notifications</span></a></span></li>
+                <li><span ><a asp-area="" asp-page="/Search"><img alt="search icon" src="/img/noun-book-explore-6540127.svg"/><span class="min-md">Search</span></a></span></li>
+                <li><span ><a asp-area="" asp-page="/Settings"><img alt="settings icon" src="/img/noun-settings-7416424.svg"/><span class="min-md">Settings</span></a></span></li>
             }
             else
             {
@@ -35,11 +36,11 @@
     @RenderBody()
 </main>
 <footer>
-    <span>Powered by <a href="https://letterbook.com">Letterbook</a> v0.0</span>
+    <span class="min-md">Powered by <a href="https://letterbook.com">Letterbook</a> v0.0</span>
     <ul>
-        <li><a asp-area="" asp-page="/About">About</a></li>
-        <li><a asp-area="" asp-page="/Moderation">Moderation policy</a></li>
-        <li><a asp-area="" asp-page="/Privacy">Privacy policy</a></li>
+        <li class="min-md"><a asp-area="" asp-page="/About">About</a></li>
+        <li class="min-md"><a asp-area="" asp-page="/Moderation">Moderation policy</a></li>
+        <li class="min-md"><a asp-area="" asp-page="/Privacy">Privacy policy</a></li>
         @if (User.Identity?.IsAuthenticated == true)
         {
             <li>
