@@ -75,13 +75,12 @@ body.app {
     }
 
     span img {
-        padding-left: 0.25em;
-        padding-right: 0.25em;
+        margin-left: 0.25em;
+        margin-right: 0.25em;
     }
     
     img {
         inline-size: 1.1lh;
-        /*min-inline-size: 0.6lh;*/
     }
 
     button.btn-link {
@@ -110,10 +109,10 @@ body.app {
     }
 }
 
-@media screen and (height <= 598px) {
+@media screen and (height <= 580px) {
     /* small displays */
     body.app header {
-        /*font-size: 1rem;*/
+        font-size: revert;
     }
     
     .app .min-md {
