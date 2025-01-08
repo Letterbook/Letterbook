@@ -6,16 +6,22 @@ public enum Restrictions
 	None,
 	/// Click-through warnings on posts/profiles, require approval for follow requests
 	Warn,
+	/// Hide posts from non-followers
+	LimitDiscovery,
 	/// Reject private messages
 	DenyPrivate,
+	/// Reject posts in public/shared audiences
+	DenyPublic,
 	/// Reject shared posts
 	DenyShare,
-	/// Reject posts in public/shared audiences
-	NoPublic,
-	/// Hide posts from non-followers
-	NoDiscovery,
+	/// Discard all images, audio, video, quote posts, etc
+	DenyAttachments,
+	/// Discard all links
+	DenyLinks,
+	/// Discard all replies (permit top-level posts and self-replies)
+	DenyReplies,
 	/// Discard all posts (permit profile moves and updates)
-	Ignore,
+	DenyPosts,
 	/// Discard all messages
 	Defederate
 }
