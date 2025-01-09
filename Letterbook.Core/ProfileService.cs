@@ -470,6 +470,46 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		throw new NotImplementedException();
 	}
 
+	public async Task<FollowerRelation> Block(ProfileId selfId, ProfileId targetId)
+	{
+		var self = await _profiles.SingleProfile(selfId).WithRelation(targetId).FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(selfId);
+		var target = await _profiles.SingleProfile(targetId).WithRelation(selfId).FirstOrDefaultAsync()
+		             ?? throw CoreException.MissingData<Profile>(targetId);
+
+		return Block(self, target);
+	}
+
+	public async Task<FollowerRelation?> ReceiveBlock(Uri actorId, Uri targetId)
+	{
+		var crawlTarget = false;
+		if (await _profiles.SingleProfile(actorId).WithRelation(targetId).FirstOrDefaultAsync() is not { } actor)
+		{
+			actor = Profile.CreateEmpty(actorId);
+			_profiles.Add(actor);
+			crawlTarget = true;
+		}
+
+		if (await _profiles.SingleProfile(targetId).WithRelation(actorId).FirstOrDefaultAsync() is not { } target)
+		{
+			throw CoreException.MissingData<Profile>(targetId);
+		}
+
+		var result = actor.Block(target);
+		await _profiles.Commit();
+		await _profileEvents.Blocked(target, actor);
+		if (crawlTarget) await Task.CompletedTask; // TODO: crawler
+
+		return result;
+	}
+
+	private FollowerRelation Block(Profile self, Profile target)
+	{
+		// todo: authorization
+		var result = self.Block(target);
+		return result;
+	}
+
 	public async Task<IQueryable<Profile>> LookupFollowing(ProfileId profileId, DateTimeOffset? followedBefore, int limit)
 	{
 		var profile = await _profiles.LookupProfile(profileId)
