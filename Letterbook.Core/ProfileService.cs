@@ -22,11 +22,12 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private IDataAdapter _profiles;
 	private IProfileEventPublisher _profileEvents;
 	private readonly IActivityPubClient _client;
+	private readonly IApCrawlScheduler _crawler;
 	private readonly IHostSigningKeyProvider _hostSigningKeyProvider;
 	private readonly IActivityScheduler _activity;
 
 	public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options, Instrumentation instrumentation,
-		IDataAdapter profiles, IProfileEventPublisher profileEvents, IActivityPubClient client,
+		IDataAdapter profiles, IProfileEventPublisher profileEvents, IActivityPubClient client, IApCrawlScheduler crawler,
 		IHostSigningKeyProvider hostSigningKeyProvider, IActivityScheduler activity)
 	{
 		_logger = logger;
@@ -35,6 +36,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		_profiles = profiles;
 		_profileEvents = profileEvents;
 		_client = client;
+		_crawler = crawler;
 		_hostSigningKeyProvider = hostSigningKeyProvider;
 		_activity = activity;
 	}
@@ -482,12 +484,12 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation?> ReceiveBlock(Uri actorId, Uri targetId)
 	{
-		var crawlTarget = false;
+		var crawlActor = false;
 		if (await _profiles.SingleProfile(actorId).WithRelation(targetId).FirstOrDefaultAsync() is not { } actor)
 		{
 			actor = Profile.CreateEmpty(actorId);
 			_profiles.Add(actor);
-			crawlTarget = true;
+			crawlActor = true;
 		}
 
 		if (await _profiles.SingleProfile(targetId).WithRelation(actorId).FirstOrDefaultAsync() is not { } target)
@@ -498,7 +500,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		var result = actor.Block(target);
 		await _profiles.Commit();
 		await _profileEvents.Blocked(target, actor);
-		if (crawlTarget) await Task.CompletedTask; // TODO: crawler
+		if (crawlActor) await _crawler.CrawlProfile(default, actorId);
 
 		return result;
 	}

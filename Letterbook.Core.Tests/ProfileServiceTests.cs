@@ -31,8 +31,8 @@ public class ProfileServiceTests : WithMocks
 		CoreOptionsMock.Value.MaxCustomFields = 2;
 
 		_service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, Mock.Of<Instrumentation>(),
-			DataAdapterMock.Object, Mock.Of<IProfileEventPublisher>(), ActivityPubClientMock.Object, Mock.Of<IHostSigningKeyProvider>(),
-			ActivityPublisherMock.Object);
+			DataAdapterMock.Object, Mock.Of<IProfileEventPublisher>(), ActivityPubClientMock.Object, ApCrawlerSchedulerMock.Object,
+			Mock.Of<IHostSigningKeyProvider>(), ActivityPublisherMock.Object);
 		_profile = _fakeProfile.Generate();
 	}
 
@@ -398,5 +398,42 @@ public class ProfileServiceTests : WithMocks
 
 		Assert.Equal(FollowState.None, actual.State);
 		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
+	}
+
+	[Fact(DisplayName = "Should block the target profile")]
+	public async Task Block()
+	{
+		var target = new FakeProfile().Generate();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.Id)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.Id)).Returns(new List<Profile> { target }.BuildMock());
+
+		var actual = await _service.Block(_profile.Id, target.Id);
+
+		Assert.Equal(FollowState.Blocked, actual.State);
+	}
+
+	[Fact(DisplayName = "Should block on a received remote block")]
+	public async Task ReceiveBlock()
+	{
+		var target = new FakeProfile().Generate();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.FediId)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.FediId)).Returns(new List<Profile> { target }.BuildMock());
+
+		var actual = await _service.ReceiveBlock(_profile.FediId, target.FediId);
+
+		Assert.Equal(FollowState.Blocked, actual?.State);
+	}
+
+	[Fact(DisplayName = "Should crawl unknown profiles on received block")]
+	public async Task ReceiveBlock_Unknown()
+	{
+		var actor = new FakeProfile().Generate();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.FediId)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(actor.FediId)).Returns(new List<Profile>().BuildMock());
+
+		var actual = await _service.ReceiveBlock(actor.FediId, _profile.FediId);
+
+		Assert.Equal(FollowState.Blocked, actual?.State);
+		ApCrawlerSchedulerMock.Verify(m => m.CrawlProfile(It.IsAny<ProfileId>(), actor.FediId, It.IsAny<int>()));
 	}
 }
