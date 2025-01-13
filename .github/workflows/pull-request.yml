@@ -36,14 +36,12 @@ jobs:
           key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
           
       - name: Web Resource Cache
-        id: resource-cache
         uses: actions/cache@v4
         with:
           path: "./Letterbook.Web/wwwroot/lib"
           key: "libman-${{ hashFiles('Letterbook.Web/libman.json') }}"
 
       - name: Docs Resource Cache
-        id: resource-cache
         uses: actions/cache@v4
         with:
           path: "./Letterbook.Docs/wwwroot/lib"
