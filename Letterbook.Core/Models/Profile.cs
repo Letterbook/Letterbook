@@ -202,6 +202,13 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		return follower;
 	}
 
+	public bool HasBlocked(Profile target)
+	{
+		var relation = FollowersCollection.FirstOrDefault(relation => relation.Follower == target,
+			new FollowerRelation(target, this, FollowState.None));
+		return relation.State == FollowState.Blocked;
+	}
+
 	// Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?
 	// The only use case I'm imagining for a service is to represent the server itself
 	public static Profile CreateIndividual(Uri baseUri, string handle)

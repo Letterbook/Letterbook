@@ -300,6 +300,21 @@ public class ProfileServiceTests : WithMocks
 		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
 	}
 
+	[Fact(DisplayName = "Should NOT add a blocked follower")]
+	public async Task ReceiveFollowRequest_Blocked()
+	{
+		var follower = new FakeProfile().Generate();
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		var queryFollower = ((List<Profile>)[follower]).BuildMock();
+		_profile.AddFollower(follower, FollowState.Blocked);
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.FediId)).Returns(queryProfile);
+		DataAdapterMock.Setup(m => m.SingleProfile(follower.FediId)).Returns(queryFollower);
+
+		var actual = await _service.ReceiveFollowRequest(_profile.FediId, follower.FediId, null);
+
+		Assert.Equal(FollowState.Blocked, actual.State);
+	}
+
 	[Fact(DisplayName = "Should update a pending follow")]
 	public async Task FollowReply()
 	{
@@ -383,6 +398,22 @@ public class ProfileServiceTests : WithMocks
 
 		Assert.Equal(FollowState.Accepted, actual.State);
 		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
+	}
+
+	[Fact(DisplayName = "Should NOT accept a follower that is blocked")]
+	public async Task AcceptFollower_Blocked()
+	{
+		var follower = new FakeProfile().Generate();
+		_profile.AddFollower(follower, FollowState.Blocked);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<ProfileId>()))
+			.Returns(queryable);
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
+			.Returns(queryable);
+
+		var actual = await _service.AcceptFollower(_profile.Id, follower.Id);
+
+		Assert.Equal(FollowState.Blocked, actual.State);
 	}
 
 	[Fact(DisplayName = "Should not add a follower that did not request to follow")]
