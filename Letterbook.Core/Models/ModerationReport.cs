@@ -9,6 +9,7 @@ public class ModerationReport
 {
 	public ModerationReportId Id { get; set; }
 	public Uri? FediId => Context.FediId;
+	public required string Summary { get; set; }
 	public required ThreadContext Context { get; set; }
 	public ICollection<Account> Moderators { get; set; } = new HashSet<Account>();
 	public ICollection<ModerationPolicy> Policies { get; set; } = new HashSet<ModerationPolicy>();
