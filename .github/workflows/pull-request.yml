@@ -28,12 +28,24 @@ jobs:
         with:
           dotnet-version: 8.0.x
       
-      - name: Package Cache
+      - name: Nuget Package Cache
         id: package-cache
         uses: actions/cache@v4
         with:
           path: ${{env.NUGET_PACKAGES}}
           key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
+          
+      - name: Web Resource Cache
+        uses: actions/cache@v4
+        with:
+          path: "./Letterbook.Web/wwwroot/lib"
+          key: "libman-${{ hashFiles('Letterbook.Web/libman.json') }}"
+
+      - name: Docs Resource Cache
+        uses: actions/cache@v4
+        with:
+          path: "./Letterbook.Docs/wwwroot/lib"
+          key: "libman-${{ hashFiles('Letterbook.Docs/libman.json') }}"
       
       - name: Restore Packages
         if: steps.package-cache.outputs.cache-hit != 'true'
