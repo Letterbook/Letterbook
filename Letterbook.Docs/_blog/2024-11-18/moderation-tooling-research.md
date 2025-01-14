@@ -1,5 +1,5 @@
 ---
-title: Research: Moderator Tools User Experience
+title: 'Research: Moderator Tools User Experience'
 authors:
   - mattly
 ---
