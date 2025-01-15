@@ -202,6 +202,17 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		return follower;
 	}
 
+	public FollowerRelation Unblock(Profile target)
+	{
+		var follower = FollowersCollection.FirstOrDefault(relation => relation.Follower == target) ?? target.RelationWith(this);
+		follower.State = FollowState.None;
+
+		var following = FollowingCollection.FirstOrDefault(relation => relation.Follows == target) ?? RelationWith(target);
+		following.State = FollowState.None;
+
+		return follower;
+	}
+
 	public bool HasBlocked(Profile target)
 	{
 		var relation = FollowersCollection.FirstOrDefault(relation => relation.Follower == target,

@@ -486,12 +486,16 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> Block(ProfileId selfId, ProfileId targetId)
 	{
-		var self = await _data.SingleProfile(selfId).WithRelation(targetId).FirstOrDefaultAsync()
-		           ?? throw CoreException.MissingData<Profile>(selfId);
-		var target = await _data.SingleProfile(targetId).WithRelation(selfId).FirstOrDefaultAsync()
-		             ?? throw CoreException.MissingData<Profile>(targetId);
+		var (self, target) = await GetRelatedProfiles(selfId, targetId);
 
 		return Block(self, target);
+	}
+
+	public async Task<FollowerRelation> Unblock(ProfileId selfId, ProfileId targetId)
+	{
+		var (self, target) = await GetRelatedProfiles(selfId, targetId);
+
+		return Unblock(self, target);
 	}
 
 	public async Task<FollowerRelation?> ReceiveBlock(Uri actorId, Uri targetId)
@@ -517,10 +521,39 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return result;
 	}
 
+	public async Task<FollowerRelation?> ReceiveUndoBlock(Uri actorId, Uri targetId)
+	{
+		var crawlActor = false;
+		if (await _data.SingleProfile(actorId).WithRelation(targetId).FirstOrDefaultAsync() is not { } actor)
+		{
+			actor = Profile.CreateEmpty(actorId);
+			_data.Add(actor);
+			crawlActor = true;
+		}
+
+		if (await _data.SingleProfile(targetId).WithRelation(actorId).FirstOrDefaultAsync() is not { } target)
+		{
+			throw CoreException.MissingData<Profile>(targetId);
+		}
+
+		var result = actor.Unblock(target);
+		await _data.Commit();
+		if (crawlActor) await _crawler.CrawlProfile(default, actorId);
+
+		return result;
+	}
+
 	private FollowerRelation Block(Profile self, Profile target)
 	{
 		// todo: authorization
 		var result = self.Block(target);
+		return result;
+	}
+
+	private FollowerRelation Unblock(Profile self, Profile target)
+	{
+		// todo: authorization
+		var result = self.Unblock(target);
 		return result;
 	}
 
@@ -593,6 +626,15 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		redacted.Description = "";
 
 		return redacted;
+	}
+
+	private async Task<(Profile self, Profile target)> GetRelatedProfiles(ProfileId selfId, ProfileId targetId)
+	{
+		var self = await _data.SingleProfile(selfId).WithRelation(targetId).FirstOrDefaultAsync()
+		           ?? throw CoreException.MissingData<Profile>(selfId);
+		var target = await _data.SingleProfile(targetId).WithRelation(selfId).FirstOrDefaultAsync()
+		             ?? throw CoreException.MissingData<Profile>(targetId);
+		return (self, target);
 	}
 
 	[SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]

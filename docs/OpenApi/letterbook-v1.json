@@ -1451,6 +1451,110 @@
         }
       }
     },
+    "/lb/v1/profiles/{profileId}/block/{targetProfileId}": {
+      "put": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Block",
+        "description": "Block the targetProfileId",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "targetProfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Unblock",
+        "description": "Unblock the targetProfileId, and allow them to see and interact with you again",
+        "parameters": [
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          },
+          {
+            "name": "targetProfileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "pattern": "[0-9a-z]{25}",
+              "type": "string",
+              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowerRelationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/lb/v1/timelines/{profileId}": {
       "get": {
         "tags": [
