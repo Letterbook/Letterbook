@@ -443,6 +443,46 @@ public class ProfileServiceTests : WithMocks
 		Assert.Equal(FollowState.Blocked, actual.State);
 	}
 
+	[Fact(DisplayName = "Block should preserve a reciprocal block")]
+	public async Task Block_PreserveReciprocal()
+	{
+		var target = new FakeProfile().Generate();
+		target.Block(_profile);
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.Id)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.Id)).Returns(new List<Profile> { target }.BuildMock());
+
+		await _service.Block(_profile.Id, target.Id);
+
+		Assert.True(target.HasBlocked(_profile));
+	}
+
+	[Fact(DisplayName = "Should unblock the target profile")]
+	public async Task Unblock()
+	{
+		var target = new FakeProfile().Generate();
+		_profile.Block(target);
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.Id)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.Id)).Returns(new List<Profile> { target }.BuildMock());
+
+		var actual = await _service.Unblock(_profile.Id, target.Id);
+
+		Assert.Equal(FollowState.None, actual.State);
+	}
+
+	[Fact(DisplayName = "Unblock should preserve a reciprocal block")]
+	public async Task Unblock_NotReciprocal()
+	{
+		var target = new FakeProfile().Generate();
+		_profile.Block(target);
+		target.Block(_profile);
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.Id)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.Id)).Returns(new List<Profile> { target }.BuildMock());
+
+		await _service.Unblock(_profile.Id, target.Id);
+
+		Assert.True(target.HasBlocked(_profile));
+	}
+
 	[Fact(DisplayName = "Should block on a received remote block")]
 	public async Task ReceiveBlock()
 	{

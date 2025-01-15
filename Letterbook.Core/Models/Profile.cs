@@ -193,7 +193,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		FollowersCollection.Add(follower);
 
 		var following = FollowingCollection.FirstOrDefault(relation => relation.Follows == target) ?? RelationWith(target);
-		following.State = FollowState.None;
+		if(following.State != FollowState.Blocked) following.State = FollowState.None;
 		FollowingCollection.Add(following);
 
 		target.LeaveAudience(this);
@@ -206,9 +206,6 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	{
 		var follower = FollowersCollection.FirstOrDefault(relation => relation.Follower == target) ?? target.RelationWith(this);
 		follower.State = FollowState.None;
-
-		var following = FollowingCollection.FirstOrDefault(relation => relation.Follows == target) ?? RelationWith(target);
-		following.State = FollowState.None;
 
 		return follower;
 	}
