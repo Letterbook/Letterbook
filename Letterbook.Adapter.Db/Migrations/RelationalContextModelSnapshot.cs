@@ -267,6 +267,10 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<Guid?>("ReporterId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset>("Updated")
                         .HasColumnType("timestamp with time zone");
 
