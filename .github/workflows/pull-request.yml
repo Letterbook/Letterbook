@@ -42,20 +42,16 @@ jobs:
           key: "libman-${{ hashFiles('Letterbook.Web/libman.json', 'Letterbook.Docs/libman.json') }}"
 
       - name: Restore Packages
-        if: steps.package-cache.outputs.cache-hit != 'true'
         run: dotnet restore
       
       - name: Restore Tools
         run: dotnet tool restore
 
-      - name: __DEBUG__libman
-        run: dotnet libman cache list
-
       - name: Build
-        run: dotnet build Letterbook.sln --configuration Release
+        run: dotnet build Letterbook.sln --configuration Release --no-restore
       
       - name: Test
-        run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --blame-crash --no-build
+        run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --no-build
         
       - name: Save test crash report
         if: failure()
