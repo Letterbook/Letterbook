@@ -40,6 +40,7 @@ jobs:
         with:
           path: "~/.local/share/.librarymanager/cache"
           key: "libman-${{ hashFiles('Letterbook.Web/libman.json', 'Letterbook.Docs/libman.json') }}"
+          restore-keys: libman
 
       - name: Restore Packages
         run: dotnet restore
