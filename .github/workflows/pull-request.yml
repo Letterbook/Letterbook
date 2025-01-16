@@ -61,11 +61,11 @@ jobs:
           path: '**/TestResults/'
       
       - name: Check Relational Migrations
-        run: dotnet ef migrations has-pending-model-changes --no-build
+        run: dotnet ef migrations has-pending-model-changes
         working-directory: Letterbook.Adapter.Db/
         
       - name: Check Feeds Migrations
-        run: dotnet ef migrations has-pending-model-changes --no-build
+        run: dotnet ef migrations has-pending-model-changes
         working-directory: Letterbook.Adapter.TimescaleFeeds/
 
       - name: Check Docs Prerender
