@@ -20,6 +20,7 @@ public class RelationalContext : DbContext
 	public DbSet<Post> Posts { get; set; }
 	public DbSet<ThreadContext> Threads { get; set; }
 	public DbSet<Audience> Audience { get; set; }
+	public DbSet<Peer> Peers { get; set; }
 
 	public RelationalContext(DbContextOptions<RelationalContext> context) : base(context)
 	{
