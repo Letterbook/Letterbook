@@ -35,30 +35,24 @@ jobs:
           path: ${{env.NUGET_PACKAGES}}
           key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
           
-      - name: Web Resource Cache
+      - name: Libman Resource Cache
         uses: actions/cache@v4
         with:
-          path: "./Letterbook.Web/wwwroot/lib"
-          key: "libman-${{ hashFiles('Letterbook.Web/libman.json') }}"
+          path: "~/.local/share/.librarymanager/cache"
+          key: "libman-${{ hashFiles('Letterbook.Web/libman.json', 'Letterbook.Docs/libman.json') }}"
 
-      - name: Docs Resource Cache
-        uses: actions/cache@v4
-        with:
-          path: "./Letterbook.Docs/wwwroot/lib"
-          key: "libman-${{ hashFiles('Letterbook.Docs/libman.json') }}"
-      
       - name: Restore Packages
         if: steps.package-cache.outputs.cache-hit != 'true'
         run: dotnet restore
       
       - name: Restore Tools
         run: dotnet tool restore
-      
-      - name: Build
-        run: dotnet build Letterbook.sln --configuration Release
 
       - name: __DEBUG__libman
         run: dotnet libman cache list
+
+      - name: Build
+        run: dotnet build Letterbook.sln --configuration Release
       
       - name: Test
         run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --blame-crash --no-build
