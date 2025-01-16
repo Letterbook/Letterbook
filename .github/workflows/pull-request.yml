@@ -27,9 +27,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-
-      - name: __DEBUG__
-        run: dotnet libman cache list
       
       - name: Nuget Package Cache
         id: package-cache
@@ -56,6 +53,9 @@ jobs:
       
       - name: Restore Tools
         run: dotnet tool restore
+
+      - name: __DEBUG__libman
+        run: dotnet libman cache list
       
       - name: Build
         run: dotnet build Letterbook.sln --configuration Release
