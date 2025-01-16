@@ -126,6 +126,12 @@ public interface IAuthzProfileService
 
 	Task ReportProfile(Uuid7 selfId, Uri profileId);
 
+	public Task<FollowerRelation> Block(ProfileId self, ProfileId target);
+	public Task<FollowerRelation> Unblock(ProfileId self, ProfileId target);
+	public Task<FollowerRelation?> ReceiveBlock(Uri actorId, Uri targetId);
+	public Task<FollowerRelation?> ReceiveUndoBlock(Uri actorId, Uri targetId);
+
+
 
 	// - [ ] receive report
 

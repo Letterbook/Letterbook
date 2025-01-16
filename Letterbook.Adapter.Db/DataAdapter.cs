@@ -172,6 +172,20 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			: _context.Threads.Where(thread => threadIds.Contains(thread.FediId));
 	}
 
+	public IQueryable<Models.Profile> Profiles(params Uri[] ids)
+	{
+		return ids.Length == 1
+			? _context.Profiles.Where(p => p.FediId == ids[0])
+			: _context.Profiles.Where(p => ids.Contains(p.FediId));
+	}
+
+	public IQueryable<Models.Profile> Profiles(params Models.ProfileId[] ids)
+	{
+		return ids.Length == 1
+			? _context.Profiles.Where(p => p.Id == ids[0])
+			: _context.Profiles.Where(p => ids.Contains(p.Id));
+	}
+
 	public IQueryable<Models.Profile> WithAudience(IQueryable<Models.Profile> query)
 	{
 		return query.Include(profile => profile.Audiences);

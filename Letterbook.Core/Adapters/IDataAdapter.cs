@@ -83,6 +83,9 @@ public interface IDataAdapter : IDisposable
 	/// <see cref="Threads(Medo.Uuid7)"/>
 	public IQueryable<ThreadContext> Threads(params Uri[] threadIds);
 
+	public IQueryable<Profile> Profiles(params ProfileId[] ids);
+	public IQueryable<Profile> Profiles(params Uri[] ids);
+
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public IQueryable<Profile> WithAudience(IQueryable<Profile> query);
 
