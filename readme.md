@@ -89,13 +89,12 @@ All of this is just the beginning of what we have planned for Letterbook. We're 
 
 Please reach out to let us know you're interested in the project! There are many ways to contribute, it's a lot more than just code. Experience in these areas would be particularly helpful, right now. And this list will only grow over time.
 
-1. User experience research
-2. Trust and safety advice
-3. Visual design
-4. Web UI code
-5. Backend C# code
-6. Project management
-7. Technical communication
+1. Visual and web design
+2. Web UI code 
+3. Backend code
+4. Technical and copywriting
+5. Cross-project coordination
+6. Product research
 
 ## Roadmap
 
@@ -111,12 +110,12 @@ timeline
     section Zero to Federated 🏔️
         ActivityPub & friends       : ActivityStreams types : ActivityPub APIs : Data models and persistance : Webfinger API : HTTP Signatures : Message queue
     section Single user preview 👤
-        Posting 🟢                  : Data models ☑️ : Core logic ☑️ : Db Schema ☑️ : APIs ☑️ : Federation : 3rd party APIs 
+        Posting 🟢                  : Data models ☑️ : Core logic ☑️ : Db Schema ☑️ : APIs ☑️ : Federation ☑️ : 3rd party APIs 
         Account management 🟢       : Data models ☑️ : Db schema ☑️ : Account creation ☑️ : APIs : Contact management : Password management : Email verification : 3rd party APIs 
         Authn/Authz 🟡              : Data models ☑️ : Password verification ☑️ : Token creation/verification ☑️ : Login/logout/challenge : Claims scheme : OIDC support 
         Feeds 🟢                    : Data models ☑️ : Db schema ☑️ : APIs ☑️ : Populate data ☑️ : 3rd party APIs 
-        Moderation 🔴               : Data models : Db schema : APIs : Block : Mute : Suspend : Report : Federation limits : 3rd party APIs 
-        Media 🔴                    : Data models : Db schema : 3rd party APIs 
+        Moderation 🟡               : Data models ☑️ : Db schema ☑️ : APIs : Block : Mute : Suspend : Report : Federation limits : 3rd party APIs
+        Web UI 🟡                   : Sign up/login : Account management : Profiles : Threads : Feeds : Reports
 ```
 
 Please note that this roadmap is only updated ocassionally. The project's Github issues, and specifically the [Single User Preview board][sup-board] is the best way to keep track of what's planned, in-progress, and completed.

@@ -18,6 +18,6 @@ public class Page([FromServices] LoaderFactory loader) : PageModel
 
 	public void OnGet()
 	{
-		Authors.Reload(Doc);
+		Authors.Reload(Doc!);
 	}
 }

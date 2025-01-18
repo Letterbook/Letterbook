@@ -19,6 +19,6 @@ public class Page([FromServices] LoaderFactory categories) : PageModel
 
 	public void OnGet()
 	{
-		Categories.Reload(Source);
+		Categories.Reload(Source!);
 	}
 }
