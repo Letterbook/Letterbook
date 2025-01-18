@@ -15,6 +15,6 @@ public class Page([FromServices] LoaderFactory factory) : PageModel
 
 	public void OnGet()
 	{
-		Docs.Reload(Doc);
+		Docs.Reload(Doc!);
 	}
 }
