@@ -213,4 +213,28 @@ public class ProfilesController : ControllerBase
 		var result = await _profiles.As(User.Claims).RemoveFollower(profileId, followerProfileId);
 		return Ok(_mapper.Map<FollowerRelationDto>(result));
 	}
+
+	[HttpPut("{profileId}/block/{targetProfileId}")]
+	[ProducesResponseType<FollowerRelationDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Block", "Block the targetProfileId")]
+	public async Task<IActionResult> Block(Uuid7 profileId, Uuid7 targetProfileId)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		var result = await _profiles.As(User.Claims).Block(profileId, targetProfileId);
+		return Ok(_mapper.Map<FollowerRelationDto>(result));
+	}
+
+	[HttpDelete("{profileId}/block/{targetProfileId}")]
+	[ProducesResponseType<FollowerRelationDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Unblock", "Unblock the targetProfileId, and allow them to see and interact with you again")]
+	public async Task<IActionResult> Unblock(Uuid7 profileId, Uuid7 targetProfileId)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		var result = await _profiles.As(User.Claims).Unblock(profileId, targetProfileId);
+		return Ok(_mapper.Map<FollowerRelationDto>(result));
+	}
 }
