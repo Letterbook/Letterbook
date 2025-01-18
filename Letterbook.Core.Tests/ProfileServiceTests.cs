@@ -31,8 +31,8 @@ public class ProfileServiceTests : WithMocks
 		CoreOptionsMock.Value.MaxCustomFields = 2;
 
 		_service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, Mock.Of<Instrumentation>(),
-			DataAdapterMock.Object, Mock.Of<IProfileEventPublisher>(), ActivityPubClientMock.Object, Mock.Of<IHostSigningKeyProvider>(),
-			ActivityPublisherMock.Object);
+			DataAdapterMock.Object, Mock.Of<IProfileEventPublisher>(), ActivityPubClientMock.Object, ApCrawlerSchedulerMock.Object,
+			Mock.Of<IHostSigningKeyProvider>(), ActivityPublisherMock.Object);
 		_profile = _fakeProfile.Generate();
 	}
 
@@ -300,6 +300,21 @@ public class ProfileServiceTests : WithMocks
 		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
 	}
 
+	[Fact(DisplayName = "Should NOT add a blocked follower")]
+	public async Task ReceiveFollowRequest_Blocked()
+	{
+		var follower = new FakeProfile().Generate();
+		var queryProfile = ((List<Profile>)[_profile]).BuildMock();
+		var queryFollower = ((List<Profile>)[follower]).BuildMock();
+		_profile.AddFollower(follower, FollowState.Blocked);
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.FediId)).Returns(queryProfile);
+		DataAdapterMock.Setup(m => m.SingleProfile(follower.FediId)).Returns(queryFollower);
+
+		var actual = await _service.ReceiveFollowRequest(_profile.FediId, follower.FediId, null);
+
+		Assert.Equal(FollowState.Blocked, actual.State);
+	}
+
 	[Fact(DisplayName = "Should update a pending follow")]
 	public async Task FollowReply()
 	{
@@ -385,6 +400,22 @@ public class ProfileServiceTests : WithMocks
 		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
 	}
 
+	[Fact(DisplayName = "Should NOT accept a follower that is blocked")]
+	public async Task AcceptFollower_Blocked()
+	{
+		var follower = new FakeProfile().Generate();
+		_profile.AddFollower(follower, FollowState.Blocked);
+		var queryable = new List<Profile> { _profile }.BuildMock();
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<ProfileId>()))
+			.Returns(queryable);
+		DataAdapterMock.Setup(m => m.WithRelation(It.IsAny<IQueryable<Profile>>(), It.IsAny<Uri>()))
+			.Returns(queryable);
+
+		var actual = await _service.AcceptFollower(_profile.Id, follower.Id);
+
+		Assert.Equal(FollowState.Blocked, actual.State);
+	}
+
 	[Fact(DisplayName = "Should not add a follower that did not request to follow")]
 	public async Task NoForceFollower()
 	{
@@ -398,5 +429,82 @@ public class ProfileServiceTests : WithMocks
 
 		Assert.Equal(FollowState.None, actual.State);
 		Assert.Contains(follower, _profile.FollowersCollection.Select(r => r.Follower));
+	}
+
+	[Fact(DisplayName = "Should block the target profile")]
+	public async Task Block()
+	{
+		var target = new FakeProfile().Generate();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.Id)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.Id)).Returns(new List<Profile> { target }.BuildMock());
+
+		var actual = await _service.Block(_profile.Id, target.Id);
+
+		Assert.Equal(FollowState.Blocked, actual.State);
+	}
+
+	[Fact(DisplayName = "Block should preserve a reciprocal block")]
+	public async Task Block_PreserveReciprocal()
+	{
+		var target = new FakeProfile().Generate();
+		target.Block(_profile);
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.Id)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.Id)).Returns(new List<Profile> { target }.BuildMock());
+
+		await _service.Block(_profile.Id, target.Id);
+
+		Assert.True(target.HasBlocked(_profile));
+	}
+
+	[Fact(DisplayName = "Should unblock the target profile")]
+	public async Task Unblock()
+	{
+		var target = new FakeProfile().Generate();
+		_profile.Block(target);
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.Id)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.Id)).Returns(new List<Profile> { target }.BuildMock());
+
+		var actual = await _service.Unblock(_profile.Id, target.Id);
+
+		Assert.Equal(FollowState.None, actual.State);
+	}
+
+	[Fact(DisplayName = "Unblock should preserve a reciprocal block")]
+	public async Task Unblock_NotReciprocal()
+	{
+		var target = new FakeProfile().Generate();
+		_profile.Block(target);
+		target.Block(_profile);
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.Id)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.Id)).Returns(new List<Profile> { target }.BuildMock());
+
+		await _service.Unblock(_profile.Id, target.Id);
+
+		Assert.True(target.HasBlocked(_profile));
+	}
+
+	[Fact(DisplayName = "Should block on a received remote block")]
+	public async Task ReceiveBlock()
+	{
+		var target = new FakeProfile().Generate();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.FediId)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(target.FediId)).Returns(new List<Profile> { target }.BuildMock());
+
+		var actual = await _service.ReceiveBlock(_profile.FediId, target.FediId);
+
+		Assert.Equal(FollowState.Blocked, actual?.State);
+	}
+
+	[Fact(DisplayName = "Should crawl unknown profiles on received block")]
+	public async Task ReceiveBlock_Unknown()
+	{
+		var actor = new FakeProfile().Generate();
+		DataAdapterMock.Setup(m => m.SingleProfile(_profile.FediId)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.SingleProfile(actor.FediId)).Returns(new List<Profile>().BuildMock());
+
+		var actual = await _service.ReceiveBlock(actor.FediId, _profile.FediId);
+
+		Assert.Equal(FollowState.Blocked, actual?.State);
+		ApCrawlerSchedulerMock.Verify(m => m.CrawlProfile(It.IsAny<ProfileId>(), actor.FediId, It.IsAny<int>()));
 	}
 }

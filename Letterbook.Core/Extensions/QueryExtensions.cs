@@ -6,7 +6,7 @@ namespace Letterbook.Core.Extensions;
 
 public static class QueryExtensions
 {
-	public static IQueryable<Profile> WithRelation(this IQueryable<Profile> query, Uri relationId) =>
+	public static IQueryable<Profile> WithRelation(this IQueryable<Profile> query, Uri? relationId) =>
 		query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.FediId == relationId))
 			.ThenInclude(relation => relation.Follows)
 			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.FediId == relationId))
@@ -15,7 +15,7 @@ public static class QueryExtensions
 			.Include(profile => profile.Audiences)
 			.AsSplitQuery();
 
-	public static IQueryable<Profile> WithRelation(this IQueryable<Profile> query, ProfileId relationId) =>
+	public static IQueryable<Profile> WithRelation(this IQueryable<Profile> query, ProfileId? relationId) =>
 		query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId))
 			.ThenInclude(relation => relation.Follows)
 			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
