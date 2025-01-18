@@ -10,6 +10,11 @@ ViewData["Brand"] = "Letterbook Project";
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
+    <meta property="og:title" content="@(ViewData["Title"] ?? "Docs")" />
+    <meta property="og:site_name" content="Letterbook" />
+    <meta property="og:type" content="@(ViewData["OgType"] ?? "website")" />
+    <meta property="og:url" content="@("https://letterbook.com" + ViewData["OgUrl"] ?? "")" />
+    <meta property="og:image" content="@(ViewData["OgImage"] ?? "https://letterbook.com/img/letterbook-social.png")" />
     <link rel="icon" type="image/svg" href="/img/letterbook.svg">
     <link rel="stylesheet" href="/lib/picocss/css/pico.min.css"/>
     <link rel="stylesheet" href="/css/site.css"/>
