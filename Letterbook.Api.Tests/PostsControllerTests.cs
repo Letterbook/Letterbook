@@ -197,10 +197,10 @@ public class PostsControllerTests : WithMockContext
 	[Fact(DisplayName = "Should lookup a thread of posts by Id")]
 	public async Task CanGetThread()
 	{
-		PostServiceAuthMock.Setup(m => m.LookupThread(It.IsAny<Models.ProfileId>(), _post.Thread.GetId()))
+		PostServiceAuthMock.Setup(m => m.LookupThread(It.IsAny<Models.ProfileId>(), _post.Thread.Id))
 			.ReturnsAsync(_post.Thread);
 
-		var result = await _controller.GetThread(_profile.GetId(), _post.Thread.GetId());
+		var result = await _controller.GetThread(_profile.GetId(), _post.Thread.Id);
 
 		var response = Assert.IsType<OkObjectResult>(result);
 		Assert.IsAssignableFrom<IEnumerable<PostDto>>(response.Value);

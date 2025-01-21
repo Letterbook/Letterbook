@@ -1,25 +1,16 @@
 using System.Diagnostics.CodeAnalysis;
 using Letterbook.Core.Extensions;
+using Letterbook.Generators;
 using Medo;
 
 namespace Letterbook.Core.Models;
 
+public partial record struct ThreadId(Uuid7 Id) : ITypedId<Uuid7>;
+
 public class ThreadContext
 {
-	private Uuid7 _id = Uuid7.NewUuid7();
-	private Uuid7 _rootId;
-
-	public Guid Id
-	{
-		get => _id.ToGuid();
-		set => _id = Uuid7.FromGuid(value);
-	}
-
-	public required PostId RootId
-	{
-		get => _rootId;
-		set => _rootId = value.Id;
-	}
+	public ThreadId Id { get; set; } = Uuid7.NewUuid7();
+	public required PostId? RootId { get; set; }
 
 	public Uri? FediId { get; set; }
 	public ICollection<Post> Posts { get; set; } = new HashSet<Post>();
@@ -31,13 +22,12 @@ public class ThreadContext
 	public ThreadContext(PostId rootId, CoreOptions opts)
 	{
 		var builder = new UriBuilder(opts.BaseUri());
-		builder.Path += $"thread/{_id.ToId25String()}";
+		builder.Path += $"thread/{Id.ToString()}";
 		FediId = builder.Uri;
 		RootId = rootId;
 	}
 
-	public Uuid7 GetId() => _id;
-	public string GetId25() => _id.ToId25String();
+	public Uuid7 GetId() => Id.Id;
 }
 
 /// <summary>

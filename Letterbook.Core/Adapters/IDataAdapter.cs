@@ -49,7 +49,7 @@ public interface IDataAdapter : IDisposable
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<ThreadContext?> LookupThread(Uri threadId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<ThreadContext?> LookupThread(Uuid7 threadId);
+	public Task<ThreadContext?> LookupThread(ThreadId threadId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<Post?> LookupPostWithThread(PostId postId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
@@ -79,7 +79,7 @@ public interface IDataAdapter : IDisposable
 	/// </summary>
 	/// <param name="id"></param>
 	/// <returns></returns>
-	public IQueryable<ThreadContext> Threads(Uuid7 id);
+	public IQueryable<ThreadContext> Threads(ThreadId id);
 	/// <see cref="Threads(Medo.Uuid7)"/>
 	public IQueryable<ThreadContext> Threads(params Uri[] threadIds);
 

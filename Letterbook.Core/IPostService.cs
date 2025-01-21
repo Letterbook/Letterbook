@@ -13,7 +13,7 @@ public interface IAuthzPostService
 {
 	public Task<Post?> LookupPost(ProfileId asProfile, PostId id, bool withThread = true);
 	public Task<Post?> LookupPost(ProfileId asProfile, Uri id, bool withThread = true);
-	public Task<ThreadContext?> LookupThread(ProfileId asProfile, Uuid7 id);
+	public Task<ThreadContext?> LookupThread(ProfileId asProfile, ThreadId id);
 	public Task<ThreadContext?> LookupThread(ProfileId asProfile, Uri id);
 	public Task<Post> DraftNote(ProfileId asProfile, string contentSource, PostId? inReplyToId = default);
 	public Task<Post> Draft(ProfileId asProfile, Post post, PostId? inReplyToId = default, bool publish = false);
