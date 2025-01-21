@@ -99,10 +99,10 @@ public sealed class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTest
 	public async Task CanLookupThread()
 	{
 		var expected = _posts[_profiles[0]][0].Thread;
-		var actual = await _adapter.LookupThread(expected.GetId());
+		var actual = await _adapter.LookupThread(expected.Id);
 
 		Assert.NotNull(actual);
-		Assert.Equal(expected.GetId(), actual.GetId());
+		Assert.Equal(expected.Id, actual.Id);
 		Assert.Equal(expected.FediId, actual.FediId);
 	}
 
@@ -113,7 +113,7 @@ public sealed class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTest
 		var actual = await _adapter.LookupThread(expected.FediId!);
 
 		Assert.NotNull(actual);
-		Assert.Equal(expected.GetId(), actual.GetId());
+		Assert.Equal(expected.Id, actual.Id);
 		Assert.Equal(expected.FediId, actual.FediId);
 	}
 
@@ -122,7 +122,7 @@ public sealed class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTest
 	{
 		// Should have several posts in this thread
 		var expected = _posts[_profiles[0]][3].Thread;
-		var actual = await _adapter.LookupThread(expected.GetId());
+		var actual = await _adapter.LookupThread(expected.Id);
 
 		Assert.NotNull(actual);
 		Assert.NotEmpty(actual.Posts);

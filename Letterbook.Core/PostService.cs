@@ -56,9 +56,9 @@ public class PostService : IAuthzPostService, IPostService
 			: await _data.LookupPost(fediId);
 	}
 
-	public async Task<ThreadContext?> LookupThread(ProfileId asProfile, Uuid7 threadId)
+	public async Task<ThreadContext?> LookupThread(ProfileId asProfile, ThreadId id)
 	{
-		return await _data.LookupThread(threadId);
+		return await _data.LookupThread(id);
 	}
 
 	public async Task<ThreadContext?> LookupThread(ProfileId asProfile, Uri threadId)

@@ -296,7 +296,7 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		var post = _posts[profile][2];
 
 		var response = await _client
-			.GetAsync($"/lb/v1/posts/{profile.GetId25()}/thread/{post.Thread.GetId25()}");
+			.GetAsync($"/lb/v1/posts/{profile.GetId25()}/thread/{post.Thread.Id.ToString()}");
 
 		Assert.NotNull(response);
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);

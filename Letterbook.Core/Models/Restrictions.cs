@@ -22,6 +22,8 @@ public enum Restrictions
 	DenyReplies,
 	/// Discard all posts (permit profile moves and updates)
 	DenyPosts,
+	/// Discard reports
+	DenyReports,
 	/// Discard all messages
 	Defederate
 }

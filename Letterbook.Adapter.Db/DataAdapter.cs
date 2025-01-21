@@ -101,11 +101,11 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			.FirstOrDefaultAsync(thread => thread.FediId == threadId);
 	}
 
-	public async Task<Models.ThreadContext?> LookupThread(Uuid7 threadId)
+	public async Task<Models.ThreadContext?> LookupThread(Models.ThreadId threadId)
 	{
 		return await _context.Threads
 			.Include(thread => thread.Posts)
-			.FirstOrDefaultAsync(thread => thread.Id == threadId.ToGuid());
+			.FirstOrDefaultAsync(thread => thread.Id == threadId);
 	}
 
 	public async Task<Models.Post?> LookupPostWithThread(Models.PostId postId)
@@ -162,7 +162,12 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public IQueryable<Models.ThreadContext> Threads(Uuid7 id)
 	{
-		return _context.Threads.Where(thread => thread.Id == id.ToGuid());
+		throw new NotImplementedException();
+	}
+
+	public IQueryable<Models.ThreadContext> Threads(Models.ThreadId id)
+	{
+		return _context.Threads.Where(thread => thread.Id == id);
 	}
 
 	public IQueryable<Models.ThreadContext> Threads(params Uri[] threadIds)

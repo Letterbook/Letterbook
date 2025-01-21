@@ -64,7 +64,7 @@ public class TimelinePost
 	public required Uri AudienceId { get; set; }
 
 	/// <summary>ID of the Thread to which the Post belongs</summary>
-	public required Guid ThreadId { get; set; }
+	public required ThreadId ThreadId { get; set; }
 
 	public static explicit operator Post(TimelinePost p) => new Post
 	{
