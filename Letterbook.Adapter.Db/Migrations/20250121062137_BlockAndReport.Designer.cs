@@ -14,7 +14,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    [Migration("20250113083748_BlockAndReport")]
+    [Migration("20250121062137_BlockAndReport")]
     partial class BlockAndReport
     {
         /// <inheritdoc />
