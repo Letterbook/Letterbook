@@ -15,22 +15,25 @@ public class TimelineService : IAuthzTimelineService, ITimelineService
 	private ILogger<TimelineService> _logger;
 	private CoreOptions _options;
 	private IFeedsAdapter _feeds;
-	private IDataAdapter _profileAdapter;
+	private IDataAdapter _data;
 	private readonly IAuthorizationService _authz;
 	private IEnumerable<Claim>? _claims;
 
-	public TimelineService(ILogger<TimelineService> logger, IOptions<CoreOptions> options, IFeedsAdapter feeds, IDataAdapter profileAdapter, IAuthorizationService authz)
+	public TimelineService(ILogger<TimelineService> logger, IOptions<CoreOptions> options, IFeedsAdapter feeds, IDataAdapter data, IAuthorizationService authz)
 	{
 		_logger = logger;
 		_options = options.Value;
 		_feeds = feeds;
-		_profileAdapter = profileAdapter;
+		_data = data;
 		_authz = authz;
 	}
 
 	/// <inheritdoc />
 	public async Task HandlePublish(Post post)
 	{
+		var profiles = await _data.Profiles([..post.AddressedTo.Select(m => m.Subject.Id)])
+			.ToDictionaryAsync(p => p.Id);
+		post.ConvergeMentions(profiles);
 		// TODO: account for moderation conditions (blocks, etc)
 		post.Audience = NormalizeAudience(post);
 		_feeds.AddToTimeline(post);
@@ -78,8 +81,8 @@ public class TimelineService : IAuthzTimelineService, ITimelineService
 	public async Task<IEnumerable<Post>> GetFeed(Uuid7 profileId, DateTimeOffset begin, int limit = 40)
 	{
 		// TODO(moderation): Account for moderation conditions (block, mute, etc)
-		var query = _profileAdapter.SingleProfile(profileId);
-		query = _profileAdapter.WithAudience(query);
+		var query = _data.SingleProfile(profileId);
+		query = _data.WithAudience(query);
 		var recipient = await query.SingleOrDefaultAsync();
 
 		_logger.LogDebug("Getting feed for {Profile} with membership in {Count} Audiences", profileId, recipient?.Audiences.Count);

@@ -2,6 +2,7 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Microsoft.Extensions.Logging;
+using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 
@@ -40,6 +41,8 @@ public class TimelineServiceTest : WithMocks
 	[Fact(DisplayName = "HandlePublish should add public posts to the public audience")]
 	public async Task AddToPublicOnCreate()
 	{
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile>().BuildMock());
 		_testPost.Audience.Add(Audience.Public);
 
 		await _timeline.HandlePublish(_testPost);
@@ -53,6 +56,8 @@ public class TimelineServiceTest : WithMocks
 	[Fact(DisplayName = "HandlePublish should add follower posts to the creator's follower audience")]
 	public async Task AddToFollowersOnCreate()
 	{
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile> { _profile }.BuildMock());
 		var expected = Audience.Followers(_testPost.Creators.First());
 		_testPost.Audience.Add(expected);
 
@@ -67,6 +72,8 @@ public class TimelineServiceTest : WithMocks
 	[Fact(DisplayName = "HandlePublish should add public posts to the creator's follower audience")]
 	public async Task AddToFollowersImplicitlyOnCreate()
 	{
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile> { _profile }.BuildMock());
 		var expected = Audience.Followers(_testPost.Creators.First());
 		_testPost.Audience.Add(Audience.Public);
 
@@ -85,6 +92,8 @@ public class TimelineServiceTest : WithMocks
 		var mention = new Mention(mentioned, MentionVisibility.To);
 		_testPost.AddressedTo.Add(mention);
 		var expected = Audience.FromMention(mention.Subject);
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile> { _profile, mentioned }.BuildMock());
 
 		await _timeline.HandlePublish(_testPost);
 
@@ -101,6 +110,8 @@ public class TimelineServiceTest : WithMocks
 		_testPost.Audience.Remove(Audience.Followers(_testPost.Creators.First()));
 		var mention = Mention.To(mentioned);
 		_testPost.AddressedTo.Add(mention);
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile> { _profile, mentioned }.BuildMock());
 
 		await _timeline.HandlePublish(_testPost);
 
