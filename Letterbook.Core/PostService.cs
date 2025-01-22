@@ -101,6 +101,17 @@ public class PostService : IAuthzPostService, IPostService
 			post.Thread.Posts.Add(post);
 		}
 
+		var profiles = await _data.Profiles([asProfile, ..post.AddressedTo.Select(m => m.Subject.Id)]).WithRelation(asProfile)
+			.ToDictionaryAsync(p => p.Id);
+		post.AddressedTo = post.AddressedTo.Where(mention => profiles.ContainsKey(mention.Subject.Id)).ToHashSet();
+		foreach (var mention in post.AddressedTo)
+		{
+			if (profiles.TryGetValue(mention.Subject.Id, out var profile))
+			{
+				mention.Subject = profile;
+			}
+		}
+
 		if (await _data.LookupProfile(asProfile) is not { } author)
 			throw CoreException.MissingData<Profile>($"Couldn't find profile {asProfile}", asProfile);
 		post.Creators.Clear();

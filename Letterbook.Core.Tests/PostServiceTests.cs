@@ -78,6 +78,20 @@ public class PostServiceTests : WithMocks
 		Assert.Equal(_post.Id, actual.InReplyTo?.Id);
 	}
 
+	[Fact(DisplayName = "Should create posts with mentions")]
+	public async Task CanDraftMention()
+	{
+		var mentioned = _fakeProfile.Generate();
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
+			.ReturnsAsync(_profile);
+
+		_post.AddressedTo.Add(new Mention(mentioned, MentionVisibility.To));
+		var actual = await _service.Draft(_profile.Id, _post, publish: true);
+
+		Assert.Equal(_post.AddressedTo.Count, actual.AddressedTo.Count);
+	}
+
 	[Fact(DisplayName = "Should update post")]
 	public async Task CanUpdate()
 	{

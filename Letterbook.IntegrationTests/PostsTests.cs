@@ -132,6 +132,28 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		await Traces.AssertNoTraceErrors(traceId, _host.Spans);
 	}
 
+	[Fact(DisplayName = "Should draft and publish a note with mentions")]
+	public async Task CanPublishMention()
+	{
+		var profile = _profiles[7];
+		var dto = _postDto.Generate();
+		dto.AddressedTo.Add(new MentionDto(){Mentioned = _profiles[2].Id.ToString(), Visibility = MentionVisibility.To});
+		var payload = JsonContent.Create(dto, options: _json);
+		var traceId = Traces.TraceRequest(payload.Headers);
+
+		var response = await _client.PostAsync($"/lb/v1/posts/{profile.GetId25()}/post", payload);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var body = Assert.IsType<PostDto>(await response.Content.ReadFromJsonAsync<PostDto>(_json));
+		Assert.NotNull(body.Id);
+		Assert.NotEqual(Uuid7.Empty, body.Id);
+		Assert.Single(body.AddressedTo);
+		Assert.Equal(dto.Contents.First(), body.Contents.FirstOrDefault(), ContentComparer);
+
+		await Traces.AssertNoTraceErrors(traceId, _host.Spans);
+	}
+
 	[Fact(DisplayName = "Should draft a note without publishing")]
 	public async Task CanDraftNote()
 	{
