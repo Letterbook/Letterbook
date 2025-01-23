@@ -1,4 +1,4 @@
-using Medo;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Letterbook.Core.Models;
 
@@ -7,8 +7,10 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public class Mention : IEquatable<Mention>
 {
-	public Post Source { get; set; }
-	public Profile Subject { get; set; }
+	public PostId SourceId { get; set; }
+	public ProfileId SubjectId { get; set; }
+	public required Post Source { get; set; }
+	public required Profile Subject { get; set; }
 	public MentionVisibility Visibility { get; set; }
 
 	private Mention()
@@ -17,8 +19,11 @@ public class Mention : IEquatable<Mention>
 		Subject = default!;
 	}
 
+	[SetsRequiredMembers]
 	public Mention(Post source, Profile subject, MentionVisibility visibility)
 	{
+		SourceId = source.Id;
+		SubjectId = subject.Id;
 		Source = source;
 		Subject = subject;
 		Visibility = visibility;

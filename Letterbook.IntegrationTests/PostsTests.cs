@@ -149,7 +149,7 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 		Assert.NotNull(body.Id);
 		Assert.NotEqual(Uuid7.Empty, body.Id);
 		Assert.Single(body.AddressedTo);
-		Assert.Equal(dto.Contents.First(), body.Contents.FirstOrDefault(), ContentComparer);
+		Assert.Equal(_profiles[2].Id.ToString(), body.AddressedTo.First().Mentioned);
 
 		await Traces.AssertNoTraceErrors(traceId, _host.Spans);
 	}
