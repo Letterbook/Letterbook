@@ -93,7 +93,7 @@ public class PostServiceReceiveTests : WithMocks
 	public async Task ShouldReceiveCreate_Mention()
 	{
 		var peer = new FakeProfile("letterbook.example").Generate();
-		_post.AddressedTo.Add(new Mention(peer, MentionVisibility.To));
+		_post.Mention(peer, MentionVisibility.To);
 
 		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
 		DataAdapterMock.Setup(m => m.ListProfiles(It.IsAny<IEnumerable<Uri>>())).Returns(new List<Profile>{_actor, peer}.BuildMock());
@@ -102,7 +102,7 @@ public class PostServiceReceiveTests : WithMocks
 		var actual = await _service.ReceiveCreate([_post]);
 
 		Assert.Single(actual);
-		Assert.Contains(new Mention(peer, MentionVisibility.To), actual.First().AddressedTo);
+		Assert.Contains(new Mention(_post, peer, MentionVisibility.To), actual.First().AddressedTo);
 		DataAdapterMock.Verify(m => m.ListProfiles(It.Is<IEnumerable<Uri>>(l => l.Contains(peer.FediId))), Times.Once);
 	}
 
@@ -111,7 +111,7 @@ public class PostServiceReceiveTests : WithMocks
 	public async Task ShouldReceiveCreate_MentionUnknown()
 	{
 		var peer = new FakeProfile("letterbook.example").Generate();
-		_post.AddressedTo.Add(new Mention(peer, MentionVisibility.To));
+		_post.Mention(peer, MentionVisibility.To);
 
 		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
 		DataAdapterMock.Setup(m => m.ListProfiles(It.IsAny<IEnumerable<Uri>>())).Returns(new List<Profile>{_actor}.BuildMock());
@@ -120,7 +120,7 @@ public class PostServiceReceiveTests : WithMocks
 		var actual = await _service.ReceiveCreate([_post]);
 
 		Assert.Single(actual);
-		Assert.Contains(new Mention(peer, MentionVisibility.To), actual.First().AddressedTo);
+		Assert.Contains(new Mention(_post, peer, MentionVisibility.To), actual.First().AddressedTo);
 		ApCrawlerSchedulerMock.Verify(m => m.CrawlProfile(It.IsAny<ProfileId>(), peer.FediId, 0));
 	}
 
@@ -206,7 +206,7 @@ public class PostServiceReceiveTests : WithMocks
 	{
 		var updated = _post.ShallowClone();
 		var addressedTo = _fakeActor.Generate();
-		updated.AddressedTo.Add(new(addressedTo, MentionVisibility.To));
+		updated.Mention(addressedTo, MentionVisibility.To);
 
 		DataAdapterMock.Setup(m => m.ListPosts(It.IsAny<IEnumerable<Uri>>())).Returns(new List<Post> { _post }.BuildMock());
 		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
@@ -225,7 +225,7 @@ public class PostServiceReceiveTests : WithMocks
 	{
 		var updated = _post.ShallowClone();
 		var addressedTo = _fakeActor.Generate();
-		updated.AddressedTo.Add(new(addressedTo, MentionVisibility.To));
+		updated.Mention(addressedTo, MentionVisibility.To);
 
 		DataAdapterMock.Setup(m => m.ListPosts(It.IsAny<IEnumerable<Uri>>())).Returns(new List<Post> { _post }.BuildMock());
 		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());

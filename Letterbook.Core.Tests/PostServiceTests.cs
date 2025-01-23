@@ -92,7 +92,7 @@ public class PostServiceTests : WithMocks
 		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
 			.ReturnsAsync(_profile);
 
-		_post.AddressedTo.Add(new Mention(mentioned, MentionVisibility.To));
+		_post.Mention(mentioned, MentionVisibility.To);
 		var actual = await _service.Draft(_profile.Id, _post, publish: true);
 
 		Assert.Equal(_post.AddressedTo.Count, actual.AddressedTo.Count);

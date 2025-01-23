@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Generators;
 using Medo;
@@ -117,12 +118,50 @@ public class Post : IFederated, IEquatable<Post>
 		return content;
 	}
 
+	public void Mention(Profile subject, MentionVisibility visibility)
+	{
+		AddressedTo.Add(new Mention(this, subject, visibility));
+	}
+
 	public void SetRootContent(Content content)
 	{
 		ContentRootIdUri = content.FediId;
 	}
 
 	public Content? GetRootContent() => Contents.Order().FirstOrDefault();
+
+	/// <summary>
+	/// Replace mentions in this post with e
+	/// </summary>
+	/// <param name="profiles"></param>
+	/// <exception cref="CoreException"></exception>
+	public void ConvergeMentions(Dictionary<ProfileId, Profile> profiles)
+	{
+		var missing = AddressedTo.Select(mention => mention.Subject.Id).Where(id => !profiles.ContainsKey(id)).ToHashSet();
+		if (missing.Count != 0)
+			throw CoreException.MissingData<Profile>($"These profiles do not exist [{string.Join(", ", missing)}]", missing);
+		foreach (var mention in AddressedTo)
+		{
+			if (profiles.TryGetValue(mention.Subject.Id, out var profile))
+			{
+				mention.Subject = profile;
+			}
+		}
+	}
+
+	public IEnumerable<Uri> ConvergeMentions(Dictionary<Uri, Profile> profiles)
+	{
+		var missing = AddressedTo.Select(mention => mention.Subject.FediId).Where(id => !profiles.ContainsKey(id)).ToHashSet();
+		foreach (var mention in AddressedTo)
+		{
+			if (profiles.TryGetValue(mention.Subject.FediId, out var profile))
+			{
+				mention.Subject = profile;
+			}
+		}
+
+		return missing;
+	}
 
 	public override int GetHashCode()
 	{

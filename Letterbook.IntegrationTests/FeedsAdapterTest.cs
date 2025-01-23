@@ -50,7 +50,7 @@ public class FeedsAdapterTest : IClassFixture<TimescaleDataFixture<FeedsAdapterT
 	{
 		var post = new FakePost("letterbook.example").Generate();
 		post.Audience.Remove(Audience.Public);
-		post.AddressedTo.Add(Mention.To(_timescale.Profiles[0]));
+		post.Mention(_timescale.Profiles[0], MentionVisibility.To);
 
 		// Generated fake audience, plus 1 explicit mention
 		var expected = post.Audience.Count + 1;

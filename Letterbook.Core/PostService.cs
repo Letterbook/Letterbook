@@ -139,7 +139,7 @@ public class PostService : IAuthzPostService, IPostService
 		_data.Add(post);
 		await _data.Commit();
 		span?.AddTag("letterbook.post.audience", string.Join(",", post.Audience.Select(a => a.FediId)));
-		span?.AddTag("letterbook.post.mentions", string.Join(",", post.AddressedTo.Select(m => m.Id)));
+		span?.AddTag("letterbook.post.mentions", string.Join(",", post.AddressedTo.Select(m => m.Subject.Id)));
 		await _postEvents.Created(post, (Uuid7)asProfile, _claims);
 		if (publish) await _postEvents.Published(post, (Uuid7)asProfile, _claims);
 
