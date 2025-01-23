@@ -53,13 +53,6 @@ jobs:
       
       - name: Test
         run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --no-build
-        
-      - name: Save test crash report
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: TestResults
-          path: '**/TestResults/'
       
       - name: Check Relational Migrations
         run: dotnet ef migrations has-pending-model-changes
@@ -135,10 +128,3 @@ jobs:
         run: dotnet test Letterbook.Web.Tests.E2E --no-build --configuration Release
         env:
           BROWSER: firefox
-
-      - name: Save test crash report
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: TestResults
-          path: '**/TestResults/'
