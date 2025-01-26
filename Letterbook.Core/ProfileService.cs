@@ -216,7 +216,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<IEnumerable<Profile>> FindProfiles(string handle)
 	{
-		var results = _data.FindProfilesByHandle(handle);
+		var results = _data.AllProfiles().Where(p => p.Handle == handle).AsAsyncEnumerable();//FindProfilesByHandle(handle);
 
 		var profiles = new List<Profile>();
 		await foreach (var profile in results)
@@ -352,7 +352,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> ReceiveFollowReply(ProfileId selfId, Uri targetId, FollowState response)
 	{
-		var profile = await _data.LookupProfileWithRelation(selfId, targetId) ??
+		var profile = await _data.Profiles(selfId).WithRelation(targetId).FirstOrDefaultAsync() ??
 		              throw CoreException.MissingData($"Cannot update Profile {selfId} because it could not be found", typeof(Profile),
 			              selfId);
 		var relation = profile.FollowingCollection.FirstOrDefault(r => r.Follows.FediId == targetId) ?? throw CoreException.MissingData(

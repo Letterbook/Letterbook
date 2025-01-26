@@ -320,7 +320,7 @@ public class ProfileServiceTests : WithMocks
 	{
 		var target = new FakeProfile().Generate();
 		_profile.Follow(target, FollowState.Pending);
-		DataAdapterMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), target.FediId)).ReturnsAsync(_profile);
+		DataAdapterMock.Setup(m => m.Profiles(_profile.GetId())).Returns(new List<Profile>{ _profile}.BuildMock());
 
 		var actual = await _service.ReceiveFollowReply(_profile.GetId(), target.FediId, FollowState.Accepted);
 
@@ -334,14 +334,12 @@ public class ProfileServiceTests : WithMocks
 	{
 		var target = new FakeProfile().Generate();
 		_profile.Follow(target, FollowState.Pending);
-		DataAdapterMock.Setup(m => m.LookupProfileWithRelation(_profile.GetId(), target.FediId)).ReturnsAsync(_profile);
+		DataAdapterMock.Setup(m => m.Profiles(_profile.Id)).Returns(new List<Profile>{_profile}.BuildMock());
 
 		var actual = await _service.ReceiveFollowReply(_profile.GetId(), target.FediId, FollowState.Rejected);
 
 		Assert.Equal(FollowState.Rejected, actual.State);
 		Assert.DoesNotContain(target, _profile.FollowingCollection.Select(r => r.Follows));
-
-		// Assert.Equal(FollowState.Accepted, _profile.Following.FirstOrDefault(r => r.Follows.Id == target.Id)?.State);
 	}
 
 	[InlineData(false)]

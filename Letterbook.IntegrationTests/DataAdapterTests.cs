@@ -47,42 +47,6 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 	{
 	}
 
-	[Trait("AccountProfileAdapter", "AnyProfile")]
-	[Fact(DisplayName = "Should indicate ID is in use")]
-	public async Task AnyProfileTest()
-	{
-		var actual = await _adapter.AnyProfile(_profiles[0].FediId);
-
-		Assert.True(actual);
-	}
-
-	[Trait("AccountProfileAdapter", "AnyProfile")]
-	[Fact(DisplayName = "Should indicate ID is not in use")]
-	public async Task AnyProfileTestNone()
-	{
-		var actual = await _adapter.AnyProfile(new Uri("https://does.notexist.example"));
-
-		Assert.False(actual);
-	}
-
-	[Trait("AccountProfileAdapter", "AnyProfile")]
-	[Fact(DisplayName = "Should indicate handle is in use")]
-	public async Task AnyProfileHandleTest()
-	{
-		var actual = await _adapter.AnyProfile(_profiles[0].Handle);
-
-		Assert.True(actual);
-	}
-
-	[Trait("AccountProfileAdapter", "AnyProfile")]
-	[Fact(DisplayName = "Should indicate handle is not in use")]
-	public async Task AnyProfileHandleTestNone()
-	{
-		var actual = await _adapter.AnyProfile("This is not a real handle");
-
-		Assert.False(actual);
-	}
-
 	[Trait("AccountProfileAdapter", "LookupProfile")]
 	[Fact(DisplayName = "Should find a profile by Id")]
 	public async Task LookupProfileTestId()
@@ -101,45 +65,6 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 
 		Assert.NotNull(actual);
 		Assert.Equal(_profiles[0], actual);
-	}
-
-	[Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
-	[Fact(DisplayName = "Should find related profiles by LocalId")]
-	public async Task LookupProfileForFollowingTestLocalId()
-	{
-		var actual = await _adapter.LookupProfileWithRelation(_profiles[0].GetId(), _profiles[4].FediId);
-
-		Assert.NotNull(actual);
-		Assert.Equal(_profiles[0], actual);
-		Assert.Contains(_profiles[4], actual.FollowingCollection.Select(r => r.Follows));
-		Assert.Contains(_profiles[4], actual.FollowersCollection.Select(r => r.Follower));
-	}
-
-	[Trait("AccountProfileAdapter", "LookupProfileWithRelation")]
-	[Fact(DisplayName = "LookupProfileWithRelation should not permit additional lazy loading")]
-	public async Task LookupProfileForFollowingNoLazyLoad()
-	{
-		var actual = await _adapter.LookupProfileWithRelation(_profiles[0].GetId(), _profiles[4].FediId);
-
-		Assert.NotNull(actual);
-		Assert.Equal(_profiles[0], actual);
-		Assert.Single(actual.FollowingCollection.AsEnumerable());
-		Assert.Single(actual.FollowersCollection.AsEnumerable());
-	}
-
-	[Trait("AccountProfileAdapter", "FindProfilesByHandle")]
-	[Fact(DisplayName = "Find profile by handle")]
-	public async Task FindProfileByHandleTest()
-	{
-		var actual = _adapter.FindProfilesByHandle(_profiles[0].Handle);
-		var list = new List<Profile>();
-		await foreach (var each in actual)
-		{
-			list.Add(each);
-		}
-
-		Assert.Contains(_profiles[0], list);
-		Assert.DoesNotContain(_profiles[1], list);
 	}
 
 	[Trait("AccountProfileAdapter", "QueryFrom")]

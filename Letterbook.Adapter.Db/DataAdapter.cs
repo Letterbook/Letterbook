@@ -47,16 +47,6 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Accounts.AsQueryable();
 	}
 
-	public Task<bool> AnyProfile(string handle)
-	{
-		return _context.Profiles.AnyAsync(profile => profile.Handle == handle);
-	}
-
-	public Task<bool> AnyProfile(Uri id)
-	{
-		return _context.Profiles.AnyAsync(profile => profile.FediId == id);
-	}
-
 	public Task<Models.Profile?> LookupProfile(Models.ProfileId localId)
 	{
 		return _context.Profiles
@@ -110,26 +100,6 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public IQueryable<Models.Profile> SingleProfile(Uri fediId) => Profiles(fediId);
 
-	public IQueryable<Models.Profile> ListProfiles(IEnumerable<Models.ProfileId> profileIds)
-	{
-		return _context.Profiles.Where(post => profileIds.Contains(post.Id));
-	}
-
-	public IQueryable<Models.Profile> ListProfiles(IEnumerable<Uri> profileIds)
-	{
-		return _context.Profiles.Where(post => profileIds.Contains(post.FediId));
-	}
-
-	public IQueryable<Models.Post> SinglePost(Models.PostId id)
-	{
-		return _context.Posts.Where(post => post.Id == id);
-	}
-
-	public IQueryable<Models.Post> SinglePost(Uri fediId)
-	{
-		return _context.Posts.Where(post => post.FediId == fediId);
-	}
-
 	public IQueryable<Models.Post> Posts(IEnumerable<Models.PostId> postIds)
 	{
 		return _context.Posts.Where(post => postIds.Contains(post.Id));
@@ -138,11 +108,6 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	public IQueryable<Models.Post> Posts(IEnumerable<Uri> postIds)
 	{
 		return _context.Posts.Where(post => postIds.Contains(post.FediId));
-	}
-
-	public IQueryable<Models.ThreadContext> Threads(Uuid7 id)
-	{
-		throw new NotImplementedException();
 	}
 
 	public IQueryable<Models.ThreadContext> Threads(Models.ThreadId id)
@@ -214,24 +179,6 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	public IQueryable<Models.Audience> AllAudience()
 	{
 		return _context.Audience.AsQueryable();
-	}
-
-	public Task<Models.Profile?> LookupProfileWithRelation(Models.ProfileId localId, Uri relationId)
-	{
-		return WithRelation(_context.Profiles.Where(profile => profile.Id == localId), relationId)
-			.FirstOrDefaultAsync();
-	}
-
-	public IAsyncEnumerable<Models.Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0)
-	{
-		limit = limit >= 100 ? 100 : limit;
-		var query = _context.Profiles.OrderBy(profile => profile.FediId)
-			.Skip(limit * page)
-			.Take(limit);
-		query = partial
-			? query.Where(profile => profile.Handle.StartsWith(handle))
-			: query.Where(profile => profile.Handle == handle);
-		return query.AsAsyncEnumerable();
 	}
 
 	public void Add(Models.Profile profile)

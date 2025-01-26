@@ -94,16 +94,11 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<T> QueryFrom<T>(Profile profile, Expression<Func<Profile, IEnumerable<T>>> queryExpression)
 		where T : class;
 
+	/// <see cref="QueryFrom{T}(Letterbook.Core.Models.Profile,System.Linq.Expressions.Expression{System.Func{Letterbook.Core.Models.Profile,System.Collections.Generic.IEnumerable{T}}})"/>
 	public IQueryable<T> QueryFrom<T>(Post post, Expression<Func<Post, IEnumerable<T>>> queryExpression)
 		where T : class;
 
 	public IQueryable<Audience> AllAudience();
-
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Profile?> LookupProfileWithRelation(ProfileId localId, Uri relationId);
-
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public IAsyncEnumerable<Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0);
 
 	public void Add(Profile profile);
 	public void Add(Account account);
