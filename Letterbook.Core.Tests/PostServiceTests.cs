@@ -45,6 +45,8 @@ public class PostServiceTests : WithMocks
 	[Fact(DisplayName = "Should create unpublished draft notes")]
 	public async Task CanDraftNote()
 	{
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile> { _profile }.BuildMock());
 		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
 			.ReturnsAsync(_profile);
 
@@ -69,6 +71,8 @@ public class PostServiceTests : WithMocks
 	[Fact(DisplayName = "Should create unpublished reply posts")]
 	public async Task CanDraftReply()
 	{
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile> { _profile }.BuildMock());
 		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
 		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
 			.ReturnsAsync(_profile);
@@ -76,6 +80,22 @@ public class PostServiceTests : WithMocks
 		var actual = await _service.DraftNote(_profile.Id, "Test content", _post.Id);
 
 		Assert.Equal(_post.Id, actual.InReplyTo?.Id);
+	}
+
+	[Fact(DisplayName = "Should create posts with mentions")]
+	public async Task CanDraftMention()
+	{
+		var mentioned = _fakeProfile.Generate();
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile> { _profile, mentioned }.BuildMock());
+		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
+			.ReturnsAsync(_profile);
+
+		_post.Mention(mentioned, MentionVisibility.To);
+		var actual = await _service.Draft(_profile.Id, _post, publish: true);
+
+		Assert.Equal(_post.AddressedTo.Count, actual.AddressedTo.Count);
 	}
 
 	[Fact(DisplayName = "Should update post")]

@@ -12,7 +12,6 @@ public class ConfigurePost : IEntityTypeConfiguration<Models.Post>
 
 		builder.HasMany<Models.Content>(post => post.Contents)
 			.WithOne(content => content.Post);
-		builder.OwnsMany<Models.Mention>(post => post.AddressedTo);
 		builder.HasMany<Models.Profile>(post => post.Creators)
 			.WithMany("CreatedPosts")
 			.UsingEntity("PostsCreatedByProfile");

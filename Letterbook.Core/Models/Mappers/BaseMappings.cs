@@ -11,8 +11,6 @@ public class BaseMappings : AutoMapper.Profile
 	{
 		CreateMap<Models.IFederated, Uuid7>()
 			.ConvertUsing<IdUuid7Converter>();
-		CreateMap<Models.Mention, Uuid7>()
-			.ConvertUsing<IdUuid7Converter>();
 		CreateMap<Models.ThreadContext, Uuid7>()
 			.ConvertUsing<IdUuid7Converter>();
 		CreateMap<Uuid7, Models.Profile>(MemberList.None)

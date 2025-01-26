@@ -16,7 +16,7 @@ public class PostMappings : AutoMapper.Profile
 		CreateMap<ThreadDto, ThreadContext>(MemberList.Source);
 
 		CreateMap<Mention, MentionDto>(MemberList.Destination)
-			.ForMember(dest => dest.Mentioned, opt => opt.MapFrom(src => src.GetId25()));
+			.ForMember(dest => dest.Mentioned, opt => opt.MapFrom(src => src.Subject.Id));
 
 		CreateMap<Note, ContentDto>(MemberList.Destination)
 			.IncludeBase<Content, ContentDto>()

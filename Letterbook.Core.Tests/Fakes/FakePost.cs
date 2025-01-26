@@ -72,7 +72,7 @@ public class FakePost : Faker<Post>
 		{
 			foreach (var c in inReplyTo.Creators)
 			{
-				post.AddressedTo.Add(Mention.To(c));
+				post.Mention(c, MentionVisibility.To);
 			}
 
 			post.Thread.Posts.Add(post);

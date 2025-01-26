@@ -101,6 +101,10 @@ public class PostService : IAuthzPostService, IPostService
 			post.Thread.Posts.Add(post);
 		}
 
+		var profiles = await _data.Profiles([asProfile, ..post.AddressedTo.Select(m => m.Subject.Id)]).WithRelation(asProfile)
+			.ToDictionaryAsync(p => p.Id);
+		post.ConvergeMentions(profiles);
+
 		if (await _data.LookupProfile(asProfile) is not { } author)
 			throw CoreException.MissingData<Profile>($"Couldn't find profile {asProfile}", asProfile);
 		post.Creators.Clear();
@@ -135,7 +139,7 @@ public class PostService : IAuthzPostService, IPostService
 		_data.Add(post);
 		await _data.Commit();
 		span?.AddTag("letterbook.post.audience", string.Join(",", post.Audience.Select(a => a.FediId)));
-		span?.AddTag("letterbook.post.mentions", string.Join(",", post.AddressedTo.Select(m => m.Id)));
+		span?.AddTag("letterbook.post.mentions", string.Join(",", post.AddressedTo.Select(m => m.Subject.Id)));
 		await _postEvents.Created(post, (Uuid7)asProfile, _claims);
 		if (publish) await _postEvents.Published(post, (Uuid7)asProfile, _claims);
 
