@@ -56,45 +56,6 @@ public sealed class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTest
 		Assert.NotNull(_adapter);
 	}
 
-	[Fact(DisplayName = "Should lookup posts by ID")]
-	public async Task CanLookupById()
-	{
-		var expected = _posts[_profiles[0]][0];
-		var actual = await _adapter.LookupPost(expected.GetId());
-
-		Assert.True(expected.GetId() == actual?.GetId());
-		Assert.Equal(expected, actual, _cmp);
-	}
-
-	[Fact(DisplayName = "Should lookup posts by FediID")]
-	public async Task CanLookupByFediId()
-	{
-		var expected = _posts[_profiles[0]][0];
-		var actual = await _adapter.LookupPost(expected.FediId);
-
-		Assert.True(expected.GetId() == actual?.GetId());
-		Assert.Equal(expected, actual, _cmp);
-	}
-
-	[Fact(DisplayName = "Should lookup posts with Content and Creators")]
-	public async Task CanLookupWithNavigations()
-	{
-		var expected = _posts[_profiles[0]][0];
-		var actual = await _adapter.LookupPost(expected.GetId());
-
-		Assert.NotNull(actual);
-		Assert.NotEmpty(actual.Contents);
-		Assert.NotEmpty(actual.Creators);
-	}
-
-	[Fact(DisplayName = "Should not lookup non-existent posts")]
-	public async Task CanLookupMissing()
-	{
-		var actual = await _adapter.LookupPost(Uuid7.NewUuid7());
-
-		Assert.Null(actual);
-	}
-
 	[Fact(DisplayName = "Should lookup threads")]
 	public async Task CanLookupThread()
 	{
@@ -128,19 +89,6 @@ public sealed class PostAdapterTests : IClassFixture<HostFixture<PostAdapterTest
 		Assert.NotEmpty(actual.Posts);
 		Assert.Contains(_posts[_profiles[0]][2], actual.Posts, _cmp);
 		Assert.Contains(_posts[_profiles[4]][0], actual.Posts, _cmp);
-	}
-
-	[Fact(DisplayName = "Should lookup a post with its thread")]
-	public async Task CanLookupPostAndThread()
-	{
-		// Should have several posts in this thread
-		var expected = _posts[_profiles[0]][3];
-		var actual = await _adapter.LookupPostWithThread(expected.GetId());
-
-		Assert.NotNull(actual);
-		Assert.NotEmpty(actual.Thread.Posts);
-		Assert.Contains(_posts[_profiles[0]][2], actual.Thread.Posts, _cmp);
-		Assert.Contains(_posts[_profiles[4]][0], actual.Thread.Posts, _cmp);
 	}
 
 	[Fact(DisplayName = "Should not lookup non-existent threads")]

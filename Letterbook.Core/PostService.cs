@@ -46,15 +46,15 @@ public class PostService : IAuthzPostService, IPostService
 	public async Task<Post?> LookupPost(ProfileId asProfile, PostId id, bool withThread = true)
 	{
 		return withThread
-			? await _data.LookupPostWithThread(id)
-			: await _data.LookupPost(id);
+			? await _data.Posts(id).WithThread().FirstOrDefaultAsync()
+			: await _data.Posts(id).FirstOrDefaultAsync();
 	}
 
 	public async Task<Post?> LookupPost(ProfileId asProfile, Uri fediId, bool withThread = true)
 	{
 		return withThread
-			? await _data.LookupPostWithThread(fediId)
-			: await _data.LookupPost(fediId);
+			? await _data.Posts(fediId).WithThread().FirstOrDefaultAsync()
+			: await _data.Posts(fediId).FirstOrDefaultAsync();
 	}
 
 	public async Task<ThreadContext?> LookupThread(ProfileId asProfile, ThreadId id)
@@ -94,7 +94,7 @@ public class PostService : IAuthzPostService, IPostService
 
 		if (inReplyToId is { } parentId)
 		{
-			var parent = await _data.LookupPost(parentId)
+			var parent = await _data.Posts(parentId).WithCommonData().WithThread().FirstOrDefaultAsync()
 						 ?? throw CoreException.MissingData($"Couldn't find post {parentId} to reply to", typeof(Post),
 							 parentId);
 			post.InReplyTo = parent;
@@ -152,7 +152,7 @@ public class PostService : IAuthzPostService, IPostService
 		// TODO: authz
 		// I think authz can be conveyed around the app with just a list of claims, as long as one of the claims is
 		// a profile, right?
-		var previous = await _data.LookupPost(postId)
+		var previous = await _data.Posts(postId).WithCommonData().WithThread().FirstOrDefaultAsync()
 					   ?? throw CoreException.MissingData($"Could not find existing post {post.Id} to update",
 						   typeof(Post), postId);
 
@@ -184,7 +184,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task Delete(ProfileId asProfile, PostId id)
 	{
-		var post = await _data.LookupPost(id);
+		var post = await _data.Posts(id).FirstOrDefaultAsync();
 		if (post is null) return;
 		// TODO: authz and thread root
 		post.DeletedDate = DateTimeOffset.UtcNow;
@@ -195,7 +195,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> Publish(ProfileId asProfile, PostId id, bool localOnly = false)
 	{
-		var post = await _data.LookupPost(id);
+		var post = await _data.Posts(id).WithCommonData().FirstOrDefaultAsync();
 		if (post is null) throw CoreException.MissingData<Post>($"Can't find post {id} to publish", id);
 		if (post.PublishedDate is not null)
 			throw CoreException.Duplicate($"Tried to publish post {id} that is already published", id);
@@ -210,7 +210,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> AddContent(ProfileId asProfile, PostId postId, Content content)
 	{
-		var post = await _data.LookupPost(postId)
+		var post = await _data.Posts(postId).WithCommonData().FirstOrDefaultAsync()
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
@@ -232,7 +232,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> RemoveContent(ProfileId asProfile, PostId postId, Uuid7 contentId)
 	{
-		var post = await _data.LookupPost(postId)
+		var post = await _data.Posts(postId).WithCommonData().FirstOrDefaultAsync()
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to remove content", postId);
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
@@ -260,7 +260,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> UpdateContent(ProfileId asProfile, PostId postId, Uuid7 contentId, Content content)
 	{
-		var post = await _data.LookupPost(postId)
+		var post = await _data.Posts(postId).WithCommonData().FirstOrDefaultAsync()
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
@@ -399,7 +399,7 @@ public class PostService : IAuthzPostService, IPostService
 		}
 
 		posts = posts.ToList();
-		var knownPosts = await _data.Posts(posts.Select(p => p.FediId))
+		var knownPosts = await _data.Posts(posts.Select(p => p.FediId).ToArray())
 			.Include(p => p.Thread)
 			.Include(p => p.InReplyTo)
 			.Include(p => p.Audience)
@@ -474,7 +474,7 @@ public class PostService : IAuthzPostService, IPostService
 			return [];
 
 		var posts = new List<Post>(items.Count());
-		await foreach (var post in _data.Posts(items).AsAsyncEnumerable())
+		await foreach (var post in _data.Posts(items.ToArray()).AsAsyncEnumerable())
 		{
 			post.DeletedDate ??= DateTimeOffset.UtcNow;
 			posts.Add(post);
@@ -545,7 +545,7 @@ public class PostService : IAuthzPostService, IPostService
 	{
 		var postIds = posts.Select(p => p.FediId)
 			.Concat(posts.Select(p => p.InReplyTo).WhereNotNull().Select(p => p.FediId))
-			.ToList();
+			.ToArray();
 		return await _data.Posts(postIds)
 			.Include(post => post.Thread)
 			.ToDictionaryAsync(p => p.FediId);

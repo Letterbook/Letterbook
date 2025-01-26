@@ -29,25 +29,17 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<Account> AllAccounts();
 
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPost(PostId postId);
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPost(Uri fediId);
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<ThreadContext?> LookupThread(Uri threadId);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public Task<ThreadContext?> LookupThread(ThreadId threadId);
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPostWithThread(PostId postId);
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPostWithThread(Uri postId);
 
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public IQueryable<Profile> SingleProfile(ProfileId id);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public IQueryable<Profile> SingleProfile(Uri fediId);
 
-	public IQueryable<Post> Posts(IEnumerable<PostId> postIds);
-	public IQueryable<Post> Posts(IEnumerable<Uri> postIds);
+	public IQueryable<Post> Posts(params PostId[] postIds);
+	public IQueryable<Post> Posts(params Uri[] postIds);
 
 	/// <summary>
 	/// Query for a Thread by Id

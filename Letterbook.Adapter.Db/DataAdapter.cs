@@ -47,16 +47,6 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Accounts.AsQueryable();
 	}
 
-	public async Task<Models.Post?> LookupPost(Models.PostId postId)
-	{
-		return await WithDefaults(_context.Posts).FirstOrDefaultAsync(post => post.Id == postId);
-	}
-
-	public async Task<Models.Post?> LookupPost(Uri fediId)
-	{
-		return await WithDefaults(_context.Posts).FirstOrDefaultAsync(post => post.FediId == fediId);
-	}
-
 	public async Task<Models.ThreadContext?> LookupThread(Uri threadId)
 	{
 		return await _context.Threads
@@ -71,28 +61,16 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			.FirstOrDefaultAsync(thread => thread.Id == threadId);
 	}
 
-	public async Task<Models.Post?> LookupPostWithThread(Models.PostId postId)
-	{
-		return await WithThread(_context.Posts)
-			.FirstOrDefaultAsync(post => post.Id == postId);
-	}
-
-	public async Task<Models.Post?> LookupPostWithThread(Uri postId)
-	{
-		return await WithThread(_context.Posts)
-			.FirstOrDefaultAsync(post => post.FediId == postId);
-	}
-
 	public IQueryable<Models.Profile> SingleProfile(Models.ProfileId id) => Profiles(id);
 
 	public IQueryable<Models.Profile> SingleProfile(Uri fediId) => Profiles(fediId);
 
-	public IQueryable<Models.Post> Posts(IEnumerable<Models.PostId> postIds)
+	public IQueryable<Models.Post> Posts(params Models.PostId[] postIds)
 	{
 		return _context.Posts.Where(post => postIds.Contains(post.Id));
 	}
 
-	public IQueryable<Models.Post> Posts(IEnumerable<Uri> postIds)
+	public IQueryable<Models.Post> Posts(params Uri[] postIds)
 	{
 		return _context.Posts.Where(post => postIds.Contains(post.FediId));
 	}

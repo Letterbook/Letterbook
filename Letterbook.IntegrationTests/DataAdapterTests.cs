@@ -47,26 +47,6 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 	{
 	}
 
-	[Trait("AccountProfileAdapter", "LookupProfile")]
-	[Fact(DisplayName = "Should find a profile by Id")]
-	public async Task LookupProfileTestId()
-	{
-		var actual = await _adapter.LookupProfile(_profiles[0].FediId);
-
-		Assert.NotNull(actual);
-		Assert.Equal(_profiles[0], actual);
-	}
-
-	[Trait("AccountProfileAdapter", "LookupProfile")]
-	[Fact(DisplayName = "Should find a profile by LocalId")]
-	public async Task LookupProfileTestLocalId()
-	{
-		var actual = await _adapter.LookupProfile(_profiles[0].GetId());
-
-		Assert.NotNull(actual);
-		Assert.Equal(_profiles[0], actual);
-	}
-
 	[Trait("AccountProfileAdapter", "QueryFrom")]
 	[Fact(DisplayName = "Query from profiles")]
 	public async Task QueryFromProfile()
