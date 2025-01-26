@@ -11,24 +11,24 @@ public interface IDataAdapter : IDisposable
 
 	delegate bool ProfileComparer(Profile profile);
 
-	/// <summary>
-	/// Query for one account by ID
-	/// </summary>
-	/// <param name="accountId"></param>
-	/// <returns></returns>
-	IQueryable<Account> SingleAccount(Guid accountId);
-
 	public bool RecordAccount(Account account);
 	public Task<Account?> LookupAccount(Guid id);
 	public Task<Account?> FindAccountByEmail(string normalizedEmail);
 
 	/// <summary>
-	/// Query for Accounts
+	/// Query across all Accounts
 	/// </summary>
 	/// <returns></returns>
 	public IQueryable<Account> AllAccounts();
 
+	/// <summary>
+	/// Query for Posts by ID
+	/// </summary>
+	/// <param name="postIds"></param>
+	/// <returns></returns>
 	public IQueryable<Post> Posts(params PostId[] postIds);
+
+	/// <see cref="Posts(Letterbook.Core.Models.PostId[])"/>
 	public IQueryable<Post> Posts(params Uri[] postIds);
 
 	/// <summary>
@@ -40,22 +40,21 @@ public interface IDataAdapter : IDisposable
 	/// <see cref="Threads(Medo.Uuid7)"/>
 	public IQueryable<ThreadContext> Threads(params Uri[] threadIds);
 
+	/// <summary>
+	/// Query for Profiles by ID
+	/// </summary>
+	/// <param name="ids"></param>
+	/// <returns></returns>
 	public IQueryable<Profile> Profiles(params ProfileId[] ids);
+
+	/// <see cref="Profiles(Letterbook.Core.Models.ProfileId[])"/>
 	public IQueryable<Profile> Profiles(params Uri[] ids);
-	public IQueryable<Profile> AllProfiles();
 
 	/// <summary>
-	/// Include follow relationships in the profile query
+	/// Query across all Profiles
 	/// </summary>
-	/// <param name="query"></param>
-	/// <param name="relationId"></param>
 	/// <returns></returns>
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uri relationId);
-
-	/// <see cref="WithRelation(System.Linq.IQueryable{Letterbook.Core.Models.Profile},System.Uri)"/>
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, ProfileId relationId);
+	public IQueryable<Profile> AllProfiles();
 
 	/// <summary>
 	/// Query for navigation entities, using the given object as a root entity
@@ -72,6 +71,10 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<T> QueryFrom<T>(Post post, Expression<Func<Post, IEnumerable<T>>> queryExpression)
 		where T : class;
 
+	/// <summary>
+	/// Query across all Audiences
+	/// </summary>
+	/// <returns></returns>
 	public IQueryable<Audience> AllAudience();
 
 	public void Add(Profile profile);

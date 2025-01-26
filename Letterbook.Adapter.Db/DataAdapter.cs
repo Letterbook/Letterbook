@@ -18,11 +18,6 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		_context = context;
 	}
 
-	public IQueryable<Models.Account> SingleAccount(Guid accountId)
-	{
-		return _context.Accounts.Where(account => account.Id == accountId).AsQueryable();
-	}
-
 	public bool RecordAccount(Models.Account account)
 	{
 		var added = _context.Accounts.Add(account);
@@ -84,28 +79,6 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	}
 
 	public IQueryable<Models.Profile> AllProfiles() => _context.Profiles;
-
-	public IQueryable<Models.Profile> WithRelation(IQueryable<Models.Profile> query, Uri relationId)
-	{
-		return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.FediId == relationId))
-			.ThenInclude(relation => relation.Follows)
-			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.FediId == relationId))
-			.ThenInclude(relation => relation.Follower)
-			.Include(profile => profile.Keys)
-			.Include(profile => profile.Audiences)
-			.AsSplitQuery();
-	}
-
-	public IQueryable<Models.Profile> WithRelation(IQueryable<Models.Profile> query, Models.ProfileId relationId)
-	{
-		return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId))
-			.ThenInclude(relation => relation.Follows)
-			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
-			.ThenInclude(relation => relation.Follower)
-			.Include(profile => profile.Keys)
-			.Include(profile => profile.Audiences)
-			.AsSplitQuery();
-	}
 
 	public IQueryable<T> QueryFrom<T>(Models.Profile profile, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
 		where T : class

@@ -437,7 +437,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> Unfollow(ProfileId selfId, Uri targetId)
 	{
-		var self = await _data.WithRelation(_data.Profiles(selfId), targetId)
+		var self = await _data.Profiles(selfId).WithRelation(targetId)
 			           .Include(profile => profile.Audiences.Where(
 				           audience => audience.Source != null && audience.Source.FediId.OriginalString == targetId.OriginalString))
 			           .FirstOrDefaultAsync()
@@ -451,7 +451,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation?> Unfollow(ProfileId selfId, ProfileId targetId)
 	{
-		var self = await _data.WithRelation(_data.Profiles(selfId), targetId)
+		var self = await _data.Profiles(selfId).WithRelation(targetId)
 			           .Include(profile => profile.Audiences.Where(
 				           audience => audience.Source != null && audience.Source.Id == targetId))
 			           .FirstOrDefaultAsync()
@@ -596,7 +596,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> AcceptFollower(ProfileId profileId, Uri followerId)
 	{
-		var self = await _data.WithRelation(_data.Profiles(profileId), followerId).FirstOrDefaultAsync()
+		var self = await _data.Profiles(profileId).WithRelation(followerId).FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(profileId);
 		var relation = self.FollowersCollection
 			.FirstOrDefault(p => p.Follower.FediId.OriginalString == followerId.OriginalString);
@@ -607,7 +607,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> AcceptFollower(ProfileId profileId, ProfileId followerId)
 	{
-		var self = await _data.WithRelation(_data.Profiles(profileId), followerId).FirstOrDefaultAsync()
+		var self = await _data.Profiles(profileId).WithRelation(followerId).FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(profileId);
 		var relation = self.FollowersCollection
 			.FirstOrDefault(p => p.Follower.Id == followerId);
