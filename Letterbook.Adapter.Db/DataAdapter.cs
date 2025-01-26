@@ -47,19 +47,6 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Accounts.AsQueryable();
 	}
 
-	public Task<Models.Profile?> LookupProfile(Models.ProfileId localId)
-	{
-		return _context.Profiles
-			.Include(profile => profile.Keys)
-			.AsSplitQuery()
-			.FirstOrDefaultAsync(profile => profile.Id == localId);
-	}
-
-	public Task<Models.Profile?> LookupProfile(Uri id)
-	{
-		return _context.Profiles.FirstOrDefaultAsync(profile => profile.FediId == id);
-	}
-
 	public async Task<Models.Post?> LookupPost(Models.PostId postId)
 	{
 		return await WithDefaults(_context.Posts).FirstOrDefaultAsync(post => post.Id == postId);

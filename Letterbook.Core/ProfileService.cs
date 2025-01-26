@@ -560,7 +560,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<IQueryable<Profile>> LookupFollowing(ProfileId profileId, DateTimeOffset? followedBefore, int limit)
 	{
-		var profile = await _data.LookupProfile(profileId)
+		var profile = await _data.Profiles(profileId).FirstOrDefaultAsync()
 		              ?? throw CoreException.MissingData<Profile>(profileId);
 		return _data.QueryFrom(profile, query => query.FollowingCollection)
 			.Take(Math.Max(limit, 200))
@@ -572,7 +572,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<IQueryable<Profile>> LookupFollowers(ProfileId profileId, DateTimeOffset? followedBefore, int limit)
 	{
-		var profile = await _data.LookupProfile(profileId)
+		var profile = await _data.Profiles(profileId).FirstOrDefaultAsync()
 		              ?? throw CoreException.MissingData<Profile>(profileId);
 		return _data.QueryFrom(profile, query => query.FollowersCollection)
 			.Take(Math.Max(limit, 200))

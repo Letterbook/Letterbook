@@ -22,4 +22,8 @@ public static class ProfileQueries
 			.Include(profile => profile.Keys)
 			.Include(profile => profile.Audiences)
 			.AsSplitQuery();
+
+	public static IQueryable<Profile> WithKeys(this IQueryable<Profile> query) =>
+		query.Include(profile => profile.Keys)
+			.AsSplitQuery();
 }

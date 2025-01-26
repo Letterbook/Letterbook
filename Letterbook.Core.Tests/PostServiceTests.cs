@@ -47,8 +47,8 @@ public class PostServiceTests : WithMocks
 	{
 		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
 			.Returns(new List<Profile> { _profile }.BuildMock());
-		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
-			.ReturnsAsync(_profile);
+		// DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
+			// .ReturnsAsync(_profile);
 
 		var actual = await _service.DraftNote(_profile.Id, "Test content");
 
@@ -74,8 +74,8 @@ public class PostServiceTests : WithMocks
 		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
 			.Returns(new List<Profile> { _profile }.BuildMock());
 		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
-		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
-			.ReturnsAsync(_profile);
+		// DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
+			// .ReturnsAsync(_profile);
 
 		var actual = await _service.DraftNote(_profile.Id, "Test content", _post.Id);
 
@@ -89,8 +89,8 @@ public class PostServiceTests : WithMocks
 		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
 			.Returns(new List<Profile> { _profile, mentioned }.BuildMock());
 		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
-		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
-			.ReturnsAsync(_profile);
+		// DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
+			// .ReturnsAsync(_profile);
 
 		_post.Mention(mentioned, MentionVisibility.To);
 		var actual = await _service.Draft(_profile.Id, _post, publish: true);

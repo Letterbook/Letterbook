@@ -69,7 +69,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> DraftNote(ProfileId asProfile, string contentSource, PostId? inReplyToId = default)
 	{
-		var author = await _data.LookupProfile(asProfile)
+		var author = await _data.Profiles(asProfile).WithKeys().FirstOrDefaultAsync()
 					 ?? throw CoreException.MissingData($"Couldn't find profile {asProfile}", typeof(Profile), asProfile);
 		var post = new Post(_options);
 		var note = new Note
@@ -106,7 +106,7 @@ public class PostService : IAuthzPostService, IPostService
 			.ToDictionaryAsync(p => p.Id);
 		post.ConvergeMentions(profiles);
 
-		if (await _data.LookupProfile(asProfile) is not { } author)
+		if (await _data.Profiles(asProfile).FirstOrDefaultAsync() is not { } author)
 			throw CoreException.MissingData<Profile>($"Couldn't find profile {asProfile}", asProfile);
 		post.Creators.Clear();
 		post.Creators.Add(author);
