@@ -29,11 +29,6 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<Account> AllAccounts();
 
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<ThreadContext?> LookupThread(Uri threadId);
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<ThreadContext?> LookupThread(ThreadId threadId);
-
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public IQueryable<Profile> SingleProfile(ProfileId id);
 	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
 	public IQueryable<Profile> SingleProfile(Uri fediId);

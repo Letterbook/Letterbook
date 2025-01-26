@@ -59,12 +59,12 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<ThreadContext?> LookupThread(ProfileId asProfile, ThreadId id)
 	{
-		return await _data.LookupThread(id);
+		return await _data.Threads(id).Include(t => t.Posts).FirstOrDefaultAsync();
 	}
 
 	public async Task<ThreadContext?> LookupThread(ProfileId asProfile, Uri threadId)
 	{
-		return await _data.LookupThread(threadId);
+		return await _data.Threads(threadId).Include(t => t.Posts).FirstOrDefaultAsync();
 	}
 
 	public async Task<Post> DraftNote(ProfileId asProfile, string contentSource, PostId? inReplyToId = default)
