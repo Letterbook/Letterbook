@@ -94,7 +94,7 @@ public class PostService : IAuthzPostService, IPostService
 
 		if (inReplyToId is { } parentId)
 		{
-			var parent = await _data.Posts(parentId).WithCommonData().WithThread().FirstOrDefaultAsync()
+			var parent = await _data.Posts(parentId).WithCommonFields().WithThread().FirstOrDefaultAsync()
 						 ?? throw CoreException.MissingData($"Couldn't find post {parentId} to reply to", typeof(Post),
 							 parentId);
 			post.InReplyTo = parent;
@@ -152,7 +152,7 @@ public class PostService : IAuthzPostService, IPostService
 		// TODO: authz
 		// I think authz can be conveyed around the app with just a list of claims, as long as one of the claims is
 		// a profile, right?
-		var previous = await _data.Posts(postId).WithCommonData().WithThread().FirstOrDefaultAsync()
+		var previous = await _data.Posts(postId).WithCommonFields().WithThread().FirstOrDefaultAsync()
 					   ?? throw CoreException.MissingData($"Could not find existing post {post.Id} to update",
 						   typeof(Post), postId);
 
@@ -184,7 +184,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task Delete(ProfileId asProfile, PostId id)
 	{
-		var post = await _data.Posts(id).FirstOrDefaultAsync();
+		var post = await _data.Posts(id).WithCommonFields().FirstOrDefaultAsync();
 		if (post is null) return;
 		// TODO: authz and thread root
 		post.DeletedDate = DateTimeOffset.UtcNow;
@@ -195,7 +195,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> Publish(ProfileId asProfile, PostId id, bool localOnly = false)
 	{
-		var post = await _data.Posts(id).WithCommonData().FirstOrDefaultAsync();
+		var post = await _data.Posts(id).WithCommonFields().FirstOrDefaultAsync();
 		if (post is null) throw CoreException.MissingData<Post>($"Can't find post {id} to publish", id);
 		if (post.PublishedDate is not null)
 			throw CoreException.Duplicate($"Tried to publish post {id} that is already published", id);
@@ -210,7 +210,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> AddContent(ProfileId asProfile, PostId postId, Content content)
 	{
-		var post = await _data.Posts(postId).WithCommonData().FirstOrDefaultAsync()
+		var post = await _data.Posts(postId).WithCommonFields().FirstOrDefaultAsync()
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
@@ -232,7 +232,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> RemoveContent(ProfileId asProfile, PostId postId, Uuid7 contentId)
 	{
-		var post = await _data.Posts(postId).WithCommonData().FirstOrDefaultAsync()
+		var post = await _data.Posts(postId).WithCommonFields().FirstOrDefaultAsync()
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to remove content", postId);
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
@@ -260,7 +260,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> UpdateContent(ProfileId asProfile, PostId postId, Uuid7 contentId, Content content)
 	{
-		var post = await _data.Posts(postId).WithCommonData().FirstOrDefaultAsync()
+		var post = await _data.Posts(postId).WithCommonFields().FirstOrDefaultAsync()
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
