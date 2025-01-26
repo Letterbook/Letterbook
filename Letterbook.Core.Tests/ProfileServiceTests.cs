@@ -48,7 +48,7 @@ public class ProfileServiceTests : WithMocks
 		var accountId = Uuid7.NewUuid7();
 		var expected = "testAccount";
 		DataAdapterMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
-		DataAdapterMock.Setup(m => m.AnyProfile(expected)).ReturnsAsync(false);
+		DataAdapterMock.Setup(m => m.AllProfiles()).Returns(new List<Profile>().BuildMock());
 
 		var actual = await _service.CreateProfile(accountId, expected);
 
@@ -62,7 +62,7 @@ public class ProfileServiceTests : WithMocks
 		var accountId = Uuid7.NewUuid7();
 		var expected = "testAccount";
 		DataAdapterMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(default(Account));
-		DataAdapterMock.Setup(m => m.AnyProfile(expected)).ReturnsAsync(false);
+		DataAdapterMock.Setup(m => m.AllProfiles()).Returns(new List<Profile>().BuildMock());
 
 		await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
 	}
@@ -75,7 +75,7 @@ public class ProfileServiceTests : WithMocks
 		var existing = _fakeProfile.Generate();
 		existing.Handle = expected;
 		DataAdapterMock.Setup(m => m.LookupAccount(accountId)).ReturnsAsync(_fakeAccount.Generate());
-		DataAdapterMock.Setup(m => m.AnyProfile(It.IsAny<string>())).ReturnsAsync(true);
+		DataAdapterMock.Setup(m => m.AllProfiles()).Returns(new List<Profile>(){existing}.BuildMock());
 
 		await Assert.ThrowsAsync<CoreException>(async () => await _service.CreateProfile(accountId, expected));
 	}

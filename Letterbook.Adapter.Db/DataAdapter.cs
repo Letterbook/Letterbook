@@ -30,11 +30,6 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return added.State == EntityState.Added;
 	}
 
-	public Task<bool> RecordAccounts(IEnumerable<Models.Account> accounts)
-	{
-		throw new NotImplementedException();
-	}
-
 	public Task<Models.Account?> LookupAccount(Guid id)
 	{
 		return _context.Accounts.FirstOrDefaultAsync(account => account.Id == id);
@@ -47,19 +42,10 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			.FirstOrDefaultAsync(account => account.NormalizedEmail == normalizedEmail);
 	}
 
-	public IQueryable<Models.Account> SearchAccounts()
+	public IQueryable<Models.Account> AllAccounts()
 	{
 		return _context.Accounts.AsQueryable();
 	}
-
-	public IQueryable<Models.Account> WithProfiles(IQueryable<Models.Account> query)
-	{
-		return query
-			.Include(account => account.LinkedProfiles)
-			.ThenInclude(l => l.Profile)
-			.AsSplitQuery();
-	}
-
 
 	public Task<bool> AnyProfile(string handle)
 	{
@@ -120,15 +106,9 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			.FirstOrDefaultAsync(post => post.FediId == postId);
 	}
 
-	public IQueryable<Models.Profile> SingleProfile(Models.ProfileId id)
-	{
-		return _context.Profiles.Where(profile => profile.Id == id);
-	}
+	public IQueryable<Models.Profile> SingleProfile(Models.ProfileId id) => Profiles(id);
 
-	public IQueryable<Models.Profile> SingleProfile(Uri fediId)
-	{
-		return _context.Profiles.Where(profile => profile.FediId == fediId);
-	}
+	public IQueryable<Models.Profile> SingleProfile(Uri fediId) => Profiles(fediId);
 
 	public IQueryable<Models.Profile> ListProfiles(IEnumerable<Models.ProfileId> profileIds)
 	{
@@ -150,12 +130,12 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Posts.Where(post => post.FediId == fediId);
 	}
 
-	public IQueryable<Models.Post> ListPosts(IEnumerable<Models.PostId> postIds)
+	public IQueryable<Models.Post> Posts(IEnumerable<Models.PostId> postIds)
 	{
 		return _context.Posts.Where(post => postIds.Contains(post.Id));
 	}
 
-	public IQueryable<Models.Post> ListPosts(IEnumerable<Uri> postIds)
+	public IQueryable<Models.Post> Posts(IEnumerable<Uri> postIds)
 	{
 		return _context.Posts.Where(post => postIds.Contains(post.FediId));
 	}
@@ -190,6 +170,8 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			? _context.Profiles.Where(p => p.Id == ids[0])
 			: _context.Profiles.Where(p => ids.Contains(p.Id));
 	}
+
+	public IQueryable<Models.Profile> AllProfiles() => _context.Profiles;
 
 	public IQueryable<Models.Profile> WithAudience(IQueryable<Models.Profile> query)
 	{
@@ -229,7 +211,7 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Entry(post).Collection(queryExpression).Query();
 	}
 
-	public IQueryable<Models.Audience> QueryAudience()
+	public IQueryable<Models.Audience> AllAudience()
 	{
 		return _context.Audience.AsQueryable();
 	}

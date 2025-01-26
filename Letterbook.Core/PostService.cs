@@ -4,6 +4,7 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Letterbook.Core.Queries;
 using Medo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -398,7 +399,7 @@ public class PostService : IAuthzPostService, IPostService
 		}
 
 		posts = posts.ToList();
-		var knownPosts = await _data.ListPosts(posts.Select(p => p.FediId))
+		var knownPosts = await _data.Posts(posts.Select(p => p.FediId))
 			.Include(p => p.Thread)
 			.Include(p => p.InReplyTo)
 			.Include(p => p.Audience)
@@ -473,7 +474,7 @@ public class PostService : IAuthzPostService, IPostService
 			return [];
 
 		var posts = new List<Post>(items.Count());
-		await foreach (var post in _data.ListPosts(items).AsAsyncEnumerable())
+		await foreach (var post in _data.Posts(items).AsAsyncEnumerable())
 		{
 			post.DeletedDate ??= DateTimeOffset.UtcNow;
 			posts.Add(post);
@@ -545,7 +546,7 @@ public class PostService : IAuthzPostService, IPostService
 		var postIds = posts.Select(p => p.FediId)
 			.Concat(posts.Select(p => p.InReplyTo).WhereNotNull().Select(p => p.FediId))
 			.ToList();
-		return await _data.ListPosts(postIds)
+		return await _data.Posts(postIds)
 			.Include(post => post.Thread)
 			.ToDictionaryAsync(p => p.FediId);
 	}
@@ -557,7 +558,7 @@ public class PostService : IAuthzPostService, IPostService
 	/// <returns></returns>
 	private async Task<Dictionary<Uri, Profile>> ConvergeProfiles(IEnumerable<Profile> profiles)
 	{
-		return await _data.ListProfiles(profiles.Select(p => p.FediId)).ToDictionaryAsync(p => p.FediId);
+		return await _data.Profiles(profiles.Select(p => p.FediId).ToArray()).ToDictionaryAsync(p => p.FediId);
 	}
 
 	/// <summary>
@@ -614,7 +615,7 @@ public class PostService : IAuthzPostService, IPostService
 	{
 		var audienceIds = posts.SelectMany(p => p.Audience).Select(a => a.FediId)
 			.Concat(posts.SelectMany(p => p.AddressedTo).Select(m => m.Subject.FediId));
-		var knownAudience = await _data.QueryAudience()
+		var knownAudience = await _data.AllAudience()
 			.Where(a => audienceIds.Contains(a.FediId))
 			.Distinct()
 			.ToDictionaryAsync(a => a.FediId);

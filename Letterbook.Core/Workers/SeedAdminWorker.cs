@@ -32,7 +32,7 @@ public class SeedAdminWorker : IScopedWorker
 
 		try
 		{
-			if (_accountAdapter.SearchAccounts().Any())
+			if (_accountAdapter.AllAccounts().Any())
 			{
 				_logger.LogDebug("Found accounts, skipping seed");
 				return;

@@ -190,7 +190,7 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 	private IAsyncEnumerable<Uri> GetAudienceInboxes(Post post)
 	{
 		_logger.LogDebug("Getting inboxes for {Audiences}", post.Audience.Select(a => a.FediId));
-		return _posts.QueryAudience()
+		return _posts.AllAudience()
 			.Where(audience => post.Audience.Select(a => a.FediId).Contains(audience.FediId))
 			.Include(audience => audience.Members)
 			.SelectMany(profile => profile.Members)

@@ -6,6 +6,7 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Letterbook.Core.Queries;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.EntityFrameworkCore;
@@ -56,7 +57,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 				ownerId);
 		}
 
-		if (await _data.AnyProfile(handle))
+		if (await _data.AllProfiles().AnyAsync(p => p.Handle == handle))
 		{
 			_logger.LogError("Cannot create a new profile because a profile already exists with handle {Handle}",
 				handle);
