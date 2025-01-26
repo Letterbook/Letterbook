@@ -72,6 +72,13 @@ public interface IDataAdapter : IDisposable
 		where T : class;
 
 	/// <summary>
+	/// Query audiences by ID
+	/// </summary>
+	/// <param name="ids"></param>
+	/// <returns></returns>
+	public IQueryable<Audience> Audiences(params Uri[] ids);
+
+	/// <summary>
 	/// Query across all Audiences
 	/// </summary>
 	/// <returns></returns>

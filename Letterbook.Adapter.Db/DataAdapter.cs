@@ -91,6 +91,13 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Entry(post).Collection(queryExpression).Query();
 	}
 
+	public IQueryable<Models.Audience> Audiences(params Uri[] ids)
+	{
+		return ids.Length == 1
+			? _context.Audience.Where(p => p.FediId == ids[0])
+			: _context.Audience.Where(p => ids.Contains(p.FediId));
+	}
+
 	public IQueryable<Models.Audience> AllAudience()
 	{
 		return _context.Audience.AsQueryable();

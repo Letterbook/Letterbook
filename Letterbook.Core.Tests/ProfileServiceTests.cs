@@ -407,7 +407,7 @@ public class ProfileServiceTests : WithMocks
 	{
 		var follower = new FakeProfile().Generate();
 		_profile.AddFollower(follower, FollowState.None);
-		DataAdapterMock.Setup(m => m.Profiles(_profile.FediId)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_profile.Id)).Returns(new List<Profile> { _profile }.BuildMock());
 
 		var actual = await _service.AcceptFollower(_profile.GetId(), follower.GetId());
 

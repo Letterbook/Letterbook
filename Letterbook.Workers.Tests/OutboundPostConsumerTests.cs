@@ -70,9 +70,7 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 			.Members.Add(follower);
 		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.Audience)).Returns(_post.Audience.BuildMock());
 		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.AddressedTo)).Returns(_post.AddressedTo.BuildMock());
-		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_post.Audience.BuildMock());
-		//ProfileServiceAuthMock.Setup(m => m.LookupProfile(_profile.Id, It.IsAny<ProfileId?>()))
-		//	.ReturnsAsync(_profile);
+		DataAdapterMock.Setup(m => m.Audiences(It.IsAny<Uri[]>())).Returns(_post.Audience.BuildMock());
 
 		await _publisher.Published(_post, _profile.GetId(), []);
 
@@ -91,7 +89,7 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 		audience.Members.Add(recipient);
 
 		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.AddressedTo)).Returns(new List<Mention>().BuildMock());
-		DataAdapterMock.Setup(m => m.AllAudience()).Returns(new List<Audience> { audience }.BuildMock());
+		DataAdapterMock.Setup(m => m.Audiences(It.IsAny<Uri[]>())).Returns(new List<Audience> { audience }.BuildMock());
 
 		await _publisher.Published(_post, _profile.GetId(), []);
 
@@ -108,7 +106,7 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 		audience.Members.Add(recipient);
 
 		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.AddressedTo)).Returns(new List<Mention>().BuildMock());
-		DataAdapterMock.Setup(m => m.AllAudience()).Returns(new List<Audience> { audience }.BuildMock());
+		DataAdapterMock.Setup(m => m.Audiences(It.IsAny<Uri[]>())).Returns(new List<Audience> { audience }.BuildMock());
 
 		await _publisher.Updated(_post, _profile.GetId(), []);
 
@@ -125,7 +123,7 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 		audience.Members.Add(recipient);
 
 		DataAdapterMock.Setup(m => m.QueryFrom(_post, p => p.AddressedTo)).Returns(new List<Mention>().BuildMock());
-		DataAdapterMock.Setup(m => m.AllAudience()).Returns(new List<Audience> { audience }.BuildMock());
+		DataAdapterMock.Setup(m => m.Audiences(It.IsAny<Uri[]>())).Returns(new List<Audience> { audience }.BuildMock());
 
 		await _publisher.Deleted(_post, _profile.GetId(), []);
 

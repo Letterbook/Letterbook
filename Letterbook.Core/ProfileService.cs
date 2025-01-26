@@ -607,7 +607,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<FollowerRelation> AcceptFollower(ProfileId profileId, ProfileId followerId)
 	{
-		var self = await _data.Profiles(profileId).WithRelation(followerId).FirstOrDefaultAsync()
+		var self = await _data.Profiles(profileId)
+			           .WithRelation(followerId)
+			           .FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(profileId);
 		var relation = self.FollowersCollection
 			.FirstOrDefault(p => p.Follower.Id == followerId);
