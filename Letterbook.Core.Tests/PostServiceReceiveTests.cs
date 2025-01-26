@@ -34,7 +34,6 @@ public class PostServiceReceiveTests : WithMocks
 		DataAdapterMock.Setup(m => m.Posts(It.IsAny<Uri[]>())).Returns(Array.Empty<Post>().BuildMock());
 		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<Uri[]>())).Returns(Array.Empty<Profile>().BuildMock());
 		DataAdapterMock.Setup(m => m.Threads(It.IsAny<Uri[]>())).Returns(Array.Empty<ThreadContext>().BuildMock());
-		DataAdapterMock.Setup(m => m.SingleProfile(It.IsAny<Uri>())).Returns(Array.Empty<Profile>().BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(Array.Empty<Audience>().BuildMock());
 	}
 
@@ -49,7 +48,7 @@ public class PostServiceReceiveTests : WithMocks
 	[Fact(DisplayName = "Should create new received posts")]
 	public async Task ShouldReceiveCreate()
 	{
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.BuildMock());
 
 		var actual = await _service.ReceiveCreate([_post]);
@@ -61,7 +60,7 @@ public class PostServiceReceiveTests : WithMocks
 	[Fact(DisplayName = "Should create multiple received posts")]
 	public async Task ShouldReceiveCreate_Multiple()
 	{
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.BuildMock());
 		var reply = new FakePost(_actor, _post).Generate();
 
@@ -77,7 +76,7 @@ public class PostServiceReceiveTests : WithMocks
 		var parent = new FakePost("peer.example").Generate();
 		_post.InReplyTo = parent;
 
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
 		DataAdapterMock.Setup(m => m.Posts(It.IsAny<Uri[]>())).Returns(new []{parent}.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.BuildMock());
 
@@ -95,8 +94,8 @@ public class PostServiceReceiveTests : WithMocks
 		var peer = new FakeProfile("letterbook.example").Generate();
 		_post.Mention(peer, MentionVisibility.To);
 
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
-		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<Uri[]>())).Returns(new List<Profile>{_actor, peer}.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(It.Is<Uri[]>(uris => uris.Length > 1))).Returns(new List<Profile>{_actor, peer}.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.BuildMock());
 
 		var actual = await _service.ReceiveCreate([_post]);
@@ -113,7 +112,7 @@ public class PostServiceReceiveTests : WithMocks
 		var peer = new FakeProfile("letterbook.example").Generate();
 		_post.Mention(peer, MentionVisibility.To);
 
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
 		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<Uri[]>())).Returns(new List<Profile>{_actor}.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.BuildMock());
 
@@ -131,7 +130,7 @@ public class PostServiceReceiveTests : WithMocks
 		var parent = new Post(new Uri("https://peer.example/post/this-is-a-test"), new ThreadContext(default, new CoreOptions()));
 		_post.InReplyTo = parent;
 
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.BuildMock());
 
 		var actual = await _service.ReceiveCreate([_post]);
@@ -179,7 +178,7 @@ public class PostServiceReceiveTests : WithMocks
 			}
 		};
 
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile> { _actor }.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile> { _actor }.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.Append(Audience.Public).BuildMock());
 		DataAdapterMock.Setup(m => m.Posts(It.IsAny<Uri[]>())).Returns(new List<Post> { _post }.BuildMock());
 
@@ -192,7 +191,7 @@ public class PostServiceReceiveTests : WithMocks
 	[Fact(DisplayName = "Should create unknown post when received as update")]
 	public async Task ShouldReceiveUpdate_Unknown()
 	{
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.Append(Audience.Public).BuildMock());
 
 		var actual = await _service.ReceiveUpdate([_post]);
@@ -209,8 +208,8 @@ public class PostServiceReceiveTests : WithMocks
 		updated.Mention(addressedTo, MentionVisibility.To);
 
 		DataAdapterMock.Setup(m => m.Posts(It.IsAny<Uri[]>())).Returns(new List<Post> { _post }.BuildMock());
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
-		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<Uri[]>()))
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(It.Is<Uri[]>(uris => uris.Length > 1)))
 			.Returns(new List<Profile>() { _actor, addressedTo }.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.Append(Audience.Public).BuildMock());
 
@@ -228,7 +227,7 @@ public class PostServiceReceiveTests : WithMocks
 		updated.Mention(addressedTo, MentionVisibility.To);
 
 		DataAdapterMock.Setup(m => m.Posts(It.IsAny<Uri[]>())).Returns(new List<Post> { _post }.BuildMock());
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile>{_actor}.BuildMock());
 		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<Uri[]>()))
 			.Returns(new List<Profile>() { _actor }.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.Append(Audience.Public).BuildMock());
@@ -243,7 +242,7 @@ public class PostServiceReceiveTests : WithMocks
 	[Fact(DisplayName = "Should delete posts")]
 	public async Task ShouldReceiveDelete()
 	{
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile> { _actor }.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile> { _actor }.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.Append(Audience.Public).BuildMock());
 		DataAdapterMock.Setup(m => m.Posts(It.IsAny<Uri[]>())).Returns(new List<Post> { _post }.BuildMock());
 
@@ -256,7 +255,7 @@ public class PostServiceReceiveTests : WithMocks
 	[Fact(DisplayName = "Should delete posts")]
 	public async Task ShouldReceiveDelete_IgnoreUnknown()
 	{
-		DataAdapterMock.Setup(m => m.SingleProfile(_actor.FediId)).Returns(new List<Profile> { _actor }.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(_actor.FediId)).Returns(new List<Profile> { _actor }.BuildMock());
 		DataAdapterMock.Setup(m => m.AllAudience()).Returns(_actor.Headlining.Append(Audience.Public).BuildMock());
 		DataAdapterMock.Setup(m => m.Posts(It.IsAny<Uri[]>())).Returns(new List<Post> { }.BuildMock());
 

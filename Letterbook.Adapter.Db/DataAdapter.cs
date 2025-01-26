@@ -47,10 +47,6 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Accounts.AsQueryable();
 	}
 
-	public IQueryable<Models.Profile> SingleProfile(Models.ProfileId id) => Profiles(id);
-
-	public IQueryable<Models.Profile> SingleProfile(Uri fediId) => Profiles(fediId);
-
 	public IQueryable<Models.Post> Posts(params Models.PostId[] postIds)
 	{
 		return _context.Posts.Where(post => postIds.Contains(post.Id));
@@ -88,11 +84,6 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	}
 
 	public IQueryable<Models.Profile> AllProfiles() => _context.Profiles;
-
-	public IQueryable<Models.Profile> WithAudience(IQueryable<Models.Profile> query)
-	{
-		return query.Include(profile => profile.Audiences);
-	}
 
 	public IQueryable<Models.Profile> WithRelation(IQueryable<Models.Profile> query, Uri relationId)
 	{

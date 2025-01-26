@@ -302,7 +302,7 @@ public class PostService : IAuthzPostService, IPostService
 
 			return [];
 		}
-		if(await _data.SingleProfile(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
+		if(await _data.Profiles(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
 		{
 			await _crawler.CrawlProfile(default, new Uri(actorId));
 			foreach (var post in posts)
@@ -388,7 +388,7 @@ public class PostService : IAuthzPostService, IPostService
 
 			return [];
 		}
-		if(await _data.SingleProfile(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
+		if(await _data.Profiles(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
 		{
 			await _crawler.CrawlProfile(default, new Uri(actorId));
 			foreach (var post in posts)
@@ -470,7 +470,7 @@ public class PostService : IAuthzPostService, IPostService
 		// If we don't recognize this actor then there's definitely nothing for us to do
 		if (_claims.FirstOrDefault(c => c.Type == ApplicationClaims.Actor)?.Value is not { } actorId)
 			return [];
-		if (await _data.SingleProfile(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
+		if (await _data.Profiles(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
 			return [];
 
 		var posts = new List<Post>(items.Count());

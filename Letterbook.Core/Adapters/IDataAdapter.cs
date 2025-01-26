@@ -28,11 +28,6 @@ public interface IDataAdapter : IDisposable
 	/// <returns></returns>
 	public IQueryable<Account> AllAccounts();
 
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public IQueryable<Profile> SingleProfile(ProfileId id);
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public IQueryable<Profile> SingleProfile(Uri fediId);
-
 	public IQueryable<Post> Posts(params PostId[] postIds);
 	public IQueryable<Post> Posts(params Uri[] postIds);
 
@@ -48,9 +43,6 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<Profile> Profiles(params ProfileId[] ids);
 	public IQueryable<Profile> Profiles(params Uri[] ids);
 	public IQueryable<Profile> AllProfiles();
-
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public IQueryable<Profile> WithAudience(IQueryable<Profile> query);
 
 	/// <summary>
 	/// Include follow relationships in the profile query
