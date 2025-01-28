@@ -3,6 +3,7 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Letterbook.Core.Queries;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -98,20 +99,22 @@ public class AccountService : IAccountService, IDisposable
 	public async Task<Account?> LookupAccount(Guid id)
 	{
 		return await _accountAdapter
-			.WithProfiles(_accountAdapter.SingleAccount(id))
+			.AllAccounts()
+			.Where(account => account.Id == id)
+			.WithProfiles()
 			.FirstOrDefaultAsync();
 	}
 
 	public IAsyncEnumerable<Account> FindAccounts(string email)
 	{
-		return _accountAdapter.WithProfiles(_accountAdapter.SearchAccounts())
+		return _accountAdapter.AllAccounts().WithProfiles()
 			.Where(account => account.NormalizedEmail == _identityManager.NormalizeEmail(email))
 			.AsAsyncEnumerable();
 	}
 
 	public async Task<Account?> FirstAccount(string email)
 	{
-		return await _accountAdapter.WithProfiles(_accountAdapter.SearchAccounts())
+		return await _accountAdapter.AllAccounts().WithProfiles()
 			.Where(account => account.NormalizedEmail == _identityManager.NormalizeEmail(email))
 			.FirstOrDefaultAsync();
 	}

@@ -81,9 +81,7 @@ public class TimelineService : IAuthzTimelineService, ITimelineService
 	public async Task<IEnumerable<Post>> GetFeed(Uuid7 profileId, DateTimeOffset begin, int limit = 40)
 	{
 		// TODO(moderation): Account for moderation conditions (block, mute, etc)
-		var query = _data.SingleProfile(profileId);
-		query = _data.WithAudience(query);
-		var recipient = await query.SingleOrDefaultAsync();
+		var recipient = await _data.Profiles(profileId).Include(p => p.Audiences).SingleOrDefaultAsync();
 
 		_logger.LogDebug("Getting feed for {Profile} with membership in {Count} Audiences", profileId, recipient?.Audiences.Count);
 		return recipient != null

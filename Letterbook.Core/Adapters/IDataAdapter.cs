@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using Letterbook.Core.Models;
-using Medo;
 
 namespace Letterbook.Core.Adapters;
 
@@ -12,67 +11,25 @@ public interface IDataAdapter : IDisposable
 
 	delegate bool ProfileComparer(Profile profile);
 
-	/// <summary>
-	/// Query for one account by ID
-	/// </summary>
-	/// <param name="accountId"></param>
-	/// <returns></returns>
-	IQueryable<Account> SingleAccount(Guid accountId);
-
 	public bool RecordAccount(Account account);
-	public Task<bool> RecordAccounts(IEnumerable<Account> accounts);
 	public Task<Account?> LookupAccount(Guid id);
 	public Task<Account?> FindAccountByEmail(string normalizedEmail);
 
 	/// <summary>
-	/// Query for Accounts
+	/// Query across all Accounts
 	/// </summary>
 	/// <returns></returns>
-	public IQueryable<Account> SearchAccounts();
+	public IQueryable<Account> AllAccounts();
 
 	/// <summary>
-	/// Compose a query including LinkedProfiles
+	/// Query for Posts by ID
 	/// </summary>
-	/// <param name="query">The query to compose onto</param>
+	/// <param name="postIds"></param>
 	/// <returns></returns>
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions")]
-	public IQueryable<Account> WithProfiles(IQueryable<Account> query);
+	public IQueryable<Post> Posts(params PostId[] postIds);
 
-	public Task<bool> AnyProfile(string handle);
-	public Task<Profile?> LookupProfile(ProfileId localId);
-	public Task<Profile?> LookupProfile(Uri id);
-
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPost(PostId postId);
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPost(Uri fediId);
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<ThreadContext?> LookupThread(Uri threadId);
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<ThreadContext?> LookupThread(ThreadId threadId);
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPostWithThread(PostId postId);
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Post?> LookupPostWithThread(Uri postId);
-
-	public IQueryable<Profile> SingleProfile(ProfileId id);
-	public IQueryable<Profile> SingleProfile(Uri fediId);
-
-	public IQueryable<Profile> ListProfiles(IEnumerable<ProfileId> profileIds);
-	public IQueryable<Profile> ListProfiles(IEnumerable<Uri> profileIds);
-
-	/// <summary>
-	/// Query for a Post by Id
-	/// </summary>
-	/// <param name="id"></param>
-	/// <returns></returns>
-	public IQueryable<Post> SinglePost(PostId id);
-
-	/// <see cref="SinglePost(Medo.Uuid7)"/>
-	public IQueryable<Post> SinglePost(Uri fediId);
-
-	public IQueryable<Post> ListPosts(IEnumerable<PostId> postIds);
-	public IQueryable<Post> ListPosts(IEnumerable<Uri> postIds);
+	/// <see cref="Posts(Letterbook.Core.Models.PostId[])"/>
+	public IQueryable<Post> Posts(params Uri[] postIds);
 
 	/// <summary>
 	/// Query for a Thread by Id
@@ -83,24 +40,21 @@ public interface IDataAdapter : IDisposable
 	/// <see cref="Threads(Medo.Uuid7)"/>
 	public IQueryable<ThreadContext> Threads(params Uri[] threadIds);
 
+	/// <summary>
+	/// Query for Profiles by ID
+	/// </summary>
+	/// <param name="ids"></param>
+	/// <returns></returns>
 	public IQueryable<Profile> Profiles(params ProfileId[] ids);
+
+	/// <see cref="Profiles(Letterbook.Core.Models.ProfileId[])"/>
 	public IQueryable<Profile> Profiles(params Uri[] ids);
 
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public IQueryable<Profile> WithAudience(IQueryable<Profile> query);
-
 	/// <summary>
-	/// Include follow relationships in the profile query
+	/// Query across all Profiles
 	/// </summary>
-	/// <param name="query"></param>
-	/// <param name="relationId"></param>
 	/// <returns></returns>
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, Uri relationId);
-
-	/// <see cref="WithRelation(System.Linq.IQueryable{Letterbook.Core.Models.Profile},System.Uri)"/>
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public IQueryable<Profile> WithRelation(IQueryable<Profile> query, ProfileId relationId);
+	public IQueryable<Profile> AllProfiles();
 
 	/// <summary>
 	/// Query for navigation entities, using the given object as a root entity
@@ -113,15 +67,22 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<T> QueryFrom<T>(Profile profile, Expression<Func<Profile, IEnumerable<T>>> queryExpression)
 		where T : class;
 
+	/// <see cref="QueryFrom{T}(Letterbook.Core.Models.Profile,System.Linq.Expressions.Expression{System.Func{Letterbook.Core.Models.Profile,System.Collections.Generic.IEnumerable{T}}})"/>
 	public IQueryable<T> QueryFrom<T>(Post post, Expression<Func<Post, IEnumerable<T>>> queryExpression)
 		where T : class;
 
-	public IQueryable<Audience> QueryAudience();
+	/// <summary>
+	/// Query audiences by ID
+	/// </summary>
+	/// <param name="ids"></param>
+	/// <returns></returns>
+	public IQueryable<Audience> Audiences(params Uri[] ids);
 
-	[Obsolete("Use Letterbook.Core.Extensions.QueryExtensions", false)]
-	public Task<Profile?> LookupProfileWithRelation(ProfileId localId, Uri relationId);
-
-	public IAsyncEnumerable<Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0);
+	/// <summary>
+	/// Query across all Audiences
+	/// </summary>
+	/// <returns></returns>
+	public IQueryable<Audience> AllAudience();
 
 	public void Add(Profile profile);
 	public void Add(Account account);
