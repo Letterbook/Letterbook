@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Letterbook.Core.Extensions;
 using Letterbook.Generators;
 using Medo;
@@ -24,8 +25,10 @@ public class ModerationReport
 
 	public ModerationReport() { }
 
-	public ModerationReport(CoreOptions opts)
+	[SetsRequiredMembers]
+	public ModerationReport(CoreOptions opts, string summary)
 	{
+		Summary = summary;
 		var builder = new UriBuilder(opts.BaseUri());
 		builder.Path += $"report/{Id.ToString()}";
 		FediId = builder.Uri;
