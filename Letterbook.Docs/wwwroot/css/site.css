@@ -108,6 +108,10 @@ time {
     color: var(--pico-muted-color);
 }
 
+button {
+    display: flex;
+}
+
 .text-lg {
     font-size: 110%;
 }
@@ -125,6 +129,11 @@ img.logo {
     max-height: 6rem;
     overflow: visible;
     margin-bottom: -1rem;
+}
+
+:is(img, svg).inline {
+    height: 1rlh;
+    display: inline-block;
 }
 
 .top-nav {
@@ -258,6 +267,24 @@ div.custom-block {
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     word-break: break-word;
+}
+
+.error-page {
+    height: 100vh;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+
+    img {
+        height: 6rlh;
+    }
+    
+    .summary {
+        align-content: end;
+        border-left: 2px solid var(--lb-color-contrast-dark);
+        margin-left: 1rem;
+        padding-left: 1rem;
+    }
 }
 
 @media screen and (min-width: 796px) {
