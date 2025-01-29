@@ -54,11 +54,6 @@ jobs:
             fi
           fi
 
-      - name: Build tailwind
-        working-directory: ./Letterbook.Docs
-        run: |
-          npm run build
-
       - name: prerender
         working-directory: ./Letterbook.Docs
         run: |
