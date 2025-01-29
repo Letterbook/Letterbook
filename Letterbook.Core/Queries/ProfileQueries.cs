@@ -1,10 +1,9 @@
 using Letterbook.Core.Models;
-using Medo;
 using Microsoft.EntityFrameworkCore;
 
-namespace Letterbook.Core.Extensions;
+namespace Letterbook.Core.Queries;
 
-public static class QueryExtensions
+public static class ProfileQueries
 {
 	public static IQueryable<Profile> WithRelation(this IQueryable<Profile> query, Uri? relationId) =>
 		query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.FediId == relationId))
@@ -22,5 +21,9 @@ public static class QueryExtensions
 			.ThenInclude(relation => relation.Follower)
 			.Include(profile => profile.Keys)
 			.Include(profile => profile.Audiences)
+			.AsSplitQuery();
+
+	public static IQueryable<Profile> WithKeys(this IQueryable<Profile> query) =>
+		query.Include(profile => profile.Keys)
 			.AsSplitQuery();
 }

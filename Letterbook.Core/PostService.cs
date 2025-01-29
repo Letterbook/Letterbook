@@ -4,6 +4,7 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
+using Letterbook.Core.Queries;
 using Medo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -45,30 +46,30 @@ public class PostService : IAuthzPostService, IPostService
 	public async Task<Post?> LookupPost(ProfileId asProfile, PostId id, bool withThread = true)
 	{
 		return withThread
-			? await _data.LookupPostWithThread(id)
-			: await _data.LookupPost(id);
+			? await _data.Posts(id).WithThread().FirstOrDefaultAsync()
+			: await _data.Posts(id).FirstOrDefaultAsync();
 	}
 
 	public async Task<Post?> LookupPost(ProfileId asProfile, Uri fediId, bool withThread = true)
 	{
 		return withThread
-			? await _data.LookupPostWithThread(fediId)
-			: await _data.LookupPost(fediId);
+			? await _data.Posts(fediId).WithThread().FirstOrDefaultAsync()
+			: await _data.Posts(fediId).FirstOrDefaultAsync();
 	}
 
 	public async Task<ThreadContext?> LookupThread(ProfileId asProfile, ThreadId id)
 	{
-		return await _data.LookupThread(id);
+		return await _data.Threads(id).Include(t => t.Posts).FirstOrDefaultAsync();
 	}
 
 	public async Task<ThreadContext?> LookupThread(ProfileId asProfile, Uri threadId)
 	{
-		return await _data.LookupThread(threadId);
+		return await _data.Threads(threadId).Include(t => t.Posts).FirstOrDefaultAsync();
 	}
 
 	public async Task<Post> DraftNote(ProfileId asProfile, string contentSource, PostId? inReplyToId = default)
 	{
-		var author = await _data.LookupProfile(asProfile)
+		var author = await _data.Profiles(asProfile).WithKeys().FirstOrDefaultAsync()
 					 ?? throw CoreException.MissingData($"Couldn't find profile {asProfile}", typeof(Profile), asProfile);
 		var post = new Post(_options);
 		var note = new Note
@@ -93,7 +94,7 @@ public class PostService : IAuthzPostService, IPostService
 
 		if (inReplyToId is { } parentId)
 		{
-			var parent = await _data.LookupPost(parentId)
+			var parent = await _data.Posts(parentId).WithCommonFields().WithThread().FirstOrDefaultAsync()
 						 ?? throw CoreException.MissingData($"Couldn't find post {parentId} to reply to", typeof(Post),
 							 parentId);
 			post.InReplyTo = parent;
@@ -105,7 +106,7 @@ public class PostService : IAuthzPostService, IPostService
 			.ToDictionaryAsync(p => p.Id);
 		post.ConvergeMentions(profiles);
 
-		if (await _data.LookupProfile(asProfile) is not { } author)
+		if (await _data.Profiles(asProfile).FirstOrDefaultAsync() is not { } author)
 			throw CoreException.MissingData<Profile>($"Couldn't find profile {asProfile}", asProfile);
 		post.Creators.Clear();
 		post.Creators.Add(author);
@@ -151,7 +152,7 @@ public class PostService : IAuthzPostService, IPostService
 		// TODO: authz
 		// I think authz can be conveyed around the app with just a list of claims, as long as one of the claims is
 		// a profile, right?
-		var previous = await _data.LookupPost(postId)
+		var previous = await _data.Posts(postId).WithCommonFields().WithThread().FirstOrDefaultAsync()
 					   ?? throw CoreException.MissingData($"Could not find existing post {post.Id} to update",
 						   typeof(Post), postId);
 
@@ -183,7 +184,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task Delete(ProfileId asProfile, PostId id)
 	{
-		var post = await _data.LookupPost(id);
+		var post = await _data.Posts(id).WithCommonFields().FirstOrDefaultAsync();
 		if (post is null) return;
 		// TODO: authz and thread root
 		post.DeletedDate = DateTimeOffset.UtcNow;
@@ -194,7 +195,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> Publish(ProfileId asProfile, PostId id, bool localOnly = false)
 	{
-		var post = await _data.LookupPost(id);
+		var post = await _data.Posts(id).WithCommonFields().FirstOrDefaultAsync();
 		if (post is null) throw CoreException.MissingData<Post>($"Can't find post {id} to publish", id);
 		if (post.PublishedDate is not null)
 			throw CoreException.Duplicate($"Tried to publish post {id} that is already published", id);
@@ -209,7 +210,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> AddContent(ProfileId asProfile, PostId postId, Content content)
 	{
-		var post = await _data.LookupPost(postId)
+		var post = await _data.Posts(postId).WithCommonFields().FirstOrDefaultAsync()
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
@@ -231,7 +232,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> RemoveContent(ProfileId asProfile, PostId postId, Uuid7 contentId)
 	{
-		var post = await _data.LookupPost(postId)
+		var post = await _data.Posts(postId).WithCommonFields().FirstOrDefaultAsync()
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to remove content", postId);
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
@@ -259,7 +260,7 @@ public class PostService : IAuthzPostService, IPostService
 
 	public async Task<Post> UpdateContent(ProfileId asProfile, PostId postId, Uuid7 contentId, Content content)
 	{
-		var post = await _data.LookupPost(postId)
+		var post = await _data.Posts(postId).WithCommonFields().FirstOrDefaultAsync()
 				   ?? throw CoreException.MissingData<Post>("Can't find existing post to add content", postId);
 		if (!post.FediId.HasLocalAuthority(_options))
 			throw CoreException.WrongAuthority("Can't modify contents of remote post", post.FediId);
@@ -301,7 +302,7 @@ public class PostService : IAuthzPostService, IPostService
 
 			return [];
 		}
-		if(await _data.SingleProfile(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
+		if(await _data.Profiles(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
 		{
 			await _crawler.CrawlProfile(default, new Uri(actorId));
 			foreach (var post in posts)
@@ -387,7 +388,7 @@ public class PostService : IAuthzPostService, IPostService
 
 			return [];
 		}
-		if(await _data.SingleProfile(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
+		if(await _data.Profiles(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
 		{
 			await _crawler.CrawlProfile(default, new Uri(actorId));
 			foreach (var post in posts)
@@ -398,7 +399,7 @@ public class PostService : IAuthzPostService, IPostService
 		}
 
 		posts = posts.ToList();
-		var knownPosts = await _data.ListPosts(posts.Select(p => p.FediId))
+		var knownPosts = await _data.Posts(posts.Select(p => p.FediId).ToArray())
 			.Include(p => p.Thread)
 			.Include(p => p.InReplyTo)
 			.Include(p => p.Audience)
@@ -469,11 +470,11 @@ public class PostService : IAuthzPostService, IPostService
 		// If we don't recognize this actor then there's definitely nothing for us to do
 		if (_claims.FirstOrDefault(c => c.Type == ApplicationClaims.Actor)?.Value is not { } actorId)
 			return [];
-		if (await _data.SingleProfile(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
+		if (await _data.Profiles(new Uri(actorId)).SingleOrDefaultAsync() is not { } actor)
 			return [];
 
 		var posts = new List<Post>(items.Count());
-		await foreach (var post in _data.ListPosts(items).AsAsyncEnumerable())
+		await foreach (var post in _data.Posts(items.ToArray()).AsAsyncEnumerable())
 		{
 			post.DeletedDate ??= DateTimeOffset.UtcNow;
 			posts.Add(post);
@@ -544,8 +545,8 @@ public class PostService : IAuthzPostService, IPostService
 	{
 		var postIds = posts.Select(p => p.FediId)
 			.Concat(posts.Select(p => p.InReplyTo).WhereNotNull().Select(p => p.FediId))
-			.ToList();
-		return await _data.ListPosts(postIds)
+			.ToArray();
+		return await _data.Posts(postIds)
 			.Include(post => post.Thread)
 			.ToDictionaryAsync(p => p.FediId);
 	}
@@ -557,7 +558,7 @@ public class PostService : IAuthzPostService, IPostService
 	/// <returns></returns>
 	private async Task<Dictionary<Uri, Profile>> ConvergeProfiles(IEnumerable<Profile> profiles)
 	{
-		return await _data.ListProfiles(profiles.Select(p => p.FediId)).ToDictionaryAsync(p => p.FediId);
+		return await _data.Profiles(profiles.Select(p => p.FediId).ToArray()).ToDictionaryAsync(p => p.FediId);
 	}
 
 	/// <summary>
@@ -614,7 +615,7 @@ public class PostService : IAuthzPostService, IPostService
 	{
 		var audienceIds = posts.SelectMany(p => p.Audience).Select(a => a.FediId)
 			.Concat(posts.SelectMany(p => p.AddressedTo).Select(m => m.Subject.FediId));
-		var knownAudience = await _data.QueryAudience()
+		var knownAudience = await _data.AllAudience()
 			.Where(a => audienceIds.Contains(a.FediId))
 			.Distinct()
 			.ToDictionaryAsync(a => a.FediId);
