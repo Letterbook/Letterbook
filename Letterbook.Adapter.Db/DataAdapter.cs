@@ -18,21 +18,11 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		_context = context;
 	}
 
-	public IQueryable<Models.Account> SingleAccount(Guid accountId)
-	{
-		return _context.Accounts.Where(account => account.Id == accountId).AsQueryable();
-	}
-
 	public bool RecordAccount(Models.Account account)
 	{
 		var added = _context.Accounts.Add(account);
 		_logger.LogDebug("{Method} added properties {@Properties}", nameof(RecordAccount), added.Properties.Select(p => $"{p.Metadata.Name}:{p.CurrentValue}"));
 		return added.State == EntityState.Added;
-	}
-
-	public Task<bool> RecordAccounts(IEnumerable<Models.Account> accounts)
-	{
-		throw new NotImplementedException();
 	}
 
 	public Task<Models.Account?> LookupAccount(Guid id)
@@ -47,122 +37,24 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			.FirstOrDefaultAsync(account => account.NormalizedEmail == normalizedEmail);
 	}
 
-	public IQueryable<Models.Account> SearchAccounts()
+	public IQueryable<Models.Account> AllAccounts()
 	{
 		return _context.Accounts.AsQueryable();
 	}
 
-	public IQueryable<Models.Account> WithProfiles(IQueryable<Models.Account> query)
-	{
-		return query
-			.Include(account => account.LinkedProfiles)
-			.ThenInclude(l => l.Profile)
-			.AsSplitQuery();
-	}
-
-
-	public Task<bool> AnyProfile(string handle)
-	{
-		return _context.Profiles.AnyAsync(profile => profile.Handle == handle);
-	}
-
-	public Task<bool> AnyProfile(Uri id)
-	{
-		return _context.Profiles.AnyAsync(profile => profile.FediId == id);
-	}
-
-	public Task<Models.Profile?> LookupProfile(Models.ProfileId localId)
-	{
-		return _context.Profiles
-			.Include(profile => profile.Keys)
-			.AsSplitQuery()
-			.FirstOrDefaultAsync(profile => profile.Id == localId);
-	}
-
-	public Task<Models.Profile?> LookupProfile(Uri id)
-	{
-		return _context.Profiles.FirstOrDefaultAsync(profile => profile.FediId == id);
-	}
-
-	public async Task<Models.Post?> LookupPost(Models.PostId postId)
-	{
-		return await WithDefaults(_context.Posts).FirstOrDefaultAsync(post => post.Id == postId);
-	}
-
-	public async Task<Models.Post?> LookupPost(Uri fediId)
-	{
-		return await WithDefaults(_context.Posts).FirstOrDefaultAsync(post => post.FediId == fediId);
-	}
-
-	public async Task<Models.ThreadContext?> LookupThread(Uri threadId)
-	{
-		return await _context.Threads
-			.Include(thread => thread.Posts)
-			.FirstOrDefaultAsync(thread => thread.FediId == threadId);
-	}
-
-	public async Task<Models.ThreadContext?> LookupThread(Uuid7 threadId)
-	{
-		return await _context.Threads
-			.Include(thread => thread.Posts)
-			.FirstOrDefaultAsync(thread => thread.Id == threadId.ToGuid());
-	}
-
-	public async Task<Models.Post?> LookupPostWithThread(Models.PostId postId)
-	{
-		return await WithThread(_context.Posts)
-			.FirstOrDefaultAsync(post => post.Id == postId);
-	}
-
-	public async Task<Models.Post?> LookupPostWithThread(Uri postId)
-	{
-		return await WithThread(_context.Posts)
-			.FirstOrDefaultAsync(post => post.FediId == postId);
-	}
-
-	public IQueryable<Models.Profile> SingleProfile(Models.ProfileId id)
-	{
-		return _context.Profiles.Where(profile => profile.Id == id);
-	}
-
-	public IQueryable<Models.Profile> SingleProfile(Uri fediId)
-	{
-		return _context.Profiles.Where(profile => profile.FediId == fediId);
-	}
-
-	public IQueryable<Models.Profile> ListProfiles(IEnumerable<Models.ProfileId> profileIds)
-	{
-		return _context.Profiles.Where(post => profileIds.Contains(post.Id));
-	}
-
-	public IQueryable<Models.Profile> ListProfiles(IEnumerable<Uri> profileIds)
-	{
-		return _context.Profiles.Where(post => profileIds.Contains(post.FediId));
-	}
-
-	public IQueryable<Models.Post> SinglePost(Models.PostId id)
-	{
-		return _context.Posts.Where(post => post.Id == id);
-	}
-
-	public IQueryable<Models.Post> SinglePost(Uri fediId)
-	{
-		return _context.Posts.Where(post => post.FediId == fediId);
-	}
-
-	public IQueryable<Models.Post> ListPosts(IEnumerable<Models.PostId> postIds)
+	public IQueryable<Models.Post> Posts(params Models.PostId[] postIds)
 	{
 		return _context.Posts.Where(post => postIds.Contains(post.Id));
 	}
 
-	public IQueryable<Models.Post> ListPosts(IEnumerable<Uri> postIds)
+	public IQueryable<Models.Post> Posts(params Uri[] postIds)
 	{
 		return _context.Posts.Where(post => postIds.Contains(post.FediId));
 	}
 
-	public IQueryable<Models.ThreadContext> Threads(Uuid7 id)
+	public IQueryable<Models.ThreadContext> Threads(Models.ThreadId id)
 	{
-		return _context.Threads.Where(thread => thread.Id == id.ToGuid());
+		return _context.Threads.Where(thread => thread.Id == id);
 	}
 
 	public IQueryable<Models.ThreadContext> Threads(params Uri[] threadIds)
@@ -172,32 +64,21 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			: _context.Threads.Where(thread => threadIds.Contains(thread.FediId));
 	}
 
-	public IQueryable<Models.Profile> WithAudience(IQueryable<Models.Profile> query)
+	public IQueryable<Models.Profile> Profiles(params Uri[] ids)
 	{
-		return query.Include(profile => profile.Audiences);
+		return ids.Length == 1
+			? _context.Profiles.Where(p => p.FediId == ids[0])
+			: _context.Profiles.Where(p => ids.Contains(p.FediId));
 	}
 
-	public IQueryable<Models.Profile> WithRelation(IQueryable<Models.Profile> query, Uri relationId)
+	public IQueryable<Models.Profile> Profiles(params Models.ProfileId[] ids)
 	{
-		return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.FediId == relationId))
-			.ThenInclude(relation => relation.Follows)
-			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.FediId == relationId))
-			.ThenInclude(relation => relation.Follower)
-			.Include(profile => profile.Keys)
-			.Include(profile => profile.Audiences)
-			.AsSplitQuery();
+		return ids.Length == 1
+			? _context.Profiles.Where(p => p.Id == ids[0])
+			: _context.Profiles.Where(p => ids.Contains(p.Id));
 	}
 
-	public IQueryable<Models.Profile> WithRelation(IQueryable<Models.Profile> query, Models.ProfileId relationId)
-	{
-		return query.Include(profile => profile.FollowingCollection.Where(relation => relation.Follows.Id == relationId))
-			.ThenInclude(relation => relation.Follows)
-			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
-			.ThenInclude(relation => relation.Follower)
-			.Include(profile => profile.Keys)
-			.Include(profile => profile.Audiences)
-			.AsSplitQuery();
-	}
+	public IQueryable<Models.Profile> AllProfiles() => _context.Profiles;
 
 	public IQueryable<T> QueryFrom<T>(Models.Profile profile, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
 		where T : class
@@ -210,27 +91,16 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 		return _context.Entry(post).Collection(queryExpression).Query();
 	}
 
-	public IQueryable<Models.Audience> QueryAudience()
+	public IQueryable<Models.Audience> Audiences(params Uri[] ids)
+	{
+		return ids.Length == 1
+			? _context.Audience.Where(p => p.FediId == ids[0])
+			: _context.Audience.Where(p => ids.Contains(p.FediId));
+	}
+
+	public IQueryable<Models.Audience> AllAudience()
 	{
 		return _context.Audience.AsQueryable();
-	}
-
-	public Task<Models.Profile?> LookupProfileWithRelation(Models.ProfileId localId, Uri relationId)
-	{
-		return WithRelation(_context.Profiles.Where(profile => profile.Id == localId), relationId)
-			.FirstOrDefaultAsync();
-	}
-
-	public IAsyncEnumerable<Models.Profile> FindProfilesByHandle(string handle, bool partial = false, int limit = 20, int page = 0)
-	{
-		limit = limit >= 100 ? 100 : limit;
-		var query = _context.Profiles.OrderBy(profile => profile.FediId)
-			.Skip(limit * page)
-			.Take(limit);
-		query = partial
-			? query.Where(profile => profile.Handle.StartsWith(handle))
-			: query.Where(profile => profile.Handle == handle);
-		return query.AsAsyncEnumerable();
 	}
 
 	public void Add(Models.Profile profile)

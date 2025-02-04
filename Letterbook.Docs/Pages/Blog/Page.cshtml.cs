@@ -33,6 +33,6 @@ public class Page([FromServices] LoaderFactory loader) : PageModel
 
 	public void OnGet()
 	{
-		Blog.Reload(Source);
+		Blog.Reload(Source!);
 	}
 }

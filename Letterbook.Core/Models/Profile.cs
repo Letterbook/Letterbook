@@ -88,6 +88,11 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
 	public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
 	public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
+	/// This Profile was the subject of these Reports
+	public ICollection<ModerationReport> ReportSubject = new HashSet<ModerationReport>();
+	/// This Profile submitted these Reports
+	public ICollection<ModerationReport> Reports = new HashSet<ModerationReport>();
+	public IDictionary<Restrictions, DateTimeOffset> Restrictions { get; set; } = new Dictionary<Restrictions, DateTimeOffset>();
 
 	public Uuid7 GetId() => Id.Id;
 	public string GetId25() => Id.ToString();
@@ -181,6 +186,37 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		return count;
 	}
 
+	public FollowerRelation Block(Profile target)
+	{
+		var follower = FollowersCollection.FirstOrDefault(relation => relation.Follower == target) ?? target.RelationWith(this);
+		follower.State = FollowState.Blocked;
+		FollowersCollection.Add(follower);
+
+		var following = FollowingCollection.FirstOrDefault(relation => relation.Follows == target) ?? RelationWith(target);
+		if(following.State != FollowState.Blocked) following.State = FollowState.None;
+		FollowingCollection.Add(following);
+
+		target.LeaveAudience(this);
+		LeaveAudience(target);
+
+		return follower;
+	}
+
+	public FollowerRelation Unblock(Profile target)
+	{
+		var follower = FollowersCollection.FirstOrDefault(relation => relation.Follower == target) ?? target.RelationWith(this);
+		follower.State = FollowState.None;
+
+		return follower;
+	}
+
+	public bool HasBlocked(Profile target)
+	{
+		var relation = FollowersCollection.FirstOrDefault(relation => relation.Follower == target,
+			new FollowerRelation(target, this, FollowState.None));
+		return relation.State == FollowState.Blocked;
+	}
+
 	// Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?
 	// The only use case I'm imagining for a service is to represent the server itself
 	public static Profile CreateIndividual(Uri baseUri, string handle)
@@ -219,6 +255,10 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 
 	public static Profile CreateEmpty(ProfileId id) => new() { Id = id };
 	public static Profile CreateEmpty(ProfileId id, Uri fediId) => new() { Id = id, FediId = fediId };
+
+	/// private
+
+	private FollowerRelation RelationWith(Profile target) => new(this, target, FollowState.None);
 
 	public bool Equals(Profile? other)
 	{

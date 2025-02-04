@@ -23,6 +23,10 @@
 
     Response.StatusCode = 200;
     ViewData["Title"] = Model.Doc.Title;
+    ViewData["OgType"] = "profile";
+    ViewData["OgUrl"] = $"/blog/author/{Model.Slug}";
+    if (Model.Doc.Image != null)
+        ViewData["OgImage"] = "https://letterbook.com" + Model.Doc.Image.Href;
 }
 
 <section class="author-grid">
@@ -71,3 +75,9 @@
         </dl>
     }
 </section>
+
+@section Head
+{
+    <meta property="profile:username" content="@Model.Doc.Id"/>
+    <meta property="profile:first_name" content="@Model.Doc.DisplayName"/>
+}

@@ -172,6 +172,9 @@ public static class AstMapper
 			.ForMember(dest => dest.Accessors, opt => opt.Ignore())
 			.ForMember(dest => dest.Audiences, opt => opt.Ignore())
 			.ForMember(dest => dest.Headlining, opt => opt.Ignore())
+			.ForMember(dest => dest.Restrictions, opt => opt.Ignore())
+			.ForMember(dest => dest.Reports, opt => opt.Ignore())
+			.ForMember(dest => dest.ReportSubject, opt => opt.Ignore())
 			.ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
 			.ForMember(dest => dest.FollowingCollection, opt => opt.Ignore())
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
@@ -217,6 +220,7 @@ public static class AstMapper
 	{
 		cfg.CreateMap<ASObject, Post>(MemberList.Destination)
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
+			.ForMember(dest => dest.RelatedReports, opt => opt.Ignore())
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
 			.ForMember(dest => dest.Authority, opt => opt.MapFrom((_, post) => post.FediId.GetAuthority()))
 			.ForMember(dest => dest.Hostname, opt => opt.MapFrom((_, post) => post.FediId.Host))
@@ -232,7 +236,7 @@ public static class AstMapper
 			.ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => src.Updated))
 			.ForMember(dest => dest.LastSeenDate, opt => opt.Ignore())
 			.ForMember(dest => dest.DeletedDate, opt => opt.Ignore())
-			.ForMember(dest => dest.AddressedTo, opt => opt.ConvertUsing<MentionsConverter, ASObject>(src => src))
+			.ForMember(dest => dest.AddressedTo, opt => opt.MapFrom<MentionsConverter, ASObject>(src => src))
 			.ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Generator))
 			.ForMember(dest => dest.LikesCollection,
 				opt => opt.MapFrom<ProfileResolver, Linkable<ASCollection>?>(src => src.Likes))
@@ -305,29 +309,28 @@ public static class AstMapper
 	}
 }
 
-internal class MentionsConverter : IValueConverter<ASObject, ICollection<Mention>>
+internal class MentionsConverter : IMemberValueResolver<ASObject, Post, ASObject, ICollection<Mention>>
 {
-	public ICollection<Mention> Convert(ASObject sourceMember, ResolutionContext context)
+	public ICollection<Mention> Resolve(ASObject source, Post destination, ASObject sourceMember, ICollection<Mention> destMember, ResolutionContext context)
 	{
-		var result = new HashSet<Mention>();
 		foreach (var l in sourceMember.To)
 		{
-			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.To));
+			destination.Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.To);
 		}
 		foreach (var l in sourceMember.BTo)
 		{
-			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Bto));
+			destination.Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Bto);
 		}
 		foreach (var l in sourceMember.CC)
 		{
-			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Cc));
+			destination.Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Cc);
 		}
 		foreach (var l in sourceMember.BCC)
 		{
-			result.Add(new Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Bcc));
+			destination.Mention(Models.Profile.CreateEmpty(context.Mapper.Map<Uri>(l)), MentionVisibility.Bcc);
 		}
 
-		return result;
+		return destination.AddressedTo;
 	}
 }
 

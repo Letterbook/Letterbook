@@ -181,7 +181,7 @@ public class MapperTests : WithMocks
 
 		var actual = _postMapper.Map<Models.Post>(_postDto);
 
-		Assert.NotEqual(uuid, actual.Thread.GetId());
+		Assert.NotEqual(uuid, actual.Thread.Id);
 	}
 
 	[Fact(DisplayName = "Should map the Audience")]

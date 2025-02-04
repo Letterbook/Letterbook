@@ -1,10 +1,10 @@
 ---
-title: Fedi Moderation Tooling Research
+title: 'Research: Moderator Tools User Experience'
 authors:
   - mattly
 ---
 
-# Intro
+# Moderator Tools User Experience
 More than ever, it's imperative to [provide safe places](https://www.wrecka.ge/safer-places-now/). Moderation tooling hasn't been a major priority for a lot of the server softwares common in the fediverse, and that's unfortunate, if understandable -- oftentimes priorities and efforts for open source projects focus on technical aspects more than interface design.
 
 For the last ten years or so, my work has focused on interface design for highly technical and often nuanced things, across a variety of domains (and I often have to remind people what the "I" is in API). I've learned a lot of things through this work, but perhaps the most important is: when you are designing for practitioners, _you need to listen to the people doing the work_. We talked to a small handful of people doing moderation work at a variety of scales and contexts: instances large & small, people moderating discord servers, people doing trust & safety work professionaly at scale. We talked about trust & safety as it relates to administering and moderating servers; while there is much worthwhile work which could empower individual users in these regards, our conversations focused on the admin/moderation roles.

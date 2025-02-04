@@ -35,37 +35,24 @@ jobs:
           path: ${{env.NUGET_PACKAGES}}
           key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
           
-      - name: Web Resource Cache
+      - name: Libman Resource Cache
         uses: actions/cache@v4
         with:
-          path: "./Letterbook.Web/wwwroot/lib"
-          key: "libman-${{ hashFiles('Letterbook.Web/libman.json') }}"
+          path: "~/.local/share/.librarymanager/cache"
+          key: "libman-${{ hashFiles('Letterbook.Web/libman.json', 'Letterbook.Docs/libman.json') }}"
+          restore-keys: libman
 
-      - name: Docs Resource Cache
-        uses: actions/cache@v4
-        with:
-          path: "./Letterbook.Docs/wwwroot/lib"
-          key: "libman-${{ hashFiles('Letterbook.Docs/libman.json') }}"
-      
       - name: Restore Packages
-        if: steps.package-cache.outputs.cache-hit != 'true'
         run: dotnet restore
       
       - name: Restore Tools
         run: dotnet tool restore
-      
+
       - name: Build
-        run: dotnet build Letterbook.sln --configuration Release
+        run: dotnet build Letterbook.sln --configuration Release --no-restore
       
       - name: Test
-        run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --blame-crash --no-build
-        
-      - name: Save test crash report
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: TestResults
-          path: '**/TestResults/'
+        run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger GitHubActions --no-build
       
       - name: Check Relational Migrations
         run: dotnet ef migrations has-pending-model-changes
@@ -141,10 +128,3 @@ jobs:
         run: dotnet test Letterbook.Web.Tests.E2E --no-build --configuration Release
         env:
           BROWSER: firefox
-
-      - name: Save test crash report
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: TestResults
-          path: '**/TestResults/'

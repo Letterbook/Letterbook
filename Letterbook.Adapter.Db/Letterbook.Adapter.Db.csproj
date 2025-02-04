@@ -47,14 +47,4 @@
       <Folder Include="Migrations\" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Migrations\20230901221809_Current.cs" />
-      <Compile Remove="Migrations\20230901221809_Current.Designer.cs" />
-      <Compile Remove="Migrations\TransactionalContextModelSnapshot.cs" />
-      <Compile Remove="Migrations\Identity\20230910185508_Identity_Navigations.Designer.cs" />
-      <Compile Remove="Migrations\Identity\IdentityContextModelSnapshot.cs" />
-      <Compile Remove="Migrations\20240525051736_FixAudienceKey.cs" />
-      <Compile Remove="Migrations\20240525051736_FixAudienceKey.Designer.cs" />
-    </ItemGroup>
-
 </Project>

@@ -198,7 +198,7 @@ public class TypedIdGenerator : ISourceGenerator
 			: "ToString()";
 		var fromStringFn = isUuid7
 			? "Medo.Uuid7.FromId25String(s)"
-			: $"idType.Parse(s)";
+			: $"{idType}.Parse(s)";
 		var typeDef = type.IsValueType
 			? "record struct"
 			: "record";

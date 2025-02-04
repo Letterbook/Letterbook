@@ -45,8 +45,10 @@ public class PostServiceTests : WithMocks
 	[Fact(DisplayName = "Should create unpublished draft notes")]
 	public async Task CanDraftNote()
 	{
-		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
-			.ReturnsAsync(_profile);
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile> { _profile }.BuildMock());
+		// DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
+			// .ReturnsAsync(_profile);
 
 		var actual = await _service.DraftNote(_profile.Id, "Test content");
 
@@ -69,19 +71,35 @@ public class PostServiceTests : WithMocks
 	[Fact(DisplayName = "Should create unpublished reply posts")]
 	public async Task CanDraftReply()
 	{
-		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
-		DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
-			.ReturnsAsync(_profile);
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
 
 		var actual = await _service.DraftNote(_profile.Id, "Test content", _post.Id);
 
 		Assert.Equal(_post.Id, actual.InReplyTo?.Id);
 	}
 
+	[Fact(DisplayName = "Should create posts with mentions")]
+	public async Task CanDraftMention()
+	{
+		var mentioned = _fakeProfile.Generate();
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile> { _profile, mentioned }.BuildMock());
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
+		// DataAdapterMock.Setup(m => m.LookupProfile(It.IsAny<ProfileId>()))
+			// .ReturnsAsync(_profile);
+
+		_post.Mention(mentioned, MentionVisibility.To);
+		var actual = await _service.Draft(_profile.Id, _post, publish: true);
+
+		Assert.Equal(_post.AddressedTo.Count, actual.AddressedTo.Count);
+	}
+
 	[Fact(DisplayName = "Should update post")]
 	public async Task CanUpdate()
 	{
-		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
 		var update = new FakePost(_profile).Generate();
 		update.Id = _post.Id;
 		update.FediId = _post.FediId;
@@ -94,7 +112,7 @@ public class PostServiceTests : WithMocks
 	[Fact(DisplayName = "Update should add post content")]
 	public async Task UpdateCanAddContent()
 	{
-		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
 		var update = new FakePost(_profile).Generate();
 		update.Id = _post.Id;
 		update.FediId = _post.FediId;
@@ -110,7 +128,7 @@ public class PostServiceTests : WithMocks
 	public async Task UpdateCanRemoveContent()
 	{
 		_post.Contents.Add(new Fakes.FakeNote(_post).Generate());
-		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
 		var update = new FakePost(_profile).Generate();
 		update.Id = _post.Id;
 		update.FediId = _post.FediId;
@@ -127,7 +145,7 @@ public class PostServiceTests : WithMocks
 		var expectedNote = new Fakes.FakeNote(_post).Generate();
 		expectedNote.Id = before.Id;
 		_post.Contents.Add(new Fakes.FakeNote(_post).Generate());
-		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
 		var update = new FakePost(_profile).Generate();
 		update.Contents.Clear();
 		update.Contents.Add(expectedNote);
@@ -145,7 +163,7 @@ public class PostServiceTests : WithMocks
 		var evilProfile = new FakeProfile("letterbook.example").Generate();
 		var evilDomain = new UriBuilder(_post.FediId);
 		evilDomain.Host = "letterbook.evil";
-		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
 		var update = new FakePost(evilProfile).Generate();
 		update.Id = _post.Id;
 		update.FediId = evilDomain.Uri;
@@ -156,7 +174,7 @@ public class PostServiceTests : WithMocks
 	[Fact(DisplayName = "Should delete posts")]
 	public async Task CanDelete()
 	{
-		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
 
 		await _service.Delete(_profile.Id, _post.Id);
 
@@ -168,7 +186,7 @@ public class PostServiceTests : WithMocks
 	{
 		_post.PublishedDate = null;
 		var expected = DateTimeOffset.Now;
-		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
 
 		var actual = await _service.Publish(_profile.Id, _post.Id);
 
@@ -180,7 +198,7 @@ public class PostServiceTests : WithMocks
 	public async Task CanAddContent()
 	{
 		var content = new Fakes.FakeNote(_post).Generate();
-		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
 
 		var actual = await _service.AddContent(_profile.Id, _post.Id, content);
 
@@ -196,7 +214,7 @@ public class PostServiceTests : WithMocks
 		note.FediId = _post.Contents.First().FediId;
 		note.SourceText = expected;
 		note.GeneratePreview();
-		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
 
 		var result = await _service.UpdateContent(_profile.Id, _post.Id, note.Id, note);
 
@@ -209,7 +227,7 @@ public class PostServiceTests : WithMocks
 	{
 		var content = new Fakes.FakeNote(_post).Generate();
 		_post.Contents.Add(content);
-		DataAdapterMock.Setup(m => m.LookupPost(_post.Id)).ReturnsAsync(_post);
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
 
 		var actual = await _service.RemoveContent(_profile.Id, _post.Id, content.Id);
 

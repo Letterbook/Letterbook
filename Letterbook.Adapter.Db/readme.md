@@ -14,9 +14,14 @@ You should either run these commands from this subdirectory or add the `--projec
 cd Letterbook.Adapter.Db
 ```
 
+For convenience, when using Jetbrains to run from the editor, or similar
+```shell
+export $MIGRATION=NameThisMigration
+```
+
 To generate a new migration:
 ```shell
-dotnet ef migrations add NAME
+dotnet ef migrations add $MIGRATION
 ```
 
 To run all unapplied migrations:
@@ -26,7 +31,7 @@ dotnet ef database update
 
 To migrate (down) to a specific migration
 ```shell
-dotnet ef database update NAME
+dotnet ef database update $MIGRATION
 ```
 
 To delete the last migration (ONLY DURING DEVELOPMENT)

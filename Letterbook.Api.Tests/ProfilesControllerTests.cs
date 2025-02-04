@@ -227,4 +227,36 @@ public class ProfilesControllerTests : WithMockContext
 		var actual = Assert.IsAssignableFrom<FollowerRelationDto>(response.Value);
 		Assert.Equal(FollowState.None, actual.State);
 	}
+
+	[Fact(DisplayName = "Should block a target profile")]
+	public async Task CanBlock()
+	{
+
+		var target = _fakeProfile.Generate();
+		_profile.Follow(target, FollowState.None);
+		ProfileServiceAuthMock.Setup(m => m.Block(_profile.GetId(), target.GetId()))
+			.ReturnsAsync(new Models.FollowerRelation(_profile, target, FollowState.Blocked));
+
+		var result = await _controller.Block(_profile.GetId(), target.GetId());
+
+		var response = Assert.IsType<OkObjectResult>(result);
+		var actual = Assert.IsAssignableFrom<FollowerRelationDto>(response.Value);
+		Assert.Equal(FollowState.Blocked, actual.State);
+	}
+
+	[Fact(DisplayName = "Should unblock a target profile")]
+	public async Task CanUnblock()
+	{
+
+		var target = _fakeProfile.Generate();
+		_profile.Follow(target, FollowState.Blocked);
+		ProfileServiceAuthMock.Setup(m => m.Unblock(_profile.GetId(), target.GetId()))
+			.ReturnsAsync(new Models.FollowerRelation(_profile, target, FollowState.None));
+
+		var result = await _controller.Unblock(_profile.GetId(), target.GetId());
+
+		var response = Assert.IsType<OkObjectResult>(result);
+		var actual = Assert.IsAssignableFrom<FollowerRelationDto>(response.Value);
+		Assert.Equal(FollowState.None, actual.State);
+	}
 }

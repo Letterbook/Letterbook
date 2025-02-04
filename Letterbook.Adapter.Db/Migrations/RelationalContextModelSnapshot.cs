@@ -19,7 +19,7 @@ namespace Letterbook.Adapter.Db.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -189,6 +189,139 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.ToTable("FollowerRelation");
                 });
 
+            modelBuilder.Entity("Letterbook.Core.Models.Mention", b =>
+                {
+                    b.Property<Guid>("SubjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Visibility")
+                        .HasColumnType("integer");
+
+                    b.HasKey("SubjectId", "SourceId");
+
+                    b.HasIndex("SourceId");
+
+                    b.ToTable("Mention");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.ModerationPolicy", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Policy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("Retired")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ModerationPolicy");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.ModerationRemark", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ReportId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("Updated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("ReportId");
+
+                    b.ToTable("ModerationRemark");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.ModerationReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Closed")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ContextId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FediId")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ReporterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("Updated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContextId");
+
+                    b.HasIndex("ReporterId");
+
+                    b.ToTable("ModerationReport");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.Peer", b =>
+                {
+                    b.Property<string>("Authority")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Hostname")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<IDictionary<Restrictions, DateTimeOffset>>("Restrictions")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Authority");
+
+                    b.ToTable("Peers");
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Post", b =>
                 {
                     b.Property<Guid>("Id")
@@ -315,6 +448,10 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Property<Guid?>("OwnedById")
                         .HasColumnType("uuid");
 
+                    b.Property<IDictionary<Restrictions, DateTimeOffset>>("Restrictions")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
                     b.Property<string>("SharedInbox")
                         .HasColumnType("text");
 
@@ -404,7 +541,6 @@ namespace Letterbook.Adapter.Db.Migrations
             modelBuilder.Entity("Letterbook.Core.Models.ThreadContext", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("FediId")
@@ -612,6 +748,66 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.ToTable("PostsToAudience");
                 });
 
+            modelBuilder.Entity("ReportByPolicy", b =>
+                {
+                    b.Property<int>("PoliciesId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RelatedReportsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("PoliciesId", "RelatedReportsId");
+
+                    b.HasIndex("RelatedReportsId");
+
+                    b.ToTable("ReportByPolicy");
+                });
+
+            modelBuilder.Entity("ReportModerator", b =>
+                {
+                    b.Property<Guid>("ModeratedReportsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ModeratorsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("ModeratedReportsId", "ModeratorsId");
+
+                    b.HasIndex("ModeratorsId");
+
+                    b.ToTable("ReportModerator");
+                });
+
+            modelBuilder.Entity("ReportSubject", b =>
+                {
+                    b.Property<Guid>("ReportSubjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SubjectsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("ReportSubjectId", "SubjectsId");
+
+                    b.HasIndex("SubjectsId");
+
+                    b.ToTable("ReportSubject");
+                });
+
+            modelBuilder.Entity("ReportedPost", b =>
+                {
+                    b.Property<Guid>("RelatedPostsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RelatedReportsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RelatedPostsId", "RelatedReportsId");
+
+                    b.HasIndex("RelatedReportsId");
+
+                    b.ToTable("ReportedPost");
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Note", b =>
                 {
                     b.HasBaseType("Letterbook.Core.Models.Content");
@@ -679,6 +875,61 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("Follows");
                 });
 
+            modelBuilder.Entity("Letterbook.Core.Models.Mention", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Post", "Source")
+                        .WithMany("AddressedTo")
+                        .HasForeignKey("SourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Profile", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Source");
+
+                    b.Navigation("Subject");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.ModerationRemark", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Account", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.ModerationReport", "Report")
+                        .WithMany("Remarks")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Report");
+                });
+
+            modelBuilder.Entity("Letterbook.Core.Models.ModerationReport", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.ThreadContext", "Context")
+                        .WithMany()
+                        .HasForeignKey("ContextId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Profile", "Reporter")
+                        .WithMany("Reports")
+                        .HasForeignKey("ReporterId");
+
+                    b.Navigation("Context");
+
+                    b.Navigation("Reporter");
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Post", b =>
                 {
                     b.HasOne("Letterbook.Core.Models.Post", "InReplyTo")
@@ -690,41 +941,6 @@ namespace Letterbook.Adapter.Db.Migrations
                         .HasForeignKey("ThreadId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.OwnsMany("Letterbook.Core.Models.Mention", "AddressedTo", b1 =>
-                        {
-                            b1.Property<Guid>("PostId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uuid");
-
-                            b1.Property<Guid>("SubjectId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<int>("Visibility")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("PostId", "Id");
-
-                            b1.HasIndex("SubjectId");
-
-                            b1.ToTable("Mention");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PostId");
-
-                            b1.HasOne("Letterbook.Core.Models.Profile", "Subject")
-                                .WithMany()
-                                .HasForeignKey("SubjectId")
-                                .OnDelete(DeleteBehavior.Cascade)
-                                .IsRequired();
-
-                            b1.Navigation("Subject");
-                        });
-
-                    b.Navigation("AddressedTo");
 
                     b.Navigation("InReplyTo");
 
@@ -868,13 +1084,80 @@ namespace Letterbook.Adapter.Db.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ReportByPolicy", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.ModerationPolicy", null)
+                        .WithMany()
+                        .HasForeignKey("PoliciesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.ModerationReport", null)
+                        .WithMany()
+                        .HasForeignKey("RelatedReportsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ReportModerator", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.ModerationReport", null)
+                        .WithMany()
+                        .HasForeignKey("ModeratedReportsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Account", null)
+                        .WithMany()
+                        .HasForeignKey("ModeratorsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ReportSubject", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.ModerationReport", null)
+                        .WithMany()
+                        .HasForeignKey("ReportSubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("SubjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ReportedPost", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Post", null)
+                        .WithMany()
+                        .HasForeignKey("RelatedPostsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.ModerationReport", null)
+                        .WithMany()
+                        .HasForeignKey("RelatedReportsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Account", b =>
                 {
                     b.Navigation("LinkedProfiles");
                 });
 
+            modelBuilder.Entity("Letterbook.Core.Models.ModerationReport", b =>
+                {
+                    b.Navigation("Remarks");
+                });
+
             modelBuilder.Entity("Letterbook.Core.Models.Post", b =>
                 {
+                    b.Navigation("AddressedTo");
+
                     b.Navigation("Contents");
 
                     b.Navigation("RepliesCollection");
@@ -891,6 +1174,8 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.Navigation("Headlining");
 
                     b.Navigation("Keys");
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.ThreadContext", b =>

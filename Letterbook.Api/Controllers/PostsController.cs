@@ -196,7 +196,7 @@ public class PostsController : ControllerBase
 	[HttpGet("{profileId}/thread/{threadId}")]
 	[ProducesResponseType<IEnumerable<PostDto>>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Thread", "Get a thread by id")]
-	public async Task<IActionResult> GetThread(ProfileId profileId, Uuid7 threadId)
+	public async Task<IActionResult> GetThread(ProfileId profileId, ThreadId threadId)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);

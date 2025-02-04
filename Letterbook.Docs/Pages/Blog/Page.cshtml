@@ -30,9 +30,12 @@
         return;
     }
 
-
     Response.StatusCode = 200;
     ViewData["Title"] = Model.Source.Title;
+    ViewData["OgType"] = "article";
+    ViewData["OgUrl"] = $"/blog/post/{Model.Year}/{Model.Month}/{Model.Day}/{Model.Slug}";
+    if (Model.Source.Image != null)
+        ViewData["OgImage"] = "https://letterbook.com" + Model.Source.Image.Href;
 }
 
 @{
@@ -103,5 +106,13 @@
     @if (Model.Source.Canonical is { } canonical && new Uri(canonical) is {} href)
     {
         <link rel="canonical" href="@(href.IsAbsoluteUri ? href.ToString() : $"https://letterbook.com/{href.ToString()}")"/>
+    }
+
+    <meta property="article:published_time" content="@Model.Source.Date.ToString("O")"/>
+    @foreach (var id in Model.Source.Authors)
+    {
+        var author = Model.Authors.GetBySlug<MarkdownAuthor>(id);
+        if (author == null) continue;
+        <meta property="article:author" content="https://letterbook.com/blog/author/@id"/>
     }
 }
