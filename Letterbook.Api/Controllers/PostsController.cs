@@ -61,10 +61,10 @@ public class PostsController : ControllerBase
 			content.SetLocalFediId(_options);
 		}
 
-		var decision = _authz.Create(User.Claims, post, profileId);
+		var decision = _authz.Create(User.Claims, post);
 		if (!decision.Allowed)
 			return Unauthorized(decision);
-		var pubDecision = _authz.Publish(User.Claims, post, profileId);
+		var pubDecision = _authz.Publish(User.Claims, post);
 		if (!draft && !pubDecision.Allowed)
 			return Unauthorized(pubDecision);
 
@@ -94,7 +94,7 @@ public class PostsController : ControllerBase
 		if (_mapper.Map<Post>(dto) is not { } post)
 			return BadRequest();
 
-		var decision = _authz.Publish(User.Claims, post, (Uuid7)profileId);
+		var decision = _authz.Publish(User.Claims, post);
 		if (!decision.Allowed)
 			return Unauthorized(decision);
 

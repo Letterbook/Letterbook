@@ -76,7 +76,7 @@ public class ProfilesController : ControllerBase
 		if (_mapper.Map<Models.Profile>(dto) is not { } profile)
 			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(FullProfileDto)}"));
 
-		var decision = _authz.Update(User.Claims, profile, profileId);
+		var decision = _authz.Update(User.Claims, profile);
 		if (!decision.Allowed)
 			return Unauthorized(decision);
 
