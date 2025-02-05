@@ -80,6 +80,22 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public IQueryable<Models.Profile> AllProfiles() => _context.Profiles;
 
+	public IQueryable<Models.ModerationReport> ModerationReports(params Models.ModerationReportId[] ids)
+	{
+		return ids.Length == 1
+			? _context.ModerationReports.Where(p => p.Id == ids[0])
+			: _context.ModerationReports.Where(p => ids.Contains(p.Id));
+	}
+
+	public IQueryable<Models.ModerationReport> ModerationReports(params Uri[] ids)
+	{
+		return ids.Length == 1
+			? _context.ModerationReports.Where(p => p.FediId == ids[0])
+			: _context.ModerationReports.Where(p => ids.Contains(p.FediId));
+	}
+
+	public IQueryable<Models.ModerationReport> AllModerationReports() => _context.ModerationReports;
+
 	public IQueryable<T> QueryFrom<T>(Models.Profile profile, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
 		where T : class
 	{

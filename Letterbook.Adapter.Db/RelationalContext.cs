@@ -21,6 +21,7 @@ public class RelationalContext : DbContext
 	public DbSet<ThreadContext> Threads { get; set; }
 	public DbSet<Audience> Audience { get; set; }
 	public DbSet<Peer> Peers { get; set; }
+	public DbSet<ModerationReport> ModerationReports { get; set; }
 
 	public RelationalContext(DbContextOptions<RelationalContext> context) : base(context)
 	{
