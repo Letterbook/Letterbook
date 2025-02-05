@@ -1,4 +1,7 @@
-﻿namespace Letterbook.Core.Extensions;
+﻿using System.Linq.Expressions;
+using Letterbook.Generators;
+
+namespace Letterbook.Core.Extensions;
 
 public static class CollectionExtensions
 {
@@ -60,4 +63,8 @@ public static class CollectionExtensions
 
 	private static readonly Func<object?, bool> TestNotNull = x => x is not null;
 
+	public static IEnumerable<T> Converge<T, TId>(this IEnumerable<T> source, Dictionary<TId, T> values, Func<T, TId> selector) where TId : notnull where T : class
+	{
+		return source.Select(each => values.GetValueOrDefault(selector(each))).WhereNotNull();
+	}
 }

@@ -131,6 +131,8 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public void Add(Models.Post post) => _context.Posts.Add(post);
 
+	public void Add(Models.ModerationReport report) => _context.ModerationReports.Add(report);
+
 	public void AddRange(IEnumerable<Models.Profile> profile)
 	{
 		_context.Profiles.AddRange(profile);

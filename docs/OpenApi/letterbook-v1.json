@@ -1553,6 +1553,73 @@
         }
       }
     },
+    "/lb/v1/reports/{profileId}/post": {
+      "post": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Post",
+        "description": "Open a new moderation report",
+        "parameters": [
+          {
+            "name": "selfId",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ProfileId"
+            }
+          },
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberModerationReportDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberModerationReportDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberModerationReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/lb/v1/timelines/{profileId}": {
       "get": {
         "tags": [
@@ -1953,6 +2020,46 @@
         },
         "additionalProperties": false
       },
+      "MemberModerationReportDto": {
+        "required": [
+          "summary"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ModerationReportId"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "policies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModerationPolicyId"
+            },
+            "nullable": true
+          },
+          "reporter": {
+            "$ref": "#/components/schemas/ProfileId"
+          },
+          "subjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProfileId"
+            },
+            "nullable": true
+          },
+          "relatedPosts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PostId"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "MentionDto": {
         "type": "object",
         "properties": {
@@ -1998,6 +2105,27 @@
           "handle": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ModerationPolicyId": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ModerationReportId": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "[0-9a-z]{25}",
+            "type": "string",
+            "example": "HQqgQL5NFV4bPxZaTXhCPW"
           }
         },
         "additionalProperties": false
@@ -2116,6 +2244,17 @@
               "$ref": "#/components/schemas/MiniProfileDto"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PostId": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "[0-9a-z]{25}",
+            "type": "string",
+            "example": "HQqgQL5NFV4bPxZaTXhCPW"
           }
         },
         "additionalProperties": false
