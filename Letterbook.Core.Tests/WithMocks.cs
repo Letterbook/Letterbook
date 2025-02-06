@@ -92,11 +92,13 @@ public abstract class WithMocks
 		AuthorizationServiceMock.Setup(s => s.Update(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>()))
 			.Returns(Allow);
 		AuthorizationServiceMock.Setup(s => s.Report(It.IsAny<IEnumerable<Claim>>()))
-			.Returns(Allow);
+			.Returns(AllowNone);
 		AuthorizationServiceMock.Setup(s => s.Attribute(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>(), It.IsAny<ProfileId>()))
-			.Returns(Allow);
+			.Returns(AllowProfile);
 		return;
 
-		Decision Allow(IEnumerable<Claim> claims, IFederated _, Uuid7 __) => Decision.Allow("Mock", claims);
+		Decision Allow(IEnumerable<Claim> claims, object _) => Decision.Allow("Mock", claims);
+		Decision AllowProfile(IEnumerable<Claim> claims, object _, ProfileId __) => Decision.Allow("Mock", claims);
+		Decision AllowNone(IEnumerable<Claim> claims) => Decision.Allow("Mock", claims);
 	}
 }

@@ -38,9 +38,6 @@ public class ReportsController : ControllerBase
 			return BadRequest(ModelState);
 		reportDto.Id = default;
 
-		var authz = _authz.Report(User.Claims);
-		if (!authz.Allowed)
-			throw CoreException.Unauthorized(authz);
 		if (reportDto.Reporter != selfId)
 			throw CoreException.InvalidRequest($"Cannot create report as Profile {reportDto.Reporter}");
 		if (_mapper.Map<ModerationReport>(reportDto) is not { } report)

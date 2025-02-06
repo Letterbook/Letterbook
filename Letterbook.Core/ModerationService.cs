@@ -35,6 +35,12 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 	public async Task<ModerationReport> CreateReport(ProfileId reporterId, ModerationReport report)
 	{
+		var authz = _authz.Report(_claims);
+		if (!authz.Allowed)
+			throw CoreException.Unauthorized(authz);
+		if (report.Subjects.Count == 0)
+			throw CoreException.InvalidRequest("Report must include a subject profile");
+
 		var profiles = await _data.Profiles([report.Reporter!.Id, ..report.Subjects.Select(p => p.Id)])
 			.Distinct()
 			.ToDictionaryAsync(profile => profile.Id);
@@ -68,6 +74,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		return report;
 	}
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 	public async Task<ModerationReport> AddRemark(ModerationReportId id, ModerationRemark remark)
 	{
 		throw new NotImplementedException();
@@ -80,6 +87,8 @@ public class ModerationService : IModerationService, IAuthzModerationService
 	{
 		throw new NotImplementedException();
 	}
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+
 	public IAsyncEnumerable<ModerationReport> Search(string query, bool assignedToMe = true, bool unassigned = true, bool includeClosed = false)
 	{
 		throw new NotImplementedException();
