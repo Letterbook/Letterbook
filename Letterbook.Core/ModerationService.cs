@@ -37,7 +37,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 	public async Task<ModerationReport> CreateReport(ProfileId reporterId, ModerationReport report)
 	{
-		var authz = _authz.Report(_claims);
+		var authz = _authz.Create<ModerationReport>(_claims);
 		if (!authz.Allowed)
 			throw CoreException.Unauthorized(authz);
 		if (report.Subjects.Count == 0)
@@ -119,24 +119,55 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		return report;
 	}
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 	public async Task<ModerationReport> CloseReport(ModerationReportId reportId, bool reopen = false)
 	{
-		throw new NotImplementedException();
+		if (await _data.ModerationReports(reportId).FirstOrDefaultAsync() is not {} report)
+			throw CoreException.MissingData<ModerationReport>(reportId);
+
+		var allowed = _authz.Update(_claims, report);
+		if(!allowed)
+			throw CoreException.Unauthorized(allowed);
+
+		if (reopen) report.Closed = DateTimeOffset.MaxValue;
+		else report.Close();
+
+		await _data.Commit();
+		return report;
 	}
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
 	public IAsyncEnumerable<ModerationReport> Search(string query, bool assignedToMe = true, bool unassigned = true, bool includeClosed = false)
 	{
 		throw new NotImplementedException();
 	}
-	public IAsyncEnumerable<ModerationReport> FindRelated(PostId post)
+
+	public IAsyncEnumerable<ModerationReport> FindCreatedBy(ProfileId reporter)
 	{
-		throw new NotImplementedException();
+		return _data.Profiles(reporter)
+			.Include(p => p.Reports)
+			.SelectMany(p => p.Reports)
+			.OrderByDescending(r => r.Created)
+			.AsAsyncEnumerable()
+			.Where(report => _authz.View(_claims, report));
 	}
-	public IAsyncEnumerable<ModerationReport> FindRelated(ProfileId post)
+
+	public IAsyncEnumerable<ModerationReport> FindRelatedTo(PostId post)
 	{
-		throw new NotImplementedException();
+		return _data.Posts(post)
+			.Include(p => p.RelatedReports)
+			.SelectMany(p => p.RelatedReports)
+			.OrderByDescending(r => r.Created)
+			.AsAsyncEnumerable()
+			.Where(report => _authz.View(_claims, report));
+	}
+
+	public IAsyncEnumerable<ModerationReport> FindRelatedTo(ProfileId subject)
+	{
+		return _data.Profiles(subject)
+			.Include(p => p.Reports)
+			.SelectMany(p => p.Reports)
+			.OrderByDescending(r => r.Created)
+			.AsAsyncEnumerable()
+			.Where(report => _authz.View(_claims, report));
 	}
 
 	public IAuthzModerationService As(IEnumerable<Claim> claims)

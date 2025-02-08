@@ -131,4 +131,40 @@ public class ModerationServiceTests : WithMocks
 
 		Assert.Empty(actual.Moderators);
 	}
+
+	[Fact(DisplayName = "Should close open reports")]
+	public async Task ShouldClose()
+	{
+		var actual = await _service.As([]).CloseReport(_reports[0].Id);
+
+		Assert.NotEqual(DateTimeOffset.MaxValue, actual.Closed);
+	}
+
+	[Fact(DisplayName = "Should reopen closed reports")]
+	public async Task ShouldReopen()
+	{
+		var actual = await _service.As([]).CloseReport(_reports[0].Id, true);
+
+		Assert.Equal(DateTimeOffset.MaxValue, actual.Closed);
+	}
+
+	[Fact(DisplayName = "Should not modify already closed reports")]
+	public async Task ShouldNotDoubleClose()
+	{
+		var expected = DateTimeOffset.UtcNow.AddHours(-1);
+		_reports[0].Closed = expected;
+		var actual = await _service.As([]).CloseReport(_reports[0].Id);
+
+		Assert.Equal(expected, actual.Closed);
+	}
+
+	[Fact(DisplayName = "Should immediately close reports with a future close date")]
+	public async Task ShouldClosePendingClosed()
+	{
+		var expected = DateTimeOffset.UtcNow.AddHours(1);
+		_reports[0].Closed = expected;
+		var actual = await _service.As([]).CloseReport(_reports[0].Id);
+
+		Assert.True(actual.Closed <= DateTimeOffset.UtcNow);
+	}
 }

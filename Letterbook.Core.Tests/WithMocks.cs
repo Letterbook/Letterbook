@@ -83,15 +83,19 @@ public abstract class WithMocks
 		// TODO: reflect over the Decision methods instead of individual setups
 		AuthorizationServiceMock.Setup(s => s.View(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>()))
 			.Returns(Allow);
+		AuthorizationServiceMock.Setup(s => s.View<object>(It.IsAny<IEnumerable<Claim>>()))
+			.Returns(AllowNone);
 		AuthorizationServiceMock.Setup(s => s.Create(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>()))
 			.Returns(Allow);
+		AuthorizationServiceMock.Setup(s => s.Create<object>(It.IsAny<IEnumerable<Claim>>()))
+			.Returns(AllowNone);
 		AuthorizationServiceMock.Setup(s => s.Delete(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>()))
 			.Returns(Allow);
 		AuthorizationServiceMock.Setup(s => s.Publish(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>()))
 			.Returns(Allow);
 		AuthorizationServiceMock.Setup(s => s.Update(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>()))
 			.Returns(Allow);
-		AuthorizationServiceMock.Setup(s => s.Report(It.IsAny<IEnumerable<Claim>>()))
+		AuthorizationServiceMock.Setup(s => s.Update<object>(It.IsAny<IEnumerable<Claim>>()))
 			.Returns(AllowNone);
 		AuthorizationServiceMock.Setup(s => s.Attribute(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>(), It.IsAny<ProfileId>()))
 			.Returns(AllowProfile);

@@ -7,20 +7,19 @@ namespace Letterbook.Core;
 public interface IAuthorizationService
 {
 	/// <summary>
-	/// Authorize creating reports
-	/// </summary>
-	/// <param name="claims"></param>
-	/// <returns></returns>
-	public Decision Report(IEnumerable<Claim> claims);
-
-	/// <summary>
-	/// Authorize creating a new resource
+	/// Authorize creating a specific resource
 	/// </summary>
 	/// <param name="claims"></param>
 	/// <param name="resource"></param>
 	/// <typeparam name="T"></typeparam>
 	/// <returns></returns>
 	public Decision Create<T>(IEnumerable<Claim> claims, T resource);
+
+	/// <summary>
+	/// Authorize creatine a new resource by type
+	/// </summary>
+	/// <see cref="Create{T}(System.Collections.Generic.IEnumerable{System.Security.Claims.Claim},T)"/>
+	public Decision Create<T>(IEnumerable<Claim> claims);
 
 	/// <summary>
 	/// Authorize modifying an existing resource
@@ -30,6 +29,12 @@ public interface IAuthorizationService
 	/// <typeparam name="T"></typeparam>
 	/// <returns></returns>
 	public Decision Update<T>(IEnumerable<Claim> claims, T resource);
+
+	/// <summary>
+	/// Authorize modifying a type of resource
+	/// </summary>
+	/// <see cref="Update{T}(System.Collections.Generic.IEnumerable{System.Security.Claims.Claim},T)"/>
+	public Decision Update<T>(IEnumerable<Claim> claims);
 
 	/// <summary>
 	/// Authorize deleting an existing resource
@@ -67,6 +72,11 @@ public interface IAuthorizationService
 	/// <typeparam name="T"></typeparam>
 	/// <returns></returns>
 	public Decision View<T>(IEnumerable<Claim> claims, T resource);
+
+	/// <summary>Authorize reading or viewing a type of resource</summary>
+	/// <see cref="View{T}(System.Collections.Generic.IEnumerable{System.Security.Claims.Claim},T)"/>
+	public Decision View<T>(IEnumerable<Claim> claims);
+
 
 	// TODO: collections/tags/whatever we call them
 	// TODO: account stuff

@@ -20,7 +20,7 @@ public class ModerationReport
 	public ICollection<Post> RelatedPosts { get; set; } = new HashSet<Post>();
 	public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 	public DateTimeOffset Updated { get; set; } = DateTimeOffset.UtcNow;
-	public DateTimeOffset Closed { get; set; } = DateTimeOffset.UtcNow;
+	public DateTimeOffset Closed { get; set; } = DateTimeOffset.MaxValue;
 	public ICollection<ModerationRemark> Remarks { get; set; } = new List<ModerationRemark>();
 
 	public ModerationReport() { }
@@ -36,5 +36,16 @@ public class ModerationReport
 		{
 			RootId = default(PostId),
 		};
+	}
+
+	public bool Close()
+	{
+		if (Closed > DateTimeOffset.UtcNow)
+		{
+			Closed = DateTimeOffset.UtcNow;
+			return true;
+		}
+
+		return false;
 	}
 }
