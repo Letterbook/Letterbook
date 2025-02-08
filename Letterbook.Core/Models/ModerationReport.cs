@@ -21,7 +21,7 @@ public class ModerationReport
 	public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 	public DateTimeOffset Updated { get; set; } = DateTimeOffset.UtcNow;
 	public DateTimeOffset Closed { get; set; } = DateTimeOffset.UtcNow;
-	public IEnumerable<ModerationRemark> Remarks { get; set; } = new List<ModerationRemark>();
+	public ICollection<ModerationRemark> Remarks { get; set; } = new List<ModerationRemark>();
 
 	public ModerationReport() { }
 

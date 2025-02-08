@@ -13,12 +13,14 @@ public class ModerationService : IModerationService, IAuthzModerationService
 	private readonly IDataAdapter _data;
 	private readonly IAuthorizationService _authz;
 	private readonly IProfileEventPublisher _profileEvents;
+	private readonly IAccountService _accounts;
 
-	public ModerationService(IDataAdapter data, IAuthorizationService authz, IProfileEventPublisher profileEvents)
+	public ModerationService(IDataAdapter data, IAuthorizationService authz, IProfileEventPublisher profileEvents, IAccountService accounts)
 	{
 		_data = data;
 		_authz = authz;
 		_profileEvents = profileEvents;
+		_accounts = accounts;
 	}
 
 	public async Task<ModerationReport?> LookupReport(ModerationReportId id)
@@ -74,15 +76,50 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		return report;
 	}
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 	public async Task<ModerationReport> AddRemark(ModerationReportId id, ModerationRemark remark)
 	{
-		throw new NotImplementedException();
+		if (await _data.ModerationReports(id).FirstOrDefaultAsync() is not { } report)
+			throw CoreException.MissingData<ModerationReport>(id);
+
+		var authz = _authz.Create(_claims, remark);
+		if (!authz.Allowed)
+			throw CoreException.Unauthorized(authz);
+
+		remark.Report = report;
+		report.Remarks.Add(remark);
+		await _data.Commit();
+
+		return report;
 	}
+
 	public async Task<ModerationReport> AssignModerator(ModerationReportId reportId, Guid moderatorAccountId, bool remove = false)
 	{
-		throw new NotImplementedException();
+		if (await _data.ModerationReports(reportId).FirstOrDefaultAsync() is not {} report)
+			throw CoreException.MissingData<ModerationReport>(reportId);
+		if (await _data.LookupAccount(moderatorAccountId) is not {} moderator)
+			throw CoreException.MissingData<Account>(moderatorAccountId);
+
+		var canAssign = _authz.Update(_claims, report);
+		if(!canAssign)
+			throw CoreException.Unauthorized(canAssign);
+
+		if (remove)
+		{
+			report.Moderators.Remove(moderator);
+			await _data.Commit();
+			return report;
+		}
+
+		var isModerator = _authz.Update(await _accounts.LookupClaims(moderator), report);
+		if(!isModerator)
+			throw CoreException.Unauthorized(isModerator);
+		report.Moderators.Add(moderator);
+
+		await _data.Commit();
+		return report;
 	}
+
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 	public async Task<ModerationReport> CloseReport(ModerationReportId reportId, bool reopen = false)
 	{
 		throw new NotImplementedException();

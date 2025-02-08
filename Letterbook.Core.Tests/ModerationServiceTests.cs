@@ -14,18 +14,21 @@ public class ModerationServiceTests : WithMocks
 	private readonly List<Profile> _profiles;
 	private readonly List<Post> _posts;
 	private readonly CoreOptions _opts;
+	private readonly List<ModerationReport> _reports;
 
 	public ModerationServiceTests()
 	{
-		_service = new ModerationService(DataAdapterMock.Object, AuthorizationServiceMock.Object, ProfileEventServiceMock.Object);
+		_service = new ModerationService(DataAdapterMock.Object, AuthorizationServiceMock.Object, ProfileEventServiceMock.Object, AccountServiceMock.Object);
 		_fakeAccounts = new FakeAccount();
 		_fakeProfiles = new FakeProfile();
 		_profiles = _fakeProfiles.Generate(3);
 		_posts = new FakePost(_profiles[0]).Generate(3);
 		_opts = new CoreOptions();
+		_reports = new FakeReport(_profiles[2], _profiles[0], _opts).Generate(1);
 
 		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>())).Returns(_profiles.BuildMock());
 		DataAdapterMock.Setup(m => m.Posts(It.IsAny<PostId[]>())).Returns(_posts.BuildMock());
+		DataAdapterMock.Setup(m => m.ModerationReports(It.IsAny<ModerationReportId[]>())).Returns(_reports.BuildMock());
 
 		MockAuthorizeAllowAll();
 	}
@@ -88,4 +91,44 @@ public class ModerationServiceTests : WithMocks
 		await Assert.ThrowsAsync<CoreException>(async () => await _service.As([]).CreateReport(_profiles[2].Id, report));
 	}
 
+	[Fact(DisplayName = "Should add a remark")]
+	public async Task ShouldAddRemark()
+	{
+		var remark = new ModerationRemark
+		{
+			Report = _reports[0],
+			Author = _fakeAccounts.Generate(),
+			Created = DateTimeOffset.UtcNow,
+			Updated = DateTimeOffset.UtcNow,
+			Text = "test remark"
+		};
+
+		var actual = await _service.As([]).AddRemark(_reports[0].Id, remark);
+
+		Assert.Single(actual.Remarks);
+		Assert.Equal(actual.Remarks.First(), remark);
+	}
+
+	[Fact(DisplayName = "Should assign a moderator")]
+	public async Task ShouldAssign()
+	{
+		var mod = _fakeAccounts.Generate();
+		DataAdapterMock.Setup(m => m.LookupAccount(mod.Id)).ReturnsAsync(mod);
+		var actual = await _service.As([]).AssignModerator(_reports[0].Id, mod.Id);
+
+		Assert.Single(actual.Moderators);
+		Assert.Equal(actual.Moderators.First(), mod);
+	}
+
+	[Fact(DisplayName = "Should remove an assigned moderator")]
+	public async Task ShouldUnassign()
+	{
+		var mod = _fakeAccounts.Generate();
+		_reports[0].Moderators.Add(mod);
+		DataAdapterMock.Setup(m => m.LookupAccount(mod.Id)).ReturnsAsync(mod);
+
+		var actual = await _service.As([]).AssignModerator(_reports[0].Id, mod.Id, true);
+
+		Assert.Empty(actual.Moderators);
+	}
 }
