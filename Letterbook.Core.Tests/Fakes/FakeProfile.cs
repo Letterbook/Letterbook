@@ -1,8 +1,5 @@
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Bogus;
-using Bogus.DataSets;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 
 namespace Letterbook.Core.Tests.Fakes;
