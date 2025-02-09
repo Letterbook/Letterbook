@@ -73,6 +73,20 @@ public interface IDataAdapter : IDisposable
 	/// </summary>
 	/// <returns></returns>
 	public IQueryable<ModerationReport> AllModerationReports();
+
+	/// <summary>
+	/// Query for moderation policies
+	/// </summary>
+	/// <param name="ids"></param>
+	/// <returns></returns>
+	public IQueryable<ModerationPolicy> Policies(params ModerationPolicyId[] ids);
+
+	/// <summary>
+	/// Query across all moderation policies
+	/// </summary>
+	/// <returns></returns>
+	public IQueryable<ModerationPolicy> AllPolicies();
+
 	/// <summary>
 	/// Query for navigation entities, using the given object as a root entity
 	/// </summary>
@@ -105,6 +119,7 @@ public interface IDataAdapter : IDisposable
 	public void Add(Account account);
 	public void Add(Post post);
 	public void Add(ModerationReport report);
+	public void Add(ModerationPolicy policy);
 	public void AddRange(IEnumerable<Profile> profile);
 	public void AddRange(IEnumerable<Account> account);
 	public void AddRange(IEnumerable<Post> posts);

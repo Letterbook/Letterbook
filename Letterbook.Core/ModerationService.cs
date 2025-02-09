@@ -193,6 +193,47 @@ public class ModerationService : IModerationService, IAuthzModerationService
 			.TakeWhile(report => _authz.View(_claims, report));
 	}
 
+	public IAsyncEnumerable<ModerationPolicy> ListPolicies(bool includeRetired = false)
+	{
+		return _data.AllPolicies()
+			.Where(p => includeRetired || p.Retired >= DateTimeOffset.UtcNow)
+			.AsAsyncEnumerable();
+	}
+
+	public async Task<ModerationPolicy> AddPolicy(ModerationPolicy policy)
+	{
+		var allowed = _authz.Create<ModerationPolicy>(_claims);
+		if (!allowed)
+			throw CoreException.Unauthorized(allowed);
+
+		_data.Add(policy);
+		await _data.Commit();
+		return policy;
+	}
+
+	public async Task<ModerationPolicy> RetirePolicy(ModerationPolicyId policyId, bool restore = false)
+	{
+		var allowed = _authz.Update<ModerationPolicy>(_claims);
+		if (!allowed)
+			throw CoreException.Unauthorized(allowed);
+
+		if (await _data.Policies(policyId).FirstOrDefaultAsync() is not { } policy)
+			throw CoreException.MissingData<ModerationPolicy>(policyId);
+
+		if (restore)
+		{
+			policy.Retired = DateTimeOffset.MaxValue;
+			await _data.Commit();
+
+			return policy;
+		}
+
+		if (policy.Retire())
+			await _data.Commit();
+
+		return policy;
+	}
+
 	public IAuthzModerationService As(IEnumerable<Claim> claims)
 	{
 		_claims = claims;

@@ -3,6 +3,7 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using MockQueryable;
 using Moq;
+using Xunit.Abstractions;
 
 namespace Letterbook.Core.Tests;
 
@@ -18,9 +19,10 @@ public class ModerationServiceTests : WithMocks
 	private readonly List<Account> _accounts;
 	private readonly List<ModerationPolicy> _policies;
 
-	public ModerationServiceTests()
+	public ModerationServiceTests(ITestOutputHelper output)
 	{
-		_service = new ModerationService(DataAdapterMock.Object, AuthorizationServiceMock.Object, ProfileEventServiceMock.Object, AccountServiceMock.Object);
+		_service = new ModerationService(DataAdapterMock.Object, AuthorizationServiceMock.Object, ProfileEventServiceMock.Object,
+			AccountServiceMock.Object);
 		_fakeAccounts = new FakeAccount();
 		_fakeProfiles = new FakeProfile();
 		_accounts = new FakeAccount().Generate(3);
@@ -31,13 +33,18 @@ public class ModerationServiceTests : WithMocks
 		_policies =
 		[
 			new() { Id = 0, Title = "Policy 0" },
-			new() { Id = 1, Title = "Policy 1" }
+			new() { Id = 1, Title = "Policy 1" },
+			new() { Id = 2, Title = "Retired", Retired = DateTimeOffset.UtcNow.AddHours(-1) }
 		];
 
+		DataAdapterMock.Setup(m => m.Policies(It.IsAny<ModerationPolicyId[]>())).Returns(_policies.BuildMock());
+		DataAdapterMock.Setup(m => m.AllPolicies()).Returns(_policies.BuildMock());
 		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>())).Returns(_profiles.BuildMock());
 		DataAdapterMock.Setup(m => m.Accounts(It.IsAny<Guid[]>())).Returns(_accounts.BuildMock());
 		DataAdapterMock.Setup(m => m.Posts(It.IsAny<PostId[]>())).Returns(_posts.BuildMock());
 		DataAdapterMock.Setup(m => m.ModerationReports(It.IsAny<ModerationReportId[]>())).Returns(_reports.BuildMock());
+
+		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 
 		MockAuthorizeAllowAll();
 	}
@@ -46,6 +53,14 @@ public class ModerationServiceTests : WithMocks
 	public void Exists()
 	{
 		Assert.NotNull(_service);
+	}
+
+	[Fact(DisplayName = "Should lookup a report by ID")]
+	public async Task CanLookup()
+	{
+		var actual = await _service.As([]).LookupReport(_reports[0].Id);
+
+		Assert.Equivalent(_reports[0], actual);
 	}
 
 	[Fact(DisplayName = "Should create new reports")]
@@ -217,5 +232,47 @@ public class ModerationServiceTests : WithMocks
 		Assert.NotEqual(actual.Subjects, given.Subjects);
 		Assert.NotEqual(actual.RelatedPosts, given.RelatedPosts);
 		Assert.NotEqual(actual.Created, given.Created);
+	}
+
+	[InlineData(false, 2)]
+	[InlineData(true, 3)]
+	[Theory(DisplayName = "Should list policies")]
+	public async Task ShouldListPolicies(bool expired, int expected)
+	{
+		var actual = await _service.As([]).ListPolicies(expired).ToListAsync();
+
+		Assert.Equivalent(_policies.Take(expected), actual);
+	}
+
+	[Fact(DisplayName = "Should add a new policy")]
+	public async Task ShouldAddNewPolicy()
+	{
+		var given = new ModerationPolicy
+		{
+			Id = 10,
+			Title = "new policy",
+			Summary = "A short summary",
+			Policy = "A long, detailed, policy document.",
+		};
+
+		var actual = await _service.As([]).AddPolicy(given);
+
+		Assert.Equal(given, actual);
+	}
+
+	[Fact(DisplayName = "Should retire an existing policy")]
+	public async Task ShouldRetirePolicy()
+	{
+		var actual = await _service.As([]).RetirePolicy(_policies[0].Id);
+
+		Assert.True(actual.Retired <= DateTimeOffset.UtcNow);
+	}
+
+	[Fact(DisplayName = "Should restore a retired policy")]
+	public async Task ShouldRestorePolicy()
+	{
+		var actual = await _service.As([]).RetirePolicy(_policies[2].Id, true);
+
+		Assert.True(actual.Retired > DateTimeOffset.UtcNow);
 	}
 }

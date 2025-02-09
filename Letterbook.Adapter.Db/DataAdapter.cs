@@ -103,6 +103,15 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public IQueryable<Models.ModerationReport> AllModerationReports() => _context.ModerationReports;
 
+	public IQueryable<Models.ModerationPolicy> Policies(params Models.ModerationPolicyId[] ids)
+	{
+		return ids.Length == 1
+			? _context.ModerationPolicies.Where(p => p.Id == ids[0])
+			: _context.ModerationPolicies.Where(p => ids.Contains(p.Id));
+	}
+
+	public IQueryable<Models.ModerationPolicy> AllPolicies() => _context.ModerationPolicies;
+
 	public IQueryable<T> QueryFrom<T>(Models.Profile profile, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
 		where T : class
 	{
@@ -139,6 +148,7 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	public void Add(Models.Post post) => _context.Posts.Add(post);
 
 	public void Add(Models.ModerationReport report) => _context.ModerationReports.Add(report);
+	public void Add(Models.ModerationPolicy policy) => _context.ModerationPolicies.Add(policy);
 
 	public void AddRange(IEnumerable<Models.Profile> profile)
 	{

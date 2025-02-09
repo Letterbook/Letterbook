@@ -88,6 +88,10 @@ public interface IAuthzModerationService
 	/// <param name="subject"></param>
 	/// <returns></returns>
 	public IAsyncEnumerable<ModerationReport> FindRelatedTo(ProfileId subject);
+
+	public IAsyncEnumerable<ModerationPolicy> ListPolicies(bool includeRetired = false);
+	public Task<ModerationPolicy> AddPolicy(ModerationPolicy policy);
+	public Task<ModerationPolicy> RetirePolicy(ModerationPolicyId policyId, bool restore = false);
 }
 
 public interface IModerationService
