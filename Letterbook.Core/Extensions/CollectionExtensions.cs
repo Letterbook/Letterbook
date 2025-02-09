@@ -5,6 +5,8 @@ namespace Letterbook.Core.Extensions;
 
 public static class CollectionExtensions
 {
+	private static readonly Func<object?, bool> TestNotNull = x => x is not null;
+
 	/// <summary>
 	/// Uses IEquatable comparisons to return a new Collection which has items that are equivalent to the replacement collection,
 	/// but reusing any equivalent objects from the source collection.
@@ -61,9 +63,19 @@ public static class CollectionExtensions
 	public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) where T : struct =>
 		source.Where(x => x.HasValue).Select(x => x!.Value);
 
-	private static readonly Func<object?, bool> TestNotNull = x => x is not null;
 
-	public static IEnumerable<T> Converge<T, TId>(this IEnumerable<T> source, Dictionary<TId, T> values, Func<T, TId> selector) where TId : notnull where T : class
+	/// <summary>
+	/// Reproduce an IEnumerable, with equivalent elements taken from the values dictionary by matching a selector function.
+	/// Values in the source IEnumerable which have no equivalent are excluded.
+	/// </summary>
+	/// <param name="source"></param>
+	/// <param name="values"></param>
+	/// <param name="selector">A function that returns a lookup key for each element of the source IEnumerable, to retrieve a value from the
+	/// values dictionary</param>
+	/// <typeparam name="T">The type of the source and resultant IEnumerable</typeparam>
+	/// <typeparam name="TKey">The key type of the values dictionary</typeparam>
+	/// <returns>The subset of the objects in the values dictionary which are equivalent to the elements in the source</returns>
+	public static IEnumerable<T> Converge<T, TKey>(this IEnumerable<T> source, Dictionary<TKey, T> values, Func<T, TKey> selector) where TKey : notnull where T : class
 	{
 		return source.Select(each => values.GetValueOrDefault(selector(each))).WhereNotNull();
 	}

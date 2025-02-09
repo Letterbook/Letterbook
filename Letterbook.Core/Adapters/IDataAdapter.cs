@@ -15,6 +15,8 @@ public interface IDataAdapter : IDisposable
 	public Task<Account?> LookupAccount(Guid id);
 	public Task<Account?> FindAccountByEmail(string normalizedEmail);
 
+	public IQueryable<Account> Accounts(params Guid[] ids);
+
 	/// <summary>
 	/// Query across all Accounts
 	/// </summary>

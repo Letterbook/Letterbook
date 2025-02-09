@@ -38,6 +38,19 @@ public interface IAuthzModerationService
 	public Task<ModerationReport> AssignModerator(ModerationReportId reportId, Guid moderatorAccountId, bool remove = false);
 
 	/// <summary>
+	/// Make certain kinds of updates to a report. Not all updates are permitted.
+	/// </summary>
+	/// <remarks>
+	/// It is not permitted to change the report summary, the related posts and subjects, or the remarks.
+	/// Those changes would make this a fundamentally different report, or obscure its history.
+	/// Instead of making those major changes, consider closing this report and opening a new one.
+	/// </remarks>
+	/// <param name="reportId"></param>
+	/// <param name="updated"></param>
+	/// <returns></returns>
+	public Task<ModerationReport> UpdateReport(ModerationReportId reportId, ModerationReport updated);
+
+	/// <summary>
 	/// Close or reopen a report
 	/// </summary>
 	/// <param name="reportId"></param>

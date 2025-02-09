@@ -37,6 +37,13 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			.FirstOrDefaultAsync(account => account.NormalizedEmail == normalizedEmail);
 	}
 
+	public IQueryable<Models.Account> Accounts(params Guid[] ids)
+	{
+		return ids.Length == 1
+			? _context.Accounts.Where(a => a.Id == ids[0])
+			: _context.Accounts.Where(a => ids.Contains(a.Id));
+	}
+
 	public IQueryable<Models.Account> AllAccounts()
 	{
 		return _context.Accounts.AsQueryable();

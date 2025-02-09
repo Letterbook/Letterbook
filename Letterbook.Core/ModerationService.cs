@@ -87,6 +87,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 		remark.Report = report;
 		report.Remarks.Add(remark);
+		report.Updated = DateTimeOffset.UtcNow;
 		await _data.Commit();
 
 		return report;
@@ -114,7 +115,29 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		if(!isModerator)
 			throw CoreException.Unauthorized(isModerator);
 		report.Moderators.Add(moderator);
+		report.Updated = DateTimeOffset.UtcNow;
 
+		await _data.Commit();
+		return report;
+	}
+
+	public async Task<ModerationReport> UpdateReport(ModerationReportId reportId, ModerationReport updated)
+	{
+		if (await _data.ModerationReports(reportId)
+			    .Include(r => r.Policies)
+			    .Include(r => r.Moderators)
+			    .FirstOrDefaultAsync() is not {} report)
+			throw CoreException.MissingData<ModerationReport>(reportId);
+
+		var mods = await _data.Accounts(updated.Moderators.Select(a => a.Id).ToArray())
+			.ToDictionaryAsync(a => a.Id);
+		var policies = await _data.Policies(updated.Policies.Select(p => p.Id).ToArray())
+			.ToDictionaryAsync(p => p.Id);
+
+		report.Moderators = updated.Moderators.Converge(mods, account => account.Id).ToHashSet();
+		report.Policies = updated.Policies.Converge(policies, policy => policy.Id).ToHashSet();
+		report.Closed = updated.Closed;
+		report.Updated = DateTimeOffset.UtcNow;
 		await _data.Commit();
 		return report;
 	}
@@ -147,7 +170,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 			.SelectMany(p => p.Reports)
 			.OrderByDescending(r => r.Created)
 			.AsAsyncEnumerable()
-			.Where(report => _authz.View(_claims, report));
+			.TakeWhile(report => _authz.View(_claims, report));
 	}
 
 	public IAsyncEnumerable<ModerationReport> FindRelatedTo(PostId post)
@@ -157,7 +180,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 			.SelectMany(p => p.RelatedReports)
 			.OrderByDescending(r => r.Created)
 			.AsAsyncEnumerable()
-			.Where(report => _authz.View(_claims, report));
+			.TakeWhile(report => _authz.View(_claims, report));
 	}
 
 	public IAsyncEnumerable<ModerationReport> FindRelatedTo(ProfileId subject)
@@ -167,7 +190,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 			.SelectMany(p => p.Reports)
 			.OrderByDescending(r => r.Created)
 			.AsAsyncEnumerable()
-			.Where(report => _authz.View(_claims, report));
+			.TakeWhile(report => _authz.View(_claims, report));
 	}
 
 	public IAuthzModerationService As(IEnumerable<Claim> claims)
