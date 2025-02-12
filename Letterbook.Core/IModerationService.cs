@@ -73,21 +73,28 @@ public interface IAuthzModerationService
 	/// </summary>
 	/// <param name="reporter"></param>
 	/// <returns></returns>
-	public IAsyncEnumerable<ModerationReport> FindCreatedBy(ProfileId reporter);
+	public IAsyncEnumerable<ModerationReport> FindCreatedBy(ProfileId reporter, bool includeClosed = false);
 
 	/// <summary>
 	/// Find reports related to this post
 	/// </summary>
 	/// <param name="post"></param>
 	/// <returns></returns>
-	public IAsyncEnumerable<ModerationReport> FindRelatedTo(PostId post);
+	public IAsyncEnumerable<ModerationReport> FindRelatedTo(PostId post, bool includeClosed = false);
+
+	/// <summary>
+	/// Find reports assigned to this moderator
+	/// </summary>
+	/// <param name="moderator"></param>
+	/// <returns></returns>
+	public IAsyncEnumerable<ModerationReport> FindAssigned(Guid moderator, bool includeClosed = false);
 
 	/// <summary>
 	/// Find reports related to this subject
 	/// </summary>
 	/// <param name="subject"></param>
 	/// <returns></returns>
-	public IAsyncEnumerable<ModerationReport> FindRelatedTo(ProfileId subject);
+	public IAsyncEnumerable<ModerationReport> FindRelatedTo(ProfileId subject, bool includeClosed = false);
 
 	public IAsyncEnumerable<ModerationPolicy> ListPolicies(bool includeRetired = false);
 	public Task<ModerationPolicy> AddPolicy(ModerationPolicy policy);

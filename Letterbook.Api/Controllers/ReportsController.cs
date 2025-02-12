@@ -26,12 +26,13 @@ public class ReportsController : ControllerBase
 	{
 		_moderation = moderation;
 		_authz = authz;
-		_mapper = new Mapper(mappingConfig.Posts);
+		_mapper = new Mapper(mappingConfig.ModerationReports);
 	}
 
-	[HttpPost("{profileId}/post")]
-	[ProducesResponseType<PostDto>(StatusCodes.Status200OK)]
-	[SwaggerOperation("Post", "Open a new moderation report")]
+	[HttpPost("{selfId}/report")]
+	[ProducesResponseType<FullModerationReportDto>(StatusCodes.Status200OK)]
+	[ProducesResponseType<MemberModerationReportDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Create", "Open a new moderation report")]
 	public async Task<IActionResult> CreateReport(ProfileId selfId, [FromBody] MemberModerationReportDto reportDto)
 	{
 		if (!ModelState.IsValid)
@@ -44,6 +45,115 @@ public class ReportsController : ControllerBase
 			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(MemberModerationReportDto)}"));
 
 		var result = await _moderation.As(User.Claims).CreateReport(selfId, report);
+
+		return Ok(_authz.Update(User.Claims, result)
+			? _mapper.Map<FullModerationReportDto>(result)
+			: _mapper.Map<MemberModerationReportDto>(result));
+	}
+
+	[HttpGet("{selfId}/report/{reportId}")]
+	[ProducesResponseType<FullModerationReportDto>(StatusCodes.Status200OK)]
+	[ProducesResponseType<MemberModerationReportDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Get", "Get a new moderation report by ID")]
+	public async Task<IActionResult> LookupReport(ProfileId selfId, ModerationReportId reportId)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+		if (!_authz.Any(User.Claims, selfId))
+			return Unauthorized();
+
+		var result = await _moderation.As(User.Claims).LookupReport(reportId);
+
+		return Ok(_authz.Update(User.Claims, result)
+			? _mapper.Map<FullModerationReportDto>(result)
+			: _mapper.Map<MemberModerationReportDto>(result));
+	}
+
+	[HttpGet("moderator/report")]
+	[ProducesResponseType<IAsyncEnumerable<FullModerationReportDto>>(StatusCodes.Status200OK)]
+	[SwaggerOperation("List", "Filter and list moderation reports")]
+	public IActionResult ListReports([FromQuery] ProfileId? subjectId = null, [FromQuery] ProfileId? reporterId = null,
+		[FromQuery] Guid? moderatorId = null, [FromQuery] bool includeClosed = false)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+		if (!_authz.Update<ModerationReport>(User.Claims))
+			return Unauthorized();
+
+		if (subjectId is { } subject)
+			return Ok(_moderation.As(User.Claims).FindRelatedTo(subject, includeClosed).Select(_mapper.Map<FullModerationReportDto>));
+		if (reporterId is { } reporter)
+			return Ok(_moderation.As(User.Claims).FindCreatedBy(reporter, includeClosed).Select(_mapper.Map<FullModerationReportDto>));
+		if (moderatorId is { } moderator)
+			return Ok(_moderation.As(User.Claims).FindAssigned(moderator, includeClosed).Select(_mapper.Map<FullModerationReportDto>));
+
+		return BadRequest();
+	}
+
+	[HttpPut("moderator/report/{reportId}")]
+	[ProducesResponseType<FullModerationReportDto>(StatusCodes.Status200OK)]
+	[ProducesResponseType<MemberModerationReportDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Update", "Update a moderation report")]
+	public async Task<IActionResult> UpdateReport(ModerationReportId reportId, [FromBody] FullModerationReportDto dto)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		if (_mapper.Map<ModerationReport>(dto) is not { } report)
+			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(MemberModerationReportDto)}"));
+
+		var result = await _moderation.As(User.Claims).UpdateReport(reportId, report);
+
+		return Ok(_authz.Update(User.Claims, result)
+			? _mapper.Map<FullModerationReportDto>(result)
+			: _mapper.Map<MemberModerationReportDto>(result));
+	}
+
+	[HttpPost("moderator/report/{reportId}/remark")]
+	[ProducesResponseType<FullModerationReportDto>(StatusCodes.Status200OK)]
+	[ProducesResponseType<MemberModerationReportDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Remark", "Add a remark to a moderation report")]
+	public async Task<IActionResult> Remark(ModerationReportId reportId, [FromBody] ModerationRemarkDto dto)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		if (_mapper.Map<ModerationRemark>(dto) is not { } remark)
+			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(MemberModerationReportDto)}"));
+
+		var result = await _moderation.As(User.Claims).AddRemark(reportId, remark);
+
+		return Ok(_authz.Update(User.Claims, result)
+			? _mapper.Map<FullModerationReportDto>(result)
+			: _mapper.Map<MemberModerationReportDto>(result));
+	}
+
+	[HttpPut("moderator/report/{reportId}/assign/{accountId}")]
+	[ProducesResponseType<FullModerationReportDto>(StatusCodes.Status200OK)]
+	[ProducesResponseType<MemberModerationReportDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Assign", "Assign or unassign a moderator")]
+	public async Task<IActionResult> Remark(ModerationReportId reportId, Guid accountId, [FromQuery] bool unassign = false)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		var result = await _moderation.As(User.Claims).AssignModerator(reportId, accountId, unassign);
+
+		return Ok(_authz.Update(User.Claims, result)
+			? _mapper.Map<FullModerationReportDto>(result)
+			: _mapper.Map<MemberModerationReportDto>(result));
+	}
+
+	[HttpPut("moderator/report/{reportId}/close")]
+	[ProducesResponseType<FullModerationReportDto>(StatusCodes.Status200OK)]
+	[ProducesResponseType<MemberModerationReportDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Close", "Close or reopen a moderation report")]
+	public async Task<IActionResult> Close(ModerationReportId reportId, [FromQuery] bool reopen = false)
+	{
+		if (!ModelState.IsValid)
+			return BadRequest(ModelState);
+
+		var result = await _moderation.As(User.Claims).CloseReport(reportId, reopen);
 
 		return Ok(_authz.Update(User.Claims, result)
 			? _mapper.Map<FullModerationReportDto>(result)

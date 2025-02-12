@@ -163,32 +163,46 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		throw new NotImplementedException();
 	}
 
-	public IAsyncEnumerable<ModerationReport> FindCreatedBy(ProfileId reporter)
+	public IAsyncEnumerable<ModerationReport> FindCreatedBy(ProfileId reporter, bool includeClosed = false)
 	{
 		return _data.Profiles(reporter)
 			.Include(p => p.Reports)
 			.SelectMany(p => p.Reports)
 			.OrderByDescending(r => r.Created)
+			.Where(r => includeClosed || r.Closed > DateTimeOffset.UtcNow)
 			.AsAsyncEnumerable()
 			.TakeWhile(report => _authz.View(_claims, report));
 	}
 
-	public IAsyncEnumerable<ModerationReport> FindRelatedTo(PostId post)
+	public IAsyncEnumerable<ModerationReport> FindRelatedTo(PostId post, bool includeClosed = false)
 	{
 		return _data.Posts(post)
 			.Include(p => p.RelatedReports)
 			.SelectMany(p => p.RelatedReports)
 			.OrderByDescending(r => r.Created)
+			.Where(r => includeClosed || r.Closed > DateTimeOffset.UtcNow)
 			.AsAsyncEnumerable()
 			.TakeWhile(report => _authz.View(_claims, report));
 	}
 
-	public IAsyncEnumerable<ModerationReport> FindRelatedTo(ProfileId subject)
+	public IAsyncEnumerable<ModerationReport> FindAssigned(Guid moderator, bool includeClosed = false)
+	{
+		return _data.Accounts(moderator)
+			.Include(a => a.ModeratedReports)
+			.SelectMany(a => a.ModeratedReports)
+			.OrderByDescending(r => r.Created)
+			.Where(r => includeClosed || r.Closed > DateTimeOffset.UtcNow)
+			.AsAsyncEnumerable()
+			.TakeWhile(report => _authz.View(_claims, report));
+	}
+
+	public IAsyncEnumerable<ModerationReport> FindRelatedTo(ProfileId subject, bool includeClosed = false)
 	{
 		return _data.Profiles(subject)
 			.Include(p => p.Reports)
 			.SelectMany(p => p.Reports)
 			.OrderByDescending(r => r.Created)
+			.Where(r => includeClosed || r.Closed > DateTimeOffset.UtcNow)
 			.AsAsyncEnumerable()
 			.TakeWhile(report => _authz.View(_claims, report));
 	}

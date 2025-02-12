@@ -77,6 +77,14 @@ public interface IAuthorizationService
 	/// <see cref="View{T}(System.Collections.Generic.IEnumerable{System.Security.Claims.Claim},T)"/>
 	public Decision View<T>(IEnumerable<Claim> claims);
 
+	/// <summary>
+	/// Authorize at least one claim on the Profile. This supports early exit for requests that are definitely unauthorized. In most cases
+	/// some additional authorization will still be necessary.
+	/// </summary>
+	/// <param name="claims"></param>
+	/// <param name="profileId"></param>
+	/// <returns></returns>
+	public Decision Any(IEnumerable<Claim> claims, ProfileId profileId);
 
 	// TODO: collections/tags/whatever we call them
 	// TODO: account stuff
