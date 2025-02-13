@@ -132,7 +132,7 @@ public class ReportsController : ControllerBase
 	[ProducesResponseType<FullModerationReportDto>(StatusCodes.Status200OK)]
 	[ProducesResponseType<MemberModerationReportDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Assign", "Assign or unassign a moderator")]
-	public async Task<IActionResult> Remark(ModerationReportId reportId, Guid accountId, [FromQuery] bool unassign = false)
+	public async Task<IActionResult> Assign(ModerationReportId reportId, Guid accountId, [FromQuery] bool unassign = false)
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);

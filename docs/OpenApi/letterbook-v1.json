@@ -1685,7 +1685,7 @@
             }
           },
           {
-            "name": "assignedTo",
+            "name": "moderatorId",
             "in": "query",
             "schema": {
               "type": "string",

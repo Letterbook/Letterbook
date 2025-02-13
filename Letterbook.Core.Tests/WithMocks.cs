@@ -104,6 +104,8 @@ public abstract class WithMocks
 			.Returns(AllowNone);
 		AuthorizationServiceMock.Setup(s => s.Attribute(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>(), It.IsAny<ProfileId>()))
 			.Returns(AllowProfile);
+		AuthorizationServiceMock.Setup(s => s.Any(It.IsAny<IEnumerable<Claim>>(), It.IsAny<ProfileId>()))
+			.Returns(Allow);
 		return;
 
 		Decision Allow(IEnumerable<Claim> claims, object _) => Decision.Allow("Mock", claims);
