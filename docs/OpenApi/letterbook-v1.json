@@ -9,6 +9,162 @@
     "version": "v1"
   },
   "paths": {
+    "/lb/v1/policies/public/policy": {
+      "get": {
+        "tags": [
+          "Policies"
+        ],
+        "summary": "Get",
+        "description": "List moderation policies",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ModerationPolicyId"
+            }
+          },
+          {
+            "name": "includeRetired",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ModerationPolicyDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ModerationPolicyDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ModerationPolicyDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/policies/moderator/policy": {
+      "post": {
+        "tags": [
+          "Policies"
+        ],
+        "summary": "Add a policy",
+        "description": "Add a new moderation policies",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerationPolicy"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerationPolicy"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModerationPolicy"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModerationPolicyDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModerationPolicyDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModerationPolicyDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/lb/v1/policies/moderator/policy/{policyId}": {
+      "put": {
+        "tags": [
+          "Policies"
+        ],
+        "summary": "Retire a policy",
+        "description": "Retire an existing moderation policies",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ModerationPolicyId"
+            }
+          },
+          {
+            "name": "restore",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModerationPolicyDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModerationPolicyDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModerationPolicyDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/lb/v1/posts/{profileId}/post": {
       "post": {
         "tags": [
@@ -2141,6 +2297,97 @@
   },
   "components": {
     "schemas": {
+      "Account": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalizedUserName": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalizedEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "emailConfirmed": {
+            "type": "boolean"
+          },
+          "passwordHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "securityStamp": {
+            "type": "string",
+            "nullable": true
+          },
+          "concurrencyStamp": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneNumberConfirmed": {
+            "type": "boolean"
+          },
+          "twoFactorEnabled": {
+            "type": "boolean"
+          },
+          "lockoutEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lockoutEnabled": {
+            "type": "boolean"
+          },
+          "accessFailedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "authenticationType": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "isAuthenticated": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "linkedProfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProfileClaims"
+            },
+            "nullable": true
+          },
+          "moderatedReports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModerationReport"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ActivityActorType": {
         "enum": [
           0,
@@ -2152,6 +2399,33 @@
         ],
         "type": "integer",
         "format": "int32"
+      },
+      "Audience": {
+        "type": "object",
+        "properties": {
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "authority": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Profile"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "AudienceDto": {
         "type": "object",
@@ -2167,6 +2441,102 @@
             "nullable": true
           },
           "sourceType": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ByteReadOnlyMemory": {
+        "type": "object",
+        "properties": {
+          "length": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "isEmpty": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "span": {
+            "$ref": "#/components/schemas/ByteReadOnlySpan"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ByteReadOnlySpan": {
+        "type": "object",
+        "properties": {
+          "length": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "isEmpty": {
+            "type": "boolean",
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConditionKind": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "Content": {
+        "required": [
+          "fediId",
+          "html",
+          "post"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "post": {
+            "$ref": "#/components/schemas/Post"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "preview": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "sortKey": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "contentType": {
+            "$ref": "#/components/schemas/ContentType"
+          },
+          "html": {
             "type": "string",
             "nullable": true
           }
@@ -2219,6 +2589,34 @@
         },
         "additionalProperties": false
       },
+      "ContentType": {
+        "type": "object",
+        "properties": {
+          "boundary": {
+            "type": "string",
+            "nullable": true
+          },
+          "charSet": {
+            "type": "string",
+            "nullable": true
+          },
+          "mediaType": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "parameters": {
+            "type": "array",
+            "items": { },
+            "nullable": true,
+            "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CustomField": {
         "required": [
           "label",
@@ -2247,6 +2645,36 @@
         ],
         "type": "integer",
         "format": "int32"
+      },
+      "FollowerRelation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "follower": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "follows": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "state": {
+            "$ref": "#/components/schemas/FollowState"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RelationCondition"
+            },
+            "nullable": true
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
       },
       "FollowerRelationDto": {
         "type": "object",
@@ -2419,6 +2847,20 @@
         },
         "additionalProperties": false
       },
+      "Heuristics": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "KeyFamily": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
       "LoginRequest": {
         "required": [
           "email",
@@ -2478,6 +2920,31 @@
         },
         "additionalProperties": false
       },
+      "Mention": {
+        "required": [
+          "source",
+          "subject"
+        ],
+        "type": "object",
+        "properties": {
+          "sourceId": {
+            "$ref": "#/components/schemas/PostId"
+          },
+          "subjectId": {
+            "$ref": "#/components/schemas/ProfileId"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Post"
+          },
+          "subject": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "visibility": {
+            "$ref": "#/components/schemas/MentionVisibility"
+          }
+        },
+        "additionalProperties": false
+      },
       "MentionDto": {
         "type": "object",
         "properties": {
@@ -2527,10 +2994,107 @@
         },
         "additionalProperties": false
       },
+      "ModerationPolicy": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ModerationPolicyId"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "retired": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "policy": {
+            "type": "string",
+            "nullable": true
+          },
+          "relatedReports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModerationReport"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ModerationPolicyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ModerationPolicyId"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "retired": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "policy": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ModerationPolicyId": {
         "type": "integer",
         "additionalProperties": false,
         "example": "0"
+      },
+      "ModerationRemark": {
+        "required": [
+          "author",
+          "report",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ModerationRemarkId"
+          },
+          "report": {
+            "$ref": "#/components/schemas/ModerationReport"
+          },
+          "author": {
+            "$ref": "#/components/schemas/Account"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "text": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "ModerationRemarkDto": {
         "required": [
@@ -2570,10 +3134,236 @@
         "additionalProperties": false,
         "example": "0000000000000000000000000"
       },
+      "ModerationReport": {
+        "required": [
+          "context",
+          "summary"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ModerationReportId"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "context": {
+            "$ref": "#/components/schemas/ThreadContext"
+          },
+          "moderators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Account"
+            },
+            "nullable": true
+          },
+          "policies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModerationPolicy"
+            },
+            "nullable": true
+          },
+          "reporter": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "subjects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Profile"
+            },
+            "nullable": true
+          },
+          "relatedPosts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closed": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "remarks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModerationRemark"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ModerationReportId": {
         "type": "string",
         "additionalProperties": false,
         "example": "0000000000000000000000000"
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/PostId"
+          },
+          "contentRootIdUri": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "thread": {
+            "$ref": "#/components/schemas/ThreadContext"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "preview": {
+            "type": "string",
+            "nullable": true
+          },
+          "source": {
+            "type": "string",
+            "nullable": true
+          },
+          "hostname": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "authority": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "creators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Profile"
+            },
+            "nullable": true
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "publishedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deletedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastSeenDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "contents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Content"
+            },
+            "nullable": true
+          },
+          "audience": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Audience"
+            },
+            "nullable": true
+          },
+          "addressedTo": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Mention"
+            },
+            "nullable": true
+          },
+          "client": {
+            "type": "string",
+            "nullable": true
+          },
+          "inReplyTo": {
+            "$ref": "#/components/schemas/Post"
+          },
+          "replies": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "repliesCollection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "nullable": true
+          },
+          "likes": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "likesCollection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Profile"
+            },
+            "nullable": true
+          },
+          "shares": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "sharesCollection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Profile"
+            },
+            "nullable": true
+          },
+          "relatedReports": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModerationReport"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "PostDto": {
         "type": "object",
@@ -2698,6 +3488,218 @@
         "additionalProperties": false,
         "example": "0000000000000000000000000"
       },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ProfileId"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "inbox": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "outbox": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "sharedInbox": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "followers": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "following": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "authority": {
+            "type": "string",
+            "nullable": true,
+            "readOnly": true
+          },
+          "handle": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "customFields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomField"
+            },
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ownedBy": {
+            "$ref": "#/components/schemas/Account"
+          },
+          "accessors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProfileClaims"
+            },
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/ActivityActorType"
+          },
+          "headlining": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Audience"
+            },
+            "nullable": true
+          },
+          "audiences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Audience"
+            },
+            "nullable": true
+          },
+          "followersCollection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FollowerRelation"
+            },
+            "nullable": true
+          },
+          "followingCollection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FollowerRelation"
+            },
+            "nullable": true
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SigningKey"
+            },
+            "nullable": true
+          },
+          "restrictions": {
+            "type": "object",
+            "properties": {
+              "None": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "Warn": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "LimitDiscovery": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "DenyPrivate": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "DenyPublic": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "DenyShare": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "DenyAttachments": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "DenyLinks": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "DenyReplies": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "DenyPosts": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "DenyReports": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "Defederate": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "additionalProperties": false,
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProfileClaim": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ProfileClaims": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "account": {
+            "$ref": "#/components/schemas/Account"
+          },
+          "claims": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProfileClaim"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ProfileId": {
         "type": "string",
         "additionalProperties": false,
@@ -2767,6 +3769,98 @@
           "confirmPassword": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RelationCondition": {
+        "type": "object",
+        "properties": {
+          "beginning": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiration": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "condition": {
+            "$ref": "#/components/schemas/ConditionKind"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SigningKey": {
+        "required": [
+          "fediId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "keyOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "family": {
+            "$ref": "#/components/schemas/KeyFamily"
+          },
+          "publicKey": {
+            "$ref": "#/components/schemas/ByteReadOnlyMemory"
+          },
+          "privateKey": {
+            "$ref": "#/components/schemas/ByteReadOnlyMemory"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ThreadContext": {
+        "required": [
+          "rootId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ThreadId"
+          },
+          "rootId": {
+            "$ref": "#/components/schemas/PostId"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "posts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "nullable": true
+          },
+          "heuristics": {
+            "$ref": "#/components/schemas/Heuristics"
           }
         },
         "additionalProperties": false

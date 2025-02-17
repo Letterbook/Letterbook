@@ -80,6 +80,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	public List<Profile> Profiles { get; set; } = new();
 	public List<Account> Accounts { get; set; } = new();
 	public List<ModerationReport> Reports { get; set; } = new();
+	public List<ModerationPolicy> Policies { get; set; } = new();
 	public Dictionary<Profile, List<Post>> Posts { get; set; } = new();
 	public List<Post> Timeline { get; set; } = new();
 	public IAsyncEnumerable<Activity> Spans => _spans.ToAsyncEnumerable();
@@ -175,6 +176,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_context.Posts.AddRange(Posts.SelectMany(pair => pair.Value));
 		_context.SaveChanges();
 
+		_context.ModerationPolicy.AddRange(Policies);
 		_context.ModerationReport.AddRange(Reports);
 		_context.SaveChanges();
 
@@ -260,6 +262,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 	private void InitTestData()
 	{
+		var generic = new Faker();
 		var authority = Options.BaseUri() ?? new Uri("letterbook.example");
 		var peer = "peer.example";
 		Accounts.AddRange(new FakeAccount(false).Generate(2));
@@ -307,9 +310,35 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		// P4 creates post 0, as reply to post P0:3
 		Posts.Add(Profiles[4], new FakePost(Profiles[3], Posts[Profiles[0]][3]).Generate(1));
 
+		// Policies
+		Policies.AddRange([
+			// Policy0, retired
+			new ModerationPolicy
+			{
+				Title = generic.Lorem.Sentence(),
+				Summary = generic.Lorem.Sentence(6),
+				Policy = generic.Lorem.Sentence(60),
+				// retired 1-3 days ago
+				Retired = generic.Date.BetweenOffset(DateTimeOffset.UtcNow - TimeSpan.FromDays(3), DateTimeOffset.UtcNow- TimeSpan.FromDays(1))
+			},
+			new ModerationPolicy
+			{
+				Title = generic.Lorem.Sentence(),
+				Summary = generic.Lorem.Sentence(6),
+				Policy = generic.Lorem.Sentence(60),
+			},
+			new ModerationPolicy
+			{
+				Title = generic.Lorem.Sentence(),
+				Summary = generic.Lorem.Sentence(6),
+				Policy = generic.Lorem.Sentence(60),
+			}
+		]);
+
 		// Reports
-		// P3 reports P5
+		// P3 reports P5, linked to Policy1
 		Reports.Add(new FakeReport(Profiles[3], Profiles[5]).Generate());
+		Reports[0].Policies.Add(Policies[1]);
 		// P3 reports P1+post7
 		Reports.Add(new FakeReport(Profiles[3], Posts[Profiles[1]][7]).Generate());
 		// P0 reports P1+post7
