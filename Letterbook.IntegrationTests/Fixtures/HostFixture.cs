@@ -79,6 +79,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 	public List<Profile> Profiles { get; set; } = new();
 	public List<Account> Accounts { get; set; } = new();
+	public List<ModerationReport> Reports { get; set; } = new();
 	public Dictionary<Profile, List<Post>> Posts { get; set; } = new();
 	public List<Post> Timeline { get; set; } = new();
 	public IAsyncEnumerable<Activity> Spans => _spans.ToAsyncEnumerable();
@@ -174,6 +175,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_context.Posts.AddRange(Posts.SelectMany(pair => pair.Value));
 		_context.SaveChanges();
 
+		_context.ModerationReport.AddRange(Reports);
+		_context.SaveChanges();
+
 		_feedsContext.Database.EnsureDeleted();
 		_feedsContext.Database.Migrate();
 		_feedsContext.AddRange(Timeline.Select(p => TimelinePost.Denormalize(p)).SelectMany(p => p));
@@ -259,6 +263,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		var authority = Options.BaseUri() ?? new Uri("letterbook.example");
 		var peer = "peer.example";
 		Accounts.AddRange(new FakeAccount(false).Generate(2));
+		Accounts.Add(new FakeAccount().Generate());
 		Profiles.AddRange(new FakeProfile(authority, Accounts[0]).Generate(3)); // P0-2
 		Profiles.Add(new FakeProfile(authority, Accounts[1]).Generate()); // P3
 		Profiles.AddRange(new FakeProfile().Generate(3)); // P4-6
@@ -301,6 +306,19 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		// Remote profiles
 		// P4 creates post 0, as reply to post P0:3
 		Posts.Add(Profiles[4], new FakePost(Profiles[3], Posts[Profiles[0]][3]).Generate(1));
+
+		// Reports
+		// P3 reports P5
+		Reports.Add(new FakeReport(Profiles[3], Profiles[5]).Generate());
+		// P3 reports P1+post7
+		Reports.Add(new FakeReport(Profiles[3], Posts[Profiles[1]][7]).Generate());
+		// P0 reports P1+post7
+		Reports.Add(new FakeReport(Profiles[0], Posts[Profiles[1]][7]).Generate());
+		// A2 assigned to R0-1
+		foreach (var report in Reports.Take(2))
+		{
+			report.Moderators.Add(Accounts[2]);
+		}
 
 		var allAudience = Posts
 			.SelectMany(pair => pair.Value)

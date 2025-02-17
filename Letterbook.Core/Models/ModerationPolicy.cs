@@ -13,4 +13,12 @@ public class ModerationPolicy
 	public string Summary { get; set; } = "";
 	public string Policy { get; set; } = "";
 	public ICollection<ModerationReport> RelatedReports { get; set; } = new HashSet<ModerationReport>();
+
+	public bool Retire()
+	{
+		if (Retired <= DateTimeOffset.UtcNow)
+			return false;
+		Retired = DateTimeOffset.UtcNow;
+		return true;
+	}
 }
