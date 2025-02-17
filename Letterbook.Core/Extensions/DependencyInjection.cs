@@ -33,6 +33,7 @@ public static class DependencyInjection
 			.AddScoped<IPostService, PostService>()
 			.AddScoped<IAuthzPostService, PostService>()
 			.AddScoped<ITimelineService, TimelineService>()
+			.AddScoped<IModerationService, ModerationService>()
 			.AddSingleton<MappingConfigProvider>()
 			.AddSingleton<Instrumentation>()
 			.AddSingleton<IAuthorizationService, AuthorizationService>()
