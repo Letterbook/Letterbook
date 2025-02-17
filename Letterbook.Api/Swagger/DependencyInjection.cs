@@ -43,20 +43,6 @@ public static class DependencyInjection
 					Contact = new() { Url = new Uri("https://www.w3.org/TR/activitypub/") }
 				});
 
-			// foreach (var idType in Assembly.GetExecutingAssembly().GetTypes()
-			// 	         .Where(type => typeof(ITypedId<Uuid7>).IsAssignableFrom(type)))
-			// {
-			// 	Console.WriteLine(idType.FullName);
-			// 	options.MapType(idType, () => new OpenApiSchema
-			// 	{
-			// 		Type = "string",
-			// 		Pattern = "[0-9a-z]{25}",
-			// 		Example = new OpenApiString(id)
-			// 	});
-			// 	// var converter = Activator.CreateInstance(idType);
-			// 	// if (converter is JsonConverter jsonConverter)
-			// 		// options.Converters.Add(jsonConverter);
-			// }
 			options.MapType<Uuid7>(() => new OpenApiSchema
 			{
 				Type = "string",
