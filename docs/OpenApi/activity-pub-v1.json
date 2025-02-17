@@ -44,7 +44,7 @@
             "schema": {
               "pattern": "[0-9a-z]{25}",
               "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "example": "fgfrff01jnp851pm72jmn9v44"
             }
           }
         ],
@@ -68,7 +68,7 @@
             "schema": {
               "pattern": "[0-9a-z]{25}",
               "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "example": "fgfrff01jnp851pm72jmn9v44"
             }
           }
         ],
@@ -92,7 +92,7 @@
             "schema": {
               "pattern": "[0-9a-z]{25}",
               "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "example": "fgfrff01jnp851pm72jmn9v44"
             }
           }
         ],
@@ -116,7 +116,7 @@
             "schema": {
               "pattern": "[0-9a-z]{25}",
               "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "example": "fgfrff01jnp851pm72jmn9v44"
             }
           }
         ],
@@ -328,7 +328,7 @@
             "schema": {
               "pattern": "[0-9a-z]{25}",
               "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "example": "fgfrff01jnp851pm72jmn9v44"
             }
           }
         ],
@@ -350,7 +350,7 @@
             "schema": {
               "pattern": "[0-9a-z]{25}",
               "type": "string",
-              "example": "HQqgQL5NFV4bPxZaTXhCPW"
+              "example": "fgfrff01jnp851pm72jmn9v44"
             }
           }
         ],
@@ -920,7 +920,7 @@
             "pattern": "https://\\w+\\.\\w+/\\w*",
             "type": "string",
             "nullable": true,
-            "example": "https://example.com/HQqgQL5NFV4bPxZaTXhCPW"
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
           }
         },
         "additionalProperties": false
@@ -1160,15 +1160,9 @@
         "additionalProperties": { }
       },
       "ProfileId": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "pattern": "[0-9a-z]{25}",
-            "type": "string",
-            "example": "HQqgQL5NFV4bPxZaTXhCPW"
-          }
-        },
-        "additionalProperties": false
+        "type": "string",
+        "additionalProperties": false,
+        "example": "0000000000000000000000000"
       }
     },
     "securitySchemes": {

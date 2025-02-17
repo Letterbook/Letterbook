@@ -1,4 +1,3 @@
-using Letterbook.Api.Dto;
 using Medo;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
@@ -17,7 +16,7 @@ public static class DependencyInjection
 				var r = new Random(691029504);
 				var b = new byte[16];
 				r.NextBytes(b);
-				var id = new Uuid7(b).ToId22String();
+				var id = new Uuid7(b).ToId25String();
 			options.EnableAnnotations();
 			options.SwaggerDoc(Docs.LetterbookV1Desc.Name,
 				new OpenApiInfo
@@ -43,6 +42,7 @@ public static class DependencyInjection
 					Description = "ActivityPub objects and specified endpoints",
 					Contact = new() { Url = new Uri("https://www.w3.org/TR/activitypub/") }
 				});
+
 			options.MapType<Uuid7>(() => new OpenApiSchema
 			{
 				Type = "string",
