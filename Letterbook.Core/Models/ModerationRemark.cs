@@ -7,7 +7,7 @@ public partial record struct ModerationRemarkId(Uuid7 Id) : ITypedId<Uuid7>;
 
 public class ModerationRemark : IComparable<ModerationRemark>
 {
-	public ModerationRemarkId Id { get; set; }
+	public ModerationRemarkId Id { get; set; } = Uuid7.NewUuid7();
 	public required ModerationReport Report { get; set; }
 	public required Account Author { get; set; }
 	public DateTimeOffset Created { get; set; } = DateTimeOffset.Now;

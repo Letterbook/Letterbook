@@ -430,6 +430,7 @@ public class MapperTests : WithMocks
 			Assert.Equal(dto.Text, actual.Text);
 			Assert.Equal(dto.Author, actual.Author.Id);
 			Assert.Equal(dto.Report, actual.Report.Id);
+			Assert.NotEqual(dto.Id, actual.Id);
 			Assert.True(actual.Created <= DateTimeOffset.UtcNow && actual.Created > DateTimeOffset.UtcNow.Subtract(TimeSpan.FromSeconds(1)));
 			Assert.True(actual.Updated <= DateTimeOffset.UtcNow && actual.Updated > DateTimeOffset.UtcNow.Subtract(TimeSpan.FromSeconds(1)));
 		}

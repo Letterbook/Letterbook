@@ -68,6 +68,20 @@ public class ReportsTests : IClassFixture<HostFixture<ReportsTests>>, ITestSeed,
 		Assert.Equal(given.Summary, actual.Summary);
 	}
 
+	[Fact(DisplayName = "Should get an existing report")]
+	public async Task CanCGet()
+	{
+		var given = _host.Reports[0];
+
+		var response = await _client.GetAsync($"/lb/v1/reports/{_host.Profiles[1].Id}/report/{given.Id}");
+
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert.IsType<FullModerationReportDto>(await response.Content.ReadFromJsonAsync<FullModerationReportDto>(_json));
+		Assert.NotNull(actual);
+		Assert.Equal(given.Summary, actual.Summary);
+		Assert.Equal(given.Id, actual.Id);
+	}
+
 	[Fact(DisplayName = "Should assign a report")]
 	public async Task CanAssign()
 	{
@@ -78,110 +92,38 @@ public class ReportsTests : IClassFixture<HostFixture<ReportsTests>>, ITestSeed,
 		var actual = Assert.IsType<FullModerationReportDto>(await response.Content.ReadFromJsonAsync<FullModerationReportDto>(_json));
 		Assert.NotNull(actual);
 		Assert.Contains(_host.Accounts[0].Id, actual.Moderators);
-		Assert.Fail("todo");
 	}
 
-	// [Fact(DisplayName = "Should update an existing report")]
-	// public async Task CanUpdate()
-	// {
-	// 	var given = new FakeReport().Generate();
-	// 	var dto = _mapper.Map<FullModerationReportDto>(given);
-	// 	AuthzModerationServiceMock.Setup(m => m.UpdateReport(given.Id, It.IsAny<Models.ModerationReport>()))
-	// 		.ReturnsAsync(given);
-	//
-	// 	var result = await _controller.UpdateReport(given.Id, dto);
-	// 	var response = Assert.IsType<OkObjectResult>(result);
-	// 	var actual = Assert.IsType<FullModerationReportDto>(response.Value);
-	// 	Assert.Equal(given.Id, actual.Id);
-	//
-	// 	Assert.NotNull(actual);
-	// 	AuthzModerationServiceMock.Verify(m => m.UpdateReport(given.Id, It.Is<Models.ModerationReport>(r => r.Summary == dto.Summary)));
-	// }
-	//
-	// [Fact(DisplayName = "Should lookup an existing report")]
-	// public async Task CanLookup()
-	// {
-	// 	var given = new FakeReport().Generate();
-	// 	AuthzModerationServiceMock.Setup(m => m.LookupReport(given.Id)).ReturnsAsync(given);
-	//
-	// 	var result = await _controller.LookupReport(Uuid7.NewUuid7(), given.Id);
-	// 	var response = Assert.IsType<OkObjectResult>(result);
-	// 	var actual = Assert.IsType<FullModerationReportDto>(response.Value);
-	//
-	// 	Assert.Equal(given.Id, actual.Id);
-	// 	AuthzModerationServiceMock.Verify(m => m.LookupReport(given.Id));
-	// }
-	//
-	// [Fact(DisplayName = "Should add a remark to an existing report")]
-	// public async Task CanAddRemark()
-	// {
-	// 	var given = new FakeReport().Generate();
-	// 	var remark = new ModerationRemarkDto
-	// 	{
-	// 		Report = given.Id,
-	// 		Author = Guid.NewGuid(),
-	// 		Text = "test remark"
-	// 	};
-	// 	AuthzModerationServiceMock.Setup(m => m.AddRemark(given.Id, It.IsAny<Models.ModerationRemark>())).ReturnsAsync(given);
-	//
-	// 	var result = await _controller.Remark(given.Id, remark);
-	// 	var response = Assert.IsType<OkObjectResult>(result);
-	// 	var actual = Assert.IsType<FullModerationReportDto>(response.Value);
-	//
-	// 	Assert.Equal(given.Id, actual.Id);
-	// 	AuthzModerationServiceMock.Verify(m => m.AddRemark(given.Id, It.Is<Models.ModerationRemark>(r => r.Text == remark.Text)));
-	// }
-	//
-	// [InlineData(true)]
-	// [InlineData(false)]
-	// [Theory(DisplayName = "Should assign a moderator to an existing report")]
-	// public async Task CanAssignModerator(bool assign)
-	// {
-	// 	var given = new FakeReport().Generate();
-	// 	var mod = Guid.NewGuid();
-	// 	AuthzModerationServiceMock.Setup(m => m.AssignModerator(given.Id, mod, assign)).ReturnsAsync(given);
-	//
-	// 	var result = await _controller.Assign(given.Id, mod, assign);
-	// 	var response = Assert.IsType<OkObjectResult>(result);
-	// 	var actual = Assert.IsType<FullModerationReportDto>(response.Value);
-	//
-	// 	Assert.Equal(given.Id, actual.Id);
-	// 	AuthzModerationServiceMock.Verify();
-	// }
-	//
-	// [InlineData(true)]
-	// [InlineData(false)]
-	// [Theory(DisplayName = "Should close an existing report")]
-	// public async Task CanClose(bool close)
-	// {
-	// 	var given = new FakeReport().Generate();
-	// 	AuthzModerationServiceMock.Setup(m => m.CloseReport(given.Id, close)).ReturnsAsync(given);
-	//
-	// 	var result = await _controller.Close(given.Id, close);
-	// 	var response = Assert.IsType<OkObjectResult>(result);
-	// 	var actual = Assert.IsType<FullModerationReportDto>(response.Value);
-	//
-	// 	Assert.Equal(given.Id, actual.Id);
-	// 	AuthzModerationServiceMock.Verify();
-	// }
-	//
-	// [ClassData(typeof(ListTheoryData))]
-	// [Theory(DisplayName = "Should list existing reports")]
-	// public async Task CanList(bool closed, Models.ProfileId? subjectId, Models.ProfileId? reporterId, Guid? moderatorId)
-	// {
-	// 	var given = new FakeReport().Generate(2);
-	// 	if (moderatorId is {} moderator)
-	// 		AuthzModerationServiceMock.Setup(m => m.FindAssigned(moderator, closed)).Returns(given.ToAsyncEnumerable());
-	// 	if (subjectId is {} subject)
-	// 		AuthzModerationServiceMock.Setup(m => m.FindRelatedTo(subject, closed)).Returns(given.ToAsyncEnumerable());
-	// 	if (reporterId is {} reporter)
-	// 		AuthzModerationServiceMock.Setup(m => m.FindCreatedBy(reporter, closed)).Returns(given.ToAsyncEnumerable());
-	//
-	// 	var result = _controller.ListReports(subjectId, reporterId, moderatorId, closed);
-	// 	var response = Assert.IsType<OkObjectResult>(result);
-	// 	var actual = Assert.IsAssignableFrom<IAsyncEnumerable<FullModerationReportDto>>(response.Value);
-	//
-	// 	Assert.Equal(2, await actual.CountAsync());
-	// 	AuthzModerationServiceMock.Verify();
-	// }
+	[Fact(DisplayName = "Should add a remark to a report")]
+	public async Task CanAddRemark()
+	{
+		var report = _host.Reports[1];
+		var given = new ModerationRemarkDto
+		{
+			Report = report.Id,
+			Author = _host.Accounts[0].Id,
+			Text = $"intgration tests {nameof(CanAddRemark)}"
+		};
+		var payload = JsonContent.Create(given, options: _json);
+		var response = await _client.PostAsync($"/lb/v1/reports/moderator/report/{report.Id}/remark", payload);
+
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert.IsType<FullModerationReportDto>(await response.Content.ReadFromJsonAsync<FullModerationReportDto>(_json));
+		Assert.NotNull(actual);
+		Assert.NotEmpty(actual.Remarks);
+		Assert.Equivalent(given, actual.Remarks.FirstOrDefault());
+		Assert.NotEqual(given.Id, actual.Remarks.FirstOrDefault()?.Id);
+	}
+
+	[Fact(DisplayName = "Should close a report")]
+	public async Task CanClose()
+	{
+		var given = _host.Reports[1];
+		var response = await _client.PutAsync($"/lb/v1/reports/moderator/report/{given.Id}/close", null);
+
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+		var actual = Assert.IsType<FullModerationReportDto>(await response.Content.ReadFromJsonAsync<FullModerationReportDto>(_json));
+		Assert.NotNull(actual);
+		Assert.True(actual.Closed < DateTimeOffset.MaxValue);
+	}
 }

@@ -130,7 +130,7 @@ public class ModerationServiceTests : WithMocks
 		var actual = await _service.As([]).AddRemark(_reports[0].Id, remark);
 
 		Assert.Single(actual.Remarks);
-		Assert.Equal(actual.Remarks.First(), remark);
+		Assert.Equal(remark, actual.Remarks.First());
 	}
 
 	[Fact(DisplayName = "Should assign a moderator")]

@@ -80,11 +80,14 @@ public class ModerationService : IModerationService, IAuthzModerationService
 	{
 		if (await _data.ModerationReports(id).FirstOrDefaultAsync() is not { } report)
 			throw CoreException.MissingData<ModerationReport>(id);
+		if (await _data.Accounts(remark.Author.Id).FirstOrDefaultAsync() is not {} moderator)
+			throw CoreException.MissingData<Account>(remark.Author.Id);
 
 		var authz = _authz.Create(_claims, remark);
 		if (!authz.Allowed)
 			throw CoreException.Unauthorized(authz);
 
+		remark.Author = moderator;
 		remark.Report = report;
 		report.Remarks.Add(remark);
 		report.Updated = DateTimeOffset.UtcNow;

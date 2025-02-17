@@ -23,6 +23,8 @@ public class ModerationReportMappings : AutoMapper.Profile
 			.ForMember(report => report.Id, opt => opt.MapFrom(s => s.Id));
 
 		CreateMap<ModerationRemark, ModerationRemarkDto>(MemberList.Destination);
-		CreateMap<ModerationRemarkDto, ModerationRemark>(MemberList.Source);
+		CreateMap<ModerationRemarkDto, ModerationRemark>(MemberList.Source)
+			.ForMember(d => d.Id, opt => opt.Ignore())
+			.ForSourceMember(s => s.Id, opt => opt.DoNotValidate());
 	}
 }
