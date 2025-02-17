@@ -35,6 +35,7 @@ public class ModerationReport
 		Context = new ThreadContext()
 		{
 			RootId = default(PostId),
+			FediId = FediId
 		};
 	}
 

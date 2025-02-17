@@ -4,14 +4,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
 using Letterbook.Api.Tests.Fakes;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Models.Mappers.Converters;
 using Letterbook.IntegrationTests.Fixtures;
 using Medo;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
 using Profile = Letterbook.Core.Models.Profile;
@@ -25,6 +23,7 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 	public void Dispose()
 	{
 		_scope.Dispose();
+		_client.Dispose();
 	}
 
 	private readonly HostFixture<PostsTests> _host;
