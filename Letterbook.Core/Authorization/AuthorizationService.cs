@@ -6,37 +6,52 @@ namespace Letterbook.Core.Authorization;
 
 public class AuthorizationService : IAuthorizationService
 {
-	public Decision Create<T>(IEnumerable<Claim> claims, T target, Uuid7 profile) where T : IFederated
+	public Decision Create<T>(IEnumerable<Claim> claims, T target)
 	{
 		return Decision.Allow("todo", claims);
 	}
 
-	public Decision Update<T>(IEnumerable<Claim> claims, T target, Uuid7 profile) where T : IFederated
+	public Decision Create<T>(IEnumerable<Claim> claims)
 	{
 		return Decision.Allow("todo", claims);
 	}
 
-	public Decision Delete<T>(IEnumerable<Claim> claims, T target, Uuid7 profile) where T : IFederated
+	public Decision Update<T>(IEnumerable<Claim> claims, T target)
 	{
 		return Decision.Allow("todo", claims);
 	}
 
-	public Decision Attribute<T>(IEnumerable<Claim> claims, T target, Uuid7 attributeTo, Uuid7 profile) where T : IFederated
+	public Decision Update<T>(IEnumerable<Claim> claims)
 	{
 		return Decision.Allow("todo", claims);
 	}
 
-	public Decision Publish<T>(IEnumerable<Claim> claims, T target, Uuid7 profile) where T : IFederated
+	public Decision Delete<T>(IEnumerable<Claim> claims, T target)
 	{
 		return Decision.Allow("todo", claims);
 	}
 
-	public Decision View<T>(IEnumerable<Claim> claims, T target, Uuid7 profile) where T : IFederated
+	public Decision Attribute<T>(IEnumerable<Claim> claims, T target, ProfileId attributeTo)
 	{
 		return Decision.Allow("todo", claims);
 	}
 
-	public Decision Report<T>(IEnumerable<Claim> claims, T target, Uuid7 profile) where T : IFederated
+	public Decision Publish<T>(IEnumerable<Claim> claims, T target)
+	{
+		return Decision.Allow("todo", claims);
+	}
+
+	public Decision View<T>(IEnumerable<Claim> claims, T target)
+	{
+		return Decision.Allow("todo", claims);
+	}
+
+	public Decision View<T>(IEnumerable<Claim> claims)
+	{
+		return Decision.Allow("todo", claims);
+	}
+
+	public Decision Any(IEnumerable<Claim> claims, ProfileId profileId)
 	{
 		return Decision.Allow("todo", claims);
 	}

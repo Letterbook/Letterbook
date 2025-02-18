@@ -30,6 +30,8 @@ public class GeneratorTests
 		"TestIdIntJsonConverter.g.cs",
 		"TestIdUuidEfConverter.g.cs",
 		"TestIdIntEfConverter.g.cs",
+		"TestIdUuidSwaggerSchemaFilter.g.cs",
+		"TestIdIntSwaggerSchemaFilter.g.cs",
 	};
 
 	[Fact]
