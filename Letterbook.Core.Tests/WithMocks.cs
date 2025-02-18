@@ -81,20 +81,30 @@ public abstract class WithMocks
 	public void MockAuthorizeAllowAll()
 	{
 		// TODO: reflect over the Decision methods instead of individual setups
-		AuthorizationServiceMock.Setup(s => s.View(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		AuthorizationServiceMock.Setup(s => s.View(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>()))
 			.Returns(Allow);
-		AuthorizationServiceMock.Setup(s => s.Create(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		AuthorizationServiceMock.Setup(s => s.View<object>(It.IsAny<IEnumerable<Claim>>()))
+			.Returns(AllowNone);
+		AuthorizationServiceMock.Setup(s => s.Create(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>()))
 			.Returns(Allow);
-		AuthorizationServiceMock.Setup(s => s.Delete(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		AuthorizationServiceMock.Setup(s => s.Create<object>(It.IsAny<IEnumerable<Claim>>()))
+			.Returns(AllowNone);
+		AuthorizationServiceMock.Setup(s => s.Delete(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>()))
 			.Returns(Allow);
-		AuthorizationServiceMock.Setup(s => s.Publish(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		AuthorizationServiceMock.Setup(s => s.Publish(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>()))
 			.Returns(Allow);
-		AuthorizationServiceMock.Setup(s => s.Update(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		AuthorizationServiceMock.Setup(s => s.Update(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>()))
 			.Returns(Allow);
-		AuthorizationServiceMock.Setup(s => s.Report(It.IsAny<IEnumerable<Claim>>(), It.IsAny<IFederated>(), It.IsAny<Uuid7>()))
+		AuthorizationServiceMock.Setup(s => s.Update<object>(It.IsAny<IEnumerable<Claim>>()))
+			.Returns(AllowNone);
+		AuthorizationServiceMock.Setup(s => s.Attribute(It.IsAny<IEnumerable<Claim>>(), It.IsAny<object>(), It.IsAny<ProfileId>()))
+			.Returns(AllowProfile);
+		AuthorizationServiceMock.Setup(s => s.Any(It.IsAny<IEnumerable<Claim>>(), It.IsAny<ProfileId>()))
 			.Returns(Allow);
 		return;
 
-		Decision Allow(IEnumerable<Claim> claims, IFederated _, Uuid7 __) => Decision.Allow("Mock", claims);
+		Decision Allow(IEnumerable<Claim> claims, object _) => Decision.Allow("Mock", claims);
+		Decision AllowProfile(IEnumerable<Claim> claims, object _, ProfileId __) => Decision.Allow("Mock", claims);
+		Decision AllowNone(IEnumerable<Claim> claims) => Decision.Allow("Mock", claims);
 	}
 }
