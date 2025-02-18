@@ -11,7 +11,17 @@ public class AuthorizationService : IAuthorizationService
 		return Decision.Allow("todo", claims);
 	}
 
+	public Decision Create<T>(IEnumerable<Claim> claims)
+	{
+		return Decision.Allow("todo", claims);
+	}
+
 	public Decision Update<T>(IEnumerable<Claim> claims, T target)
+	{
+		return Decision.Allow("todo", claims);
+	}
+
+	public Decision Update<T>(IEnumerable<Claim> claims)
 	{
 		return Decision.Allow("todo", claims);
 	}
@@ -36,7 +46,12 @@ public class AuthorizationService : IAuthorizationService
 		return Decision.Allow("todo", claims);
 	}
 
-	public Decision Report(IEnumerable<Claim> claims)
+	public Decision View<T>(IEnumerable<Claim> claims)
+	{
+		return Decision.Allow("todo", claims);
+	}
+
+	public Decision Any(IEnumerable<Claim> claims, ProfileId profileId)
 	{
 		return Decision.Allow("todo", claims);
 	}
