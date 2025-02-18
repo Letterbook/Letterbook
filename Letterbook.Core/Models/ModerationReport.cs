@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Letterbook.Core.Extensions;
 using Letterbook.Generators;
 using Medo;
@@ -19,19 +20,33 @@ public class ModerationReport
 	public ICollection<Post> RelatedPosts { get; set; } = new HashSet<Post>();
 	public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 	public DateTimeOffset Updated { get; set; } = DateTimeOffset.UtcNow;
-	public DateTimeOffset Closed { get; set; } = DateTimeOffset.UtcNow;
-	public IEnumerable<ModerationRemark> Remarks { get; set; } = new List<ModerationRemark>();
+	public DateTimeOffset Closed { get; set; } = DateTimeOffset.MaxValue;
+	public ICollection<ModerationRemark> Remarks { get; set; } = new List<ModerationRemark>();
 
 	public ModerationReport() { }
 
-	public ModerationReport(CoreOptions opts)
+	[SetsRequiredMembers]
+	public ModerationReport(CoreOptions opts, string summary)
 	{
+		Summary = summary;
 		var builder = new UriBuilder(opts.BaseUri());
 		builder.Path += $"report/{Id.ToString()}";
 		FediId = builder.Uri;
 		Context = new ThreadContext()
 		{
 			RootId = default(PostId),
+			FediId = FediId
 		};
+	}
+
+	public bool Close()
+	{
+		if (Closed > DateTimeOffset.UtcNow)
+		{
+			Closed = DateTimeOffset.UtcNow;
+			return true;
+		}
+
+		return false;
 	}
 }

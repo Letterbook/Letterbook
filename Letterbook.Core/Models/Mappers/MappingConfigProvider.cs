@@ -13,25 +13,30 @@ namespace Letterbook.Core.Models.Mappers;
 /// </summary>
 public class MappingConfigProvider
 {
-	private readonly MapperConfiguration _posts;
-
-	private readonly MapperConfiguration _profiles;
-
 	public MappingConfigProvider(IOptions<CoreOptions> options)
 	{
-		_posts = new MapperConfiguration(cfg =>
+		Posts = new MapperConfiguration(cfg =>
 		{
 			cfg.AddProfile<BaseMappings>();
 			cfg.AddProfile(new PostMappings(options));
 		});
 
-		_profiles = new MapperConfiguration(cfg =>
+		Profiles = new MapperConfiguration(cfg =>
 		{
 			cfg.AddProfile<BaseMappings>();
 			cfg.AddProfile<ProfileMappings>();
 		});
+
+		ModerationReports = new MapperConfiguration(cfg =>
+		{
+			cfg.AddProfile<BaseMappings>();
+			cfg.AddProfile(new ModerationReportMappings(options));
+		});
 	}
 
-	public MapperConfiguration Posts => _posts;
-	public MapperConfiguration Profiles => _profiles;
+	public MapperConfiguration Posts { get; }
+
+	public MapperConfiguration Profiles { get; }
+
+	public MapperConfiguration ModerationReports { get; }
 }

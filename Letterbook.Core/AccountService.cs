@@ -171,6 +171,11 @@ public class AccountService : IAccountService, IDisposable
 		return result;
 	}
 
+	public async Task<IEnumerable<Claim>> LookupClaims(Account account)
+	{
+		return await _identityManager.GetClaimsAsync(account);
+	}
+
 	public void Dispose()
 	{
 		GC.SuppressFinalize(this);

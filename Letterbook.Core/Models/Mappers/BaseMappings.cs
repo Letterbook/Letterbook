@@ -15,6 +15,58 @@ public class BaseMappings : AutoMapper.Profile
 			.ConvertUsing<IdUuid7Converter>();
 		CreateMap<Uuid7, Models.Profile>(MemberList.None)
 			.ConstructUsing(uuid7 => Models.Profile.CreateEmpty(new ProfileId(uuid7)));
+		CreateMap<ProfileId, Models.Profile>(MemberList.None)
+			.ConstructUsing(id => Models.Profile.CreateEmpty(id));
+		CreateMap<Models.Profile, ProfileId>()
+			.ConstructUsing(profile => profile.Id);
+
+		CreateMap<Guid, Account>(MemberList.None)
+			.ConstructUsing(id => new Account(){Id = id})
+			.ReverseMap()
+			.ConstructUsing(account => account.Id);
+
+		CreateMap<ThreadId, ThreadContext>(MemberList.None)
+			.ConstructUsing(id => new ThreadContext
+			{
+				Id = id,
+				RootId = null
+			})
+			.ReverseMap()
+			.ConstructUsing(thread => thread.Id);
+
+		CreateMap<ModerationReportId, ModerationReport>(MemberList.None)
+			.ConstructUsing(id => new ModerationReport
+			{
+				Id = id,
+				Summary = default!,
+				Context = default!,
+			})
+			.ReverseMap()
+			.ConstructUsing(o => o.Id);
+
+		CreateMap<ModerationRemarkId, ModerationRemark>(MemberList.None)
+			.ConstructUsing(id => new ModerationRemark
+			{
+				Id = id,
+				Report = default!,
+				Author = default!,
+				Text = default!,
+			})
+			.ReverseMap()
+			.ConstructUsing(o => o.Id);
+
+		CreateMap<ModerationPolicyId, ModerationPolicy>(MemberList.None)
+			.ConstructUsing(id => new ModerationPolicy
+			{
+				Id = id,
+			})
+			.ReverseMap()
+			.ConstructUsing(o => o.Id);
+
+		CreateMap<PostId, Models.Post>(MemberList.None)
+			.ConstructUsing(id => new Post { Id = id });
+		CreateMap<Models.Post, PostId>()
+			.ConstructUsing(post => post.Id);
 		CreateMap<Uuid7, Models.Post>(MemberList.None);
 		CreateMap<Uuid7, Guid>().ConstructUsing(uuid7 => uuid7.ToGuid());
 		CreateMap<Guid, Uuid7>().ConstructUsing(guid => Uuid7.FromGuid(guid));
@@ -23,6 +75,8 @@ public class BaseMappings : AutoMapper.Profile
 		CreateMap<string?, Guid>().ConstructUsing(str => str == null ? Uuid7.NewUuid7().ToGuid() : Uuid7.FromId25String(str).ToGuid());
 		CreateMap<string, Models.Profile>(MemberList.None)
 			.ConstructUsing(s => Models.Profile.CreateEmpty(new ProfileId(ProfileId.FromString(s))));
+
+
 
 		CreateMap<DateTimeOffset?, DateTimeOffset?>()
 			.ConvertUsing<DateTimeOffsetMapper>();

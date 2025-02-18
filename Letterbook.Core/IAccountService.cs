@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Security.Principal;
 using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Identity;
@@ -30,4 +31,5 @@ public interface IAccountService
 	public Task<bool> AddLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims);
 	public Task<bool> UpdateLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims);
 	public Task<bool> RemoveLinkedProfile(Guid accountId, Profile profile);
+	public Task<IEnumerable<Claim>> LookupClaims(Account account);
 }

@@ -33,6 +33,8 @@ public abstract class WithMocks
 	public Mock<IJsonLdSerializer> JsonLdSerializerMock;
 	public Mock<IActivityScheduler> ActivityPublisherMock;
 	public Mock<IApCrawlScheduler> ApCrawlerSchedulerMock;
+	public Mock<IModerationService> ModerationServiceMock;
+	public Mock<IAuthzModerationService> AuthzModerationServiceMock;
 
 	public ServiceCollection MockedServiceCollection;
 
@@ -56,11 +58,14 @@ public abstract class WithMocks
 		JsonLdSerializerMock = new Mock<IJsonLdSerializer>();
 		ActivityPublisherMock = new Mock<IActivityScheduler>();
 		ApCrawlerSchedulerMock = new Mock<IApCrawlScheduler>();
+		ModerationServiceMock = new Mock<IModerationService>();
+		AuthzModerationServiceMock = new Mock<IAuthzModerationService>();
 
 		ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
 		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(PostServiceAuthMock.Object);
 		ProfileServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(ProfileServiceAuthMock.Object);
 		TimelineServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(AuthzTimelineServiceMock.Object);
+		ModerationServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(AuthzModerationServiceMock.Object);
 		var mockOptions = new CoreOptions
 		{
 			DomainName = "letterbook.example",

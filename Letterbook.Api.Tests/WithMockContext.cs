@@ -17,7 +17,7 @@ public abstract class WithMockContext : WithMocks
 
 	public ClaimsPrincipal Auth(params Claim[] claims)
 	{
-		var identity = new ClaimsIdentity(claims, "MockContenxt");
+		var identity = new ClaimsIdentity(claims, "MockContext");
 		var principal = new ClaimsPrincipal(identity);
 
 		MockHttpContext.Setup(m => m.User).Returns(principal);
