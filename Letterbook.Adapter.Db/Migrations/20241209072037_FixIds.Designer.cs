@@ -14,7 +14,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    [Migration("20241209072037_blah")]
+    [Migration("20241209072037_FixIds")]
     partial class FidIds
     {
         /// <inheritdoc />
