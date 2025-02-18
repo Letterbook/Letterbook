@@ -18,13 +18,18 @@ namespace Letterbook.Adapter.Db.Migrations
                 name: "Restrictions",
                 table: "Profiles",
                 type: "jsonb",
-                nullable: false);
+                nullable: false,
+                defaultValue: new Dictionary<Restrictions, DateTimeOffset>()
+                {
+	                [Restrictions.None] = new DateTimeOffset(new DateTime(2025, 2, 4, 16, 59, 41, 837, DateTimeKind.Unspecified).AddTicks(4925), new TimeSpan(0, 0, 0, 0, 0)),
+                });
 
             migrationBuilder.AddColumn<List<RelationCondition>>(
                 name: "Conditions",
                 table: "FollowerRelation",
                 type: "jsonb",
-                nullable: false);
+                nullable: false,
+                defaultValue: new List<RelationCondition>());
 
             migrationBuilder.CreateTable(
                 name: "ModerationPolicy",
