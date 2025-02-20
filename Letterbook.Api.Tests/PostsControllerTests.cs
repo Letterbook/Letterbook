@@ -1,4 +1,5 @@
 using System.Xml;
+using Bogus;
 using Letterbook.Api.Controllers;
 using Letterbook.Api.Dto;
 using Letterbook.Api.Tests.Fakes;
@@ -23,12 +24,14 @@ public class PostsControllerTests : WithMockContext
 	private readonly Models.Profile _profile;
 	private readonly FakePost _postFakes;
 	private readonly Models.Post _post;
+	private readonly Guid _accountId;
 
 
 	public PostsControllerTests(ITestOutputHelper output)
 	{
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
-		Auth();
+		_accountId = new Faker().Random.Guid();
+		Auth(_accountId);
 		_controller = new PostsController(Mock.Of<ILogger<PostsController>>(), CoreOptionsMock, PostServiceMock.Object,
 			ProfileServiceMock.Object, AuthorizationServiceMock.Object, new MappingConfigProvider(CoreOptionsMock))
 		{

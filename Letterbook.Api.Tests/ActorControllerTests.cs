@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ActivityPub.Types.AS;
+using Bogus;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Api.Controllers.ActivityPub;
 using Letterbook.Core;
@@ -24,6 +25,7 @@ public class ActorControllerTests : WithMockContext
 	private Profile _remoteProfile;
 	private IActivityPubDocument _document;
 	private readonly FakePost _fakePost;
+	private readonly Guid _accountId;
 
 	public ActorControllerTests(ITestOutputHelper output)
 	{
@@ -37,7 +39,8 @@ public class ActorControllerTests : WithMockContext
 		_document = new Document(JsonLdSerializerMock.Object);
 		_fakePost = new FakePost(_profile);
 
-		var user = Auth(new Claim(ApplicationClaims.Actor, _remoteProfile.FediId.ToString()));
+		_accountId = new Faker().Random.Guid();
+		var user = Auth(_accountId, new Claim(ApplicationClaims.Actor, _remoteProfile.FediId.ToString()));
 
 		_controller = new ActorController(Mock.Of<ILogger<ActorController>>(), ProfileServiceMock.Object,
 			PostServiceMock.Object, ApCrawlerSchedulerMock.Object)

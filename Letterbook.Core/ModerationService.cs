@@ -14,13 +14,15 @@ public class ModerationService : IModerationService, IAuthzModerationService
 	private readonly IAuthorizationService _authz;
 	private readonly IProfileEventPublisher _profileEvents;
 	private readonly IAccountService _accounts;
+	private readonly IModerationEventPublisher _moderationEvents;
 
-	public ModerationService(IDataAdapter data, IAuthorizationService authz, IProfileEventPublisher profileEvents, IAccountService accounts)
+	public ModerationService(IDataAdapter data, IAuthorizationService authz, IProfileEventPublisher profileEvents, IAccountService accounts, IModerationEventPublisher moderationEvents)
 	{
 		_data = data;
 		_authz = authz;
 		_profileEvents = profileEvents;
 		_accounts = accounts;
+		_moderationEvents = moderationEvents;
 	}
 
 	public async Task<ModerationReport?> LookupReport(ModerationReportId id)
@@ -67,6 +69,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 		_data.Add(report);
 		await _data.Commit();
+		await _moderationEvents.Created(report, reporterId, _claims);
 
 		foreach (var subject in report.Subjects)
 		{
@@ -121,10 +124,11 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		report.Updated = DateTimeOffset.UtcNow;
 
 		await _data.Commit();
+		await _moderationEvents.Assigned(report, moderatorAccountId, _claims);
 		return report;
 	}
 
-	public async Task<ModerationReport> UpdateReport(ModerationReportId reportId, ModerationReport updated)
+	public async Task<ModerationReport> UpdateReport(ModerationReportId reportId, ModerationReport updated, Guid accountId)
 	{
 		if (await _data.ModerationReports(reportId)
 			    .Include(r => r.Policies)
@@ -137,15 +141,26 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		var policies = await _data.Policies(updated.Policies.Select(p => p.Id).ToArray())
 			.ToDictionaryAsync(p => p.Id);
 
+		var newModerators = updated.Moderators.Select(m => m.Id).Except(report.Moderators.Select(m => m.Id));
 		report.Moderators = updated.Moderators.Converge(mods, account => account.Id).ToHashSet();
 		report.Policies = updated.Policies.Converge(policies, policy => policy.Id).ToHashSet();
+		var closed = updated.Closed < DateTimeOffset.UtcNow && report.Closed > DateTimeOffset.UtcNow;
+		var reopened = report.Closed > DateTimeOffset.UtcNow && updated.Closed <= DateTimeOffset.UtcNow;
 		report.Closed = updated.Closed;
 		report.Updated = DateTimeOffset.UtcNow;
+
 		await _data.Commit();
+		foreach (var moderator in newModerators)
+		{
+			await _moderationEvents.Assigned(report, moderator, _claims);
+		}
+		if (closed) await _moderationEvents.Closed(report, accountId, _claims);
+		if (reopened) await _moderationEvents.Reopened(report, accountId, _claims);
+
 		return report;
 	}
 
-	public async Task<ModerationReport> CloseReport(ModerationReportId reportId, bool reopen = false)
+	public async Task<ModerationReport> CloseReport(ModerationReportId reportId, Guid moderatorId, bool reopen = false)
 	{
 		if (await _data.ModerationReports(reportId).FirstOrDefaultAsync() is not {} report)
 			throw CoreException.MissingData<ModerationReport>(reportId);
@@ -154,10 +169,14 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		if(!allowed)
 			throw CoreException.Unauthorized(allowed);
 
+		var closed = false;
 		if (reopen) report.Closed = DateTimeOffset.MaxValue;
-		else report.Close();
+		else closed = report.Close();
+
 
 		await _data.Commit();
+		if (closed) await _moderationEvents.Closed(report, moderatorId, _claims);
+		if (reopen) await _moderationEvents.Reopened(report, moderatorId, _claims);
 		return report;
 	}
 
