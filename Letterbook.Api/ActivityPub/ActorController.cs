@@ -17,7 +17,7 @@ using Medo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Letterbook.Api.Controllers.ActivityPub;
+namespace Letterbook.Api.ActivityPub;
 
 /// <summary>
 /// Provides the endpoints specified for Actors in the ActivityPub spec

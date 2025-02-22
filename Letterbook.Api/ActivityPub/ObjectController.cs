@@ -2,7 +2,7 @@ using Letterbook.Api.Swagger;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Letterbook.Api.Controllers.ActivityPub;
+namespace Letterbook.Api.ActivityPub;
 
 /// <summary>
 /// Provides the Collection endpoints specified for all objects in the ActivityPub spec
