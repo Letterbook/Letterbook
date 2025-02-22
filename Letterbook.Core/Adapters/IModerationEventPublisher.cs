@@ -9,7 +9,6 @@ namespace Letterbook.Core.Adapters;
 public interface IModerationEventPublisher
 {
 	public Task Created(ModerationReport report, ProfileId author, IEnumerable<Claim> claims);
-	public Task Forwarded(ModerationReport report, IEnumerable<Uri> inboxes, IEnumerable<Claim> claims);
 	public Task Assigned(ModerationReport report, Guid moderator, IEnumerable<Claim> claims);
 	public Task Closed(ModerationReport report, Guid moderator, IEnumerable<Claim> claims);
 	public Task Reopened(ModerationReport report, Guid moderator, IEnumerable<Claim> claims);

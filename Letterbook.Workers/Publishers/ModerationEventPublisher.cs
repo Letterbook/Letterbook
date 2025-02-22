@@ -1,41 +1,63 @@
-using System.Security.Claims;
+using AutoMapper;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers;
+using Letterbook.Workers.Contracts;
+using MassTransit;
+using Claim = System.Security.Claims.Claim;
 
 namespace Letterbook.Workers.Publishers;
 
 public class ModerationEventPublisher : IModerationEventPublisher
 {
-	private readonly ILogger<ModerationEventPublisher> _logger;
+	private readonly IBus _bus;
+	private readonly Mapper _mapper;
 
-	public ModerationEventPublisher(ILogger<ModerationEventPublisher> logger)
+	public ModerationEventPublisher(IBus bus, MappingConfigProvider maps)
 	{
-		_logger = logger;
+		_bus = bus;
+		_mapper = new Mapper(maps.ModerationReports);
 	}
 
-	public Task Created(ModerationReport report, ProfileId author, IEnumerable<Claim> claims)
+	/// <inheritdoc />
+	public async Task Created(ModerationReport report, ProfileId author, IEnumerable<Claim> claims)
 	{
-		_logger.LogWarning($"{nameof(Created)} event not implemented");
-		return Task.CompletedTask;
+		var message = Message(report, nameof(Created), claims, author);
+		await _bus.Publish(message, c => c.SetCustomHeaders(nameof(Created)));
 	}
-	public Task Forwarded(ModerationReport report, IEnumerable<Uri> inboxes, IEnumerable<Claim> claims)
+
+	/// <inheritdoc />
+	public async Task Assigned(ModerationReport report, Guid moderator, IEnumerable<Claim> claims)
 	{
-		_logger.LogWarning($"{nameof(Forwarded)} event not implemented");
-		return Task.CompletedTask;
+		var message = Message(report, nameof(Assigned), claims, moderator: moderator);
+		await _bus.Publish(message, c => c.SetCustomHeaders(nameof(Assigned)));
 	}
-	public Task Assigned(ModerationReport report, Guid moderator, IEnumerable<Claim> claims)
+
+	/// <inheritdoc />
+	public async Task Closed(ModerationReport report, Guid moderator, IEnumerable<Claim> claims)
 	{
-		_logger.LogWarning($"{nameof(Assigned)} event not implemented");
-		return Task.CompletedTask;
+		var message = Message(report, nameof(Closed), claims, moderator: moderator);
+		await _bus.Publish(message, c => c.SetCustomHeaders(nameof(Closed)));
 	}
-	public Task Closed(ModerationReport report, Guid moderator, IEnumerable<Claim> claims)
+
+	/// <inheritdoc />
+	public async Task Reopened(ModerationReport report, Guid moderator, IEnumerable<Claim> claims)
 	{
-		_logger.LogWarning($"{nameof(Closed)} event not implemented");
-		return Task.CompletedTask;
+		var message = Message(report, nameof(Reopened), claims, moderator: moderator);
+		await _bus.Publish(message, c => c.SetCustomHeaders(nameof(Reopened)));
 	}
-	public Task Reopened(ModerationReport report, Guid moderator, IEnumerable<Claim> claims)
+
+	private ModerationReportEvent Message(ModerationReport report, string type, IEnumerable<Claim> claims, ProfileId author = default,
+		Guid moderator = default)
 	{
-		_logger.LogWarning($"{nameof(Reopened)} event not implemented");
-		return Task.CompletedTask;
+		return new ModerationReportEvent
+		{
+			Author = author,
+			Moderator = moderator,
+			NextData = _mapper.Map<FullModerationReportDto>(report),
+			Claims = claims.MapDto(),
+			Type = type
+		};
 	}
 }
