@@ -11,6 +11,7 @@ public class MemberModerationReportDto
 	public ProfileId Reporter { get; set; }
 	public ICollection<ProfileId> Subjects { get; set; } = new HashSet<ProfileId>();
 	public ICollection<PostId> RelatedPosts { get; set; } = new HashSet<PostId>();
+	public IEnumerable<Uri> Forwarded { get; set; } = new List<Uri>();
 }
 
 public class FullModerationReportDto : MemberModerationReportDto
@@ -22,7 +23,6 @@ public class FullModerationReportDto : MemberModerationReportDto
 	public DateTimeOffset Updated { get; set; } = DateTimeOffset.UtcNow;
 	public DateTimeOffset Closed { get; set; } = DateTimeOffset.UtcNow;
 	public IEnumerable<ModerationRemarkDto> Remarks { get; set; } = new List<ModerationRemarkDto>();
-	public IEnumerable<Uri> Forwarded { get; set; } = new List<Uri>();
 }
 
 public class ModerationRemarkDto
