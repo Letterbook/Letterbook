@@ -37,6 +37,13 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			.FirstOrDefaultAsync(account => account.NormalizedEmail == normalizedEmail);
 	}
 
+	public IQueryable<Models.Account> Accounts(params Guid[] ids)
+	{
+		return ids.Length == 1
+			? _context.Accounts.Where(a => a.Id == ids[0])
+			: _context.Accounts.Where(a => ids.Contains(a.Id));
+	}
+
 	public IQueryable<Models.Account> AllAccounts()
 	{
 		return _context.Accounts.AsQueryable();
@@ -80,6 +87,31 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public IQueryable<Models.Profile> AllProfiles() => _context.Profiles;
 
+	public IQueryable<Models.ModerationReport> ModerationReports(params Models.ModerationReportId[] ids)
+	{
+		return ids.Length == 1
+			? _context.ModerationReport.Where(p => p.Id == ids[0])
+			: _context.ModerationReport.Where(p => ids.Contains(p.Id));
+	}
+
+	public IQueryable<Models.ModerationReport> ModerationReports(params Uri[] ids)
+	{
+		return ids.Length == 1
+			? _context.ModerationReport.Where(p => p.FediId == ids[0])
+			: _context.ModerationReport.Where(p => ids.Contains(p.FediId));
+	}
+
+	public IQueryable<Models.ModerationReport> AllModerationReports() => _context.ModerationReport;
+
+	public IQueryable<Models.ModerationPolicy> Policies(params Models.ModerationPolicyId[] ids)
+	{
+		return ids.Length == 1
+			? _context.ModerationPolicy.Where(p => p.Id == ids[0])
+			: _context.ModerationPolicy.Where(p => ids.Contains(p.Id));
+	}
+
+	public IQueryable<Models.ModerationPolicy> AllPolicies() => _context.ModerationPolicy;
+
 	public IQueryable<T> QueryFrom<T>(Models.Profile profile, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
 		where T : class
 	{
@@ -114,6 +146,9 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	}
 
 	public void Add(Models.Post post) => _context.Posts.Add(post);
+
+	public void Add(Models.ModerationReport report) => _context.ModerationReport.Add(report);
+	public void Add(Models.ModerationPolicy policy) => _context.ModerationPolicy.Add(policy);
 
 	public void AddRange(IEnumerable<Models.Profile> profile)
 	{

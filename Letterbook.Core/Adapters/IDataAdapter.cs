@@ -15,6 +15,8 @@ public interface IDataAdapter : IDisposable
 	public Task<Account?> LookupAccount(Guid id);
 	public Task<Account?> FindAccountByEmail(string normalizedEmail);
 
+	public IQueryable<Account> Accounts(params Guid[] ids);
+
 	/// <summary>
 	/// Query across all Accounts
 	/// </summary>
@@ -57,6 +59,35 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<Profile> AllProfiles();
 
 	/// <summary>
+	/// Query for ModerationReports by Id
+	/// </summary>
+	/// <param name="ids"></param>
+	/// <returns></returns>
+	public IQueryable<ModerationReport> ModerationReports(params ModerationReportId[] ids);
+
+	/// <see cref="ModerationReports"/>
+	public IQueryable<ModerationReport> ModerationReports(params Uri[] ids);
+
+	/// <summary>
+	/// Query across all ModerationReports
+	/// </summary>
+	/// <returns></returns>
+	public IQueryable<ModerationReport> AllModerationReports();
+
+	/// <summary>
+	/// Query for moderation policies
+	/// </summary>
+	/// <param name="ids"></param>
+	/// <returns></returns>
+	public IQueryable<ModerationPolicy> Policies(params ModerationPolicyId[] ids);
+
+	/// <summary>
+	/// Query across all moderation policies
+	/// </summary>
+	/// <returns></returns>
+	public IQueryable<ModerationPolicy> AllPolicies();
+
+	/// <summary>
 	/// Query for navigation entities, using the given object as a root entity
 	/// </summary>
 	/// <remarks>Consumers should be sure to set an OrderBy property</remarks>
@@ -87,6 +118,8 @@ public interface IDataAdapter : IDisposable
 	public void Add(Profile profile);
 	public void Add(Account account);
 	public void Add(Post post);
+	public void Add(ModerationReport report);
+	public void Add(ModerationPolicy policy);
 	public void AddRange(IEnumerable<Profile> profile);
 	public void AddRange(IEnumerable<Account> account);
 	public void AddRange(IEnumerable<Post> posts);
