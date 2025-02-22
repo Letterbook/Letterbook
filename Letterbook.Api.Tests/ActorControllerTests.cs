@@ -2,7 +2,7 @@ using System.Security.Claims;
 using ActivityPub.Types.AS;
 using Bogus;
 using Letterbook.Adapter.ActivityPub;
-using Letterbook.Api.Controllers.ActivityPub;
+using Letterbook.Api.ActivityPub;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;

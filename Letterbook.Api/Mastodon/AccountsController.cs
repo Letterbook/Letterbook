@@ -1,7 +1,7 @@
 using Letterbook.Api.Swagger;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Letterbook.Api.Controllers.Mastodon;
+namespace Letterbook.Api.Mastodon;
 
 [ApiExplorerSettings(GroupName = Docs.MastodonV1)]
 [Route("api/v1/[controller]")]
