@@ -107,6 +107,11 @@ public class ActivityScheduler : IActivityScheduler
 		await Deliver(inbox, document, actor);
 	}
 
+	public Task Report(Uri inbox, ModerationReport report)
+	{
+		throw new NotImplementedException();
+	}
+
 	private ASObject PopulateMentions(Post post, Mention? extraMention)
 	{
 		var doc = _document.FromPost(post);

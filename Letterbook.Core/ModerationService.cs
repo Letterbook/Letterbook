@@ -15,14 +15,16 @@ public class ModerationService : IModerationService, IAuthzModerationService
 	private readonly IProfileEventPublisher _profileEvents;
 	private readonly IAccountService _accounts;
 	private readonly IModerationEventPublisher _moderationEvents;
+	private readonly IActivityScheduler _activity;
 
-	public ModerationService(IDataAdapter data, IAuthorizationService authz, IProfileEventPublisher profileEvents, IAccountService accounts, IModerationEventPublisher moderationEvents)
+	public ModerationService(IDataAdapter data, IAuthorizationService authz, IProfileEventPublisher profileEvents, IAccountService accounts, IModerationEventPublisher moderationEvents, IActivityScheduler activity)
 	{
 		_data = data;
 		_authz = authz;
 		_profileEvents = profileEvents;
 		_accounts = accounts;
 		_moderationEvents = moderationEvents;
+		_activity = activity;
 	}
 
 	public async Task<ModerationReport?> LookupReport(ModerationReportId id)
@@ -74,6 +76,11 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		foreach (var subject in report.Subjects)
 		{
 			await _profileEvents.Reported(subject, reporter);
+		}
+
+		foreach (var inbox in report.Forwarded)
+		{
+			await _activity.Report(inbox, report);
 		}
 
 		return report;
@@ -144,10 +151,15 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		var newModerators = updated.Moderators.Select(m => m.Id).Except(report.Moderators.Select(m => m.Id));
 		report.Moderators = updated.Moderators.Converge(mods, account => account.Id).ToHashSet();
 		report.Policies = updated.Policies.Converge(policies, policy => policy.Id).ToHashSet();
+
 		var closed = updated.Closed < DateTimeOffset.UtcNow && report.Closed > DateTimeOffset.UtcNow;
 		var reopened = report.Closed > DateTimeOffset.UtcNow && updated.Closed <= DateTimeOffset.UtcNow;
 		report.Closed = updated.Closed;
+
+		var forwardTo = updated.Forwarded.Where(inbox => report.ForwardTo(inbox)).ToList();
+
 		report.Updated = DateTimeOffset.UtcNow;
+
 
 		await _data.Commit();
 		foreach (var moderator in newModerators)
@@ -156,6 +168,12 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		}
 		if (closed) await _moderationEvents.Closed(report, accountId, _claims);
 		if (reopened) await _moderationEvents.Reopened(report, accountId, _claims);
+		if (report.IsClosed()) return report;
+
+		foreach (var inbox in forwardTo)
+		{
+			await _activity.Report(inbox, report);
+		}
 
 		return report;
 	}

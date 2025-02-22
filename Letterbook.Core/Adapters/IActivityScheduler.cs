@@ -131,4 +131,13 @@ public interface IActivityScheduler
 	/// <param name="actor">The current actor profile that is accepting the request</param>
 	/// <returns></returns>
 	public Task PendingFollower(Uri inbox, Profile target, Profile actor);
+
+	/// <summary>
+	/// Construct an AP Flag document concerning the report's subjects and send it to the specified inbox. Reports are
+	/// always sent using a special system actor.
+	/// </summary>
+	/// <param name="inbox"></param>
+	/// <param name="report"></param>
+	/// <returns></returns>
+	public Task Report(Uri inbox, ModerationReport report);
 }

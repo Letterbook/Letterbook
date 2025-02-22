@@ -69,4 +69,6 @@ public class ModerationReport
 
 		return false;
 	}
+
+	public bool IsClosed() => Closed <= DateTimeOffset.UtcNow;
 }
