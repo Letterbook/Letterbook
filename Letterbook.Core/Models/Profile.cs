@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Letterbook.Generators;
@@ -30,10 +31,12 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		Description = default!;
 	}
 
+	private Profile(Uri baseUri) : this(new(Uuid7.NewUuid7()), baseUri) { }
+
 	// Constructor for local profiles
-	private Profile(Uri baseUri) : this()
+	private Profile(ProfileId id, Uri baseUri) : this()
 	{
-		Id = new(Uuid7.NewUuid7());
+		Id = id;
 		FediId = new Uri(baseUri, $"/actor/{Id}");
 		Authority = FediId.GetAuthority();
 		Handle = string.Empty;
@@ -64,6 +67,44 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		builder.Fragment = "key-1";
 		Keys.Add(SigningKey.EcDsa(1, builder.Uri));
 	}
+
+	private static readonly ConcurrentDictionary<ProfileId, Profile> SystemProfiles = new();
+	private static readonly ProfileId ModeratorsId = new Uuid7(new byte[] { 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+	private static readonly ProfileId InstanceId = new Uuid7(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+
+	/// <summary>
+	/// A reserved system profile to be used by moderators for federating moderation reports and related correspondence
+	/// </summary>
+	/// <remarks>
+	/// You SHOULD NOT USE the Keys or other collections on this object. Those must be queried from the data adapter. This static instance
+	/// can be used to quickly look up the profile's various identifiers.
+	/// </remarks>
+	/// <param name="opts"></param>
+	/// <returns></returns>
+	public static Profile SystemModerators(CoreOptions opts) => SystemProfiles.GetOrAdd(ModeratorsId, id => new Profile(id, opts.BaseUri())
+	{
+		Type = ActivityActorType.Service,
+		Handle = "Moderators",
+		DisplayName = "Moderators",
+		Description = $"The special reserved profile for the {opts.DomainName} moderators"
+	});
+
+	/// <summary>
+	/// A reserved system profile to be used to represent the system itself, when no other profile is better suited
+	/// </summary>
+	/// <remarks>
+	/// You SHOULD NOT USE the Keys or other collections on this object. Those must be queried from the data adapter. This static instance
+	/// can be used to quickly look up the profile's various identifiers.
+	/// </remarks>
+	/// <param name="opts"></param>
+	/// <returns></returns>
+	public static Profile SystemInstance(CoreOptions opts) => SystemProfiles.GetOrAdd(InstanceId, id => new Profile(id, opts.BaseUri())
+	{
+		Type = ActivityActorType.Service,
+		Handle = opts.DomainName,
+		DisplayName = "Letterbook",
+		Description = $"The special system profile for the {opts.DomainName} server instance"
+	});
 
 	public ProfileId Id { get; set; }
 
