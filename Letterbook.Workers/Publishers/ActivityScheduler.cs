@@ -107,9 +107,15 @@ public class ActivityScheduler : IActivityScheduler
 		await Deliver(inbox, document, actor);
 	}
 
-	public Task Report(Uri inbox, ModerationReport report)
+	/// <inheritdoc />
+	public async Task Report(Uri inbox, ModerationReport report, bool fullContext = false)
 	{
-		throw new NotImplementedException();
+		var systemActor = Profile.SystemModerators(_options);
+		foreach (var subject in report.Subjects)
+		{
+			var document = _document.Flag(systemActor!, inbox, report, subject, fullContext);
+			await Deliver(inbox, document, systemActor);
+		}
 	}
 
 	private ASObject PopulateMentions(Post post, Mention? extraMention)

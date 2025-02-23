@@ -15,6 +15,8 @@ public interface IActivityPubDocument
 	DeleteActivity Delete(Profile actor, Uri content);
 	DislikeActivity Dislike(Profile actor, IContentRef content);
 	FollowActivity Follow(Profile actor, Profile target, Uri? id = null, bool implicitId = false);
+	FlagActivity Flag(Profile systemActor, Uri inbox, ModerationReport report, bool fullContext = false);
+	FlagActivity Flag(Profile systemActor, Uri inbox, ModerationReport report, Profile subject, bool fullContext = false);
 	LikeActivity Like(Profile actor, Uri content);
 	RejectActivity Reject(Profile actor, ASObject asObject);
 	RemoveActivity Remove(Profile actor, ASType @object, ASType target);

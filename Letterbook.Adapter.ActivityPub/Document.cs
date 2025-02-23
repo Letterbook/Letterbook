@@ -2,10 +2,10 @@ using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Conversion;
+using ActivityPub.Types.Util;
 using AutoMapper;
 using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Models.Mappers;
 
 namespace Letterbook.Adapter.ActivityPub;
 
@@ -82,6 +82,37 @@ public class Document : IActivityPubDocument
 		return doc;
 	}
 
+	private FlagActivity _Flag(Models.Profile systemActor, Uri inbox, Models.ModerationReport report, string id, bool fullContext = false)
+	{
+		var doc = new FlagActivity
+		{
+			Id = id,
+			Actor = ObjectId(systemActor),
+			Content = report.Summary
+		};
+		doc.Object.AddRange(report.RelatedPosts.Where(p => fullContext || p.FediId.Authority == inbox.Authority).Select(ObjectId));
+		return doc;
+	}
+
+	public FlagActivity Flag(Models.Profile systemActor, Uri inbox, Models.ModerationReport report, bool fullContext = false)
+	{
+		var doc = _Flag(systemActor, inbox, report, report.FediId!.ToString(), fullContext);
+		doc.Object.InsertRange(0, report.Subjects.Where(p => fullContext || p.SharedInbox == inbox).Select(LinkableId));
+		return doc;
+	}
+
+	public FlagActivity Flag(Models.Profile systemActor, Uri inbox, Models.ModerationReport report, Models.Profile subject,
+		bool fullContext = false)
+	{
+		var idBuilder = new UriBuilder(report.FediId!)
+		{
+			Query = $"subject?{subject.FediId}"
+		};
+		var doc = _Flag(systemActor, inbox, report, idBuilder.Uri.ToString(), fullContext);
+		doc.Object.Insert(0, LinkableId(subject));
+		return doc;
+	}
+
 	public LikeActivity Like(Models.Profile actor, Uri content)
 	{
 		throw new NotImplementedException();
@@ -134,6 +165,11 @@ public class Document : IActivityPubDocument
 		throw new NotImplementedException();
 	}
 
+	/// <summary>
+	/// Get an ASLink with the item's FediId
+	/// </summary>
+	/// <param name="contentRef"></param>
+	/// <returns></returns>
 	public ASLink ObjectId(Models.IFederated contentRef)
 	{
 		return new ASLink()
@@ -141,6 +177,13 @@ public class Document : IActivityPubDocument
 			HRef = contentRef.FediId
 		};
 	}
+
+	/// <summary>
+	/// Get a Linkable with a link to the item's FediId
+	/// </summary>
+	/// <param name="contentRef"></param>
+	/// <returns></returns>
+	public Linkable<ASObject> LinkableId(Models.IFederated contentRef) => ObjectId(contentRef);
 
 	private Uri ImplicitId(Uri id, string activity, Uri? targetId = null)
 	{

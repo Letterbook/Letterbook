@@ -136,8 +136,10 @@ public interface IActivityScheduler
 	/// Construct an AP Flag document concerning the report's subjects and send it to the specified inbox. Reports are
 	/// always sent using a special system actor.
 	/// </summary>
+	/// <remarks>Only sends the subset of the report that shares a domain with the recipient inbox</remarks>
 	/// <param name="inbox"></param>
 	/// <param name="report"></param>
+	/// <param name="fullContext">Send the full context of the report to the recipient, including from other domains</param>
 	/// <returns></returns>
-	public Task Report(Uri inbox, ModerationReport report);
+	public Task Report(Uri inbox, ModerationReport report, bool fullContext = false);
 }
