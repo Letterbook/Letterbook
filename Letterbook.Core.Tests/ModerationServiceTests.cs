@@ -96,7 +96,7 @@ public class ModerationServiceTests : WithMocks
 		Assert.NotNull(actual);
 		ProfileEventServiceMock.Verify(m => m.Reported(_profiles[0], _profiles[2]), Times.Once());
 		ModerationEventPublisherMock.Verify(m => m.Created(It.IsAny<ModerationReport>(), It.IsAny<ProfileId>(), It.IsAny<IEnumerable<Claim>>()), Times.Once);
-		ActivityPublisherMock.Verify(m => m.Report(_profiles[0].SharedInbox!, It.IsAny<ModerationReport>()));
+		ActivityPublisherMock.Verify(m => m.Report(_profiles[0].SharedInbox!, It.IsAny<ModerationReport>(), It.IsAny<bool>()));
 	}
 
 	[Fact(DisplayName = "Should require at least one subject in new reports")]
@@ -259,7 +259,7 @@ public class ModerationServiceTests : WithMocks
 		var actual = await _service.As([]).UpdateReport(given.Id, given, Guid.NewGuid());
 
 		Assert.Equivalent(given.Policies, actual.Policies);
-		ActivityPublisherMock.Verify(m => m.Report(_profiles[0].SharedInbox!, It.IsAny<ModerationReport>()));
+		ActivityPublisherMock.Verify(m => m.Report(_profiles[0].SharedInbox!, It.IsAny<ModerationReport>(), It.IsAny<bool>()));
 	}
 
 	[Fact(DisplayName = "Should not forward to unrelated recipients")]

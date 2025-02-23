@@ -92,7 +92,7 @@ public class ReportsControllerTests : WithMockContext
 	{
 		var given = new FakeReport().Generate();
 		var dto = _mapper.Map<FullModerationReportDto>(given);
-		AuthzModerationServiceMock.Setup(m => m.UpdateReport(given.Id, It.IsAny<Models.ModerationReport>(), It.IsAny<Guid>()))
+		AuthzModerationServiceMock.Setup(m => m.UpdateReport(given.Id, It.IsAny<Models.ModerationReport>(), It.IsAny<Guid>(), It.IsAny<bool>(), It.IsAny<bool>()))
 			.ReturnsAsync(given);
 
 		var result = await _controller.UpdateReport(given.Id, dto);
@@ -101,7 +101,7 @@ public class ReportsControllerTests : WithMockContext
 		Assert.Equal(given.Id, actual.Id);
 
 		Assert.NotNull(actual);
-		AuthzModerationServiceMock.Verify(m => m.UpdateReport(given.Id, It.Is<Models.ModerationReport>(r => r.Summary == dto.Summary), It.IsAny<Guid>()));
+		AuthzModerationServiceMock.Verify(m => m.UpdateReport(given.Id, It.Is<Models.ModerationReport>(r => r.Summary == dto.Summary), It.IsAny<Guid>(), It.IsAny<bool>(), It.IsAny<bool>()));
 	}
 
 	[Fact(DisplayName = "Should lookup an existing report")]

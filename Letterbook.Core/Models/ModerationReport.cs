@@ -61,13 +61,9 @@ public class ModerationReport
 
 	public bool Close()
 	{
-		if (Closed > DateTimeOffset.UtcNow)
-		{
-			Closed = DateTimeOffset.UtcNow;
-			return true;
-		}
-
-		return false;
+		if (Closed <= DateTimeOffset.UtcNow) return false;
+		Closed = DateTimeOffset.UtcNow;
+		return true;
 	}
 
 	public bool IsClosed() => Closed <= DateTimeOffset.UtcNow;

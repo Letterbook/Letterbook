@@ -135,7 +135,8 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		return report;
 	}
 
-	public async Task<ModerationReport> UpdateReport(ModerationReportId reportId, ModerationReport updated, Guid accountId)
+	public async Task<ModerationReport> UpdateReport(ModerationReportId reportId, ModerationReport updated, Guid accountId,
+		bool resend = false, bool sendFullContext = false)
 	{
 		if (await _data.ModerationReports(reportId)
 			    .Include(r => r.Policies)
@@ -156,7 +157,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		var reopened = report.Closed > DateTimeOffset.UtcNow && updated.Closed <= DateTimeOffset.UtcNow;
 		report.Closed = updated.Closed;
 
-		var forwardTo = updated.Forwarded.Where(inbox => report.ForwardTo(inbox)).ToList();
+		var forwardTo = updated.Forwarded.Where(inbox => report.ForwardTo(inbox, resend)).ToList();
 
 		report.Updated = DateTimeOffset.UtcNow;
 
@@ -172,7 +173,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 		foreach (var inbox in forwardTo)
 		{
-			await _activity.Report(inbox, report);
+			await _activity.Report(inbox, report, sendFullContext);
 		}
 
 		return report;
