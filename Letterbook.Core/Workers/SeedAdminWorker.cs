@@ -31,18 +31,26 @@ public class SeedAdminWorker : IScopedWorker
 
 		try
 		{
-			var instance = Profile.SystemInstance(_coreOptions);
-			if (!await _data.Profiles(instance.Id).AnyAsync(cancellationToken: cancellationToken))
+			if (await _data.Profiles(Profile.SystemInstanceId)
+				    .AsNoTracking()
+				    .FirstOrDefaultAsync(cancellationToken: cancellationToken) is { } instance)
 			{
-				_data.Add(instance);
-				_logger.LogInformation("Seeding instance profile {Id}", instance.Id);
+				Profile.AddInstanceProfile(instance);
+			}
+			else {
+				_data.Add(Profile.GetOrAddInstanceProfile(_coreOptions));
+				_logger.LogInformation("Seeding instance profile {Id}", Profile.SystemInstanceId);
 			}
 
-			var mods = Profile.SystemModerators(_coreOptions);
-			if (!await _data.Profiles(mods.Id).AnyAsync(cancellationToken: cancellationToken))
+			if (await _data.Profiles(Profile.SystemModeratorsId)
+				    .AsNoTracking()
+				    .FirstOrDefaultAsync(cancellationToken: cancellationToken) is { } moderators)
 			{
-				_data.Add(mods);
-				_logger.LogInformation("Seeding moderator profile {Id}", mods.Id);
+				Profile.AddModeratorsProfile(moderators);
+			}
+			else {
+				_data.Add(Profile.GetOrAddModeratorsProfile(_coreOptions));
+				_logger.LogInformation("Seeding moderator profile {Id}", Profile.SystemModeratorsId);
 			}
 
 			await _data.Commit();

@@ -69,8 +69,8 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	}
 
 	private static readonly ConcurrentDictionary<ProfileId, Profile> SystemProfiles = new();
-	private static readonly ProfileId ModeratorsId = new Uuid7(new byte[] { 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-	private static readonly ProfileId InstanceId = new Uuid7(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+	public static readonly ProfileId SystemModeratorsId = new Uuid7(new byte[] { 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+	public static readonly ProfileId SystemInstanceId = new Uuid7(new byte[] { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
 
 	/// <summary>
 	/// A reserved system profile to be used by moderators for federating moderation reports and related correspondence
@@ -81,13 +81,16 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	/// </remarks>
 	/// <param name="opts"></param>
 	/// <returns></returns>
-	public static Profile SystemModerators(CoreOptions opts) => SystemProfiles.GetOrAdd(ModeratorsId, id => new Profile(id, opts.BaseUri())
+	public static Profile GetOrAddModeratorsProfile(CoreOptions opts) => SystemProfiles.GetOrAdd(SystemModeratorsId, id => new Profile(id, opts.BaseUri())
 	{
 		Type = ActivityActorType.Service,
 		Handle = "Moderators",
 		DisplayName = "Moderators",
 		Description = $"The special reserved profile for the {opts.DomainName} moderators"
 	});
+
+	public static Profile AddModeratorsProfile(Profile moderators) => SystemProfiles[SystemModeratorsId] = moderators;
+	public static Profile? GetModeratorsProfile() => SystemProfiles.GetValueOrDefault(SystemModeratorsId);
 
 	/// <summary>
 	/// A reserved system profile to be used to represent the system itself, when no other profile is better suited
@@ -98,13 +101,16 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	/// </remarks>
 	/// <param name="opts"></param>
 	/// <returns></returns>
-	public static Profile SystemInstance(CoreOptions opts) => SystemProfiles.GetOrAdd(InstanceId, id => new Profile(id, opts.BaseUri())
+	public static Profile GetOrAddInstanceProfile(CoreOptions opts) => SystemProfiles.GetOrAdd(SystemInstanceId, id => new Profile(id, opts.BaseUri())
 	{
 		Type = ActivityActorType.Service,
 		Handle = opts.DomainName,
 		DisplayName = "Letterbook",
 		Description = $"The special system profile for the {opts.DomainName} server instance"
 	});
+
+	public static Profile AddInstanceProfile(Profile instance) => SystemProfiles[SystemInstanceId] = instance;
+	public static Profile? GetInstanceProfile() => SystemProfiles.GetValueOrDefault(SystemInstanceId);
 
 	public ProfileId Id { get; set; }
 
