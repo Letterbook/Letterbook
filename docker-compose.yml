@@ -17,7 +17,7 @@ services:
     restart: always
   postgres:
     container_name: postgres
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     command:
       - postgres
       - -c
@@ -76,7 +76,7 @@ services:
       - debug
       - o11y
     container_name: prometheus
-    image: prom/prometheus:v2.55.1
+    image: prom/prometheus:v3.2.0
     ports:
       - "9090:9090"
     volumes:
