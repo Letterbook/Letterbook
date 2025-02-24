@@ -106,7 +106,7 @@ public class Document : IActivityPubDocument
 	{
 		var idBuilder = new UriBuilder(report.FediId!)
 		{
-			Query = $"subject?{subject.FediId}"
+			Query = $"?subject={subject.FediId}"
 		};
 		var doc = _Flag(systemActor, inbox, report, idBuilder.Uri.ToString(), fullContext);
 		doc.Object.Insert(0, LinkableId(subject));
