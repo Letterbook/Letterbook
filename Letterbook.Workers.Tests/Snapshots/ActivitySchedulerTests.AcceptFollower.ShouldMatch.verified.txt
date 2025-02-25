@@ -1,0 +1,11 @@
+﻿{
+  "type": "Accept",
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "actor": "http://letterbook.example/actor/4DZM4sLjSAmbBYSYgTU7eP",
+  "object": {
+    "type": "Follow",
+    "@context": "https://www.w3.org/ns/activitystreams",
+    "actor": "http://peer.example/actor/9kBSY1pnQxnunMTkZauzbV",
+    "object": "http://letterbook.example/actor/4DZM4sLjSAmbBYSYgTU7eP"
+  }
+}

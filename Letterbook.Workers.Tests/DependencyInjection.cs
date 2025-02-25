@@ -1,4 +1,6 @@
-﻿using ActivityPub.Types;
+﻿using System.Text.Json;
+using ActivityPub.Types;
+using ActivityPub.Types.Conversion;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
@@ -16,7 +18,13 @@ public static class DependencyInjection
 	internal static IServiceCollection AddMocks(this IServiceCollection services, WithMocks mocks)
 	{
 		services.TryAddTypesModule();
-		return services.AddScoped<IActivityPubClient>(_ => mocks.ActivityPubClientMock.Object)
+		return services
+			// Configure AP docs to serialize with multiple lines for readability
+			.Configure<JsonLdSerializerOptions>(options =>
+			{
+				options.DefaultJsonSerializerOptions = new JsonSerializerOptions() { WriteIndented = true };
+			})
+			.AddScoped<IActivityPubClient>(_ => mocks.ActivityPubClientMock.Object)
 			.AddScoped<ITimelineService>(_ => mocks.TimelineServiceMock.Object)
 			.AddScoped<IProfileService>(_ => mocks.ProfileServiceMock.Object)
 			.AddScoped<IActivityScheduler>(_ => mocks.ActivityPublisherMock.Object)
