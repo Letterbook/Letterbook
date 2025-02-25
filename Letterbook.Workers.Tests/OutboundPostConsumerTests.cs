@@ -39,6 +39,7 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 			{
 				bus.AddConsumer<OutboundPostConsumer>();
 				bus.AddTestBus();
+				bus.SetTestTimeouts(testTimeout: TimeSpan.FromMilliseconds(3000), testInactivityTimeout: TimeSpan.FromMilliseconds(1500));
 			})
 			.BuildServiceProvider();
 		_publisher = _provider.GetRequiredService<IPostEventPublisher>();

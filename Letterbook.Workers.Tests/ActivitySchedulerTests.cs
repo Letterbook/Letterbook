@@ -262,7 +262,7 @@ public class ActivitySchedulerTests : WithMockBus<IActivityScheduler, ActivitySc
 
 			await _publisher.Report(_target.Inbox, report);
 			await Harness.Published.Any<ActivityMessage>();
-			await Harness.Consumed.Any<ActivityMessage>();
+			await Harness.Consumed.SelectAsync<ActivityMessage>().Skip(1).FirstOrDefaultAsync();
 
 			ActivityPubAuthClientMock.Verify(m => m.SendDocument(_target.Inbox, It.IsAny<string>()), Times.Exactly(2));
 		}
