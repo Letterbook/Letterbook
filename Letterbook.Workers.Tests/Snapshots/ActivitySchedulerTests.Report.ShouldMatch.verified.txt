@@ -1,0 +1,8 @@
+﻿{
+  "type": "Flag",
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "http://letterbook.example/report/d7qgu4eneycbo008cbcdpgzr8?subject=http://peer.example/actor/9kBSY1pnQxnunMTkZauzbV",
+  "content": "Ut minus sunt vitae laboriosam sit minus eveniet.",
+  "actor": "http://letterbook.example/actor/bneffcn07btjpctg69570zsxv",
+  "object": [ "http://peer.example/actor/9kBSY1pnQxnunMTkZauzbV" ]
+}

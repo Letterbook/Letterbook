@@ -188,4 +188,83 @@ public class ActivitySchedulerTests : WithMockBus<IActivityScheduler, ActivitySc
 			ActivityPubAuthClientMock.Verify(m => m.SendDocument(_target.Inbox, It.IsAny<string>()));
 		}
 	}
+
+	public class Report(ITestOutputHelper output) : ActivitySchedulerTests(output)
+	{
+		[Fact(DisplayName = "Should match the snapshot with a full context report")]
+		public async Task ShouldMatch_FullContext()
+		{
+			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
+			var target = new FakeProfile("peer.example").UseSeed(1).Generate(3);
+			var other = new FakeProfile("different.example").UseSeed(4).Generate();
+			var report = new FakeReport(actor, target[0]).UseSeed(2).Generate();
+			var posts = new FakePost(target[0]).UseSeed(1).Generate(3);
+			var otherPost = new FakePost(other).UseSeed(4).Generate();
+			report.Subjects.Add(target[1]);
+			report.Subjects.Add(target[2]);
+			report.Subjects.Add(other);
+			foreach (var post in posts)
+			{
+				report.RelatedPosts.Add(post);
+			}
+			report.RelatedPosts.Add(otherPost);
+			await _publisher.Report(target[0].Inbox, report, true);
+			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
+
+			Assert.NotNull(actual);
+			await Verify(actual);
+		}
+
+		[Fact(DisplayName = "Should match the snapshot with a minimal report")]
+		public async Task ShouldMatch()
+		{
+			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
+			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
+			var report = new FakeReport(actor, target).UseSeed(2).Generate();
+			await _publisher.Report(target.Inbox, report, false);
+			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
+
+			Assert.NotNull(actual);
+			await Verify(actual);
+		}
+
+		[Fact(DisplayName = "Should match the snapshot with a post")]
+		public async Task ShouldMatch_WithPost()
+		{
+			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
+			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
+			var post = new FakePost(target).UseSeed(1).Generate();
+			var report = new FakeReport(actor, post).UseSeed(2).Generate();
+			await _publisher.Report(target.Inbox, report, false);
+			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
+
+			Assert.NotNull(actual);
+			await Verify(actual);
+		}
+
+		[Fact(DisplayName = "Should publish report messages")]
+		public async Task CanSendReport()
+		{
+			var report = new FakeReport(_actor, _target).Generate();
+
+			await _publisher.Report(_target.Inbox, report);
+			await Harness.Published.Any<ActivityMessage>();
+			await Harness.Consumed.Any<ActivityMessage>();
+
+			ActivityPubAuthClientMock.Verify(m => m.SendDocument(_target.Inbox, It.IsAny<string>()));
+		}
+
+		[Fact(DisplayName = "Should publish report messages for multiple profiles")]
+		public async Task CanSendReport_Multiple()
+		{
+			var report = new FakeReport(_actor, _target).Generate();
+			report.Subjects.Add(new FakeProfile("peer.example").Generate());
+
+			await _publisher.Report(_target.Inbox, report);
+			await Harness.Published.Any<ActivityMessage>();
+			await Harness.Consumed.Any<ActivityMessage>();
+
+			ActivityPubAuthClientMock.Verify(m => m.SendDocument(_target.Inbox, It.IsAny<string>()), Times.Exactly(2));
+		}
+	}
 }
