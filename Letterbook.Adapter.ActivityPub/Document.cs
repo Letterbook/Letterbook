@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
 using ActivityPub.Types.AS.Extended.Object;
@@ -23,6 +24,16 @@ public class Document : IActivityPubDocument
 	public string Serialize(ASType document)
 	{
 		return _serializer.Serialize(document);
+	}
+
+	public string Serialize(JsonNode node)
+	{
+		return _serializer.Serialize(node);
+	}
+
+	public JsonNode? SerializeToNode(ASType document)
+	{
+		return _serializer.SerializeToNode(document);
 	}
 
 	public AcceptActivity Accept(Models.Profile actor, ASObject asObject)

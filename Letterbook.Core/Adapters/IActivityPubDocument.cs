@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
 using Letterbook.Core.Models;
@@ -7,6 +8,8 @@ namespace Letterbook.Core.Adapters;
 public interface IActivityPubDocument
 {
 	public string Serialize(ASType document);
+	public string Serialize(JsonNode node);
+	public JsonNode? SerializeToNode(ASType document);
 	AcceptActivity Accept(Profile actor, ASObject asObject);
 	AddActivity Add(Profile actor, ASObject asObject, ASObject target);
 	AnnounceActivity Announce(Profile actor, Uri content);

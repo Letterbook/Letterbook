@@ -1,4 +1,8 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using ActivityPub.Types.AS;
+using ActivityPub.Types.AS.Extended.Activity;
+using ActivityPub.Types.Conversion;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
@@ -149,9 +153,14 @@ public class ActivityScheduler : IActivityScheduler
 		var act = activity.Is<ASObject>(out var o)
 			? o.Id
 			: activity.Is<ASLink>(out var l)
-				? l.HRef.ToString() : null;
+				? l.HRef.ToString()
+				: null;
 		act ??= string.Join(',', activity.TypeMap.ASTypes);
-		var data = _document.Serialize(activity);
+		var data = activity switch
+		{
+			FlagActivity f => PreprocessFlag(f),
+			_ => _document.Serialize(activity)
+		};
 		_logger.LogDebug("Scheduling message to {Inbox} with {Document}", inbox, data);
 		return new ActivityMessage
 		{
@@ -162,5 +171,33 @@ public class ActivityScheduler : IActivityScheduler
 			OnBehalfOf = onBehalfOf?.GetId(),
 			Inbox = inbox
 		};
+
+		// Pleroma and friends don't parse Flag activities properly if the object is a single value
+		// So, we need to massage it into a single element array
+		// See https://activitypub.software/TransFem-org/Sharkey/-/merge_requests/690
+		// To my knowledge, everyone parses the array correctly
+		string PreprocessFlag(FlagActivity flag)
+		{
+			if (flag.Object.Count > 1)
+				return _document.Serialize(flag);
+
+			var node = _document.SerializeToNode(flag);
+			if (node!["object"] is not { } obj)
+			{
+				_logger.LogDebug("Failed to preprocess FlagActivity {Activity}", JsonSerializer.Serialize(node));
+				_logger.LogInformation("Failed to preprocess FlagActivity {Id}; falling back to default serialization", flag.Id);
+				return _document.Serialize(flag);
+			}
+
+			if (!obj.AsValue().TryGetValue<string>(out var objVal))
+			{
+				_logger.LogDebug("Failed to preprocess FlagActivity {Activity}", JsonSerializer.Serialize(node));
+				_logger.LogInformation("Failed to preprocess FlagActivity {Id}; falling back to default serialization", flag.Id);
+				return _document.Serialize(flag);
+			}
+
+			node["object"] = new JsonArray(objVal);
+			return _document.Serialize(node);
+		}
 	}
 }
