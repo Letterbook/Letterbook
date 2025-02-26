@@ -35,6 +35,7 @@ public abstract class WithMocks
 	public Mock<IApCrawlScheduler> ApCrawlerSchedulerMock;
 	public Mock<IModerationService> ModerationServiceMock;
 	public Mock<IAuthzModerationService> AuthzModerationServiceMock;
+	public Mock<IModerationEventPublisher> ModerationEventPublisherMock;
 
 	public ServiceCollection MockedServiceCollection;
 
@@ -60,6 +61,7 @@ public abstract class WithMocks
 		ApCrawlerSchedulerMock = new Mock<IApCrawlScheduler>();
 		ModerationServiceMock = new Mock<IModerationService>();
 		AuthzModerationServiceMock = new Mock<IAuthzModerationService>();
+		ModerationEventPublisherMock = new Mock<IModerationEventPublisher>();
 
 		ActivityPubClientMock.Setup(m => m.As(It.IsAny<Profile>())).Returns(ActivityPubAuthClientMock.Object);
 		PostServiceMock.Setup(m => m.As(It.IsAny<IEnumerable<Claim>>())).Returns(PostServiceAuthMock.Object);
@@ -81,6 +83,9 @@ public abstract class WithMocks
 		MockedServiceCollection.AddScoped<IActivityPubAuthenticatedClient>(_ => ActivityPubAuthClientMock.Object);
 		MockedServiceCollection.AddScoped<IProfileService>(_ => ProfileServiceMock.Object);
 		MockedServiceCollection.TryAddTypesModule();
+
+		Profile.GetOrAddModeratorsProfile(CoreOptionsMock.Value);
+		Profile.GetOrAddInstanceProfile(CoreOptionsMock.Value);
 	}
 
 	public void MockAuthorizeAllowAll()

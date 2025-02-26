@@ -8,6 +8,7 @@ using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Swashbuckle.AspNetCore.Annotations;
 using IAuthorizationService = Letterbook.Core.IAuthorizationService;
 
@@ -27,6 +28,11 @@ public class ReportsController : ControllerBase
 		_moderation = moderation;
 		_authz = authz;
 		_mapper = new Mapper(mappingConfig.ModerationReports);
+	}
+
+	private bool TryGetAccountId(out Guid accountId)
+	{
+		return Guid.TryParse(User.Claims.First(c => c.Type == JwtRegisteredClaimNames.Sub).Value, out accountId);
 	}
 
 	[HttpPost("{selfId}/report")]
@@ -98,11 +104,13 @@ public class ReportsController : ControllerBase
 	{
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
+		if (!TryGetAccountId(out var accountId))
+			return Forbid();
 
 		if (_mapper.Map<ModerationReport>(dto) is not { } report)
 			return BadRequest(new ErrorMessage(ErrorCodes.InvalidRequest, $"Invalid {typeof(MemberModerationReportDto)}"));
 
-		var result = await _moderation.As(User.Claims).UpdateReport(reportId, report);
+		var result = await _moderation.As(User.Claims).UpdateReport(reportId, report, accountId);
 
 		return Ok(_authz.Update(User.Claims, result)
 			? _mapper.Map<FullModerationReportDto>(result)
@@ -153,7 +161,8 @@ public class ReportsController : ControllerBase
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
 
-		var result = await _moderation.As(User.Claims).CloseReport(reportId, reopen);
+		if (!TryGetAccountId(out var accountId)) return Forbid();
+		var result = await _moderation.As(User.Claims).CloseReport(reportId, accountId, reopen);
 
 		return Ok(_authz.Update(User.Claims, result)
 			? _mapper.Map<FullModerationReportDto>(result)

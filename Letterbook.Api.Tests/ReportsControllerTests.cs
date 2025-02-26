@@ -1,4 +1,5 @@
 using AutoMapper;
+using Bogus;
 using Letterbook.Api.Controllers;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
@@ -14,11 +15,13 @@ public class ReportsControllerTests : WithMockContext
 {
 	private readonly ReportsController _controller;
 	private readonly IMapper _mapper;
+	private readonly Guid _accountId;
 
 	public ReportsControllerTests(ITestOutputHelper output)
 	{
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
-		Auth();
+		_accountId = new Faker().Random.Guid();
+		Auth(_accountId);
 		var maps = new MappingConfigProvider(CoreOptionsMock);
 		_mapper = new Mapper(maps.ModerationReports);
 
@@ -89,7 +92,7 @@ public class ReportsControllerTests : WithMockContext
 	{
 		var given = new FakeReport().Generate();
 		var dto = _mapper.Map<FullModerationReportDto>(given);
-		AuthzModerationServiceMock.Setup(m => m.UpdateReport(given.Id, It.IsAny<Models.ModerationReport>()))
+		AuthzModerationServiceMock.Setup(m => m.UpdateReport(given.Id, It.IsAny<Models.ModerationReport>(), It.IsAny<Guid>(), It.IsAny<Models.ModerationReport.Scope>(), It.IsAny<bool>()))
 			.ReturnsAsync(given);
 
 		var result = await _controller.UpdateReport(given.Id, dto);
@@ -98,7 +101,7 @@ public class ReportsControllerTests : WithMockContext
 		Assert.Equal(given.Id, actual.Id);
 
 		Assert.NotNull(actual);
-		AuthzModerationServiceMock.Verify(m => m.UpdateReport(given.Id, It.Is<Models.ModerationReport>(r => r.Summary == dto.Summary)));
+		AuthzModerationServiceMock.Verify(m => m.UpdateReport(given.Id, It.Is<Models.ModerationReport>(r => r.Summary == dto.Summary), It.IsAny<Guid>(), It.IsAny<Models.ModerationReport.Scope>(), It.IsAny<bool>()));
 	}
 
 	[Fact(DisplayName = "Should lookup an existing report")]
@@ -158,7 +161,7 @@ public class ReportsControllerTests : WithMockContext
 	public async Task CanClose(bool close)
 	{
 		var given = new FakeReport().Generate();
-		AuthzModerationServiceMock.Setup(m => m.CloseReport(given.Id, close)).ReturnsAsync(given);
+		AuthzModerationServiceMock.Setup(m => m.CloseReport(given.Id, _accountId, close)).ReturnsAsync(given);
 
 		var result = await _controller.Close(given.Id, close);
 		var response = Assert.IsType<OkObjectResult>(result);

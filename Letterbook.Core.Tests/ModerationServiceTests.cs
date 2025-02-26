@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
@@ -22,7 +23,7 @@ public class ModerationServiceTests : WithMocks
 	public ModerationServiceTests(ITestOutputHelper output)
 	{
 		_service = new ModerationService(DataAdapterMock.Object, AuthorizationServiceMock.Object, ProfileEventServiceMock.Object,
-			AccountServiceMock.Object);
+			AccountServiceMock.Object, ModerationEventPublisherMock.Object, ActivityPublisherMock.Object);
 		_fakeAccounts = new FakeAccount();
 		_fakeProfiles = new FakeProfile();
 		_accounts = new FakeAccount().Generate(3);
@@ -61,6 +62,7 @@ public class ModerationServiceTests : WithMocks
 		var actual = await _service.As([]).LookupReport(_reports[0].Id);
 
 		Assert.Equivalent(_reports[0], actual);
+		ModerationEventPublisherMock.VerifyNoOtherCalls();
 	}
 
 	[Fact(DisplayName = "Should create new reports")]
@@ -76,6 +78,25 @@ public class ModerationServiceTests : WithMocks
 
 		Assert.NotNull(actual);
 		ProfileEventServiceMock.Verify(m => m.Reported(_profiles[0], _profiles[2]), Times.Once());
+		ModerationEventPublisherMock.Verify(m => m.Created(It.IsAny<ModerationReport>(), It.IsAny<ProfileId>(), It.IsAny<IEnumerable<Claim>>()), Times.Once);
+	}
+
+	[Fact(DisplayName = "Should forward new reports")]
+	public async Task CanForward()
+	{
+		var report = new ModerationReport(_opts, "test report")
+		{
+			Reporter = _profiles[2],
+			Subjects = [_profiles[0]],
+			RelatedPosts = _posts,
+			Forwarded = [_profiles[0].SharedInbox!]
+		};
+		var actual = await _service.As([]).CreateReport(_profiles[2].Id, report);
+
+		Assert.NotNull(actual);
+		ProfileEventServiceMock.Verify(m => m.Reported(_profiles[0], _profiles[2]), Times.Once());
+		ModerationEventPublisherMock.Verify(m => m.Created(It.IsAny<ModerationReport>(), It.IsAny<ProfileId>(), It.IsAny<IEnumerable<Claim>>()), Times.Once);
+		ActivityPublisherMock.Verify(m => m.Report(_profiles[0].SharedInbox!, It.IsAny<ModerationReport>(), It.IsAny<ModerationReport.Scope>()));
 	}
 
 	[Fact(DisplayName = "Should require at least one subject in new reports")]
@@ -131,6 +152,7 @@ public class ModerationServiceTests : WithMocks
 
 		Assert.Single(actual.Remarks);
 		Assert.Equal(remark, actual.Remarks.First());
+		ModerationEventPublisherMock.VerifyNoOtherCalls();
 	}
 
 	[Fact(DisplayName = "Should assign a moderator")]
@@ -142,6 +164,7 @@ public class ModerationServiceTests : WithMocks
 
 		Assert.Single(actual.Moderators);
 		Assert.Equal(actual.Moderators.First(), mod);
+		ModerationEventPublisherMock.Verify(m => m.Assigned(It.IsAny<ModerationReport>(), It.IsAny<Guid>(), It.IsAny<IEnumerable<Claim>>()), Times.Once);
 	}
 
 	[Fact(DisplayName = "Should remove an assigned moderator")]
@@ -154,32 +177,37 @@ public class ModerationServiceTests : WithMocks
 		var actual = await _service.As([]).AssignModerator(_reports[0].Id, mod.Id, true);
 
 		Assert.Empty(actual.Moderators);
+		ModerationEventPublisherMock.VerifyNoOtherCalls();
 	}
 
 	[Fact(DisplayName = "Should close open reports")]
 	public async Task ShouldClose()
 	{
-		var actual = await _service.As([]).CloseReport(_reports[0].Id);
+		var actual = await _service.As([]).CloseReport(_reports[0].Id, _accounts[0].Id);
 
 		Assert.NotEqual(DateTimeOffset.MaxValue, actual.Closed);
+		ModerationEventPublisherMock.Verify(m => m.Closed(It.IsAny<ModerationReport>(), It.IsAny<Guid>(), It.IsAny<IEnumerable<Claim>>()), Times.Once);
+
 	}
 
 	[Fact(DisplayName = "Should reopen closed reports")]
 	public async Task ShouldReopen()
 	{
-		var actual = await _service.As([]).CloseReport(_reports[0].Id, true);
+		var actual = await _service.As([]).CloseReport(_reports[0].Id, _accounts[0].Id, true);
 
 		Assert.Equal(DateTimeOffset.MaxValue, actual.Closed);
+		ModerationEventPublisherMock.Verify(m => m.Reopened(It.IsAny<ModerationReport>(), It.IsAny<Guid>(), It.IsAny<IEnumerable<Claim>>()), Times.Once);
 	}
 
-	[Fact(DisplayName = "Should not modify already closed reports")]
+	[Fact(DisplayName = "Should not modify closing date of already closed reports")]
 	public async Task ShouldNotDoubleClose()
 	{
 		var expected = DateTimeOffset.UtcNow.AddHours(-1);
 		_reports[0].Closed = expected;
-		var actual = await _service.As([]).CloseReport(_reports[0].Id);
+		var actual = await _service.As([]).CloseReport(_reports[0].Id, _accounts[0].Id);
 
 		Assert.Equal(expected, actual.Closed);
+		ModerationEventPublisherMock.VerifyNoOtherCalls();
 	}
 
 	[Fact(DisplayName = "Should immediately close reports with a future close date")]
@@ -187,9 +215,11 @@ public class ModerationServiceTests : WithMocks
 	{
 		var expected = DateTimeOffset.UtcNow.AddHours(1);
 		_reports[0].Closed = expected;
-		var actual = await _service.As([]).CloseReport(_reports[0].Id);
+		var actual = await _service.As([]).CloseReport(_reports[0].Id, _accounts[0].Id);
 
 		Assert.True(actual.Closed <= DateTimeOffset.UtcNow);
+		ModerationEventPublisherMock.Verify(m => m.Closed(It.IsAny<ModerationReport>(), It.IsAny<Guid>(), It.IsAny<IEnumerable<Claim>>()), Times.Once);
+
 	}
 
 	[Fact(DisplayName = "Should update assigned Moderators")]
@@ -201,21 +231,62 @@ public class ModerationServiceTests : WithMocks
 		given.Moderators = [mod];
 		DataAdapterMock.Setup(m => m.Accounts(mod.Id)).Returns(given.Moderators.BuildMock());
 
-		var actual = await _service.As([]).UpdateReport(given.Id, given);
+		var actual = await _service.As([]).UpdateReport(given.Id, given, mod.Id);
 
 		Assert.Equivalent(given.Moderators, actual.Moderators);
+		ModerationEventPublisherMock.Verify(m => m.Assigned(It.IsAny<ModerationReport>(), It.IsAny<Guid>(), It.IsAny<IEnumerable<Claim>>()), Times.Once);
 	}
 
-	[Fact(DisplayName = "Should update assigned Moderators")]
+	[Fact(DisplayName = "Should update associated Policies")]
 	public async Task ShouldUpdatePolicies()
 	{
 		var given = new FakeReport(_profiles[2], _profiles[0], _opts).Generate();
 		given.Id = _reports[0].Id;
 		given.Policies = [_policies[1]];
 
-		var actual = await _service.As([]).UpdateReport(given.Id, given);
+		var actual = await _service.As([]).UpdateReport(given.Id, given, Guid.NewGuid());
 
 		Assert.Equivalent(given.Policies, actual.Policies);
+	}
+
+	[Fact(DisplayName = "Should forward to new recipients")]
+	public async Task ShouldUpdateForwarding()
+	{
+		var given = new FakeReport(_profiles[2], _profiles[0], _opts).Generate();
+		given.Id = _reports[0].Id;
+		given.Forwarded = [_profiles[0].SharedInbox!];
+
+		var actual = await _service.As([]).UpdateReport(given.Id, given, Guid.NewGuid());
+
+		Assert.Equivalent(given.Policies, actual.Policies);
+		ActivityPublisherMock.Verify(m => m.Report(_profiles[0].SharedInbox!, It.IsAny<ModerationReport>(), It.IsAny<ModerationReport.Scope>()));
+	}
+
+	[Fact(DisplayName = "Should not forward to unrelated recipients")]
+	public async Task ShouldNotForwardUnrelated()
+	{
+		var given = new FakeReport(_profiles[2], _profiles[0], _opts).Generate();
+		given.Id = _reports[0].Id;
+		given.Forwarded = [new Uri("https://inbox.example")];
+
+		var actual = await _service.As([]).UpdateReport(given.Id, given, Guid.NewGuid());
+
+		Assert.Equivalent(given.Policies, actual.Policies);
+		ActivityPublisherMock.VerifyNoOtherCalls();
+	}
+
+	[Fact(DisplayName = "Should not repeat forwarding")]
+	public async Task ShouldNotForwardRepeat()
+	{
+		_reports[0].Forwarded.Add(_profiles[0].SharedInbox!);
+		var given = new FakeReport(_profiles[2], _profiles[0], _opts).Generate();
+		given.Id = _reports[0].Id;
+		given.Forwarded = [_profiles[0].SharedInbox!];
+
+		var actual = await _service.As([]).UpdateReport(given.Id, given, Guid.NewGuid());
+
+		Assert.Equivalent(given.Policies, actual.Policies);
+		ActivityPublisherMock.VerifyNoOtherCalls();
 	}
 
 	[Fact(DisplayName = "Should not update summary, subjects, or posts")]
@@ -225,7 +296,7 @@ public class ModerationServiceTests : WithMocks
 		given.RelatedPosts = _posts;
 		given.Id = _reports[0].Id;
 
-		var actual = await _service.As([]).UpdateReport(given.Id, given);
+		var actual = await _service.As([]).UpdateReport(given.Id, given, Guid.NewGuid());
 
 		Assert.NotEqual(actual.Summary, given.Summary);
 		Assert.NotEqual(actual.Reporter, given.Reporter);

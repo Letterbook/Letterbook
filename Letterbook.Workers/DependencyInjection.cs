@@ -24,7 +24,8 @@ public static class DependencyInjection
 			.AddSingleton<IApCrawlScheduler, ApCrawlScheduler>()
 			.AddScoped<IAccountEventPublisher, AccountEventPublisher>()
 			.AddScoped<IPostEventPublisher, PostEventPublisher>()
-			.AddScoped<IProfileEventPublisher, ProfileEventPublisher>();
+			.AddScoped<IProfileEventPublisher, ProfileEventPublisher>()
+			.AddScoped<IModerationEventPublisher, ModerationEventPublisher>();
 	}
 
 	/// <summary>

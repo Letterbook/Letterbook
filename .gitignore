@@ -478,3 +478,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# VerifyTests temporary files
+*.received.*

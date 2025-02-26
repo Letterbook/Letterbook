@@ -1,4 +1,5 @@
-﻿using Letterbook.Api.Controllers;
+﻿using Bogus;
+using Letterbook.Api.Controllers;
 using Letterbook.Api.Dto;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models.Dto;
@@ -20,12 +21,14 @@ public class ProfilesControllerTests : WithMockContext
 	private readonly ProfilesController _controller;
 	private readonly FakeProfile _fakeProfile;
 	private readonly Models.Profile _profile;
+	private readonly Guid _accountId;
 
 	public ProfilesControllerTests(ITestOutputHelper output)
 	{
 		_output = output;
 		_output.WriteLine($"Bogus seed: {Init.WithSeed()}");
-		Auth();
+		_accountId = new Faker().Random.Guid();
+		Auth(_accountId);
 		_controller = new ProfilesController(Mock.Of<ILogger<ProfilesController>>(), CoreOptionsMock, ProfileServiceMock.Object,
 			new MappingConfigProvider(CoreOptionsMock), AuthorizationServiceMock.Object)
 		{

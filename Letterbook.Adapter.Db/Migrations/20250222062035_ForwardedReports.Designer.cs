@@ -5,6 +5,7 @@ using Letterbook.Adapter.Db;
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -13,9 +14,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Letterbook.Adapter.Db.Migrations
 {
     [DbContext(typeof(RelationalContext))]
-    partial class RelationalContextModelSnapshot : ModelSnapshot
+    [Migration("20250222062035_ForwardedReports")]
+    partial class ForwardedReports
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -782,22 +785,7 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.ToTable("ReportModerator");
                 });
 
-            modelBuilder.Entity("ReportSubjectPost", b =>
-                {
-                    b.Property<Guid>("RelatedPostsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("RelatedReportsId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("RelatedPostsId", "RelatedReportsId");
-
-                    b.HasIndex("RelatedReportsId");
-
-                    b.ToTable("ReportSubjectPost");
-                });
-
-            modelBuilder.Entity("ReportSubjectProfile", b =>
+            modelBuilder.Entity("ReportSubject", b =>
                 {
                     b.Property<Guid>("ReportSubjectId")
                         .HasColumnType("uuid");
@@ -809,7 +797,22 @@ namespace Letterbook.Adapter.Db.Migrations
 
                     b.HasIndex("SubjectsId");
 
-                    b.ToTable("ReportSubjectProfile");
+                    b.ToTable("ReportSubject");
+                });
+
+            modelBuilder.Entity("ReportedPost", b =>
+                {
+                    b.Property<Guid>("RelatedPostsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RelatedReportsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("RelatedPostsId", "RelatedReportsId");
+
+                    b.HasIndex("RelatedReportsId");
+
+                    b.ToTable("ReportedPost");
                 });
 
             modelBuilder.Entity("Letterbook.Core.Models.Note", b =>
@@ -1118,22 +1121,7 @@ namespace Letterbook.Adapter.Db.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ReportSubjectPost", b =>
-                {
-                    b.HasOne("Letterbook.Core.Models.Post", null)
-                        .WithMany()
-                        .HasForeignKey("RelatedPostsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Letterbook.Core.Models.ModerationReport", null)
-                        .WithMany()
-                        .HasForeignKey("RelatedReportsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ReportSubjectProfile", b =>
+            modelBuilder.Entity("ReportSubject", b =>
                 {
                     b.HasOne("Letterbook.Core.Models.ModerationReport", null)
                         .WithMany()
@@ -1144,6 +1132,21 @@ namespace Letterbook.Adapter.Db.Migrations
                     b.HasOne("Letterbook.Core.Models.Profile", null)
                         .WithMany()
                         .HasForeignKey("SubjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ReportedPost", b =>
+                {
+                    b.HasOne("Letterbook.Core.Models.Post", null)
+                        .WithMany()
+                        .HasForeignKey("RelatedPostsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Letterbook.Core.Models.ModerationReport", null)
+                        .WithMany()
+                        .HasForeignKey("RelatedReportsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

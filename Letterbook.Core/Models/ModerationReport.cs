@@ -22,11 +22,21 @@ public class ModerationReport
 	public DateTimeOffset Updated { get; set; } = DateTimeOffset.UtcNow;
 	public DateTimeOffset Closed { get; set; } = DateTimeOffset.MaxValue;
 	public ICollection<ModerationRemark> Remarks { get; set; } = new List<ModerationRemark>();
+	// TODO: Support forwarding to labelers
+	public IList<Uri> Forwarded { get; set; } = new List<Uri>();
 
-	public ModerationReport() { }
+	private readonly Lazy<HashSet<Uri>> _lazyForwardingInboxes;
+
+	public ModerationReport()
+	{
+		_lazyForwardingInboxes = new Lazy<HashSet<Uri>>(() => Subjects.Select(p => p.SharedInbox)
+			.Concat(RelatedPosts.SelectMany(p => p.Creators).Select(p => p.SharedInbox))
+			.WhereNotNull()
+			.ToHashSet());
+	}
 
 	[SetsRequiredMembers]
-	public ModerationReport(CoreOptions opts, string summary)
+	public ModerationReport(CoreOptions opts, string summary) : this()
 	{
 		Summary = summary;
 		var builder = new UriBuilder(opts.BaseUri());
@@ -39,14 +49,32 @@ public class ModerationReport
 		};
 	}
 
+	public HashSet<Uri> ForwardingInboxes() => _lazyForwardingInboxes.Value;
+
+	public bool ForwardTo(Uri inbox, bool resend = false)
+	{
+		if (!ForwardingInboxes().Contains(inbox)) return false;
+		if (Forwarded.Contains(inbox)) return resend;
+		Forwarded.Add(inbox);
+		return true;
+	}
+
 	public bool Close()
 	{
-		if (Closed > DateTimeOffset.UtcNow)
-		{
-			Closed = DateTimeOffset.UtcNow;
-			return true;
-		}
+		if (Closed <= DateTimeOffset.UtcNow) return false;
+		Closed = DateTimeOffset.UtcNow;
+		return true;
+	}
 
-		return false;
+	public bool IsClosed() => Closed <= DateTimeOffset.UtcNow;
+
+	/// <summary>
+	/// Scope of resources to include in forwarded reports
+	/// </summary>
+	public enum Scope
+	{
+		Profile,
+		Domain,
+		Full
 	}
 }

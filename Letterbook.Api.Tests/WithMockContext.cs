@@ -1,5 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Principal;
 using Letterbook.Core.Tests;
 using Microsoft.AspNetCore.Http;
 using Moq;
@@ -15,9 +15,9 @@ public abstract class WithMockContext : WithMocks
 		MockHttpContext = new Mock<HttpContext>();
 	}
 
-	public ClaimsPrincipal Auth(params Claim[] claims)
+	public ClaimsPrincipal Auth(Guid accountId, params Claim[] claims)
 	{
-		var identity = new ClaimsIdentity(claims, "MockContext");
+		var identity = new ClaimsIdentity([new Claim(JwtRegisteredClaimNames.Sub, accountId.ToString()), ..claims], "MockContext");
 		var principal = new ClaimsPrincipal(identity);
 
 		MockHttpContext.Setup(m => m.User).Returns(principal);

@@ -7,3 +7,12 @@ max_line_length = 140
 insert_final_newline = false
 trim_trailing_whitespace = true
 dotnet_diagnostic.CS0618.severity = suggestion
+
+# snapshot files
+[*.{received,verified}.{json,txt,xml}]
+charset = utf-8-bom
+end_of_line = lf
+indent_size = unset
+indent_style = unset
+insert_final_newline = false
+trim_trailing_whitespace = false

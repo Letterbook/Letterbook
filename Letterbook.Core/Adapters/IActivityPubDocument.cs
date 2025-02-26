@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
 using Letterbook.Core.Models;
@@ -7,6 +8,8 @@ namespace Letterbook.Core.Adapters;
 public interface IActivityPubDocument
 {
 	public string Serialize(ASType document);
+	public string Serialize(JsonNode node);
+	public JsonNode? SerializeToNode(ASType document);
 	AcceptActivity Accept(Profile actor, ASObject asObject);
 	AddActivity Add(Profile actor, ASObject asObject, ASObject target);
 	AnnounceActivity Announce(Profile actor, Uri content);
@@ -14,6 +17,7 @@ public interface IActivityPubDocument
 	CreateActivity Create(Profile actor, ASObject createdObject);
 	DeleteActivity Delete(Profile actor, Uri content);
 	DislikeActivity Dislike(Profile actor, IContentRef content);
+	FlagActivity Flag(Profile systemActor, Uri inbox, ModerationReport report, ModerationReport.Scope scope, Profile? subject = null);
 	FollowActivity Follow(Profile actor, Profile target, Uri? id = null, bool implicitId = false);
 	LikeActivity Like(Profile actor, Uri content);
 	RejectActivity Reject(Profile actor, ASObject asObject);
@@ -23,5 +27,5 @@ public interface IActivityPubDocument
 	UpdateActivity Update(Profile actor, ASObject content);
 	ASObject FromPost(Post post);
 	ASLink ObjectId(IFederated linkable);
-	ASActivity BuildActivity(Models.ActivityType type);
+	ASActivity BuildActivity(ActivityType type);
 }

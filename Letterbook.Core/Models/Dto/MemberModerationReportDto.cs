@@ -11,6 +11,7 @@ public class MemberModerationReportDto
 	public ProfileId Reporter { get; set; }
 	public ICollection<ProfileId> Subjects { get; set; } = new HashSet<ProfileId>();
 	public ICollection<PostId> RelatedPosts { get; set; } = new HashSet<PostId>();
+	public IEnumerable<Uri> Forwarded { get; set; } = new List<Uri>();
 }
 
 public class FullModerationReportDto : MemberModerationReportDto

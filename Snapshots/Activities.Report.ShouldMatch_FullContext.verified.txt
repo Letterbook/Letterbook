@@ -1,0 +1,17 @@
+﻿{
+  "type": "Flag",
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "http://letterbook.example/report/d7qgu4eneycbo008cbcdpgzr8",
+  "content": "Ut minus sunt vitae laboriosam sit minus eveniet.",
+  "actor": "http://letterbook.example/actor/bneffcn07btjpctg69570zsxv",
+  "object": [
+    "http://peer.example/actor/9kBSY1pnQxnunMTkZauzbV",
+    "http://peer.example/actor/B78gd9KB6Nvf2VgMKTRhX9",
+    "http://peer.example/actor/XZGKsfsDJdoEXjDH8DLqed",
+    "http://different.example/actor/Ri8Dovdm5GkuXgtMEHkUjK",
+    "https://peer.example/post/88hrk9ekkrkwnjrxc4n3m1hd1",
+    "https://peer.example/post/j8esdwgbaumu39izj76a51z7f",
+    "https://peer.example/post/4ocaujgirpq183y1kat5ew9zd",
+    "https://different.example/post/oa7yk0g10do1axdouby5k1wiu"
+  ]
+}

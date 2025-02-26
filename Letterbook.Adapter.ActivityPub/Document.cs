@@ -1,11 +1,12 @@
+using System.Text.Json.Nodes;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Conversion;
+using ActivityPub.Types.Util;
 using AutoMapper;
 using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Models.Mappers;
 
 namespace Letterbook.Adapter.ActivityPub;
 
@@ -23,6 +24,16 @@ public class Document : IActivityPubDocument
 	public string Serialize(ASType document)
 	{
 		return _serializer.Serialize(document);
+	}
+
+	public string Serialize(JsonNode node)
+	{
+		return _serializer.Serialize(node);
+	}
+
+	public JsonNode? SerializeToNode(ASType document)
+	{
+		return _serializer.SerializeToNode(document);
 	}
 
 	public AcceptActivity Accept(Models.Profile actor, ASObject asObject)
@@ -82,6 +93,43 @@ public class Document : IActivityPubDocument
 		return doc;
 	}
 
+	public FlagActivity Flag(Models.Profile systemActor, Uri inbox, Models.ModerationReport report, Models.ModerationReport.Scope scope, Models.Profile? subject = null)
+	{
+		var idBuilder = new UriBuilder(report.FediId!);
+		var doc = new FlagActivity
+		{
+			Id = idBuilder.Uri.ToString(),
+			Actor = ObjectId(systemActor),
+			Content = report.Summary
+		};
+
+		switch (scope)
+		{
+			case Models.ModerationReport.Scope.Profile:
+				if (subject is null)
+					throw new ArgumentException("Subject must be specified for Profile scope", nameof(subject));
+				idBuilder.Query = $"?subject={subject.FediId}";
+				doc.Id = idBuilder.Uri.ToString();
+				doc.Object.Add(subject.FediId);
+				doc.Object.AddRange(report.RelatedPosts.Where(p => p.FediId.Authority == inbox.Authority).Select(LinkableId));
+				break;
+			case Models.ModerationReport.Scope.Domain:
+				idBuilder.Query = $"?domain={inbox.Authority}";
+				doc.Id = idBuilder.Uri.ToString();
+				doc.Object.AddRange(report.Subjects.Where(p => p.FediId.Authority == inbox.Authority).Select(LinkableId));
+				doc.Object.AddRange(report.RelatedPosts.Where(p => p.FediId.Authority == inbox.Authority).Select(LinkableId));
+				break;
+			case Models.ModerationReport.Scope.Full:
+				doc.Id = idBuilder.Uri.ToString();
+				doc.Object.AddRange(report.Subjects.Select(LinkableId));
+				doc.Object.AddRange(report.RelatedPosts.Select(LinkableId));
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(scope), scope, null);
+		}
+		return doc;
+	}
+
 	public LikeActivity Like(Models.Profile actor, Uri content)
 	{
 		throw new NotImplementedException();
@@ -134,6 +182,11 @@ public class Document : IActivityPubDocument
 		throw new NotImplementedException();
 	}
 
+	/// <summary>
+	/// Get an ASLink with the item's FediId
+	/// </summary>
+	/// <param name="contentRef"></param>
+	/// <returns></returns>
 	public ASLink ObjectId(Models.IFederated contentRef)
 	{
 		return new ASLink()
@@ -141,6 +194,13 @@ public class Document : IActivityPubDocument
 			HRef = contentRef.FediId
 		};
 	}
+
+	/// <summary>
+	/// Get a Linkable with a link to the item's FediId
+	/// </summary>
+	/// <param name="contentRef"></param>
+	/// <returns></returns>
+	public Linkable<ASObject> LinkableId(Models.IFederated contentRef) => ObjectId(contentRef);
 
 	private Uri ImplicitId(Uri id, string activity, Uri? targetId = null)
 	{

@@ -2739,6 +2739,15 @@
             },
             "nullable": true
           },
+          "forwarded": {
+            "type": "array",
+            "items": {
+              "pattern": "https://\\w+\\.\\w+/\\w*",
+              "type": "string",
+              "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+            },
+            "nullable": true
+          },
           "fediId": {
             "pattern": "https://\\w+\\.\\w+/\\w*",
             "type": "string",
@@ -2914,6 +2923,15 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PostId"
+            },
+            "nullable": true
+          },
+          "forwarded": {
+            "type": "array",
+            "items": {
+              "pattern": "https://\\w+\\.\\w+/\\w*",
+              "type": "string",
+              "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
             },
             "nullable": true
           }
@@ -3204,6 +3222,15 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ModerationRemark"
+            },
+            "nullable": true
+          },
+          "forwarded": {
+            "type": "array",
+            "items": {
+              "pattern": "https://\\w+\\.\\w+/\\w*",
+              "type": "string",
+              "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
             },
             "nullable": true
           }

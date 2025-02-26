@@ -47,16 +47,21 @@ public interface IAuthzModerationService
 	/// </remarks>
 	/// <param name="reportId"></param>
 	/// <param name="updated"></param>
+	/// <param name="accountId"></param>
+	/// <param name="sendScope"></param>
+	/// <param name="resend"></param>
 	/// <returns></returns>
-	public Task<ModerationReport> UpdateReport(ModerationReportId reportId, ModerationReport updated);
+	public Task<ModerationReport> UpdateReport(ModerationReportId reportId, ModerationReport updated, Guid accountId,
+		ModerationReport.Scope sendScope = ModerationReport.Scope.Profile, bool resend = false);
 
 	/// <summary>
 	/// Close or reopen a report
 	/// </summary>
 	/// <param name="reportId"></param>
+	/// <param name="moderatorId"></param>
 	/// <param name="reopen"></param>
 	/// <returns></returns>
-	public Task<ModerationReport> CloseReport(ModerationReportId reportId, bool reopen = false);
+	public Task<ModerationReport> CloseReport(ModerationReportId reportId, Guid moderatorId, bool reopen = false);
 
 	/// <summary>
 	/// Search for reports
