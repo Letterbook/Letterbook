@@ -12,16 +12,16 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Workers.Tests;
 
-public class ActivitySchedulerTests : WithMockBus<IActivityScheduler, ActivityScheduler>
+public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 {
 	private readonly IActivityScheduler _publisher;
 	private readonly DeliveryWorker _consumer;
 	private readonly Profile _actor;
 	private readonly Profile _target;
 
-	public ActivitySchedulerTests(ITestOutputHelper output)
+	public Activities(ITestOutputHelper output)
 	{
-		UseProjectRelativeDirectory("Snapshots");
+		UseProjectRelativeDirectory("../Snapshots");
 
 		_publisher = Provider.GetRequiredService<IActivityScheduler>();
 		_consumer = Provider.GetRequiredService<DeliveryWorker>();
@@ -39,7 +39,7 @@ public class ActivitySchedulerTests : WithMockBus<IActivityScheduler, ActivitySc
 		bus.AddConsumer<DeliveryWorker>();
 	}
 
-	public class Follow(ITestOutputHelper output) : ActivitySchedulerTests(output)
+	public class Follow(ITestOutputHelper output) : Activities(output)
 	{
 		[Fact(DisplayName = "Should match the snapshot")]
 		public async Task ShouldMatch()
@@ -64,7 +64,7 @@ public class ActivitySchedulerTests : WithMockBus<IActivityScheduler, ActivitySc
 		}
 	}
 
-	public class Unfollow(ITestOutputHelper output) : ActivitySchedulerTests(output)
+	public class Unfollow(ITestOutputHelper output) : Activities(output)
 	{
 		[Fact(DisplayName = "Should match the snapshot")]
 		public async Task ShouldMatch()
@@ -89,7 +89,7 @@ public class ActivitySchedulerTests : WithMockBus<IActivityScheduler, ActivitySc
 		}
 	}
 
-	public class AcceptFollower(ITestOutputHelper output) : ActivitySchedulerTests(output)
+	public class AcceptFollower(ITestOutputHelper output) : Activities(output)
 	{
 		[Fact(DisplayName = "Should match the snapshot")]
 		public async Task ShouldMatch()
@@ -114,7 +114,7 @@ public class ActivitySchedulerTests : WithMockBus<IActivityScheduler, ActivitySc
 		}
 	}
 
-	public class RejectFollower(ITestOutputHelper output) : ActivitySchedulerTests(output)
+	public class RejectFollower(ITestOutputHelper output) : Activities(output)
 	{
 		[Fact(DisplayName = "Should match the snapshot")]
 		public async Task ShouldMatch()
@@ -139,7 +139,7 @@ public class ActivitySchedulerTests : WithMockBus<IActivityScheduler, ActivitySc
 		}
 	}
 
-	public class PendingFollower(ITestOutputHelper output) : ActivitySchedulerTests(output)
+	public class PendingFollower(ITestOutputHelper output) : Activities(output)
 	{
 		[Fact(DisplayName = "Should match the snapshot")]
 		public async Task ShouldMatch()
@@ -164,7 +164,7 @@ public class ActivitySchedulerTests : WithMockBus<IActivityScheduler, ActivitySc
 		}
 	}
 
-	public class RemoveFollower(ITestOutputHelper output) : ActivitySchedulerTests(output)
+	public class RemoveFollower(ITestOutputHelper output) : Activities(output)
 	{
 		[Fact(DisplayName = "Should match the snapshot")]
 		public async Task ShouldMatch()
@@ -189,7 +189,7 @@ public class ActivitySchedulerTests : WithMockBus<IActivityScheduler, ActivitySc
 		}
 	}
 
-	public class Report(ITestOutputHelper output) : ActivitySchedulerTests(output)
+	public class Report(ITestOutputHelper output) : Activities(output)
 	{
 		[Fact(DisplayName = "Should match the snapshot with a full context report")]
 		public async Task ShouldMatch_FullContext()
