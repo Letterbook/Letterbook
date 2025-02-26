@@ -114,7 +114,7 @@ public class ActivityScheduler : IActivityScheduler
 	/// <inheritdoc />
 	public async Task Report(Uri inbox, ModerationReport report, bool fullContext = false)
 	{
-		var systemActor = Profile.SystemModerators(_options);
+		var systemActor = Profile.GetModeratorsProfile();
 		foreach (var subject in report.Subjects)
 		{
 			var document = _document.Flag(systemActor!, inbox, report, subject, fullContext);

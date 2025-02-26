@@ -83,6 +83,9 @@ public abstract class WithMocks
 		MockedServiceCollection.AddScoped<IActivityPubAuthenticatedClient>(_ => ActivityPubAuthClientMock.Object);
 		MockedServiceCollection.AddScoped<IProfileService>(_ => ProfileServiceMock.Object);
 		MockedServiceCollection.TryAddTypesModule();
+
+		Profile.GetOrAddModeratorsProfile(CoreOptionsMock.Value);
+		Profile.GetOrAddInstanceProfile(CoreOptionsMock.Value);
 	}
 
 	public void MockAuthorizeAllowAll()
