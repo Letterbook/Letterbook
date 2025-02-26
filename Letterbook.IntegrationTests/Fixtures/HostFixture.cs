@@ -171,6 +171,8 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_context.Database.Migrate();
 		_context.Accounts.AddRange(Accounts);
 		_context.Profiles.AddRange(Profiles);
+		_context.Profiles.Add(Profile.GetOrAddInstanceProfile(Options));
+		_context.Profiles.Add(Profile.GetOrAddModeratorsProfile(Options));
 		_context.SaveChanges();
 
 		_context.Posts.AddRange(Posts.SelectMany(pair => pair.Value));
