@@ -27,7 +27,7 @@ public class FakePost : Faker<Post>
 		_creators = creators;
 		_authority = _creators.First().FediId.Authority;
 		RuleFor(p => p.Id, faker => new PostId(faker.Random.Guid7()));
-		RuleFor(p => p.FediId, faker => faker.FediId(_authority, "post"));
+		RuleFor(p => p.FediId, (faker, post) => faker.FediId(_authority, "post", post.Id.Id));
 		RuleFor(p => p.Creators, () => _creators);
 		RuleFor(p => p.CreatedDate, faker => faker.Date.Recent().ToUniversalTime());
 		RuleFor(p => p.PublishedDate, (_, post) => post.CreatedDate);
