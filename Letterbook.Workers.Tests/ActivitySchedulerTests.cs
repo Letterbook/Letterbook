@@ -191,7 +191,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 
 	public class Report(ITestOutputHelper output) : Activities(output)
 	{
-		[Fact(DisplayName = "Should match the snapshot with a full context report")]
+		[Fact(DisplayName = "Should match the snapshot with a full context from a report")]
 		public async Task ShouldMatch_FullContext()
 		{
 			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
@@ -208,7 +208,31 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 				report.RelatedPosts.Add(post);
 			}
 			report.RelatedPosts.Add(otherPost);
-			await _publisher.Report(target[0].Inbox, report, true);
+			await _publisher.Report(target[0].Inbox, report, ModerationReport.Scope.Full);
+			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
+
+			Assert.NotNull(actual);
+			await Verify(actual);
+		}
+
+		[Fact(DisplayName = "Should match the snapshot with a single domain context from a report")]
+		public async Task ShouldMatch_DomainContext()
+		{
+			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
+			var target = new FakeProfile("peer.example").UseSeed(1).Generate(3);
+			var other = new FakeProfile("different.example").UseSeed(4).Generate();
+			var report = new FakeReport(actor, target[0]).UseSeed(2).Generate();
+			var posts = new FakePost(target[0]).UseSeed(1).Generate(3);
+			var otherPost = new FakePost(other).UseSeed(4).Generate();
+			report.Subjects.Add(target[1]);
+			report.Subjects.Add(target[2]);
+			report.Subjects.Add(other);
+			foreach (var post in posts)
+			{
+				report.RelatedPosts.Add(post);
+			}
+			report.RelatedPosts.Add(otherPost);
+			await _publisher.Report(target[0].Inbox, report, ModerationReport.Scope.Domain);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -221,7 +245,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
 			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
 			var report = new FakeReport(actor, target).UseSeed(2).Generate();
-			await _publisher.Report(target.Inbox, report, false);
+			await _publisher.Report(target.Inbox, report);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -235,7 +259,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
 			var post = new FakePost(target).UseSeed(1).Generate();
 			var report = new FakeReport(actor, post).UseSeed(2).Generate();
-			await _publisher.Report(target.Inbox, report, false);
+			await _publisher.Report(target.Inbox, report);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);

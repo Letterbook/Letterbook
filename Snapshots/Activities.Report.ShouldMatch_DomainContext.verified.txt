@@ -1,17 +1,15 @@
 ﻿{
   "type": "Flag",
   "@context": "https://www.w3.org/ns/activitystreams",
-  "id": "http://letterbook.example/report/d7qgu4eneycbo008cbcdpgzr8",
+  "id": "http://letterbook.example/report/d7qgu4eneycbo008cbcdpgzr8?domain=peer.example",
   "content": "Ut minus sunt vitae laboriosam sit minus eveniet.",
   "actor": "http://letterbook.example/actor/bneffcn07btjpctg69570zsxv",
   "object": [
     "http://peer.example/actor/9kBSY1pnQxnunMTkZauzbV",
     "http://peer.example/actor/B78gd9KB6Nvf2VgMKTRhX9",
     "http://peer.example/actor/XZGKsfsDJdoEXjDH8DLqed",
-    "http://different.example/actor/Ri8Dovdm5GkuXgtMEHkUjK",
     "https://peer.example/seychelles-rupee/security.post/3544",
     "https://peer.example/cross-platform.post/5736",
-    "https://peer.example/disintermediate/implement.post/1564",
-    "https://different.example/program/transparent.post/5894"
+    "https://peer.example/disintermediate/implement.post/1564"
   ]
 }

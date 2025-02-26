@@ -136,7 +136,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 	}
 
 	public async Task<ModerationReport> UpdateReport(ModerationReportId reportId, ModerationReport updated, Guid accountId,
-		bool resend = false, bool sendFullContext = false)
+		ModerationReport.Scope sendScope, bool resend = false)
 	{
 		if (await _data.ModerationReports(reportId)
 			    .Include(r => r.Policies)
@@ -173,7 +173,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 		foreach (var inbox in forwardTo)
 		{
-			await _activity.Report(inbox, report, sendFullContext);
+			await _activity.Report(inbox, report, sendScope);
 		}
 
 		return report;

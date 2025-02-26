@@ -93,34 +93,40 @@ public class Document : IActivityPubDocument
 		return doc;
 	}
 
-	private FlagActivity _Flag(Models.Profile systemActor, Uri inbox, Models.ModerationReport report, string id, bool fullContext = false)
+	public FlagActivity Flag(Models.Profile systemActor, Uri inbox, Models.ModerationReport report, Models.ModerationReport.Scope scope, Models.Profile? subject = null)
 	{
+		var idBuilder = new UriBuilder(report.FediId!);
 		var doc = new FlagActivity
 		{
-			Id = id,
+			Id = idBuilder.Uri.ToString(),
 			Actor = ObjectId(systemActor),
 			Content = report.Summary
 		};
-		doc.Object.AddRange(report.RelatedPosts.Where(p => fullContext || p.FediId.Authority == inbox.Authority).Select(ObjectId));
-		return doc;
-	}
 
-	public FlagActivity Flag(Models.Profile systemActor, Uri inbox, Models.ModerationReport report, bool fullContext = false)
-	{
-		var doc = _Flag(systemActor, inbox, report, report.FediId!.ToString(), fullContext);
-		doc.Object.InsertRange(0, report.Subjects.Where(p => fullContext || p.SharedInbox == inbox).Select(LinkableId));
-		return doc;
-	}
-
-	public FlagActivity Flag(Models.Profile systemActor, Uri inbox, Models.ModerationReport report, Models.Profile subject,
-		bool fullContext = false)
-	{
-		var idBuilder = new UriBuilder(report.FediId!)
+		switch (scope)
 		{
-			Query = $"?subject={subject.FediId}"
-		};
-		var doc = _Flag(systemActor, inbox, report, idBuilder.Uri.ToString(), fullContext);
-		doc.Object.Insert(0, LinkableId(subject));
+			case Models.ModerationReport.Scope.Profile:
+				if (subject is null)
+					throw new ArgumentException("Subject must be specified for Profile scope", nameof(subject));
+				idBuilder.Query = $"?subject={subject.FediId}";
+				doc.Id = idBuilder.Uri.ToString();
+				doc.Object.Add(subject.FediId);
+				doc.Object.AddRange(report.RelatedPosts.Where(p => p.FediId.Authority == inbox.Authority).Select(LinkableId));
+				break;
+			case Models.ModerationReport.Scope.Domain:
+				idBuilder.Query = $"?domain={inbox.Authority}";
+				doc.Id = idBuilder.Uri.ToString();
+				doc.Object.AddRange(report.Subjects.Where(p => p.FediId.Authority == inbox.Authority).Select(LinkableId));
+				doc.Object.AddRange(report.RelatedPosts.Where(p => p.FediId.Authority == inbox.Authority).Select(LinkableId));
+				break;
+			case Models.ModerationReport.Scope.Full:
+				doc.Id = idBuilder.Uri.ToString();
+				doc.Object.AddRange(report.Subjects.Select(LinkableId));
+				doc.Object.AddRange(report.RelatedPosts.Select(LinkableId));
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(scope), scope, null);
+		}
 		return doc;
 	}
 

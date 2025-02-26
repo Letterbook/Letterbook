@@ -112,14 +112,25 @@ public class ActivityScheduler : IActivityScheduler
 	}
 
 	/// <inheritdoc />
-	public async Task Report(Uri inbox, ModerationReport report, bool fullContext = false)
+	public async Task Report(Uri inbox, ModerationReport report, ModerationReport.Scope scope)
 	{
 		var systemActor = Profile.GetModeratorsProfile();
-		foreach (var subject in report.Subjects)
+		switch (scope)
 		{
-			var document = _document.Flag(systemActor!, inbox, report, subject, fullContext);
-			await Deliver(inbox, document, systemActor);
+			case ModerationReport.Scope.Profile:
+				foreach (var subject in report.Subjects)
+				{
+					await Deliver(inbox, _document.Flag(systemActor!, inbox, report, scope, subject), systemActor);
+				}
+				break;
+			case ModerationReport.Scope.Domain:
+			case ModerationReport.Scope.Full:
+				await Deliver(inbox, _document.Flag(systemActor!, inbox, report, scope), systemActor);
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(scope), scope, null);
 		}
+
 	}
 
 	private ASObject PopulateMentions(Post post, Mention? extraMention)

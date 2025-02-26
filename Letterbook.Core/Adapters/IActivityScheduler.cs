@@ -139,7 +139,7 @@ public interface IActivityScheduler
 	/// <remarks>Only sends the subset of the report that shares a domain with the recipient inbox</remarks>
 	/// <param name="inbox"></param>
 	/// <param name="report"></param>
-	/// <param name="fullContext">Send the full context of the report to the recipient, including from other domains</param>
+	/// <param name="scope"></param>
 	/// <returns></returns>
-	public Task Report(Uri inbox, ModerationReport report, bool fullContext = false);
+	public Task Report(Uri inbox, ModerationReport report, ModerationReport.Scope scope = ModerationReport.Scope.Profile);
 }

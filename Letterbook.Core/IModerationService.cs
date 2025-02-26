@@ -48,11 +48,11 @@ public interface IAuthzModerationService
 	/// <param name="reportId"></param>
 	/// <param name="updated"></param>
 	/// <param name="accountId"></param>
+	/// <param name="sendScope"></param>
 	/// <param name="resend"></param>
-	/// <param name="sendFullContext"></param>
 	/// <returns></returns>
-	public Task<ModerationReport> UpdateReport(ModerationReportId reportId, ModerationReport updated, Guid accountId, bool resend = false,
-		bool sendFullContext = false);
+	public Task<ModerationReport> UpdateReport(ModerationReportId reportId, ModerationReport updated, Guid accountId,
+		ModerationReport.Scope sendScope = ModerationReport.Scope.Profile, bool resend = false);
 
 	/// <summary>
 	/// Close or reopen a report

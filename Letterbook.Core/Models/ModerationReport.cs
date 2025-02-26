@@ -67,4 +67,14 @@ public class ModerationReport
 	}
 
 	public bool IsClosed() => Closed <= DateTimeOffset.UtcNow;
+
+	/// <summary>
+	/// Scope of resources to include in forwarded reports
+	/// </summary>
+	public enum Scope
+	{
+		Profile,
+		Domain,
+		Full
+	}
 }
