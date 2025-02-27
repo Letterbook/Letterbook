@@ -93,8 +93,6 @@ public static class DependencyInjectionExtensions
 	{
 		// Register options
 		services.Configure<CoreOptions>(configuration.GetSection(CoreOptions.ConfigKey));
-		services.Configure<ApiOptions>(configuration.GetSection(ApiOptions.ConfigKey));
-		services.Configure<DbOptions>(configuration.GetSection(DbOptions.ConfigKey));
 
 		// Register Mapping Configs
 		services.AddSingleton<MappingConfigProvider>();

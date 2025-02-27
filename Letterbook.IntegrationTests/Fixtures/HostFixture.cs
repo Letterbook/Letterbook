@@ -220,8 +220,6 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		{
 			["ConnectionStrings:db"] = ConnectionString,
 			["ConnectionStrings:feeds"] = FeedsConnectionString,
-			// [$"{DbOptions.ConfigKey}:{nameof(DbOptions.ConnectionString)}"] = ConnectionString,
-			[$"{FeedsDbOptions.ConfigKey}:{nameof(FeedsDbOptions.ConnectionString)}"] = FeedsConnectionString
 		};
 		var cfg = new ConfigurationBuilder().AddInMemoryCollection(memConfig!).Build();
 
