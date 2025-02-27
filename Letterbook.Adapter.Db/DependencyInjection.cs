@@ -11,10 +11,7 @@ public static class DependencyInjection
 {
 	public static IServiceCollection AddDbAdapter(this IServiceCollection services, IConfigurationManager config)
 	{
-		var dbOptions = config.GetSection(DbOptions.ConfigKey)
-			.Get<DbOptions>() ?? throw new ArgumentNullException(DbOptions.ConfigKey);
-		var dataSource = DataSource(dbOptions);
-
+		var dataSource = DataSource(config);
 		return services.AddDbContext<RelationalContext>(options => options.UseNpgsql(dataSource))
 			.AddScoped<IDataAdapter, DataAdapter>();
 	}
@@ -29,17 +26,6 @@ public static class DependencyInjection
 			{
 				tracing.AddNpgsql();
 			});
-	}
-
-	internal static NpgsqlDataSource DataSource(DbOptions dbOptions)
-	{
-		var dataSource = new NpgsqlDataSourceBuilder(dbOptions.GetConnectionString())
-		{
-			Name = dbOptions.Database ?? "letterbook"
-		};
-		dataSource.EnableDynamicJson();
-
-		return dataSource.Build();
 	}
 
 	internal static NpgsqlDataSource DataSource(IConfiguration config)

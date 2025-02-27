@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Letterbook.Adapter.TimescaleFeeds._Tests.Fixtures;
 
@@ -18,8 +19,11 @@ public class TimescaleFixture<T>
 
 	public TimescaleFixture()
 	{
+		var dataSource = new NpgsqlDataSourceBuilder(_connectionString);
+		dataSource.EnableDynamicJson();
+
 		_opts = new DbContextOptionsBuilder<FeedsContext>()
-			.UseNpgsql(DependencyInjection.DataSource(new FeedsDbOptions() { ConnectionString = _connectionString }))
+			.UseNpgsql(dataSource.Build())
 			.Options;
 	}
 

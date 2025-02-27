@@ -3,6 +3,7 @@ using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Medo;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Letterbook.Adapter.Db.Tests;
 
@@ -14,18 +15,11 @@ public class RelationalContextTest : IDisposable
 
 	public RelationalContextTest()
 	{
-
-		var options = new DbOptions
-		{
-			Host = "localhost",
-			Port = "5432",
-			Username = "postgres",
-			Database = "postgres",
-			UseSsl = false,
-			Password = "postgres",
-		};
+		const string connectionString = "Server=127.0.0.1;Port=5432;Database=letterbook;User Id=letterbook;Password=letterbookpw;SSL Mode=Prefer;";
+		var dataSource = new NpgsqlDataSourceBuilder(connectionString);
+		dataSource.EnableDynamicJson();
 		var dbContextOptions = new DbContextOptionsBuilder<RelationalContext>()
-			.UseNpgsql(DependencyInjection.DataSource(options))
+			.UseNpgsql(dataSource.Build())
 			.Options;
 		_context = new RelationalContext(dbContextOptions);
 		_profiles = new FakeProfile("letterbook.example");
