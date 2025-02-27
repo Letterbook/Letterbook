@@ -38,12 +38,11 @@ services:
         dotnet tool restore
         dotnet build
         dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj --no-build
-        
+        dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj --no-build
 #        /vsdbg/vsdbg --server --port 4022 --no-https --engineLogging=/tmp/enginelog.log &
 #        dotnet run --project Letterbook/Letterbook.csproj
 
 #        tail -f /dev/null
-#        dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj -- --environment Pasture
   
 volumes:
   ts_data:

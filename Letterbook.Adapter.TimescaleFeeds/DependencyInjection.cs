@@ -28,4 +28,12 @@ public static class DependencyInjection
 
 		return dataSource.Build();
 	}
+
+	internal static NpgsqlDataSource DataSource(IConfiguration config)
+	{
+		var dataSource = new NpgsqlDataSourceBuilder(config.GetConnectionString("feeds"));
+		dataSource.EnableDynamicJson();
+
+		return dataSource.Build();
+	}
 }
