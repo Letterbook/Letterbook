@@ -1,0 +1,55 @@
+version: "3.10"
+name: pasture
+services:
+  letterbook_db:
+    image: timescale/timescaledb:2.17.2-pg15-oss
+    networks:
+      - letterbook
+    environment:
+      - POSTGRES_USER=letterbook
+      - POSTGRES_PASSWORD=letterbookpw
+      - POSTGRES_DB=letterbook
+    volumes:
+      - ts_data:/var/lib/postgresql/data
+    restart: always
+
+  letterbook:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    networks:
+      - letterbook
+      - default
+    ports:
+      - '2999:5127'
+    volumes:
+      - './:/app:z'
+      - './volumes/appsettings.Pasture.json:/app/Letterbook.Adapter.Db/bin/Debug/net8.0/appsettings.Pasture.json'
+      - './volumes/appsettings.Pasture.json:/app/Letterbook.Adapter.TimescaleFeeds/bin/Debug/net8.0/appsettings.Pasture.json'
+      - './volumes/appsettings.Pasture.json:/app/Letterbook/bin/Debug/net8.0/appsettings.Pasture.json'
+    depends_on:
+      - letterbook_db
+    working_dir: '/app'
+    environment:
+      ASPNETCORE_ENVIRONMENT: Pasture
+      DOTNET_ENVIRONMENT: Pasture
+    entrypoint: ["/bin/sh","-c"]
+    command:
+      - | 
+        pwd
+        dotnet tool restore
+        dotnet build
+        dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj --no-build
+        
+#        /vsdbg/vsdbg --server --port 4022 --no-https --engineLogging=/tmp/enginelog.log &
+#        dotnet run --project Letterbook/Letterbook.csproj
+
+#        tail -f /dev/null
+#        dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj -- --environment Pasture
+  
+volumes:
+  ts_data:
+    driver: local
+networks:
+  letterbook:
+  default:
+    name: fediverse-pasture
+    external: true
