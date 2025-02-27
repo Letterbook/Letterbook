@@ -24,7 +24,7 @@ services:
       - './:/app:z'
       - './volumes/appsettings.Pasture.json:/app/Letterbook.Adapter.Db/bin/Debug/net8.0/appsettings.Pasture.json'
       - './volumes/appsettings.Pasture.json:/app/Letterbook.Adapter.TimescaleFeeds/bin/Debug/net8.0/appsettings.Pasture.json'
-      - './volumes/appsettings.Pasture.json:/app/Letterbook/bin/Debug/net8.0/appsettings.Pasture.json'
+      - './volumes/appsettings.Pasture.json:/app/Letterbook/appsettings.Pasture.json'
     depends_on:
       - letterbook_db
     working_dir: '/app'
@@ -36,13 +36,11 @@ services:
       - | 
         pwd
         dotnet tool restore
-        dotnet build
-        dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj --no-build
-        dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj --no-build
-#        /vsdbg/vsdbg --server --port 4022 --no-https --engineLogging=/tmp/enginelog.log &
-#        dotnet run --project Letterbook/Letterbook.csproj
+        dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj
+        dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj
+        dotnet watch run --project Letterbook
 
-#        tail -f /dev/null
+#        /vsdbg/vsdbg --server --port 4022 --no-https --engineLogging=/tmp/enginelog.log &
   
 volumes:
   ts_data:
