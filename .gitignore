@@ -12,6 +12,7 @@
 *[Ll]ocal.*
 *private.env*
 development.key
+appsettings.Pasture.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
