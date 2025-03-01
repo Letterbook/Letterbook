@@ -27,7 +27,7 @@ public class WebfingerProvider : IResourceDescriptorProvider
 		HttpRequest request, CancellationToken cancellationToken)
 	{
 		var match = Regex.Match(resource.AbsolutePath, "^.*@"
-													   + _options.BaseUri().Authority
+													   + _options.BaseUri().Host
 													   + "$");
 		if (!match.Success)
 		{

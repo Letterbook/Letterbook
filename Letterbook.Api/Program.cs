@@ -35,7 +35,7 @@ public class Program
 		builder.ConfigureHostBuilder();
 
 		var coreOptions = builder.Configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
-		                  ?? throw new ConfigException(nameof(CoreOptions));
+		                  ?? throw ConfigException.Missing(nameof(CoreOptions));
 		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
 
 		var app = builder.Build();
@@ -67,6 +67,6 @@ public class Program
 		app.UsePathBase(new PathString("/api/v1"));
 		app.MapControllers();
 
-		app.Run("http://localhost:5127");
+		app.Run();
 	}
 }

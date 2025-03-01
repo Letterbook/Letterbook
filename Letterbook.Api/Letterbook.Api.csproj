@@ -62,4 +62,10 @@
     <Exec Command="dotnet swagger tofile --output ../docs/OpenApi/activity-pub-v1.json $(OutputPath)$(AssemblyName).dll activity-pub-v1" WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" />
   </Target>
 
+  <ItemGroup>
+    <Content Update="appsettings.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

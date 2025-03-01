@@ -31,7 +31,7 @@ public class Program
 
 		var builder = WebApplication.CreateBuilder(args);
 		var coreOptions = builder.Configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
-		                  ?? throw new ConfigException(nameof(CoreOptions));
+		                  ?? throw ConfigException.Missing(nameof(CoreOptions));
 
 		if (!builder.Environment.IsProduction())
 			builder.Configuration.AddUserSecrets<Program>();
@@ -111,7 +111,7 @@ public class Program
 
 		app.MapRazorPages();
 
-		app.Run("http://localhost:5127");
+		app.Run();
 	}
 }
 

@@ -161,7 +161,7 @@ public static class DependencyInjectionExtensions
 	public static IServiceCollection AddApiProperties(this IServiceCollection services, ConfigurationManager configuration)
 	{
 		var coreOptions = configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
-		                  ?? throw new ConfigException(nameof(CoreOptions));
+		                  ?? throw ConfigException.Missing(nameof(CoreOptions));
 		// Register controllers
 		services
 			.ConfigureSwagger()

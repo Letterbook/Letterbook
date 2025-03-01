@@ -26,7 +26,7 @@ public static class DependencyInjectionExtensions
 
 	public static IServiceCollection AddActivityPubClient(this IServiceCollection services, IConfigurationManager configuration)
 	{
-		var coreOptions = configuration.Get<CoreOptions>() ?? throw new ConfigException(nameof(CoreOptions));
+		var coreOptions = configuration.Get<CoreOptions>() ?? throw ConfigException.Missing(nameof(CoreOptions));
 
 		services.TryAddTypesModule();
 		services

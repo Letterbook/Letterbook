@@ -6,13 +6,16 @@ using Letterbook.Api;
 using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
 using Letterbook.Api.Swagger;
 using Letterbook.AspNet;
+using Letterbook.Core;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Web;
 using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
@@ -41,7 +44,7 @@ public class Program
 			.Enrich.WithSpan()
 			.ReadFrom.Configuration(context.Configuration)
 			.ReadFrom.Services(services),
-			true
+			preserveStaticLogger: true
 		);
 
 		builder.Services.AddOpenTelemetry()
@@ -117,9 +120,23 @@ public class Program
 		app.UsePathBase(new PathString("/api/v1"));
 		app.MapControllers();
 
-		app.Run("http://localhost:5127");
+		var options = app.Services.GetRequiredService<IOptions<CoreOptions>>().Value;
+		MigrateAtRuntime(options);
+
+		app.Run();
 
 		return;
+
+		void MigrateAtRuntime(CoreOptions coreOptions)
+		{
+			if (!coreOptions.Database.MigrateAtRuntime) return;
+			using var scope = app.Services.CreateScope();
+			var data = scope.ServiceProvider.GetRequiredService<RelationalContext>();
+			data.Database.Migrate();
+
+			var feeds = scope.ServiceProvider.GetRequiredService<FeedsContext>();
+			feeds.Database.Migrate();
+		}
 
 		static bool ProfileIdentityPaths(HttpContext context)
 		{
