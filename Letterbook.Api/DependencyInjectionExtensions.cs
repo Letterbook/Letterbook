@@ -93,8 +93,6 @@ public static class DependencyInjectionExtensions
 	{
 		// Register options
 		services.Configure<CoreOptions>(configuration.GetSection(CoreOptions.ConfigKey));
-		services.Configure<ApiOptions>(configuration.GetSection(ApiOptions.ConfigKey));
-		services.Configure<DbOptions>(configuration.GetSection(DbOptions.ConfigKey));
 
 		// Register Mapping Configs
 		services.AddSingleton<MappingConfigProvider>();
@@ -163,7 +161,7 @@ public static class DependencyInjectionExtensions
 	public static IServiceCollection AddApiProperties(this IServiceCollection services, ConfigurationManager configuration)
 	{
 		var coreOptions = configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
-		                  ?? throw new ConfigException(nameof(CoreOptions));
+		                  ?? throw ConfigException.Missing(nameof(CoreOptions));
 		// Register controllers
 		services
 			.ConfigureSwagger()

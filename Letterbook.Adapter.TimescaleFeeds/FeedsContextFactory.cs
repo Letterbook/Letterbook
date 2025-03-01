@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace Letterbook.Adapter.TimescaleFeeds;
 
@@ -10,19 +11,19 @@ public class FeedsContextFactory : IDesignTimeDbContextFactory<FeedsContext>
 {
 	public FeedsContext CreateDbContext(string[] args)
 	{
-		var feedsDbOptions = new FeedsDbOptions
-		{
-			Host = "localhost",
-			Port = "5433",
-			Username = "letterbook",
-			Database = "letterbook_feeds",
-			UseSsl = false,
-			Password = "letterbookpw"
-		};
+		var envName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+		              ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+		Console.WriteLine($"Looking for appsettings files at {AppDomain.CurrentDomain.BaseDirectory}");
+		var configBuilder = new ConfigurationBuilder()
+			.SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+			.AddJsonFile("appsettings.json", true, false)
+			.AddJsonFile($"appsettings.{envName}.json", true, false);
+
+		var config = configBuilder.Build();
 		var optionsBuilder = new DbContextOptionsBuilder<FeedsContext>();
 
 		return new FeedsContext(optionsBuilder
-			.UseNpgsql(DependencyInjection.DataSource(feedsDbOptions))
+			.UseNpgsql(DependencyInjection.DataSource(config))
 			.Options);
 	}
 }

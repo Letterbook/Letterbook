@@ -10,20 +10,14 @@ public static class DependencyInjection
 {
 	public static IServiceCollection AddFeedsAdapter(this IServiceCollection services, IConfigurationManager config)
 	{
-		var dbOptions = config.GetSection(FeedsDbOptions.ConfigKey)
-			.Get<FeedsDbOptions>() ?? throw new ArgumentNullException(FeedsDbOptions.ConfigKey);
-		var dataSource = DataSource(dbOptions);
-
+		var dataSource = DataSource(config);
 		return services.AddDbContext<FeedsContext>(options => options.UseNpgsql(dataSource))
 			.AddScoped<IFeedsAdapter, FeedsAdapter>();
 	}
 
-	internal static NpgsqlDataSource DataSource(FeedsDbOptions dbOptions)
+	internal static NpgsqlDataSource DataSource(IConfiguration config)
 	{
-		var dataSource = new NpgsqlDataSourceBuilder(dbOptions.GetConnectionString())
-		{
-			Name = dbOptions.Database ?? "letterbook_feeds"
-		};
+		var dataSource = new NpgsqlDataSourceBuilder(config.GetConnectionString("feeds"));
 		dataSource.EnableDynamicJson();
 
 		return dataSource.Build();

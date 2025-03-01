@@ -218,13 +218,14 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		// See https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-8.0#configuration-keys-and-values
 		var memConfig = new Dictionary<string, string>()
 		{
-			[$"{DbOptions.ConfigKey}:{nameof(DbOptions.ConnectionString)}"] = ConnectionString,
-			[$"{FeedsDbOptions.ConfigKey}:{nameof(FeedsDbOptions.ConnectionString)}"] = FeedsConnectionString
+			["ConnectionStrings:db"] = ConnectionString,
+			["ConnectionStrings:feeds"] = FeedsConnectionString,
 		};
 		var cfg = new ConfigurationBuilder().AddInMemoryCollection(memConfig!).Build();
 
 		builder
 			.UseConfiguration(cfg)
+
 			.ConfigureServices(services =>
 			{
 				// SeedAdminWorker executes before we have a chance to create the test database

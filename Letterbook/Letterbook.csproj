@@ -8,10 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MassTransit" />
-        <PackageReference Include="Npgsql" />
-        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
-        <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+        <PackageReference Include="MassTransit"/>
+        <PackageReference Include="Npgsql"/>
+        <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore"/>
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -21,15 +21,22 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj" />
-        <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj" />
-        <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj" />
-        <ProjectReference Include="..\Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj" />
-        <ProjectReference Include="..\Letterbook.Api\Letterbook.Api.csproj" />
-        <ProjectReference Include="..\Letterbook.AspNet\Letterbook.AspNet.csproj" />
-        <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
-        <ProjectReference Include="..\Letterbook.Web\Letterbook.Web.csproj" />
-        <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj" />
+        <ProjectReference Include="..\Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj"/>
+        <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj"/>
+        <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj"/>
+        <ProjectReference Include="..\Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj"/>
+        <ProjectReference Include="..\Letterbook.Api\Letterbook.Api.csproj"/>
+        <ProjectReference Include="..\Letterbook.AspNet\Letterbook.AspNet.csproj"/>
+        <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj"/>
+        <ProjectReference Include="..\Letterbook.Web\Letterbook.Web.csproj"/>
+        <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Update="appsettings.*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+        </Content>
     </ItemGroup>
 
 </Project>

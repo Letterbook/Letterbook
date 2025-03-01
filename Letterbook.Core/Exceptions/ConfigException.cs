@@ -2,11 +2,8 @@ namespace Letterbook.Core.Exceptions;
 
 public class ConfigException : Exception
 {
-	public ConfigException(string? message) : base(message)
-	{
-	}
+	private ConfigException(string? message) : base(message) { }
 
-	public ConfigException(string? message, Exception? innerException) : base(message, innerException)
-	{
-	}
+	public static ConfigException Missing(string section) =>
+		new($"Missing required config ({section}). Did you provide an appsettings file?");
 }
