@@ -29,10 +29,6 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: build
-        working-directory: ./Letterbook.Docs
-        run: dotnet build .
-
       - name: Nuget Package Cache
         id: package-cache
         uses: actions/cache@v4
@@ -46,6 +42,10 @@ jobs:
           path: "~/.local/share/.librarymanager/cache"
           key: "libman-${{ hashFiles('Letterbook.Web/libman.json', 'Letterbook.Docs/libman.json') }}"
           restore-keys: libman
+
+      - name: build
+        working-directory: ./Letterbook.Docs
+        run: dotnet build .
       
       - name: Assign default GitHub URL base path
         env:
