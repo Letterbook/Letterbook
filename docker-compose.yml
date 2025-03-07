@@ -5,7 +5,7 @@ services:
   # Services required for Letterbook operation
   timescale:
     container_name: timescale
-    image: timescale/timescaledb:2.17.2-pg15-oss
+    image: timescale/timescaledb:2.18.0-pg15-oss
     environment:
       - POSTGRES_USER=letterbook
       - POSTGRES_PASSWORD=letterbookpw
@@ -88,7 +88,7 @@ services:
       - debug
       - o11y
     container_name: tempo
-    image: &tempo-image grafana/tempo:2.6.1
+    image: &tempo-image grafana/tempo:2.7.0
     command: [ "-config.file=/etc/tempo.yaml" ]
     depends_on:
       - tempo-init
