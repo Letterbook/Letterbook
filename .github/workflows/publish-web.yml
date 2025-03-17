@@ -20,6 +20,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -29,10 +32,24 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Nuget Package Cache
+        id: package-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{env.NUGET_PACKAGES}}
+          key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
+          
+      - name: Libman Resource Cache
+        uses: actions/cache@v4
+        with:
+          path: "~/.local/share/.librarymanager/cache"
+          key: "libman-${{ hashFiles('Letterbook.Web/libman.json', 'Letterbook.Docs/libman.json') }}"
+          restore-keys: libman
+
       - name: build
         working-directory: ./Letterbook.Docs
         run: dotnet build .
-
+      
       - name: Assign default GitHub URL base path
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
