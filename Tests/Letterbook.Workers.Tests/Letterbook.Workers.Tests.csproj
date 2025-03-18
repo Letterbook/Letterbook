@@ -30,8 +30,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Source\Letterbook.Workers\Letterbook.Workers.csproj" />
       <ProjectReference Include="..\Letterbook.Core.Tests\Letterbook.Core.Tests.csproj" />
-      <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj" />
     </ItemGroup>
 
 </Project>

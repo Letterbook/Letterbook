@@ -21,7 +21,7 @@ public class ClientHandler : DelegatingHandler
 	{
 		request.Headers.Date ??= DateTimeOffset.UtcNow;
 		if (request.Content?.Headers.TryGetValues("Content-Digest", out var digest) == true)
-			request.Headers.Add("Digest", digest);
+			request.Headers.Add("Digest", digest.First().Trim(':'));
 		if (!request.Options.TryGetValue(
 				new HttpRequestOptionsKey<IEnumerable<Models.SigningKey>>(IClientSigner.SigningKeysOptionsId),
 				out IEnumerable<Models.SigningKey>? keys))

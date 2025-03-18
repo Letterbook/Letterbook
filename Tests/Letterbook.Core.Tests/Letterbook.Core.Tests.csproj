@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
-        <RootNamespace>Letterbook.Adapter.TimescaleFeeds._Tests</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
 
@@ -16,8 +15,21 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="ILogger.Moq" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Bogus" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
+
+        <PackageReference Include="MockQueryable.Moq" />
         <PackageReference Include="Moq" />
+        <PackageReference Include="Neovolve.Logging.Xunit" />
+        <PackageReference Include="Verify.Xunit" />
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,8 +42,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj" />
-      <ProjectReference Include="..\Letterbook.Core.Tests\Letterbook.Core.Tests.csproj" />
+      <ProjectReference Include="..\..\Source\Letterbook.Core\Letterbook.Core.csproj" />
     </ItemGroup>
 
 </Project>

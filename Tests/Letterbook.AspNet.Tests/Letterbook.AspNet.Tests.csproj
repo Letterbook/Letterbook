@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj" />
-        <ProjectReference Include="..\Letterbook.AspNet\Letterbook.AspNet.csproj"/>
+        <ProjectReference Include="..\..\Source\Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj" />
+        <ProjectReference Include="..\..\Source\Letterbook.AspNet\Letterbook.AspNet.csproj" />
         <ProjectReference Include="..\Letterbook.Core.Tests\Letterbook.Core.Tests.csproj"/>
     </ItemGroup>
 

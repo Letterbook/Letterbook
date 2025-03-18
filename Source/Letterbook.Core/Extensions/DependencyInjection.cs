@@ -85,19 +85,25 @@ public static class DependencyInjection
 				{
 					options.EnrichWithHttpRequestMessage = (activity, message) =>
 					{
-						activity.SetTag("http.request.header.accept", message.Headers.Accept);
-						activity.SetTag("http.request.header.date", message.Headers.Date);
-						if (message.Headers.TryGetValues("signature", out var signature))
-							activity.SetTag("http.request.header.signature", string.Join("; ", signature));
-						if (message.Headers.TryGetValues("signature-input", out var signatureInput))
-							activity.SetTag("http.request.header.signature-input", string.Join("; ", signatureInput));
-						if (message.Headers.TryGetValues("content-digest", out var contentDigest))
-							activity.SetTag("http.request.header.content-digest", contentDigest.FirstOrDefault());
+						foreach (var header in message.Headers)
+						{
+							activity.SetTag($"http.request.header.{header.Key}", string.Join("; ", header.Value));
+						}
+						// activity.SetTag("http.request.header.accept", message.Headers.Accept);
+						// activity.SetTag("http.request.header.date", message.Headers.Date);
+						// if (message.Headers.TryGetValues("signature", out var signature))
+						// 	activity.SetTag("http.request.header.signature", string.Join("; ", signature));
+						// if (message.Headers.TryGetValues("signature-input", out var signatureInput))
+						// 	activity.SetTag("http.request.header.signature-input", string.Join("; ", signatureInput));
+						// if (message.Headers.TryGetValues("content-digest", out var contentDigest))
+						// 	activity.SetTag("http.request.header.content-digest", contentDigest.FirstOrDefault());
+						// if (message.Headers.TryGetValues("digest", out var legacyDigest))
+						// 	activity.SetTag("http.request.header.digest", legacyDigest.FirstOrDefault());
 					};
 					options.EnrichWithHttpResponseMessage = (activity, message) =>
 					{
 						message.Headers.TryGetValues("content-type", out var contentType);
-						activity.SetTag("http.response.header.content-type", contentType?.FirstOrDefault() ?? "unkown");
+						activity.SetTag("http.response.header.content-type", contentType?.FirstOrDefault() ?? "unknown");
 						activity.SetTag("http.response.header.content-length",
 							message.Headers.GetValues("content-length").FirstOrDefault());
 					};

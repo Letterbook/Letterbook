@@ -57,9 +57,9 @@
     <!-- Usage -->
     <!-- dotnet swagger tofile -\-output [path] [entryAssembly].dll [openApi document name] -->
     <!-- Docs for future APIs (ex: lb/v2) should be generatd here as well, by invoking dotnet swagger again -->
-    <Exec Command="dotnet swagger tofile --output ../docs/OpenApi/letterbook-v1.json $(OutputPath)$(AssemblyName).dll letterbook-v1" WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" />
-    <Exec Command="dotnet swagger tofile --output ../docs/OpenApi/mastodon-v1.json $(OutputPath)$(AssemblyName).dll mastodon-v1" WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" />
-    <Exec Command="dotnet swagger tofile --output ../docs/OpenApi/activity-pub-v1.json $(OutputPath)$(AssemblyName).dll activity-pub-v1" WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" />
+    <Exec Command="dotnet swagger tofile --output ../../docs/OpenApi/letterbook-v1.json $(OutputPath)$(AssemblyName).dll letterbook-v1" WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" />
+    <Exec Command="dotnet swagger tofile --output ../../docs/OpenApi/mastodon-v1.json $(OutputPath)$(AssemblyName).dll mastodon-v1" WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" />
+    <Exec Command="dotnet swagger tofile --output ../../docs/OpenApi/activity-pub-v1.json $(OutputPath)$(AssemblyName).dll activity-pub-v1" WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" />
   </Target>
 
   <ItemGroup>

@@ -117,7 +117,7 @@ public class ActorController : ControllerBase
 			return BadRequest(new {Reason = "Input was not an Activity"});
 		if (activity.Actor.SingleOrDefault()?.TryGetId(out var actorId) != true)
 			return Unauthorized(new {Reason = "Could not determine the Actor"});
-		if (actorId!.ToString() != User.Claims.FirstOrDefault(c => c.Type == ApplicationClaims.Actor)?.Value)
+		if (actorId != User.Claims.Where(c => c.Type == ApplicationClaims.Actor).Select(c => new Uri(c.Value)).FirstOrDefault())
 			return Unauthorized(new {Reason = "Activity was not signed by the Actor"});
 		try
 		{
