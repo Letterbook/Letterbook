@@ -703,14 +703,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	private async Task<TResult> Fetch<TResult>(Uri id, Profile? onBehalfOf) where TResult : IFederated
 	{
-		if (onBehalfOf != null)
-		{
-			return await _client.As(onBehalfOf).Fetch<TResult>(id);
-		}
+		onBehalfOf ??= await _data.Profiles(Profile.SystemInstanceId).WithKeys().FirstOrDefaultAsync();
 
-		Activity.Current?.AddEvent(new("HostKeySignature"));
-		var key = await _hostSigningKeyProvider.GetSigningKey();
-		return await _client.Fetch<TResult>(id, key);
+		return await _client.As(onBehalfOf).Fetch<TResult>(id);
 	}
 
 	public IAuthzProfileService As(IEnumerable<Claim> claims) => this;
