@@ -11,7 +11,11 @@ public static class ProfileQueries
 			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.FediId == relationId))
 			.ThenInclude(relation => relation.Follower)
 			.Include(profile => profile.Keys)
-			.Include(profile => profile.Audiences)
+			.Include(profile => profile.Audiences.Where(audience => audience.Source != null && audience.Source.FediId == relationId))
+			.ThenInclude(audience => audience.Source)
+			.Include(profile => profile.Headlining)
+			.ThenInclude(audience => audience.Members.Where(member => member.FediId == relationId))
+			.Include(profile => profile.Headlining)
 			.AsSplitQuery();
 
 	public static IQueryable<Profile> WithRelation(this IQueryable<Profile> query, ProfileId? relationId) =>
@@ -20,7 +24,10 @@ public static class ProfileQueries
 			.Include(profile => profile.FollowersCollection.Where(relation => relation.Follower.Id == relationId))
 			.ThenInclude(relation => relation.Follower)
 			.Include(profile => profile.Keys)
-			.Include(profile => profile.Audiences)
+			.Include(profile => profile.Audiences.Where(audience => audience.Source != null && audience.Source.Id == relationId))
+			.ThenInclude(audience => audience.Source)
+			.Include(profile => profile.Headlining)
+			.ThenInclude(audience => audience.Members.Where(member => member.Id == relationId))
 			.AsSplitQuery();
 
 	public static IQueryable<Profile> WithKeys(this IQueryable<Profile> query) =>

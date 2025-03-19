@@ -380,8 +380,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private async Task<FollowerRelation> RemoveFollower(Profile self, FollowerRelation relation)
 	{
 		self.RemoveFollower(relation.Follower);
-		if (relation.Follower.HasLocalAuthority(_coreConfig))
-			relation.Follower.LeaveAudience(self);
+		self.RemoveFromAudience(relation.Follower);
 
 		await _data.Commit();
 		await _activity.RemoveFollower(relation.Follower.Inbox, relation.Follower, self);
@@ -647,6 +646,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		[CallerLineNumber] int line = -1)
 	{
 		var query = _data.Profiles(localId)
+			.TagWith(nameof(RequireProfile))
+			.TagWith(name)
 			.Include(p => p.Headlining);
 
 		var profile = relationId != null
@@ -667,6 +668,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		[CallerLineNumber] int line = -1)
 	{
 		var profile = await _data.Profiles(profileId)
+			.TagWith(nameof(ResolveProfile))
+			.TagWith(name)
 			.Include(p => p.Headlining)
 			.FirstOrDefaultAsync();
 

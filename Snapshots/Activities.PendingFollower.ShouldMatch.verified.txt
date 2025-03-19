@@ -1,11 +1,11 @@
 ﻿{
   "type": "TentativeAccept",
   "@context": "https://www.w3.org/ns/activitystreams",
-  "actor": "http://letterbook.example/actor/4DZM4sLjSAmbBYSYgTU7eP",
+  "actor": "http://letterbook.example/actor/314a7rvzjb2d1hm2hk69a1nic",
   "object": {
     "type": "Follow",
     "@context": "https://www.w3.org/ns/activitystreams",
-    "actor": "http://peer.example/actor/9kBSY1pnQxnunMTkZauzbV",
-    "object": "http://letterbook.example/actor/4DZM4sLjSAmbBYSYgTU7eP"
+    "actor": "http://peer.example/actor/88hrk9ekkrkwnjrxc4n3m1hd1",
+    "object": "http://letterbook.example/actor/314a7rvzjb2d1hm2hk69a1nic"
   }
 }

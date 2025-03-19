@@ -233,6 +233,11 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		return count;
 	}
 
+	public int RemoveFromAudience(Profile member)
+	{
+		return Headlining.Sum(audience => audience.Members.Remove(member) ? 1 : 0);
+	}
+
 	public FollowerRelation Block(Profile target)
 	{
 		var follower = FollowersCollection.FirstOrDefault(relation => relation.Follower == target) ?? target.RelationWith(this);
@@ -243,7 +248,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		if(following.State != FollowState.Blocked) following.State = FollowState.None;
 		FollowingCollection.Add(following);
 
-		target.LeaveAudience(this);
+		RemoveFromAudience(target);
 		LeaveAudience(target);
 
 		return follower;
