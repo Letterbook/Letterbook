@@ -18,6 +18,7 @@ ViewData["Brand"] = "Letterbook Project";
     <link rel="icon" type="image/svg" href="/img/letterbook.svg">
     <link rel="stylesheet" href="/lib/picocss/css/pico.min.css"/>
     <link rel="stylesheet" href="/css/site.css"/>
+    <link rel="stylesheet" href="/css/prism-synthwave84.css"/>
     <title>Letterbook | @(ViewData["Title"] ?? "Docs")</title>
     @await RenderSectionAsync("Head", required: false)
 </head>
@@ -34,6 +35,13 @@ ViewData["Brand"] = "Letterbook Project";
 @await RenderSectionAsync("Scripts", required: false)
 <script src="/lib/mermaid/dist/mermaid.min.js" type="text/javascript"></script>
 <script src="/js/mermaid-config.js" type="text/javascript"></script>
-
+<script src="/lib/prismjs/components/prism-core.min.js"></script>
+<script src="/lib/prismjs/components/prism-bash.min.js"></script>
+<script src="/lib/prismjs/components/prism-csharp.min.js"></script>
+<script src="/lib/prismjs/components/prism-javascript.min.js"></script>
+<script src="/lib/prismjs/components/prism-markup.min.js"></script>
+<script src="/lib/prismjs/components/prism-scss.min.js"></script>
+<script src="/lib/prismjs/components/prism-sql.min.js"></script>
+<script src="/lib/prismjs/components/prism-yaml.min.js"></script>
 </body>
 </html>

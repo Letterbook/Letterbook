@@ -2,24 +2,25 @@
   "solution": {
     "path": "Letterbook.sln",
     "projects": [
-      "Letterbook.Adapter.ActivityPub.Test\\Letterbook.Adapter.ActivityPub.Test.csproj",
-      "Letterbook.Adapter.ActivityPub\\Letterbook.Adapter.ActivityPub.csproj",
-      "Letterbook.Adapter.Db.Tests\\Letterbook.Adapter.Db.Tests.csproj",
-      "Letterbook.Adapter.Db\\Letterbook.Adapter.Db.csproj",
-      "Letterbook.Adapter.TimescaleFeeds.Tests\\Letterbook.Adapter.TimescaleFeeds.Tests.csproj",
-      "Letterbook.Adapter.TimescaleFeeds\\Letterbook.Adapter.TimescaleFeeds.csproj",
-      "Letterbook.Api.Authentication.HttpSignature\\Letterbook.Api.Authentication.HttpSignature.csproj",
-      "Letterbook.Api.Tests\\Letterbook.Api.Tests.csproj",
-      "Letterbook.Api\\Letterbook.Api.csproj",
-      "Letterbook.AspNet.Tests\\Letterbook.AspNet.Tests.csproj",
-      "Letterbook.AspNet\\Letterbook.AspNet.csproj",
-      "Letterbook.Core.Tests\\Letterbook.Core.Tests.csproj",
-      "Letterbook.Core\\Letterbook.Core.csproj",
-      "Letterbook.Web.Tests\\Letterbook.Web.Tests.csproj",
-      "Letterbook.Web\\Letterbook.Web.csproj",
-      "Letterbook.Workers.Tests\\Letterbook.Workers.Tests.csproj",
-      "Letterbook.Workers\\Letterbook.Workers.csproj",
-      "Letterbook\\Letterbook.csproj"
+      "Source\\Letterbook.Adapter.ActivityPub\\Letterbook.Adapter.ActivityPub.csproj",
+      "Source\\Letterbook.Adapter.Db\\Letterbook.Adapter.Db.csproj",
+      "Source\\Letterbook.Adapter.TimescaleFeeds\\Letterbook.Adapter.TimescaleFeeds.csproj",
+      "Source\\Letterbook.Api.Authentication.HttpSignature\\Letterbook.Api.Authentication.HttpSignature.csproj",
+      "Source\\Letterbook.Api\\Letterbook.Api.csproj",
+      "Source\\Letterbook.AspNet\\Letterbook.AspNet.csproj",
+      "Source\\Letterbook.Core\\Letterbook.Core.csproj",
+      "Source\\Letterbook.Generators\\Letterbook.Generators\\Letterbook.Generators.csproj",
+      "Source\\Letterbook.Web\\Letterbook.Web.csproj",
+      "Source\\Letterbook.Workers\\Letterbook.Workers.csproj",
+      "Source\\Letterbook\\Letterbook.csproj",
+      "Tests\\Letterbook.Adapter.ActivityPub.Test\\Letterbook.Adapter.ActivityPub.Test.csproj",
+      "Tests\\Letterbook.Adapter.Db.Tests\\Letterbook.Adapter.Db.Tests.csproj",
+      "Tests\\Letterbook.Adapter.TimescaleFeeds.Tests\\Letterbook.Adapter.TimescaleFeeds.Tests.csproj",
+      "Tests\\Letterbook.Api.Tests\\Letterbook.Api.Tests.csproj",
+      "Tests\\Letterbook.AspNet.Tests\\Letterbook.AspNet.Tests.csproj",
+      "Tests\\Letterbook.Core.Tests\\Letterbook.Core.Tests.csproj",
+      "Tests\\Letterbook.Web.Tests\\Letterbook.Web.Tests.csproj",
+      "Tests\\Letterbook.Workers.Tests\\Letterbook.Workers.Tests.csproj"
     ]
   }
 }
