@@ -56,11 +56,11 @@ jobs:
       
       - name: Check Relational Migrations
         run: dotnet ef migrations has-pending-model-changes
-        working-directory: Letterbook.Adapter.Db/
+        working-directory: Source/Letterbook.Adapter.Db/
         
       - name: Check Feeds Migrations
         run: dotnet ef migrations has-pending-model-changes
-        working-directory: Letterbook.Adapter.TimescaleFeeds/
+        working-directory: Source/Letterbook.Adapter.TimescaleFeeds/
 
       - name: Check Docs Prerender
         working-directory: ./Letterbook.Docs

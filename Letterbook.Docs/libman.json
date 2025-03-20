@@ -17,6 +17,21 @@
         "dist/mermaid.min.js",
         "LICENSE"
       ]
+    },
+    {
+      "library": "prismjs@1.30.0",
+      "destination": "wwwroot/lib/prismjs",
+      "files": [
+        "components/prism-core.min.js",
+        "components/prism-csharp.min.js",
+        "components/prism-markup.min.js",
+        "components/prism-scss.min.js",
+        "components/prism-javascript.min.js",
+        "components/prism-bash.min.js",
+        "components/prism-sql.min.js",
+        "components/prism-yaml.min.js",
+        "LICENSE"
+      ]
     }
   ]
 }
