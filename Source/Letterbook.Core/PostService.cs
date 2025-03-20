@@ -106,7 +106,7 @@ public class PostService : IAuthzPostService, IPostService
 			.ToDictionaryAsync(p => p.Id);
 		post.ConvergeMentions(profiles);
 
-		if (await _data.Profiles(asProfile).FirstOrDefaultAsync() is not { } author)
+		if (await _data.Profiles(asProfile).Include(p => p.Headlining).FirstOrDefaultAsync() is not { } author)
 			throw CoreException.MissingData<Profile>($"Couldn't find profile {asProfile}", asProfile);
 		post.Creators.Clear();
 		post.Creators.Add(author);
@@ -115,7 +115,7 @@ public class PostService : IAuthzPostService, IPostService
 			content.Sanitize(_sanitizers);
 		}
 
-		if (post.Audience.Contains(Audience.Public))
+		if (post.Audience.Intersect([Audience.Public, ..author.Headlining]).Any())
 		{
 			// Fill in the followers audience(s), if necessary. Also fixes reference equality if the audience was already included
 			_logger.LogDebug("Normalizing {Audience} for followers from {Headliners}",

@@ -276,7 +276,6 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 		var self = await _data.Profiles(selfId)
 			           .WithRelation(targetId)
-			           .Include(profile => profile.Audiences.Where(audience => audience.Source!.Id == targetId))
 			           .FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
 
@@ -451,8 +450,6 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	public async Task<FollowerRelation?> Unfollow(ProfileId selfId, ProfileId targetId)
 	{
 		var self = await _data.Profiles(selfId).WithRelation(targetId)
-			           .Include(profile => profile.Audiences.Where(
-				           audience => audience.Source != null && audience.Source.Id == targetId))
 			           .FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
 		var relation = self!.FollowingCollection
