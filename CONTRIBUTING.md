@@ -129,6 +129,10 @@ dotnet watch run --project Source/Letterbook.--launch-profile dev
 5. Open the UI http://localhost:5127  
 There is also a Swagger UI http://localhost:5127/swagger/index.html
 
+The setup process creates an `admin` account with:
+- email: `admin@letterbook.example`
+- password: `Password1!`
+
 ## Navigating the Codebase
 
 ### Start with `Letterbook.Core`
