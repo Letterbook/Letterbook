@@ -6,15 +6,15 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="ActivityPub.Types" Version="0.1.0-snapshot.2024-10-13.21-01-46" />
-    <PackageVersion Include="AutoMapper" Version="13.0.1" />
-    <PackageVersion Include="AutoMapper.Collection" Version="10.0.0" />
+    <PackageVersion Include="AutoMapper" Version="14.0.0" />
+    <PackageVersion Include="AutoMapper.Collection" Version="11.0.0" />
     <PackageVersion Include="Bogus" Version="35.6.1" />
     <PackageVersion Include="BouncyCastle.Cryptography" Version="2.5.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.2" />
     <PackageVersion Include="DarkLink.Web.WebFinger.Server" Version="1.0.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
-    <PackageVersion Include="HtmlSanitizer" Version="8.1.870" />
-    <PackageVersion Include="ILogger.Moq" Version="1.1.10" />
+    <PackageVersion Include="HtmlSanitizer" Version="9.0.876" />
+    <PackageVersion Include="ILogger.Moq" Version="2.0.0" />
     <PackageVersion Include="Letterbook.Uuid7" Version="2.1.1-patch.12" />
     <PackageVersion Include="Markdig" Version="0.39.1" />
     <PackageVersion Include="MassTransit" Version="8.3.4" />
@@ -50,7 +50,7 @@
     <PackageVersion Include="Microsoft.Playwright" Version="1.49.0" />
     <PackageVersion Include="Microsoft.Playwright.NUnit" Version="1.49.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="[8.0.7, 9.0.0)" />
-    <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
+    <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="3.0.67" />
     <PackageVersion Include="MockQueryable.Moq" Version="7.0.3" />
     <PackageVersion Include="Moq" Version="4.18.4" />
     <!--  Neovolve 6.3+ requires an upgrade to various Microsoft.Abstractions 9.x, which we're not taking yet -->
@@ -67,7 +67,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="6.0.0" />
     <!--  OpenTelemetry 1.10+ requires an upgrade to Microsoft.Abstractions.Logging 9.x, which we're not taking yet -->
     <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="[1.9.0, 1.10)" />
@@ -89,8 +89,8 @@
     <PackageVersion Include="Serilog.Sinks.Grafana.Loki" Version="[8.3.0, 9.0.0)" />
     <PackageVersion Include="ServiceStack" Version="8.5.2" />
     <PackageVersion Include="ServiceStack.Mvc" Version="8.5.2" />
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.2.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="8.0.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="8.0.0" />
     <PackageVersion Include="System.Linq.Async" Version="6.0.1" />
     <PackageVersion Include="System.Reactive.Async" Version="6.0.0-alpha.18" />
     <PackageVersion Include="Verify.Xunit" Version="28.12.1" />
