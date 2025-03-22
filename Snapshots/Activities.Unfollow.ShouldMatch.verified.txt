@@ -1,12 +1,12 @@
 ﻿{
   "type": "Undo",
   "@context": "https://www.w3.org/ns/activitystreams",
-  "actor": "http://letterbook.example/actor/4DZM4sLjSAmbBYSYgTU7eP",
+  "actor": "http://letterbook.example/actor/314a7rvzjb2d1hm2hk69a1nic",
   "object": {
     "type": "Follow",
     "@context": "https://www.w3.org/ns/activitystreams",
-    "id": "http://letterbook.example/actor/4DZM4sLjSAmbBYSYgTU7eP#Follow/peer.example/actor/9kBSY1pnQxnunMTkZauzbV",
-    "actor": "http://letterbook.example/actor/4DZM4sLjSAmbBYSYgTU7eP",
-    "object": "http://peer.example/actor/9kBSY1pnQxnunMTkZauzbV"
+    "id": "http://letterbook.example/actor/314a7rvzjb2d1hm2hk69a1nic#Follow/peer.example/actor/88hrk9ekkrkwnjrxc4n3m1hd1",
+    "actor": "http://letterbook.example/actor/314a7rvzjb2d1hm2hk69a1nic",
+    "object": "http://peer.example/actor/88hrk9ekkrkwnjrxc4n3m1hd1"
   }
 }

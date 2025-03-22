@@ -39,23 +39,12 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
 
 	public void Visit(HttpHeaderComponent httpHeader)
 	{
-		string fieldName = httpHeader.ComponentName;
+		var fieldName = httpHeader.ComponentName;
 
-		if (_requestComponentProvider.TryGetHeaderValues(fieldName, out var values))
-		{
-			// Mastodon only understands the Digest header, which is a non-standard header that was
-			// replaced with content-digest in the httpsig drafts years ago
-			AddHeader(
-				fieldName.Equals("content-digest", StringComparison.InvariantCultureIgnoreCase) ? "digest" : fieldName,
-				string.Join(", ", values));
-		}
-		else
-		{
-			if (fieldName == "host")
-			{
-				AddHeader(fieldName, _requestComponentProvider.GetDerivedComponentValue(SignatureComponent.Authority));
-			}
-		}
+		if (fieldName == "host")
+			AddHeader(fieldName, _requestComponentProvider.GetDerivedComponentValue(SignatureComponent.Authority));
+		else if (_requestComponentProvider.TryGetHeaderValues(fieldName, out var values))
+			AddHeader(fieldName, string.Join(", ", values));
 	}
 
 	/// <summary>

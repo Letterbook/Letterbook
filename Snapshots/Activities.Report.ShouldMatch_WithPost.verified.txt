@@ -1,11 +1,11 @@
 ﻿{
   "type": "Flag",
   "@context": "https://www.w3.org/ns/activitystreams",
-  "id": "http://letterbook.example/report/d7qgu4eneycbo008cbcdpgzr8?subject=http://peer.example/actor/9kBSY1pnQxnunMTkZauzbV",
+  "id": "http://letterbook.example/report/d7qgu4eneycbo008cbcdpgzr8?subject=http://peer.example/actor/88hrk9ekkrkwnjrxc4n3m1hd1",
   "content": "Ut minus sunt vitae laboriosam sit minus eveniet.",
   "actor": "http://letterbook.example/actor/bneffcn07btjpctg69570zsxv",
   "object": [
-    "http://peer.example/actor/9kBSY1pnQxnunMTkZauzbV",
+    "http://peer.example/actor/88hrk9ekkrkwnjrxc4n3m1hd1",
     "https://peer.example/post/88hrk9ekkrkwnjrxc4n3m1hd1"
   ]
 }

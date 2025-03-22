@@ -13,6 +13,7 @@ namespace Letterbook.IntegrationTests;
 public class InboxTests : IClassFixture<HostFixture<InboxTests>>, ITestSeed, IDisposable
 {
 	private const string? SkipAuthorization = "Authorization";
+
 	public void Dispose()
 	{
 		_client.Dispose();
@@ -26,6 +27,7 @@ public class InboxTests : IClassFixture<HostFixture<InboxTests>>, ITestSeed, IDi
 	private readonly IServiceScope _scope;
 	private Models.Profile _actor;
 	private readonly MediaTypeHeaderValue _mediaType = new("application/ld+json");
+	private readonly FollowActivity _followActivity;
 
 	public InboxTests(HostFixture<InboxTests> host)
 	{
@@ -40,6 +42,15 @@ public class InboxTests : IClassFixture<HostFixture<InboxTests>>, ITestSeed, IDi
 		_client.DefaultRequestHeaders.Accept.Clear();
 		_client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/ld+json"));
 		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Signed", _actor.FediId.ToString());
+
+		// activities
+
+		_followActivity = new FollowActivity()
+		{
+			Actor = _actor.FediId,
+			Object = _profiles[7].FediId,
+			Id = $"https://{_actor.FediId.Host}/0"
+		};
 	}
 
 	[Fact]
@@ -322,6 +333,78 @@ public class InboxTests : IClassFixture<HostFixture<InboxTests>>, ITestSeed, IDi
 	{
 		await Task.CompletedTask;
 		Assert.Fail("not implemented");
+	}
 
+	[Fact(DisplayName = "Should accept a follow activity")]
+	public async Task CanAcceptFollow()
+	{
+		var content = _serializer.Serialize(_followActivity);
+		var payload = new StringContent(content, mediaType: _mediaType);
+
+		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Signed", _actor.FediId.ToString());
+		var response = await _client.PostAsync($"actor/{_profiles[7].Id}/inbox", payload);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
+	}
+
+	[Fact(DisplayName = "Should accept a duplicate follow activity")]
+	public async Task CanAcceptFollow_Duplicate()
+	{
+		var content = _serializer.Serialize(_followActivity);
+		var payload = new StringContent(content, mediaType: _mediaType);
+
+		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Signed", _actor.FediId.ToString());
+		var initialResponse = await _client.PostAsync($"actor/{_profiles[7].Id}/inbox", payload);
+		var secondResponse = await _client.PostAsync($"actor/{_profiles[7].Id}/inbox", payload);
+
+		Assert.NotNull(initialResponse);
+		Assert.NotNull(secondResponse);
+		Assert.Equal(HttpStatusCode.Accepted, initialResponse.StatusCode);
+		Assert.Equal(HttpStatusCode.Accepted, secondResponse.StatusCode);
+	}
+
+	[Fact(DisplayName = "Should accept undo(follow) activity")]
+	public async Task CanAcceptUnfollow()
+	{
+		var actor = _profiles[12];
+		_followActivity.Actor = actor.FediId;
+		var undo = new UndoActivity
+		{
+			Actor = actor.FediId,
+			Object = _followActivity
+		};
+		var content = _serializer.Serialize(undo);
+		var payload = new StringContent(content, mediaType: _mediaType);
+
+		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Signed", actor.FediId.ToString());
+		var response = await _client.PostAsync($"actor/{_profiles[7].Id}/inbox", payload);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+	}
+
+	[Fact(DisplayName = "Should accept refollow activity after unfollow")]
+	public async Task CanAcceptUnfollow_Refollow()
+	{
+		var actor = _profiles[12];
+		_followActivity.Actor = actor.FediId;
+		var undo = new UndoActivity
+		{
+			Actor = actor.FediId,
+			Object = _followActivity
+		};
+		var content = _serializer.Serialize(undo);
+		var unfollowPayload = new StringContent(content, mediaType: _mediaType);
+		var followPayload = new StringContent(_serializer.Serialize(_followActivity), mediaType: _mediaType);
+
+		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Signed", actor.FediId.ToString());
+		var unfollowResponse = await _client.PostAsync($"actor/{_profiles[7].Id}/inbox", unfollowPayload);
+		var followResponse = await _client.PostAsync($"actor/{_profiles[7].Id}/inbox", followPayload);
+
+		Assert.NotNull(unfollowResponse);
+		Assert.NotNull(followResponse);
+		Assert.Equal(HttpStatusCode.OK, unfollowResponse.StatusCode);
+		Assert.Equal(HttpStatusCode.Accepted, followResponse.StatusCode);
 	}
 }

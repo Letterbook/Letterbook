@@ -13,6 +13,7 @@ using Letterbook.Core.Values;
 using Letterbook.IntegrationTests.Fixtures;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Xunit.Abstractions;
 using Profile = Letterbook.Core.Models.Profile;
 
 namespace Letterbook.IntegrationTests;
@@ -27,6 +28,7 @@ public sealed class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITe
 	}
 
 	private readonly HostFixture<ProfileTests> _host;
+	private readonly ITestOutputHelper _output;
 	private readonly HttpClient _client;
 	private readonly List<Profile> _profiles;
 	private readonly Dictionary<Profile, List<Post>> _posts;
@@ -37,9 +39,10 @@ public sealed class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITe
 	private readonly IServiceScope _scope;
 	static int? ITestSeed.Seed() => null;
 
-	public ProfileTests(HostFixture<ProfileTests> host)
+	public ProfileTests(HostFixture<ProfileTests> host, ITestOutputHelper output)
 	{
 		_host = host;
+		_output = output;
 		_scope = host.CreateScope();
 		var clientOptions = new WebApplicationFactoryClientOptions
 		{

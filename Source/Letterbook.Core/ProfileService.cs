@@ -276,7 +276,6 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 		var self = await _data.Profiles(selfId)
 			           .WithRelation(targetId)
-			           .Include(profile => profile.Audiences.Where(audience => audience.Source!.Id == targetId))
 			           .FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
 
@@ -380,8 +379,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private async Task<FollowerRelation> RemoveFollower(Profile self, FollowerRelation relation)
 	{
 		self.RemoveFollower(relation.Follower);
-		if (relation.Follower.HasLocalAuthority(_coreConfig))
-			relation.Follower.LeaveAudience(self);
+		self.RemoveFromAudience(relation.Follower);
 
 		await _data.Commit();
 		await _activity.RemoveFollower(relation.Follower.Inbox, relation.Follower, self);
@@ -452,8 +450,6 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	public async Task<FollowerRelation?> Unfollow(ProfileId selfId, ProfileId targetId)
 	{
 		var self = await _data.Profiles(selfId).WithRelation(targetId)
-			           .Include(profile => profile.Audiences.Where(
-				           audience => audience.Source != null && audience.Source.Id == targetId))
 			           .FirstOrDefaultAsync()
 		           ?? throw CoreException.MissingData<Profile>(selfId);
 		var relation = self!.FollowingCollection
@@ -647,6 +643,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		[CallerLineNumber] int line = -1)
 	{
 		var query = _data.Profiles(localId)
+			.TagWith(nameof(RequireProfile))
+			.TagWith(name)
 			.Include(p => p.Headlining);
 
 		var profile = relationId != null
@@ -667,6 +665,8 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		[CallerLineNumber] int line = -1)
 	{
 		var profile = await _data.Profiles(profileId)
+			.TagWith(nameof(ResolveProfile))
+			.TagWith(name)
 			.Include(p => p.Headlining)
 			.FirstOrDefaultAsync();
 

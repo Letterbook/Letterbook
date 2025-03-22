@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSign.Client;
 using NSign.Signatures;
+using AddContentDigestHandler = Letterbook.Adapter.ActivityPub.Signatures.AddContentDigestHandler;
 
 namespace Letterbook.Adapter.ActivityPub;
 
@@ -24,9 +25,9 @@ public static class DependencyInjectionExtensions
 			.AddHttpMessageHandler<ClientHandler>();
 	}
 
-	public static IServiceCollection AddActivityPubClient(this IServiceCollection services, IConfigurationManager configuration)
+	public static IServiceCollection AddActivityPubClient(this IServiceCollection services, IConfiguration configuration)
 	{
-		var coreOptions = configuration.Get<CoreOptions>() ?? throw ConfigException.Missing(nameof(CoreOptions));
+		var coreOptions = configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>() ?? throw ConfigException.Missing(nameof(CoreOptions));
 
 		services.TryAddTypesModule();
 		services
@@ -39,6 +40,7 @@ public static class DependencyInjectionExtensions
 				options.WithMandatoryComponent(SignatureComponent.Authority);
 				options.WithMandatoryComponent(SignatureComponent.RequestTarget);
 				options.WithOptionalComponent(SignatureComponent.ContentDigest);
+				options.WithOptionalComponent(new HttpHeaderComponent("Digest"));
 				options.WithMandatoryComponent(new HttpHeaderComponent("Date"));
 				options.SetParameters = component =>
 				{

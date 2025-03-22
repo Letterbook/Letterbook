@@ -61,7 +61,7 @@ public sealed class FakeProfile : Faker<Profile>
 				UserName = null,
 			};
 
-			builder.Path += $"actor/{localId.ToId22String()}";
+			builder.Path += $"actor/{localId.ToId25String()}";
 			var id = builder.Uri;
 			var basePath = builder.Path;
 			builder.Path = basePath + "/inbox";
