@@ -25,20 +25,19 @@ public class AddContentDigestHandler : DelegatingHandler
 	{
 		if (request.Content is null) return await base.SendAsync(request, cancellationToken);
 
-		foreach (var alg in _options.Value.Hashes)
+		foreach (var pair in _options.Value.Hashes.Select((alg, i) => new { alg, i }))
 		{
-			using var hash = GetConfiguredHash(alg, out var algName);
+			using var hash = GetConfiguredHash(pair.alg, out var algName);
+			var digestValue = await GetContentDigestValueAsync(request.Content, hash);
+
 			// IETF-9421 spec compliant
-			request.Content.Headers.Add(Constants.Headers.ContentDigest, $"{algName}=:{await GetContentDigestValueAsync(request.Content, hash)}:");
-		}
+			request.Content.Headers.Add(Constants.Headers.ContentDigest, $"{algName}=:{digestValue}:");
 
-		if (_options.Value.Hashes.Order().FirstOrDefault() is var first)
-		{
-			using var hash = GetConfiguredHash(first, out var algName);
 			// Required by mastodon/draft-cavage-8 (note the missing colons. It's likely to be ambiguous if you try to use multiple algorithms)
-			request.Content.Headers.Add(DigestHeader, $"{algName}={await GetContentDigestValueAsync(request.Content, hash)}");
-		}
+			if (pair.i == 0)
+				request.Content.Headers.Add(DigestHeader, $"{algName}={digestValue}");
 
+		}
 		return await base.SendAsync(request, cancellationToken);
 	}
 
