@@ -2,7 +2,9 @@ using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using Bogus;
 using Letterbook.Adapter.ActivityPub.Signatures;
+using Letterbook.Core;
 using Letterbook.Core.Tests.Fakes;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -128,6 +130,30 @@ public class MastodonSignatureTests
 
 		var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
 		var actual = signer.SignRequest(new HttpRequestMessage(HttpMethod.Get, "http://example.com"), _signingKey);
+
+		var verifier = new MastodonVerifier(_verifierLogger);
+		Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
+	}
+
+	[Fact(DisplayName = "Should verify own signatures with all components")]
+	public void TestSignAndVerifyConfig()
+	{
+		var b = new ConfigurationBuilder();
+		b.AddInMemoryCollection(new Dictionary<string, string?>()
+		{
+			[$"{CoreOptions.ConfigKey}:{nameof(CoreOptions.DomainName)}"] = "test.letterbook.example"
+		});
+		_serviceCollection.AddActivityPubClient(b.Build());
+		var provider = _serviceCollection.BuildServiceProvider();
+
+		var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
+		var message = new HttpRequestMessage(HttpMethod.Post, "http://example.com");
+		message.Content = new StringContent("hello world");
+		// precomputed digests of "hello world" string content
+		message.Content.Headers.Add("Content-Digest", "sha-256=:uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek=:");
+		message.Content.Headers.Add("Digest", "sha-256=uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek=");
+
+		var actual = signer.SignRequest(message, _signingKey);
 
 		var verifier = new MastodonVerifier(_verifierLogger);
 		Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
