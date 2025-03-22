@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSign.Client;
 using NSign.Signatures;
+using AddContentDigestHandler = Letterbook.Adapter.ActivityPub.Signatures.AddContentDigestHandler;
 
 namespace Letterbook.Adapter.ActivityPub;
 
