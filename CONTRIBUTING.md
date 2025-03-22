@@ -111,8 +111,8 @@ docker-compose up -d
 2. Migrate the database
 ```shell
 dotnet tool restore
-dotnet ef database update --project Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj
-dotnet ef database update --project Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj
+dotnet ef database update --project Source/Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj
+dotnet ef database update --project Source/Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj
 ```
 
 3. Add an application host secret
@@ -123,11 +123,15 @@ dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Lett
 4. Run Letterbook (in watch mode)
 ```shell
 dotnet restore Letterbook.sln
-dotnet watch run --project Letterbook --launch-profile dev
+dotnet watch run --project Source/Letterbook.--launch-profile dev
 ```
 
 5. Open the UI http://localhost:5127  
 There is also a Swagger UI http://localhost:5127/swagger/index.html
+
+The setup process creates an `admin` account with:
+- email: `admin@letterbook.example`
+- password: `Password1!`
 
 ## Navigating the Codebase
 
