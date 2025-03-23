@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Security.Claims;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Letterbook.Generators;
@@ -77,7 +78,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	/// </summary>
 	/// <remarks>
 	/// You SHOULD NOT USE the Keys or other collections on this object. Those must be queried from the data adapter. This static instance
-	/// can be used to quickly look up the profile's various identifiers.
+	/// can be used to seed the database, and quickly look up the profile's various identifiers.
 	/// </remarks>
 	/// <param name="opts"></param>
 	/// <returns></returns>
@@ -86,7 +87,8 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		Type = ActivityActorType.Service,
 		Handle = "Moderators",
 		DisplayName = "Moderators",
-		Description = $"The special reserved profile for the {opts.DomainName} moderators"
+		Description = $"The special reserved profile for the {opts.DomainName} moderators",
+		OwnedBy = new Account() { UserName = "System Moderator account" }
 	});
 
 	public static Profile AddModeratorsProfile(Profile moderators) => SystemProfiles[SystemModeratorsId] = moderators;
@@ -97,7 +99,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	/// </summary>
 	/// <remarks>
 	/// You SHOULD NOT USE the Keys or other collections on this object. Those must be queried from the data adapter. This static instance
-	/// can be used to quickly look up the profile's various identifiers.
+	/// can be used to seed the database, and quickly look up the profile's various identifiers.
 	/// </remarks>
 	/// <param name="opts"></param>
 	/// <returns></returns>
@@ -141,6 +143,9 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public ICollection<ModerationReport> Reports = new HashSet<ModerationReport>();
 	public IDictionary<Restrictions, DateTimeOffset> Restrictions { get; set; } = new Dictionary<Restrictions, DateTimeOffset>();
 
+	public IEnumerable<Claim> RestrictionClaims() => Restrictions
+		.Where(r => r.Value >= DateTimeOffset.UtcNow)
+		.Select(pair => new Claim(pair.Key.ToString(), "true"));
 	public Uuid7 GetId() => Id.Id;
 	public string GetId25() => Id.ToString();
 	public Profile ShallowClone() => (Profile)MemberwiseClone();
@@ -271,11 +276,14 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 
 	// Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?
 	// The only use case I'm imagining for a service is to represent the server itself
-	public static Profile CreateIndividual(Uri baseUri, string handle)
+	public static Profile CreateIndividual(Uri baseUri, string handle) => Create(baseUri, handle, ActivityActorType.Person);
+	public static Profile CreateSystemActor(Uri baseUri, string handle) => Create(baseUri, handle, ActivityActorType.Application);
+
+	private static Profile Create(Uri baseUri, string handle, ActivityActorType type)
 	{
 		var profile = new Profile(baseUri)
 		{
-			Type = ActivityActorType.Person,
+			Type = type,
 			Handle = handle,
 			DisplayName = handle,
 		};

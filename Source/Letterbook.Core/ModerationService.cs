@@ -4,27 +4,34 @@ using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Core;
 
 public class ModerationService : IModerationService, IAuthzModerationService
 {
 	private IEnumerable<Claim> _claims = [];
+	private readonly ILogger<ModerationService> _log;
 	private readonly IDataAdapter _data;
 	private readonly IAuthorizationService _authz;
 	private readonly IProfileEventPublisher _profileEvents;
 	private readonly IAccountService _accounts;
 	private readonly IModerationEventPublisher _moderationEvents;
 	private readonly IActivityScheduler _activity;
+	private readonly IApCrawlScheduler _crawler;
 
-	public ModerationService(IDataAdapter data, IAuthorizationService authz, IProfileEventPublisher profileEvents, IAccountService accounts, IModerationEventPublisher moderationEvents, IActivityScheduler activity)
+	public ModerationService(ILogger<ModerationService> log, IDataAdapter data, IAuthorizationService authz,
+		IProfileEventPublisher profileEvents, IAccountService accounts, IModerationEventPublisher moderationEvents,
+		IActivityScheduler activity, IApCrawlScheduler crawler)
 	{
+		_log = log;
 		_data = data;
 		_authz = authz;
 		_profileEvents = profileEvents;
 		_accounts = accounts;
 		_moderationEvents = moderationEvents;
 		_activity = activity;
+		_crawler = crawler;
 	}
 
 	public async Task<ModerationReport?> LookupReport(ModerationReportId id)
@@ -196,6 +203,67 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		await _data.Commit();
 		if (closed) await _moderationEvents.Closed(report, moderatorId, _claims);
 		if (reopen) await _moderationEvents.Reopened(report, moderatorId, _claims);
+		return report;
+	}
+
+	public async Task<ModerationReport> ReceiveReport(Uri reporterId, ModerationReport report)
+	{
+		if(await _data.Profiles(reporterId).FirstOrDefaultAsync() is not { } actor)
+		{
+			await _crawler.CrawlProfile(default, reporterId);
+			actor = Profile.CreateSystemActor(reporterId, $"unknown actor ({reporterId})");
+		}
+
+		// There's no actual way to know if the IDs we receive in federated reports are posts or profiles (or some secret third thing)
+		// So, the best we can do is try to look them up both ways, and then guess what type any unknown objects are and try to fix it later
+		var allObjects = report.RelatedPosts.Select(p => p.FediId).Concat(report.Subjects.Select(p => p.FediId)).ToArray();
+		var authz = _authz.Create<ModerationReport>(_claims);
+		if (!authz.Allowed)
+			throw CoreException.Unauthorized(authz);
+		if (allObjects.Length == 0)
+			throw CoreException.InvalidRequest("Report must include at least 1 object");
+
+		var systemModerator = await _data.Profiles(Profile.SystemModeratorsId).Include(p => p.OwnedBy).FirstAsync();
+
+		var profiles = await _data.Profiles(allObjects)
+			.Distinct()
+			.ToDictionaryAsync(profile => profile.FediId);
+		var posts = await _data.Posts([..allObjects.Except(profiles.Keys)])
+			.Distinct()
+			.ToDictionaryAsync(post => post.FediId);
+
+		var missingObjects = allObjects.Except(profiles.Keys).Except(posts.Keys).Distinct();
+		foreach (var uri in missingObjects)
+		{
+			// Assume unknown objects are posts, and crawl 1 hop in case we also don't know the author or mentioned profiles
+			// Also assume this would be rare. Otherwise, why are we even getting this report?
+			// If that turns out not to be rare, then we might want to stop crawling on receipt, and do it on demand instead.
+			// Or not? It's hard to say. Anyway, revisit this if it becomes a problem.
+			_log.LogInformation("Crawling unknown object {ObjectId} referenced in moderation report {ReportId} from {ReporterId}", uri, report.Id, reporterId);
+			// It might seem reasonable to crawl as the moderator profile. But we use the instance profile, to not leak that these objects
+			// were included in a report
+			await _crawler.CrawlPost(Profile.SystemInstanceId, uri, depthLimit: 1);
+			posts.Add(uri, new Post { FediId = uri });
+			report.Remarks.Add(new ModerationRemark
+			{
+				Report = report,
+				Author = systemModerator.OwnedBy!,
+				Text = $"This federated report referenced an unknown object {uri}"
+			});
+		}
+
+		report.Reporter = actor;
+		report.Subjects = profiles.Values;
+		report.RelatedPosts = posts.Values;
+
+		_data.Add(report);
+		await _data.Commit();
+		await _moderationEvents.Created(report, actor.Id, _claims);
+
+		foreach (var subject in report.Subjects)
+		{
+			await _profileEvents.Reported(subject);
+		}
 		return report;
 	}
 
