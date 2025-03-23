@@ -153,9 +153,9 @@ public class ActorController : ControllerBase
 				return await InboxUpdate(id, update);
 
 
-			_logger.LogWarning("Ignored unknown activity {ActivityType}", activity.GetType());
+			_logger.LogWarning("Ignored unknown activity {@ActivityType}", activity.TypeMap.ASTypes);
 			_logger.LogDebug("Ignored unknown activity details {@Activity}", activity);
-			return Accepted();
+			return UnprocessableEntity();
 		}
 		catch (CoreException e)
 		{
@@ -303,7 +303,7 @@ public class ActorController : ControllerBase
 		}
 
 		_logger.LogWarning("{Method}: Unknown object semantics {@ObjectType}", nameof(InboxAccept) , activityObject.TypeMap.ASTypes);
-		return Accepted();
+		return UnprocessableEntity();
 	}
 
 	private async Task<IActionResult> InboxReject(ProfileId localId, RejectActivity rejectActivity)
@@ -325,7 +325,7 @@ public class ActorController : ControllerBase
 		}
 
 		_logger.LogWarning("{Method}: Unknown object semantics {@ObjectType}", nameof(InboxReject) , activityObject.TypeMap.ASTypes);
-		return Accepted();
+		return UnprocessableEntity();
 	}
 
 	private async Task<IActionResult> InboxUndo(ProfileId id, ASActivity activity)
@@ -354,8 +354,8 @@ public class ActorController : ControllerBase
 		if (activityObject.Is<LikeActivity>(out var likeActivity))
 			throw new NotImplementedException();
 
-		_logger.LogInformation("Ignored unknown Undo target {ActivityType}", activityObject.TypeMap.ASTypes);
-		return new AcceptedResult();
+		_logger.LogInformation("Ignored unknown Undo target {@ActivityType}", activityObject.TypeMap.ASTypes);
+		return UnprocessableEntity();
 	}
 
 	private async Task<IActionResult> InboxFollow(ProfileId localId, ASActivity followRequest)
