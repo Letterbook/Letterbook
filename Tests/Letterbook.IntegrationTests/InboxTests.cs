@@ -443,6 +443,7 @@ public class InboxTests : IClassFixture<HostFixture<InboxTests>>, ITestSeed, IDi
 		var response = await _client.PostAsync($"actor/{_profiles[7].Id}/inbox", payload);
 
 		Assert.NotNull(response);
+		if (!response.IsSuccessStatusCode) Assert.Fail(await response.Content.ReadAsStringAsync());
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 	}
 }

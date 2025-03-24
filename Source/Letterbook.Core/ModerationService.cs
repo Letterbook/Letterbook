@@ -243,7 +243,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 			// It might seem reasonable to crawl as the moderator profile. But we use the instance profile, to not leak that these objects
 			// were included in a report
 			await _crawler.CrawlPost(Profile.SystemInstanceId, uri, depthLimit: 1);
-			posts.Add(uri, new Post { FediId = uri });
+			posts.Add(uri, new Post(uri));
 			report.Remarks.Add(new ModerationRemark
 			{
 				Report = report,

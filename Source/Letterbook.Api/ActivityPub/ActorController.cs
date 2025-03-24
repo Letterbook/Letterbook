@@ -38,16 +38,18 @@ public class ActorController : ControllerBase
 	private readonly ILogger<ActorController> _logger;
 	private readonly IProfileService _profileService;
 	private readonly IPostService _postService;
+	private readonly IModerationService _moderationService;
 	private readonly IApCrawlScheduler _apCrawler;
 	private static readonly IMapper ActorMapper = new Mapper(AstMapper.Profile);
 	private static readonly IMapper Mapper = new Mapper(AstMapper.Default);
 
 	public ActorController(ILogger<ActorController> logger,
-		IProfileService profileService, IPostService postService, IApCrawlScheduler apCrawler)
+		IProfileService profileService, IPostService postService, IModerationService moderationService, IApCrawlScheduler apCrawler)
 	{
 		_logger = logger;
 		_profileService = profileService;
 		_postService = postService;
+		_moderationService = moderationService;
 		_apCrawler = apCrawler;
 		_logger.LogInformation("Loaded {Controller}", nameof(ActorController));
 	}
@@ -152,6 +154,9 @@ public class ActorController : ControllerBase
 			if (activity.Is<UpdateActivity>(out var update))
 				return await InboxUpdate(id, update);
 
+			if (activity.Is<FlagActivity>(out var flag))
+				return await InboxFlag(actorId!, flag);
+
 
 			_logger.LogWarning("Ignored unknown activity {@ActivityType}", activity.TypeMap.ASTypes);
 			_logger.LogDebug("Ignored unknown activity details {@Activity}", activity);
@@ -232,6 +237,16 @@ public class ActorController : ControllerBase
 		actorId = id;
 		error = default;
 		return true;
+	}
+
+	private async Task<IActionResult> InboxFlag(Uri actorId, FlagActivity activity)
+	{
+		var report = Mapper.Map<ModerationReport>(activity);
+		if (report == null)
+			return BadRequest();
+
+		await _moderationService.As(User.Claims).ReceiveReport(actorId, report);
+		return Ok();
 	}
 
 	private async Task<IActionResult> InboxUpdate(ProfileId id, UpdateActivity activity)
