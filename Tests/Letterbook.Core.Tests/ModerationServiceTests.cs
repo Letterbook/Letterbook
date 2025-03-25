@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
+using Microsoft.Extensions.Logging;
 using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
@@ -22,8 +23,8 @@ public class ModerationServiceTests : WithMocks
 
 	public ModerationServiceTests(ITestOutputHelper output)
 	{
-		_service = new ModerationService(DataAdapterMock.Object, AuthorizationServiceMock.Object, ProfileEventServiceMock.Object,
-			AccountServiceMock.Object, ModerationEventPublisherMock.Object, ActivityPublisherMock.Object);
+		_service = new ModerationService(Mock.Of<ILogger<ModerationService>>(), DataAdapterMock.Object, AuthorizationServiceMock.Object, ProfileEventServiceMock.Object,
+			AccountServiceMock.Object, ModerationEventPublisherMock.Object, ActivityPublisherMock.Object, ApCrawlerSchedulerMock.Object);
 		_fakeAccounts = new FakeAccount();
 		_fakeProfiles = new FakeProfile();
 		_accounts = new FakeAccount().Generate(3);
@@ -134,6 +135,64 @@ public class ModerationServiceTests : WithMocks
 		};
 
 		await Assert.ThrowsAsync<CoreException>(async () => await _service.As([]).CreateReport(_profiles[2].Id, report));
+	}
+
+	[Fact(DisplayName = "Should receive inbound federated reports")]
+	public async Task CanReceive()
+	{
+		var actor = new FakeProfile("peer.example").Generate();
+		var report = new ModerationReport(_opts, "test report")
+		{
+			Reporter = actor,
+			Subjects = [_profiles[0]],
+			RelatedPosts = _posts
+		};
+		DataAdapterMock.Setup(m => m.Profiles(It.Is<Uri[]>(uris => uris.Contains(actor.FediId)))).Returns(new List<Profile>() { actor }.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<Uri[]>())).Returns(new List<Profile>() { _profiles[0] }.BuildMock());
+		DataAdapterMock.Setup(m => m.Posts(It.IsAny<Uri[]>())).Returns(_posts.BuildMock());
+		var actual = await _service.As([]).ReceiveReport(actor.FediId, report);
+
+		Assert.NotNull(actual);
+		ProfileEventServiceMock.Verify(m => m.Reported(_profiles[0], default), Times.Once());
+		ModerationEventPublisherMock.Verify(m => m.Created(It.IsAny<ModerationReport>(), It.IsAny<ProfileId>(), It.IsAny<IEnumerable<Claim>>()), Times.Once);
+	}
+
+	[Fact(DisplayName = "Should crawl unknown objects from received federated reports")]
+	public async Task CanReceive_CrawlUnknownObjects()
+	{
+		var actor = new FakeProfile("peer.example").Generate();
+		var report = new ModerationReport(_opts, "test report")
+		{
+			Reporter = actor,
+			Subjects = [_profiles[0]],
+			RelatedPosts = _posts
+		};
+		DataAdapterMock.Setup(m => m.Profiles(It.Is<Uri[]>(uris => uris.Contains(actor.FediId)))).Returns(new List<Profile>() { actor }.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<Uri[]>())).Returns(new List<Profile>() { _profiles[0] }.BuildMock());
+		DataAdapterMock.Setup(m => m.Posts(It.IsAny<Uri[]>())).Returns(_posts.Take(1).BuildMock());
+		var actual = await _service.As([]).ReceiveReport(actor.FediId, report);
+
+		Assert.NotNull(actual);
+		ApCrawlerSchedulerMock.Verify(m => m.CrawlPost(It.IsAny<ProfileId>(), It.IsAny<Uri>(), 1), Times.Exactly(2));
+	}
+
+	[Fact(DisplayName = "Should crawl unknown actors from received federated reports")]
+	public async Task CanReceive_CrawlUnknownReporter()
+	{
+		var actor = new FakeProfile("peer.example").Generate();
+		var report = new ModerationReport(_opts, "test report")
+		{
+			Reporter = actor,
+			Subjects = [_profiles[0]],
+			RelatedPosts = _posts
+		};
+		DataAdapterMock.Setup(m => m.Profiles(It.Is<Uri[]>(uris => uris.Contains(actor.FediId)))).Returns(new List<Profile>().BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(It.Is<Uri[]>(uris => uris.Length > 1))).Returns(new List<Profile>() { _profiles[0] }.BuildMock());
+		DataAdapterMock.Setup(m => m.Posts(It.IsAny<Uri[]>())).Returns(_posts.BuildMock());
+		var actual = await _service.As([]).ReceiveReport(actor.FediId, report);
+
+		Assert.NotNull(actual);
+		ApCrawlerSchedulerMock.Verify(m => m.CrawlProfile(It.IsAny<ProfileId>(), It.IsAny<Uri>(), 0), Times.Once);
 	}
 
 	[Fact(DisplayName = "Should add a remark")]

@@ -64,6 +64,14 @@ public interface IAuthzModerationService
 	public Task<ModerationReport> CloseReport(ModerationReportId reportId, Guid moderatorId, bool reopen = false);
 
 	/// <summary>
+	/// Process an inbound federated report
+	/// </summary>
+	/// <param name="reporterId"></param>
+	/// <param name="report"></param>
+	/// <returns></returns>
+	public Task<ModerationReport> ReceiveReport(Uri reporterId, ModerationReport report);
+
+	/// <summary>
 	/// Search for reports
 	/// </summary>
 	/// <param name="query"></param>

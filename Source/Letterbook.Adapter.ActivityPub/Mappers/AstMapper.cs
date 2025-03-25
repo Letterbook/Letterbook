@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using ActivityPub.Types;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
+using ActivityPub.Types.AS.Extended.Activity;
 using ActivityPub.Types.AS.Extended.Actor;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Util;
@@ -29,6 +30,7 @@ public static class AstMapper
 	{
 		ConfigureBaseTypes(cfg);
 		ConfigureKeyTypes(cfg);
+		FromFlag(cfg);
 		FromActor(cfg);
 		FromNote(cfg);
 		FromASType(cfg);
@@ -146,6 +148,47 @@ public static class AstMapper
 			.ForSourceMember(s => s.SourceText, opt => opt.DoNotValidate())
 			.ForSourceMember(s => s.SourceContentType, opt => opt.DoNotValidate())
 			;
+	}
+
+	private static void FromFlag(IMapperConfigurationExpression cfg)
+	{
+		cfg.CreateMap<FlagActivity, ModerationReport>(MemberList.Destination)
+			.ConstructUsing(src => ConstructModerationReport(src))
+			.ForMember(d => d.Reporter, opt => opt.MapFrom<ProfileResolver, Linkable<ASObject>>(src => src.Actor.First()))
+			.ForMember(d => d.Subjects, opt => opt.MapFrom<ProfileResolver, IEnumerable<Linkable<ASObject>>>(src => src.Object.Take(1)))
+			.ForMember(d => d.RelatedPosts, opt => opt.MapFrom<PostResolver, IEnumerable<Linkable<ASObject>>>(src => src.Object.Skip(1)))
+			.ForMember(d => d.Summary, opt =>
+			{
+				opt.Condition(src => src.Content != null);
+				opt.MapFrom(src => src.Content);
+			})
+			.ForMember(d => d.Id, opt => opt.Ignore())
+			.ForMember(d => d.Context, opt => opt.Ignore())
+			.ForMember(d => d.FediId, opt => opt.Ignore())
+			.ForMember(d => d.Moderators, opt => opt.Ignore())
+			.ForMember(d => d.Policies, opt => opt.Ignore())
+			.ForMember(d => d.Created, opt => opt.Ignore())
+			.ForMember(d => d.Closed, opt => opt.Ignore())
+			.ForMember(d => d.Remarks, opt => opt.Ignore())
+			.ForMember(d => d.Forwarded, opt => opt.Ignore());
+	}
+
+	private static ModerationReport ConstructModerationReport(FlagActivity src)
+	{
+		if (src.Context?.TryGetId(out var contextId) == true)
+			return new ModerationReport(contextId);
+		if (src.Id != null)
+			return new ModerationReport(new Uri(src.Id));
+		if (src.Actor.First().TryGetId(out var actorId))
+		{
+			var b = new UriBuilder(actorId)
+			{
+				Fragment = $"report/synthetic-id/{Guid.NewGuid()}"
+			};
+			return new ModerationReport(b.Uri);
+		}
+
+		throw CoreException.InvalidRequest("Flag must have an Id");
 	}
 
 	private static void FromActor(IMapperConfigurationExpression cfg)
@@ -391,7 +434,9 @@ public class MediaTypeResolver : IMemberValueResolver<Post, NoteObject, Content?
 [UsedImplicitly]
 internal class ProfileResolver :
 	IMemberValueResolver<ASObject, Post, LinkableList<ASObject>, ICollection<Models.Profile>>,
-	IMemberValueResolver<ASObject, Post, Linkable<ASCollection>?, IList<Models.Profile>>
+	IMemberValueResolver<ASObject, Post, Linkable<ASCollection>?, IList<Models.Profile>>,
+	IMemberValueResolver<FlagActivity, ModerationReport, IEnumerable<Linkable<ASObject>>, ICollection<Models.Profile>>,
+	IMemberValueResolver<FlagActivity, ModerationReport, Linkable<ASObject>, Models.Profile?>
 {
 	public ICollection<Models.Profile> Resolve(ASObject source, Post destination, LinkableList<ASObject> sourceMember,
 		ICollection<Models.Profile> destMember,
@@ -424,12 +469,33 @@ internal class ProfileResolver :
 
 		return destMember;
 	}
+
+	public ICollection<Models.Profile> Resolve(FlagActivity source, ModerationReport destination, IEnumerable<Linkable<ASObject>> sourceMember, ICollection<Models.Profile> destMember,
+		ResolutionContext context)
+	{
+		foreach (var member in sourceMember)
+		{
+			if (!member.TryGetId(out var id)) continue;
+			var profile = Models.Profile.CreateEmpty(id);
+			destMember.Add(profile);
+		}
+
+		return destMember;
+	}
+
+	public Models.Profile? Resolve(FlagActivity source, ModerationReport destination, Linkable<ASObject> sourceMember, Models.Profile? destMember, ResolutionContext context)
+	{
+		if (source.TryGetId(out var id) == true)
+			return Models.Profile.CreateEmpty(id);
+		return destMember;
+	}
 }
 
 [UsedImplicitly]
 internal class PostResolver :
 	IMemberValueResolver<ASObject, Post, LinkableList<ASObject>?, Post?>,
-	IMemberValueResolver<ASObject, Post, ASCollection?, IList<Post>>
+	IMemberValueResolver<ASObject, Post, ASCollection?, IList<Post>>,
+	IMemberValueResolver<FlagActivity, ModerationReport, IEnumerable<Linkable<ASObject>>, ICollection<Post>>
 {
 	public Post? Resolve(ASObject source, Post destination, LinkableList<ASObject>? sourceMember, Post? destMember,
 		ResolutionContext context)
@@ -456,6 +522,19 @@ internal class PostResolver :
 		foreach (var id in sourceMember.Items.LinkItems.SelectIds())
 		{
 			var post = new Post(fediId: id, thread: destination.Thread);
+			destMember.Add(post);
+		}
+
+		return destMember;
+	}
+
+	public ICollection<Post> Resolve(FlagActivity source, ModerationReport destination, IEnumerable<Linkable<ASObject>> sourceMember, ICollection<Post> destMember,
+		ResolutionContext context)
+	{
+		foreach (var member in sourceMember)
+		{
+			if (!member.TryGetId(out var id)) continue;
+			var post = new Post() { FediId = id };
 			destMember.Add(post);
 		}
 

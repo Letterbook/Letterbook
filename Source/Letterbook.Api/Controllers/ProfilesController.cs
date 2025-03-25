@@ -48,6 +48,17 @@ public class ProfilesController : ControllerBase
 			: NotFound();
 	}
 
+	[HttpGet]
+	[ProducesResponseType<FullProfileDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Get", "Lookup a profile by ID")]
+	public async Task<IActionResult> Get([FromQuery]string handle)
+	{
+		var result = await _profiles.As(User.Claims).FindProfiles(handle);
+		return result.Any()
+			? Ok(_mapper.Map<IEnumerable<FullProfileDto>>(result))
+			: NotFound();
+	}
+
 	[HttpPost("new/{accountId}")]
 	[ProducesResponseType<FullProfileDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("New Profile", "Create a new profile that belongs to the given account")]

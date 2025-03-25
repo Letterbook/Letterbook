@@ -11,7 +11,7 @@ public class ModerationReport
 {
 	public ModerationReportId Id { get; set; } = Uuid7.NewUuid7();
 	public Uri? FediId { get; set; }
-	public required string Summary { get; set; }
+	public string Summary { get; set; } = "";
 	public required ThreadContext Context { get; set; }
 	public ICollection<Account> Moderators { get; set; } = new HashSet<Account>();
 	public ICollection<ModerationPolicy> Policies { get; set; } = new HashSet<ModerationPolicy>();
@@ -20,7 +20,7 @@ public class ModerationReport
 	public ICollection<Post> RelatedPosts { get; set; } = new HashSet<Post>();
 	public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 	public DateTimeOffset Updated { get; set; } = DateTimeOffset.UtcNow;
-	public DateTimeOffset Closed { get; set; } = DateTimeOffset.MaxValue;
+	public DateTimeOffset Closed { get; set; } = DateTimeOffset.MaxValue.ToUniversalTime();
 	public ICollection<ModerationRemark> Remarks { get; set; } = new List<ModerationRemark>();
 	// TODO: Support forwarding to labelers
 	public IList<Uri> Forwarded { get; set; } = new List<Uri>();
@@ -33,6 +33,17 @@ public class ModerationReport
 			.Concat(RelatedPosts.SelectMany(p => p.Creators).Select(p => p.SharedInbox))
 			.WhereNotNull()
 			.ToHashSet());
+	}
+
+	[SetsRequiredMembers]
+	public ModerationReport(Uri fediId) : this()
+	{
+		FediId = fediId;
+		Context = new ThreadContext()
+		{
+			RootId = default(PostId),
+			FediId = FediId
+		};
 	}
 
 	[SetsRequiredMembers]
