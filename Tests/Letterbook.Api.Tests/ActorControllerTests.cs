@@ -43,7 +43,7 @@ public class ActorControllerTests : WithMockContext
 		var user = Auth(_accountId, new Claim(ApplicationClaims.Actor, _remoteProfile.FediId.ToString()));
 
 		_controller = new ActorController(Mock.Of<ILogger<ActorController>>(), ProfileServiceMock.Object,
-			PostServiceMock.Object, ApCrawlerSchedulerMock.Object)
+			PostServiceMock.Object, ModerationServiceMock.Object, ApCrawlerSchedulerMock.Object)
 		{
 			ControllerContext = new ControllerContext()
 			{

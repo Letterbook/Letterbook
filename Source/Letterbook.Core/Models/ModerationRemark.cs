@@ -10,8 +10,8 @@ public class ModerationRemark : IComparable<ModerationRemark>
 	public ModerationRemarkId Id { get; set; } = Uuid7.NewUuid7();
 	public required ModerationReport Report { get; set; }
 	public required Account Author { get; set; }
-	public DateTimeOffset Created { get; set; } = DateTimeOffset.Now;
-	public DateTimeOffset Updated { get; set; } = DateTimeOffset.Now;
+	public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
+	public DateTimeOffset Updated { get; set; } = DateTimeOffset.UtcNow;
 	public required string Text { get; set; }
 
 	public int CompareTo(ModerationRemark? other)

@@ -968,6 +968,46 @@
         }
       }
     },
+    "/lb/v1/profiles": {
+      "get": {
+        "tags": [
+          "Profiles"
+        ],
+        "summary": "Get",
+        "description": "Lookup a profile by ID",
+        "parameters": [
+          {
+            "name": "handle",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/lb/v1/profiles/new/{accountId}": {
       "post": {
         "tags": [
@@ -3154,8 +3194,7 @@
       },
       "ModerationReport": {
         "required": [
-          "context",
-          "summary"
+          "context"
         ],
         "type": "object",
         "properties": {
@@ -3277,13 +3316,11 @@
           },
           "hostname": {
             "type": "string",
-            "nullable": true,
-            "readOnly": true
+            "nullable": true
           },
           "authority": {
             "type": "string",
-            "nullable": true,
-            "readOnly": true
+            "nullable": true
           },
           "creators": {
             "type": "array",
