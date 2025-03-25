@@ -1,5 +1,7 @@
+using System.Text.RegularExpressions;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Collection;
+using ActivityPub.Types.AS.Extended.Activity;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Conversion;
 using ActivityPub.Types.Util;
@@ -17,7 +19,7 @@ namespace Letterbook.Adapter.ActivityPub.Test;
 /// Mapper tests are a little bit of a mess right now, but half the mappers will need to be rebuilt in the near future
 /// anyway.
 /// </summary>
-public class MapperTests : IClassFixture<JsonLdSerializerFixture>
+public partial class MapperTests : IClassFixture<JsonLdSerializerFixture>
 {
 
 	public class MapFromModelTests : IClassFixture<JsonLdSerializerFixture>
@@ -111,12 +113,16 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 		}
 	}
 
-	public class MapFromAstTests : IClassFixture<JsonLdSerializerFixture>
+	public partial class MapFromAstTests : IClassFixture<JsonLdSerializerFixture>
 	{
 		private readonly ITestOutputHelper _output;
 		private static IMapper AstMapper => new Mapper(Mappers.AstMapper.Default);
 		private readonly IJsonLdSerializer _serializer;
-		private NoteObject _simpleNote;
+		private readonly NoteObject _simpleNote;
+		private readonly FlagActivity _flag;
+
+		[GeneratedRegex("^https://example.com/actor/1#report/synthetic-id/[0-9a-z-]{36}$")]
+		private static partial Regex FlagRegex();
 
 		public MapFromAstTests(ITestOutputHelper output, JsonLdSerializerFixture serializerFixture)
 		{
@@ -133,9 +139,17 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 				{
 					Content = "test content",
 					MediaType = "text"
-				}
+				},
+				AttributedTo = ["https://note.example/actor/1"]
 			};
-			_simpleNote.AttributedTo.Add("https://note.example/actor/1");
+			_flag = new FlagActivity()
+			{
+				Id = "https://example.com/flag/1",
+				Actor = "https://example.com/actor/1",
+				Object = ["https://example.com/actor/2", "https://example.com/post/1"],
+				Content = "Some reason"
+			};
+			// _simpleNote.AttributedTo.Add("https://note.example/actor/1");
 		}
 
 		[Fact]
@@ -300,6 +314,34 @@ public class MapperTests : IClassFixture<JsonLdSerializerFixture>
 
 			Assert.NotNull(post);
 			Assert.Empty(post.Contents);
+		}
+
+		[Fact]
+		public void CanMapFlag()
+		{
+			var report = AstMapper.Map<Models.ModerationReport>(_flag);
+
+			Assert.NotNull(report);
+		}
+
+		[Fact]
+		public void CanMapFlag_PreferContextId()
+		{
+			const string expected = "https://example.com/flag/1/context";
+			_flag.Context = expected;
+			var report = AstMapper.Map<Models.ModerationReport>(_flag);
+
+			Assert.Equal(expected, report.FediId?.ToString());
+		}
+
+		[Fact]
+		public void CanMapFlag_FallbackActorId()
+		{
+			_flag.Id = null;
+			var report = AstMapper.Map<Models.ModerationReport>(_flag);
+
+			// ex: https://example.com/actor/1#report/synthetic-id/fd294bb8-c51c-434a-98fe-88b8e97e19bc
+			Assert.Matches(FlagRegex(), report.FediId?.ToString());
 		}
 	}
 }

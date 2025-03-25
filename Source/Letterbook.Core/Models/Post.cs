@@ -21,17 +21,31 @@ public class Post : IFederated, IEquatable<Post>
 	}
 
 	/// <summary>
+	/// Construct a new federated post with an unknown ThreadContext
+	/// </summary>
+	/// <param name="fediId">FediId</param>
+	/// <param name="thread">Thread</param>
+	public Post(Uri fediId) : this()
+	{
+		FediId = fediId;
+		Authority = fediId.GetAuthority();
+		Hostname = fediId.Host;
+		Thread = new ThreadContext
+		{
+			RootId = Id,
+			FediId = fediId,
+		};
+	}
+
+	/// <summary>
 	/// Construct a new federated post with a known or presumed ThreadContext
 	/// </summary>
 	/// <param name="fediId">FediId</param>
 	/// <param name="thread">Thread</param>
 	[SetsRequiredMembers]
-	public Post(Uri fediId, ThreadContext thread) : this()
+	public Post(Uri fediId, ThreadContext thread) : this(fediId)
 	{
-		FediId = fediId;
 		Thread = thread;
-		Authority = fediId.GetAuthority();
-		Hostname = fediId.Host;
 	}
 
 	/// <summary>
@@ -85,8 +99,8 @@ public class Post : IFederated, IEquatable<Post>
 	public string? Summary { get; set; }
 	public string? Preview { get; set; }
 	public string? Source { get; set; }
-	public string Hostname { get; private set; }
-	public string Authority { get; private set; }
+	public string Hostname { get; set; }
+	public string Authority { get; set; }
 	public ICollection<Profile> Creators { get; set; } = new HashSet<Profile>();
 	public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
 	public DateTimeOffset? PublishedDate { get; set; }

@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using ActivityPub.Types.AS.Extended.Activity;
 using ActivityPub.Types.AS.Extended.Object;
 using ActivityPub.Types.Conversion;
+using Bogus;
 using Letterbook.Core.Tests;
 using Letterbook.IntegrationTests.Fixtures;
 using Medo;
@@ -406,5 +407,43 @@ public class InboxTests : IClassFixture<HostFixture<InboxTests>>, ITestSeed, IDi
 		Assert.NotNull(followResponse);
 		Assert.Equal(HttpStatusCode.OK, unfollowResponse.StatusCode);
 		Assert.Equal(HttpStatusCode.Accepted, followResponse.StatusCode);
+	}
+
+	[Fact(DisplayName = "Should not accept unhandled activities")]
+	public async Task ShouldNotAcceptUnknown()
+	{
+		var actor = _profiles[12];
+		var unknown = new TravelActivity()
+		{
+			Actor = actor.FediId,
+		};
+		var content = _serializer.Serialize(unknown);
+		var payload = new StringContent(content, mediaType: _mediaType);
+
+		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Signed", actor.FediId.ToString());
+		var response = await _client.PostAsync($"actor/{_profiles[7].Id}/inbox", payload);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+	}
+
+	[Fact(DisplayName = "Should accept a report")]
+	public async Task ShouldAcceptReports()
+	{
+		var fake = new Faker();
+		var unknown = new FlagActivity()
+		{
+			Actor = "https://peer.example/system-actor",
+			Object = [_profiles[10].FediId, fake.Internet.Url(), fake.Internet.Url()]
+		};
+		var content = _serializer.Serialize(unknown);
+		var payload = new StringContent(content, mediaType: _mediaType);
+
+		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Signed", "https://peer.example/system-actor");
+		var response = await _client.PostAsync($"actor/{_profiles[7].Id}/inbox", payload);
+
+		Assert.NotNull(response);
+		if (!response.IsSuccessStatusCode) Assert.Fail(await response.Content.ReadAsStringAsync());
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 	}
 }
