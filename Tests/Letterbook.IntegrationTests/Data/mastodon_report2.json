@@ -1,0 +1,11 @@
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "https://mastodon.castle/2024fda6-dc85-4d1e-8987-24a911a8ebfc",
+  "type": "Flag",
+  "actor": "https://mastodon.castle/actor",
+  "content": "blah",
+  "object": [
+    "https://letterbook.castle/actor/06fzjxkqvmv6c5x8r0xu5vmfg",
+    "https://letterbook.castle/post/06g0a3vifffb8f3h272rs007r"
+  ]
+}
