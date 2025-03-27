@@ -12,8 +12,8 @@ body.app {
         font-size: 0.75rem;
     }
 
-    header {
-        font-size: 1.25rem;
+    & > header {
+        font-size: 1.5rem;
         --pico-font-weight: 700;
         grid-area: header;
         justify-content: stretch;
@@ -67,7 +67,27 @@ body.app {
 
     main {
         article {
-            --pico-font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+            /*! margin-left: 2px; */
+            /*! margin-right: 2px; */
+            border-radius: 0;
+            display: grid;
+            grid-template-areas:
+                "header main" 
+                "header footer";
+            grid-template-columns: 2fr 5fr;
+/*             display: flex; */
+            font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+            
+            header {
+                grid-area: header;
+                
+                height: 100%;
+            }
+            
+            footer {
+                grid-area: footer;
+                height: 1.1lh;
+            }
         }
 
         grid-area: main;
@@ -107,9 +127,73 @@ body.app {
         background: radial-gradient(var(--lb-color-primary), var(--lb-color-contrast), var(--lb-color-accent), var(--lb-color-secondary));
         clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%, 0 2em, 4px calc(2em + 1.66px), 4px calc(100% - 4px), calc(100% - 2em - 1.66px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2em - 1.66px), calc(100% - 4px) 4px, calc(2em + 1.66px) 4px, 4px calc(2em + 1.66px));
     }
+    
+    .timeline-body {
+        grid-area: main;
+    }
+    
+    .timeline-header {
+        display: flex;
+        flex-direction: row;
+        overflow: hidden;
+        text-overflow: elipsis;
+        line-break: anywhere;
+        white-space: nowrap;
+        width: 100%;
+        height: 100%;
+        
+        .timeline-pfp {
+            flex-shrink: 0;
+        }
+        
+        .timeline-profile-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        a {
+            text-decoration: none;
+            line-height: initial;
+        }
+        
+        .pfp-sm {
+            line-height: 2lh;
+            /*! width: 2rem; */
+        }
+        span, 
+        .display-name {
+/*             margin: 0; */
+            width: 100%;
+/*             height: 100%; */
+/*             line-break: strict; */
+            overflow: hidden;
+            display: inline-block;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .handle {
+            font-size: .7em;
+        }
+    }
 }
 
-@media screen and (height <= 580px) {
+@media (min-width:576px) {
+    :root {
+        --pico-font-size: 100%;
+    }
+}
+@media (min-width:1280px) {
+    :root {
+        --pico-font-size: 106.25%;
+    }
+}
+@media (min-width:1536px) {
+    :root {
+        --pico-font-size:112.5%
+    }
+}
+
+@media screen and (height <= 576px) {
     /* small displays */
     body.app header {
         font-size: revert;
