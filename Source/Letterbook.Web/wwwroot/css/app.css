@@ -65,28 +65,32 @@ body.app {
         }
     }
 
-    main {
+    main .timeline {
         article {
-            /*! margin-left: 2px; */
-            /*! margin-right: 2px; */
-            border-radius: 0;
+            padding: 0;
             display: grid;
             grid-template-areas:
                 "header main" 
                 "header footer";
-            grid-template-columns: 2fr 5fr;
-/*             display: flex; */
+            grid-template-columns: minmax(12em, 30%) auto;
+            align-items: stretch;
             font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+            
+            .timeline-body {
+                padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal)
+            }
             
             header {
                 grid-area: header;
-                
                 height: 100%;
+                margin: 0;
+                padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal)
             }
             
             footer {
                 grid-area: footer;
-                height: 1.1lh;
+                height: 1.5lh;
+                margin: 0;
             }
         }
 
@@ -118,7 +122,6 @@ body.app {
     .box {
         clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%);
         position: relative;
-    }
 
     .box:before {
         content: "";
@@ -130,17 +133,21 @@ body.app {
     
     .timeline-body {
         grid-area: main;
+        padding-top: var(--pico-block-spacing-vertical);
+        padding-bottom: var(--pico-block-spacing-vertical);
     }
     
     .timeline-header {
         display: flex;
-        flex-direction: row;
-        overflow: hidden;
-        text-overflow: elipsis;
-        line-break: anywhere;
-        white-space: nowrap;
+        flex-direction: column;
         width: 100%;
         height: 100%;
+        
+        .timeline-author {
+            display: flex;
+            flex-direction: row;
+           
+        }
         
         .timeline-pfp {
             flex-shrink: 0;
@@ -162,14 +169,7 @@ body.app {
         }
         span, 
         .display-name {
-/*             margin: 0; */
             width: 100%;
-/*             height: 100%; */
-/*             line-break: strict; */
-            overflow: hidden;
-            display: inline-block;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
         .handle {
             font-size: .7em;

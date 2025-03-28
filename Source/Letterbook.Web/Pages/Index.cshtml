@@ -5,7 +5,7 @@
     ViewData["Title"] = "Home";
 }
 
-<div>
+<div class="timeline">
     <h1>Home</h1>
     <p>
         <a asp-page="Profile" asp-route-handle="admin">Admin profile</a>
@@ -13,20 +13,22 @@
     <p>And now some content, to demonstrate scrolling behavior</p>
     @foreach (var post in await Model.GetPosts())
     {
-        <article class="app">
+        <article>
             <header class="timeline-header">
-                <div class="timeline-pfp">
-                    <a asp-page="Profile" asp-route-handle="@post.Creators.First().Handle">
-                        <img class="pfp-sm inline" src="/img/letterbook-square.svg"/>
-                    </a>
-                </div>
-                <div class="timeline-profile-container">
-                    <a asp-page="Profile" asp-route-handle="@post.Creators.First().Handle">
-                        <span class="display-name">@post.Creators.First().DisplayName</span>
-                    </a>
-                    <a asp-page="Profile" asp-route-handle="@post.Creators.First().Handle">
-                        <span class="handle">@@@post.Creators.First().Handle</span>
-                    </a>
+                <div class="timeline-author">
+                    <div class="timeline-pfp">
+                        <a asp-page="Profile" asp-route-handle="@post.Creators.First().Handle">
+                            <img class="pfp-sm inline" src="/img/letterbook-square.svg"/>
+                        </a>
+                    </div>
+                    <div class="timeline-profile-container">
+                        <a asp-page="Profile" asp-route-handle="@post.Creators.First().Handle">
+                            <span class="display-name">@post.Creators.First().DisplayName</span>
+                        </a>
+                        <a asp-page="Profile" asp-route-handle="@post.Creators.First().Handle">
+                            <span class="handle">@@@post.Creators.First().Handle</span>
+                        </a>
+                    </div>
                 </div>
             </header>
             <div class="timeline-body">
