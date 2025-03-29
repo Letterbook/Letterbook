@@ -95,6 +95,10 @@ code, pre, .letterbook-brand {
     text-decoration: none;
 }
 
+.spacer {
+    flex: 1 0 auto;
+}
+
 html {
     height: 100vh;
 }
