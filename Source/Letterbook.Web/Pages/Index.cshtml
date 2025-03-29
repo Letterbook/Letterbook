@@ -25,8 +25,8 @@
                         <a asp-page="Profile" asp-route-handle="@post.Creators.First().Handle">
                             <span class="display-name">@post.Creators.First().DisplayName</span>
                         </a>
-                        <a asp-page="Profile" asp-route-handle="@post.Creators.First().Handle">
-                            <span class="handle">@@@post.Creators.First().Handle</span>
+                        <a asp-page="Profile" class="handle" asp-route-handle="@post.Creators.First().Handle">
+                            <span>@@@post.Creators.First().Handle</span>
                         </a>
                     </div>
                 </div>
@@ -34,7 +34,13 @@
             <div class="timeline-body">
                 @(new HtmlString(post.Contents.First().Html))
             </div>
-            <footer class="timeline-footer"></footer>
+            <footer class="timeline-footer">
+                <a>like</a>
+                <a>share</a>
+                <a>reply</a>
+                <span class="spacer"></span>
+                <time datetime="@((post.UpdatedDate ?? post.CreatedDate).ToString("r"))">@((post.UpdatedDate ?? post.CreatedDate).ToString("MMM d h:m tt"))</time>
+            </footer>
         </article>
     }
 </div>

@@ -66,6 +66,9 @@ body.app {
     }
 
     main .timeline {
+        grid-area: main;
+        overflow: scroll;
+
         article {
             padding: 0;
             display: grid;
@@ -75,18 +78,19 @@ body.app {
             grid-template-columns: minmax(12em, 30%) auto;
             align-items: stretch;
             font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
-            
+
             .timeline-body {
-                padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal)
+                padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
+                grid-area: main;
             }
-            
+
             header {
                 grid-area: header;
                 height: 100%;
                 margin: 0;
-                padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal)
+                padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
             }
-            
+
             footer {
                 grid-area: footer;
                 height: 1.5lh;
@@ -94,15 +98,36 @@ body.app {
             }
         }
 
-        grid-area: main;
-        overflow: scroll;
+        .timeline-author {
+            display: flex;
+        }
+
+        .timeline-pfp {
+            flex: 0 0 auto;
+        }
+
+        .timeline-author {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .timeline-profile-container {
+            flex: 0 1 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .handle {
+            font-size: 0.75em;
+        }
     }
 
     span img {
         margin-left: 0.25em;
         margin-right: 0.25em;
     }
-    
+
     img {
         inline-size: 1.1lh;
     }
@@ -122,6 +147,7 @@ body.app {
     .box {
         clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%);
         position: relative;
+    }
 
     .box:before {
         content: "";
@@ -130,66 +156,83 @@ body.app {
         background: radial-gradient(var(--lb-color-primary), var(--lb-color-contrast), var(--lb-color-accent), var(--lb-color-secondary));
         clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%, 0 2em, 4px calc(2em + 1.66px), 4px calc(100% - 4px), calc(100% - 2em - 1.66px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2em - 1.66px), calc(100% - 4px) 4px, calc(2em + 1.66px) 4px, 4px calc(2em + 1.66px));
     }
-    
+
     .timeline-body {
         grid-area: main;
         padding-top: var(--pico-block-spacing-vertical);
         padding-bottom: var(--pico-block-spacing-vertical);
     }
-    
+
     .timeline-header {
         display: flex;
         flex-direction: column;
         width: 100%;
         height: 100%;
-        
+        overflow: hidden;
+        white-space: nowrap;
+        line-break: anywhere;
+
         .timeline-author {
             display: flex;
             flex-direction: row;
-           
+
         }
-        
+
         .timeline-pfp {
             flex-shrink: 0;
         }
-        
+
         .timeline-profile-container {
             display: flex;
             flex-direction: column;
         }
-        
+
         a {
             text-decoration: none;
             line-height: initial;
         }
-        
+
         .pfp-sm {
             line-height: 2lh;
             /*! width: 2rem; */
         }
-        span, 
+
+        span,
         .display-name {
             width: 100%;
         }
+
         .handle {
             font-size: .7em;
         }
     }
 }
 
-@media (min-width:576px) {
+@media (max-width: 1024px) {
+    main .timeline article {
+        grid-template-areas:
+            "header" 
+            "main"
+            "footer";
+        grid-template-columns: auto;
+    }
+}
+
+@media (min-width: 576px) {
     :root {
         --pico-font-size: 100%;
     }
 }
-@media (min-width:1280px) {
+
+@media (min-width: 1280px) {
     :root {
         --pico-font-size: 106.25%;
     }
 }
-@media (min-width:1536px) {
+
+@media (min-width: 1536px) {
     :root {
-        --pico-font-size:112.5%
+        --pico-font-size: 112.5%
     }
 }
 
@@ -198,7 +241,7 @@ body.app {
     body.app header {
         font-size: revert;
     }
-    
+
     .app .min-md {
         /*display: none;*/
     }
@@ -212,7 +255,7 @@ body.app {
                     "main main";
         grid-template-columns: 1fr auto;
         grid-template-rows: auto 1fr;
-        
+
         header {
             justify-content: normal;
 
@@ -223,7 +266,7 @@ body.app {
             }
         }
     }
-    
+
     .app .min-md {
         display: none;
     }
