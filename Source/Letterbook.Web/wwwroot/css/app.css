@@ -10,6 +10,8 @@ body.app {
     footer {
         grid-area: footer;
         font-size: 0.75rem;
+        position: sticky;
+        bottom: 0;
     }
 
     & > header {
@@ -36,6 +38,8 @@ body.app {
                     margin: 0;
                 }
             }
+            position: sticky;
+            top: 0;
         }
     }
 
@@ -73,9 +77,10 @@ body.app {
             padding: 0;
             display: grid;
             grid-template-areas:
-                "header main" 
-                "header footer";
-            grid-template-columns: minmax(12em, 30%) auto;
+            "header" 
+            "main"
+            "footer";
+            grid-template-columns: auto;
             align-items: stretch;
             font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
 
@@ -208,20 +213,21 @@ body.app {
     }
 }
 
-@media (max-width: 1024px) {
-    main .timeline article {
-        grid-template-areas:
-            "header" 
-            "main"
-            "footer";
-        grid-template-columns: auto;
-    }
-}
-
 @media (min-width: 576px) {
     :root {
         --pico-font-size: 100%;
     }
+}
+
+@media (min-width: 1024px) {
+    body.app main .timeline article {
+        grid-template-areas:
+        "header main" 
+        "footer main";
+        grid-template-columns: 1fr 3fr;
+        grid-template-rows: 1fr auto;
+    }
+    
 }
 
 @media (min-width: 1280px) {
