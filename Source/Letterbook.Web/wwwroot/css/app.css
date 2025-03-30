@@ -38,6 +38,7 @@ body.app {
                     margin: 0;
                 }
             }
+
             position: sticky;
             top: 0;
         }
@@ -98,7 +99,6 @@ body.app {
 
             footer {
                 grid-area: footer;
-                height: 1.5lh;
                 margin: 0;
                 display: flex;
                 gap: 0.5rem;
@@ -131,6 +131,13 @@ body.app {
         }
     }
 
+    .timeline button {
+        padding-top: .0625rem;
+        padding-bottom: .0625rem;
+        margin-top: .125rem;
+        margin-bottom: .125rem;
+    }
+    
     span img {
         margin-left: 0.25em;
         margin-right: 0.25em;
@@ -230,7 +237,7 @@ body.app {
         grid-template-columns: 1fr 3fr;
         grid-template-rows: 1fr auto;
     }
-    
+
 }
 
 @media (min-width: 1280px) {

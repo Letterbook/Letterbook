@@ -1,0 +1,38 @@
+@using Microsoft.AspNetCore.Html
+@model IndexModel
+
+<div class="timeline">
+    <h1>Home</h1>
+    @foreach (var post in await Model.GetPosts())
+    {
+        <article>
+            <header class="timeline-header">
+                <div class="timeline-author">
+                    <div class="timeline-pfp">
+                        <a asp-page="Profile" asp-route-handle="@post.Creators.First().Handle">
+                            <img class="pfp-sm inline" src="/img/letterbook-square.svg"/>
+                        </a>
+                    </div>
+                    <div class="timeline-profile-container">
+                        <a asp-page="Profile" asp-route-handle="@post.Creators.First().Handle">
+                            <span class="display-name">@post.Creators.First().DisplayName</span>
+                        </a>
+                        <a asp-page="Profile" class="handle" asp-route-handle="@post.Creators.First().Handle">
+                            <span>@@@post.Creators.First().Handle</span>
+                        </a>
+                    </div>
+                </div>
+            </header>
+            <div class="timeline-body">
+                @(new HtmlString(post.Contents.First().Html))
+            </div>
+            <footer class="timeline-footer">
+                <button class="outline">like</button>
+                <button class="outline">share</button>
+                <button class="outline">reply</button>
+                <span class="spacer"></span>
+                <time datetime="@((post.UpdatedDate ?? post.CreatedDate).ToString("r"))">@((post.UpdatedDate ?? post.CreatedDate).ToString("MMM d h:mm tt"))</time>
+            </footer>
+        </article>
+    }
+</div>
