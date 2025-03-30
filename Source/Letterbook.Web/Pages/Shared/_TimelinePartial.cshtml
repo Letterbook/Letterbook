@@ -27,11 +27,12 @@
                 @(new HtmlString(post.Contents.First().Html))
             </div>
             <footer class="timeline-footer">
-                <button class="outline">like</button>
-                <button class="outline">share</button>
-                <button class="outline">reply</button>
+                <button class="outline">♥️<span class="hide-sm"> like</span></button>
+                <button class="outline">🔄<span class="hide-sm"> share</span></button>
+                <button class="outline">💬<span class="hide-sm"> reply</span></button>
                 <span class="spacer"></span>
-                <time datetime="@((post.UpdatedDate ?? post.CreatedDate).ToString("r"))">@((post.UpdatedDate ?? post.CreatedDate).ToString("MMM d h:mm tt"))</time>
+                <time datetime="@((post.UpdatedDate ?? post.CreatedDate).ToString("r"))">@((post.UpdatedDate ?? post.CreatedDate).ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
+                <button class="outline">🍔</button>
             </footer>
         </article>
     }

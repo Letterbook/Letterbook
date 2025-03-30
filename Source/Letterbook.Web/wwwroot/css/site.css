@@ -99,6 +99,23 @@ code, pre, .letterbook-brand {
     flex: 1 0 auto;
 }
 
+.inline-block-list {
+    padding: 0;
+    margin: 0;
+
+    li {
+        display: inline-block;
+    }
+
+    li:last-child::after {
+        display: none;
+    }
+
+    li:not(last-child)::after {
+        content: ' - ';
+    }
+}
+
 html {
     height: 100vh;
 }
