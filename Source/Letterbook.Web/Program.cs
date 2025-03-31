@@ -96,6 +96,7 @@ public class Program
 		}
 
 		app.UseStaticFiles();
+		app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();

@@ -11,27 +11,26 @@
 </head>
 <body class="container app">
 <header>
-    <div class="header-content">
-        <nav>
-            <h1 class="letterbook-brand"><a asp-page="/Index">Letterbook</a></h1>
-            <ul>
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    <li>
-                        <partial name="_ProfileSelector"/>
-                    </li>
-                    <li><span ><a asp-area="" asp-page="/Notifications"><img alt="notification icon" src="/img/noun-inbox-6760588.svg"/><span class="min-md">Notifications</span></a></span></li>
-                    <li><span ><a asp-area="" asp-page="/Search"><img alt="search icon" src="/img/noun-book-explore-6540127.svg"/><span class="min-md">Search</span></a></span></li>
-                    <li><span ><a asp-area="" asp-page="/Settings"><img alt="settings icon" src="/img/noun-settings-7416424.svg"/><span class="min-md">Settings</span></a></span></li>
-                }
-                else
-                {
-                    <li>
-                        <partial name="_LoginPartial"/>
-                    </li>
-                }
-            </ul>
-        </nav></div>
+    <nav>
+        <h1 class="letterbook-brand"><a asp-page="/Index">Letterbook</a></h1>
+        <ul>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <li>
+                    <partial name="_ProfileSelector"/>
+                </li>
+                <li><span ><a asp-area="" asp-page="/Notifications"><img alt="notification icon" src="/img/noun-inbox-6760588.svg"/><span class="min-md">Notifications</span></a></span></li>
+                <li><span ><a asp-area="" asp-page="/Search"><img alt="search icon" src="/img/noun-book-explore-6540127.svg"/><span class="min-md">Search</span></a></span></li>
+                <li><span ><a asp-area="" asp-page="/Settings"><img alt="settings icon" src="/img/noun-settings-7416424.svg"/><span class="min-md">Settings</span></a></span></li>
+            }
+            else
+            {
+                <li>
+                    <partial name="_LoginPartial"/>
+                </li>
+            }
+        </ul>
+    </nav>
 </header>
 <main role="main">
     @RenderBody()

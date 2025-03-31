@@ -100,6 +100,7 @@ public class Program
 		{
 			FileProvider = new ManifestEmbeddedFileProvider(Assembly.GetAssembly(typeof(Web.Program))!, "wwwroot"),
 		});
+		app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();

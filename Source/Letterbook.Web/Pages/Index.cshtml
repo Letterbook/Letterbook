@@ -4,4 +4,11 @@
     ViewData["Title"] = "Home";
 }
 
-<partial name="Shared/_TimelinePartial"/>
+@if(User.Identity?.IsAuthenticated == true)
+{
+    <partial name="Shared/_TimelinePartial"/>
+}
+else
+{
+    <partial name="Shared/_AboutPartial"/>
+}
