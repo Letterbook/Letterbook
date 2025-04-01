@@ -10,7 +10,7 @@
                 <div class="timeline-author">
                     <div class="timeline-pfp">
                         <a asp-page="Profile" asp-route-handle="@post.Creators.First().Handle">
-                            <img class="pfp-sm inline" src="/img/letterbook-square.svg"/>
+                            <img class="pfp-sm inline" src="/img/user-square.png"/>
                         </a>
                     </div>
                     <div class="timeline-profile-container">
@@ -27,12 +27,12 @@
                 @(new HtmlString(post.Contents.First().Html))
             </div>
             <footer class="timeline-footer">
-                <button class="outline">♥️<span class="hide-sm"> like</span></button>
-                <button class="outline">🔄<span class="hide-sm"> share</span></button>
-                <button class="outline">💬<span class="hide-sm"> reply</span></button>
+                <button class="outline">♥️<span class="min-lg"> like</span></button>
+                <button class="outline">🔄<span class="min-lg"> share</span></button>
+                <button class="outline">💬<span class="min-lg"> reply</span></button>
                 <span class="spacer"></span>
                 <time datetime="@((post.UpdatedDate ?? post.CreatedDate).ToString("r"))">@((post.UpdatedDate ?? post.CreatedDate).ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
-                <button class="outline">🍡</button>
+                <button class="outline">⋯</button>
             </footer>
         </article>
     }

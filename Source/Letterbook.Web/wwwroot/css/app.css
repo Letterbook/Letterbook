@@ -1,16 +1,15 @@
 body.app {
     display: grid;
     grid-template-areas:
-        "header main" 
-        "footer main";
+        "header main";
     grid-template-columns: 1fr 3fr;
-    grid-template-rows: 1fr auto;
-    height: 100vh;
-    
+    grid-template-rows: auto;
+    height: auto;
+
     & > footer {
-        grid-area: footer;
+        grid-area: header;
         font-size: 0.75rem;
-        position: sticky;
+        position: fixed;
         bottom: 0;
         height: fit-content;
     }
@@ -28,23 +27,17 @@ body.app {
             display: flex;
             flex-direction: column;
             align-items: initial;
-
-            ul, ul:first-of-type, ul:last-of-type {
-                /* *-of-type pseudo classes are needed for specificity */
+            
+            .menu-items {
                 line-height: 1.5rlh;
-                display: flex;
                 flex-direction: column;
                 align-items: initial;
                 margin-left: 0;
-
-                li {
-                    padding: 0;
-                    margin: 0;
+                * {
+                    text-decoration: none;
+                    font-weight: 700;
                 }
             }
-
-            position: sticky;
-            top: 0;
         }
     }
 
@@ -205,14 +198,71 @@ body.app {
     }
 }
 
+/* Collapsible menus */
+/* Always collapsible */
+.menu-collapsible,
+*[class^="menu-collapsible-"], *[class*=" menu-collapsible-"],
+/* Becomes collapsible on small screens*/
+.menu-responsive,
+*[class^="menu-responsive-"], *[class*=" menu-responsive-"] {
+    & > label {
+        display: inline-block;
+        padding: .5rem;
+        cursor: pointer;
+
+        input {
+            display: none;
+        }
+    }
+
+    .menu-items {
+        display: none;
+
+        & > * {
+            /*padding: 10px;*/
+            /*text-align: center;*/
+            width: 100%;
+            display: block;
+        }
+    }
+    
+    /* Toggle show/hide */
+    &:has( input[type="checkbox"]:not(:checked)) {
+        width: fit-content;
+    }
+    label:has(input:checked) ~ .menu-items {
+        display: flex;
+    }
+}
+
+@media (min-width: 796px) {
+    .menu-responsive,
+    *[class^="menu-responsive-"], *[class*=" menu-responsive-"] {
+        & > label.collapse-control { display: none; }
+        .menu-items { display: block; }
+    }
+}
+/* Collapsing Nav menu end */
+
 @media (max-width: 576px) {
-    .hide-sm {
+    .app .min-lg {
         display: none;
     }
-    body.app article .timeline footer {
-        *, button {
-            font-size: calc(0.75 * var(--pico-font-size));
+
+    body.app {
+        display: flex;
+        & > header {
+            position: sticky;
+            grid-area: main;
+            top: 0;
         }
+
+        article .timeline footer {
+            *, button {
+                font-size: calc(0.75 * var(--pico-font-size));
+            }
+        }
+        flex-direction: column;
     }
 }
 
@@ -223,7 +273,7 @@ body.app {
 }
 
 @media (max-width: 1024px) {
-    .hide-md {
+    .app .min-md {
         display: none;
     }
 }
@@ -258,23 +308,19 @@ body.app {
     }
 }
 
-@media screen and (width <= 796px) {
+@media screen and (max-width: 796px) {
     /* single-column layout */
     body.app {
-        grid-template-areas:
-                    "header footer"
-                    "main main";
-        grid-template-columns: 1fr auto;
-        grid-template-rows: auto 1fr;
-
-        header {
-            justify-content: normal;
-
-            nav {
-                & ul, & ul:first-of-type, & ul:last-of-type {
-                    flex-direction: row;
-                }
-            }
+        display: flex;
+        flex-direction: column;
+        
+        & > header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            position: sticky;
+            grid-area: main;
+            top: 0;
         }
     }
 

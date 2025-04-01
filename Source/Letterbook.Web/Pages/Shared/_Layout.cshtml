@@ -11,25 +11,24 @@
 </head>
 <body class="container app">
 <header>
-    <nav>
-        <h1 class="letterbook-brand"><a asp-page="/Index">Letterbook</a></h1>
-        <ul>
+    <h1 class="letterbook-brand"><a asp-page="/Index">Letterbook</a></h1>
+    <nav class="menu-responsive">
+        <label class="collapse-control">&#9776;
+            <input type="checkbox"/>
+        </label>
+        <div class="menu-items">
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <li>
-                    <partial name="_ProfileSelector"/>
-                </li>
-                <li><span ><a asp-area="" asp-page="/Notifications"><img alt="notification icon" src="/img/noun-inbox-6760588.svg"/><span class="min-md">Notifications</span></a></span></li>
-                <li><span ><a asp-area="" asp-page="/Search"><img alt="search icon" src="/img/noun-book-explore-6540127.svg"/><span class="min-md">Search</span></a></span></li>
-                <li><span ><a asp-area="" asp-page="/Settings"><img alt="settings icon" src="/img/noun-settings-7416424.svg"/><span class="min-md">Settings</span></a></span></li>
+                <partial name="_ProfileSelector"/>
+                <a asp-area="" asp-page="/Notifications">Notifications</a>
+                <a asp-area="" asp-page="/Search">Search</a>
+                <a asp-area="" asp-page="/Settings">Settings</a>
             }
             else
             {
-                <li>
-                    <partial name="_LoginPartial"/>
-                </li>
+                <partial name="_LoginPartial"/>
             }
-        </ul>
+        </div>
     </nav>
 </header>
 <main role="main">
