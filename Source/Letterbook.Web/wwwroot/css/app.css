@@ -6,6 +6,7 @@ body.app {
     grid-template-rows: auto;
     height: auto;
 
+    & > header footer,
     & > footer {
         grid-area: header;
         font-size: 0.75rem;
@@ -26,7 +27,6 @@ body.app {
         nav {
             display: flex;
             flex-direction: column;
-            align-items: initial;
             
             .menu-items {
                 line-height: 1.5rlh;
@@ -256,10 +256,22 @@ body.app {
         display: flex;
     }
 }
+.menu-responsive-right,
+.menu-collapsible-right {
+    text-align: end;
+    align-items: end;
+}
+.menu-responsive-left,
+.menu-collapsible-left {
+    text-align: start;
+    align-items: start;
+}
 
 @media (min-width: 796px) {
     .menu-responsive,
     *[class^="menu-responsive-"], *[class*=" menu-responsive-"] {
+        text-align: start;
+        align-items: start;
         & > label.collapse-control { display: none; }
         .menu-items { display: block; }
     }
@@ -291,6 +303,10 @@ body.app {
 @media (min-width: 576px) {
     :root {
         --pico-font-size: 100%;
+    }
+    
+    .app .max-sm {
+        display: none;
     }
 }
 
@@ -343,6 +359,8 @@ body.app {
             position: sticky;
             grid-area: main;
             top: 0;
+            background-color: var(--pico-background-color);
+            z-index: 1;
         }
     }
 
