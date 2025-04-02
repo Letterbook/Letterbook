@@ -28,12 +28,17 @@ jobs:
         with:
           dotnet-version: 8.0.x
       
+#      We cache the cache, and then just always restore
+#      This makes our workflow simpler, because we have fewer locations to check
+#      for packages. It also means we can gladly take partial cache hits, because
+#      we'll restore the difference before build.
       - name: Nuget Package Cache
         id: package-cache
         uses: actions/cache@v4
         with:
           path: ${{env.NUGET_PACKAGES}}
           key: "${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props') }}"
+          restore-keys: "${{ runner.os }}-nuget"
           
       - name: Libman Resource Cache
         uses: actions/cache@v4
