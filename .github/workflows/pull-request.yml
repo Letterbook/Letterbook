@@ -17,6 +17,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+#    todo: explore running in a dotnet sdk container
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
       
@@ -27,11 +28,25 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
+#      We clean the local cache first, because it can get re-used from other people's
+#      runs, and caching their dependencies just inflates our cache size and
+#      slows down our CI
+      - name: Clean Nuget Cache
+        run: dotnet nuget locals global-packages -c
       
-#      We cache the cache, and then just always restore
-#      This makes our workflow simpler, because we have fewer locations to check
-#      for packages. It also means we can gladly take partial cache hits, because
+      - name: Clean Libman Cache
+        run: dotnet libman cache clean
+      
+#      Our CI caching strategy is to "cache the cache"
+#      Basically, we preserve our package manager's local on-disk cache between runs
+#      and then just always do a restore from the package manager.
+#      This makes our workflow simpler, because we don't need to check for cache misses,
+#      and we have fewer locations to check for packages.
+#      It also means we can gladly take partial cache hits, because
 #      we'll restore the difference before build.
+#      This makes CI both faster (usually) and more reliable, because we're less likely to
+#      need to traverse the internet, or encounter transient errors from the upstream repositories
       - name: Nuget Package Cache
         id: package-cache
         uses: actions/cache@v4
