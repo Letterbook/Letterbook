@@ -35,9 +35,6 @@ jobs:
       - name: Clean Nuget Cache
         run: dotnet nuget locals global-packages -c
       
-      - name: Clean Libman Cache
-        run: dotnet libman cache clean
-      
 #      Our CI caching strategy is to "cache the cache"
 #      Basically, we preserve our package manager's local on-disk cache between runs
 #      and then just always do a restore from the package manager.
