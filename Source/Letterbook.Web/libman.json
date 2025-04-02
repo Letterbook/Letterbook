@@ -15,9 +15,11 @@
       "destination": "wwwroot/lib/remixicon",
       "fileMappings": [
         {
+          "files": ["License"]
+        },
+        {
           "root": "icons/Business",
           "files": [
-            "reply-line.svg",
             "mail-open-line.svg"
           ]
         },
@@ -54,9 +56,6 @@
             "account-box-line.svg"
           ]
         }
-      ],
-      "files": [
-        "License"
       ]
     }
   ]

@@ -39,7 +39,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: "~/.local/share/.librarymanager/cache"
-          key: "libman-${{ hashFiles('Letterbook.Web/libman.json', 'Letterbook.Docs/libman.json') }}"
+          key: "libman-${{ hashFiles('Source/Letterbook.Web/libman.json', 'Letterbook.Docs/libman.json') }}"
           restore-keys: libman
 
       - name: Restore Packages

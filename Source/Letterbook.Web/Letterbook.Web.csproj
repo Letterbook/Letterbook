@@ -75,25 +75,18 @@
     </ItemGroup>
 
     <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\icons\Business\reply-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\icons\Health &amp; Medical\heart-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\icons\Media\notification-2-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\icons\Media\repeat-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\icons\System\more-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\icons\System\search-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\icons\System\settings-3-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\icons\User &amp; Faces\account-box-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\heart-fill.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\License" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\picocss\css\pico.min.css" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\picocss\LICENSE.md" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\account-box-line.svg" />
+      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\file-damage-line.svg" />
+      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\heart-line.svg" />
+      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\License" />
+      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\mail-open-line.svg" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\more-line.svg" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\notification-2-line.svg" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\repeat-line.svg" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\reply-line.svg" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\search-line.svg" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\settings-3-line.svg" />
-      <_ContentIncludedByDefault Remove="Views\_ViewImports.cshtml" />
     </ItemGroup>
 </Project>
