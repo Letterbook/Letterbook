@@ -196,6 +196,28 @@ body.app {
             }
         }
     }
+    
+    .icon {
+        max-height: 1em;
+        max-width: 1em;
+        background-repeat: no-repeat;
+        background-color: var(--pico-primary);
+    }
+    .icon-like {
+        mask: url("/lib/remixicon/heart-line.svg");
+    }
+    .icon-share {
+        mask: url("/lib/remixicon/repeat-line.svg");
+    }
+    .icon-reply {
+        mask: url("/lib/remixicon/reply-line.svg");
+    }
+    .icon-more {
+        mask: url("/lib/remixicon/more-line.svg");
+    }
+    .icon-thread {
+        mask: url("/lib/remixicon/mail-open-line.svg");
+    }
 }
 
 /* Collapsible menus */
