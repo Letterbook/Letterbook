@@ -23,9 +23,16 @@
                 <a asp-area="" asp-page="/Notifications">Notifications</a>
                 <a asp-area="" asp-page="/Search">Search</a>
                 <a asp-area="" asp-page="/Settings">Settings</a>
-                <span class="max-sm">
-                    <partial name="_LogoutPartial"/>
-                </span>
+                <div class="spacer min-md"></div>
+                <footer>
+                    <a asp-page="Profile" asp-route-handle="admin">Admin profile</a>
+                    <a asp-area="" asp-page="/About">About</a>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <partial name="_LogoutPartial"/>
+                    }
+                    <span class="min-md">Powered by <a href="https://letterbook.com">Letterbook</a> v0.0</span>
+                </footer>
             }
             else
             {
@@ -37,25 +44,6 @@
 <main role="main">
     @RenderBody()
 </main>
-<footer class="min-md">
-    <div class="footer-content">
-        <p>
-            <a asp-page="Profile" asp-route-handle="admin">Admin profile</a>
-        </p>
-        <span class="min-md">Powered by <a href="https://letterbook.com">Letterbook</a> v0.0</span>
-        <ul class="inline-block-list">
-            <li class="min-md"><a asp-area="" asp-page="/About">About</a></li>
-            <li class="min-md"><a asp-area="" asp-page="/Moderation">Moderation policy</a></li>
-            <li class="min-md"><a asp-area="" asp-page="/Privacy">Privacy policy</a></li>
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <li>
-                    <partial name="_LogoutPartial"/>
-                </li>
-            }
-        </ul>
-    </div>
-</footer>
 <script src="~/js/site.js" asp-append-version="true"></script>
 
 @await RenderSectionAsync("Scripts", required: false)

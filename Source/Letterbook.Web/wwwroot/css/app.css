@@ -1,19 +1,11 @@
-body.app {
+.app {
     display: grid;
     grid-template-areas:
         "header main";
     grid-template-columns: 1fr 3fr;
     grid-template-rows: auto;
+    grid-column-gap: .5rem;
     height: auto;
-
-    & > header footer,
-    & > footer {
-        grid-area: header;
-        font-size: 0.75rem;
-        position: fixed;
-        bottom: 0;
-        height: fit-content;
-    }
 
     & > header {
         font-size: 1.5rem;
@@ -37,7 +29,18 @@ body.app {
                     text-decoration: none;
                     font-weight: 700;
                 }
+                footer {
+                    font-weight: 500;
+                    font-size: 0.75rem;
+                    line-height: 1rlh;
+                    margin-top: 1rem;
+                    position: sticky;
+                    bottom: 1rem;
+                    /*! margin-bottom: 1rem; */
+                }
+                height: 100%;
             }
+            height: 100%;
         }
     }
 
@@ -77,6 +80,10 @@ body.app {
                     display: flex;
                     gap: 0.5rem;
                     align-items: center;
+                    
+                    time {
+                        text-align: end;
+                    }
                 }
             }
 
@@ -231,6 +238,7 @@ body.app {
         display: inline-block;
         padding: .5rem;
         cursor: pointer;
+        margin: -0.5rem 0;
 
         input {
             display: none;
@@ -245,6 +253,11 @@ body.app {
             /*text-align: center;*/
             width: 100%;
             display: block;
+        }
+
+        footer {
+            display: flex;
+            flex-direction: column;
         }
     }
     
@@ -268,12 +281,16 @@ body.app {
 }
 
 @media (min-width: 796px) {
+    .app > header {
+        height: 100vh;
+    }
+    
     .menu-responsive,
     *[class^="menu-responsive-"], *[class*=" menu-responsive-"] {
         text-align: start;
         align-items: start;
-        & > label.collapse-control { display: none; }
-        .menu-items { display: block; }
+        & > label.collapse-control {display: none; }
+        .menu-items { display: flex; }
     }
 }
 /* Collapsing Nav menu end */
@@ -306,12 +323,6 @@ body.app {
     }
     
     .app .max-sm {
-        display: none;
-    }
-}
-
-@media (max-width: 1024px) {
-    .app .min-md {
         display: none;
     }
 }
