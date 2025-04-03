@@ -14,17 +14,20 @@ Content-Type: application/json
   ],
   "contents": [
     {
-      "sortKey": 0,
       "type": "Note",
-      "text": "Simple text post from Api.http"
+      "text": "Posted from Api.http"
     }
   ],
-  "audience": [],
-  "addressedTo": [],
-  "repliesCollection": [],
-  "likesCollection": [],
-  "sharesCollection": []
+  "audience": [
+    {
+      "fediId": "https://www.w3.org/ns/activitystreams#Public"
+    }
+  ],
+  "addressedTo": []
 }
 
 ### Follow FediId
-POST {{host}}/lb/v1/profiles/{{id}}/
+GET {{host}}/lb/v1/profiles/{{profileId}}/
+
+### Query Peer
+GET {{host}}/lb/v1/profiles?handle={{peer_user}}

@@ -91,8 +91,45 @@ code, pre, .letterbook-brand {
     --pico-font-family: "Share Tech Mono", monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
 }
 
+button.btn-link {
+    --pico-color: var(--lb-color-primary);
+    text-decoration: underline;
+    display: inline-block;
+    border: none;
+    background-color: inherit;
+    padding: 0;
+    margin: 0;
+    font-size: inherit;
+    width: initial;
+}
+
 .letterbook-brand a:not(:hover) {
     text-decoration: none;
+}
+
+.spacer {
+    flex: 1 0 auto;
+}
+
+.inline-block-list {
+    padding: 0;
+    margin: 0;
+
+    li {
+        display: inline-block;
+    }
+
+    li:last-child::after {
+        display: none;
+    }
+
+    li:not(last-child)::after {
+        content: ' - ';
+    }
+}
+
+img {
+    inline-size: 1lh;
 }
 
 html {

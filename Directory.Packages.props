@@ -50,7 +50,7 @@
     <PackageVersion Include="Microsoft.Playwright" Version="1.49.0" />
     <PackageVersion Include="Microsoft.Playwright.NUnit" Version="1.49.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="[8.0.7, 9.0.0)" />
-    <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
+    <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="3.0.71" />
     <PackageVersion Include="MockQueryable.Moq" Version="7.0.3" />
     <PackageVersion Include="Moq" Version="4.18.4" />
     <!--  Neovolve 6.3+ requires an upgrade to various Microsoft.Abstractions 9.x, which we're not taking yet -->
