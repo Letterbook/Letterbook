@@ -80,6 +80,9 @@
     .icon-thread {
         mask: url("/lib/remixicon/mail-open-line.svg");
     }
+    .spacer {
+        flex: 1 0 auto;
+    }
 }
 
 button {
@@ -96,10 +99,13 @@ button {
     }
 }
 
-.app img {
+
+.app :is(img, svg) {
     inline-size: 1.1lh;
     
-    &.inline {
+    &.img-inline {
+        height: 1lh;
+        display: inline-block;
         margin-left: 0.25em;
         margin-right: 0.25em;
     }
@@ -124,7 +130,6 @@ button {
             "footer";
         grid-template-columns: auto;
         align-items: stretch;
-        font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
 
         .timeline-body {
             padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);

@@ -1,3 +1,8 @@
+/***
+ This file is primarily css vars and some baseline branding styles.
+ Instances could replace or override these variables and styles to customize their specific look and feel.
+ ***/
+
 /* Font used for user content (except monospaced) */
 @font-face {
     font-family: inclusve_sans;
@@ -31,9 +36,9 @@
     --lb-color-contrast-light: hsl(27, 100%, 67.5%);
 
     /* Accent color "Spring Bud" */
-    --lb-color-accent: hsla(77, 89%, 49%, 1);
-    --lb-color-accent-dark: hsl(79, 89%, 42.4%);
-    --lb-color-accent-light: hsla(77, 89%, 49%, 1);
+    --lb-color-accent: light-dark(hsla(77, 89%, 49%, 1) hsla(77, 89%, 41%, 1));
+    --lb-color-accent-dark: light-dark(hsl(79, 89%, 42.4%) hsl(79, 89%, 38%));
+    --lb-color-accent-light: light-dark(hsl(77, 70%, 66%) hsl(77, 81%, 43%));
 
     /* Background colors */
     --charcoal: hsla(204, 19%, 26%, 1);
@@ -83,55 +88,14 @@
     color: var(--pico-secondary);
 }
 
-figcaption {
-    display: inline;
-}
-
 code, pre, .letterbook-brand {
     --pico-font-family: "Share Tech Mono", monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
 }
 
-button.btn-link {
-    --pico-color: var(--lb-color-primary);
-    text-decoration: underline;
-    display: inline-block;
-    border: none;
-    background-color: inherit;
-    padding: 0;
-    margin: 0;
-    font-size: inherit;
-    width: initial;
+article {
+    font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
 }
 
 .letterbook-brand a:not(:hover) {
     text-decoration: none;
-}
-
-.spacer {
-    flex: 1 0 auto;
-}
-
-.inline-block-list {
-    padding: 0;
-    margin: 0;
-
-    li {
-        display: inline-block;
-    }
-
-    li:last-child::after {
-        display: none;
-    }
-
-    li:not(last-child)::after {
-        content: ' - ';
-    }
-}
-
-img {
-    inline-size: 1lh;
-}
-
-html {
-    height: 100vh;
 }
