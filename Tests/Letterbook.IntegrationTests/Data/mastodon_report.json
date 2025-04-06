@@ -1,0 +1,11 @@
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "id": "https://mastodon.castle/1aba071c-5f04-496f-a3bf-c25a7fde7d90",
+  "type": "Flag",
+  "actor": "https://mastodon.castle/actor",
+  "content": "test report, it's actually fine to use swagger",
+  "object": [
+    "https://letterbook.castle/actor/06fzjxkqvmv6c5x8r0xu5vmfg",
+    "https://letterbook.castle/post/06g0a3vifffb8f3h272rs007r"
+  ]
+}

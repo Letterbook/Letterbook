@@ -1,4 +1,4 @@
-using System.Text.Encodings.Web;
+using System.Reflection;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
@@ -8,14 +8,15 @@ using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Workers;
 using MassTransit;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Enrichers.Span;
 using Serilog.Events;
 
-namespace Letterbook.Web;
+namespace Letterbook.Web.Mocks;
 
 public class Program
 {
@@ -30,9 +31,6 @@ public class Program
 			.CreateBootstrapLogger();
 
 		var builder = WebApplication.CreateBuilder(args);
-		var coreOptions = builder.Configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
-		                  ?? throw ConfigException.Missing(nameof(CoreOptions));
-
 		if (!builder.Environment.IsProduction())
 			builder.Configuration.AddUserSecrets<Program>();
 		// Register Serilog - Serialized Logging (configured in appsettings.json)
@@ -69,13 +67,16 @@ public class Program
 			//
 			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
 			.AddDefaultUI();
-		builder.Services.AddRazorPages();
+		builder.Services.AddRazorPages()
+			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
 		builder.Services.AddAuthorization(options =>
 		{
 			options.AddWebAuthzPolicy();
 		});
 
-		builder.WebHost.UseUrls(coreOptions.BaseUri().ToString());
+		// Add mocked services
+		builder.Services.AddScoped<TimelineService>()
+			.AddScoped<ITimelineService, MockTimelineService>();
 
 		var app = builder.Build();
 
@@ -95,7 +96,10 @@ public class Program
 			});
 		}
 
-		app.UseStaticFiles();
+		app.UseStaticFiles(new StaticFileOptions
+		{
+			FileProvider = new ManifestEmbeddedFileProvider(Assembly.GetAssembly(typeof(Web.Program))!, "wwwroot"),
+		});
 		app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 		app.UseHealthChecks("/healthz");
@@ -112,22 +116,20 @@ public class Program
 
 		app.MapRazorPages();
 
+		var options = app.Services.GetRequiredService<IOptions<CoreOptions>>().Value;
+		MigrateAtRuntime(options);
 		app.Run();
-	}
-}
+		return;
 
-public class WebSchemeHandler : AuthenticationHandler<WebSchemeOptions>
-{
+		void MigrateAtRuntime(CoreOptions options)
+		{
+			if (!options.Database.MigrateAtRuntime) return;
+			using var scope = app.Services.CreateScope();
+			var data = scope.ServiceProvider.GetRequiredService<RelationalContext>();
+			data.Database.Migrate();
 
-	public WebSchemeHandler(IOptionsMonitor<WebSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
-	{
+			var feeds = scope.ServiceProvider.GetRequiredService<FeedsContext>();
+			feeds.Database.Migrate();
+		}
 	}
-	protected override Task<AuthenticateResult> HandleAuthenticateAsync()
-	{
-		throw new NotImplementedException();
-	}
-}
-
-public class WebSchemeOptions : AuthenticationSchemeOptions
-{
 }

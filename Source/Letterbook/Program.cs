@@ -99,8 +99,8 @@ public class Program
 		app.UseStaticFiles(new StaticFileOptions
 		{
 			FileProvider = new ManifestEmbeddedFileProvider(Assembly.GetAssembly(typeof(Web.Program))!, "wwwroot"),
-
 		});
+		app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();

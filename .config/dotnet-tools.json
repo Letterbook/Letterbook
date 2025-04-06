@@ -6,43 +6,37 @@
       "version": "8.0.11",
       "commands": [
         "dotnet-ef"
-      ],
-      "rollForward": false
+      ]
     },
     "swashbuckle.aspnetcore.cli": {
       "version": "7.2.0",
       "commands": [
         "swagger"
-      ],
-      "rollForward": false
+      ]
     },
     "docfx": {
       "version": "2.78.2",
       "commands": [
         "docfx"
-      ],
-      "rollForward": false
+      ]
     },
     "microsoft.web.librarymanager.cli": {
-      "version": "2.1.175",
+      "version": "3.0.71",
       "commands": [
         "libman"
-      ],
-      "rollForward": false
+      ]
     },
     "dotnet-outdated-tool": {
       "version": "4.6.4",
       "commands": [
         "dotnet-outdated"
-      ],
-      "rollForward": false
+      ]
     },
     "verify.tool": {
       "version": "0.6.0",
       "commands": [
         "dotnet-verify"
-      ],
-      "rollForward": false
+      ]
     }
   }
 }

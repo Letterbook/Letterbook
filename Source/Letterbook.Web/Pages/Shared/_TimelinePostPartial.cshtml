@@ -1,0 +1,35 @@
+@using Letterbook.Web.Tags
+@using Microsoft.AspNetCore.Html
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Models.Post
+
+<article>
+    <header class="timeline-header">
+        <div class="timeline-author">
+            <div class="timeline-pfp">
+                <a asp-page="Profile" asp-route-handle="@Model.Creators.First().Handle">
+                    <img class="pfp-sm inline" src="/img/user-square.png"/>
+                </a>
+            </div>
+            <div class="timeline-profile-container">
+                <a asp-page="Profile" asp-route-handle="@Model.Creators.First().Handle">
+                    <span class="display-name">@Model.Creators.First().DisplayName</span>
+                </a>
+                <a asp-page="Profile" class="handle" asp-route-handle="@Model.Creators.First().Handle">
+                    <span>@@@Model.Creators.First().Handle</span>
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="timeline-body">
+        @(new HtmlString(Model.Contents.First().Html))
+    </div>
+    <footer class="timeline-footer">
+        <button class="outline"><app-icon type=@Icon.Like /><span class="min-lg"> like</span></button>
+        <button class="outline"><app-icon type=@Icon.Share /><span class="min-lg"> share</span></button>
+        <button class="outline"><app-icon type=@Icon.Thread /><span class="min-lg"> open</span></button>
+        <span class="spacer"></span>
+        <time datetime="@((Model.UpdatedDate ?? Model.CreatedDate).ToString("r"))">@((Model.UpdatedDate ?? Model.CreatedDate).ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
+        <button class="outline"><app-icon type=@Icon.More /></button>
+    </footer>
+</article>

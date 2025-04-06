@@ -4,14 +4,17 @@
     ViewData["Title"] = "Home";
 }
 
-<div>
-    <h1>Home</h1>
-    <p>
-        <a asp-page="Profile" asp-route-handle="admin">Admin profile</a>
-    </p>
-    <p>And now some content, to demonstrate scrolling behavior</p>
-    @foreach (var number in Enumerable.Range(1, 20))
-    {
-        <p>@number</p>
-    }
-</div>
+@if(User.Identity?.IsAuthenticated == true)
+{
+    <div class="timeline">
+        <h1>Home</h1>
+        @foreach (var post in await Model.GetPosts())
+        {
+            <partial name="Shared/_TimelinePostPartial" model="post"/>
+        }
+    </div>
+}
+else
+{
+    <partial name="Shared/_AboutPartial"/>
+}

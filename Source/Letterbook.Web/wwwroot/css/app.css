@@ -1,89 +1,92 @@
-body.app {
+.app {
     display: grid;
     grid-template-areas:
-        "header main" 
-        "footer main";
+        "header main";
     grid-template-columns: 1fr 3fr;
-    grid-template-rows: 1fr auto;
-    height: 100vh;
+    grid-template-rows: auto;
+    grid-column-gap: .5rem;
+    height: auto;
 
-    footer {
-        grid-area: footer;
-        font-size: 0.75rem;
-    }
-
-    header {
-        font-size: 1.25rem;
+    & > header {
+        font-size: 1.5rem;
         --pico-font-weight: 700;
         grid-area: header;
         justify-content: stretch;
+        position: sticky;
+        height: fit-content;
+        top: 0;
 
         nav {
             display: flex;
             flex-direction: column;
-            align-items: initial;
-
-            ul, ul:first-of-type, ul:last-of-type {
-                /* *-of-type pseudo classes are needed for specificity */
+            
+            .menu-items {
                 line-height: 1.5rlh;
-                display: flex;
                 flex-direction: column;
                 align-items: initial;
                 margin-left: 0;
-
-                li {
-                    padding: 0;
-                    margin: 0;
+                * {
+                    text-decoration: none;
+                    font-weight: 700;
                 }
+                footer {
+                    font-weight: 500;
+                    font-size: 0.75rem;
+                    line-height: 1rlh;
+                    margin-top: 1rem;
+                    position: sticky;
+                    bottom: 1rem;
+                    /*! margin-bottom: 1rem; */
+                }
+                height: 100%;
             }
-        }
-    }
-
-
-    .sidebar {
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding-block: var(--pico-block-spacing-vertical);
-    }
-
-    footer ul {
-        padding: 0;
-        margin: 0;
-
-        li {
-            display: inline-block;
-        }
-
-        li:last-child::after {
-            display: none;
-        }
-
-        li:not(last-child)::after {
-            content: ' - ';
+            height: 100%;
         }
     }
 
     main {
-        article {
-            --pico-font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
-        }
-
         grid-area: main;
-        overflow: scroll;
     }
+    .box {
+        clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%);
+        position: relative;
+        
+        &:before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(var(--lb-color-primary), var(--lb-color-contrast), var(--lb-color-accent), var(--lb-color-secondary));
+            clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%, 0 2em, 4px calc(2em + 1.66px), 4px calc(100% - 4px), calc(100% - 2em - 1.66px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2em - 1.66px), calc(100% - 4px) 4px, calc(2em + 1.66px) 4px, 4px calc(2em + 1.66px));
+        }
+    }
+    .icon {
+        max-height: 1em;
+        max-width: 1em;
+        background-repeat: no-repeat;
+        background-color: var(--pico-primary);
+    }
+    .icon-like {
+        mask: url("/lib/remixicon/heart-line.svg");
+    }
+    .icon-share {
+        mask: url("/lib/remixicon/repeat-line.svg");
+    }
+    .icon-reply {
+        mask: url("/lib/remixicon/reply-line.svg");
+    }
+    .icon-more {
+        mask: url("/lib/remixicon/more-line.svg");
+    }
+    .icon-thread {
+        mask: url("/lib/remixicon/mail-open-line.svg");
+    }
+    .spacer {
+        flex: 1 0 auto;
+    }
+}
 
-    span img {
-        margin-left: 0.25em;
-        margin-right: 0.25em;
-    }
-    
-    img {
-        inline-size: 1.1lh;
-    }
-
-    button.btn-link {
+button {
+    &.btn-link {
         --pico-color: var(--lb-color-primary);
         text-decoration: underline;
         display: inline-block;
@@ -94,52 +97,281 @@ body.app {
         font-size: inherit;
         width: initial;
     }
+}
 
-    .box {
-        clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%);
-        position: relative;
-    }
 
-    .box:before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(var(--lb-color-primary), var(--lb-color-contrast), var(--lb-color-accent), var(--lb-color-secondary));
-        clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%, 0 2em, 4px calc(2em + 1.66px), 4px calc(100% - 4px), calc(100% - 2em - 1.66px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2em - 1.66px), calc(100% - 4px) 4px, calc(2em + 1.66px) 4px, 4px calc(2em + 1.66px));
+.app :is(img, svg) {
+    inline-size: 1.1lh;
+    
+    &.img-inline {
+        height: 1lh;
+        display: inline-block;
+        margin-left: 0.25em;
+        margin-right: 0.25em;
     }
 }
 
-@media screen and (height <= 580px) {
+.app button {
+    padding-top: .0625rem;
+    padding-bottom: .0625rem;
+    margin-top: .125rem;
+    margin-bottom: .125rem;
+}
+
+.app .timeline {
+    overflow: scroll;
+
+    article {
+        padding: 0;
+        display: grid;
+        grid-template-areas:
+            "header" 
+            "main"
+            "footer";
+        grid-template-columns: auto;
+        align-items: stretch;
+    }
+
+    .timeline-author {
+        display: flex;
+    }
+
+    .timeline-pfp {
+        flex: 0 0 auto;
+    }
+
+    .timeline-author {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .timeline-profile-container {
+        flex: 0 1 auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .timeline-body {
+        grid-area: main;
+        padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
+    }
+
+    .timeline-header {
+        grid-area: header;
+        margin: 0;
+        padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        line-break: anywhere;
+
+        .timeline-author {
+            display: flex;
+            flex-direction: row;
+
+        }
+
+        .timeline-pfp {
+            flex-shrink: 0;
+        }
+
+        .timeline-profile-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        a {
+            text-decoration: none;
+            line-height: initial;
+        }
+
+        .pfp-sm {
+            line-height: 2lh;
+            /*! width: 2rem; */
+        }
+
+        span,
+        .display-name {
+            width: 100%;
+        }
+
+        .handle {
+            font-size: .7em;
+        }
+    }
+    
+    .timeline-footer {
+        font-size: 0.75rem;
+        grid-area: footer;
+        margin: 0;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+
+        time {
+            text-align: end;
+        }
+    }
+
+    .handle {
+        font-size: 0.75em;
+    }
+}
+
+
+/* Collapsible menus */
+/* Always collapsible */
+.menu-collapsible,
+*[class^="menu-collapsible-"], *[class*=" menu-collapsible-"],
+/* Becomes collapsible on small screens*/
+.menu-responsive,
+*[class^="menu-responsive-"], *[class*=" menu-responsive-"] {
+    & > label {
+        display: inline-block;
+        padding: .5rem;
+        cursor: pointer;
+        margin: -0.5rem 0;
+
+        input {
+            display: none;
+        }
+    }
+
+    .menu-items {
+        display: none;
+
+        & > * {
+            width: 100%;
+            display: block;
+        }
+
+        footer {
+            display: flex;
+            flex-direction: row;
+            column-gap: 1em;
+            text-wrap: nowrap;
+            flex-wrap: wrap;
+        }
+    }
+    
+    /* Toggle show/hide */
+    &:has( input[type="checkbox"]:not(:checked)) {
+        width: fit-content;
+    }
+    label:has(input:checked) ~ .menu-items {
+        display: flex;
+    }
+}
+.menu-responsive-right,
+.menu-collapsible-right {
+    text-align: end;
+    align-items: end;
+}
+.menu-responsive-left,
+.menu-collapsible-left {
+    text-align: start;
+    align-items: start;
+}
+
+@media (min-width: 796px) {
+    .app > header {
+        height: 100vh;
+    }
+    
+    .menu-responsive,
+    *[class^="menu-responsive-"], *[class*=" menu-responsive-"] {
+        text-align: start;
+        align-items: start;
+        & > label.collapse-control {display: none; }
+        .menu-items { display: flex; }
+    }
+}
+/* Collapsing Nav menu end */
+
+@media (max-width: 576px) {
+    .app .min-lg {
+        display: none;
+    }
+
+    body.app {
+        display: flex;
+        & > header {
+            position: sticky;
+            grid-area: main;
+            top: 0;
+        }
+
+        article .timeline footer {
+            *, button {
+                font-size: calc(0.75 * var(--pico-font-size));
+            }
+        }
+        flex-direction: column;
+    }
+}
+
+@media (min-width: 576px) {
+    :root {
+        --pico-font-size: 100%;
+    }
+    
+    .app .max-sm {
+        display: none;
+    }
+}
+
+@media (min-width: 1024px) {
+    body.app main .timeline article {
+        grid-template-areas:
+        "header main" 
+        "header footer";
+        grid-template-columns: 1fr 3fr;
+        grid-template-rows: 1fr auto;
+    }
+
+}
+
+@media (min-width: 1280px) {
+    :root {
+        --pico-font-size: 106.25%;
+    }
+}
+
+@media (min-width: 1536px) {
+    :root {
+        --pico-font-size: 112.5%
+    }
+}
+
+@media screen and (height <= 576px) {
     /* small displays */
     body.app header {
         font-size: revert;
     }
-    
-    .app .min-md {
-        /*display: none;*/
-    }
 }
 
-@media screen and (width <= 796px) {
+@media screen and (max-width: 796px) {
     /* single-column layout */
     body.app {
-        grid-template-areas:
-                    "header footer"
-                    "main main";
-        grid-template-columns: 1fr auto;
-        grid-template-rows: auto 1fr;
+        display: flex;
+        flex-direction: column;
         
-        header {
-            justify-content: normal;
-
-            nav {
-                & ul, & ul:first-of-type, & ul:last-of-type {
-                    flex-direction: row;
-                }
-            }
+        & > header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            position: sticky;
+            grid-area: main;
+            top: 0;
+            background-color: var(--pico-background-color);
+            z-index: 1;
         }
     }
-    
+
     .app .min-md {
         display: none;
     }

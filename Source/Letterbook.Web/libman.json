@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "3.0",
   "defaultProvider": "jsdelivr",
   "libraries": [
     {
@@ -8,6 +8,54 @@
       "files": [
         "css/pico.min.css",
         "LICENSE.md"
+      ]
+    },
+    {
+      "library": "remixicon@4.6.0",
+      "destination": "wwwroot/lib/remixicon",
+      "fileMappings": [
+        {
+          "files": ["License"]
+        },
+        {
+          "root": "icons/Business",
+          "files": [
+            "mail-open-line.svg"
+          ]
+        },
+        {
+          "root": "icons/Document",
+          "files": [
+            "file-damage-line.svg"
+          ]
+        },
+        {
+          "root": "icons/Health & Medical",
+          "files": [
+            "heart-line.svg"
+          ]
+        },
+        {
+          "root": "icons/Media",
+          "files": [
+            "repeat-line.svg",
+            "notification-2-line.svg"
+          ]
+        },
+        {
+          "root": "icons/System",
+          "files": [
+            "more-line.svg",
+            "search-line.svg",
+            "settings-3-line.svg"
+          ]
+        },
+        {
+          "root": "icons/User & Faces",
+          "files": [
+            "account-box-line.svg"
+          ]
+        }
       ]
     }
   ]
