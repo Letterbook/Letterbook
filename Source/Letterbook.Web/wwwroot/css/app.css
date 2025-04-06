@@ -46,164 +46,19 @@
 
     main {
         grid-area: main;
-
-        .timeline {
-            overflow: scroll;
-
-            article {
-                padding: 0;
-                display: grid;
-                grid-template-areas:
-            "header" 
-            "main"
-            "footer";
-                grid-template-columns: auto;
-                align-items: stretch;
-                font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
-
-                .timeline-body {
-                    padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
-                    grid-area: main;
-                }
-
-                header {
-                    grid-area: header;
-                    height: 100%;
-                    margin: 0;
-                    padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
-                }
-
-                footer {
-                    font-size: 0.75rem;
-                    grid-area: footer;
-                    margin: 0;
-                    display: flex;
-                    gap: 0.5rem;
-                    align-items: center;
-                    
-                    time {
-                        text-align: end;
-                    }
-                }
-            }
-
-            .timeline-author {
-                display: flex;
-            }
-
-            .timeline-pfp {
-                flex: 0 0 auto;
-            }
-
-            .timeline-author {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-
-            .timeline-profile-container {
-                flex: 0 1 auto;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .handle {
-                font-size: 0.75em;
-            }
-        }
-
-        .timeline button {
-            padding-top: .0625rem;
-            padding-bottom: .0625rem;
-            margin-top: .125rem;
-            margin-bottom: .125rem;
-        }
-
-        span img {
-            margin-left: 0.25em;
-            margin-right: 0.25em;
-        }
-
-        img {
-            inline-size: 1.1lh;
-        }
-
-        button.btn-link {
-            --pico-color: var(--lb-color-primary);
-            text-decoration: underline;
-            display: inline-block;
-            border: none;
-            background-color: inherit;
-            padding: 0;
-            margin: 0;
-            font-size: inherit;
-            width: initial;
-        }
-
-        .box {
-            clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%);
-            position: relative;
-        }
-
-        .box:before {
+    }
+    .box {
+        clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%);
+        position: relative;
+        
+        &:before {
             content: "";
             position: absolute;
             inset: 0;
             background: radial-gradient(var(--lb-color-primary), var(--lb-color-contrast), var(--lb-color-accent), var(--lb-color-secondary));
             clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%, 0 2em, 4px calc(2em + 1.66px), 4px calc(100% - 4px), calc(100% - 2em - 1.66px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2em - 1.66px), calc(100% - 4px) 4px, calc(2em + 1.66px) 4px, 4px calc(2em + 1.66px));
         }
-
-        .timeline-body {
-            grid-area: main;
-            padding-top: var(--pico-block-spacing-vertical);
-            padding-bottom: var(--pico-block-spacing-vertical);
-        }
-
-        .timeline-header {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            white-space: nowrap;
-            line-break: anywhere;
-
-            .timeline-author {
-                display: flex;
-                flex-direction: row;
-
-            }
-
-            .timeline-pfp {
-                flex-shrink: 0;
-            }
-
-            .timeline-profile-container {
-                display: flex;
-                flex-direction: column;
-            }
-
-            a {
-                text-decoration: none;
-                line-height: initial;
-            }
-
-            .pfp-sm {
-                line-height: 2lh;
-                /*! width: 2rem; */
-            }
-
-            span,
-            .display-name {
-                width: 100%;
-            }
-
-            .handle {
-                font-size: .7em;
-            }
-        }
     }
-    
     .icon {
         max-height: 1em;
         max-width: 1em;
@@ -227,6 +82,154 @@
     }
 }
 
+button {
+    &.btn-link {
+        --pico-color: var(--lb-color-primary);
+        text-decoration: underline;
+        display: inline-block;
+        border: none;
+        background-color: inherit;
+        padding: 0;
+        margin: 0;
+        font-size: inherit;
+        width: initial;
+    }
+}
+
+.app img {
+    inline-size: 1.1lh;
+    
+    &.inline {
+        margin-left: 0.25em;
+        margin-right: 0.25em;
+    }
+}
+
+.app button {
+    padding-top: .0625rem;
+    padding-bottom: .0625rem;
+    margin-top: .125rem;
+    margin-bottom: .125rem;
+}
+
+.app .timeline {
+    overflow: scroll;
+
+    article {
+        padding: 0;
+        display: grid;
+        grid-template-areas:
+            "header" 
+            "main"
+            "footer";
+        grid-template-columns: auto;
+        align-items: stretch;
+        font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+
+        .timeline-body {
+            padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
+            grid-area: main;
+        }
+
+        header {
+            grid-area: header;
+            height: 100%;
+            margin: 0;
+            padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
+        }
+
+        footer {
+            font-size: 0.75rem;
+            grid-area: footer;
+            margin: 0;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+
+            time {
+                text-align: end;
+            }
+        }
+    }
+
+    .timeline-author {
+        display: flex;
+    }
+
+    .timeline-pfp {
+        flex: 0 0 auto;
+    }
+
+    .timeline-author {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .timeline-profile-container {
+        flex: 0 1 auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .timeline-body {
+        grid-area: main;
+        padding-top: var(--pico-block-spacing-vertical);
+        padding-bottom: var(--pico-block-spacing-vertical);
+    }
+
+    .timeline-header {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        line-break: anywhere;
+
+        .timeline-author {
+            display: flex;
+            flex-direction: row;
+
+        }
+
+        .timeline-pfp {
+            flex-shrink: 0;
+        }
+
+        .timeline-profile-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        a {
+            text-decoration: none;
+            line-height: initial;
+        }
+
+        .pfp-sm {
+            line-height: 2lh;
+            /*! width: 2rem; */
+        }
+
+        span,
+        .display-name {
+            width: 100%;
+        }
+
+        .handle {
+            font-size: .7em;
+        }
+    }
+    
+    .timeline-footer {}
+
+    .handle {
+        font-size: 0.75em;
+    }
+}
+
+
 /* Collapsible menus */
 /* Always collapsible */
 .menu-collapsible,
@@ -249,15 +252,16 @@
         display: none;
 
         & > * {
-            /*padding: 10px;*/
-            /*text-align: center;*/
             width: 100%;
             display: block;
         }
 
         footer {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            column-gap: 1em;
+            text-wrap: nowrap;
+            flex-wrap: wrap;
         }
     }
     
