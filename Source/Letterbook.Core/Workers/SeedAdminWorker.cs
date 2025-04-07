@@ -31,6 +31,17 @@ public class SeedAdminWorker : IScopedWorker
 
 		try
 		{
+			// TODO: replace with invite mechanism
+			if (_data.AllAccounts().Any())
+			{
+				_logger.LogDebug("Found accounts, skipping seed");
+				return;
+			}
+			var admin = await _accountService.RegisterAccount($"admin@letterbook.example", "admin",
+				"Password1!");
+			if (admin is not null) _logger.LogInformation("Created admin account");
+			else _logger.LogError("Couldn't create admin account");
+
 			if (await _data.Profiles(Profile.SystemInstanceId)
 				    .AsNoTracking()
 				    .FirstOrDefaultAsync(cancellationToken: cancellationToken) is { } instance)
@@ -54,22 +65,6 @@ public class SeedAdminWorker : IScopedWorker
 			}
 
 			await _data.Commit();
-
-			// TODO: replace with invite mechanism
-			if (_data.AllAccounts().Any())
-			{
-				_logger.LogDebug("Found accounts, skipping seed");
-				return;
-			}
-			var admin = await _accountService.RegisterAccount($"admin@letterbook.example", "admin",
-				"Password1!");
-			if (admin is not null)
-			{
-				_logger.LogInformation("Created admin account");
-				return;
-			}
-
-			_logger.LogError("Couldn't create admin account");
 		}
 		catch (OperationCanceledException ex)
 		{
