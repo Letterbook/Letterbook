@@ -1,6 +1,4 @@
 using System.Security.Claims;
-using Letterbook.Core.Models.Mappers;
-using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Letterbook.Web.Pages;
@@ -31,7 +29,7 @@ public class ProfileControllerTests : WithMockContext
 			PageContext = PageContext,
 		};
 
-		ProfileServiceAuthMock.Setup(m => m.FindProfiles(It.IsAny<string>())).ReturnsAsync([_profile]);
+		ProfileServiceAuthMock.Setup(m => m.FindProfiles(It.IsAny<string>(), It.IsAny<string>())).Returns(new List<Models.Profile>{_profile}.ToAsyncEnumerable());
 	}
 
 	[Fact]

@@ -4,10 +4,11 @@ using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Letterbook.Generators;
 using Medo;
+using Microsoft.AspNetCore.Routing;
 
 namespace Letterbook.Core.Models;
 
-public partial record struct ProfileId(Uuid7 Id) : ITypedId<Uuid7>;
+public partial record struct ProfileId(Uuid7 Id) : ITypedId<Uuid7>, IParameterPolicy;
 
 /// <summary>
 /// A Profile is the externally visible representation of an account on the network. In ActivityPub terms, it should map

@@ -5,6 +5,7 @@ using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
+using MassTransit.Testing;
 using Medo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,8 +54,8 @@ public class ProfilesController : ControllerBase
 	[SwaggerOperation("Get", "Lookup a profile by ID")]
 	public async Task<IActionResult> Get([FromQuery]string handle)
 	{
-		var result = await _profiles.As(User.Claims).FindProfiles(handle);
-		return result.Any()
+		var result = _profiles.As(User.Claims).FindProfiles(handle);
+		return await result.Any()
 			? Ok(_mapper.Map<IEnumerable<FullProfileDto>>(result))
 			: NotFound();
 	}

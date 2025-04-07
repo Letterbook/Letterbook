@@ -36,25 +36,25 @@ public class ProfileEdit : PageModel
 
     public async Task<IActionResult> OnGet(string handle)
     {
-        var found = await _profiles.As(User.Claims).FindProfiles(handle);
-		if (found.FirstOrDefault() is not { } profile)
+        var found = await _profiles.As(User.Claims).FindProfiles(handle).FirstOrDefaultAsync();
+		if (found is null)
 			return NotFound();
 
 		Handle = handle;
-		DisplayName = profile.DisplayName;
-		Description = profile.Description;
+		DisplayName = found.DisplayName;
+		Description = found.Description;
         return Page();
     }
 
 	public async Task<IActionResult> OnPostAsync(string handle)
 	{
-		var found = await _profiles.As(User.Claims).FindProfiles(handle);
-		if (found.FirstOrDefault() is not { } profile)
+		var found = await _profiles.As(User.Claims).FindProfiles(handle).FirstOrDefaultAsync();
+		if (found is null)
 			return NotFound();
 
 		if (ModelState.IsValid) {
-			await _profiles.As(User.Claims).UpdateDisplayName(profile.Id, DisplayName);
-			await _profiles.As(User.Claims).UpdateDescription(profile.Id, Description);
+			await _profiles.As(User.Claims).UpdateDisplayName(found.Id, DisplayName);
+			await _profiles.As(User.Claims).UpdateDescription(found.Id, Description);
 			return RedirectToPage("Profile", new { handle = handle });
 		}
 		return Page();

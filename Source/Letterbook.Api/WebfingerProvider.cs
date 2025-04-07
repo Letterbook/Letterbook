@@ -40,8 +40,8 @@ public class WebfingerProvider : IResourceDescriptorProvider
 		var handle = match.Value.Split('@', 2,
 			StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
 		if (handle == null) return default;
-		var profiles = await _profiles.As(Enumerable.Empty<Claim>()).FindProfiles(handle);
-		if (profiles.FirstOrDefault() is { } subject)
+		var profile = await _profiles.As([]).FindProfiles(handle, _options.DomainName).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+		if (profile != null)
 		{
 			var descriptor = JsonResourceDescriptor.Empty with
 			{
@@ -50,7 +50,7 @@ public class WebfingerProvider : IResourceDescriptorProvider
 					DarkLink.Web.WebFinger.Shared.Link.Create("self") with
 					{
 						Type = Core.Constants.ActivityPubAccept,
-						Href = subject.FediId,
+						Href = profile.FediId,
 					}),
 			};
 

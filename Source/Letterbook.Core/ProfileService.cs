@@ -214,17 +214,14 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return result;
 	}
 
-	public async Task<IEnumerable<Profile>> FindProfiles(string handle)
+	public IAsyncEnumerable<Profile> FindProfiles(string handle, string host)
 	{
-		var results = _data.AllProfiles().Where(p => p.Handle == handle).AsAsyncEnumerable();//FindProfilesByHandle(handle);
+		return _data.AllProfiles().Where(p => p.Handle == handle && p.Authority == host).AsAsyncEnumerable();
+	}
 
-		var profiles = new List<Profile>();
-		await foreach (var profile in results)
-		{
-			profiles.Add(profile);
-		}
-
-		return profiles;
+	public IAsyncEnumerable<Profile> FindProfiles(string handle)
+	{
+		return _data.AllProfiles().Where(p => p.Handle == handle).AsAsyncEnumerable();
 	}
 
 	private async Task<FollowerRelation> Follow(Profile self, Profile target, bool subscribeOnly)

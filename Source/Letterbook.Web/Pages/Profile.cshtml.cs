@@ -66,12 +66,12 @@ public class Profile : PageModel
 	{
 		_profiles = _profileSvc.As(User.Claims);
 
-		var found = await _profiles.FindProfiles(handle);
-		if (found.FirstOrDefault() is not { } profile)
+		var found = await _profiles.FindProfiles(handle).FirstOrDefaultAsync();
+		if (found is null)
 			return NotFound();
 
-		_profile = profile;
-		if (SelfId is { } id && await _profiles.LookupProfile((Models.ProfileId)Uuid7.FromId25String(id), (Models.ProfileId?)profile.GetId()) is { } self)
+		_profile = found;
+		if (SelfId is { } id && await _profiles.LookupProfile((Models.ProfileId)Uuid7.FromId25String(id), (Models.ProfileId?)found.GetId()) is { } self)
 		{
 			_self = self;
 		}
