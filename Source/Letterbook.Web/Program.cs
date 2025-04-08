@@ -71,10 +71,7 @@ public class Program
 			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
 			.AddDefaultUI();
 		builder.Services.AddRazorPages()
-			.AddRazorPagesOptions(options =>
-			{
-				options.AddWebRoutes();
-			});
+			.AddRazorPagesOptions(options => options.AddWebRoutes());
 		builder.Services.Configure<RouteOptions>(opts => opts.ConfigureWebRoutes());
 		builder.Services.AddAuthorization(options =>
 		{

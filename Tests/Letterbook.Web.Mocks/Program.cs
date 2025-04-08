@@ -69,10 +69,7 @@ public class Program
 			.AddDefaultUI();
 		builder.Services.AddRazorPages()
 			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!)
-			.AddRazorPagesOptions(options =>
-			{
-				options.AddWebRoutes();
-			});
+			.AddRazorPagesOptions(options => options.AddWebRoutes());
 		builder.Services.Configure<RouteOptions>(opts => opts.ConfigureWebRoutes());
 		builder.Services.AddAuthorization(options =>
 		{
