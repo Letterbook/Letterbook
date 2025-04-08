@@ -73,11 +73,7 @@ public class Program
 			{
 				options.AddWebRoutes();
 			});
-		builder.Services.Configure<RouteOptions>(options =>
-		{
-			// options.ConstraintMap.Add(nameof(Models.ProfileId), typeof(Models.ProfileId));
-			options.LowercaseUrls = true;
-		});
+		builder.Services.Configure<RouteOptions>(opts => opts.ConfigureWebRoutes());
 		builder.Services.AddAuthorization(options =>
 		{
 			options.AddWebAuthzPolicy();
@@ -89,12 +85,12 @@ public class Program
 
 		var app = builder.Build();
 
+		// app.UseStatusCodePagesWithReExecute("/error/{0}");
 		app.UseDeveloperExceptionPage();
 		app.UseStaticFiles(new StaticFileOptions
 		{
 			FileProvider = new ManifestEmbeddedFileProvider(Assembly.GetAssembly(typeof(Web.Program))!, "wwwroot"),
 		});
-		// app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();

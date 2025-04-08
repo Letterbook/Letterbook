@@ -1,6 +1,8 @@
+using Letterbook.Web.Routes;
 using Medo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Letterbook.Web;
@@ -27,8 +29,14 @@ public static class DependencyInjection
 
 	public static void AddWebRoutes(this RazorPagesOptions options)
 	{
-		// options.Conventions.AddPageRoute("/Profile", "/@{handle}");
-		// options.Conventions.AddPageRoute("/Profile", "/@{handle}@{host}");
-		// options.Conventions.AddPageRoute("/Profile", "/profile/{id}");
+		options.Conventions.Add(new PageRouteTransformerConvention(new ProfileHandleParameterTransformer()));
+		options.Conventions.Add(new PageRouteTransformerConvention(new ProfileIdParameterTransformer()));
+		options.Conventions.AddPageRoute("/Profile", "/{id:handle}");
+	}
+
+	public static void ConfigureWebRoutes(this RouteOptions options)
+	{
+		options.ConstraintMap.Add("handle", typeof(ProfileHandleParameterTransformer));
+		options.LowercaseUrls = true;
 	}
 }

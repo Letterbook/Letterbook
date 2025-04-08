@@ -6,6 +6,7 @@ using Letterbook.AspNet;
 using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
+using Letterbook.Web.Routes;
 using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication;
@@ -74,10 +75,7 @@ public class Program
 			{
 				options.AddWebRoutes();
 			});
-		builder.Services.Configure<RouteOptions>(options =>
-		{
-			options.LowercaseUrls = true;
-		});
+		builder.Services.Configure<RouteOptions>(opts => opts.ConfigureWebRoutes());
 		builder.Services.AddAuthorization(options =>
 		{
 			options.AddWebAuthzPolicy();

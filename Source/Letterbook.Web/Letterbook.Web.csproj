@@ -72,6 +72,8 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <CopyToPublishDirectory>Never</CopyToPublishDirectory>
         </Content>
+        <Content Remove="Pages\ProfileWithhost.cshtml" />
+        <Content Remove="Pages\Shared\Components\ProfileViewComponent.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
@@ -88,5 +90,14 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\reply-line.svg" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\search-line.svg" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\settings-3-line.svg" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Pages\ProfileWithhost.cshtml.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Pages\Shared\Components\Profile\" />
+      <Folder Include="ViewComponents\" />
     </ItemGroup>
 </Project>

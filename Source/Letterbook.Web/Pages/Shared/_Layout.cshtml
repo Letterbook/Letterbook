@@ -25,7 +25,7 @@
                 <a asp-area="" asp-page="/Settings">Settings</a>
                 <div class="spacer min-md"></div>
                 <footer>
-                    <a asp-page="Profile" asp-route-handle="admin">Admin profile</a>
+                    <a asp-page="Profile" asp-route-id="admin">Admin profile</a>
                     <a asp-area="" asp-page="/About">About</a>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
