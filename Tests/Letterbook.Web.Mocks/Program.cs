@@ -68,7 +68,9 @@ public class Program
 			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
 			.AddDefaultUI();
 		builder.Services.AddRazorPages()
-			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
+			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!)
+			.AddRazorPagesOptions(options => options.AddWebRoutes());
+		builder.Services.Configure<RouteOptions>(opts => opts.ConfigureWebRoutes());
 		builder.Services.AddAuthorization(options =>
 		{
 			options.AddWebAuthzPolicy();
@@ -80,27 +82,12 @@ public class Program
 
 		var app = builder.Build();
 
-		// Configure the HTTP request pipeline.
-		if (!app.Environment.IsDevelopment())
-		{
-			// Not sure if this works, with mixed Razor/WebApi
-			app.UseExceptionHandler("/Error");
-		}
-
-		if (!app.Environment.IsProduction())
-		{
-			app.Use((context, next) =>
-			{
-				context.Request.EnableBuffering();
-				return next();
-			});
-		}
-
+		// app.UseStatusCodePagesWithReExecute("/error/{0}");
+		app.UseDeveloperExceptionPage();
 		app.UseStaticFiles(new StaticFileOptions
 		{
 			FileProvider = new ManifestEmbeddedFileProvider(Assembly.GetAssembly(typeof(Web.Program))!, "wwwroot"),
 		});
-		app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();

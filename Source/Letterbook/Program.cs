@@ -65,7 +65,9 @@ public class Program
 			.AddDefaultTokenProviders()
 			.AddDefaultUI();
 		builder.Services.AddRazorPages()
-			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!);
+			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!)
+			.AddRazorPagesOptions(options => options.AddWebRoutes());
+		builder.Services.Configure<RouteOptions>(opts => opts.ConfigureWebRoutes());
 		builder.Services.AddAuthorization(options =>
 		{
 			options.AddWebAuthzPolicy();

@@ -1,6 +1,4 @@
 using System.Security.Claims;
-using Letterbook.Core.Models.Mappers;
-using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
 using Letterbook.Web.Pages;
@@ -26,12 +24,12 @@ public class ProfileControllerTests : WithMockContext
 		_principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("activeProfile", _selfProfile.GetId25())], "Test"));
 
 		_profile = new FakeProfile("letterbook.example").Generate();
-		_page = new Profile(ProfileServiceMock.Object, Mock.Of<ILogger<Profile>>())
+		_page = new Profile(ProfileServiceMock.Object, Mock.Of<ILogger<Profile>>(), CoreOptionsMock)
 		{
 			PageContext = PageContext,
 		};
 
-		ProfileServiceAuthMock.Setup(m => m.FindProfiles(It.IsAny<string>())).ReturnsAsync([_profile]);
+		ProfileServiceAuthMock.Setup(m => m.FindProfiles(It.IsAny<string>(), It.IsAny<string>())).Returns(new List<Models.Profile>{_profile}.ToAsyncEnumerable());
 	}
 
 	[Fact]
@@ -43,11 +41,11 @@ public class ProfileControllerTests : WithMockContext
 	[Fact(DisplayName = "Should load the template data for a profile")]
 	public async Task CanGetPage()
 	{
-		var result = await _page.OnGet(_profile.Handle);
+		var result = await _page.OnGet($"@{_profile.Handle}");
 
 		Assert.IsType<PageResult>(result);
 		Assert.Equal(_profile.Description, _page.Description.ToString());
-		Assert.Equal($"@{_profile.Handle}@{_profile.Authority}", _page.Handle);
+		Assert.Equal($"@{_profile.Handle}@{_profile.Authority}", _page.FullHandle);
 		Assert.Equal(_profile.DisplayName, _page.DisplayName);
 		Assert.Equal(_profile.CustomFields, _page.CustomFields);
 	}
@@ -61,7 +59,7 @@ public class ProfileControllerTests : WithMockContext
 	{
 		ProfileServiceAuthMock.Setup(m => m.FollowingCount(_profile)).ReturnsAsync(x);
 
-		await _page.OnGet(_profile.Handle);
+		await _page.OnGet($"@{_profile.Handle}");
 
 		Assert.Equal(x, await _page.FollowingCount);
 	}
@@ -75,7 +73,7 @@ public class ProfileControllerTests : WithMockContext
 	{
 		ProfileServiceAuthMock.Setup(m => m.FollowerCount(_profile)).ReturnsAsync(x);
 
-		await _page.OnGet(_profile.Handle);
+		await _page.OnGet($"@{_profile.Handle}");
 
 		Assert.Equal(x, await _page.FollowerCount);
 	}
@@ -85,7 +83,7 @@ public class ProfileControllerTests : WithMockContext
 	{
 		MockHttpContext.SetupGet(ctx => ctx.User).Returns(_principal);
 
-		var result = await _page.OnGet(_profile.Handle);
+		var result = await _page.OnGet($"@{_profile.Handle}");
 
 		Assert.Equal(_selfProfile.GetId25(), _page.SelfId);
 	}
@@ -100,7 +98,7 @@ public class ProfileControllerTests : WithMockContext
 		ProfileServiceAuthMock.Setup(m => m.LookupProfile((Models.ProfileId)_selfProfile.GetId(), (Models.ProfileId?)_profile.GetId()))
 			.ReturnsAsync(_selfProfile);
 
-		await _page.OnGet(_profile.Handle);
+		await _page.OnGet($"@{_profile.Handle}");
 
 		Assert.True(_page.FollowsYou);
 		Assert.True(_page.YouFollow);

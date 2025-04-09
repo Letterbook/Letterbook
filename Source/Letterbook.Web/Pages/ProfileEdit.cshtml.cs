@@ -34,28 +34,28 @@ public class ProfileEdit : PageModel
 	[StringLength(1000)]
 	public string Description { get; set; }
 
-    public async Task<IActionResult> OnGet(string handle)
+    public async Task<IActionResult> OnGet(Models.ProfileId id)
     {
-        var found = await _profiles.As(User.Claims).FindProfiles(handle);
-		if (found.FirstOrDefault() is not { } profile)
+	    var profile = await _profiles.As(User.Claims).LookupProfile(id);
+		if (profile == null)
 			return NotFound();
 
-		Handle = handle;
+		Handle = profile.Handle;
 		DisplayName = profile.DisplayName;
 		Description = profile.Description;
         return Page();
     }
 
-	public async Task<IActionResult> OnPostAsync(string handle)
+	public async Task<IActionResult> OnPostAsync(Models.ProfileId id)
 	{
-		var found = await _profiles.As(User.Claims).FindProfiles(handle);
-		if (found.FirstOrDefault() is not { } profile)
+		var profile = await _profiles.As(User.Claims).LookupProfile(id);
+		if (profile == null)
 			return NotFound();
 
 		if (ModelState.IsValid) {
 			await _profiles.As(User.Claims).UpdateDisplayName(profile.Id, DisplayName);
 			await _profiles.As(User.Claims).UpdateDescription(profile.Id, Description);
-			return RedirectToPage("Profile", new { handle = handle });
+			return RedirectToPage("Profile", new { handle = profile.Handle });
 		}
 		return Page();
 	}

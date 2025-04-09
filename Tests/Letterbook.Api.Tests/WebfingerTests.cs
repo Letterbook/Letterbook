@@ -29,8 +29,8 @@ public class WebfingerTests : WithMocks
 	[Fact(DisplayName = "Should return the descriptor")]
 	public async Task GetsDescriptor()
 	{
-		ProfileServiceAuthMock.Setup(m => m.FindProfiles(_profile.Handle))
-			.ReturnsAsync(new List<Models.Profile> { _profile });
+		ProfileServiceAuthMock.Setup(m => m.FindProfiles(_profile.Handle, It.IsAny<string>()))
+			.Returns(new List<Models.Profile> { _profile }.ToAsyncEnumerable());
 
 		var actual = await _provider.GetResourceDescriptorAsync(new Uri($"acct:{_profile.Handle}@letterbook.example"),
 			Array.Empty<string>(), Mock.Of<HttpRequest>(), CancellationToken.None);
@@ -43,8 +43,8 @@ public class WebfingerTests : WithMocks
 	[Fact(DisplayName = "Should not return a descriptor when no profiles are found")]
 	public async Task GetsNoDescriptor()
 	{
-		ProfileServiceAuthMock.Setup(m => m.FindProfiles(_profile.Handle))
-			.ReturnsAsync(Array.Empty<Models.Profile>());
+		ProfileServiceAuthMock.Setup(m => m.FindProfiles(_profile.Handle, It.IsAny<string>()))
+			.Returns(Array.Empty<Models.Profile>().ToAsyncEnumerable());
 
 		var actual = await _provider.GetResourceDescriptorAsync(new Uri($"acct:{_profile.Handle}@letterbook.example"),
 			Array.Empty<string>(), Mock.Of<HttpRequest>(), CancellationToken.None);
@@ -59,7 +59,7 @@ public class WebfingerTests : WithMocks
 		req.SetupGet<IHeaderDictionary>(m => m.Headers).Returns(new HeaderDictionary());
 
 		ProfileServiceAuthMock.Setup(m => m.FindProfiles(_profile.Handle))
-			.ReturnsAsync(Array.Empty<Models.Profile>());
+			.Returns(Array.Empty<Models.Profile>().ToAsyncEnumerable());
 
 		var actual = await _provider.GetResourceDescriptorAsync(new Uri($"acct:{_profile.Handle}"),
 			Array.Empty<string>(), req.Object, CancellationToken.None);

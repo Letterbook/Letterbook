@@ -1,6 +1,5 @@
-﻿using AutoMapper;
-using Letterbook.Core;
-using Letterbook.Core.Models.Mappers;
+﻿using Letterbook.Core;
+using Letterbook.Core.Extensions;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -16,13 +15,14 @@ public class Profile : PageModel
 {
 	private readonly IProfileService _profileSvc;
 	private readonly ILogger<Profile> _logger;
+	private readonly CoreOptions _opts;
 	private IAuthzProfileService _profiles;
 	private Models.Profile _profile;
 	private Models.Profile? _self;
 
 	/// The full conventional fediverse @user@domain username.
 	/// Ostensibly globally unique
-	public string Handle => $"@{BareHandle}@{_profile.Authority}";
+	public string FullHandle => $"@{BareHandle}@{_profile.Authority}";
 
 	/// Just the username, with no @'s
 	public string BareHandle => _profile.Handle;
@@ -43,7 +43,7 @@ public class Profile : PageModel
 	public Task<int> FollowingCount => _profiles.FollowingCount(_profile);
 
 	/// The internal unique ID for this profile (used a lot in our APIs)
-	public string Id => _profile.GetId25();
+	public string GetId => _profile.GetId25();
 
 	public string? SelfId => User.Claims.FirstOrDefault(c => c.Type == "activeProfile")?.Value;
 
@@ -54,29 +54,56 @@ public class Profile : PageModel
 	public bool YouFollow => _self?.FollowingCollection.Any() ?? false;
 
 
-	public Profile(IProfileService profiles, ILogger<Profile> logger)
+	public Profile(IProfileService profiles, ILogger<Profile> logger, IOptions<CoreOptions> opts)
 	{
 		_profile = default!;
 		_profiles = default!;
 		_profileSvc = profiles;
 		_logger = logger;
+		_opts = opts.Value;
 	}
 
-	public async Task<IActionResult> OnGet(string handle)
+	public async Task<IActionResult> OnGet(string id)
 	{
 		_profiles = _profileSvc.As(User.Claims);
 
-		var found = await _profiles.FindProfiles(handle);
-		if (found.FirstOrDefault() is not { } profile)
-			return NotFound();
+		if (id.StartsWith('@')) return await GetByHandle(id);
+		return await GetById(id);
+	}
 
+	private async Task<IActionResult> GetById(string id)
+	{
+		if (!Models.ProfileId.TryParse(id, out var profileId)) return BadRequest();
+
+		if (await _profiles.LookupProfile(profileId) is not { } profile)
+			return NotFound();
 		_profile = profile;
-		if (SelfId is { } id && await _profiles.LookupProfile((Models.ProfileId)Uuid7.FromId25String(id), (Models.ProfileId?)profile.GetId()) is { } self)
+
+		await GetSelf();
+
+		return Page();
+	}
+
+	public async Task<IActionResult> GetByHandle(string id)
+	{
+		var parts = id.Split("@", 2, StringSplitOptions.RemoveEmptyEntries);
+		var handle = parts[0];
+		var host = parts.Length == 2 ? parts[1] : _opts.BaseUri().GetAuthority();
+		if (await _profiles.FindProfiles(handle, host).FirstOrDefaultAsync() is not { } profile)
+			return NotFound();
+		_profile = profile;
+
+		await GetSelf();
+
+		return Page();
+	}
+
+	private async Task GetSelf()
+	{
+		if (SelfId is { } selfId && await _profiles.LookupProfile(Models.ProfileId.FromString(selfId), _profile.Id) is { } self)
 		{
 			_self = self;
 		}
-
-		return Page();
 	}
 
 	public async Task<IActionResult> OnPostFollowRequest(string handle, Uuid7 followId)
@@ -111,7 +138,7 @@ public class Profile : PageModel
 			return Challenge();
 
 		_profiles = _profileSvc.As(User.Claims);
-		var result = await _profiles.RemoveFollower(Uuid7.FromId25String(selfId), followerId);
+		await _profiles.RemoveFollower(Uuid7.FromId25String(selfId), followerId);
 
 		return RedirectToPage(GetType().Name, new { handle });
 	}

@@ -1,38 +1,38 @@
-﻿@page "/@{handle}"
+﻿@page "{id}"
 @model Letterbook.Web.Pages.Profile
 
 @{
-    ViewData["Title"] = $"{Model.DisplayName} ({Model.Handle})";
+    ViewData["Title"] = $"{Model.DisplayName} ({Model.FullHandle})";
 }
 
 <div>
     <h1>
         <span>@Model.DisplayName</span>
-        <span>@Model.Handle</span>
+        <span>@Model.FullHandle</span>
     </h1>
     
-    @if (User.Identity?.IsAuthenticated == true && Model.SelfId == Model.Id)
+    @if (User.Identity?.IsAuthenticated == true && Model.SelfId == Model.GetId)
     {
         <a asp-page="ProfileEdit" asp-route-handle="@Model.BareHandle">Edit</a>
     }
-    @if (User.Identity?.IsAuthenticated == true && Model.SelfId != Model.Id)
+    @if (User.Identity?.IsAuthenticated == true && Model.SelfId != Model.GetId)
     {
         if (Model.YouFollow)
         {
             
-            <form asp-page-handler="Unfollow" asp-route-followId="@Model.Id" method="post">
+            <form asp-page-handler="Unfollow" asp-route-followId="@Model.GetId" method="post">
                 <button>Unfollow</button>
             </form>
         }
         else
         {
-            <form asp-page-handler="FollowRequest" asp-route-followId="@Model.Id" method="post">
+            <form asp-page-handler="FollowRequest" asp-route-followId="@Model.GetId" method="post">
                 <button>Follow</button>
             </form>
         }
         if(Model.FollowsYou)
         {
-            <form asp-page-handler="RemoveFollower" asp-route-followerId="@Model.Id" method="post">
+            <form asp-page-handler="RemoveFollower" asp-route-followerId="@Model.GetId" method="post">
                 <span>Follows you</span>
                 <button>Remove follower</button>
             </form>
@@ -64,6 +64,6 @@
         
     </div>
     
-    <p>Profile Id: <code>@Model.Id</code></p>
+    <p>Profile Id: <code>@Model.GetId</code></p>
     
 </div>

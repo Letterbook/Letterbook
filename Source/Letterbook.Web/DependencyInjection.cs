@@ -1,5 +1,9 @@
+using Letterbook.Web.Routes;
+using Medo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Letterbook.Web;
 
@@ -21,5 +25,18 @@ public static class DependencyInjection
 			options.SlidingExpiration = true;
 			options.ExpireTimeSpan = TimeSpan.FromDays(90);
 		});
+	}
+
+	public static void AddWebRoutes(this RazorPagesOptions options)
+	{
+		options.Conventions.Add(new PageRouteTransformerConvention(new ProfileHandleParameterTransformer()));
+		options.Conventions.Add(new PageRouteTransformerConvention(new ProfileIdParameterTransformer()));
+		options.Conventions.AddPageRoute("/Profile", "/{id:handle}");
+	}
+
+	public static void ConfigureWebRoutes(this RouteOptions options)
+	{
+		options.ConstraintMap.Add("handle", typeof(ProfileHandleParameterTransformer));
+		options.LowercaseUrls = true;
 	}
 }
