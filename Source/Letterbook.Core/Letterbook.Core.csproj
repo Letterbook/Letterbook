@@ -10,6 +10,7 @@
     <ItemGroup>
       <PackageReference Include="ActivityPub.Types" />
       <PackageReference Include="AutoMapper" />
+      <PackageReference Include="BouncyCastle.Cryptography" />
       <PackageReference Include="EntityFrameworkCore.Projectables" />
       <PackageReference Include="GitHubActionsTestLogger">
         <PrivateAssets>all</PrivateAssets>
@@ -46,11 +47,6 @@
       <ProjectReference Include="..\Letterbook.Generators\Letterbook.Generators\Letterbook.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" />
       <!-- Letterbook.Generators must be built targeting the same framework as this project to allow the use of runtime features such as static abstract members on interfaces -->
       <ProjectReference Include="..\Letterbook.Generators\Letterbook.Generators\Letterbook.Generators.csproj" ReferenceOutputAssembly="true" SetTargetFramework="TargetFramework=$(TargetFramework)" />
-    </ItemGroup>
-    <ItemGroup>
-      <Reference Include="BouncyCastle.Cryptography">
-        <HintPath>..\..\..\..\.nuget\packages\bouncycastle.cryptography\2.5.0\lib\net6.0\BouncyCastle.Cryptography.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>
