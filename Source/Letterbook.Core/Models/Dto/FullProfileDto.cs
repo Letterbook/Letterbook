@@ -15,4 +15,6 @@ public class FullProfileDto
 	public ActivityActorType? Type { get; set; }
 	public ICollection<AudienceDto>? Audiences { get; set; } = new HashSet<AudienceDto>();
 	public IList<PublicKeyDto>? Keys { get; set; } = new List<PublicKeyDto>();
+	public int Followers { get; set; }
+	public int Following { get; set; }
 }

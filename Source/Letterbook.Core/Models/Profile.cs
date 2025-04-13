@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Security.Claims;
+using EntityFrameworkCore.Projectables;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Letterbook.Generators;
@@ -144,14 +145,16 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public string Description { get; set; }
 	public CustomField[] CustomFields { get; set; } = [];
 	public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
-	public DateTime Updated { get; set; } = DateTime.UtcNow;
+	public DateTimeOffset Updated { get; set; } = DateTimeOffset.UtcNow;
 	public Account? OwnedBy { get; set; }
 	public ICollection<ProfileClaims> Accessors { get; set; } = new HashSet<ProfileClaims>();
 	public ActivityActorType Type { get; set; }
 	public ICollection<Audience> Headlining { get; set; } = new HashSet<Audience>();
 	public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
 	public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
+	[Projectable] public int FollowersCount => FollowersCollection.Count;
 	public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
+	[Projectable] public int FollowingCount => FollowingCollection.Count;
 	public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
 	/// This Profile was the subject of these Reports
 	public ICollection<ModerationReport> ReportSubject = new HashSet<ModerationReport>();
@@ -288,6 +291,18 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		var relation = FollowersCollection.FirstOrDefault(relation => relation.Follower == target,
 			new FollowerRelation(target, this, FollowState.None));
 		return relation.State == FollowState.Blocked;
+	}
+
+	public FollowState HasFollower(Profile target)
+	{
+		return FollowersCollection.FirstOrDefault(relation => relation.Follower == target,
+			new FollowerRelation(target, this, FollowState.None)).State;
+	}
+
+	public FollowState IsFollowing(Profile target)
+	{
+		return FollowingCollection.FirstOrDefault(relation => relation.Follower == target,
+			new FollowerRelation(target, this, FollowState.None)).State;
 	}
 
 	// Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?

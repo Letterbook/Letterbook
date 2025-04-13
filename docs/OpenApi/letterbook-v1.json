@@ -2892,6 +2892,14 @@
               "$ref": "#/components/schemas/PublicKeyDto"
             },
             "nullable": true
+          },
+          "followers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "following": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -3660,12 +3668,22 @@
             },
             "nullable": true
           },
+          "followersCount": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
           "followingCollection": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FollowerRelation"
             },
             "nullable": true
+          },
+          "followingCount": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
           },
           "keys": {
             "type": "array",
