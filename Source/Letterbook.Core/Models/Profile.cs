@@ -131,6 +131,10 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public static Profile AddInstanceProfile(Profile instance) => SystemProfiles[SystemInstanceId] = instance;
 	public static Profile? GetInstanceProfile() => SystemProfiles.GetValueOrDefault(SystemInstanceId);
 
+	/***
+	 * Properties
+	 */
+
 	public ProfileId Id { get; set; }
 
 	public Uri FediId { get; set; }
@@ -152,9 +156,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public ICollection<Audience> Headlining { get; set; } = new HashSet<Audience>();
 	public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
 	public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
-	[Projectable] public int FollowersCount => FollowersCollection.Count(relation => relation.State == FollowState.Accepted);
 	public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
-	[Projectable] public int FollowingCount => FollowingCollection.Count(relation => relation.State == FollowState.Accepted);
 	public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
 	/// This Profile was the subject of these Reports
 	public ICollection<ModerationReport> ReportSubject = new HashSet<ModerationReport>();
@@ -162,6 +164,12 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public ICollection<ModerationReport> Reports = new HashSet<ModerationReport>();
 	public IDictionary<Restrictions, DateTimeOffset> Restrictions { get; set; } = new Dictionary<Restrictions, DateTimeOffset>();
 
+	/***
+	 * Computed properties and projections
+	 */
+
+	[Projectable] public int FollowersCount => FollowersCollection.Count(relation => relation.State == FollowState.Accepted);
+	[Projectable] public int FollowingCount => FollowingCollection.Count(relation => relation.State == FollowState.Accepted);
 	public IEnumerable<Claim> RestrictionClaims() => Restrictions
 		.Where(r => r.Value >= DateTimeOffset.UtcNow)
 		.Select(pair => new Claim(pair.Key.ToString(), "true"));
@@ -187,6 +195,10 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 
 		return this;
 	}
+
+	/***
+	 * Behavior
+	 */
 
 	public FollowerRelation AddFollower(Profile follower, FollowState state)
 	{
