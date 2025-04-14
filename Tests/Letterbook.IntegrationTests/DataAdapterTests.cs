@@ -35,7 +35,7 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 	private List<Account> _accounts;
 	private readonly IServiceScope _scope;
 	private readonly Mapper _mapper;
-	private readonly MappingConfigProvider _mappngProvider;
+	private readonly MappingConfigProvider _mappingProvider;
 	static int? ITestSeed.Seed() => null;
 
 	public DataAdapterTests(ITestOutputHelper output, HostFixture<DataAdapterTests> host)
@@ -49,8 +49,8 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 		_context = _host.CreateContext(_scope);
 		_actual = _host.CreateContext(_scope);
 		_adapter = new DataAdapter(Mock.Of<ILogger<DataAdapter>>(), _context);
-		_mappngProvider = new MappingConfigProvider(Options.Create(new CoreOptions()));
-		_mapper = new Mapper(_mappngProvider.Profiles);
+		_mappingProvider = new MappingConfigProvider(Options.Create(new CoreOptions()));
+		_mapper = new Mapper(_mappingProvider.Profiles);
 	}
 
 	[Fact]
@@ -89,7 +89,7 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 	public async Task QueryProfileProjections()
 	{
 		var projected = await _adapter.Profiles(_profiles[7].Id).Select(e => new {Followers = e.FollowersCount}).FirstAsync();
-		var automapProjected = await _adapter.Profiles(_profiles[7].Id).ProjectTo<FullProfileDto>(_mappngProvider.Profiles).FirstAsync();
+		var automapProjected = await _adapter.Profiles(_profiles[7].Id).ProjectTo<FullProfileDto>(_mappingProvider.Profiles).FirstAsync();
 		var notProjected = await _adapter.Profiles(_profiles[7].Id).FirstAsync();
 
 		Assert.Equal(4, projected.Followers);
