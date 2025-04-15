@@ -21,5 +21,8 @@ public class ConfigureProfile : IEntityTypeConfiguration<Models.Profile>
 			.WithOne(relation => relation.Follows)
 			.IsRequired();
 		builder.Property(profile => profile.Restrictions).HasColumnType("jsonb");
+		builder.Property(profile => profile.FollowersEstimate).HasDefaultValue(-1);
+		builder.Property(profile => profile.FollowingEstimate).HasDefaultValue(-1);
+		builder.Property(profile => profile.PostsEstimate).HasDefaultValue(-1);
 	}
 }

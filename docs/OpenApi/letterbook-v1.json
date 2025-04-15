@@ -3668,11 +3668,6 @@
             },
             "nullable": true
           },
-          "followersCount": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
-          },
           "followingCollection": {
             "type": "array",
             "items": {
@@ -3680,10 +3675,13 @@
             },
             "nullable": true
           },
-          "followingCount": {
+          "followersEstimate": {
             "type": "integer",
-            "format": "int32",
-            "readOnly": true
+            "format": "int32"
+          },
+          "followingEstimate": {
+            "type": "integer",
+            "format": "int32"
           },
           "keys": {
             "type": "array",
@@ -3746,6 +3744,32 @@
             },
             "additionalProperties": false,
             "nullable": true
+          },
+          "posts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            },
+            "nullable": true
+          },
+          "postsEstimate": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "followersCount": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "followingCount": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
+          },
+          "postsCount": {
+            "type": "integer",
+            "format": "int32",
+            "readOnly": true
           }
         },
         "additionalProperties": false

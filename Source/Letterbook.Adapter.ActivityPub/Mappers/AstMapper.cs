@@ -220,6 +220,7 @@ public static class AstMapper
 			.ForMember(dest => dest.ReportSubject, opt => opt.Ignore())
 			.ForMember(dest => dest.FollowersCollection, opt => opt.Ignore())
 			.ForMember(dest => dest.FollowingCollection, opt => opt.Ignore())
+			.ForMember(dest => dest.Posts, opt => opt.Ignore())
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
 			.ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Summary))
 			.ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name))
@@ -232,6 +233,9 @@ public static class AstMapper
 			.ForMember(dest => dest.Updated, opt => opt.MapFrom(src => src.Updated))
 			.ForMember(dest => dest.Followers, opt => opt.MapFrom(src => src.Followers))
 			.ForMember(dest => dest.Following, opt => opt.MapFrom(src => src.Following))
+			.ForMember(dest => dest.FollowersEstimate, opt => opt.Ignore())
+			.ForMember(dest => dest.FollowingEstimate, opt => opt.Ignore())
+			.ForMember(dest => dest.PostsEstimate, opt => opt.Ignore())
 			.ForMember(d => d.Keys, opt => opt.MapFrom(s => s.PublicKeys))
 			// .ForMember(dest => dest.Keys, opt => opt.MapFrom<PublicKeyConverter, List<PublicKey>>(src => src.PublicKey!))
 			.AfterMap((profileActor, profile) =>
