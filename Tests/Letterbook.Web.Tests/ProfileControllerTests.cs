@@ -107,6 +107,30 @@ public class ProfileControllerTests : WithMockContext
 		Assert.Equal(Math.Min(x, 100), _page.Posts.Count());
 	}
 
+	[Fact(DisplayName = "Should get posts from the start date")]
+	public async Task CanGetPostsByDate()
+	{
+		var faker = new FakePost(_profile);
+		var posts = faker.Generate(99);
+		var newestPost = faker.Generate();
+		newestPost.CreatedDate = posts.MaxBy(p => p.CreatedDate)!.CreatedDate.AddHours(1);
+		var oldestPost = faker.Generate();
+		oldestPost.CreatedDate = posts.MinBy(p => p.CreatedDate)!.CreatedDate.AddHours(-1);
+		posts.AddRange([newestPost, oldestPost]);
+		foreach (var post in posts)
+		{
+			_profile.Posts.Add(post);
+		}
+
+		await _page.OnGet($"@{_profile.Handle}", newestPost.CreatedDate.AddMinutes(-1));
+
+		Assert.NotEqual(newestPost, _page.Posts.First());
+		Assert.Equal(oldestPost, _page.Posts.Last());
+
+		// Assert.Equal(x, _page.PostCount);
+		// Assert.Equal(Math.Min(x, 100), _page.Posts.Count());
+	}
+
 	[Fact(DisplayName = "Should load activeProfile for relationship checks")]
 	public async Task CanGetSelf()
 	{

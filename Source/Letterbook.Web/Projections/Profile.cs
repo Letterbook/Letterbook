@@ -5,10 +5,9 @@ namespace Letterbook.Web.Projections;
 
 public class Profile
 {
-	public static readonly DateTimeOffset PostsBefore = DateTimeOffset.MaxValue;
-	public static readonly MapperConfiguration FromCoreModel =
+	public static MapperConfiguration FromCoreModel(DateTimeOffset postsBeforeDate) =>
 		new(cfg => cfg.CreateProjection<Models.Profile, Profile>().ForMember(d => d.Posts,
-			opt => opt.MapFrom(s => s.Posts.OrderByDescending(p => p.CreatedDate).Where(p => p.CreatedDate < PostsBefore).Take(100))));
+			opt => opt.MapFrom(s => s.Posts.OrderByDescending(p => p.CreatedDate).Where(p => p.CreatedDate < postsBeforeDate).Take(100))));
 
 	public ProfileId Id { get; set; }
 	public string Handle { get; set; } = "";

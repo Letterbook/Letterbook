@@ -68,20 +68,20 @@ public class Profile : PageModel
 		_opts = opts.Value;
 	}
 
-	public async Task<IActionResult> OnGet(string id)
+	public async Task<IActionResult> OnGet(string id, DateTimeOffset? postsBeforeDate = null)
 	{
 		_profiles = _profileSvc.As(User.Claims);
 
-		if (id.StartsWith('@')) return await GetByHandle(id);
-		return await GetById(id);
+		if (id.StartsWith('@')) return await GetByHandle(id, postsBeforeDate ?? DateTimeOffset.MaxValue);
+		return await GetById(id, postsBeforeDate ?? DateTimeOffset.MaxValue);
 	}
 
-	private async Task<IActionResult> GetById(string id)
+	private async Task<IActionResult> GetById(string id, DateTimeOffset postsBefore)
 	{
 		if (!Models.ProfileId.TryParse(id, out var profileId)) return BadRequest();
 
 		if (await _profiles.QueryProfiles(profileId)
-			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel)
+			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel(postsBefore))
 			    .FirstOrDefaultAsync() is not { } profile)
 			return NotFound();
 		_profile = profile;
@@ -91,13 +91,13 @@ public class Profile : PageModel
 		return Page();
 	}
 
-	public async Task<IActionResult> GetByHandle(string id)
+	public async Task<IActionResult> GetByHandle(string id, DateTimeOffset postsBefore)
 	{
 		var parts = id.Split("@", 2, StringSplitOptions.RemoveEmptyEntries);
 		var handle = parts[0];
 		var host = parts.Length == 2 ? parts[1] : _opts.BaseUri().GetAuthority();
 		if (await _profiles.QueryProfiles(handle, host)
-			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel)
+			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel(postsBefore))
 			    .FirstOrDefaultAsync() is not { } profile)
 			return NotFound();
 		_profile = profile;
