@@ -216,12 +216,26 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public IAsyncEnumerable<Profile> FindProfiles(string handle, string host)
 	{
-		return _data.AllProfiles().Where(p => p.Handle == handle && p.Authority == host).AsAsyncEnumerable();
+		return QueryProfiles(handle, host).AsAsyncEnumerable();
 	}
 
 	public IAsyncEnumerable<Profile> FindProfiles(string handle)
 	{
-		return _data.AllProfiles().Where(p => p.Handle == handle).AsAsyncEnumerable();
+		return QueryProfiles(handle).AsAsyncEnumerable();
+	}
+
+	public IQueryable<Profile> QueryProfiles(string handle, string host)
+	{
+		return _data.AllProfiles().Where(p => p.Handle == handle && p.Authority == host);
+	}
+	public IQueryable<Profile> QueryProfiles(string handle)
+	{
+		return _data.AllProfiles().Where(p => p.Handle == handle);
+	}
+
+	public IQueryable<Profile> QueryProfiles(ProfileId id)
+	{
+		return _data.Profiles(id);
 	}
 
 	private async Task<FollowerRelation> Follow(Profile self, Profile target, bool subscribeOnly)

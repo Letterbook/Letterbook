@@ -4,6 +4,7 @@ using Letterbook.Core.Values;
 using Letterbook.Web.Pages;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 
@@ -30,6 +31,7 @@ public class ProfileControllerTests : WithMockContext
 		};
 
 		ProfileServiceAuthMock.Setup(m => m.FindProfiles(It.IsAny<string>(), It.IsAny<string>())).Returns(new List<Models.Profile>{_profile}.ToAsyncEnumerable());
+		ProfileServiceAuthMock.Setup(m => m.QueryProfiles(It.IsAny<string>(), It.IsAny<string>())).Returns(new List<Models.Profile>{_profile}.BuildMock());
 	}
 
 	[Fact]
@@ -57,11 +59,15 @@ public class ProfileControllerTests : WithMockContext
 	[Theory(DisplayName = "Should get the following count")]
 	public async Task CanGetFollowing(int x)
 	{
-		ProfileServiceAuthMock.Setup(m => m.FollowingCount(_profile)).ReturnsAsync(x);
+		var following = new FakeProfile("letterbook.example").Generate(x);
+		foreach (var f in following)
+		{
+			_profile.Follow(f, FollowState.Accepted);
+		}
 
 		await _page.OnGet($"@{_profile.Handle}");
 
-		Assert.Equal(x, await _page.FollowingCount);
+		Assert.Equal(x, _page.FollowingCount);
 	}
 
 	[InlineData(0)]
@@ -71,11 +77,34 @@ public class ProfileControllerTests : WithMockContext
 	[Theory(DisplayName = "Should get the follower count")]
 	public async Task CanGetFollowers(int x)
 	{
-		ProfileServiceAuthMock.Setup(m => m.FollowerCount(_profile)).ReturnsAsync(x);
+		var followers = new FakeProfile("letterbook.example").Generate(x);
+		foreach (var f in followers)
+		{
+			_profile.AddFollower(f, FollowState.Accepted);
+		}
 
 		await _page.OnGet($"@{_profile.Handle}");
 
-		Assert.Equal(x, await _page.FollowerCount);
+		Assert.Equal(x, _page.FollowerCount);
+	}
+
+	[InlineData(0)]
+	[InlineData(10)]
+	[InlineData(100)]
+	[InlineData(200)]
+	[Theory(DisplayName = "Should get the posts and post count")]
+	public async Task CanGetPosts(int x)
+	{
+		var posts = new FakePost(_profile).Generate(x);
+		foreach (var post in posts)
+		{
+			_profile.Posts.Add(post);
+		}
+
+		await _page.OnGet($"@{_profile.Handle}");
+
+		Assert.Equal(x, _page.PostCount);
+		Assert.Equal(Math.Min(x, 100), _page.Posts.Count());
 	}
 
 	[Fact(DisplayName = "Should load activeProfile for relationship checks")]

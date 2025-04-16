@@ -1,4 +1,5 @@
-﻿using Letterbook.Core;
+﻿using AutoMapper.QueryableExtensions;
+using Letterbook.Core;
 using Letterbook.Core.Extensions;
 using Medo;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Html;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace Letterbook.Web.Pages;
 
@@ -17,7 +19,7 @@ public class Profile : PageModel
 	private readonly ILogger<Profile> _logger;
 	private readonly CoreOptions _opts;
 	private IAuthzProfileService _profiles;
-	private Models.Profile _profile;
+	private Projections.Profile _profile;
 	private Models.Profile? _self;
 
 	/// The full conventional fediverse @user@domain username.
@@ -37,13 +39,16 @@ public class Profile : PageModel
 	public Models.CustomField[] CustomFields => _profile.CustomFields;
 
 	/// The total number of profiles following this one
-	public Task<int> FollowerCount => _profiles.FollowerCount(_profile);
+	public int FollowerCount => _profile.FollowersCount;
 
 	/// The total number of profiles followed by this one
-	public Task<int> FollowingCount => _profiles.FollowingCount(_profile);
+	public int FollowingCount => _profile.FollowingCount;
+
+	public int PostCount => _profile.PostsCount;
+	public IEnumerable<Models.Post> Posts => _profile.Posts;
 
 	/// The internal unique ID for this profile (used a lot in our APIs)
-	public string GetId => _profile.GetId25();
+	public string GetId => _profile.Id.ToString();
 
 	public string? SelfId => User.Claims.FirstOrDefault(c => c.Type == "activeProfile")?.Value;
 
@@ -75,7 +80,9 @@ public class Profile : PageModel
 	{
 		if (!Models.ProfileId.TryParse(id, out var profileId)) return BadRequest();
 
-		if (await _profiles.LookupProfile(profileId) is not { } profile)
+		if (await _profiles.QueryProfiles(profileId)
+			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel)
+			    .FirstOrDefaultAsync() is not { } profile)
 			return NotFound();
 		_profile = profile;
 
@@ -89,7 +96,9 @@ public class Profile : PageModel
 		var parts = id.Split("@", 2, StringSplitOptions.RemoveEmptyEntries);
 		var handle = parts[0];
 		var host = parts.Length == 2 ? parts[1] : _opts.BaseUri().GetAuthority();
-		if (await _profiles.FindProfiles(handle, host).FirstOrDefaultAsync() is not { } profile)
+		if (await _profiles.QueryProfiles(handle, host)
+			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel)
+			    .FirstOrDefaultAsync() is not { } profile)
 			return NotFound();
 		_profile = profile;
 
