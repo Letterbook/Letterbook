@@ -9,13 +9,13 @@
       ]
     },
     "swashbuckle.aspnetcore.cli": {
-      "version": "7.2.0",
+      "version": "7.3.2",
       "commands": [
         "swagger"
       ]
     },
     "docfx": {
-      "version": "2.78.2",
+      "version": "2.78.3",
       "commands": [
         "docfx"
       ]
@@ -27,7 +27,7 @@
       ]
     },
     "dotnet-outdated-tool": {
-      "version": "4.6.4",
+      "version": "4.6.8",
       "commands": [
         "dotnet-outdated"
       ]
