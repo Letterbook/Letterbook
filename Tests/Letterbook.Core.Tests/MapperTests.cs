@@ -270,7 +270,7 @@ public class MapperTests : WithMocks
 			var actual = _profileMapper.Map<FullProfileDto>(expected);
 
 			Assert.NotNull(actual);
-			Assert.Equal(expected.GetId(), actual.Id);
+			Assert.Equal(expected.Id, actual.Id);
 			Assert.Equal(expected.FediId, actual.FediId);
 			Assert.Equal(expected.Handle, actual.Handle);
 			Assert.Equal(expected.DisplayName, actual.DisplayName);

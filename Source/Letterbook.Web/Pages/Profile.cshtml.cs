@@ -1,13 +1,14 @@
 ﻿using AutoMapper.QueryableExtensions;
 using Letterbook.Core;
 using Letterbook.Core.Extensions;
+using Letterbook.Core.Values;
 using Medo;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Html;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Letterbook.Web.Pages;
 
@@ -26,6 +27,8 @@ public class Profile : PageModel
 	/// Ostensibly globally unique
 	public string FullHandle => $"@{BareHandle}@{_profile.Authority}";
 
+	public Models.Profile? UserProfile => _self;
+
 	/// Just the username, with no @'s
 	public string BareHandle => _profile.Handle;
 
@@ -34,6 +37,8 @@ public class Profile : PageModel
 
 	/// The profile bio
 	public HtmlString Description => new(_profile.Description);
+
+	public DateTimeOffset CreatedDate => _profile.Created;
 
 	/// Public extra key-value fields
 	public Models.CustomField[] CustomFields => _profile.CustomFields;
@@ -53,10 +58,12 @@ public class Profile : PageModel
 	public string? SelfId => User.Claims.FirstOrDefault(c => c.Type == "activeProfile")?.Value;
 
 	/// Whether this profile follows the User's activeProfile
-	public bool FollowsYou => _self?.FollowersCollection.Any() ?? false;
+	public FollowState FollowsYou => _self?.FollowersCollection.FirstOrDefault(r => r.Follower.Id == _profile.Id)?.State ?? FollowState.None;
 
 	/// Whether the User's activeProfile follows this one
-	public bool YouFollow => _self?.FollowingCollection.Any() ?? false;
+	public FollowState YouFollow => _self?.FollowingCollection.FirstOrDefault(r => r.Follows.Id == _profile.Id)?.State ?? FollowState.None;
+
+	public bool Blocked => YouFollow == FollowState.Blocked;
 
 
 	public Profile(IProfileService profiles, ILogger<Profile> logger, IOptions<CoreOptions> opts)
@@ -151,4 +158,5 @@ public class Profile : PageModel
 
 		return RedirectToPage(GetType().Name, new { handle });
 	}
+
 }

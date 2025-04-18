@@ -126,9 +126,6 @@ public class ProfileControllerTests : WithMockContext
 
 		Assert.NotEqual(newestPost, _page.Posts.First());
 		Assert.Equal(oldestPost, _page.Posts.Last());
-
-		// Assert.Equal(x, _page.PostCount);
-		// Assert.Equal(Math.Min(x, 100), _page.Posts.Count());
 	}
 
 	[Fact(DisplayName = "Should load activeProfile for relationship checks")]
@@ -148,13 +145,13 @@ public class ProfileControllerTests : WithMockContext
 		_selfProfile.AddFollower(_profile, FollowState.Accepted);
 
 		MockHttpContext.SetupGet(ctx => ctx.User).Returns(_principal);
-		ProfileServiceAuthMock.Setup(m => m.LookupProfile((Models.ProfileId)_selfProfile.GetId(), (Models.ProfileId?)_profile.GetId()))
+		ProfileServiceAuthMock.Setup(m => m.LookupProfile(_selfProfile.Id, _profile.Id))
 			.ReturnsAsync(_selfProfile);
 
 		await _page.OnGet($"@{_profile.Handle}");
 
-		Assert.True(_page.FollowsYou);
-		Assert.True(_page.YouFollow);
+		Assert.Equal(FollowState.Accepted, _page.FollowsYou);
+		Assert.Equal(FollowState.Accepted, _page.YouFollow);
 	}
 
 	[Fact(DisplayName = "Should follow")]
