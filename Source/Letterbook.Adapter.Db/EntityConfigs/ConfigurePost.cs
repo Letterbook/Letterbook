@@ -13,7 +13,7 @@ public class ConfigurePost : IEntityTypeConfiguration<Models.Post>
 		builder.HasMany<Models.Content>(post => post.Contents)
 			.WithOne(content => content.Post);
 		builder.HasMany<Models.Profile>(post => post.Creators)
-			.WithMany("CreatedPosts")
+			.WithMany(profile => profile.Posts)
 			.UsingEntity("PostsCreatedByProfile");
 		builder.HasMany<Models.Profile>(post => post.LikesCollection)
 			.WithMany("LikedPosts")

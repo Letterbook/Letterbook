@@ -12,7 +12,11 @@ public static class DependencyInjection
 	public static IServiceCollection AddDbAdapter(this IServiceCollection services, IConfigurationManager config)
 	{
 		var dataSource = DataSource(config);
-		return services.AddDbContext<RelationalContext>(options => options.UseNpgsql(dataSource))
+		return services.AddDbContext<RelationalContext>(options =>
+			{
+				options.UseNpgsql(dataSource);
+				options.UseProjectables();
+			})
 			.AddScoped<IDataAdapter, DataAdapter>();
 	}
 

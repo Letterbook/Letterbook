@@ -76,6 +76,8 @@ public class BaseMappings : AutoMapper.Profile
 		CreateMap<string, Models.Profile>(MemberList.None)
 			.ConstructUsing(s => Models.Profile.CreateEmpty(new ProfileId(ProfileId.FromString(s))));
 
+		CreateMap<Uuid7, ProfileId>(MemberList.None).ConvertUsing(id => new(id));
+		CreateMap<ProfileId, Uuid7>(MemberList.None).ConvertUsing(id => id.Id);
 
 
 		CreateMap<DateTimeOffset?, DateTimeOffset?>()

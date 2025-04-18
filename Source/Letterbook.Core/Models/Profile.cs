@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Security.Claims;
+using EntityFrameworkCore.Projectables;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Values;
 using Letterbook.Generators;
@@ -130,6 +131,10 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public static Profile AddInstanceProfile(Profile instance) => SystemProfiles[SystemInstanceId] = instance;
 	public static Profile? GetInstanceProfile() => SystemProfiles.GetValueOrDefault(SystemInstanceId);
 
+	/***
+	 * Properties
+	 */
+
 	public ProfileId Id { get; set; }
 
 	public Uri FediId { get; set; }
@@ -144,7 +149,7 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public string Description { get; set; }
 	public CustomField[] CustomFields { get; set; } = [];
 	public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
-	public DateTime Updated { get; set; } = DateTime.UtcNow;
+	public DateTimeOffset Updated { get; set; } = DateTimeOffset.UtcNow;
 	public Account? OwnedBy { get; set; }
 	public ICollection<ProfileClaims> Accessors { get; set; } = new HashSet<ProfileClaims>();
 	public ActivityActorType Type { get; set; }
@@ -152,13 +157,24 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 	public ICollection<Audience> Audiences { get; set; } = new HashSet<Audience>();
 	public IList<FollowerRelation> FollowersCollection { get; set; } = new List<FollowerRelation>();
 	public IList<FollowerRelation> FollowingCollection { get; set; } = new List<FollowerRelation>();
+	public int FollowersEstimate { get; set; } = -1;
+	public int FollowingEstimate { get; set; } = -1;
 	public IList<SigningKey> Keys { get; set; } = new List<SigningKey>();
 	/// This Profile was the subject of these Reports
 	public ICollection<ModerationReport> ReportSubject = new HashSet<ModerationReport>();
 	/// This Profile submitted these Reports
 	public ICollection<ModerationReport> Reports = new HashSet<ModerationReport>();
 	public IDictionary<Restrictions, DateTimeOffset> Restrictions { get; set; } = new Dictionary<Restrictions, DateTimeOffset>();
+	public IList<Post> Posts { get; set; } = new List<Post>();
+	public int PostsEstimate { get; set; } = -1;
 
+	/***
+	 * Computed properties and projections
+	 */
+
+	[Projectable] public int FollowersCount => FollowersCollection.Count(relation => relation.State == FollowState.Accepted);
+	[Projectable] public int FollowingCount => FollowingCollection.Count(relation => relation.State == FollowState.Accepted);
+	[Projectable] public int PostsCount => Posts.Count;
 	public IEnumerable<Claim> RestrictionClaims() => Restrictions
 		.Where(r => r.Value >= DateTimeOffset.UtcNow)
 		.Select(pair => new Claim(pair.Key.ToString(), "true"));
@@ -184,6 +200,10 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 
 		return this;
 	}
+
+	/***
+	 * Behavior
+	 */
 
 	public FollowerRelation AddFollower(Profile follower, FollowState state)
 	{
@@ -288,6 +308,18 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 		var relation = FollowersCollection.FirstOrDefault(relation => relation.Follower == target,
 			new FollowerRelation(target, this, FollowState.None));
 		return relation.State == FollowState.Blocked;
+	}
+
+	public FollowState HasFollower(Profile target)
+	{
+		return FollowersCollection.FirstOrDefault(relation => relation.Follower == target,
+			new FollowerRelation(target, this, FollowState.None)).State;
+	}
+
+	public FollowState IsFollowing(Profile target)
+	{
+		return FollowingCollection.FirstOrDefault(relation => relation.Follower == target,
+			new FollowerRelation(target, this, FollowState.None)).State;
 	}
 
 	// Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?

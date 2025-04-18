@@ -10,6 +10,8 @@
     <ItemGroup>
       <PackageReference Include="ActivityPub.Types" />
       <PackageReference Include="AutoMapper" />
+      <PackageReference Include="BouncyCastle.Cryptography" />
+      <PackageReference Include="EntityFrameworkCore.Projectables" />
       <PackageReference Include="GitHubActionsTestLogger">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

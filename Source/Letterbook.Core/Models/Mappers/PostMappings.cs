@@ -68,17 +68,3 @@ public class PostMappings : AutoMapper.Profile
 
 	private static Post NewPost(CoreOptions options) => new(options);
 }
-
-public class PublicKeyPemConverter : IValueResolver<SigningKey, PublicKeyDto, string>
-{
-	public string Resolve(SigningKey source, PublicKeyDto destination, string destMember, ResolutionContext context)
-	{
-		return source.Family switch
-		{
-			SigningKey.KeyFamily.Rsa => source.GetRsa().ExportSubjectPublicKeyInfoPem(),
-			SigningKey.KeyFamily.Dsa => source.GetDsa().ExportSubjectPublicKeyInfoPem(),
-			SigningKey.KeyFamily.EcDsa => source.GetEcDsa().ExportSubjectPublicKeyInfoPem(),
-			_ => null!,
-		};
-	}
-}

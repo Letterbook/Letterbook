@@ -1,10 +1,17 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Letterbook.Adapter.Db;
+using Letterbook.Core;
 using Letterbook.Core.Models;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers;
+using Letterbook.Core.Queries;
 using Letterbook.IntegrationTests.Fixtures;
 using Medo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit.Abstractions;
 
@@ -24,9 +31,11 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 	private DataAdapter _adapter;
 	private RelationalContext _context;
 	private RelationalContext _actual;
-	private List<Profile> _profiles;
+	private List<Models.Profile> _profiles;
 	private List<Account> _accounts;
 	private readonly IServiceScope _scope;
+	private readonly Mapper _mapper;
+	private readonly MappingConfigProvider _mappingProvider;
 	static int? ITestSeed.Seed() => null;
 
 	public DataAdapterTests(ITestOutputHelper output, HostFixture<DataAdapterTests> host)
@@ -40,6 +49,8 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 		_context = _host.CreateContext(_scope);
 		_actual = _host.CreateContext(_scope);
 		_adapter = new DataAdapter(Mock.Of<ILogger<DataAdapter>>(), _context);
+		_mappingProvider = new MappingConfigProvider(Options.Create(new CoreOptions()));
+		_mapper = new Mapper(_mappingProvider.Profiles);
 	}
 
 	[Fact]
@@ -70,7 +81,20 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 			.ToListAsync();
 
 		Assert.Single(actual);
-		var profile = Assert.IsType<Profile>(actual.First());
+		var profile = Assert.IsType<Models.Profile>(actual.First());
 		Assert.NotEqual(Uuid7.Empty, profile.GetId());
+	}
+
+	[Fact(DisplayName = "Query profile projection fields")]
+	public async Task QueryProfileProjections()
+	{
+		var id = _profiles[7].Id;
+		var adHocProjection = await _adapter.Profiles(id).Select(e => new {Followers = e.FollowersCount}).FirstAsync();
+		var automapProjection = await _adapter.Profiles(id).ProjectTo<FullProfileDto>(_mappingProvider.Profiles).FirstAsync();
+		var noProjection = await _adapter.Profiles(id).FirstAsync();
+
+		Assert.True(adHocProjection.Followers >= 4);
+		Assert.True(automapProjection.Followers >= 4);
+		Assert.Equal(0, noProjection.FollowersCount);
 	}
 }
