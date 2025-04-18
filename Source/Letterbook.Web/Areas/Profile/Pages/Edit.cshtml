@@ -1,7 +1,8 @@
-@page "/{id}/edit"
-@model Letterbook.Web.Pages.ProfileEdit
+@page "{id}"
+@model Letterbook.Web.Areas.Profile.Pages.Edit
 
 @{
+    Layout = "_Layout";
     ViewData["title"] = $"Edit {Model.Handle}";
 }
 
