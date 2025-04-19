@@ -77,7 +77,10 @@ public class Program
 		});
 
 		// Add mocked services
-		builder.Services.AddScoped<TimelineService>()
+		builder.Services
+			.AddScoped<ProfileService>()
+			.AddScoped<IProfileService, MockProfileService>()
+			.AddScoped<TimelineService>()
 			.AddScoped<ITimelineService, MockTimelineService>();
 
 		var app = builder.Build();

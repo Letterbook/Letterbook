@@ -88,6 +88,8 @@ public class Profile : PageModel
 		if (!Models.ProfileId.TryParse(id, out var profileId)) return BadRequest();
 
 		if (await _profiles.QueryProfiles(profileId)
+			    .TagWithCallSite()
+			    .AsSplitQuery()
 			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel(postsBefore))
 			    .FirstOrDefaultAsync() is not { } profile)
 			return NotFound();
@@ -104,6 +106,8 @@ public class Profile : PageModel
 		var handle = parts[0];
 		var host = parts.Length == 2 ? parts[1] : _opts.BaseUri().GetAuthority();
 		if (await _profiles.QueryProfiles(handle, host)
+			    .TagWithCallSite()
+			    .AsSplitQuery()
 			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel(postsBefore))
 			    .FirstOrDefaultAsync() is not { } profile)
 			return NotFound();
