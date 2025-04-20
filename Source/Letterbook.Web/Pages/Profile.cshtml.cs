@@ -25,7 +25,7 @@ public class Profile : PageModel
 
 	/// The full conventional fediverse @user@domain username.
 	/// Ostensibly globally unique
-	public string FullHandle => $"@{BareHandle}@{_profile.Authority}";
+	public string FullHandle => $"{BareHandle}@{_profile.Authority}";
 
 	public Models.Profile? UserProfile => _self;
 

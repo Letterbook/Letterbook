@@ -84,7 +84,12 @@ public class MockProfileService : IProfileService, IAuthzProfileService
 		{
 			var p = _profiles.Generate();
 			p.Handle = handle;
-			return new List<Models.Profile> { p }.BuildMock(); //.AsQueryable();
+			var posts = new FakePost(p).Generate(1300);
+			foreach (var post in posts)
+			{
+				p.Posts.Add(post);
+			}
+			return new List<Models.Profile> { p }.BuildMock();
 		}
 	}
 	public IQueryable<Models.Profile> QueryProfiles(string handle)

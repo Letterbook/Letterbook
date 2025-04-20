@@ -80,6 +80,12 @@
     .icon-thread {
         mask: url("/lib/remixicon/mail-open-line.svg");
     }
+    .icon-outline {
+        --pico-border-color: var(--pico-primary);
+        border: var(--pico-border-width) solid var(--pico-border-color);
+        border-radius: var(--pico-border-radius);
+        line-height: 1em;
+    }
     .spacer {
         flex: 1 0 auto;
     }
@@ -100,15 +106,15 @@ button {
 }
 
 
-.app :is(img, svg) {
+.app :is(p, span, h1, h2, h3, h4, h5, h6) :is(img, svg) {
     inline-size: 1.1lh;
-    
-    &.img-inline {
-        height: 1lh;
-        display: inline-block;
-        margin-left: 0.25em;
-        margin-right: 0.25em;
-    }
+}
+
+.app img.inline {
+    height: 1lh;
+    display: inline-block;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
 }
 
 .app button {

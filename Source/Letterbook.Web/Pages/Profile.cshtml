@@ -1,9 +1,11 @@
 ﻿@page "{id}"
 @using Letterbook.Core.Values
+@using Letterbook.Web.Tags
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Profile
 
 @{
-    ViewData["Title"] = $"{Model.DisplayName} ({Model.FullHandle})";
+    ViewData["Title"] = $"{Model.DisplayName} (@{Model.FullHandle})";
 }
 
 <section class="profile">
@@ -12,7 +14,7 @@
         <h1>
             <span>@Model.DisplayName</span>
         </h1>
-        <span>@Model.FullHandle</span>
+        <span>@@@Model.FullHandle</span>
     </header>
     <div class="profile-controls">
         @if (User.Identity?.IsAuthenticated == true && Model.SelfId == Model.GetId)
@@ -46,6 +48,7 @@
 
             <div class="menu-collapsible-right" role="menu">
                 <label class="collapse-control icon-more">
+                    <app-icon type=@Icon.More />
                     <input type="checkbox"/>
                 </label>
                 <div class="menu-items">
@@ -58,16 +61,16 @@
     <div class="profile-stats">
         @if (Model.Blocked)
         {
-            <p>You are blocked by this user profile</p>
+            <p>Profile details hidden</p>
         }
         else
         {
             <p>Joined <time datetime="@Model.CreatedDate.ToString("yyyy-MM-dd")">
                 @Model.CreatedDate.ToString("M") @Model.CreatedDate.ToString("yyyy")
             </time></p>
-            <p>@Model.FollowerCount followers</p>
-            <p>@Model.FollowingCount following</p>
-            <p>@Model.PostCount posts</p>
+            <p>@string.Format(ShortNumberFormatter.Instance, "{0:compact}", Model.FollowerCount) followers</p>
+            <p>@string.Format(ShortNumberFormatter.Instance, "{0:compact}", Model.FollowingCount) following</p>
+            <p>@string.Format(ShortNumberFormatter.Instance, "{0:compact}", Model.PostCount) posts</p>
             @if (User.Identity?.IsAuthenticated == true && Model.SelfId != Model.GetId)
             {
                 @switch (Model.FollowsYou)
@@ -96,37 +99,19 @@
             }
         }
     </div>
+    <dic class="profile-description">@Model.Description</dic>
+    <dl>
+        @foreach (var field in Model.CustomFields) {
+            <dt>@field.Label</dt>
+            <dd>@field.Value</dd>
+        }
+    </dl>
 </section>
-<div>
-    <h1>
-        <span>@Model.DisplayName</span>
-        <span>@Model.FullHandle</span>
-    </h1>
-
-    <div>
-        <h3>Description</h3>
-        <div>@Model.Description</div>
-        
-        <h3>Custom Fields</h3>
-        <dl>
-            @foreach (var field in Model.CustomFields) {
-                <dt>@field.Label</dt>
-                <dd>@field.Value</dd>
-            }
-        </dl>
-        
-        <h3>Info</h3>
-        <div>
-            <div>
-                @Model.FollowerCount Followers
-            </div>
-            <div>
-                @Model.FollowingCount Following
-            </div>
-        </div>
-        
-    </div>
-    
-    <p>Profile Id: <code>@Model.GetId</code></p>
-    
-</div>
+<section class="profile-posts timeline">
+    <h2>Posts</h2>
+    @foreach (var post in Model.Posts)
+    {
+        <partial name="Shared/_TimelinePostPartial" model="post"/>
+    }
+    <a asp-page="Profile" asp-route-id="@Model.FullHandle" asp-route-postsBeforeDate="@Model.Posts.LastOrDefault()?.CreatedDate">Load older posts</a>
+</section>
