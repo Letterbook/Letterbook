@@ -84,10 +84,14 @@
         --pico-border-color: var(--pico-primary);
         border: var(--pico-border-width) solid var(--pico-border-color);
         border-radius: var(--pico-border-radius);
-        line-height: 1em;
     }
     .spacer {
         flex: 1 0 auto;
+    }
+    
+    img.fill {
+        width: 100%;
+        height: 100%;
     }
 }
 
@@ -117,11 +121,13 @@ button {
     margin-right: 0.25em;
 }
 
-.app button {
-    padding-top: .0625rem;
-    padding-bottom: .0625rem;
-    margin-top: .125rem;
-    margin-bottom: .125rem;
+.app {
+    button, .display-button {
+        padding-top: .0625rem;
+        padding-bottom: .0625rem;
+        margin-top: .125rem;
+        margin-bottom: .125rem;
+    }
 }
 
 .app .timeline {
@@ -228,6 +234,61 @@ button {
     }
 }
 
+.app .profile {
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+    }
+    .profile-controls {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+    header {
+        position: relative;
+        height: 12em;
+        margin-bottom: .5em;
+    }
+    .profile-name-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(180deg, 
+            hsl(from var(--pico-background-color) h s l / 0) 0%, 
+            hsl(from var(--pico-background-color) h s l / .5) 30%, 
+            hsl(from var(--pico-background-color) h s l / .5) 100%);
+        
+        &:hover, &:focus-within {
+            background: hsl(from var(--pico-background-color) h s l / .8);
+        }
+
+        &>* {
+            padding: 0;
+            margin: 0;
+        }
+    }
+    .profile-pic {
+        width: 9em;
+        height: 9em;
+        margin: 1em;
+    }
+    .profile-sidebar {
+        flex-basis: auto;
+        flex-grow: 1;
+        min-width: 12em;
+        
+        &>* {
+            margin: 0;
+        }
+    }
+    .profile-main {
+        flex-shrink: 1;
+        flex-basis: auto;
+    }
+}
 
 /* Collapsible menus */
 /* Always collapsible */
@@ -339,6 +400,11 @@ button {
         grid-template-rows: 1fr auto;
     }
 
+    body.app .profile {
+        .profile-info {
+            flex-direction: row-reverse;
+        }
+    }
 }
 
 @media (min-width: 1280px) {

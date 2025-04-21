@@ -17,6 +17,7 @@ public class ShortNumberFormatterTests
 	[Theory]
 	public void CanFormat(int given, string expected)
 	{
+		CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
 		var actual = string.Format(ShortNumberFormatter.Instance, "{0:compact}", given);
 		Assert.Equal(expected, actual);
 	}
