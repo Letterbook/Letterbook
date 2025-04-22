@@ -131,8 +131,6 @@ button {
 }
 
 .app .timeline {
-    overflow: scroll;
-
     article {
         padding: 0;
         display: grid;

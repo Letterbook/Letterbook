@@ -8,15 +8,13 @@
         <div class="timeline-author">
             <div class="timeline-pfp">
                 <a asp-page="Profile" asp-route-id="@Model.Creators.First().Handle">
-                    <img class="pfp-sm inline" src="/img/user-square.png"/>
+                    <img class="pfp-sm inline" src="/img/user-square.png" alt="@Model.Creators.First().DisplayName profile picture"/>
                 </a>
             </div>
             <div class="timeline-profile-container">
                 <a asp-page="Profile" asp-route-id="@Model.Creators.First().Handle">
-                    <span class="display-name">@Model.Creators.First().DisplayName</span>
-                </a>
-                <a asp-page="Profile" class="handle" asp-route-id="@Model.Creators.First().Handle">
-                    <span>@@@Model.Creators.First().Handle</span>
+                    <div class="display-name">@Model.Creators.First().DisplayName</div>
+                    <div class="handle">@@@Model.Creators.First().Handle</div>
                 </a>
             </div>
         </div>
