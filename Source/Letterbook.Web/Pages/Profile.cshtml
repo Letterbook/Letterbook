@@ -19,103 +19,110 @@
         </div>
     </header>
     <div class="profile-info">
-        <div class="profile-main">
-            <div class="profile-controls">
-                @if (User.Identity?.IsAuthenticated == true && Model.SelfId == Model.GetId)
+        <div class="profile-controls">
+            @if (!Model.Blocked)
+            {
+                <img class="profile-pic" src="img/user-square.png" alt="user provided alt text"/>
+            }
+            @if (User.Identity?.IsAuthenticated == true && Model.SelfId == Model.GetId)
+            {
+                <a asp-area="Profile" asp-page="Edit" asp-route-id="@Model.SelfId">Edit</a>
+            }
+            else if (Model.UserProfile != null)
+            {
+                switch (Model.YouFollow)
                 {
-                    <a asp-area="Profile" asp-page="Edit" asp-route-id="@Model.SelfId">Edit</a>
+                    case FollowState.Accepted:
+                        <form asp-page-handler="Unfollow" asp-route-followId="@Model.GetId" method="post">
+                            <button type="submit">Unfollow</button>
+                        </form>
+                        break;
+                    case FollowState.None:
+                        <form asp-page-handler="FollowRequest" asp-route-followId="@Model.GetId" method="post">
+                            <button type="submit">Follow</button>
+                        </form>
+                        break;
+                    case FollowState.Pending:
+                        <form asp-page-handler="Unfollow" asp-route-followId="@Model.GetId" method="post">
+                            <button type="submit">Cancel Follow Request</button>
+                        </form>
+                        break;
+                    case FollowState.Rejected:
+                    case FollowState.Blocked:
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-                else if (Model.UserProfile != null)
-                {
-                    switch (Model.YouFollow)
-                    {
-                        case FollowState.Accepted:
-                            <form asp-page-handler="Unfollow" asp-route-followId="@Model.GetId" method="post">
-                                <button type="submit">Unfollow</button>
-                            </form>
-                            break;
-                        case FollowState.None:
-                            <form asp-page-handler="FollowRequest" asp-route-followId="@Model.GetId" method="post">
-                                <button type="submit">Follow</button>
-                            </form>
-                            break;
-                        case FollowState.Pending:
-                            <form asp-page-handler="Unfollow" asp-route-followId="@Model.GetId" method="post">
-                                <button type="submit">Cancel Follow Request</button>
-                            </form>
-                            break;
-                        case FollowState.Rejected:
-                        case FollowState.Blocked:
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
 
-                    <div class="menu-collapsible-right" role="menu">
-                        <label class="collapse-control icon-outline display-button">
-                            <app-icon type=@Icon.More/>
-                            <input type="checkbox"/>
-                        </label>
+                <div class="menu-collapsible-right" role="menu">
+                    <label class="collapse-control icon-outline display-button">
+                        <app-icon type=@Icon.More/>
+                        <input type="checkbox"/>
+                    </label>
+                    <div class="menu-items-container">
                         <div class="menu-items">
                             <a href="/">Report</a>
                             <a href="/">Other Stuff</a>
                         </div>
                     </div>
-                }
-            </div>
-            <div class="profile-description">@Model.Description</div>
-        </div>
-        <div class="profile-sidebar">
-            @if (Model.Blocked)
-            {
-                <p>Profile details hidden</p>
+                </div>
             }
-            else
-            {
-                <img class="profile-pic" src="img/user-square.png" alt="user provided alt text"/>
-                <p>Joined
-                    <time datetime="@Model.CreatedDate.ToString("r")">
-                        @Model.CreatedDate.ToString("M") @Model.CreatedDate.ToString("yyyy") UTC
-                    </time>
-                </p>
-                <p>@string.Format(ShortNumberFormatter.Instance, "{0:compact}", Model.FollowerCount) followers</p>
-                <p>@string.Format(ShortNumberFormatter.Instance, "{0:compact}", Model.FollowingCount) following</p>
-                <p>@string.Format(ShortNumberFormatter.Instance, "{0:compact}", Model.PostCount) posts</p>
-                @if (User.Identity?.IsAuthenticated == true && Model.SelfId != Model.GetId)
+        </div>
+        <div class="profile-main">
+            <div class="profile-description">@Model.Description</div>
+            <div class="profile-sidebar">
+                @if (Model.Blocked)
                 {
-                    @switch (Model.FollowsYou)
+                    <p>Profile details hidden</p>
+                }
+                else
+                {
+                    <p>Joined
+                        <time datetime="@Model.CreatedDate.ToString("r")">
+                            @Model.CreatedDate.ToString("M") @Model.CreatedDate.ToString("yyyy") UTC
+                        </time>
+                    </p>
+                    <p>@string.Format(ShortNumberFormatter.Instance, "{0:compact}", Model.FollowerCount) followers</p>
+                    <p>@string.Format(ShortNumberFormatter.Instance, "{0:compact}", Model.FollowingCount) following</p>
+                    <p>@string.Format(ShortNumberFormatter.Instance, "{0:compact}", Model.PostCount) posts</p>
+                    @if (User.Identity?.IsAuthenticated == true && Model.SelfId != Model.GetId)
                     {
-                        case FollowState.Accepted:
-                            <form asp-page-handler="RemoveFollower" asp-route-followerId="@Model.GetId" method="post">
-                                <span>Follows you</span>
-                                <button type="submit" class="secondary">Remove follower</button>
-                            </form>
-                            break;
-                        case FollowState.Pending:
-                            <form asp-page-handler="AcceptFollower" asp-route-followerId="@Model.GetId" method="post">
-                                <p>Requested to follow you</p>
-                                <button type="submit" name="action" value="accept">Accept</button>
-                                <button type="submit" name="action" value="reject" class="secondary">Reject</button>
-                            </form>
-                            break;
-                        case FollowState.Blocked:
-                            <p class="secondary">Blocked</p>
-                            break;
-                        case FollowState.None:
-                        case FollowState.Rejected:
-                        default:
-                            break;
+                        @switch (Model.FollowsYou)
+                        {
+                            case FollowState.Accepted:
+                                <form asp-page-handler="RemoveFollower" asp-route-followerId="@Model.GetId"
+                                      method="post">
+                                    <span>Follows you</span>
+                                    <button type="submit" class="secondary">Remove follower</button>
+                                </form>
+                                break;
+                            case FollowState.Pending:
+                                <form asp-page-handler="AcceptFollower" asp-route-followerId="@Model.GetId"
+                                      method="post">
+                                    <p>Requested to follow you</p>
+                                    <button type="submit" name="action" value="accept">Accept</button>
+                                    <button type="submit" name="action" value="reject" class="secondary">Reject</button>
+                                </form>
+                                break;
+                            case FollowState.Blocked:
+                                <p class="secondary">Blocked</p>
+                                break;
+                            case FollowState.None:
+                            case FollowState.Rejected:
+                            default:
+                                break;
+                        }
                     }
                 }
-            }
+            </div>
         </div>
+        <dl class="profile-custom">
+            @foreach (var field in Model.CustomFields)
+            {
+                <dt>@field.Label</dt>
+                <dd>@field.Value</dd>
+            }
+        </dl>
     </div>
-    <dl class="profile-custom">
-        @foreach (var field in Model.CustomFields)
-        {
-            <dt>@field.Label</dt>
-            <dd>@field.Value</dd>
-        }
-    </dl>
 </section>
 <section class="profile-posts timeline">
     <h2>Posts</h2>

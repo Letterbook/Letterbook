@@ -127,6 +127,11 @@ button {
         padding-bottom: .0625rem;
         margin-top: .125rem;
         margin-bottom: .125rem;
+        min-width: 2em;
+    }
+    
+    .display-button:hover {
+        background-color: var(--pico-primary-background);
     }
 }
 
@@ -245,8 +250,9 @@ button {
         justify-content: flex-end;
     }
     header {
+        aspect-ratio: 4 / 1;
         position: relative;
-        height: 12em;
+        width: 100%;
         margin-bottom: .5em;
     }
     .profile-name-container {
@@ -300,14 +306,34 @@ button {
         padding: .5rem;
         cursor: pointer;
         margin: -0.5rem 0;
+        &:has(input:checked) {
+            background-color: var(--pico-primary-background);
+        }
 
         input {
             display: none;
         }
     }
-
+    
+    .menu-items-container {
+        display: none;
+        position: relative;
+    }
+    
     .menu-items {
         display: none;
+        position: absolute;
+        flex-direction: column;
+        background-color: var(--pico-dropdown-background-color);
+        border: var(--pico-border-width) solid var(--pico-dropdown-border-color)\);
+        border-radius: var(--pico-border-radius);
+        box-shadow: var(--pico-box-shadow);
+        padding: .5em;
+        width: max-content;
+        
+        a {
+            text-decoration: none;
+        }
 
         & > * {
             width: 100%;
@@ -327,19 +353,34 @@ button {
     &:has( input[type="checkbox"]:not(:checked)) {
         width: fit-content;
     }
-    label:has(input:checked) ~ .menu-items {
-        display: flex;
+    
+    label:has(input:checked) ~ .menu-items,
+    label:has(input:checked) ~ .menu-items-container {
+        display: block;
+        .menu-items {
+            display: flex;
+        }
     }
+}
+.menu-responsive,
+*[class^="menu-responsive-"], *[class*=" menu-responsive-"] {
+    .menu-items { position: relative; }
 }
 .menu-responsive-right,
 .menu-collapsible-right {
     text-align: end;
     align-items: end;
+    .menu-items { 
+        right: 0;
+    }
 }
 .menu-responsive-left,
 .menu-collapsible-left {
     text-align: start;
     align-items: start;
+    .menu-items {
+        left: 0;
+    }
 }
 
 @media (min-width: 796px) {
@@ -352,7 +393,15 @@ button {
         text-align: start;
         align-items: start;
         & > label.collapse-control {display: none; }
-        .menu-items { display: flex; }
+        .menu-items {
+            display: flex;
+            background-color: initial;
+            border: initial;
+            border-radius: initial;
+            box-shadow: initial;
+            position: relative;
+            width: fit-content;
+        }
     }
 }
 /* Collapsing Nav menu end */
@@ -382,10 +431,6 @@ button {
 @media (min-width: 576px) {
     :root {
         --pico-font-size: 100%;
-    }
-    
-    .app .max-sm {
-        display: none;
     }
 }
 

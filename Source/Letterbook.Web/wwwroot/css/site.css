@@ -84,6 +84,11 @@
     --pico-contrast-focus: var(--lb-color-contrast-light);
 }
 
+:focus {
+    border: var(--pico-border-width) solid var(--pico-primary-focus);
+    border-radius: var(--pico-border-radius);
+}
+
 .color-secondary {
     color: var(--pico-secondary);
 }
