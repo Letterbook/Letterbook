@@ -239,9 +239,9 @@ button {
 
 .app .profile {
     .profile-info {
-        display: flex;
-        flex-direction: column;
-        gap: 1em;
+        &>div {
+            margin-bottom: 1em;
+        }
     }
     .profile-controls {
         display: flex;
@@ -277,12 +277,15 @@ button {
     .profile-pic {
         width: 9em;
         height: 9em;
-        margin: 1em;
+        margin: 0 1em 1lh 0;
+        float: left;
     }
-    .profile-sidebar {
+    .profile-detail {
         flex-basis: auto;
-        flex-grow: 1;
-        min-width: 12em;
+        clear: both;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         
         &>* {
             margin: 0;
@@ -291,6 +294,13 @@ button {
     .profile-main {
         flex-shrink: 1;
         flex-basis: auto;
+    }
+    .profile-stats {
+        display: flex;
+        gap: 1em;
+        justify-content: space-around;
+        width: 100%;
+        flex-wrap: wrap;
     }
 }
 
