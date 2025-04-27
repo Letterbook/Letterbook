@@ -47,7 +47,7 @@ public class ProfileControllerTests : WithMockContext
 
 		Assert.IsType<PageResult>(result);
 		Assert.Equal(_profile.Description, _page.Description.ToString());
-		Assert.Equal($"@{_profile.Handle}@{_profile.Authority}", _page.FullHandle);
+		Assert.Equal($"{_profile.Handle}@{_profile.Authority}", _page.FullHandle);
 		Assert.Equal(_profile.DisplayName, _page.DisplayName);
 		Assert.Equal(_profile.CustomFields, _page.CustomFields);
 	}

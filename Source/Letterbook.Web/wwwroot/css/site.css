@@ -100,7 +100,8 @@ code, pre, .letterbook-brand {
     --pico-font-family: "Share Tech Mono", monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
 }
 
-.profile-description, .profile-custom-field, .profile-name-container article {
+.profile-description, .profile-custom-field, .profile-name-container, article {
+    --pico-font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
     font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
 }
 
