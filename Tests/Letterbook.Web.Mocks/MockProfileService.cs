@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Bogus;
 using Letterbook.Core;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Values;
@@ -82,8 +83,19 @@ public class MockProfileService : IProfileService, IAuthzProfileService
 
 		IQueryable<Models.Profile> Mock()
 		{
+			var fake = new Faker();
 			var p = _profiles.Generate();
 			p.Handle = handle;
+			var fields = Enumerable.Range(0, fake.Random.Int(0, 8)).Select(_ => fake.Random.Bool() ? new Models.CustomField
+			{
+				Label = fake.Internet.UserNameUnicode(),
+				Value = fake.Internet.UrlWithPath()
+			} : new Models.CustomField
+			{
+				Label = $"{fake.Hacker.Verb()} {fake.Hacker.Noun()}",
+				Value = fake.Hacker.Phrase()
+			}).ToArray();
+			p.CustomFields = fields;
 			var posts = new FakePost(p).Generate(1300);
 			foreach (var post in posts)
 			{

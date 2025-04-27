@@ -116,14 +116,18 @@
                 }
             }
         </div>
-
-        <dl class="profile-custom">
-            @foreach (var field in Model.CustomFields)
-            {
-                <dt>@field.Label</dt>
-                <dd>@field.Value</dd>
-            }
-        </dl>
+        @if (!Model.Blocked)
+        {
+            <dl class="profile-custom-field-container">
+                @foreach (var field in Model.CustomFields)
+                {
+                    <div class="profile-custom-field">
+                        <dt>@field.Label</dt>
+                        <dd>@field.Value</dd>
+                    </div>
+                }
+            </dl>
+        }
     </div>
 </section>
 <section class="profile-posts timeline">

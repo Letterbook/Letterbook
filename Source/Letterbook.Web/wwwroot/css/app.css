@@ -109,16 +109,10 @@ button {
     }
 }
 
-
-.app :is(p, span, h1, h2, h3, h4, h5, h6) :is(img, svg) {
-    inline-size: 1.1lh;
-}
-
 .app img.inline {
     height: 1lh;
     display: inline-block;
-    margin-left: 0.25em;
-    margin-right: 0.25em;
+    vertical-align: bottom;
 }
 
 .app {
@@ -277,7 +271,7 @@ button {
     .profile-pic {
         width: 9em;
         height: 9em;
-        margin: 0 1em 1lh 0;
+        margin: 0 1em 1em 0;
         float: left;
     }
     .profile-detail {
@@ -301,6 +295,39 @@ button {
         justify-content: space-around;
         width: 100%;
         flex-wrap: wrap;
+    }
+    .profile-custom-field-container {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        gap: 0.5em;
+    }
+    .profile-custom-field {
+        border: var(--pico-muted-border-color) solid var(--pico-border-width);
+        padding: 0 0.5em;
+        flex: 1 1 auto;
+        box-shadow: var(--pico-muted-border-color) 0 .0125em .25em;
+        
+        :hover, :focus-within {
+            -webkit-line-clamp: none;
+            max-height: none;
+        }
+        dt {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            font-variant-caps: small-caps;
+            max-height: 1lh;
+            overflow: hidden;
+        }
+        dd {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            max-height: 2lh;
+            color: var(--pico-muted-color);
+            margin-left: 1em;
+            overflow: hidden;
+        }
     }
 }
 
