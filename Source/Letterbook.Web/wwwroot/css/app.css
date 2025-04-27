@@ -348,7 +348,11 @@ button {
         }
 
         input {
-            display: none;
+            opacity: 0.00;
+            position: absolute;
+            padding: 0;
+            margin: 0;
+            border: 0;
         }
     }
     
@@ -397,6 +401,11 @@ button {
         .menu-items {
             display: flex;
         }
+    }
+    
+    &:focus-within {
+        border: var(--pico-border-width) solid var(--pico-primary-focus);
+        border-radius: var(--pico-border-radius);
     }
 }
 .menu-responsive,
