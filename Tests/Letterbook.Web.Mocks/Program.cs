@@ -1,14 +1,15 @@
+using System.Globalization;
 using System.Reflection;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.AspNet;
 using Letterbook.Core;
-using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Workers;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
@@ -77,7 +78,10 @@ public class Program
 		});
 
 		// Add mocked services
-		builder.Services.AddScoped<TimelineService>()
+		builder.Services
+			.AddScoped<ProfileService>()
+			.AddScoped<IProfileService, MockProfileService>()
+			.AddScoped<TimelineService>()
 			.AddScoped<ITimelineService, MockTimelineService>();
 
 		var app = builder.Build();
@@ -92,6 +96,16 @@ public class Program
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();
 
+		app.UseRequestLocalization(opts =>
+		{
+			// Support localization to all cultures supported by dotnet
+			// Right now this would really only affect date and number formatting. But, still
+			var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures)
+				.Where(c => !string.IsNullOrEmpty(c.Name))
+				.ToArray();
+			opts.SupportedCultures = cultures;
+			opts.SupportedUICultures = cultures;
+		});
 		app.UseAuthentication();
 		app.UseAuthorization();
 		app.UseSerilogRequestLogging();

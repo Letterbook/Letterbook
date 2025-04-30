@@ -1,11 +1,14 @@
-﻿using Letterbook.Core;
+﻿using AutoMapper.QueryableExtensions;
+using Letterbook.Core;
 using Letterbook.Core.Extensions;
+using Letterbook.Core.Values;
 using Medo;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Html;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Letterbook.Web.Pages;
 
@@ -17,12 +20,14 @@ public class Profile : PageModel
 	private readonly ILogger<Profile> _logger;
 	private readonly CoreOptions _opts;
 	private IAuthzProfileService _profiles;
-	private Models.Profile _profile;
+	private Projections.Profile _profile;
 	private Models.Profile? _self;
 
 	/// The full conventional fediverse @user@domain username.
 	/// Ostensibly globally unique
-	public string FullHandle => $"@{BareHandle}@{_profile.Authority}";
+	public string FullHandle => $"{BareHandle}@{_profile.Authority}";
+
+	public Models.Profile? UserProfile => _self;
 
 	/// Just the username, with no @'s
 	public string BareHandle => _profile.Handle;
@@ -33,25 +38,32 @@ public class Profile : PageModel
 	/// The profile bio
 	public HtmlString Description => new(_profile.Description);
 
+	public DateTimeOffset CreatedDate => _profile.Created;
+
 	/// Public extra key-value fields
 	public Models.CustomField[] CustomFields => _profile.CustomFields;
 
 	/// The total number of profiles following this one
-	public Task<int> FollowerCount => _profiles.FollowerCount(_profile);
+	public int FollowerCount => _profile.FollowersCount;
 
 	/// The total number of profiles followed by this one
-	public Task<int> FollowingCount => _profiles.FollowingCount(_profile);
+	public int FollowingCount => _profile.FollowingCount;
+
+	public int PostCount => _profile.PostsCount;
+	public IEnumerable<Models.Post> Posts => _profile.Posts;
 
 	/// The internal unique ID for this profile (used a lot in our APIs)
-	public string GetId => _profile.GetId25();
+	public string GetId => _profile.Id.ToString();
 
 	public string? SelfId => User.Claims.FirstOrDefault(c => c.Type == "activeProfile")?.Value;
 
 	/// Whether this profile follows the User's activeProfile
-	public bool FollowsYou => _self?.FollowersCollection.Any() ?? false;
+	public FollowState FollowsYou => _self?.FollowersCollection.FirstOrDefault(r => r.Follower.Id == _profile.Id)?.State ?? FollowState.None;
 
 	/// Whether the User's activeProfile follows this one
-	public bool YouFollow => _self?.FollowingCollection.Any() ?? false;
+	public FollowState YouFollow => _self?.FollowingCollection.FirstOrDefault(r => r.Follows.Id == _profile.Id)?.State ?? FollowState.None;
+
+	public bool Blocked => YouFollow == FollowState.Blocked;
 
 
 	public Profile(IProfileService profiles, ILogger<Profile> logger, IOptions<CoreOptions> opts)
@@ -63,19 +75,23 @@ public class Profile : PageModel
 		_opts = opts.Value;
 	}
 
-	public async Task<IActionResult> OnGet(string id)
+	public async Task<IActionResult> OnGet(string id, DateTimeOffset? postsBeforeDate = null)
 	{
 		_profiles = _profileSvc.As(User.Claims);
 
-		if (id.StartsWith('@')) return await GetByHandle(id);
-		return await GetById(id);
+		if (id.StartsWith('@')) return await GetByHandle(id, postsBeforeDate ?? DateTimeOffset.MaxValue);
+		return await GetById(id, postsBeforeDate ?? DateTimeOffset.MaxValue);
 	}
 
-	private async Task<IActionResult> GetById(string id)
+	private async Task<IActionResult> GetById(string id, DateTimeOffset postsBefore)
 	{
 		if (!Models.ProfileId.TryParse(id, out var profileId)) return BadRequest();
 
-		if (await _profiles.LookupProfile(profileId) is not { } profile)
+		if (await _profiles.QueryProfiles(profileId)
+			    .TagWithCallSite()
+			    .AsSplitQuery()
+			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel(postsBefore))
+			    .FirstOrDefaultAsync() is not { } profile)
 			return NotFound();
 		_profile = profile;
 
@@ -84,12 +100,16 @@ public class Profile : PageModel
 		return Page();
 	}
 
-	public async Task<IActionResult> GetByHandle(string id)
+	public async Task<IActionResult> GetByHandle(string id, DateTimeOffset postsBefore)
 	{
 		var parts = id.Split("@", 2, StringSplitOptions.RemoveEmptyEntries);
 		var handle = parts[0];
 		var host = parts.Length == 2 ? parts[1] : _opts.BaseUri().GetAuthority();
-		if (await _profiles.FindProfiles(handle, host).FirstOrDefaultAsync() is not { } profile)
+		if (await _profiles.QueryProfiles(handle, host)
+			    .TagWithCallSite()
+			    .AsSplitQuery()
+			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel(postsBefore))
+			    .FirstOrDefaultAsync() is not { } profile)
 			return NotFound();
 		_profile = profile;
 
@@ -142,4 +162,5 @@ public class Profile : PageModel
 
 		return RedirectToPage(GetType().Name, new { handle });
 	}
+
 }

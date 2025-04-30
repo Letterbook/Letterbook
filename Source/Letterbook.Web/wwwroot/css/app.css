@@ -80,8 +80,18 @@
     .icon-thread {
         mask: url("/lib/remixicon/mail-open-line.svg");
     }
+    .icon-outline {
+        --pico-border-color: var(--pico-primary);
+        border: var(--pico-border-width) solid var(--pico-border-color);
+        border-radius: var(--pico-border-radius);
+    }
     .spacer {
         flex: 1 0 auto;
+    }
+    
+    img.fill {
+        width: 100%;
+        height: 100%;
     }
 }
 
@@ -99,28 +109,27 @@ button {
     }
 }
 
+.app img.inline {
+    height: 1lh;
+    display: inline-block;
+    vertical-align: bottom;
+}
 
-.app :is(img, svg) {
-    inline-size: 1.1lh;
+.app {
+    button, .display-button {
+        padding-top: .0625rem;
+        padding-bottom: .0625rem;
+        margin-top: .125rem;
+        margin-bottom: .125rem;
+        min-width: 2em;
+    }
     
-    &.img-inline {
-        height: 1lh;
-        display: inline-block;
-        margin-left: 0.25em;
-        margin-right: 0.25em;
+    .display-button:hover {
+        background-color: var(--pico-primary-background);
     }
 }
 
-.app button {
-    padding-top: .0625rem;
-    padding-bottom: .0625rem;
-    margin-top: .125rem;
-    margin-bottom: .125rem;
-}
-
 .app .timeline {
-    overflow: scroll;
-
     article {
         padding: 0;
         display: grid;
@@ -222,6 +231,105 @@ button {
     }
 }
 
+.app .profile {
+    .profile-info {
+        &>div {
+            margin-bottom: 1em;
+        }
+    }
+    .profile-controls {
+        display: flex;
+        flex-direction: row;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+    header {
+        aspect-ratio: 4 / 1;
+        position: relative;
+        width: 100%;
+        margin-bottom: .5em;
+    }
+    .profile-name-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(180deg, 
+            hsl(from var(--pico-background-color) h s l / 0) 0%, 
+            hsl(from var(--pico-background-color) h s l / .5) 30%, 
+            hsl(from var(--pico-background-color) h s l / .5) 100%);
+        
+        &:hover, &:focus-within {
+            background: hsl(from var(--pico-background-color) h s l / .8);
+        }
+
+        &>* {
+            padding: 0;
+            margin: 0;
+        }
+    }
+    .profile-pic {
+        width: 9em;
+        height: 9em;
+        margin: 0 1em 1em 0;
+        float: left;
+    }
+    .profile-detail {
+        flex-basis: auto;
+        clear: both;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        
+        &>* {
+            margin: 0;
+        }
+    }
+    .profile-main {
+        flex-shrink: 1;
+        flex-basis: auto;
+    }
+    .profile-stats {
+        display: flex;
+        gap: 1em;
+        justify-content: space-around;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .profile-custom-field-container {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        gap: 0.5em;
+    }
+    .profile-custom-field {
+        border: var(--pico-muted-border-color) solid var(--pico-border-width);
+        padding: 0 0.5em;
+        flex: 1 1 auto;
+        box-shadow: var(--pico-muted-border-color) 0 .0125em .25em;
+        
+        :hover, :focus-within {
+            -webkit-line-clamp: none;
+            max-height: none;
+        }
+        dt {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            font-variant-caps: small-caps;
+            max-height: 1lh;
+            overflow: hidden;
+        }
+        dd {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            max-height: 2lh;
+            color: var(--pico-muted-color);
+            margin-left: 1em;
+            overflow: hidden;
+        }
+    }
+}
 
 /* Collapsible menus */
 /* Always collapsible */
@@ -235,14 +343,38 @@ button {
         padding: .5rem;
         cursor: pointer;
         margin: -0.5rem 0;
+        &:has(input:checked) {
+            background-color: var(--pico-primary-background);
+        }
 
         input {
-            display: none;
+            opacity: 0.00;
+            position: absolute;
+            padding: 0;
+            margin: 0;
+            border: 0;
         }
     }
-
+    
+    .menu-items-container {
+        display: none;
+        position: relative;
+    }
+    
     .menu-items {
         display: none;
+        position: absolute;
+        flex-direction: column;
+        background-color: var(--pico-dropdown-background-color);
+        border: var(--pico-border-width) solid var(--pico-dropdown-border-color)\);
+        border-radius: var(--pico-border-radius);
+        box-shadow: var(--pico-box-shadow);
+        padding: .5em;
+        width: max-content;
+        
+        a {
+            text-decoration: none;
+        }
 
         & > * {
             width: 100%;
@@ -262,19 +394,39 @@ button {
     &:has( input[type="checkbox"]:not(:checked)) {
         width: fit-content;
     }
-    label:has(input:checked) ~ .menu-items {
-        display: flex;
+    
+    label:has(input:checked) ~ .menu-items,
+    label:has(input:checked) ~ .menu-items-container {
+        display: block;
+        .menu-items {
+            display: flex;
+        }
     }
+    
+    &:focus-within {
+        border: var(--pico-border-width) solid var(--pico-primary-focus);
+        border-radius: var(--pico-border-radius);
+    }
+}
+.menu-responsive,
+*[class^="menu-responsive-"], *[class*=" menu-responsive-"] {
+    .menu-items { position: relative; }
 }
 .menu-responsive-right,
 .menu-collapsible-right {
     text-align: end;
     align-items: end;
+    .menu-items { 
+        right: 0;
+    }
 }
 .menu-responsive-left,
 .menu-collapsible-left {
     text-align: start;
     align-items: start;
+    .menu-items {
+        left: 0;
+    }
 }
 
 @media (min-width: 796px) {
@@ -287,7 +439,15 @@ button {
         text-align: start;
         align-items: start;
         & > label.collapse-control {display: none; }
-        .menu-items { display: flex; }
+        .menu-items {
+            display: flex;
+            background-color: initial;
+            border: initial;
+            border-radius: initial;
+            box-shadow: initial;
+            position: relative;
+            width: fit-content;
+        }
     }
 }
 /* Collapsing Nav menu end */
@@ -318,10 +478,6 @@ button {
     :root {
         --pico-font-size: 100%;
     }
-    
-    .app .max-sm {
-        display: none;
-    }
 }
 
 @media (min-width: 1024px) {
@@ -333,6 +489,11 @@ button {
         grid-template-rows: 1fr auto;
     }
 
+    body.app .profile {
+        .profile-info {
+            flex-direction: row-reverse;
+        }
+    }
 }
 
 @media (min-width: 1280px) {

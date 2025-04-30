@@ -56,6 +56,7 @@
     --pico-secondary-focus: var(--lb-color-secondary-light);
     --pico-contrast: var(--lb-color-contrast);
     --pico-contrast-focus: var(--lb-color-contrast-light);
+    --pico-muted-border-color: hsl(220, 23.1%, 76%);
 }
 
 /* Dark color scheme (Auto) */
@@ -69,6 +70,7 @@
         --pico-secondary-focus: var(--lb-color-secondary-light);
         --pico-contrast: var(--lb-color-contrast);
         --pico-contrast-focus: var(--lb-color-contrast-light);
+        --pico-muted-border-color: hsl(220, 22%, 16.1%);
     }
 }
 
@@ -82,6 +84,12 @@
     --pico-secondary-focus: var(--lb-color-secondary-light);
     --pico-contrast: var(--lb-color-contrast);
     --pico-contrast-focus: var(--lb-color-contrast-light);
+    --pico-muted-border-color: hsl(220, 22%, 16.1%);
+}
+
+:focus {
+    border: var(--pico-border-width) solid var(--pico-primary-focus);
+    border-radius: var(--pico-border-radius);
 }
 
 .color-secondary {
@@ -92,7 +100,8 @@ code, pre, .letterbook-brand {
     --pico-font-family: "Share Tech Mono", monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
 }
 
-article {
+.profile-description, .profile-custom-field, .profile-name-container, article {
+    --pico-font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
     font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
 }
 

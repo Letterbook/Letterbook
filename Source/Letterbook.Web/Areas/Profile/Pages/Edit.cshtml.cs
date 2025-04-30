@@ -1,22 +1,21 @@
+using System.ComponentModel.DataAnnotations;
 using Letterbook.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Html;
 using Microsoft.Extensions.Options;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authorization;
 
-namespace Letterbook.Web.Pages;
+namespace Letterbook.Web.Areas.Profile.Pages;
 
 [Authorize(Policy = Constants.AuthzPolicy)]
-public class ProfileEdit : PageModel
+public class Edit : PageModel
 {
     private readonly IProfileService _profiles;
 	private readonly CoreOptions _options;
 
    	public string Handle { get; set; }
 
-	public ProfileEdit(IProfileService profiles, IOptions<CoreOptions> options)
+	public Edit(IProfileService profiles, IOptions<CoreOptions> options)
 	{
 		_profiles = profiles;
 		_options = options.Value;

@@ -97,7 +97,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Pages\Shared\Components\Profile\" />
       <Folder Include="ViewComponents\" />
     </ItemGroup>
 </Project>

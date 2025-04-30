@@ -4,6 +4,7 @@ using Letterbook.Core.Values;
 using Letterbook.Web.Pages;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 
@@ -30,6 +31,7 @@ public class ProfileControllerTests : WithMockContext
 		};
 
 		ProfileServiceAuthMock.Setup(m => m.FindProfiles(It.IsAny<string>(), It.IsAny<string>())).Returns(new List<Models.Profile>{_profile}.ToAsyncEnumerable());
+		ProfileServiceAuthMock.Setup(m => m.QueryProfiles(It.IsAny<string>(), It.IsAny<string>())).Returns(new List<Models.Profile>{_profile}.BuildMock());
 	}
 
 	[Fact]
@@ -45,7 +47,7 @@ public class ProfileControllerTests : WithMockContext
 
 		Assert.IsType<PageResult>(result);
 		Assert.Equal(_profile.Description, _page.Description.ToString());
-		Assert.Equal($"@{_profile.Handle}@{_profile.Authority}", _page.FullHandle);
+		Assert.Equal($"{_profile.Handle}@{_profile.Authority}", _page.FullHandle);
 		Assert.Equal(_profile.DisplayName, _page.DisplayName);
 		Assert.Equal(_profile.CustomFields, _page.CustomFields);
 	}
@@ -57,11 +59,15 @@ public class ProfileControllerTests : WithMockContext
 	[Theory(DisplayName = "Should get the following count")]
 	public async Task CanGetFollowing(int x)
 	{
-		ProfileServiceAuthMock.Setup(m => m.FollowingCount(_profile)).ReturnsAsync(x);
+		var following = new FakeProfile("letterbook.example").Generate(x);
+		foreach (var f in following)
+		{
+			_profile.Follow(f, FollowState.Accepted);
+		}
 
 		await _page.OnGet($"@{_profile.Handle}");
 
-		Assert.Equal(x, await _page.FollowingCount);
+		Assert.Equal(x, _page.FollowingCount);
 	}
 
 	[InlineData(0)]
@@ -71,11 +77,55 @@ public class ProfileControllerTests : WithMockContext
 	[Theory(DisplayName = "Should get the follower count")]
 	public async Task CanGetFollowers(int x)
 	{
-		ProfileServiceAuthMock.Setup(m => m.FollowerCount(_profile)).ReturnsAsync(x);
+		var followers = new FakeProfile("letterbook.example").Generate(x);
+		foreach (var f in followers)
+		{
+			_profile.AddFollower(f, FollowState.Accepted);
+		}
 
 		await _page.OnGet($"@{_profile.Handle}");
 
-		Assert.Equal(x, await _page.FollowerCount);
+		Assert.Equal(x, _page.FollowerCount);
+	}
+
+	[InlineData(0)]
+	[InlineData(10)]
+	[InlineData(100)]
+	[InlineData(200)]
+	[Theory(DisplayName = "Should get the posts and post count")]
+	public async Task CanGetPosts(int x)
+	{
+		var posts = new FakePost(_profile).Generate(x);
+		foreach (var post in posts)
+		{
+			_profile.Posts.Add(post);
+		}
+
+		await _page.OnGet($"@{_profile.Handle}");
+
+		Assert.Equal(x, _page.PostCount);
+		Assert.Equal(Math.Min(x, 100), _page.Posts.Count());
+	}
+
+	[Fact(DisplayName = "Should get posts from the start date")]
+	public async Task CanGetPostsByDate()
+	{
+		var faker = new FakePost(_profile);
+		var posts = faker.Generate(99);
+		var newestPost = faker.Generate();
+		newestPost.CreatedDate = posts.MaxBy(p => p.CreatedDate)!.CreatedDate.AddHours(1);
+		var oldestPost = faker.Generate();
+		oldestPost.CreatedDate = posts.MinBy(p => p.CreatedDate)!.CreatedDate.AddHours(-1);
+		posts.AddRange([newestPost, oldestPost]);
+		foreach (var post in posts)
+		{
+			_profile.Posts.Add(post);
+		}
+
+		await _page.OnGet($"@{_profile.Handle}", newestPost.CreatedDate.AddMinutes(-1));
+
+		Assert.NotEqual(newestPost, _page.Posts.First());
+		Assert.Equal(oldestPost, _page.Posts.Last());
 	}
 
 	[Fact(DisplayName = "Should load activeProfile for relationship checks")]
@@ -95,13 +145,13 @@ public class ProfileControllerTests : WithMockContext
 		_selfProfile.AddFollower(_profile, FollowState.Accepted);
 
 		MockHttpContext.SetupGet(ctx => ctx.User).Returns(_principal);
-		ProfileServiceAuthMock.Setup(m => m.LookupProfile((Models.ProfileId)_selfProfile.GetId(), (Models.ProfileId?)_profile.GetId()))
+		ProfileServiceAuthMock.Setup(m => m.LookupProfile(_selfProfile.Id, _profile.Id))
 			.ReturnsAsync(_selfProfile);
 
 		await _page.OnGet($"@{_profile.Handle}");
 
-		Assert.True(_page.FollowsYou);
-		Assert.True(_page.YouFollow);
+		Assert.Equal(FollowState.Accepted, _page.FollowsYou);
+		Assert.Equal(FollowState.Accepted, _page.YouFollow);
 	}
 
 	[Fact(DisplayName = "Should follow")]
