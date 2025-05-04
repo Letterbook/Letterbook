@@ -403,10 +403,14 @@ button {
         }
     }
     
-    &:focus-within {
+    label:has(input[type="checkbox"]):focus-within {
         border: var(--pico-border-width) solid var(--pico-primary-focus);
         border-radius: var(--pico-border-radius);
     }
+}
+.menu-collapsible,
+*[class^="menu-collapsible-"], *[class*=" menu-collapsible-"] {
+    
 }
 .menu-responsive,
 *[class^="menu-responsive-"], *[class*=" menu-responsive-"] {
@@ -448,6 +452,11 @@ button {
             position: relative;
             width: fit-content;
         }
+
+        /*&:focus-within {*/
+        /*    border: revert;*/
+        /*    border-radius: revert;*/
+        /*}*/
     }
 }
 /* Collapsing Nav menu end */
