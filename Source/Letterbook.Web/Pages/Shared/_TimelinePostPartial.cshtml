@@ -1,17 +1,16 @@
 @using Letterbook.Web.Tags
 @using Microsoft.AspNetCore.Html
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Models.Post
 
 <article>
-    <header class="timeline-header">
-        <div class="timeline-author">
-            <div class="timeline-pfp">
+    <header class="post-header">
+        <div class="post-author">
+            <div class="post-pfp">
                 <a asp-page="Profile" asp-route-id="@Model.Creators.First().Handle">
                     <img class="pfp-sm inline" src="/img/user-square.png" alt="@Model.Creators.First().DisplayName profile picture"/>
                 </a>
             </div>
-            <div class="timeline-profile-container">
+            <div class="post-profile-container">
                 <a asp-page="Profile" asp-route-id="@Model.Creators.First().Handle">
                     <div class="display-name">@Model.Creators.First().DisplayName</div>
                     <div class="handle">@@@Model.Creators.First().Handle</div>
@@ -19,10 +18,10 @@
             </div>
         </div>
     </header>
-    <div class="timeline-body">
+    <div class="post-body">
         @(new HtmlString(Model.Contents.First().Html))
     </div>
-    <footer class="timeline-footer">
+    <footer class="post-footer">
         <button class="outline"><app-icon type=@Icon.Like /><span class="min-lg"> like</span></button>
         <button class="outline"><app-icon type=@Icon.Share /><span class="min-lg"> share</span></button>
         <button class="outline"><app-icon type=@Icon.Thread /><span class="min-lg"> open</span></button>
