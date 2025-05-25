@@ -163,7 +163,7 @@ public class PostsController : ControllerBase
 		if (!ModelState.IsValid)
 			return BadRequest(ModelState);
 
-		var result = await _post.As(User.Claims).LookupPost(profileId, postId, withThread);
+		var result = await _post.As(User.Claims).LookupPost(postId, withThread);
 		return Ok(_mapper.Map<PostDto>(result));
 	}
 

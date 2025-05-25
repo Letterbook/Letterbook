@@ -6,7 +6,22 @@ using Medo;
 
 namespace Letterbook.Core.Models;
 
-public partial record struct PostId(Uuid7 Id) : ITypedId<Uuid7>;
+public partial record struct PostId(Uuid7 Id) : ITypedId<Uuid7>
+{
+	public static bool TryParse(string id, out PostId o)
+	{
+		try
+		{
+			o = FromString(id);
+			return true;
+		}
+		catch (Exception)
+		{
+			o = default;
+			return false;
+		}
+	}
+}
 
 public class Post : IFederated, IEquatable<Post>
 {
