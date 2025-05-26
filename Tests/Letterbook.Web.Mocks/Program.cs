@@ -79,6 +79,8 @@ public class Program
 
 		// Add mocked services
 		builder.Services
+			.AddScoped<PostService>()
+			.AddScoped<IPostService, MockPostService>()
 			.AddScoped<ProfileService>()
 			.AddScoped<IProfileService, MockProfileService>()
 			.AddScoped<TimelineService>()

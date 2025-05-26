@@ -24,4 +24,11 @@ public class ProfileIdTests
 
 		Assert.Equal($"\"{expected.ToId25String()}\"", actual);
 	}
+
+	[Fact]
+	public void IdTest()
+	{
+		ProfileId id = new Uuid7(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0 });
+		Assert.Equal("", id.ToString());
+	}
 }
