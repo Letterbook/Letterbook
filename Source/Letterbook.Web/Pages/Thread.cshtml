@@ -1,0 +1,27 @@
+@page "{postId}"
+@model Letterbook.Web.Pages.Thread
+
+@{
+    ViewData["Title"] = "Thread";
+}
+
+<section class="thread">
+    <h1>Conversation</h1>
+    @foreach (var ancestor in Model.Ancestors.Skip(1).Reverse())
+    {
+        <article ><partial name="Shared/_ThreadPostPartial" model="ancestor"/></article>
+    }
+    @foreach (var parent in Model.Ancestors.Take(1))
+    {
+        <article ><partial name="Shared/_ThreadPostPartial" model="parent"/></article>
+        @* <div class="thread-post"></div> *@
+        @* <article class="thread-parent"> *@
+        @*     parent post *@
+        @* </article> *@
+    }
+    <article ><partial name="Shared/_ThreadFocusedPostPartial" model="Model.Post"/></article>
+    @foreach (var child in Model.Post.RepliesCollection)
+    {
+        <article ><partial name="Shared/_ThreadPostPartial" model="child"/></article>
+    }
+</section>

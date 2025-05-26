@@ -129,6 +129,7 @@ button {
     }
 }
 
+.app .thread,
 .app .timeline {
     article {
         padding: 0;
@@ -474,6 +475,7 @@ button {
             top: 0;
         }
 
+        article .thread footer,
         article .timeline footer {
             *, button {
                 font-size: calc(0.75 * var(--pico-font-size));
@@ -490,6 +492,7 @@ button {
 }
 
 @media (min-width: 1024px) {
+    body.app main .thread article,
     body.app main .timeline article {
         grid-template-areas:
         "header main" 
