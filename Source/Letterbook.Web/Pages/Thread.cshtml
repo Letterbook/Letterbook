@@ -1,27 +1,55 @@
 @page "{postId}"
+@using Letterbook.Web.Tags
 @model Letterbook.Web.Pages.Thread
 
 @{
     ViewData["Title"] = "Thread";
 }
 
-<section class="thread">
+<section class="thread" xmlns="http://www.w3.org/1999/html">
     <h1>Conversation</h1>
     @foreach (var ancestor in Model.Ancestors.Skip(1).Reverse())
     {
-        <article ><partial name="Shared/_ThreadPostPartial" model="ancestor"/></article>
+        <article>
+            <partial name="Shared/_ThreadPostPartial" model="ancestor"/>
+            <footer class="post-footer">
+                <partial name="_ThreadPostFooterPartial" model="ancestor"/>
+            </footer>
+        </article>
     }
     @foreach (var parent in Model.Ancestors.Take(1))
     {
-        <article ><partial name="Shared/_ThreadPostPartial" model="parent"/></article>
-        @* <div class="thread-post"></div> *@
-        @* <article class="thread-parent"> *@
-        @*     parent post *@
-        @* </article> *@
+        <article>
+            <partial name="Shared/_ThreadPostPartial" model="parent"/>
+            <footer class="post-footer">
+                <partial name="_ThreadPostFooterPartial" model="parent"/>
+            </footer>
+        </article>
     }
-    <article ><partial name="Shared/_ThreadFocusedPostPartial" model="Model.Post"/></article>
+    <article class="focused-post">
+        <partial name="Shared/_ThreadPostPartial" model="Model.Post"/>
+        <footer class="post-footer">
+            <div class="row">
+                <partial name="_ThreadPostFooterPartial" model="Model.Post"/>
+            </div>
+            <div class="row">
+                <form method="post" asp-antiforgery="true">
+                    <textarea type="text" name="content" autocomplete="off" autofocus rows="2"></textarea>
+                    <button class="outline">
+                        <app-icon type=@Icon.Send/>
+                        <span class="min-lg"> reply</span>
+                    </button>
+                </form>
+            </div>
+        </footer>
+    </article>
     @foreach (var child in Model.Post.RepliesCollection)
     {
-        <article ><partial name="Shared/_ThreadPostPartial" model="child"/></article>
+        <article>
+            <partial name="Shared/_ThreadPostPartial" model="child"/>
+            <footer class="post-footer">
+                <partial name="_ThreadPostFooterPartial" model="child"/>
+            </footer>
+        </article>
     }
 </section>

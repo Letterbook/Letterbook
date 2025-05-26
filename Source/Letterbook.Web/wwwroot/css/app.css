@@ -80,6 +80,9 @@
     .icon-thread {
         mask: url("/lib/remixicon/mail-open-line.svg");
     }
+    .icon-send {
+        mask: url("/lib/remixicon/send-plane-2-line.svg");
+    }
     .icon-outline {
         --pico-border-color: var(--pico-primary);
         border: var(--pico-border-width) solid var(--pico-border-color);
@@ -224,6 +227,36 @@ button {
 
         time {
             text-align: end;
+        }
+    }
+    
+    .focused-post .post-footer {
+        flex-direction: column;
+        
+        .row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            margin-bottom: .75rem;
+        }
+        .row:nth-last-child(1) {
+            margin-bottom: 0;
+        }
+        
+        form {
+            width: 100%;
+            text-align: right;
+            
+            * {
+                margin-top: 0;
+                margin-right: 0;
+                margin-left: 0;
+                margin-bottom: .5rem;
+            }
+            :nth-last-child(1) {
+                margin-bottom: 0;
+            }
         }
     }
 
