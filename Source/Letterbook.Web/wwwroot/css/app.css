@@ -63,6 +63,9 @@
         max-height: 1em;
         max-width: 1em;
         background-repeat: no-repeat;
+        background-color: var(--pico-color);
+    }
+    .outline .icon {
         background-color: var(--pico-primary);
     }
     .icon-like {
@@ -81,7 +84,7 @@
         mask: url("/lib/remixicon/mail-open-line.svg");
     }
     .icon-send {
-        mask: url("/lib/remixicon/send-plane-2-line.svg");
+        mask: url("/lib/remixicon/send-plane-2-fill.svg");
     }
     .icon-outline {
         --pico-border-color: var(--pico-primary);
@@ -130,6 +133,15 @@ button {
     .display-button:hover {
         background-color: var(--pico-primary-background);
     }
+
+    textarea {
+        /* not universally supported, but it solves form input sizing without js
+         * available in Webkit since March 2024
+         * support is planned in Blink
+         * https://caniuse.com/?search=field-sizing
+         * usually best to fallback to oversizing via rows= html property */
+        field-sizing: content;
+    }
 }
 
 .app .thread,
@@ -147,6 +159,7 @@ button {
 
     .post-author {
         display: flex;
+        gap: .25rem;
     }
 
     .post-pfp {
@@ -239,6 +252,7 @@ button {
             align-items: center;
             width: 100%;
             margin-bottom: .75rem;
+            gap: .5rem;
         }
         .row:nth-last-child(1) {
             margin-bottom: 0;
@@ -248,13 +262,13 @@ button {
             width: 100%;
             text-align: right;
             
-            * {
+            &>* {
                 margin-top: 0;
                 margin-right: 0;
                 margin-left: 0;
                 margin-bottom: .5rem;
             }
-            :nth-last-child(1) {
+            &>:nth-last-child(1) {
                 margin-bottom: 0;
             }
         }
