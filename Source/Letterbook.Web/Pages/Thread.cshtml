@@ -34,7 +34,8 @@
             </div>
             <div class="row">
                 <form method="post" asp-antiforgery="true">
-                    <textarea type="text" name="content" autocomplete="off" autofocus rows="4"></textarea>
+                    <textarea type="text" name="content[0].text" autocomplete="off" autofocus rows="4"></textarea>
+                    <input type="hidden" name="content[0].type" value="Note"/>
                     <button >
                         <app-icon type=@Icon.Send/>
                         <span class="min-lg"> reply</span>

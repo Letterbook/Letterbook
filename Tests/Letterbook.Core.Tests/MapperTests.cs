@@ -70,6 +70,14 @@ public class MapperTests : WithMocks
 			Assert.NotNull(actual);
 		}
 
+		[Fact(DisplayName = "Should map PostRequestDto")]
+		public void MapPostRequest()
+		{
+			var actual = _postMapper.Map<Models.Post>(_postDto as PostRequestDto);
+
+			Assert.NotNull(actual);
+		}
+
 		[InlineData("text/plain")]
 		[InlineData("text/markdown")]
 		[InlineData("text/html")]
