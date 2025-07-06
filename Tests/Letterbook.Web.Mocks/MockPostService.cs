@@ -21,12 +21,17 @@ public class MockPostService : IPostService, IAuthzPostService
 	private static readonly Models.PostId midThread = new Uuid7(new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0 });
 
 	private PostService _postService;
-	private FakePost _fakePost;
 	private Faker _fakes;
+	private readonly List<FakePost> _fakePosts;
+
 	public MockPostService(IOptions<CoreOptions> opts, PostService postService)
 	{
 		_fakes = new Faker();
-		_fakePost = new FakePost(opts.Value.DomainName);
+		_fakePosts =
+		[
+			new FakePost(opts.Value.DomainName), new FakePost(opts.Value.DomainName),
+			new FakePost(opts.Value.DomainName), new FakePost(opts.Value.DomainName)
+		];
 		_postService = postService;
 	}
 
@@ -36,25 +41,30 @@ public class MockPostService : IPostService, IAuthzPostService
 		return this;
 	}
 
+	public IQueryable<Models.Post> Query(Models.PostId id)
+	{
+		return _postService.Query(id);
+	}
+
 	public async Task<Models.Post?> LookupPost(Models.PostId id, bool withThread = true)
 	{
 		if (id == notFoundId)
 			return default;
 		if (id == soloId)
-			return _fakePost.Generate();
+			return _fakes.PickRandom(_fakePosts).Generate();
 		if (id == repliesOnly)
 		{
-			var post = _fakePost.Generate();
+			var post = _fakes.PickRandom(_fakePosts).Generate();
 			return GenerateReplies(post, _fakes.Random.Int(1, 4));
 		}
 		if (id == parentsOnly)
 		{
-			var post = _fakePost.Generate();
+			var post = _fakes.PickRandom(_fakePosts).Generate();
 			return GenerateAncestors(post, _fakes.Random.Int(1, 4));
 		}
 		if (id == midThread)
 		{
-			var post = _fakePost.Generate();
+			var post = _fakes.PickRandom(_fakePosts).Generate();
 			return GenerateReplies(GenerateAncestors(post, _fakes.Random.Int(1, 4)), _fakes.Random.Int(1, 4));
 		}
 		return await _postService.LookupPost(id, withThread);
@@ -65,9 +75,11 @@ public class MockPostService : IPostService, IAuthzPostService
 		var p = post;
 		while (depth-- > 0)
 		{
-			foreach (var reply in _fakePost.Generate(_fakes.Random.Int(1, 4)))
+			foreach (var _ in Enumerable.Range(0, _fakes.Random.Int(1, 4)))
 			{
-				p.RepliesCollection.Insert(0, reply);
+				p.RepliesCollection.Add(_fakes.PickRandom(_fakePosts).Generate());
+				if (_fakes.Random.Bool())
+					p.RepliesCollection.Add(_fakes.PickRandom(_fakePosts).Generate());
 			}
 
 			p = _fakes.PickRandom(p.RepliesCollection);
@@ -80,7 +92,7 @@ public class MockPostService : IPostService, IAuthzPostService
 		var p = post;
 		while (depth-- > 0)
 		{
-			p.InReplyTo = _fakePost.Generate();
+			p.InReplyTo = _fakes.PickRandom(_fakePosts).Generate();
 			p = p.InReplyTo;
 		}
 
