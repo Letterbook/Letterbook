@@ -3446,20 +3446,7 @@
             "nullable": true,
             "example": "fgfrff01jnp851pm72jmn9v44"
           },
-          "fediId": {
-            "pattern": "https://\\w+\\.\\w+/\\w*",
-            "type": "string",
-            "nullable": true,
-            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
-          },
-          "thread": {
-            "$ref": "#/components/schemas/ThreadDto"
-          },
           "summary": {
-            "type": "string",
-            "nullable": true
-          },
-          "preview": {
             "type": "string",
             "nullable": true
           },
@@ -3475,16 +3462,6 @@
             "nullable": true
           },
           "createdDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "publishedDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "updatedDate": {
             "type": "string",
             "format": "date-time",
             "nullable": true
@@ -3512,6 +3489,29 @@
           },
           "inReplyTo": {
             "$ref": "#/components/schemas/PostDto"
+          },
+          "fediId": {
+            "pattern": "https://\\w+\\.\\w+/\\w*",
+            "type": "string",
+            "nullable": true,
+            "example": "https://example.com/fgfrff01jnp851pm72jmn9v44"
+          },
+          "thread": {
+            "$ref": "#/components/schemas/ThreadDto"
+          },
+          "preview": {
+            "type": "string",
+            "nullable": true
+          },
+          "publishedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           },
           "replies": {
             "pattern": "https://\\w+\\.\\w+/\\w*",

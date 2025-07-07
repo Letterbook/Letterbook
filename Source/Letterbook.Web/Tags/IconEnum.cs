@@ -5,8 +5,8 @@ namespace Letterbook.Web.Tags;
 public enum Icon
 {
 	Like,
+	Send,
 	Share,
-	Reply,
 	More,
 	Thread
 }

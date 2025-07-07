@@ -183,7 +183,7 @@ public class PostsControllerTests : WithMockContext
 	[InlineData([false])]
 	public async Task CanGetPost(bool withThread)
 	{
-		PostServiceAuthMock.Setup(m => m.LookupPost(It.IsAny<Models.ProfileId>(), _post.GetId(), withThread))
+		PostServiceAuthMock.Setup(m => m.LookupPost(_post.GetId(), withThread))
 			.ReturnsAsync(_post);
 
 		var result = await _controller.Get(_profile.GetId(), _post.GetId(), withThread);

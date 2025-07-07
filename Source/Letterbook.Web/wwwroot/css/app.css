@@ -46,6 +46,7 @@
 
     main {
         grid-area: main;
+        overflow-y: auto;
     }
     .box {
         clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%);
@@ -63,6 +64,9 @@
         max-height: 1em;
         max-width: 1em;
         background-repeat: no-repeat;
+        background-color: var(--pico-color);
+    }
+    .outline .icon {
         background-color: var(--pico-primary);
     }
     .icon-like {
@@ -79,6 +83,9 @@
     }
     .icon-thread {
         mask: url("/lib/remixicon/mail-open-line.svg");
+    }
+    .icon-send {
+        mask: url("/lib/remixicon/send-plane-2-fill.svg");
     }
     .icon-outline {
         --pico-border-color: var(--pico-primary);
@@ -127,8 +134,18 @@ button {
     .display-button:hover {
         background-color: var(--pico-primary-background);
     }
+
+    textarea {
+        /* not universally supported, but it solves form input sizing without js
+         * available in Webkit since March 2024
+         * support is planned in Blink
+         * https://caniuse.com/?search=field-sizing
+         * usually best to fallback to oversizing via rows= html property */
+        field-sizing: content;
+    }
 }
 
+.app .thread,
 .app .timeline {
     article {
         padding: 0;
@@ -141,32 +158,38 @@ button {
         align-items: stretch;
     }
 
-    .timeline-author {
+    .post-author {
         display: flex;
+        gap: .25rem;
     }
 
-    .timeline-pfp {
+    .post-pfp {
         flex: 0 0 auto;
     }
 
-    .timeline-author {
+    .post-author {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    .timeline-profile-container {
+    .post-profile-container {
         flex: 0 1 auto;
         display: flex;
         flex-direction: column;
     }
 
-    .timeline-body {
+    .post-body {
         grid-area: main;
         padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
+        background-color: var(--pico-card-background-color);
+
+        /* light mode */
+        border-top: var(--pico-border-width) solid var(--pico-card-border-color);
+        border-bottom: none;
     }
 
-    .timeline-header {
+    .post-header {
         grid-area: header;
         margin: 0;
         padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
@@ -177,18 +200,22 @@ button {
         overflow: hidden;
         white-space: nowrap;
         line-break: anywhere;
+        
+        /* light mode */
+        border-top: var(--pico-border-width) solid var(--pico-card-border-color);
+        border-bottom: none;
 
-        .timeline-author {
+        .post-author {
             display: flex;
             flex-direction: row;
 
         }
 
-        .timeline-pfp {
+        .post-pfp {
             flex-shrink: 0;
         }
 
-        .timeline-profile-container {
+        .post-profile-container {
             display: flex;
             flex-direction: column;
         }
@@ -213,7 +240,7 @@ button {
         }
     }
     
-    .timeline-footer {
+    .post-footer {
         font-size: 0.75rem;
         grid-area: footer;
         margin: 0;
@@ -225,9 +252,103 @@ button {
             text-align: end;
         }
     }
+    
+    .focused-post .post-footer {
+        flex-direction: column;
+        
+        .row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            margin-bottom: .75rem;
+            gap: .5rem;
+        }
+        .row:nth-last-child(1) {
+            margin-bottom: 0;
+        }
+        
+        form {
+            width: 100%;
+            text-align: right;
+            
+            &>* {
+                margin-top: 0;
+                margin-right: 0;
+                margin-left: 0;
+                margin-bottom: .5rem;
+            }
+            &>:nth-last-child(1) {
+                margin-bottom: 0;
+            }
+        }
+    }
 
     .handle {
         font-size: 0.75em;
+    }
+}
+
+.app .thread {
+    article {
+        margin-bottom: .125em;
+    }
+    
+    .sibling-post {
+        --lb-sibling-header-height: 2.625lh;
+        max-width: 100%;
+        min-width: calc(45% - 1rem);
+        height: auto;
+        max-height: 8lh;
+        flex-grow: 1;
+        flex-shrink: 0.3;
+        width: -moz-available;
+        width: -webkit-fill-available;
+        
+        .post-header {
+            height: var(--lb-sibling-header-height);
+            background-color: var(--pico-card-sectioning-background-color);
+            padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal) calc(0.5 * var(--pico-block-spacing-vertical)) var(--pico-block-spacing-horizontal);
+        }
+        
+        .post-body {
+            height: calc(100% - var(--lb-sibling-header-height) );
+            background-color: var(--pico-card-background-color);
+            padding: calc(0.5 * var(--pico-block-spacing-vertical)) var(--pico-block-spacing-horizontal);
+            overflow: hidden;
+            word-wrap: break-word;
+            display: block;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4;
+        }
+    }
+    
+    .siblings {
+        display: flex;
+        flex-direction: row;
+        gap: .75rem;
+        overflow-y: scroll;
+        margin-left: 2rem;
+        margin-bottom: 1rem;
+        max-height: 8lh;
+        align-content: space-between;
+        
+        /*TODO temporary, remove the markup*/
+        .post-footer {
+            display: none;
+        }
+        
+        ::-webkit-scrollbar {
+            -webkit-appearance: none;
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: rgba(0,0,0,.5);
+            -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+        }
     }
 }
 
@@ -403,10 +524,14 @@ button {
         }
     }
     
-    &:focus-within {
+    label:has(input[type="checkbox"]):focus-within {
         border: var(--pico-border-width) solid var(--pico-primary-focus);
         border-radius: var(--pico-border-radius);
     }
+}
+.menu-collapsible,
+*[class^="menu-collapsible-"], *[class*=" menu-collapsible-"] {
+    
 }
 .menu-responsive,
 *[class^="menu-responsive-"], *[class*=" menu-responsive-"] {
@@ -448,6 +573,11 @@ button {
             position: relative;
             width: fit-content;
         }
+
+        /*&:focus-within {*/
+        /*    border: revert;*/
+        /*    border-radius: revert;*/
+        /*}*/
     }
 }
 /* Collapsing Nav menu end */
@@ -465,6 +595,7 @@ button {
             top: 0;
         }
 
+        article .thread footer,
         article .timeline footer {
             *, button {
                 font-size: calc(0.75 * var(--pico-font-size));
@@ -481,6 +612,7 @@ button {
 }
 
 @media (min-width: 1024px) {
+    body.app main .thread article,
     body.app main .timeline article {
         grid-template-areas:
         "header main" 

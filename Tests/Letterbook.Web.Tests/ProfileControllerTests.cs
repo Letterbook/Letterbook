@@ -22,7 +22,7 @@ public class ProfileControllerTests : WithMockContext
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 
 		_selfProfile = new FakeProfile("letterbook.example").Generate();
-		_principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("activeProfile", _selfProfile.GetId25())], "Test"));
+		_principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("activeProfile", _selfProfile.Id.ToString())], "Test"));
 
 		_profile = new FakeProfile("letterbook.example").Generate();
 		_page = new Profile(ProfileServiceMock.Object, Mock.Of<ILogger<Profile>>(), CoreOptionsMock)

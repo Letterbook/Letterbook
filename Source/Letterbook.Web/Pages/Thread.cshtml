@@ -1,0 +1,82 @@
+@page "{postId}"
+@using Letterbook.Web.Tags
+@model Letterbook.Web.Pages.Thread
+
+@{
+    ViewData["Title"] = "Thread";
+}
+
+<section class="thread" xmlns="http://www.w3.org/1999/html">
+    <h1>Conversation</h1>
+    @foreach (var ancestor in Model.Ancestors.Skip(1).Reverse())
+    {
+        <article>
+            <partial name="Shared/_ThreadPostPartial" model="ancestor"/>
+            <footer class="post-footer">
+                <partial name="_ThreadPostFooterPartial" model="ancestor"/>
+            </footer>
+        </article>
+    }
+    @{ var parent = Model.Ancestors.FirstOrDefault(); }
+    @if (parent is not null)
+    {
+        <article>
+            <partial name="Shared/_ThreadPostPartial" model="parent"/>
+            <footer class="post-footer">
+                <partial name="_ThreadPostFooterPartial" model="parent"/>
+            </footer>
+        </article>
+        <div class="siblings">
+            @foreach (var sibling in parent.RepliesCollection.Skip(1))
+            {
+                <aside class="sibling-post">
+                    <partial name="Shared/_ThreadPostPartial" model="sibling"/>
+                    <footer class="post-footer">
+                    </footer>
+                </aside>
+            }
+        </div>
+    }
+    <article class="focused-post">
+        <partial name="Shared/_ThreadPostPartial" model="Model.Post"/>
+        <footer class="post-footer">
+            <div class="row">
+                <partial name="_ThreadPostFooterPartial" model="Model.Post"/>
+            </div>
+            <div class="row">
+                <form method="post" asp-antiforgery="true">
+                    <textarea type="text" name="content[0].text" autocomplete="off" autofocus rows="4"></textarea>
+                    <input type="hidden" name="content[0].type" value="Note"/>
+                    <button>
+                        <app-icon type=@Icon.Send/>
+                        <span class="min-lg"> reply</span>
+                    </button>
+                </form>
+            </div>
+        </footer>
+    </article>
+    <div class="siblings">
+        @foreach (var sibling in Model.Post.RepliesCollection.Skip(1))
+        {
+            <aside class="sibling-post">
+                <partial name="Shared/_ThreadPostPartial" model="sibling"/>
+                <footer class="post-footer">
+                    @* <partial name="_ThreadPostFooterPartial" model="sibling"/> *@
+                </footer>
+            </aside>
+        }
+    </div>
+    @{
+        var child = Model.Post.RepliesCollection.FirstOrDefault();
+    }
+    @while (child is not null)
+    {
+        <article>
+            <partial name="Shared/_ThreadPostPartial" model="child"/>
+            <footer class="post-footer">
+                <partial name="_ThreadPostFooterPartial" model="child"/>
+            </footer>
+        </article>
+        child = child.RepliesCollection.FirstOrDefault();
+    }
+</section>
