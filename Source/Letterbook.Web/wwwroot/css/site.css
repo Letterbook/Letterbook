@@ -50,6 +50,9 @@
 [data-theme="light"],
 :root:not([data-theme="dark"]) {
     --pico-background-color: var(--cool-paper);
+    /* TODO: make these apply only to light mode */
+    /*--pico-card-sectioning-background-color: hsl(240, 12.5%, 94.25%);*/
+    /*--pico-card-background-color: hsl(180, 14.3%, 98.6%);*/
     --pico-primary: var(--lb-color-primary);
     --pico-primary-focus: var(--lb-color-primary-light);
     --pico-secondary: var(--lb-color-secondary);

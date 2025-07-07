@@ -17,7 +17,8 @@
             </footer>
         </article>
     }
-    @foreach (var parent in Model.Ancestors.Take(1))
+    @{ var parent = Model.Ancestors.FirstOrDefault(); }
+    @if (parent is not null)
     {
         <article>
             <partial name="Shared/_ThreadPostPartial" model="parent"/>
@@ -25,6 +26,16 @@
                 <partial name="_ThreadPostFooterPartial" model="parent"/>
             </footer>
         </article>
+        <div class="siblings">
+            @foreach (var sibling in parent.RepliesCollection.Skip(1))
+            {
+                <aside class="sibling-post">
+                    <partial name="Shared/_ThreadPostPartial" model="sibling"/>
+                    <footer class="post-footer">
+                    </footer>
+                </aside>
+            }
+        </div>
     }
     <article class="focused-post">
         <partial name="Shared/_ThreadPostPartial" model="Model.Post"/>

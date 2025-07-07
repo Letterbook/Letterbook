@@ -182,6 +182,11 @@ button {
     .post-body {
         grid-area: main;
         padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal);
+        background-color: var(--pico-card-background-color);
+
+        /* light mode */
+        border-top: var(--pico-border-width) solid var(--pico-card-border-color);
+        border-bottom: none;
     }
 
     .post-header {
@@ -195,6 +200,10 @@ button {
         overflow: hidden;
         white-space: nowrap;
         line-break: anywhere;
+        
+        /* light mode */
+        border-top: var(--pico-border-width) solid var(--pico-card-border-color);
+        border-bottom: none;
 
         .post-author {
             display: flex;
@@ -286,16 +295,15 @@ button {
     }
     
     .sibling-post {
-        --lb-sibling-header-height: 2.5lh;
+        --lb-sibling-header-height: 2.625lh;
         max-width: 100%;
         min-width: calc(45% - 1rem);
+        height: auto;
         max-height: 8lh;
         flex-grow: 1;
         flex-shrink: 0.3;
         width: -moz-available;
         width: -webkit-fill-available;
-        height: -webkit-fill-available;
-        height: -moz-available;
         
         .post-header {
             height: var(--lb-sibling-header-height);
@@ -304,7 +312,7 @@ button {
         }
         
         .post-body {
-            height: calc(100% - var(--lb-sibling-header-height));
+            height: calc(100% - var(--lb-sibling-header-height) );
             background-color: var(--pico-card-background-color);
             padding: calc(0.5 * var(--pico-block-spacing-vertical)) var(--pico-block-spacing-horizontal);
             overflow: hidden;
@@ -322,7 +330,7 @@ button {
         gap: .75rem;
         overflow-y: scroll;
         margin-left: 2rem;
-        margin-bottom: 0.125rem;
+        margin-bottom: 1rem;
         max-height: 8lh;
         align-content: space-between;
         

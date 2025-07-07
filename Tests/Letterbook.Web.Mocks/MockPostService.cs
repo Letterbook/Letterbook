@@ -65,7 +65,9 @@ public class MockPostService : IPostService, IAuthzPostService
 		if (id == midThread)
 		{
 			var post = _fakes.PickRandom(_fakePosts).Generate();
-			return GenerateReplies(GenerateAncestors(post, _fakes.Random.Int(1, 4)), _fakes.Random.Int(1, 4));
+			GenerateAncestors(post, _fakes.Random.Int(1, 4));
+			GenerateReplies(post.InReplyTo!, _fakes.Random.Int(1, 4));
+			return GenerateReplies(post, _fakes.Random.Int(1, 4));
 		}
 		return await _postService.LookupPost(id, withThread);
 	}
