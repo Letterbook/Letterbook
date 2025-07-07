@@ -36,7 +36,7 @@
                 <form method="post" asp-antiforgery="true">
                     <textarea type="text" name="content[0].text" autocomplete="off" autofocus rows="4"></textarea>
                     <input type="hidden" name="content[0].type" value="Note"/>
-                    <button >
+                    <button>
                         <app-icon type=@Icon.Send/>
                         <span class="min-lg"> reply</span>
                     </button>
@@ -44,7 +44,21 @@
             </div>
         </footer>
     </article>
-    @foreach (var child in Model.Post.RepliesCollection)
+    <div class="siblings">
+        @foreach (var sibling in Model.Post.RepliesCollection.Skip(1))
+        {
+            <aside class="sibling-post">
+                <partial name="Shared/_ThreadPostPartial" model="sibling"/>
+                <footer class="post-footer">
+                    @* <partial name="_ThreadPostFooterPartial" model="sibling"/> *@
+                </footer>
+            </aside>
+        }
+    </div>
+    @{
+        var child = Model.Post.RepliesCollection.FirstOrDefault();
+    }
+    @while (child is not null)
     {
         <article>
             <partial name="Shared/_ThreadPostPartial" model="child"/>
@@ -52,5 +66,6 @@
                 <partial name="_ThreadPostFooterPartial" model="child"/>
             </footer>
         </article>
+        child = child.RepliesCollection.FirstOrDefault();
     }
 </section>

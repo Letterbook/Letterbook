@@ -46,6 +46,7 @@
 
     main {
         grid-area: main;
+        overflow-y: auto;
     }
     .box {
         clip-path: polygon(0 2em, 2em 0, 100% 0, 100% calc(100% - 2em), calc(100% - 2em) 100%, 0 100%);
@@ -282,6 +283,64 @@ button {
 .app .thread {
     article {
         margin-bottom: .125em;
+    }
+    
+    .sibling-post {
+        --lb-sibling-header-height: 2.5lh;
+        max-width: 100%;
+        min-width: calc(45% - 1rem);
+        max-height: 8lh;
+        flex-grow: 1;
+        flex-shrink: 0.3;
+        width: -moz-available;
+        width: -webkit-fill-available;
+        height: -webkit-fill-available;
+        height: -moz-available;
+        
+        .post-header {
+            height: var(--lb-sibling-header-height);
+            background-color: var(--pico-card-sectioning-background-color);
+            padding: var(--pico-block-spacing-vertical) var(--pico-block-spacing-horizontal) calc(0.5 * var(--pico-block-spacing-vertical)) var(--pico-block-spacing-horizontal);
+        }
+        
+        .post-body {
+            height: calc(100% - var(--lb-sibling-header-height));
+            background-color: var(--pico-card-background-color);
+            padding: calc(0.5 * var(--pico-block-spacing-vertical)) var(--pico-block-spacing-horizontal);
+            overflow: hidden;
+            word-wrap: break-word;
+            display: block;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4;
+        }
+    }
+    
+    .siblings {
+        display: flex;
+        flex-direction: row;
+        gap: .75rem;
+        overflow-y: scroll;
+        margin-left: 2rem;
+        margin-bottom: 0.125rem;
+        max-height: 8lh;
+        align-content: space-between;
+        
+        /*TODO temporary, remove the markup*/
+        .post-footer {
+            display: none;
+        }
+        
+        ::-webkit-scrollbar {
+            -webkit-appearance: none;
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: rgba(0,0,0,.5);
+            -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+        }
     }
 }
 

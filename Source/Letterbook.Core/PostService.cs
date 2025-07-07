@@ -43,6 +43,11 @@ public class PostService : IAuthzPostService, IPostService
 		_instrument = instrumentation;
 	}
 
+	public IQueryable<Post> Query(PostId id)
+	{
+		return _data.Posts(id);
+	}
+
 	public async Task<Post?> LookupPost(PostId id, bool withThread = true)
 	{
 		return withThread

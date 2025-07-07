@@ -11,6 +11,7 @@ public interface IPostService
 
 public interface IAuthzPostService
 {
+	public IQueryable<Post> Query(PostId id);
 	public Task<Post?> LookupPost(PostId id, bool withThread = true);
 	public Task<Post?> LookupPost(ProfileId asProfile, Uri id, bool withThread = true);
 	public Task<ThreadContext?> LookupThread(ProfileId asProfile, ThreadId id);
