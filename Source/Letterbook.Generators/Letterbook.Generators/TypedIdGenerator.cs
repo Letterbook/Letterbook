@@ -2,14 +2,17 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Letterbook.Generators;
 
 [Generator]
-public class TypedIdGenerator : ISourceGenerator
+public class TypedIdGenerator : IIncrementalGenerator
 {
 	// private static readonly Lazy<SyntaxReceiver> LazyReceiver = new();
 	// private SyntaxReceiver Receiver => LazyReceiver.Value;
@@ -23,36 +26,69 @@ public class TypedIdGenerator : ISourceGenerator
 
 	private static readonly ConcurrentDictionary<Type, string> IdTypeConverters = new();
 
+	public RecordDeclarationSyntax Transformer(GeneratorSyntaxContext syntaxContext, CancellationToken token)
+	{
+		throw new NotImplementedException();
+	}
 
-	public void Initialize(GeneratorInitializationContext context)
+	public bool PredicateFilter(SyntaxNode node, CancellationToken token)
+	{
+		return false;
+	}
+
+	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
 		// Uncomment the next line to debug the source generator
 		// System.Diagnostics.Debugger.Launch();
-		context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
+
+		var provider = context.SyntaxProvider.CreateSyntaxProvider(
+			predicate: PredicateFilter,
+			transform: Transformer);
+		context.RegisterSourceOutput(provider, OutputTypedIdPartial);
+
+		// context.RegisterPostInitializationOutput(ctx => ctx.AddSource("Filename.g.cs", SourceText.From(sour)))
+		// context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
 	}
 
-	public void Execute(GeneratorExecutionContext context)
+	private static void OutputTypedIdPartial(SourceProductionContext context, RecordDeclarationSyntax source)
 	{
-		if (context.SyntaxReceiver is not SyntaxReceiver receiver)
-			return;
-
-		foreach (var declaration in receiver.CandidateDeclarations)
-		{
-			var model = context.Compilation.GetSemanticModel(declaration.SyntaxTree);
-			var type = model.GetDeclaredSymbol(declaration);
-			if (type is null)
-				continue;
-
-			if (type.AllInterfaces.FirstOrDefault(t => t.ConstructedFrom.ToString() == TypedIdName) is not { } symbol)
-				continue;
-
-			AddIdPartial(context, type, symbol);
-			AddIdTypeConverter(context, type, symbol);
-			AddIdTypeJsonConverter(context, type, symbol);
-			AddIdTypeEFConverter(context, type, symbol);
-			AddIdTypeSwaggerSchema(context, type, symbol);
-		}
+		context.AddSource($"{source.Identifier.Text}.g.cs", FormatTypedIdPartial(context, source));
 	}
+
+	// public void Initialize(GeneratorInitializationContext context)
+	// {
+		// Uncomment the next line to debug the source generator
+		// System.Diagnostics.Debugger.Launch();
+		// context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
+	// }
+
+	// static void Execute(EnumToGenerate? enumToGenerate, SourceProductionContext context)
+	// {
+
+	// }
+
+	// public void Execute(IncrementalGen context)
+	// {
+	// 	if (context.SyntaxReceiver is not SyntaxReceiver receiver)
+	// 		return;
+	//
+	// 	foreach (var declaration in receiver.CandidateDeclarations)
+	// 	{
+	// 		var model = context.Compilation.GetSemanticModel(declaration.SyntaxTree);
+	// 		var type = model.GetDeclaredSymbol(declaration);
+	// 		if (type is null)
+	// 			continue;
+	//
+	// 		if (type.AllInterfaces.FirstOrDefault(t => t.ConstructedFrom.ToString() == TypedIdName) is not { } symbol)
+	// 			continue;
+	//
+	// 		AddIdPartial(context, type, symbol);
+	// 		AddIdTypeConverter(context, type, symbol);
+	// 		AddIdTypeJsonConverter(context, type, symbol);
+	// 		AddIdTypeEFConverter(context, type, symbol);
+	// 		AddIdTypeSwaggerSchema(context, type, symbol);
+	// 	}
+	// }
 
 	private void AddIdTypeSwaggerSchema(GeneratorExecutionContext context, INamedTypeSymbol type, INamedTypeSymbol symbol)
 	{
@@ -220,11 +256,11 @@ public class TypedIdGenerator : ISourceGenerator
 		context.AddSource($"{typeName}Converter.g.cs", source);
 	}
 
-	private static void AddIdPartial(GeneratorExecutionContext context, INamedTypeSymbol type, INamedTypeSymbol symbol)
+	private static string FormatTypedIdPartial(SourceProductionContext context, RecordDeclarationSyntax source)
 	{
-		var fullNamespace = type.ContainingNamespace.ToDisplayString();
-		var typeName = type.Name;
-		var idType = symbol.TypeArguments.Single();
+		var fullNamespace = GetNamespace(source);
+		var typeName = source.Identifier.Text;// type.Name;
+		var idType = source.TypeParameterList!.Parameters.Single().Identifier.Text;// symbol.TypeArguments.Single();
 		var isUuid7 = idType.ToString() == UuidName;
 		var toStringFn = isUuid7
 			? "ToId25String()"
@@ -232,11 +268,11 @@ public class TypedIdGenerator : ISourceGenerator
 		var fromStringFn = isUuid7
 			? "Medo.Uuid7.FromId25String(s)"
 			: $"{idType}.Parse(s)";
-		var typeDef = type.IsValueType
-			? "record struct"
-			: "record";
+		var typeDef = source.Keyword;// type.IsValueType
+			// ? "record struct"
+			// : "record";
 
-		var source =
+		var result =
 			$$"""
 			  // <auto-generated from {{GeneratorName}}/>
 
@@ -257,7 +293,51 @@ public class TypedIdGenerator : ISourceGenerator
 			      }
 			  }
 			  """;
-		context.AddSource($"{typeName}.g.cs", source);
+		return result;
+	}
+
+	private static string GetNamespace(TypeDeclarationSyntax syntax)
+	{
+		// If we don't have a namespace at all we'll return an empty string
+		// This accounts for the "default namespace" case
+		string nameSpace = string.Empty;
+
+		// Get the containing syntax node for the type declaration
+		// (could be a nested type, for example)
+		SyntaxNode? potentialNamespaceParent = syntax.Parent;
+
+		// Keep moving "out" of nested classes etc until we get to a namespace
+		// or until we run out of parents
+		while (potentialNamespaceParent != null &&
+		       potentialNamespaceParent is not NamespaceDeclarationSyntax
+		       && potentialNamespaceParent is not FileScopedNamespaceDeclarationSyntax)
+		{
+			potentialNamespaceParent = potentialNamespaceParent.Parent;
+		}
+
+		// Build up the final namespace by looping until we no longer have a namespace declaration
+		if (potentialNamespaceParent is BaseNamespaceDeclarationSyntax namespaceParent)
+		{
+			// We have a namespace. Use that as the type
+			nameSpace = namespaceParent.Name.ToString();
+
+			// Keep moving "out" of the namespace declarations until we
+			// run out of nested namespace declarations
+			while (true)
+			{
+				if (namespaceParent.Parent is not NamespaceDeclarationSyntax parent)
+				{
+					break;
+				}
+
+				// Add the outer namespace as a prefix to the final namespace
+				nameSpace = $"{namespaceParent.Name}.{nameSpace}";
+				namespaceParent = parent;
+			}
+		}
+
+		// return the final namespace
+		return nameSpace;
 	}
 
 	private class SyntaxReceiver : ISyntaxReceiver
