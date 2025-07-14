@@ -64,6 +64,6 @@ public static class HttpRequestExtensions
 			}
 		}
 
-		return host.Value.ToLower();
+		return host.Value != null ? host.Value.ToLower() : host.ToString().ToLower();
 	}
 }

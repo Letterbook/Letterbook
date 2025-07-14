@@ -28,7 +28,6 @@ public class GeneratorTests
 
 	public GeneratorTests()
 	{
-		Verifier.UseProjectRelativeDirectory("./Snapshots");
 	}
 
 	[Fact]

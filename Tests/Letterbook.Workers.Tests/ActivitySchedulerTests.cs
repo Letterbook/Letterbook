@@ -21,8 +21,6 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 
 	public Activities(ITestOutputHelper output)
 	{
-		UseProjectRelativeDirectory("../../Snapshots");
-
 		_publisher = Provider.GetRequiredService<IActivityScheduler>();
 		_consumer = Provider.GetRequiredService<DeliveryWorker>();
 
