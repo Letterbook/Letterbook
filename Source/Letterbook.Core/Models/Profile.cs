@@ -9,7 +9,8 @@ using Microsoft.AspNetCore.Routing;
 
 namespace Letterbook.Core.Models;
 
-public partial record struct ProfileId(Uuid7 Id) : ITypedId<Uuid7>, IParameterPolicy
+[GenerateTypedId]
+public partial record struct ProfileId(Uuid7 Id) : IParameterPolicy
 {
 	public static bool TryParse(string id, out ProfileId o)
 	{

@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development"
 		.editorconfig = .editorconfig
 		rootless.yml = rootless.yml
 		compose.telemetry.yml = compose.telemetry.yml
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{D5E41A46-D753-4214-AF70-1839E56B4A14}"
@@ -115,6 +117,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Workers.Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Web.Mocks", "Tests\Letterbook.Web.Mocks\Letterbook.Web.Mocks.csproj", "{F09B99D6-8328-4181-844B-DA908D421642}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Generators.Tests", "Source\Letterbook.Generators\Letterbook.Generators.Tests\Letterbook.Generators.Tests.csproj", "{7FC7ECD9-14EF-489B-9B31-256E913F1F8B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -212,6 +216,10 @@ Global
 		{F09B99D6-8328-4181-844B-DA908D421642}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F09B99D6-8328-4181-844B-DA908D421642}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F09B99D6-8328-4181-844B-DA908D421642}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FC7ECD9-14EF-489B-9B31-256E913F1F8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FC7ECD9-14EF-489B-9B31-256E913F1F8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FC7ECD9-14EF-489B-9B31-256E913F1F8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FC7ECD9-14EF-489B-9B31-256E913F1F8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25C320AC-E149-44F9-81F3-5275C7D8D334} = {DFA1FACC-AC5C-4B25-A0E4-718957C70BC3}
@@ -241,5 +249,6 @@ Global
 		{5098AF7C-1B91-49C1-9B20-F957B915A590} = {1030FFE8-DD29-4671-AE2A-412E00251F41}
 		{B3D30FDD-B364-49F9-AA57-0FDB7F3901B7} = {1030FFE8-DD29-4671-AE2A-412E00251F41}
 		{F09B99D6-8328-4181-844B-DA908D421642} = {1030FFE8-DD29-4671-AE2A-412E00251F41}
+		{7FC7ECD9-14EF-489B-9B31-256E913F1F8B} = {1030FFE8-DD29-4671-AE2A-412E00251F41}
 	EndGlobalSection
 EndGlobal

@@ -5,7 +5,8 @@ using Medo;
 
 namespace Letterbook.Core.Models;
 
-public partial record struct ThreadId(Uuid7 Id) : ITypedId<Uuid7>;
+[GenerateTypedId]
+public partial record struct ThreadId(Uuid7 Id);
 
 public class ThreadContext
 {

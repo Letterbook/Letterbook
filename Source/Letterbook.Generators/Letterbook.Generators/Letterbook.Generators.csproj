@@ -19,4 +19,10 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="ITypedId.cs" />
+      <Compile Remove="GenerateTypedIdAttribute.cs" />
+      <Compile Remove="SimpleGenerator.cs" />
+    </ItemGroup>
+
 </Project>

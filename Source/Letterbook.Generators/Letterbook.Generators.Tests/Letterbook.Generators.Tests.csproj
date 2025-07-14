@@ -12,6 +12,8 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing.XUnit" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="Verify.SourceGenerators" />
+        <PackageReference Include="Verify.Xunit" />
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio" >
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -21,6 +23,16 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Letterbook.Generators\Letterbook.Generators.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Snapshots\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Letterbook.Uuid7">
+        <HintPath>..\..\..\..\..\.nuget\packages\letterbook.uuid7\2.1.1-patch.12\lib\net8.0\Letterbook.Uuid7.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 

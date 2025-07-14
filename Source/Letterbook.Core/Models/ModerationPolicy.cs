@@ -2,7 +2,8 @@ using Letterbook.Generators;
 
 namespace Letterbook.Core.Models;
 
-public partial record struct ModerationPolicyId(int Id) : ITypedId<int>;
+[GenerateTypedId]
+public partial record struct ModerationPolicyId(int Id);
 
 public class ModerationPolicy
 {
