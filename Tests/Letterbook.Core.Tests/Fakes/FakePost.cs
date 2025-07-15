@@ -56,6 +56,7 @@ public class FakePost : Faker<Post>
 			var note = new FakeNote(post, opts);
 			foreach (var n in note.Generate(contents))
 			{
+				if (post.Contents.Count == 0) n.FediId = post.FediId;
 				post.AddContent(n);
 			}
 
