@@ -6,7 +6,8 @@ using Medo;
 
 namespace Letterbook.Core.Models;
 
-public partial record struct PostId(Uuid7 Id) : ITypedId<Uuid7>
+[GenerateTypedId]
+public partial record struct PostId(Uuid7 Id)
 {
 	public static bool TryParse(string id, out PostId o)
 	{

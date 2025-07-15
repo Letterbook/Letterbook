@@ -223,14 +223,13 @@ public class PostService : IAuthzPostService, IPostService
 		content.Sanitize(_sanitizers);
 		post.Contents.Add(content);
 
+		_data.Update(post);
+		await _data.Commit();
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
 			await _postEvents.Published(post, (Uuid7)asProfile, _claims);
 		}
-
-		_data.Update(post);
-		await _data.Commit();
 		await _postEvents.Updated(post, (Uuid7)asProfile, _claims);
 		return post;
 	}
@@ -437,10 +436,25 @@ public class PostService : IAuthzPostService, IPostService
 					? mention.Subject
 					: knownSubject;
 			}
+
+			foreach (var m in pending.AddressedTo)
+			{
+				m.Subject = !knownProfiles.TryGetValue(m.Subject.FediId, out var knownSubject)
+					? m.Subject
+					: knownSubject;
+			}
+
+			var knownContents = post.Contents.ToDictionary(c => c.FediId);
+
+			post.Contents = pending.Contents.Select(rc =>
+			{
+				if (!knownContents.TryGetValue(rc.FediId, out var known)) return rc;
+				known.UpdateFrom(rc);
+				return known;
+			}).ToList();
 			post.AddressedTo = pending.AddressedTo;
 			post.Audience = pending.Audience.ReplaceFrom(knownAudience.Values);
-			post.Contents = pending.Contents.ReplaceFrom(post.Contents);
-			post.InReplyTo = pending.InReplyTo == null ? null : post.InReplyTo;
+			post.InReplyTo = pending.InReplyTo == null ? null : knownPosts[pending.InReplyTo.FediId].InReplyTo;
 			post.UpdatedDate = pending.UpdatedDate;
 			post.Client = pending.Client;
 			post.Summary = pending.Summary;

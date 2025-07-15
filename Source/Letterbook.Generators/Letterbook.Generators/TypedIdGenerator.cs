@@ -2,20 +2,19 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Letterbook.Generators;
 
 [Generator]
-public class TypedIdGenerator : ISourceGenerator
+public class TypedIdGenerator : IIncrementalGenerator
 {
 	// private static readonly Lazy<SyntaxReceiver> LazyReceiver = new();
 	// private SyntaxReceiver Receiver => LazyReceiver.Value;
 
 	// Adjust the namespace for your project
-	private const string TypedIdName = "Letterbook.Generators.ITypedId<T>";
 	private const string UuidName = "Medo.Uuid7";
 
 	private static string GeneratorName =
@@ -23,43 +22,84 @@ public class TypedIdGenerator : ISourceGenerator
 
 	private static readonly ConcurrentDictionary<Type, string> IdTypeConverters = new();
 
-
-	public void Initialize(GeneratorInitializationContext context)
+	private static Model? Transformer(GeneratorAttributeSyntaxContext context, CancellationToken token)
 	{
-		// Uncomment the next line to debug the source generator
-		// System.Diagnostics.Debugger.Launch();
-		context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
+		if (context.TargetNode is not RecordDeclarationSyntax syntaxNode)
+			return null;
+		if (syntaxNode.ParameterList?.Parameters.SingleOrDefault(p => p.Identifier.Text == "Id") is not { } idParam)
+			return null;
+		if (idParam.Type?.ToString() is not { } iDTypeName)
+			return null;
+
+		var recordType = syntaxNode.ClassOrStructKeyword.Text == "struct" ? "record struct" : "record";
+		return new Model(Namespace: GetNamespace(syntaxNode),
+			TypeName: syntaxNode.Identifier.Text,
+			IdTypeName: iDTypeName,
+			RecordType: recordType);
 	}
 
-	public void Execute(GeneratorExecutionContext context)
+	public static bool PredicateFilter(SyntaxNode node, CancellationToken token)
 	{
-		if (context.SyntaxReceiver is not SyntaxReceiver receiver)
-			return;
+		var result = false;
+		if (node is RecordDeclarationSyntax typeSyntax)
+			result = typeSyntax.Modifiers.Any(t => t.Text == "partial");
+		return result;
+	}
 
-		foreach (var declaration in receiver.CandidateDeclarations)
+	public void Initialize(IncrementalGeneratorInitializationContext context)
+	{
+		context.RegisterPostInitializationOutput(ctx =>
 		{
-			var model = context.Compilation.GetSemanticModel(declaration.SyntaxTree);
-			var type = model.GetDeclaredSymbol(declaration);
-			if (type is null)
-				continue;
+			ctx.AddSource("GenerateTypedIdAttribute.g.cs", Helper.Attribute);
+			ctx.AddSource("ITypedId.g.cs", Helper.Interface);
+		});
 
-			if (type.AllInterfaces.FirstOrDefault(t => t.ConstructedFrom.ToString() == TypedIdName) is not { } symbol)
-				continue;
+		var provider = context.SyntaxProvider.ForAttributeWithMetadataName(
+				"Letterbook.Generators.GenerateTypedIdAttribute",
+				predicate: PredicateFilter,
+				transform: Transformer)
+			.Where(static m => m is not null);
 
-			AddIdPartial(context, type, symbol);
-			AddIdTypeConverter(context, type, symbol);
-			AddIdTypeJsonConverter(context, type, symbol);
-			AddIdTypeEFConverter(context, type, symbol);
-			AddIdTypeSwaggerSchema(context, type, symbol);
-		}
+		context.RegisterImplementationSourceOutput(provider, OutputTypedIdAspTypeConverter!);
+		context.RegisterImplementationSourceOutput(provider, OutputTypedIdJsonConverter!);
+		context.RegisterImplementationSourceOutput(provider, OutputTypedIdEfConverter!);
+		context.RegisterImplementationSourceOutput(provider, OutputTypedIdSwaggerSchema!);
+		context.RegisterImplementationSourceOutput(provider, OutputTypedIdPartial!);
 	}
 
-	private void AddIdTypeSwaggerSchema(GeneratorExecutionContext context, INamedTypeSymbol type, INamedTypeSymbol symbol)
+
+
+	private static void OutputTypedIdPartial(SourceProductionContext context, Model model)
 	{
-		var fullNamespace = type.ContainingNamespace.ToDisplayString();
-		var idType = symbol.TypeArguments.Single();
-		var schemaType = idType.ToString() == "int" ? "integer" : "string";
-		var typeName = type.Name;
+		context.AddSource($"{model.TypeName}.g.cs", FormatTypedIdPartial(model));
+	}
+
+	private static void OutputTypedIdAspTypeConverter(SourceProductionContext context, Model model)
+	{
+		context.AddSource($"{model.TypeName}Converter.g.cs", FormatIdTypeConverter(model));
+	}
+
+	private static void OutputTypedIdJsonConverter(SourceProductionContext context, Model model)
+	{
+		context.AddSource($"{model.TypeName}JsonConverter.g.cs", FormatIdTypeJsonConverter(model));
+	}
+
+	private static void OutputTypedIdEfConverter(SourceProductionContext context, Model model)
+	{
+		context.AddSource($"{model.TypeName}EfConverter.g.cs", FormatTypedIdEfConverter(model));
+	}
+
+	private static void OutputTypedIdSwaggerSchema(SourceProductionContext context, Model model)
+	{
+		context.AddSource($"{model.TypeName}SwaggerSchemaFilter.g.cs", FormatTypedIdSwaggerSchema(model));
+	}
+
+	private static string FormatTypedIdSwaggerSchema(Model model)
+	{
+		var fullNamespace = model.Namespace;
+		var idType = model.IdTypeName;
+		var schemaType = idType == "int" ? "integer" : "string";
+		var typeName = model.TypeName;
 		var source =
 			$$"""
 			  // <auto-generated from {{GeneratorName}}/>
@@ -81,20 +121,18 @@ public class TypedIdGenerator : ISourceGenerator
 			      }
 			  }
 			  """;
-
-		context.AddSource($"{typeName}SwaggerSchemaFilter.g.cs", source);
-
+		return source;
 	}
 
-	private void AddIdTypeEFConverter(GeneratorExecutionContext context, INamedTypeSymbol type, INamedTypeSymbol symbol)
+	private static string FormatTypedIdEfConverter(Model model)
 	{
-		var fullNamespace = type.ContainingNamespace.ToDisplayString();
-		var idType = symbol.TypeArguments.Single();
-		var isUuid7 = idType.ToString() == UuidName;
-		var dbTypeName = isUuid7 ? "Guid" : idType.ToString();
+		var fullNamespace = model.Namespace;
+		var idType = model.IdTypeName;
+		var isUuid7 = UuidName.EndsWith(idType);
+		var dbTypeName = isUuid7 ? "Guid" : idType;
 		var toDbType = isUuid7 ? ".ToGuid()" : "";
 		var fromDbType = isUuid7 ? "new Medo.Uuid7(value)" : "value";
-		var typeName = type.Name;
+		var typeName = model.TypeName;
 		var source =
 			$$"""
 			  // <auto-generated from {{GeneratorName}}/>
@@ -110,14 +148,17 @@ public class TypedIdGenerator : ISourceGenerator
 			      public {{typeName}}EfConverter() : base(id => id.Id{{toDbType}}, value => new({{fromDbType}})) { }
 			  }
 			  """;
-		context.AddSource($"{typeName}EfConverter.g.cs", source);
+		return source;
 	}
 
-	private void AddIdTypeJsonConverter(GeneratorExecutionContext context, INamedTypeSymbol type, INamedTypeSymbol symbol)
+	private static string FormatIdTypeJsonConverter(Model model)
 	{
-		var fullNamespace = type.ContainingNamespace.ToDisplayString();
-		var idType = symbol.TypeArguments.Single();
-		var typeName = type.Name;
+		var fullNamespace = model.Namespace;
+		var idType = model.IdTypeName;
+		var typeName = model.TypeName;
+		var isUuid7 = UuidName.EndsWith(idType);
+		var usingLine = isUuid7 ? "using Medo;" : "";
+
 		var source =
 			$$"""
 			  // <auto-generated from {{GeneratorName}}/>
@@ -125,6 +166,7 @@ public class TypedIdGenerator : ISourceGenerator
 			  using System.Text.Json;
 			  using System.Text.Json.Serialization;
 			  using Letterbook.Generators;
+			  {{usingLine}}
 
 			  namespace {{fullNamespace}};
 
@@ -152,24 +194,26 @@ public class TypedIdGenerator : ISourceGenerator
 			      }
 			  }
 			  """;
-		context.AddSource($"{typeName}JsonConverter.g.cs", source);
+		return source;
 	}
 
-	private void AddIdTypeConverter(GeneratorExecutionContext context, INamedTypeSymbol type, INamedTypeSymbol symbol)
+	private static string FormatIdTypeConverter(Model model)
 	{
-		var fullNamespace = type.ContainingNamespace.ToDisplayString();
-		var typeName = type.Name;
-		var idType = symbol.TypeArguments.Single();
-		var switchLine = idType.ToString() == "string" ? "" : $"{idType} t => new {typeName}(t),";
+		var fullNamespace = model.Namespace;
+		var typeName = model.TypeName;
+		var idType = model.IdTypeName;
+		var switchLine = idType == "string" ? "" : $"{idType} t => new {typeName}(t),";
+		var isUuid7 = UuidName.EndsWith(idType);
+		var usingLine = isUuid7 ? "using Medo;" : "";
 
-		var source =
+		var result =
 			$$"""
 			  // <auto-generated from {{GeneratorName}}/>
 
 			  using System;
 			  using System.ComponentModel;
 			  using System.Globalization;
-
+			  {{usingLine}}
 
 			  namespace {{fullNamespace}};
 
@@ -217,37 +261,36 @@ public class TypedIdGenerator : ISourceGenerator
 			  	}
 			  }
 			  """;
-		context.AddSource($"{typeName}Converter.g.cs", source);
+		return result;
 	}
 
-	private static void AddIdPartial(GeneratorExecutionContext context, INamedTypeSymbol type, INamedTypeSymbol symbol)
+	private static string FormatTypedIdPartial(Model model)
 	{
-		var fullNamespace = type.ContainingNamespace.ToDisplayString();
-		var typeName = type.Name;
-		var idType = symbol.TypeArguments.Single();
-		var isUuid7 = idType.ToString() == UuidName;
+		var fullNamespace = model.Namespace;// GetNamespace(source);
+		var typeName = model.TypeName;// source.Identifier.Text;// type.Name;
+		var idType = model.IdTypeName;// source.TypeParameterList!.Parameters.Single().Identifier.Text;// symbol.TypeArguments.Single();
+		var isUuid7 = UuidName.EndsWith(idType);
 		var toStringFn = isUuid7
 			? "ToId25String()"
 			: "ToString()";
 		var fromStringFn = isUuid7
-			? "Medo.Uuid7.FromId25String(s)"
+			? "Uuid7.FromId25String(s)"
 			: $"{idType}.Parse(s)";
-		var typeDef = type.IsValueType
-			? "record struct"
-			: "record";
+		var usingLine = isUuid7 ? "using Medo;" : "";
 
-		var source =
+		var result =
 			$$"""
 			  // <auto-generated from {{GeneratorName}}/>
 
 			  using System.ComponentModel;
 			  using Swashbuckle.AspNetCore.Annotations;
+			  {{usingLine}}
 
 			  namespace {{fullNamespace}}
 			  {
 			      [SwaggerSchemaFilter(typeof({{typeName}}SchemaFilter))]
 			      [TypeConverter(typeof({{typeName}}Converter))]
-			      partial {{typeDef}} {{typeName}}
+			      partial {{model.RecordType}} {{typeName}} : Letterbook.Generators.ITypedId<{{idType}}>
 			      {
 			          public override string ToString() => Id.{{toStringFn}};
 			          public static {{idType}} FromString(string s) => {{fromStringFn}};
@@ -257,7 +300,50 @@ public class TypedIdGenerator : ISourceGenerator
 			      }
 			  }
 			  """;
-		context.AddSource($"{typeName}.g.cs", source);
+		return result;
+	}
+
+	private static string GetNamespace(TypeDeclarationSyntax syntax)
+	{
+		// If we don't have a namespace at all we'll return an empty string
+		// This accounts for the "default namespace" case
+		var nameSpace = string.Empty;
+
+		// Get the containing syntax node for the type declaration
+		// (could be a nested type, for example)
+		var potentialNamespaceParent = syntax.Parent;
+
+		// Keep moving "out" of nested classes etc until we get to a namespace
+		// or until we run out of parents
+		while (potentialNamespaceParent != null &&
+		       potentialNamespaceParent is not NamespaceDeclarationSyntax
+		       && potentialNamespaceParent is not FileScopedNamespaceDeclarationSyntax)
+		{
+			potentialNamespaceParent = potentialNamespaceParent.Parent;
+		}
+
+		if (potentialNamespaceParent is not BaseNamespaceDeclarationSyntax namespaceParent) return nameSpace;
+
+		// Build up the final namespace by walking up the syntax tree until we no longer have a namespace declaration
+		// We have a namespace. Use that as the type
+		nameSpace = namespaceParent.Name.ToString();
+
+		// Keep moving "out" of the namespace declarations until we
+		// run out of nested namespace declarations
+		while (true)
+		{
+			if (namespaceParent.Parent is not NamespaceDeclarationSyntax parent)
+			{
+				break;
+			}
+
+			// Add the outer namespace as a prefix to the final namespace
+			nameSpace = $"{namespaceParent.Name}.{nameSpace}";
+			namespaceParent = parent;
+		}
+
+		// return the final namespace
+		return nameSpace;
 	}
 
 	private class SyntaxReceiver : ISyntaxReceiver
@@ -272,5 +358,13 @@ public class TypedIdGenerator : ISourceGenerator
 				CandidateDeclarations.Add(declaration);
 			}
 		}
+	}
+
+	private class Model(string Namespace, string TypeName, string IdTypeName, string RecordType)
+	{
+		public string Namespace { get; } = Namespace;
+		public string TypeName { get; } = TypeName;
+		public string IdTypeName { get; } = IdTypeName;
+		public string RecordType { get; } = RecordType;
 	}
 }

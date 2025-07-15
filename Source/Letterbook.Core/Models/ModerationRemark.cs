@@ -3,7 +3,8 @@ using Medo;
 
 namespace Letterbook.Core.Models;
 
-public partial record struct ModerationRemarkId(Uuid7 Id) : ITypedId<Uuid7>;
+[GenerateTypedId]
+public partial record struct ModerationRemarkId(Uuid7 Id);
 
 public class ModerationRemark : IComparable<ModerationRemark>
 {

@@ -27,7 +27,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
 
 #      We clean the local cache first, because it can get re-used from other people's
 #      runs, and caching their dependencies just inflates our cache size and

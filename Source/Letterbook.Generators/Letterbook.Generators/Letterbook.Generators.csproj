@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net8.0;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net9.0;netstandard2.0</TargetFrameworks>
         <IsPackable>false</IsPackable>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
@@ -17,6 +17,12 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp"/>
         <PackageReference Include="Microsoft.CodeAnalysis.Common"/>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="ITypedId.cs" />
+      <Compile Remove="GenerateTypedIdAttribute.cs" />
+      <Compile Remove="SimpleGenerator.cs" />
     </ItemGroup>
 
 </Project>
