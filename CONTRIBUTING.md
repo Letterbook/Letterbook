@@ -101,7 +101,7 @@ Most things are not implemented, but some of it has been stubbed out to provide 
 
 This will get you up an running quickly. You can skip ahead for some discussion of our dependencies if you like.
 
-0. [Install the dotnet 8 SDK][dotnet] and a docker runtime with docker compose (either [docker desktop][docker] or [podman][podman] should work)
+0. [Install the dotnet 9 SDK][dotnet] and a docker runtime with docker compose (either [docker desktop][docker] or [podman][podman] should work)
 
 1. Start up the database
 ```shell
