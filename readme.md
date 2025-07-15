@@ -4,7 +4,7 @@
 
 [![Build status badge](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml/badge.svg?branch=main)](https://github.com/Letterbook/Letterbook/actions/workflows/pull-request.yml)
 [![Good first issues badge](https://img.shields.io/github/issues-search/letterbook/letterbook?query=is%3Aissue%20is%3Aopen%20label%3A%22ready%20to%20start%22%2C%22good%20first%20issue%22%20&style=flat&logo=github&label=Good%20first%20issue&labelColor=%23404951&color=%2333CB56)](https://github.com/Letterbook/Letterbook/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22%2C%22ready+to+start%22)
-![Dotnet 9 supported](https://img.shields.io/badge/dotnet-9.0-purple?style=flat&color=512bd5)
+[![Dotnet 9 supported](https://img.shields.io/badge/dotnet-9.0-purple?style=flat&color=512bd5)][dotnet]
 
 
 
@@ -130,3 +130,4 @@ Please note that this roadmap is only updated ocassionally. The project's Github
 
 
 [sup-board]: https://github.com/orgs/Letterbook/projects/5/views/4
+[dotnet]: https://dotnet.microsoft.com/en-us/download
