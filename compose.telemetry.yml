@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
 
   tempo:
-    image: &tempo-image grafana/tempo:2.6.1
+    image: &tempo-image grafana/tempo:2.8.1
     command: [ "-config.file=/etc/tempo.yaml" ]
     depends_on:
       tempo-init:
