@@ -10,7 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development"
 		readme.md = readme.md
 		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
 		CONTRIBUTING.md = CONTRIBUTING.md
-		docker-compose.mastodon.yml = docker-compose.mastodon.yml
 		.editorconfig = .editorconfig
 		rootless.yml = rootless.yml
 		compose.telemetry.yml = compose.telemetry.yml

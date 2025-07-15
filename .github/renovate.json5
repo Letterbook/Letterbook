@@ -4,7 +4,8 @@
     "Moq",
     "dotnet-sdk",
     "dotnet-runtime",
-    "dotnet-ef"
+    "dotnet-ef",
+    "docker"
   ],
   "packageRules": [
     {
@@ -27,7 +28,6 @@
     {
       "matchCategories": [
         "github-actions",
-        "docker"
       ],
       "groupName": "dev dependencies"
     },
