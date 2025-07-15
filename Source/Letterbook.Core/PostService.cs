@@ -223,14 +223,13 @@ public class PostService : IAuthzPostService, IPostService
 		content.Sanitize(_sanitizers);
 		post.Contents.Add(content);
 
+		_data.Update(post);
+		await _data.Commit();
 		if (post.PublishedDate is not null)
 		{
 			post.UpdatedDate = DateTimeOffset.UtcNow;
 			await _postEvents.Published(post, (Uuid7)asProfile, _claims);
 		}
-
-		_data.Update(post);
-		await _data.Commit();
 		await _postEvents.Updated(post, (Uuid7)asProfile, _claims);
 		return post;
 	}
