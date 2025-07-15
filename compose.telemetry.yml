@@ -14,7 +14,7 @@ services:
       - loki
       - prometheus
       - tempo
-    image: grafana/grafana-oss:11.4.0
+    image: grafana/grafana-oss:11.6.3
     networks:
       - default
     ports:
