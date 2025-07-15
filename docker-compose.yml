@@ -15,7 +15,7 @@ services:
       - ts_data:/var/lib/postgresql/data
     restart: always
   postgres:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     command:
       - postgres
       - -c

@@ -69,7 +69,7 @@ services:
       - MASTODON_REDIS_HOST=mastodon_redis
       - MASTODON_DATABASE_HOST=mastodon_db
   mastodon_db:
-    image: docker.io/bitnami/postgresql:16
+    image: docker.io/bitnami/postgresql:17
     networks:
       - mastodon
     volumes:
@@ -79,7 +79,7 @@ services:
       - POSTGRESQL_USERNAME=bn_mastodon
       - POSTGRESQL_PASSWORD=bitnami1
   mastodon_redis:
-    image: docker.io/bitnami/redis:7.4
+    image: docker.io/bitnami/redis:8.0
     volumes:
       - 'redis_data:/bitnami/redis'
     networks:
@@ -87,7 +87,7 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
   mastodon_es:
-    image: docker.io/bitnami/elasticsearch:8
+    image: docker.io/bitnami/elasticsearch:9
     networks:
       - mastodon
     volumes:
