@@ -49,7 +49,7 @@
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.12.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.53.0" />
-    <PackageVersion Include="Microsoft.Playwright.NUnit" Version="1.49.0" />
+    <PackageVersion Include="Microsoft.Playwright.NUnit" Version="1.53.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="3.0.71" />
     <PackageVersion Include="MockQueryable.Moq" Version="7.0.3" />
@@ -58,12 +58,12 @@
     <PackageVersion Include="Npgsql" Version="9.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageVersion Include="Npgsql.OpenTelemetry" Version="9.0.3" />
-    <PackageVersion Include="NSign.Abstractions" Version="1.1.5" />
-    <PackageVersion Include="NSign.AspNetCore" Version="1.1.5" />
-    <PackageVersion Include="NSign.Client" Version="1.1.5" />
-    <PackageVersion Include="NSign.SignatureProviders" Version="1.1.5" />
-    <PackageVersion Include="Nunit" Version="4.3.1" />
-    <PackageVersion Include="NUnit.Analyzers" Version="4.5.0">
+    <PackageVersion Include="NSign.Abstractions" Version="1.2.0" />
+    <PackageVersion Include="NSign.AspNetCore" Version="1.2.0" />
+    <PackageVersion Include="NSign.Client" Version="1.2.0" />
+    <PackageVersion Include="NSign.SignatureProviders" Version="1.2.0" />
+    <PackageVersion Include="Nunit" Version="4.3.2" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.9.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
