@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="ActivityPub.Types" Version="0.1.0-snapshot.2024-10-13.21-01-46" />
-    <PackageVersion Include="AutoMapper" Version="14.0.0" />
+    <PackageVersion Include="AutoMapper" Version="15.0.1" />
     <PackageVersion Include="AutoMapper.Collection" Version="11.0.0" />
     <PackageVersion Include="Bogus" Version="35.6.3" />
     <PackageVersion Include="BouncyCastle.Cryptography" Version="2.6.1" />
@@ -23,7 +23,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.18" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.7" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.7" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
     <PackageVersion Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.0" />
@@ -52,7 +52,7 @@
     <PackageVersion Include="Microsoft.Playwright.NUnit" Version="1.53.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Web.LibraryManager.Build" Version="3.0.71" />
-    <PackageVersion Include="MockQueryable.Moq" Version="7.0.3" />
+    <PackageVersion Include="MockQueryable.Moq" Version="8.0.0" />
     <PackageVersion Include="Moq" Version="[4.18.4]" />
     <PackageVersion Include="Neovolve.Logging.Xunit" Version="6.3.0" />
     <PackageVersion Include="Npgsql" Version="9.0.3" />
@@ -67,7 +67,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
     <PackageVersion Include="OpenIddict.EntityFrameworkCore" Version="7.0.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
