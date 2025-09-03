@@ -35,5 +35,6 @@ public class IndexModel : PageModel
 		}
 	}
 
-	public Task<IEnumerable<Models.Post>> GetPosts() => Timeline.GetFeed(Uuid7.Empty, DateTimeOffset.UtcNow);
+	// TODO: figure out what to do for anonymous feed/homepage?
+	public Task<IEnumerable<Models.Post>> GetPosts() => Timeline.GetFeed(Self.GetId(), DateTimeOffset.UtcNow);
 }
