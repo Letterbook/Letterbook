@@ -12,7 +12,7 @@ namespace Letterbook.Core.Models;
 [GenerateTypedId]
 public partial record struct ProfileId(Uuid7 Id) : IParameterPolicy
 {
-	public static bool TryParse(string id, out ProfileId o)
+	public static bool TryParse(string? id, out ProfileId o)
 	{
 		try
 		{
