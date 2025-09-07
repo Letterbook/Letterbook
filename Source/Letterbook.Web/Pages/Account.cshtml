@@ -1,0 +1,36 @@
+@page
+@model Letterbook.Web.Pages.Account
+
+@{
+    ViewData["Title"] = "Account";
+
+}
+
+<section class="account">
+    <header>
+        <h1>Account</h1>
+        <p>@Model.DisplayName</p>
+    </header>
+    <div class="account-details">
+        <form asp-page-handler="Email" method="post" asp-route-accountId="@Model.AccountId">
+            <h2>Email</h2>
+            <label for="account-email">Your email address</label>
+            <input id="account-email" name="email" value="@Model.Email"/>
+            <button type="submit">Save</button>
+        </form>
+        
+        <form asp-page-handler="Password" method="post" asp-route-accountId="@Model.AccountId">
+            <h2>Password</h2>
+            <label for="account-password-current">Current Password</label>
+            <input id="account-password-current" name="account-password-current" type="password"/>
+
+            <label for="account-password-new">New Password</label>
+            <input id="account-password-new" name="account-password-new" type="password"/>
+
+            <label for="account-password-confirm">Confirm your new password</label>
+            <input id="account-password-confirm" name="account-password-confirm" type="password"/>
+
+            <button type="submit">Save</button>
+        </form>
+    </div>
+</section>

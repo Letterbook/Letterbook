@@ -452,6 +452,19 @@ button {
     }
 }
 
+.app .account-details {
+    form {
+        margin-bottom: 1rem;
+        border-bottom: var(--pico-border-width) solid var(--pico-table-border-color);
+        padding-bottom: 1rem;
+    } 
+    :nth-last-child(1) {
+        margin-bottom: initial;
+        border-bottom: initial;
+        padding-bottom: initial;
+    }
+}
+
 /* Collapsible menus */
 /* Always collapsible */
 .menu-collapsible,
