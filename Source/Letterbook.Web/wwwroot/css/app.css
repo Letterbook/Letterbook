@@ -454,14 +454,14 @@ button {
 
 .app .account-details {
     form {
-        margin-bottom: 1rem;
+        margin-bottom: 2rem;
         border-bottom: var(--pico-border-width) solid var(--pico-table-border-color);
         padding-bottom: 1rem;
     } 
     :nth-last-child(1) {
-        margin-bottom: initial;
-        border-bottom: initial;
-        padding-bottom: initial;
+        margin-bottom: revert;
+        border-bottom: revert;
+        padding-bottom: revert;
     }
 }
 

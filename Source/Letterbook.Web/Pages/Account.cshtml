@@ -3,13 +3,11 @@
 
 @{
     ViewData["Title"] = "Account";
-
 }
 
 <section class="account">
     <header>
         <h1>Account</h1>
-        <p>@Model.DisplayName</p>
     </header>
     <div class="account-details">
         <form asp-page-handler="Email" method="post" asp-route-accountId="@Model.AccountId">
