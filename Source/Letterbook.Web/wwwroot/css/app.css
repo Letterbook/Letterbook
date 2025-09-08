@@ -116,6 +116,14 @@ button {
     }
 }
 
+input:invalid {
+    border-color: var(--pico-form-element-invalid-border-color);
+    border-width: var(--pico-border-width);
+    &:focus {
+        border-color: var(--pico-contrast);
+    }
+}
+
 .app img.inline {
     height: 1lh;
     display: inline-block;
@@ -452,13 +460,13 @@ button {
     }
 }
 
-.app .account-details {
+.app .account {
     form {
         margin-bottom: 2rem;
         border-bottom: var(--pico-border-width) solid var(--pico-table-border-color);
         padding-bottom: 1rem;
     } 
-    :nth-last-child(1) {
+    .account-details :nth-last-child(1) {
         margin-bottom: revert;
         border-bottom: revert;
         padding-bottom: revert;

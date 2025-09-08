@@ -8,25 +8,26 @@
 <section class="account">
     <header>
         <h1>Account</h1>
+        <p><span class="display-name">@Model.DisplayName</span> <span class="display-email">(@Model.Email)</span></p>
     </header>
     <div class="account-details">
         <form asp-page-handler="Email" method="post" asp-route-accountId="@Model.AccountId">
             <h2>Email</h2>
             <label for="account-email">Your email address</label>
-            <input id="account-email" name="email" value="@Model.Email"/>
+            <input id="account-email" name="email" type="email" autocomplete="email" value="@Model.Email"/>
             <button type="submit">Save</button>
         </form>
         
         <form asp-page-handler="Password" method="post" asp-route-accountId="@Model.AccountId">
             <h2>Password</h2>
             <label for="account-password-current">Current Password</label>
-            <input id="account-password-current" name="account-password-current" type="password"/>
+            <input id="account-password-current" name="account-password-current" type="password" autocomplete="current-password"/>
 
             <label for="account-password-new">New Password</label>
-            <input id="account-password-new" name="account-password-new" type="password"/>
+            <input id="account-password-new" name="account-password-new" type="password" autocomplete="new-password"/>
 
             <label for="account-password-confirm">Confirm your new password</label>
-            <input id="account-password-confirm" name="account-password-confirm" type="password"/>
+            <input id="account-password-confirm" name="account-password-confirm" type="password" autocomplete="new-password"/>
 
             <button type="submit">Save</button>
         </form>
