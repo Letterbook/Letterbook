@@ -61,6 +61,13 @@ public class AccountService : IAccountService, IDisposable
 		}
 	}
 
+	public async Task<IdentityResult> ChangePassword(Guid id, string currentPassword, string newPassword)
+	{
+		if (await LookupAccount(id) is not { } account)
+			throw CoreException.MissingData<Account>("Account not found", id);
+		return await _identityManager.ChangePasswordAsync(account, currentPassword, newPassword);
+	}
+
 	public async Task<IdentityResult> RegisterAccount(string email, string handle, string password)
 	{
 		var baseUri = _opts.BaseUri();
@@ -124,6 +131,7 @@ public class AccountService : IAccountService, IDisposable
 	{
 		var account = await _accountAdapter.LookupAccount(accountId);
 		if (account == null) return false;
+		_logger.LogDebug("Changing email {OldEmail} to {NewEmail}", account.Email, email);
 		account.Email = email;
 		return true;
 	}

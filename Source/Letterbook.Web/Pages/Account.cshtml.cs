@@ -10,6 +10,7 @@ namespace Letterbook.Web.Pages;
 public class Account : PageModel
 {
 	private readonly IAccountService _accounts;
+	private readonly ILogger<Account> _logger;
 
 	private Models.Account _self;
 
@@ -18,10 +19,11 @@ public class Account : PageModel
 	public string Email => _self.Email ?? "";
 	public bool EmailConfirmed => _self.EmailConfirmed;
 
-	public Account(IAccountService accounts)
+	public Account(IAccountService accounts, ILogger<Account> logger)
 	{
 		_self = default!;
 		_accounts = accounts;
+		_logger = logger;
 	}
 
 	public async Task<IActionResult> OnGet()
@@ -31,6 +33,31 @@ public class Account : PageModel
 		_self = account;
 
 		return Page();
+	}
+
+	public async Task<IActionResult> OnPostEmail(string email)
+	{
+		if (!User.Claims.TryGetAccountId(out var id))
+			return Challenge();
+
+		await _accounts.UpdateEmail(id, email);
+
+		return RedirectToPage();
+	}
+
+	public async Task<IActionResult> OnPostPassword(string passwordCurrent, string passwordNew, string passwordConfirm)
+	{
+		if (!User.Claims.TryGetAccountId(out var id))
+			return Challenge();
+
+		if (passwordNew != passwordConfirm)
+			return BadRequest();
+
+		var result = await _accounts.ChangePassword(id, passwordCurrent, passwordNew);
+		if(!result.Succeeded)
+			return BadRequest();
+
+		return RedirectToPage();
 	}
 
 }
