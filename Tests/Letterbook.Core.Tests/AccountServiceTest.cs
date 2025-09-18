@@ -104,7 +104,7 @@ public class AccountServiceTest : WithMocks
 		var account = _fakeAccount.Generate();
 		DataAdapterMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
 
-		await _accountService.UpdateEmail(account.Id, "test@example.com");
+		await _accountService.GenerateChangeEmailToken(account.Id, "test@example.com");
 
 		Assert.Equal("test@example.com", account.Email);
 	}

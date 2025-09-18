@@ -126,14 +126,12 @@ public class AccountService : IAccountService, IDisposable
 			.FirstOrDefaultAsync();
 	}
 
-	// TODO: do this through Identity
-	public async Task<bool> UpdateEmail(Guid accountId, string email)
+	public async Task<string> GenerateChangeEmailToken(Guid accountId, string email)
 	{
-		var account = await _accountAdapter.LookupAccount(accountId);
-		if (account == null) return false;
-		_logger.LogDebug("Changing email {OldEmail} to {NewEmail}", account.Email, email);
-		account.Email = email;
-		return true;
+		var account = await _accountAdapter.LookupAccount(accountId)
+		              ?? throw CoreException.MissingData<Account>(accountId);
+		_logger.LogDebug("Preparing email change token {OldEmail} to {NewEmail} for {Account}", account.Email, email, accountId);
+		return await _identityManager.GenerateChangeEmailTokenAsync(account, email);
 	}
 
 	public async Task<bool> AddLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims)

@@ -98,7 +98,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Areas\Account\" />
       <Folder Include="ViewComponents\" />
     </ItemGroup>
 </Project>

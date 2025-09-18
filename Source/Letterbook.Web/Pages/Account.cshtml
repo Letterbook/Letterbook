@@ -11,13 +11,19 @@
         <p><span class="display-name">@Model.DisplayName</span> <span class="display-email">(@Model.Email)</span></p>
     </header>
     <div class="account-details">
+        @if (Model.ConfirmUrl is not null)
+        {
+            <a href="@Model.ConfirmUrl">Click here to confirm your new email</a>
+            <p>This is temporary, until email support is built</p>
+        }
         <form asp-page-handler="Email" method="post" asp-route-accountId="@Model.AccountId">
             <h2>Email</h2>
             <label for="account-email">Your email address</label>
-            <input id="account-email" name="email" type="email" autocomplete="email" value="@Model.Email"/>
+            <input id="account-email" name="newEmail" type="email" autocomplete="email" value="@Model.Email"/>
+            <input type="hidden" name="oldEmail" value="@Model.Email"/>
             <button type="submit">Save</button>
         </form>
-        
+
         <form asp-page-handler="Password" method="post" asp-route-accountId="@Model.AccountId">
             <h2>Password</h2>
             <label for="account-password-current">Current Password</label>

@@ -1,0 +1,16 @@
+@page
+@model Letterbook.Web.Areas.Account.Pages.ChangeEmail
+
+@{
+    ViewData["Title"] = $"Change email - {Model.ChangeEmailResult}";
+}
+    
+<section>
+    <h1>Change Email</h1>
+    <article>
+        <header>
+            @Model.ChangeEmailResult
+        </header>
+        <p>@Model.ChangeEmailDetail</p>
+    </article>
+</section>

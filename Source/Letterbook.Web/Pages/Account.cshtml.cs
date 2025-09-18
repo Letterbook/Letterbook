@@ -1,5 +1,8 @@
 using Letterbook.Core;
 using Letterbook.Core.Extensions;
+using Letterbook.Web.Areas.Account;
+using Letterbook.Web.Areas.Account.Pages;
+using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -18,6 +21,8 @@ public class Account : PageModel
 	public string DisplayName => _self.Name ?? _self.UserName ?? "unknown";
 	public string Email => _self.Email ?? "";
 	public bool EmailConfirmed => _self.EmailConfirmed;
+	public string? ConfirmUrl { get; set; }
+
 
 	public Account(IAccountService accounts, ILogger<Account> logger)
 	{
@@ -35,14 +40,19 @@ public class Account : PageModel
 		return Page();
 	}
 
-	public async Task<IActionResult> OnPostEmail(string email)
+	public async Task<IActionResult> OnPostEmail(string newEmail, string oldEmail)
 	{
 		if (!User.Claims.TryGetAccountId(out var id))
 			return Challenge();
 
-		await _accounts.UpdateEmail(id, email);
+		var token = await _accounts.GenerateChangeEmailToken(id, newEmail);
+		ConfirmUrl = Url.PageLink(nameof(ChangeEmail), values: new { area = "Account", token, oldEmail, newEmail });
 
-		return RedirectToPage();
+		if (await _accounts.LookupAccount(id) is not { } account)
+			return Challenge();
+		_self = account;
+
+		return Page();
 	}
 
 	public async Task<IActionResult> OnPostPassword(string passwordCurrent, string passwordNew, string passwordConfirm)
