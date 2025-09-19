@@ -29,6 +29,7 @@ public interface IAccountService
 	/// <returns></returns>
 	public Task<Account?> FirstAccount(string email);
 	public Task<string> GenerateChangeEmailToken(Guid accountId, string email);
+	public Task<IdentityResult> ChangeEmailWithToken(string oldEmail, string newEmail, string token);
 	public Task<bool> AddLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims);
 	public Task<bool> UpdateLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims);
 	public Task<bool> RemoveLinkedProfile(Guid accountId, Profile profile);

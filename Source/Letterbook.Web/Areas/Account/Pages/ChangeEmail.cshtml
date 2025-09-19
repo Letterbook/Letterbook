@@ -11,6 +11,11 @@
         <header>
             @Model.ChangeEmailResult
         </header>
-        <p>@Model.ChangeEmailDetail</p>
+        <ul>
+            @foreach (var detail in Model.ChangeEmailDetails)
+            {
+                <li>@detail</li>
+            }
+        </ul>
     </article>
 </section>
