@@ -64,6 +64,7 @@ public class Program
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders()
 			.AddDefaultUI();
+		builder.Services.ConfigureAccountManagement(builder.Configuration);
 		builder.Services.AddRazorPages()
 			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!)
 			.AddRazorPagesOptions(options => options.AddWebRoutes());

@@ -30,7 +30,7 @@ public class ChangeEmail : PageModel
 		}
 
 		ChangeEmailDetails = result.Errors.Select(e => e.Description).ToList();
-		ChangeEmailResult = "Error";
+		ChangeEmailResult = "Your email address has not been changed";
 
 		return Page();
 	}
