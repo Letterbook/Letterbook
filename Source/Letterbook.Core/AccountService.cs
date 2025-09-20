@@ -136,7 +136,7 @@ public class AccountService : IAccountService, IDisposable
 
 	public async Task<IdentityResult> ChangeEmailWithToken(string oldEmail, string newEmail, string token)
 	{
-		var account = await _identityManager.FindByEmailAsync(oldEmail) ?? throw CoreException.MissingData<Account>(oldEmail);
+		var account = await _accountAdapter.FindAccountByEmail(oldEmail) ?? throw CoreException.MissingData<Account>(oldEmail);
 		return await _identityManager.ChangeEmailAsync(account, newEmail, token);
 	}
 

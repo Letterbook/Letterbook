@@ -42,6 +42,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Source\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj" />
       <ProjectReference Include="..\..\Source\Letterbook.Core\Letterbook.Core.csproj" />
     </ItemGroup>
 

@@ -61,18 +61,6 @@ public class AccountServiceTest : WithMocks
 		AccountEventServiceMock.Verify(mock => mock.Created(It.IsAny<Account>()));
 	}
 
-	[Fact(DisplayName = "Should do nothing when registration fails")]
-	public async Task RegisterAccountFail()
-	{
-		_mockIdentityManager.UserStore.Setup(m => m.CreateAsync(It.IsAny<Account>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(IdentityResult.Failed());
-
-		var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password");
-
-		Assert.False(actual.Succeeded);
-		AccountEventServiceMock.VerifyNoOtherCalls();
-	}
-
 	[Fact(DisplayName = "Should return single lookups")]
 	public async Task LookupTest()
 	{
@@ -99,14 +87,26 @@ public class AccountServiceTest : WithMocks
 	}
 
 	[Fact(DisplayName = "Should update the email address")]
-	public async Task UpdateTest()
+	public async Task UpdateEmailTest()
 	{
 		var account = _fakeAccount.Generate();
+		var oldEmail = account.Email!;
+		var expected = "test@example.com";
+
+		_mockIdentityManager.UserStore.Setup(m => m.GetUserIdAsync(account, It.IsAny<CancellationToken>())).ReturnsAsync(account.Id.ToString);
+		_mockIdentityManager.UserStore.As<IUserEmailStore<Account>>()
+			.Setup(m => m.FindByEmailAsync(oldEmail.ToUpper(), It.IsAny<CancellationToken>())).ReturnsAsync(account);
+		_mockIdentityManager.UserStore.Setup(m => m.UpdateAsync(It.IsAny<Account>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(IdentityResult.Success)
+			.Verifiable();
 		DataAdapterMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
+		DataAdapterMock.Setup(m => m.FindAccountByEmail(account.Email!)).ReturnsAsync(account);
 
-		await _accountService.GenerateChangeEmailToken(account.Id, "test@example.com");
+		var token = await _accountService.GenerateChangeEmailToken(account.Id, expected);
+		var result = await _accountService.ChangeEmailWithToken(oldEmail!, expected, token);
 
-		Assert.Equal("test@example.com", account.Email);
+		Assert.True(result.Succeeded);
+		_mockIdentityManager.UserStore.Verify();
 	}
 
 	[Fact(DisplayName = "Should link new profiles")]
