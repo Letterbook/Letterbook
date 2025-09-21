@@ -20,7 +20,6 @@ public class ChangeEmail : PageModel
 
 	public async Task<IActionResult> OnGet([FromQuery] string token, [FromQuery] string oldEmail, [FromQuery] string newEmail)
 	{
-		_logger.LogInformation("ChangeEmail {OldEmail} to {NewEmail} authorized by {Token}", oldEmail, newEmail, token);
 		var result = await _accounts.ChangeEmailWithToken(oldEmail, newEmail, token);
 
 		if (result.Succeeded)
@@ -28,9 +27,11 @@ public class ChangeEmail : PageModel
 			ChangeEmailResult = "Success";
 			ChangeEmailDetails = ["Your email address has been changed"];
 		}
-
-		ChangeEmailDetails = result.Errors.Select(e => e.Description).ToList();
-		ChangeEmailResult = "Your email address has not been changed";
+		else
+		{
+			ChangeEmailDetails = result.Errors.Select(e => e.Description).ToList();
+			ChangeEmailResult = "Your email address has not been changed";
+		}
 
 		return Page();
 	}

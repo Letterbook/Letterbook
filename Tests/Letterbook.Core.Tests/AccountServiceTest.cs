@@ -99,7 +99,8 @@ public class AccountServiceTest : WithMocks
 		_mockIdentityManager.UserStore.Setup(m => m.UpdateAsync(It.IsAny<Account>(), It.IsAny<CancellationToken>()))
 			.ReturnsAsync(IdentityResult.Success)
 			.Verifiable();
-		DataAdapterMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
+		DataAdapterMock.Setup(m => m.Accounts(account.Id)).Returns(() => new List<Account>{account}.BuildMock());
+		DataAdapterMock.Setup(m => m.AllAccounts()).Returns(() => new List<Account>{account}.BuildMock());
 		DataAdapterMock.Setup(m => m.FindAccountByEmail(account.Email!)).ReturnsAsync(account);
 
 		var token = await _accountService.GenerateChangeEmailToken(account.Id, expected);

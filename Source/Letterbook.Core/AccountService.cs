@@ -128,16 +128,20 @@ public class AccountService : IAccountService, IDisposable
 
 	public async Task<string> GenerateChangeEmailToken(Guid accountId, string email)
 	{
-		var account = await _accountAdapter.LookupAccount(accountId)
-		              ?? throw CoreException.MissingData<Account>(accountId);
+		var account = await _accountAdapter.Accounts(accountId)
+			.FirstOrDefaultAsync() ?? throw CoreException.MissingData<Account>(accountId);
 		_logger.LogDebug("Preparing email change token {OldEmail} to {NewEmail} for {Account}", account.Email, email, accountId);
 		return await _identityManager.GenerateChangeEmailTokenAsync(account, email);
 	}
 
 	public async Task<IdentityResult> ChangeEmailWithToken(string oldEmail, string newEmail, string token)
 	{
-		var account = await _accountAdapter.FindAccountByEmail(oldEmail) ?? throw CoreException.MissingData<Account>(oldEmail);
-		return await _identityManager.ChangeEmailAsync(account, newEmail, token);
+		var account = await _accountAdapter.AllAccounts().Where(a => a.NormalizedEmail == _identityManager.NormalizeEmail(oldEmail))
+			.OrderBy(a => a.Email)
+			.FirstOrDefaultAsync() ?? throw CoreException.MissingData<Account>(oldEmail);
+		var result = await _identityManager.ChangeEmailAsync(account, newEmail, token);
+		_logger.LogInformation("Password changed {@Result}", result);
+		return result;
 	}
 
 	public async Task<bool> AddLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims)
