@@ -130,7 +130,6 @@ public class AccountService : IAccountService, IDisposable
 	{
 		var account = await _accountAdapter.Accounts(accountId)
 			.FirstOrDefaultAsync() ?? throw CoreException.MissingData<Account>(accountId);
-		_logger.LogDebug("Preparing email change token {OldEmail} to {NewEmail} for {Account}", account.Email, email, accountId);
 		return await _identityManager.GenerateChangeEmailTokenAsync(account, email);
 	}
 
@@ -140,7 +139,6 @@ public class AccountService : IAccountService, IDisposable
 			.OrderBy(a => a.Email)
 			.FirstOrDefaultAsync() ?? throw CoreException.MissingData<Account>(oldEmail);
 		var result = await _identityManager.ChangeEmailAsync(account, newEmail, token);
-		_logger.LogInformation("Password changed {@Result}", result);
 		return result;
 	}
 

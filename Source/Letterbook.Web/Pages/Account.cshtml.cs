@@ -1,8 +1,5 @@
 using Letterbook.Core;
 using Letterbook.Core.Extensions;
-using Letterbook.Web.Areas.Account;
-using Letterbook.Web.Areas.Account.Pages;
-using MassTransit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -12,10 +9,15 @@ namespace Letterbook.Web.Pages;
 [Authorize(Policy = Constants.AuthzPolicy)]
 public class Account : PageModel
 {
+	internal const string ConfirmEmailAction = "ConfirmEmail";
+	internal const string ChangeEmailAction = "ChangeEmail";
+
 	private readonly IAccountService _accounts;
 	private readonly ILogger<Account> _logger;
 
 	private Models.Account _self;
+
+	[FromQuery(Name = "pageAction")] public string? PageAction { get; set; }
 
 	public Guid AccountId => _self.Id;
 	public string DisplayName => _self.Name ?? _self.UserName ?? "unknown";
@@ -23,6 +25,8 @@ public class Account : PageModel
 	public bool EmailConfirmed => _self.EmailConfirmed;
 	public string? ConfirmUrl { get; set; }
 
+	public string ConfirmEmailResult { get; set; } = "";
+	public List<string> ConfirmEmailDetails { get; set; } = [];
 
 	public Account(IAccountService accounts, ILogger<Account> logger)
 	{
@@ -31,11 +35,23 @@ public class Account : PageModel
 		_logger = logger;
 	}
 
-	public async Task<IActionResult> OnGet()
+	public async Task<IActionResult> OnGet([FromQuery] string? token = null, [FromQuery] string? oldEmail = null,
+		[FromQuery] string? newEmail = null)
 	{
 		if (!User.Claims.TryGetAccountId(out var id) || await _accounts.LookupAccount(id) is not { } account)
 			return Challenge();
 		_self = account;
+
+		switch (PageAction)
+		{
+			case ConfirmEmailAction:
+				if (token is null || oldEmail is null || newEmail is null)
+					return BadRequest();
+				await ActionConfirmEmail(token, oldEmail, newEmail);
+				break;
+			case ChangeEmailAction:
+				break;
+		}
 
 		return Page();
 	}
@@ -46,7 +62,7 @@ public class Account : PageModel
 			return Challenge();
 
 		var token = await _accounts.GenerateChangeEmailToken(id, newEmail);
-		ConfirmUrl = Url.PageLink(nameof(ChangeEmail), values: new { area = "Account", token, oldEmail, newEmail });
+		ConfirmUrl = Url.PageLink(nameof(Account), values: new { pageAction = "ConfirmEmail", token, oldEmail, newEmail });
 
 		if (await _accounts.LookupAccount(id) is not { } account)
 			return Challenge();
@@ -64,10 +80,25 @@ public class Account : PageModel
 			return BadRequest();
 
 		var result = await _accounts.ChangePassword(id, passwordCurrent, passwordNew);
-		if(!result.Succeeded)
+		if (!result.Succeeded)
 			return BadRequest();
 
 		return RedirectToPage();
 	}
 
+	private async Task ActionConfirmEmail(string token, string oldEmail, string newEmail)
+	{
+		var result = await _accounts.ChangeEmailWithToken(oldEmail, newEmail, token);
+
+		if (result.Succeeded)
+		{
+			ConfirmEmailResult = "Success";
+			ConfirmEmailDetails = ["Your email address has been changed"];
+		}
+		else
+		{
+			ConfirmEmailDetails = result.Errors.Select(e => e.Description).ToList();
+			ConfirmEmailResult = "Your email address has not been changed";
+		}
+	}
 }

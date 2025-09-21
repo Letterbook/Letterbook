@@ -11,11 +11,42 @@
         <p><span class="display-name">@Model.DisplayName</span> <span class="display-email">(@Model.Email)</span></p>
     </header>
     <div class="account-details">
-        @if (Model.ConfirmUrl is not null)
-        {
-            <a href="@Model.ConfirmUrl">Click here to confirm your new email</a>
-            <p>This is temporary, until email support is built</p>
-        }
+        <dialog @(Model.PageAction == Account.ConfirmEmailAction ? "open" : "")>
+            <article>
+                <header>
+                    <h2>@Model.ConfirmEmailResult</h2>
+                </header>
+                <ul>
+                    @foreach (var detail in Model.ConfirmEmailDetails)
+                    {
+                        <li>@detail</li>
+                    }
+                </ul>
+                <footer>
+                    <form method="dialog">
+                        <button type="submit">Close</button>
+                    </form>
+                </footer>
+            </article>
+        </dialog>
+
+        <dialog @(Model.ConfirmUrl is not null ? "open" : "")>
+            <article>
+                <header>
+                    <h2>Confirm your email</h2>
+                </header>
+                <ul>
+                    <li><a href="@Model.ConfirmUrl">Click here to confirm your new email</a></li>
+                    <li>This is temporary, until email support is built</li>
+                </ul>
+                <footer>
+                    <form method="dialog">
+                        <button type="submit" class="secondary">Cancel</button>
+                    </form>
+                </footer>
+            </article>
+        </dialog>
+
         <form asp-page-handler="Email" method="post" asp-route-accountId="@Model.AccountId">
             <h2>Email</h2>
             <label for="account-email">Your email address</label>
@@ -27,7 +58,8 @@
         <form asp-page-handler="Password" method="post" asp-route-accountId="@Model.AccountId">
             <h2>Password</h2>
             <label for="account-password-current">Current Password</label>
-            <input id="account-password-current" name="passwordCurrent" type="password" autocomplete="current-password"/>
+            <input id="account-password-current" name="passwordCurrent" type="password"
+                   autocomplete="current-password"/>
 
             <label for="account-password-new">New Password</label>
             <input id="account-password-new" name="passwordNew" type="password" autocomplete="new-password"/>
