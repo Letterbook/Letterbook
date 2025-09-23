@@ -7,7 +7,7 @@
 
 <section class="account">
     <header>
-        <h1>Manage Your Account</h1>
+        <h1>Account Settings</h1>
         <p><span class="display-name">@Model.DisplayName</span> <span class="display-email">(@Model.Email)</span></p>
     </header>
     <div class="account-details">
@@ -33,12 +33,10 @@
         <dialog @(Model.ConfirmUrl is not null ? "open" : "")>
             <article>
                 <header>
-                    <h2>Confirm your email</h2>
+                    <h2>Confirm new email</h2>
                 </header>
-                <ul>
-                    <li><a href="@Model.ConfirmUrl">Click here to confirm your new email</a></li>
-                    <li>This is temporary, until email support is built</li>
-                </ul>
+                    <p><a href="@Model.ConfirmUrl">Click here to confirm your new email</a></p>
+                    <p>This is a temporary process, until email support is implemented</p>
                 <footer>
                     <form method="dialog">
                         <button type="submit" class="secondary">Cancel</button>
@@ -49,22 +47,23 @@
 
         <form asp-page-handler="Email" method="post" asp-route-accountId="@Model.AccountId">
             <h2>Email</h2>
-            <label for="account-email">Your email address</label>
+            <label for="account-email">Email address</label>
             <input id="account-email" name="newEmail" type="email" autocomplete="email" value="@Model.Email"/>
             <input type="hidden" name="oldEmail" value="@Model.Email"/>
             <button type="submit">Save</button>
         </form>
 
         <form asp-page-handler="Password" method="post" asp-route-accountId="@Model.AccountId">
-            <h2>Password</h2>
+            <h2>Security</h2>
             <label for="account-password-current">Current Password</label>
             <input id="account-password-current" name="passwordCurrent" type="password"
                    autocomplete="current-password"/>
+            <small><a asp-area="Account" asp-page="PasswordReset">Forgot password</a></small>
 
             <label for="account-password-new">New Password</label>
             <input id="account-password-new" name="passwordNew" type="password" autocomplete="new-password"/>
 
-            <label for="account-password-confirm">Confirm your new password</label>
+            <label for="account-password-confirm">Confirm new password</label>
             <input id="account-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password"/>
 
             <button type="submit">Save</button>
