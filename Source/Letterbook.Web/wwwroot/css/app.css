@@ -116,14 +116,6 @@ button {
     }
 }
 
-input:invalid {
-    border-color: var(--pico-form-element-invalid-border-color);
-    border-width: var(--pico-border-width);
-    &:focus {
-        border-color: var(--pico-contrast);
-    }
-}
-
 .app img.inline {
     height: 1lh;
     display: inline-block;

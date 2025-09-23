@@ -111,3 +111,11 @@ code, pre, .letterbook-brand {
 .letterbook-brand a:not(:hover) {
     text-decoration: none;
 }
+
+input:invalid {
+    border-color: var(--pico-form-element-invalid-border-color);
+    border-width: var(--pico-border-width);
+    &:focus {
+        border-color: var(--pico-contrast);
+    }
+}
