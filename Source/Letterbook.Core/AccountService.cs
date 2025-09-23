@@ -61,6 +61,13 @@ public class AccountService : IAccountService, IDisposable
 		}
 	}
 
+	public async Task<IdentityResult> ChangePassword(Guid id, string currentPassword, string newPassword)
+	{
+		if (await LookupAccount(id) is not { } account)
+			throw CoreException.MissingData<Account>("Account not found", id);
+		return await _identityManager.ChangePasswordAsync(account, currentPassword, newPassword);
+	}
+
 	public async Task<IdentityResult> RegisterAccount(string email, string handle, string password)
 	{
 		var baseUri = _opts.BaseUri();
@@ -119,13 +126,20 @@ public class AccountService : IAccountService, IDisposable
 			.FirstOrDefaultAsync();
 	}
 
-	// TODO: do this through Identity
-	public async Task<bool> UpdateEmail(Guid accountId, string email)
+	public async Task<string> GenerateChangeEmailToken(Guid accountId, string email)
 	{
-		var account = await _accountAdapter.LookupAccount(accountId);
-		if (account == null) return false;
-		account.Email = email;
-		return true;
+		var account = await _accountAdapter.Accounts(accountId)
+			.FirstOrDefaultAsync() ?? throw CoreException.MissingData<Account>(accountId);
+		return await _identityManager.GenerateChangeEmailTokenAsync(account, email);
+	}
+
+	public async Task<IdentityResult> ChangeEmailWithToken(string oldEmail, string newEmail, string token)
+	{
+		var account = await _accountAdapter.AllAccounts().Where(a => a.NormalizedEmail == _identityManager.NormalizeEmail(oldEmail))
+			.OrderBy(a => a.Email)
+			.FirstOrDefaultAsync() ?? throw CoreException.MissingData<Account>(oldEmail);
+		var result = await _identityManager.ChangeEmailAsync(account, newEmail, token);
+		return result;
 	}
 
 	public async Task<bool> AddLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims)

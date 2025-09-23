@@ -68,6 +68,7 @@ public class Program
 			//
 			// We can work around some of the issues by overriding pages under Areas/IdentityPages/Account
 			.AddDefaultUI();
+		builder.Services.ConfigureAccountManagement(builder.Configuration);
 		builder.Services.AddRazorPages()
 			.AddApplicationPart(Assembly.GetAssembly(typeof(Web.Program))!)
 			.AddRazorPagesOptions(options => options.AddWebRoutes());
