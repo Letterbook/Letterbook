@@ -11,13 +11,14 @@ public class Account : PageModel
 {
 	internal const string ConfirmEmailAction = "ConfirmEmail";
 	internal const string ChangeEmailAction = "ChangeEmail";
+	internal const string ResetPasswordAction = "ResetPassword";
 
 	private readonly IAccountService _accounts;
 	private readonly ILogger<Account> _logger;
 
 	private Models.Account _self;
 
-	[FromQuery(Name = "pageAction")] public string? PageAction { get; set; }
+	[FromQuery(Name = "PageAction")] public string? PageAction { get; set; }
 
 	public Guid AccountId => _self.Id;
 	public string DisplayName => _self.Name ?? _self.UserName ?? "unknown";
@@ -62,7 +63,7 @@ public class Account : PageModel
 			return Challenge();
 
 		var token = await _accounts.GenerateChangeEmailToken(id, newEmail);
-		ConfirmUrl = Url.PageLink(nameof(Account), values: new { pageAction = "ConfirmEmail", token, oldEmail, newEmail });
+		ConfirmUrl = Url.PageLink(nameof(Account), values: new { PageAction = "ConfirmEmail", token, oldEmail, newEmail });
 
 		if (await _accounts.LookupAccount(id) is not { } account)
 			return Challenge();

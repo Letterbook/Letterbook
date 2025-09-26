@@ -13,4 +13,5 @@ public interface IAccountEventPublisher
 	public Task Suspended(Account account, IEnumerable<Claim> claims);
 	public Task Updated(Account original, Account updated, IEnumerable<Claim> claims);
 	public Task Verified(Account account, IEnumerable<Claim> claims);
+	public Task PasswordResetRequested(Account account, string resetLink);
 }

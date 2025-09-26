@@ -5,6 +5,7 @@ using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Queries;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -133,12 +134,38 @@ public class AccountService : IAccountService, IDisposable
 		return await _identityManager.GenerateChangeEmailTokenAsync(account, email);
 	}
 
+	public async Task DeliverPasswordChangeLink(string email, string baseUrl)
+	{
+		var account = await _accountAdapter.AllAccounts().Where(a => a.NormalizedEmail == _identityManager.NormalizeEmail(email))
+			.OrderBy(a => a.Email)
+			.FirstOrDefaultAsync();
+		if (account is null)
+		{
+			_logger.LogWarning("Attempted password reset for unknown account {Email}", email);
+			return;
+		}
+
+		var token = await _identityManager.GeneratePasswordResetTokenAsync(account);
+		var link = QueryHelpers.AddQueryString(baseUrl, "token", token);
+
+		await _eventPublisherService.PasswordResetRequested(account, link);
+	}
+
 	public async Task<IdentityResult> ChangeEmailWithToken(string oldEmail, string newEmail, string token)
 	{
 		var account = await _accountAdapter.AllAccounts().Where(a => a.NormalizedEmail == _identityManager.NormalizeEmail(oldEmail))
-			.OrderBy(a => a.Email)
+			.OrderBy(a => a.NormalizedEmail)
 			.FirstOrDefaultAsync() ?? throw CoreException.MissingData<Account>(oldEmail);
 		var result = await _identityManager.ChangeEmailAsync(account, newEmail, token);
+		return result;
+	}
+
+	public async Task<IdentityResult> ChangePasswordWithToken(string email, string password, string token)
+	{
+		var account = await _accountAdapter.AllAccounts().Where(a => a.NormalizedEmail == _identityManager.NormalizeEmail(email))
+			.OrderBy(a => a.NormalizedEmail)
+			.FirstOrDefaultAsync() ?? throw CoreException.MissingData<Account>(email);
+		var result = await _identityManager.ResetPasswordAsync(account, token, password);
 		return result;
 	}
 

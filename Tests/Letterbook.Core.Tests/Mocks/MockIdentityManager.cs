@@ -78,6 +78,7 @@ public class MockIdentityManager
 		UserValidator
 			.Setup(m => m.ValidateAsync(It.IsAny<UserManager<Account>>(), It.IsAny<Account>()))
 			.ReturnsAsync(IdentityResult.Success);
+		LookupNormalizer.Setup(m => m.NormalizeEmail(It.IsAny<string>())).Returns((string value) => value);
 	}
 
 	public UserManager<Account> Create(IUserStore<Account>? userStore = null,

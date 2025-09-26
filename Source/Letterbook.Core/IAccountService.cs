@@ -29,7 +29,16 @@ public interface IAccountService
 	/// <returns></returns>
 	public Task<Account?> FirstAccount(string email);
 	public Task<string> GenerateChangeEmailToken(Guid accountId, string email);
+
+	/// <summary>
+	/// Generate and deliver a password change
+	/// </summary>
+	/// <param name="email"></param>
+	/// <param name="linkPartial">A redirect URL to be included in the delivered message. The token will be attached as a query parameter</param>
+	/// <returns></returns>
+	public Task DeliverPasswordChangeLink(string email, string linkPartial);
 	public Task<IdentityResult> ChangeEmailWithToken(string oldEmail, string newEmail, string token);
+	public Task<IdentityResult> ChangePasswordWithToken(string email, string password, string token);
 	public Task<bool> AddLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims);
 	public Task<bool> UpdateLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims);
 	public Task<bool> RemoveLinkedProfile(Guid accountId, Profile profile);

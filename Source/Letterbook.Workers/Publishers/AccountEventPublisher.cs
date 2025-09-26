@@ -12,11 +12,13 @@ namespace Letterbook.Workers.Publishers;
 
 public class AccountEventPublisher : IAccountEventPublisher
 {
+	private readonly ILogger<AccountEventPublisher> _logger;
 	private readonly IBus _bus;
 	private readonly CoreOptions _options;
 
-	public AccountEventPublisher(IOptions<CoreOptions> options, IBus bus)
+	public AccountEventPublisher(IOptions<CoreOptions> options, ILogger<AccountEventPublisher> logger, IBus bus)
 	{
+		_logger = logger;
 		_bus = bus;
 		_options = options.Value;
 	}
@@ -41,7 +43,7 @@ public class AccountEventPublisher : IAccountEventPublisher
 
 	public async Task Updated(Account original, Account updated, IEnumerable<Claim> claims)
 	{
-		var message = FormatMessage(updated, original, nameof(Updated), claims);
+		var message = FormatMessage(updated, original, nameof(Updated), claims, null);
 		await _bus.Publish(message);
 	}
 
@@ -51,9 +53,19 @@ public class AccountEventPublisher : IAccountEventPublisher
 		await _bus.Publish(message);
 	}
 
+	public async Task PasswordResetRequested(Account account, string resetLink)
+	{
+		// TODO(email): remove this and send email instead
+		_logger.LogWarning("User requested password reset for {Email}. Send this {Link}", account.Email, resetLink);
+		var message = FormatMessage(account, nameof(PasswordResetRequested), resetLink);
+		await _bus.Publish(message);
+	}
+
+	private AccountEvent FormatMessage(Account nextValue, string action, string other)
+		=> FormatMessage(nextValue, null, action, [], other);
 	private AccountEvent FormatMessage(Account nextValue, string action, IEnumerable<Claim> claims)
-		=> FormatMessage(nextValue, null, action, claims);
-	private AccountEvent FormatMessage(Account nextValue, Account? prevValue, string action, IEnumerable<Claim> claims)
+		=> FormatMessage(nextValue, null, action, claims, null);
+	private AccountEvent FormatMessage(Account nextValue, Account? prevValue, string action, IEnumerable<Claim> claims, string? otherData)
 	{
 		return new AccountEvent
 		{
@@ -61,7 +73,8 @@ public class AccountEventPublisher : IAccountEventPublisher
 			Claims = claims.Select(c => (Contracts.Claim)c).ToArray(),
 			Type = action,
 			NextData = nextValue,
-			PrevData = prevValue
+			PrevData = prevValue,
+			OtherData = otherData
 		};
 	}
 }
