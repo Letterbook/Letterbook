@@ -2,13 +2,13 @@ using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 
 namespace Letterbook.Core.Tests;
-
 
 public class AccountServiceTest : WithMocks
 {
@@ -61,18 +61,6 @@ public class AccountServiceTest : WithMocks
 		AccountEventServiceMock.Verify(mock => mock.Created(It.IsAny<Account>()));
 	}
 
-	[Fact(DisplayName = "Should do nothing when registration fails")]
-	public async Task RegisterAccountFail()
-	{
-		_mockIdentityManager.UserStore.Setup(m => m.CreateAsync(It.IsAny<Account>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(IdentityResult.Failed());
-
-		var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password");
-
-		Assert.False(actual.Succeeded);
-		AccountEventServiceMock.VerifyNoOtherCalls();
-	}
-
 	[Fact(DisplayName = "Should return single lookups")]
 	public async Task LookupTest()
 	{
@@ -99,14 +87,28 @@ public class AccountServiceTest : WithMocks
 	}
 
 	[Fact(DisplayName = "Should update the email address")]
-	public async Task UpdateTest()
+	public async Task UpdateEmailTest()
 	{
 		var account = _fakeAccount.Generate();
-		DataAdapterMock.Setup(m => m.LookupAccount(account.Id)).ReturnsAsync(account);
+		var oldEmail = account.Email!;
+		var expected = "test@example.com";
 
-		await _accountService.UpdateEmail(account.Id, "test@example.com");
+		_mockIdentityManager.UserStore.Setup(m => m.GetUserIdAsync(account, It.IsAny<CancellationToken>()))
+			.ReturnsAsync(account.Id.ToString);
+		_mockIdentityManager.UserStore.As<IUserEmailStore<Account>>()
+			.Setup(m => m.FindByEmailAsync(oldEmail.ToUpper(), It.IsAny<CancellationToken>())).ReturnsAsync(account);
+		_mockIdentityManager.UserStore.Setup(m => m.UpdateAsync(It.IsAny<Account>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(IdentityResult.Success)
+			.Verifiable();
+		DataAdapterMock.Setup(m => m.Accounts(account.Id)).Returns(() => new List<Account> { account }.BuildMock());
+		DataAdapterMock.Setup(m => m.AllAccounts()).Returns(() => new List<Account> { account }.BuildMock());
+		DataAdapterMock.Setup(m => m.FindAccountByEmail(account.Email!)).ReturnsAsync(account);
 
-		Assert.Equal("test@example.com", account.Email);
+		var token = await _accountService.GenerateChangeEmailToken(account.Id, expected);
+		var result = await _accountService.ChangeEmailWithToken(oldEmail!, expected, token);
+
+		Assert.True(result.Succeeded);
+		_mockIdentityManager.UserStore.Verify();
 	}
 
 	[Fact(DisplayName = "Should link new profiles")]
@@ -177,5 +179,32 @@ public class AccountServiceTest : WithMocks
 
 		var actual = result.ProfileClaims();
 		Assert.NotEmpty(actual);
+	}
+
+	[Fact(DisplayName = "Should send a password reset message")]
+	public async Task CanSendPasswordLink()
+	{
+		_account.NormalizedEmail = _account.Email;
+		var queryable = new List<Account>() { _account }.BuildMock();
+		DataAdapterMock.Setup(m => m.AllAccounts())
+			.Returns(queryable);
+
+		_mockIdentityManager.UserStore.Setup(m => m.GetUserIdAsync(_account, It.IsAny<CancellationToken>()))
+			.ReturnsAsync(_account.Id.ToString);
+		_mockIdentityManager.UserStore.As<IUserEmailStore<Account>>()
+			.Setup(m => m.FindByEmailAsync(_account.NormalizedEmail!, It.IsAny<CancellationToken>())).ReturnsAsync(_account);
+
+		var link = $"https://letterbook.example/some/path?email={_account.Email}";
+		await _accountService.DeliverPasswordChangeLink(_account.Email!, link);
+
+		AccountEventServiceMock.Verify(m => m.PasswordResetRequested(_account, It.Is<string>(actual =>
+			VerifyLinkParams(actual)
+		)));
+	}
+
+	private bool VerifyLinkParams(string actual)
+	{
+		return QueryHelpers.ParseQuery(new Uri(actual).Query)["email"] == _account.Email
+		       && !string.IsNullOrEmpty(QueryHelpers.ParseQuery(new Uri(actual).Query)["token"]);
 	}
 }

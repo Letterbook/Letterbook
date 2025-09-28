@@ -10,9 +10,15 @@ public class CoreOptions
 	public int MaxCustomFields { get; set; } = 10;
 
 	public DatabaseOptions Database { get; set; } = new();
+	public AccountOptions Accounts { get; set; } = new();
 }
 
 public class DatabaseOptions
 {
 	public bool MigrateAtRuntime { get; set; } = false;
+}
+
+public class AccountOptions
+{
+	public int TokenExpirationMinutes = 10;
 }

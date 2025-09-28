@@ -1,0 +1,14 @@
+/*
+This stylesheet is for support pages, which don't provide normal application features 
+*/
+
+.support {
+    text-align: center;
+    max-width: 32rem;
+}
+
+.support .account {
+    label, dialog {
+        text-align: initial;
+    }
+}

@@ -1,5 +1,4 @@
 using Letterbook.Core;
-using Medo;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 
@@ -29,7 +28,7 @@ public class IndexModel : PageModel
 	{
 		Timeline = _timeline.As(User.Claims);
 		Profiles = _profiles.As(User.Claims);
-		if (SelfId is { } id && await Profiles.LookupProfile(Models.ProfileId.FromString(id)) is { } self)
+		if (Models.ProfileId.TryParse(SelfId, out var id) && await Profiles.LookupProfile(id) is {} self)
 		{
 			Self = self;
 		}

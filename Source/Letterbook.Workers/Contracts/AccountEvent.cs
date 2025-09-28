@@ -11,4 +11,5 @@ public record AccountEvent
 	public required string Subject { get; init; }
 	public required string Type { get; init; }
 	public required Claim[] Claims { get; init; }
+	public string? OtherData { get; set; }
 }

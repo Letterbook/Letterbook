@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="color-scheme" content="light dark">
+    <title>@ViewData["Title"] | Letterbook</title>
+    <link rel="icon" type="image/svg" href="/img/letterbook-square.svg">
+    <link rel="stylesheet" href="/lib/picocss/css/pico.min.css"/>
+    <link rel="stylesheet" href="/css/site.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="/css/support.css" asp-append-version="true"/>
+</head>
+<body class="container support">
+<header>
+    <h1 class="letterbook-brand"><a asp-page="/Index">Letterbook</a></h1>
+</header>
+<main role="main">
+    @RenderBody()
+</main>
+<script src="~/js/site.js" asp-append-version="true"></script>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

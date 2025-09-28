@@ -15,6 +15,7 @@ public class FakeAccount : Faker<Account>
 				Email = faker.Internet.Email(),
 				UserName = faker.Internet.UserName()
 			};
+			account.NormalizedEmail = account.Email;
 			if (!withProfile) return account;
 
 			var profile = new FakeProfile(uri).Generate();

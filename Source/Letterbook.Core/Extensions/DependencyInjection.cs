@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using AngleSharp.Css.Dom;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Authorization;
+using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Models.Mappers.Converters;
 using Letterbook.Core.Workers;
@@ -146,5 +147,15 @@ public static class DependencyInjection
 		identity.ClaimsIdentity.EmailClaimType = JwtRegisteredClaimNames.Email;
 		identity.ClaimsIdentity.UserIdClaimType = JwtRegisteredClaimNames.Sub;
 		identity.ClaimsIdentity.UserNameClaimType = JwtRegisteredClaimNames.PreferredUsername;
+	}
+
+	public static void ConfigureAccountManagement(this IServiceCollection services, IConfigurationManager config)
+	{
+		var coreOptions = config.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
+		                  ?? throw ConfigException.Missing(nameof(CoreOptions));
+		services.Configure<DataProtectionTokenProviderOptions>(options =>
+		{
+			options.TokenLifespan = TimeSpan.FromMinutes(coreOptions.Accounts.TokenExpirationMinutes);
+		});
 	}
 }

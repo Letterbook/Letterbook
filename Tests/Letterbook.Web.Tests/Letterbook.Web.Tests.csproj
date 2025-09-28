@@ -33,4 +33,8 @@
       <ProjectReference Include="..\..\Source\Letterbook.Web\Letterbook.Web.csproj" />
       <ProjectReference Include="..\Letterbook.Core.Tests\Letterbook.Core.Tests.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Mocks\" />
+    </ItemGroup>
 </Project>
