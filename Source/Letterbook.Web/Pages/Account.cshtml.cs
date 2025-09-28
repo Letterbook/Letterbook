@@ -11,7 +11,6 @@ public class Account : PageModel
 {
 	internal const string ConfirmEmailAction = "ConfirmEmail";
 	internal const string ChangeEmailAction = "ChangeEmail";
-	internal const string ResetPasswordAction = "ResetPassword";
 
 	private readonly IAccountService _accounts;
 	private readonly ILogger<Account> _logger;

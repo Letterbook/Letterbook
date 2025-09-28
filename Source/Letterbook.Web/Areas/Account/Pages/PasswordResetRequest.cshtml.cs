@@ -27,12 +27,13 @@ public class PasswordResetRequest : PageModel
 
 	public async Task<IActionResult> OnPostReset(string email)
 	{
-		var template = Url.PageLink("Account", null, new {PageAction = Web.Pages.Account.ResetPasswordAction, email})
+		var template = Url.PageLink(nameof(PasswordReset), null, new {area = "Account", email})
 		               ?? throw CoreException.InternalError("Failed to generate a password reset link template");
 		await _accounts.DeliverPasswordChangeLink(email, template);
 		_logger.LogInformation("Requested password reset for {Email}", email);
 
-		await Task.CompletedTask;
+		Result = "Received";
+
 		return Page();
 	}
 }
