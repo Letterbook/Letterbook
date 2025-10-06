@@ -29,7 +29,7 @@ public class AccountServiceTest : WithMocks
 		_mockIdentityManager = new MockIdentityManager();
 
 		_accountService = new AccountService(loggerMock, CoreOptionsMock, DataAdapterMock.Object,
-			AccountEventServiceMock.Object, _mockIdentityManager.Create());
+			AccountEventServiceMock.Object, new RandomInviteCode(), _mockIdentityManager.Create());
 
 		_account = _fakeAccount.Generate();
 	}
@@ -195,7 +195,7 @@ public class AccountServiceTest : WithMocks
 			.Setup(m => m.FindByEmailAsync(_account.NormalizedEmail!, It.IsAny<CancellationToken>())).ReturnsAsync(_account);
 
 		var link = $"https://letterbook.example/some/path?email={_account.Email}";
-		await _accountService.DeliverPasswordChangeLink(_account.Email!, link);
+		await _accountService.DeliverPasswordResetLink(_account.Email!, link);
 
 		AccountEventServiceMock.Verify(m => m.PasswordResetRequested(_account, It.Is<string>(actual =>
 			VerifyLinkParams(actual)

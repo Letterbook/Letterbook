@@ -19,16 +19,18 @@ public class AccountService : IAccountService, IDisposable
 	private readonly CoreOptions _opts;
 	private readonly IDataAdapter _accountAdapter;
 	private readonly IAccountEventPublisher _eventPublisherService;
+	private readonly IInviteCodeGenerator _invites;
 	private readonly UserManager<Account> _identityManager;
 
 	public AccountService(ILogger<AccountService> logger, IOptions<CoreOptions> options,
-		IDataAdapter accountAdapter, IAccountEventPublisher eventPublisherService,
+		IDataAdapter accountAdapter, IAccountEventPublisher eventPublisherService, IInviteCodeGenerator invites,
 		UserManager<Account> identityManager)
 	{
 		_logger = logger;
 		_opts = options.Value;
 		_accountAdapter = accountAdapter;
 		_eventPublisherService = eventPublisherService;
+		_invites = invites;
 		_identityManager = identityManager;
 	}
 
@@ -134,7 +136,12 @@ public class AccountService : IAccountService, IDisposable
 		return await _identityManager.GenerateChangeEmailTokenAsync(account, email);
 	}
 
-	public async Task DeliverPasswordChangeLink(string email, string baseUrl)
+	public Task<string> GenerateInviteCode(Guid accountId, int? uses, DateTimeOffset? expiration)
+	{
+		throw new NotImplementedException();
+	}
+
+	public async Task DeliverPasswordResetLink(string email, string baseUrl)
 	{
 		var account = await _accountAdapter.AllAccounts().Where(a => a.NormalizedEmail == _identityManager.NormalizeEmail(email))
 			.OrderBy(a => a.Email)

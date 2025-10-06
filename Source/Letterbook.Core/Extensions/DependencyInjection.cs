@@ -37,6 +37,7 @@ public static class DependencyInjection
 			.AddScoped<IModerationService, ModerationService>()
 			.AddSingleton<MappingConfigProvider>()
 			.AddSingleton<Instrumentation>()
+			.AddSingleton<IInviteCodeGenerator, RandomInviteCode>()
 			.AddSingleton<IAuthorizationService, AuthorizationService>()
 			.AddSingleton<IHostSigningKeyProvider, DevelopmentHostSigningKeyProvider>()
 			.AddSingleton<IContentSanitizer, HtmlSanitizer>()
