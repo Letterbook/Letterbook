@@ -44,7 +44,7 @@ public interface IAccountService
 	/// <param name="uses">The number of times this code can be used. No limit, if null</param>
 	/// <param name="expiration">The date this code expires. No expiration, if null</param>
 	/// <returns></returns>
-	public Task<string> GenerateInviteCode(Guid accountId, int? uses, DateTimeOffset? expiration);
+	public Task<string> GenerateInviteCode(Guid accountId, int uses = 0, DateTimeOffset? expiration = null);
 
 	/// <summary>
 	/// Generate and deliver a password change link

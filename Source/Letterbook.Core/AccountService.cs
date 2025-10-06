@@ -136,9 +136,22 @@ public class AccountService : IAccountService, IDisposable
 		return await _identityManager.GenerateChangeEmailTokenAsync(account, email);
 	}
 
-	public Task<string> GenerateInviteCode(Guid accountId, int? uses, DateTimeOffset? expiration)
+	public async Task<string> GenerateInviteCode(Guid accountId, int uses = 0, DateTimeOffset? expiration = null)
 	{
-		throw new NotImplementedException();
+		if (await _accountAdapter.LookupAccount(accountId) is not { } account)
+			throw CoreException.MissingData<Account>(accountId);
+
+		var invite = new InviteCode(_invites)
+		{
+			CreatedBy = account,
+			Uses = uses,
+			Expiration = expiration ?? DateTimeOffset.MaxValue
+		};
+
+		_accountAdapter.Add(invite);
+		await _accountAdapter.Commit();
+
+		return invite.Code;
 	}
 
 	public async Task DeliverPasswordResetLink(string email, string baseUrl)

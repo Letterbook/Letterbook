@@ -1,3 +1,4 @@
+using Bogus;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
@@ -29,7 +30,7 @@ public class AccountServiceTest : WithMocks
 		_mockIdentityManager = new MockIdentityManager();
 
 		_accountService = new AccountService(loggerMock, CoreOptionsMock, DataAdapterMock.Object,
-			AccountEventServiceMock.Object, new RandomInviteCode(), _mockIdentityManager.Create());
+			AccountEventServiceMock.Object, new RandomInviteCode(Randomizer.Seed), _mockIdentityManager.Create());
 
 		_account = _fakeAccount.Generate();
 	}
@@ -200,6 +201,19 @@ public class AccountServiceTest : WithMocks
 		AccountEventServiceMock.Verify(m => m.PasswordResetRequested(_account, It.Is<string>(actual =>
 			VerifyLinkParams(actual)
 		)));
+	}
+
+	[Fact(DisplayName = "Should generate an invite code")]
+	public async Task CanGenerateInvites()
+	{
+		Init.WithSeed(1);
+		DataAdapterMock.Setup(m => m.LookupAccount(_account.Id)).ReturnsAsync(_account);
+		var accountService = new AccountService(Mock.Of<ILogger<AccountService>>(), CoreOptionsMock, DataAdapterMock.Object,
+			AccountEventServiceMock.Object, new RandomInviteCode(Randomizer.Seed), _mockIdentityManager.Create());
+
+		var actual = await accountService.GenerateInviteCode(_account.Id);
+		Assert.Equal("83GR-NFCX-3N18", actual);
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<InviteCode>()));
 	}
 
 	private bool VerifyLinkParams(string actual)

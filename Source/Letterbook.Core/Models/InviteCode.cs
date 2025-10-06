@@ -19,20 +19,22 @@ public class InviteCode
 	public InviteCodeId Id { get; set; } = Uuid7.NewUuid7();
 	public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 	public DateTimeOffset Expiration { get; set; } = DateTimeOffset.MaxValue;
-	public int RemainingUses { get; set; } = 1;
+	public int RemainingUses { get; set; }
 	public int Uses { get; set; } = 1;
 	public string Code { get; set; }
 	public required Account CreatedBy { get; set; }
 	public IEnumerable<Account> RedeemedBy { get; set; } = new List<Account>();
 
-	public InviteCode(RandomInviteCode code)
+	public InviteCode(IInviteCodeGenerator code)
 	{
 		Code = code.Generate();
+		RemainingUses = Uses;
 	}
 
 	public InviteCode(string code)
 	{
 		Code = code;
+		RemainingUses = Uses;
 	}
 
 	/// <summary>
@@ -41,9 +43,10 @@ public class InviteCode
 	/// <returns>True if the code was redeemable, false otherwise</returns>
 	public bool TryRedeem(Account holder)
 	{
-		if (RemainingUses <= 0) return false;
+		var limitedUses = Uses > 0;
+		if (limitedUses && RemainingUses <= 0) return false;
 		if (DateTimeOffset.UtcNow >= Expiration) return false;
-		RemainingUses--;
+		if (limitedUses) RemainingUses--;
 		RedeemedBy = RedeemedBy.Append(holder);
 		return true;
 	}

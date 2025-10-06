@@ -120,6 +120,7 @@ public interface IDataAdapter : IDisposable
 	public void Add(Post post);
 	public void Add(ModerationReport report);
 	public void Add(ModerationPolicy policy);
+	public void Add(InviteCode code);
 	public void AddRange(IEnumerable<Profile> profile);
 	public void AddRange(IEnumerable<Account> account);
 	public void AddRange(IEnumerable<Post> posts);
@@ -127,6 +128,7 @@ public interface IDataAdapter : IDisposable
 	public void Update(Account account);
 	public void Update(Post post);
 	public void Update(Audience audience);
+	public void Update(InviteCode code);
 	public void UpdateRange(IEnumerable<Profile> profile);
 	public void UpdateRange(IEnumerable<Account> account);
 	public void Delete(object record);
