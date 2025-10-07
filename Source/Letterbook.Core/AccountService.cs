@@ -71,7 +71,7 @@ public class AccountService : IAccountService, IDisposable
 		return await _identityManager.ChangePasswordAsync(account, currentPassword, newPassword);
 	}
 
-	public async Task<IdentityResult> RegisterAccount(string email, string handle, string password)
+	public async Task<IdentityResult> RegisterAccount(string email, string handle, string password, string inviteCode)
 	{
 		var baseUri = _opts.BaseUri();
 		// TODO: write our own unified query for this
@@ -87,7 +87,23 @@ public class AccountService : IAccountService, IDisposable
 				Code = "Duplicate",
 				Description = "An account is already registered using that email"
 			});
+		var codes = await _accountAdapter.InviteCodes(inviteCode).ToListAsync();
+		if (codes.Count == 0)
+			return IdentityResult.Failed(new IdentityError
+			{
+				Code = "Unauthorized",
+				Description = "The invite code is not valid"
+			});
 		var account = Account.CreateAccount(baseUri, email, handle);
+		var redeemed = codes.TryRedeemAny(account);
+		if (!redeemed)
+		{
+			return IdentityResult.Failed(new IdentityError
+			{
+				Code = "Unauthorized",
+				Description = "The invite code is expired"
+			});
+		}
 
 		IdentityResult created;
 		try

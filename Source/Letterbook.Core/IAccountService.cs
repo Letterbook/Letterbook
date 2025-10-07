@@ -10,7 +10,7 @@ public interface IAccountService
 {
 	public Task<AccountIdentity> AuthenticatePassword(string email, string password);
 	public Task<IdentityResult> ChangePassword(Guid id, string currentPassword, string newPassword);
-	public Task<IdentityResult> RegisterAccount(string email, string handle, string password);
+	public Task<IdentityResult> RegisterAccount(string email, string handle, string password, string inviteCode);
 	public Task<Account?> LookupAccount(Guid id);
 
 	/// <summary>

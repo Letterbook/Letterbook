@@ -59,6 +59,13 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<Profile> AllProfiles();
 
 	/// <summary>
+	/// Query for matching invite codes
+	/// </summary>
+	/// <param name="code"></param>
+	/// <returns></returns>
+	public IQueryable<InviteCode> InviteCodes(string code);
+
+	/// <summary>
 	/// Query for ModerationReports by Id
 	/// </summary>
 	/// <param name="ids"></param>
