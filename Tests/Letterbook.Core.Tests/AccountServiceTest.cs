@@ -45,19 +45,41 @@ public class AccountServiceTest : WithMocks
 	public async Task RegisterAccount()
 	{
 		DataAdapterMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
+		DataAdapterMock.Setup(m => m.InviteCodes(It.IsAny<string>()))
+			.Returns(new List<InviteCode> { new("test-code") }.BuildMock());
 
-		var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password");
+		var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password", "test-code");
 
 		Assert.NotNull(actual);
 		Assert.True(actual.Succeeded);
+	}
+
+	[Fact(DisplayName = "Should NOT Register new accounts with invalid invites")]
+	public async Task RegisterAccount_InvalidCode()
+	{
+		var invite = new InviteCode("test-code")
+		{
+			Uses = 1,
+			RemainingUses = 0
+		};
+		DataAdapterMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
+		DataAdapterMock.Setup(m => m.InviteCodes(It.IsAny<string>()))
+			.Returns(new List<InviteCode> { invite }.BuildMock());
+
+		var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password", "test-code");
+
+		Assert.NotNull(actual);
+		Assert.False(actual.Succeeded);
 	}
 
 	[Fact(DisplayName = "Should publish new accounts")]
 	public async Task RegisterAccountPublish()
 	{
 		DataAdapterMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
+		DataAdapterMock.Setup(m => m.InviteCodes(It.IsAny<string>()))
+			.Returns(new List<InviteCode> { new("test-code") }.BuildMock());
 
-		await _accountService.RegisterAccount("test@example.com", "tester", "password");
+		await _accountService.RegisterAccount("test@example.com", "tester", "password", "test-code");
 
 		AccountEventServiceMock.Verify(mock => mock.Created(It.IsAny<Account>()));
 	}

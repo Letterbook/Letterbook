@@ -22,7 +22,7 @@ public class InviteCode
 	public int RemainingUses { get; set; }
 	public int Uses { get; set; } = 1;
 	public string Code { get; set; }
-	public required Account CreatedBy { get; set; }
+	public Account? CreatedBy { get; set; }
 	public IEnumerable<Account> RedeemedBy { get; set; } = new List<Account>();
 
 	public InviteCode(IInviteCodeGenerator code)
