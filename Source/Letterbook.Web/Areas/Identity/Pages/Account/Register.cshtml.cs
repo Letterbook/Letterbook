@@ -58,6 +58,10 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
 
         public class InputModel
         {
+	        [Required]
+	        [Display(Name = "Invite code")]
+	        public required string InviteCode { get; set; }
+
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
@@ -92,7 +96,7 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var result = await _accounts.RegisterAccount(Input.Email, Input.Handle, Input.Password);
+                var result = await _accounts.RegisterAccount(Input.Email, Input.Handle, Input.Password, Input.InviteCode);
                 if (result.Succeeded)
                 {
 	                var user = await _userManager.FindByEmailAsync(Input.Email);
