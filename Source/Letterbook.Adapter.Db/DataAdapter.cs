@@ -88,6 +88,7 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	public IQueryable<Models.Profile> AllProfiles() => _context.Profiles;
 
 	public IQueryable<Models.InviteCode> InviteCodes(string code) => _context.InviteCodes.Where(c => c.Code == code);
+	public IQueryable<Models.InviteCode> AllInviteCodes() => _context.InviteCodes;
 
 	public IQueryable<Models.ModerationReport> ModerationReports(params Models.ModerationReportId[] ids)
 	{

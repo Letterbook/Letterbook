@@ -66,6 +66,12 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<InviteCode> InviteCodes(string code);
 
 	/// <summary>
+	/// Query across all invite codes
+	/// </summary>
+	/// <returns></returns>
+	public IQueryable<InviteCode> AllInviteCodes();
+
+	/// <summary>
 	/// Query for ModerationReports by Id
 	/// </summary>
 	/// <param name="ids"></param>

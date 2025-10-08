@@ -23,7 +23,7 @@ public class InviteCode
 	public int Uses { get; set; } = 1;
 	public string Code { get; set; }
 	public Account? CreatedBy { get; set; }
-	public IEnumerable<Account> RedeemedBy { get; set; } = new List<Account>();
+	public ICollection<Account> RedeemedBy { get; set; } = new List<Account>();
 
 	public InviteCode(IInviteCodeGenerator code)
 	{
@@ -47,7 +47,7 @@ public class InviteCode
 		if (limitedUses && RemainingUses <= 0) return false;
 		if (DateTimeOffset.UtcNow >= Expiration) return false;
 		if (limitedUses) RemainingUses--;
-		RedeemedBy = RedeemedBy.Append(holder);
+		RedeemedBy.Add(holder);
 		return true;
 	}
 
