@@ -123,15 +123,10 @@ dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Lett
 4. Run Letterbook (in watch mode)
 ```shell
 dotnet restore Letterbook.sln
-dotnet watch run --project Source/Letterbook.--launch-profile dev
+dotnet watch run --project Source/Letterbook --launch-profile dev
 ```
 
-5. Open the UI http://localhost:5127  
-There is also a Swagger UI http://localhost:5127/swagger/index.html
-
-The setup process creates an `admin` account with:
-- email: `admin@letterbook.example`
-- password: `Password1!`
+5. An invite code was printed in the server logs on first startup. Use that code to make an account http://localhost:5127/identity/account/register
 
 ## Navigating the Codebase
 
