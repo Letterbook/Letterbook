@@ -26,13 +26,12 @@
                 <a asp-area="" asp-page="/Settings">Settings</a>
                 <div class="spacer min-md"></div>
                 <footer>
-                    <a asp-page="Profile" asp-route-id="admin">Admin profile</a>
                     <a asp-area="" asp-page="/About">About</a>
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <partial name="_LogoutPartial"/>
                     }
-                    <span class="min-md">Powered by <a href="https://letterbook.com">Letterbook</a> v0.0</span>
+                    <span class="min-md fill-width">Powered by <a href="https://letterbook.com">Letterbook</a> v0.0</span>
                 </footer>
             }
             else
