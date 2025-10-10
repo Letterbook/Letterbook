@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Letterbook.Web.Areas.Identity.Pages.Account
+namespace Letterbook.Web.Areas.Account.Pages
 {
     public class LoginModel : PageModel
     {
@@ -41,7 +41,7 @@ namespace Letterbook.Web.Areas.Identity.Pages.Account
             [DataType(DataType.Password)]
             public required string Password { get; set; }
 
-            [Display(Name = "Remember me?")]
+            [Display(Name = "Remember me")]
             public bool RememberMe { get; set; }
         }
 

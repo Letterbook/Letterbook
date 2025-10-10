@@ -126,7 +126,7 @@ dotnet restore Letterbook.sln
 dotnet watch run --project Source/Letterbook --launch-profile dev
 ```
 
-5. An invite code was printed in the server logs on first startup. Use that code to make an account http://localhost:5127/identity/account/register
+5. An invite code was printed in the server logs on first startup. Use that code to make an account http://localhost:5127/account/register
 
 ## Navigating the Codebase
 

@@ -47,7 +47,7 @@ public class InviteCode
 		if (limitedUses && RemainingUses <= 0) return false;
 		if (DateTimeOffset.UtcNow >= Expiration) return false;
 		if (limitedUses) RemainingUses--;
-		RedeemedBy.Add(holder);
+		holder.InvitedBy = this;
 		return true;
 	}
 
