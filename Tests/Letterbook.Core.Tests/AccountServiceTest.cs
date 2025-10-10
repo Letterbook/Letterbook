@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using MockQueryable;
 using Moq;
+using Org.BouncyCastle.Asn1.Cmp;
 using Xunit.Abstractions;
 
 namespace Letterbook.Core.Tests;
@@ -228,10 +229,10 @@ public class AccountServiceTest : WithMocks
 	[Fact(DisplayName = "Should generate an invite code")]
 	public async Task CanGenerateInvites()
 	{
-		Init.WithSeed(1);
+		var random = new Random(1);
 		DataAdapterMock.Setup(m => m.LookupAccount(_account.Id)).ReturnsAsync(_account);
 		var accountService = new AccountService(Mock.Of<ILogger<AccountService>>(), CoreOptionsMock, DataAdapterMock.Object,
-			AccountEventServiceMock.Object, new RandomInviteCode(Randomizer.Seed), _mockIdentityManager.Create());
+			AccountEventServiceMock.Object, new RandomInviteCode(random), _mockIdentityManager.Create());
 
 		var actual = await accountService.GenerateInviteCode(_account.Id);
 		Assert.Equal("83GR-NFCX-3N18", actual);
