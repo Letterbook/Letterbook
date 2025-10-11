@@ -1,0 +1,38 @@
+﻿@page
+@model Letterbook.Web.Areas.Account.Pages.LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<h1>@ViewData["Title"]</h1>
+<section>
+    <form id="account" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+        <div>
+            <label asp-for="Input.Email">Email</label>
+            <input asp-for="Input.Email" autocomplete="username" aria-required="true" placeholder="name@example.com"/>
+            <span asp-validation-for="Input.Email" class="text-danger"></span>
+        </div>
+        <div>
+            <label asp-for="Input.Password">Password</label>
+            <input asp-for="Input.Password" autocomplete="current-password" aria-required="true"
+                   placeholder="password"/>
+            <small>
+                <a id="forgot-password" asp-page="./ForgotPassword">Forgot password</a>
+            </small>
+            <span asp-validation-for="Input.Password" class="text-danger"></span>
+        </div>
+        <div>
+            <input asp-for="Input.RememberMe"/>
+            <label class="check-label" asp-for="Input.RememberMe">@Html.DisplayNameFor(m => m.Input.RememberMe)</label>
+        </div>
+        <div>
+            <button id="login-submit" type="submit">Log in</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}

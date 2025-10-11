@@ -92,7 +92,7 @@ public class UserAccountController : ControllerBase
 		try
 		{
 			var registerAccount = await _accountService
-				.RegisterAccount(registration.Email, registration.Handle, registration.Password);
+				.RegisterAccount(registration.Email, registration.Handle, registration.Password, registration.InviteCode);
 
 			if (registerAccount is null) return Forbid();
 			if (!registerAccount.Succeeded) return BadRequest(registerAccount.Errors);

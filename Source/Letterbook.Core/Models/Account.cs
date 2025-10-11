@@ -17,6 +17,7 @@ public class Account : IdentityUser<Guid>, IIdentity
 	public string? Name => UserName;
 	public ICollection<ProfileClaims> LinkedProfiles { get; set; } = new HashSet<ProfileClaims>();
 	public ICollection<ModerationReport> ModeratedReports { get; set; } = new HashSet<ModerationReport>();
+	public InviteCode? InvitedBy { get; set; }
 
 	public Account()
 	{

@@ -15,14 +15,16 @@ public class SeedAdminWorker : IScopedWorker
 	private readonly CoreOptions _coreOptions;
 	private readonly IAccountService _accountService;
 	private readonly IDataAdapter _data;
+	private readonly IInviteCodeGenerator _inviteCodeGenerator;
 
 	public SeedAdminWorker(ILogger<SeedAdminWorker> logger, IOptions<CoreOptions> coreOpts,
-		IAccountService accountService, IDataAdapter data)
+		IAccountService accountService, IDataAdapter data, IInviteCodeGenerator inviteCodeGenerator)
 	{
 		_logger = logger;
 		_coreOptions = coreOpts.Value;
 		_accountService = accountService;
 		_data = data;
+		_inviteCodeGenerator = inviteCodeGenerator;
 	}
 
 	public async Task DoWork(CancellationToken cancellationToken)
@@ -31,16 +33,34 @@ public class SeedAdminWorker : IScopedWorker
 
 		try
 		{
-			// TODO: replace with invite mechanism
-			if (_data.AllAccounts().Any())
+			if (await _data.AllAccounts().AnyAsync(cancellationToken: cancellationToken))
 			{
-				_logger.LogDebug("Found accounts, skipping seed");
-				return;
+				_logger.LogDebug("Found existing accounts, skipping seed");
 			}
-			var admin = await _accountService.RegisterAccount($"admin@letterbook.example", "admin",
-				"Password1!");
-			if (admin is not null) _logger.LogInformation("Created admin account");
-			else _logger.LogError("Couldn't create admin account");
+			else if (await _data.AllInviteCodes().AnyAsync(cancellationToken: cancellationToken))
+			{
+				_logger.LogDebug("Found existing invitations, skipping seed");
+			}
+			else
+			{
+
+				var invite = new InviteCode(_inviteCodeGenerator) { Uses = 1 };
+				_data.Add(invite);
+				try
+				{
+					await _data.Commit();
+				}
+				catch (Exception e)
+				{
+					_logger.LogError(e, "Couldn't seed initial invite code");
+					throw;
+				}
+
+				_logger.LogInformation("Welcome to Letterbook!");
+				_logger.LogInformation("Seeding database with initial data");
+				_logger.LogWarning("Letterbook does not have a default admin account. You must create one yourself. This is by design");
+				_logger.LogCritical("\n*****\nThis is a single-use invite code. Use this code ({Code}) to create an account on the site\n*****", invite.Code);
+			}
 
 			if (await _data.Profiles(Profile.SystemInstanceId)
 				    .AsNoTracking()

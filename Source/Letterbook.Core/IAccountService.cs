@@ -10,7 +10,7 @@ public interface IAccountService
 {
 	public Task<AccountIdentity> AuthenticatePassword(string email, string password);
 	public Task<IdentityResult> ChangePassword(Guid id, string currentPassword, string newPassword);
-	public Task<IdentityResult> RegisterAccount(string email, string handle, string password);
+	public Task<IdentityResult> RegisterAccount(string email, string handle, string password, string inviteCode);
 	public Task<Account?> LookupAccount(Guid id);
 
 	/// <summary>
@@ -28,15 +28,31 @@ public interface IAccountService
 	/// <param name="email"></param>
 	/// <returns></returns>
 	public Task<Account?> FirstAccount(string email);
+
+	/// <summary>
+	/// Generate and return a one-time token to verify a new email address for an account
+	/// </summary>
+	/// <param name="accountId"></param>
+	/// <param name="email">The new email address</param>
+	/// <returns></returns>
 	public Task<string> GenerateChangeEmailToken(Guid accountId, string email);
 
 	/// <summary>
-	/// Generate and deliver a password change
+	/// Generate and return an invitation code, for new account creation
+	/// </summary>
+	/// <param name="accountId"></param>
+	/// <param name="uses">The number of times this code can be used. No limit, if null</param>
+	/// <param name="expiration">The date this code expires. No expiration, if null</param>
+	/// <returns></returns>
+	public Task<string> GenerateInviteCode(Guid accountId, int uses = 0, DateTimeOffset? expiration = null);
+
+	/// <summary>
+	/// Generate and deliver a password change link
 	/// </summary>
 	/// <param name="email"></param>
 	/// <param name="linkPartial">A redirect URL to be included in the delivered message. The token will be attached as a query parameter</param>
 	/// <returns></returns>
-	public Task DeliverPasswordChangeLink(string email, string linkPartial);
+	public Task DeliverPasswordResetLink(string email, string linkPartial);
 	public Task<IdentityResult> ChangeEmailWithToken(string oldEmail, string newEmail, string token);
 	public Task<IdentityResult> ChangePasswordWithToken(string email, string password, string token);
 	public Task<bool> AddLinkedProfile(Guid accountId, Profile profile, IEnumerable<ProfileClaim> claims);

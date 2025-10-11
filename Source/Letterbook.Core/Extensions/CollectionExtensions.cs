@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Letterbook.Core.Models;
 using Letterbook.Generators;
 
 namespace Letterbook.Core.Extensions;
@@ -78,5 +79,21 @@ public static class CollectionExtensions
 	public static IEnumerable<T> Converge<T, TKey>(this IEnumerable<T> source, Dictionary<TKey, T> values, Func<T, TKey> selector) where TKey : notnull where T : class
 	{
 		return source.Select(each => values.GetValueOrDefault(selector(each))).WhereNotNull();
+	}
+
+	/// <summary>
+	/// Try to redeem the code for any (and every) known occurence
+	/// </summary>
+	/// <remarks>
+	/// In the event of a collision between invite codes, there's no way to know which instance a redemption should count toward.
+	/// So, we count it against all of them. If any of them succeeds, then we consider the code valid.
+	/// Collisions should be rare, and collisions between simultaneously valid codes should be exceedingly rare. So this is acceptable.
+	/// </remarks>
+	/// <param name="source"></param>
+	/// <param name="account"></param>
+	/// <returns>True if the code was redeemable, false otherwise</returns>
+	public static bool TryRedeemAny(this IEnumerable<InviteCode> source, Account account)
+	{
+		return source.Select(code => code.TryRedeem(account)).Aggregate(false, (acc, each) => each || acc);
 	}
 }

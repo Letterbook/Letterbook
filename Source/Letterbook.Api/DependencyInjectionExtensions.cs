@@ -106,6 +106,7 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IAuthzPostService, PostService>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 		services.AddSingleton<Instrumentation>();
+		services.AddSingleton<IInviteCodeGenerator, RandomInviteCode>();
 
 		// Register startup workers
 		services.AddScopedService<SeedAdminWorker>();
