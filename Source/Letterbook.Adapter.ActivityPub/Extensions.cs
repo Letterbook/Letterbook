@@ -60,6 +60,22 @@ public static class Extensions
 		return false;
 	}
 
+	public static bool TryGetSingleActorId(this ASActivity asa, [NotNullWhen(true)] out Uri? id)
+	{
+		id = default;
+		var result = asa.Actor.SingleOrDefault()?.TryGetId(out id);
+		return result == true;
+	}
+
+	public static IList<Uri> AsIds(this LinkableList<ASObject> ll)
+	{
+		return ll.Select(each =>
+		{
+			each.TryGetId(out var id);
+			return id;
+		}).WhereNotNull().ToList();
+	}
+
 	public static string NotNull(params string?[] args) =>
 		args.FirstOrDefault(s => TestNotNull(s))
 		?? throw new ArgumentOutOfRangeException(nameof(args), "All of the attempted values were null");
@@ -80,16 +96,16 @@ public static class Extensions
 		switch (mention.Visibility)
 		{
 			case Models.MentionVisibility.Bto:
-				aso.BTo.Add(new ASLink(){ HRef = mention.Subject.FediId});
+				aso.BTo.Add(new ASLink() { HRef = mention.Subject.FediId });
 				return;
 			case Models.MentionVisibility.Bcc:
-				aso.BCC.Add(new ASLink(){ HRef = mention.Subject.FediId});
+				aso.BCC.Add(new ASLink() { HRef = mention.Subject.FediId });
 				return;
 			case Models.MentionVisibility.To:
-				aso.To.Add(new ASLink(){ HRef = mention.Subject.FediId});
+				aso.To.Add(new ASLink() { HRef = mention.Subject.FediId });
 				return;
 			case Models.MentionVisibility.Cc:
-				aso.CC.Add(new ASLink(){ HRef = mention.Subject.FediId});
+				aso.CC.Add(new ASLink() { HRef = mention.Subject.FediId });
 				return;
 			default:
 				throw new ArgumentOutOfRangeException(nameof(mention), mention.Visibility, null);

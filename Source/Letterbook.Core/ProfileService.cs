@@ -506,7 +506,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return Unblock(self, target);
 	}
 
-	public async Task<FollowerRelation?> ReceiveBlock(Uri actorId, Uri targetId)
+	public async Task<FollowerRelation> ReceiveBlock(Uri actorId, Uri targetId)
 	{
 		var crawlActor = false;
 		if (await _data.Profiles(actorId).WithRelation(targetId).FirstOrDefaultAsync() is not { } actor)
@@ -529,7 +529,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return result;
 	}
 
-	public async Task<FollowerRelation?> ReceiveUndoBlock(Uri actorId, Uri targetId)
+	public async Task<FollowerRelation> ReceiveUndoBlock(Uri actorId, Uri targetId)
 	{
 		var crawlActor = false;
 		if (await _data.Profiles(actorId).WithRelation(targetId).FirstOrDefaultAsync() is not { } actor)

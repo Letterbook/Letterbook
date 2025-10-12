@@ -184,11 +184,11 @@ public class MockProfileService : IProfileService, IAuthzProfileService
 	{
 		return _profileService.Unblock(self, target);
 	}
-	public Task<Models.FollowerRelation?> ReceiveBlock(Uri actorId, Uri targetId)
+	public Task<Models.FollowerRelation> ReceiveBlock(Uri actorId, Uri targetId)
 	{
 		return _profileService.ReceiveBlock(actorId, targetId);
 	}
-	public Task<Models.FollowerRelation?> ReceiveUndoBlock(Uri actorId, Uri targetId)
+	public Task<Models.FollowerRelation> ReceiveUndoBlock(Uri actorId, Uri targetId)
 	{
 		return _profileService.ReceiveUndoBlock(actorId, targetId);
 	}
