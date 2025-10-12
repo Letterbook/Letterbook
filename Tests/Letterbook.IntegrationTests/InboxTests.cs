@@ -409,6 +409,73 @@ public class InboxTests : IClassFixture<HostFixture<InboxTests>>, ITestSeed, IDi
 		Assert.Equal(HttpStatusCode.Accepted, followResponse.StatusCode);
 	}
 
+	[Fact(DisplayName = "Should accept a block activity")]
+	public async Task CanAcceptBlock()
+	{
+		var block = new BlockActivity()
+		{
+			Actor = _actor.FediId,
+			Object = _profiles[3].FediId,
+		};
+		var content = _serializer.Serialize(block);
+		var payload = new StringContent(content, mediaType: _mediaType);
+
+		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Signed", _actor.FediId.ToString());
+		var response = await _client.PostAsync($"actor/{_profiles[3].Id}/inbox", payload);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+	}
+
+	[Fact(DisplayName = "Should accept an undo block activity")]
+	public async Task CanAcceptUndoBlock()
+	{
+		var block = new BlockActivity()
+		{
+			Actor = _actor.FediId,
+			Object = _profiles[2].FediId,
+		};
+		var undo = new UndoActivity()
+		{
+			Actor = _actor.FediId,
+			Object = block
+		};
+		var content = _serializer.Serialize(undo);
+		var payload = new StringContent(content, mediaType: _mediaType);
+
+		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Signed", _actor.FediId.ToString());
+		var response = await _client.PostAsync($"actor/{_profiles[2].Id}/inbox", payload);
+
+		Assert.NotNull(response);
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+	}
+
+	[Fact(DisplayName = "Should accept a reblock activity after an unblock")]
+	public async Task CanAcceptUndoRedoBlock()
+	{
+		var block = new BlockActivity()
+		{
+			Actor = _actor.FediId,
+			Object = _profiles[1].FediId,
+		};
+		var undo = new UndoActivity()
+		{
+			Actor = _actor.FediId,
+			Object = block
+		};
+		var undoPayload = new StringContent(_serializer.Serialize(undo), mediaType: _mediaType);
+		var blockPayload = new StringContent(_serializer.Serialize(block), mediaType: _mediaType);
+
+		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Signed", _actor.FediId.ToString());
+		var unblockResponse = await _client.PostAsync($"actor/{_profiles[2].Id}/inbox", undoPayload);
+		var blockResponse = await _client.PostAsync($"actor/{_profiles[2].Id}/inbox", blockPayload);
+
+		Assert.NotNull(unblockResponse);
+		Assert.Equal(HttpStatusCode.OK, unblockResponse.StatusCode);
+		Assert.NotNull(blockResponse);
+		Assert.Equal(HttpStatusCode.OK, blockResponse.StatusCode);
+	}
+
 	[Fact(DisplayName = "Should not accept unhandled activities")]
 	public async Task ShouldNotAcceptUnknown()
 	{
