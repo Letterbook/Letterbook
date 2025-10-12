@@ -2424,6 +2424,9 @@
               "$ref": "#/components/schemas/ModerationReport"
             },
             "nullable": true
+          },
+          "invitedBy": {
+            "$ref": "#/components/schemas/InviteCode"
           }
         },
         "additionalProperties": false
@@ -2907,6 +2910,50 @@
       "Heuristics": {
         "type": "object",
         "additionalProperties": false
+      },
+      "InviteCode": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/InviteCodeId"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiration": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "remainingUses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "uses": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/Account"
+          },
+          "redeemedBy": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Account"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "InviteCodeId": {
+        "type": "string",
+        "additionalProperties": false,
+        "example": "0000000000000000000000000"
       },
       "KeyFamily": {
         "enum": [
@@ -3855,6 +3902,7 @@
           "confirmPassword",
           "email",
           "handle",
+          "inviteCode",
           "password"
         ],
         "type": "object",
@@ -3873,6 +3921,10 @@
             "nullable": true
           },
           "confirmPassword": {
+            "type": "string",
+            "nullable": true
+          },
+          "inviteCode": {
             "type": "string",
             "nullable": true
           }

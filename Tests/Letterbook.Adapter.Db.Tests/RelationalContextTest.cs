@@ -85,4 +85,19 @@ public class RelationalContextTest : IDisposable
 
 		_context.Add(report);
 	}
+
+	[Fact]
+	public void CanTrackInvites()
+	{
+		var creator = new FakeAccount().Generate();
+		var invitee = new FakeAccount().Generate();
+		var invite = new InviteCode("test-code")
+		{
+			CreatedBy = creator,
+			Uses = 1
+		};
+		Assert.True(invite.TryRedeem(invitee));
+
+		_context.Add(invite);
+	}
 }

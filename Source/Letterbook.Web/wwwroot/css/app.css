@@ -38,6 +38,10 @@
                     bottom: 1rem;
                     /*! margin-bottom: 1rem; */
                 }
+                .fill-width {
+                    flex-grow: 1;
+                    width: 100%;
+                }
                 height: 100%;
             }
             height: 100%;

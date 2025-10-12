@@ -29,7 +29,7 @@ public class PasswordResetRequest : PageModel
 	{
 		var template = Url.PageLink(nameof(PasswordReset), null, new {area = "Account", email})
 		               ?? throw CoreException.InternalError("Failed to generate a password reset link template");
-		await _accounts.DeliverPasswordChangeLink(email, template);
+		await _accounts.DeliverPasswordResetLink(email, template);
 		_logger.LogInformation("Requested password reset for {Email}", email);
 
 		Result = "Received";

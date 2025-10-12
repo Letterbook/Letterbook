@@ -1,3 +1,4 @@
+using Bogus;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using MockQueryable;
 using Moq;
+using Org.BouncyCastle.Asn1.Cmp;
 using Xunit.Abstractions;
 
 namespace Letterbook.Core.Tests;
@@ -29,7 +31,7 @@ public class AccountServiceTest : WithMocks
 		_mockIdentityManager = new MockIdentityManager();
 
 		_accountService = new AccountService(loggerMock, CoreOptionsMock, DataAdapterMock.Object,
-			AccountEventServiceMock.Object, _mockIdentityManager.Create());
+			AccountEventServiceMock.Object, new RandomInviteCode(Randomizer.Seed), _mockIdentityManager.Create());
 
 		_account = _fakeAccount.Generate();
 	}
@@ -44,19 +46,41 @@ public class AccountServiceTest : WithMocks
 	public async Task RegisterAccount()
 	{
 		DataAdapterMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
+		DataAdapterMock.Setup(m => m.InviteCodes(It.IsAny<string>()))
+			.Returns(new List<InviteCode> { new("test-code") }.BuildMock());
 
-		var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password");
+		var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password", "test-code");
 
 		Assert.NotNull(actual);
 		Assert.True(actual.Succeeded);
+	}
+
+	[Fact(DisplayName = "Should NOT Register new accounts with invalid invites")]
+	public async Task RegisterAccount_InvalidCode()
+	{
+		var invite = new InviteCode("test-code")
+		{
+			Uses = 1,
+			RemainingUses = 0
+		};
+		DataAdapterMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
+		DataAdapterMock.Setup(m => m.InviteCodes(It.IsAny<string>()))
+			.Returns(new List<InviteCode> { invite }.BuildMock());
+
+		var actual = await _accountService.RegisterAccount("test@example.com", "tester", "password", "test-code");
+
+		Assert.NotNull(actual);
+		Assert.False(actual.Succeeded);
 	}
 
 	[Fact(DisplayName = "Should publish new accounts")]
 	public async Task RegisterAccountPublish()
 	{
 		DataAdapterMock.Setup(m => m.RecordAccount(It.IsAny<Account>())).Returns(true);
+		DataAdapterMock.Setup(m => m.InviteCodes(It.IsAny<string>()))
+			.Returns(new List<InviteCode> { new("test-code") }.BuildMock());
 
-		await _accountService.RegisterAccount("test@example.com", "tester", "password");
+		await _accountService.RegisterAccount("test@example.com", "tester", "password", "test-code");
 
 		AccountEventServiceMock.Verify(mock => mock.Created(It.IsAny<Account>()));
 	}
@@ -195,11 +219,24 @@ public class AccountServiceTest : WithMocks
 			.Setup(m => m.FindByEmailAsync(_account.NormalizedEmail!, It.IsAny<CancellationToken>())).ReturnsAsync(_account);
 
 		var link = $"https://letterbook.example/some/path?email={_account.Email}";
-		await _accountService.DeliverPasswordChangeLink(_account.Email!, link);
+		await _accountService.DeliverPasswordResetLink(_account.Email!, link);
 
 		AccountEventServiceMock.Verify(m => m.PasswordResetRequested(_account, It.Is<string>(actual =>
 			VerifyLinkParams(actual)
 		)));
+	}
+
+	[Fact(DisplayName = "Should generate an invite code")]
+	public async Task CanGenerateInvites()
+	{
+		var random = new Random(1);
+		DataAdapterMock.Setup(m => m.LookupAccount(_account.Id)).ReturnsAsync(_account);
+		var accountService = new AccountService(Mock.Of<ILogger<AccountService>>(), CoreOptionsMock, DataAdapterMock.Object,
+			AccountEventServiceMock.Object, new RandomInviteCode(random), _mockIdentityManager.Create());
+
+		var actual = await accountService.GenerateInviteCode(_account.Id);
+		Assert.Equal("83GR-NFCX-3N18", actual);
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<InviteCode>()));
 	}
 
 	private bool VerifyLinkParams(string actual)

@@ -23,6 +23,7 @@ public class RelationalContext : DbContext
 	public DbSet<Peer> Peers { get; set; }
 	public DbSet<ModerationReport> ModerationReport { get; set; }
 	public DbSet<ModerationPolicy> ModerationPolicy { get; set; }
+	public DbSet<InviteCode> InviteCodes { get; set; }
 
 	public RelationalContext(DbContextOptions<RelationalContext> context) : base(context)
 	{

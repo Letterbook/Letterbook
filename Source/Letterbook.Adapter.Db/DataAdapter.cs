@@ -87,6 +87,9 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public IQueryable<Models.Profile> AllProfiles() => _context.Profiles;
 
+	public IQueryable<Models.InviteCode> InviteCodes(string code) => _context.InviteCodes.Where(c => c.Code == code);
+	public IQueryable<Models.InviteCode> AllInviteCodes() => _context.InviteCodes;
+
 	public IQueryable<Models.ModerationReport> ModerationReports(params Models.ModerationReportId[] ids)
 	{
 		return ids.Length == 1
@@ -149,6 +152,7 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public void Add(Models.ModerationReport report) => _context.ModerationReport.Add(report);
 	public void Add(Models.ModerationPolicy policy) => _context.ModerationPolicy.Add(policy);
+	public void Add(Models.InviteCode code) => _context.InviteCodes.Add(code);
 
 	public void AddRange(IEnumerable<Models.Profile> profile)
 	{
@@ -178,6 +182,7 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	public void Update(Models.Post post) => _context.Posts.Update(post);
 
 	public void Update(Models.Audience audience) => _context.Update(audience);
+	public void Update(Models.InviteCode code) => _context.Update(code);
 
 	public void UpdateRange(IEnumerable<Models.Profile> profile)
 	{
