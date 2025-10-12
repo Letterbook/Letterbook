@@ -494,4 +494,17 @@ public class ProfileServiceTests : WithMocks
 		Assert.Equal(FollowState.Blocked, actual?.State);
 		ApCrawlerSchedulerMock.Verify(m => m.CrawlProfile(It.IsAny<ProfileId>(), actor.FediId, It.IsAny<int>()));
 	}
+
+	[Fact(DisplayName = "Should unblock on a received remote undo block")]
+	public async Task ReceiveUnblock()
+	{
+		var target = new FakeProfile().Generate();
+		_profile.Block(target);
+		DataAdapterMock.Setup(m => m.Profiles(_profile.FediId)).Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.Profiles(target.FediId)).Returns(new List<Profile> { target }.BuildMock());
+
+		var actual = await _service.ReceiveUndoBlock(_profile.FediId, target.FediId);
+
+		Assert.Equal(FollowState.None, actual?.State);
+	}
 }

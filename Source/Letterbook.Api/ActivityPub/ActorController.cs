@@ -117,7 +117,7 @@ public class ActorController : ControllerBase
 	{
 		if (!asType.Is<ASActivity>(out var activity))
 			return BadRequest(new {Reason = "Input was not an Activity"});
-		if (activity.Actor.SingleOrDefault()?.TryGetId(out var actorId) != true)
+		if (!activity.TryGetSingleActorId(out var actorId))
 			return Unauthorized(new {Reason = "Could not determine the Actor"});
 		if (actorId != User.Claims.Where(c => c.Type == ApplicationClaims.Actor).Select(c => new Uri(c.Value)).FirstOrDefault())
 			return Unauthorized(new {Reason = "Activity was not signed by the Actor"});
@@ -155,7 +155,10 @@ public class ActorController : ControllerBase
 				return await InboxUpdate(id, update);
 
 			if (activity.Is<FlagActivity>(out var flag))
-				return await InboxFlag(actorId!, flag);
+				return await InboxFlag(actorId, flag);
+
+			if (activity.Is<BlockActivity>(out var block))
+				return await InboxBlock(actorId, block);
 
 
 			_logger.LogWarning("Ignored unknown activity {@ActivityType}", activity.TypeMap.ASTypes);
@@ -237,6 +240,26 @@ public class ActorController : ControllerBase
 		actorId = id;
 		error = default;
 		return true;
+	}
+
+	private async Task<IActionResult> InboxBlock(Uri actorId, BlockActivity activity)
+	{
+		var targets = activity.Object.AsIds();
+		if (!targets.Any())
+			return BadRequest();
+		try
+		{
+			foreach (var target in targets)
+			{
+				await _profileService.As(User.Claims).ReceiveBlock(actorId, target);
+			}
+		}
+		catch (CoreException)
+		{
+			return BadRequest();
+		}
+
+		return Ok();
 	}
 
 	private async Task<IActionResult> InboxFlag(Uri actorId, FlagActivity activity)
@@ -351,7 +374,29 @@ public class ActorController : ControllerBase
 		if (activityObject.Is<AnnounceActivity>(out var announceActivity))
 			throw new NotImplementedException();
 		if (activityObject.Is<BlockActivity>(out var blockActivity))
-			throw new NotImplementedException();
+		{
+			_logger.LogDebug("Undo activity: {Object}", "Block");
+			if (!blockActivity.TryGetSingleActorId(out var blockActor))
+				return BadRequest();
+			if (blockActor != undoActorId)
+				return BadRequest();
+			var targets = blockActivity.Object.AsIds();
+			if (!targets.Any())
+				return BadRequest();
+			try
+			{
+				foreach (var target in targets)
+				{
+					await _profileService.As(User.Claims).ReceiveUndoBlock(blockActor, target);
+				}
+			}
+			catch (CoreException)
+			{
+				return BadRequest();
+			}
+
+			return Ok();
+		}
 		if (activityObject.Is<FollowActivity>(out var followActivity))
 		{
 			_logger.LogDebug("Undo activity: {Object}", "Follow");
@@ -366,6 +411,7 @@ public class ActorController : ControllerBase
 			await _profileService.As(User.Claims).RemoveFollower(id, followerId);
 			return Ok();
 		}
+
 		if (activityObject.Is<LikeActivity>(out var likeActivity))
 			throw new NotImplementedException();
 

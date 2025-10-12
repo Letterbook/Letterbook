@@ -294,6 +294,10 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		Follow(Profiles[11], Profiles[7]);
 		Follow(Profiles[12], Profiles[7]);
 
+		// P13 (remote) blocks P1 and P2
+		Profiles[13].Block(Profiles[2]);
+		Profiles[13].Block(Profiles[1]);
+
 		// Local profiles
 		// P0 creates posts 0-2
 		Posts.Add(Profiles[0], new FakePost(Profiles[0]).Generate(3));
