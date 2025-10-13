@@ -357,6 +357,30 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		return policy;
 	}
 
+	public async Task<ICollection<Restrictions>> GetOrInitPeerRestrictions(Uri peerId)
+	{
+		var allowed = _authz.View<Peer>(_claims);
+		if (!allowed)
+			throw CoreException.Unauthorized(allowed);
+
+		if (await _data.Peers(peerId).SingleOrDefaultAsync() is not { } peer)
+		{
+			peer = new Peer(peerId);
+			_data.Add(peer);
+			await _data.Commit();
+		}
+
+		return peer.Restrictions.Where(r => !r.Value.Expired()).Select(r => r.Key).ToHashSet();
+	}
+	public Task<Peer> SetPeerRestriction(Uri peerId, Restrictions restriction, DateTimeOffset expiration)
+	{
+		throw new NotImplementedException();
+	}
+	public Task<Peer> RemovePeerRestriction(Uri peerId, Restrictions restriction)
+	{
+		throw new NotImplementedException();
+	}
+
 	public IAuthzModerationService As(IEnumerable<Claim> claims)
 	{
 		_claims = claims;

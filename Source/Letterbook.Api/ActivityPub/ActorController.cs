@@ -7,6 +7,7 @@ using Letterbook.Adapter.ActivityPub.Mappers;
 using Letterbook.Adapter.ActivityPub.Types;
 using Letterbook.Api.Dto;
 using Letterbook.Api.Swagger;
+using Letterbook.AspNet;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Exceptions;
@@ -33,6 +34,7 @@ namespace Letterbook.Api.ActivityPub;
 	// "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"",
 	// "application/activity+json")]
 [Authorize(policy: Constants.ActivityPubPolicy)]
+[ServiceFilter<AuthorizePeerService>]
 public class ActorController : ControllerBase
 {
 	private readonly ILogger<ActorController> _logger;

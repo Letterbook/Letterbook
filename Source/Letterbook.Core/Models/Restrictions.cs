@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 namespace Letterbook.Core.Models;
 
 public enum Restrictions
@@ -26,4 +28,14 @@ public enum Restrictions
 	DenyReports,
 	/// Discard all messages
 	Defederate
+}
+
+public static class RestrictionsExtensions
+{
+	public const string RestrictionType = "letterbookRestriction";
+
+	public static Claim AsClaim(this Restrictions restriction)
+	{
+		return new Claim(RestrictionType, restriction.ToString());
+	}
 }
