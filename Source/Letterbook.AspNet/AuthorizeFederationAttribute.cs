@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Letterbook.Api.Authentication.HttpSignature.Infrastructure;
 using Letterbook.Core;
 using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -17,10 +18,14 @@ public class AuthorizePeerService: Attribute, IAsyncActionFilter
 
 	public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 	{
-		var signatures = context.HttpContext.Features.Get<List<Uri>>() ?? [];
+		if (context.HttpContext.Features.Get<HttpSignatureFeature>() is not { } signatures)
+		{
+			await next();
+			return;
+		}
 		var svc = _moderation.As(context.HttpContext.User.Claims);
 
-		foreach (var signature in signatures)
+		foreach (var signature in signatures.GetValidatedSignatures())
 		{
 			var peerRestrictions = await svc.GetOrInitPeerRestrictions(signature);
 			var peerClaims = peerRestrictions.Select(r => r.AsClaim()).ToList();
@@ -33,5 +38,7 @@ public class AuthorizePeerService: Attribute, IAsyncActionFilter
 			}
 			context.HttpContext.User.AddIdentity(new ClaimsIdentity(peerClaims));
 		}
+
+		await next();
 	}
 }
