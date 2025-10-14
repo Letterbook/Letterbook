@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ActivityPub.Types.AS;
 using Letterbook.Core.Models;
 
@@ -16,9 +17,10 @@ public interface IActivityScheduler
 	/// </summary>
 	/// <param name="inbox"></param>
 	/// <param name="activity"></param>
+	/// <param name="claims"></param>
 	/// <param name="onBehalfOf"></param>
 	/// <returns></returns>
-	public Task Deliver(Uri inbox, ASType activity, Profile? onBehalfOf);
+	public Task Deliver(Uri inbox, ASType activity, IEnumerable<Claim> claims, Profile? onBehalfOf);
 
 	/// <summary>
 	/// Deliver a Post that's been published.
@@ -27,9 +29,10 @@ public interface IActivityScheduler
 	/// <param name="inbox"></param>
 	/// <param name="post"></param>
 	/// <param name="onBehalfOf"></param>
+	/// <param name="claims"></param>
 	/// <param name="extraMention"></param>
 	/// <returns></returns>
-	public Task Publish(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default);
+	public Task Publish(Uri inbox, Post post, Profile onBehalfOf, IEnumerable<Claim> claims, Mention? extraMention = default);
 
 	/// <summary>
 	/// Deliver a Post that's been updated.
@@ -38,9 +41,10 @@ public interface IActivityScheduler
 	/// <param name="inbox"></param>
 	/// <param name="post"></param>
 	/// <param name="onBehalfOf"></param>
+	/// <param name="claims"></param>
 	/// <param name="extraMention"></param>
 	/// <returns></returns>
-	public Task Update(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default);
+	public Task Update(Uri inbox, Post post, Profile onBehalfOf, IEnumerable<Claim> claims, Mention? extraMention = default);
 
 	/// <summary>
 	/// Deliver a Post that's been deleted.
@@ -48,9 +52,10 @@ public interface IActivityScheduler
 	/// <remarks>The Post will be sent as an ID only, in a Delete activity</remarks>
 	/// <param name="inbox"></param>
 	/// <param name="post"></param>
+	/// <param name="claims"></param>
 	/// <param name="onBehalfOf"></param>
 	/// <returns></returns>
-	public Task Delete(Uri inbox, Post post, Profile onBehalfOf);
+	public Task Delete(Uri inbox, Post post, IEnumerable<Claim> claims, Profile onBehalfOf);
 
 	/// <summary>
 	/// Share a previously published Post.
@@ -58,18 +63,20 @@ public interface IActivityScheduler
 	/// <remarks>The Post will be sent as an ID only, in an Announce activity</remarks>
 	/// <param name="inbox"></param>
 	/// <param name="post"></param>
+	/// <param name="claims"></param>
 	/// <param name="onBehalfOf"></param>
 	/// <returns></returns>
-	public Task Share(Uri inbox, Post post, Profile onBehalfOf);
+	public Task Share(Uri inbox, Post post, IEnumerable<Claim> claims, Profile onBehalfOf);
 
 	/// <summary>
 	/// Send a Like message regarding a Post.
 	/// </summary>
 	/// <param name="inbox"></param>
 	/// <param name="post"></param>
+	/// <param name="claims"></param>
 	/// <param name="onBehalfOf"></param>
 	/// <returns></returns>
-	public Task Like(Uri inbox, Post post, Profile onBehalfOf);
+	public Task Like(Uri inbox, Post post, IEnumerable<Claim> claims, Profile onBehalfOf);
 
 	/// <summary>
 	/// Construct an AP document representing a request to follow the target and send it to the specified inbox
@@ -77,9 +84,10 @@ public interface IActivityScheduler
 	/// <remarks>This will be represented as a simple Follow activity</remarks>
 	/// <param name="inbox"></param>
 	/// <param name="target"></param>
+	/// <param name="claims"></param>
 	/// <param name="actor"></param>
 	/// <returns></returns>
-	public Task Follow(Uri inbox, Profile target, Profile actor);
+	public Task Follow(Uri inbox, Profile target, IEnumerable<Claim> claims, Profile actor);
 
 	/// <summary>
 	/// Construct an AP document that signals the actor is no longer following the target and send it to the specified inbox
@@ -87,9 +95,10 @@ public interface IActivityScheduler
 	/// <remarks>This will be represented as an Undo:Follow activity</remarks>
 	/// <param name="inbox"></param>
 	/// <param name="target"></param>
+	/// <param name="claims"></param>
 	/// <param name="actor"></param>
 	/// <returns></returns>
-	public Task Unfollow(Uri inbox, Profile target, Profile actor);
+	public Task Unfollow(Uri inbox, Profile target, IEnumerable<Claim> claims, Profile actor);
 
 	/// <summary>
 	/// Construct an AP document that signals the target profile has been removed as a follower and send it to the specified inbox
@@ -97,9 +106,10 @@ public interface IActivityScheduler
 	/// <remarks>This will be represented as an Undo:Accept:Follow Activity</remarks>
 	/// <param name="inbox"></param>
 	/// <param name="target"></param>
+	/// <param name="claims"></param>
 	/// <param name="actor"></param>
 	/// <returns></returns>
-	public Task RemoveFollower(Uri inbox, Profile target, Profile actor);
+	public Task RemoveFollower(Uri inbox, Profile target, IEnumerable<Claim> claims, Profile actor);
 
 	/// <summary>
 	/// Construct an AP document that accepts the target's follow request and send it do the specified inbox
@@ -107,9 +117,10 @@ public interface IActivityScheduler
 	/// <remarks>This will be represented as an Accept:Follow Activity</remarks>
 	/// <param name="inbox"></param>
 	/// <param name="target">The profile that previously made the request</param>
+	/// <param name="claims"></param>
 	/// <param name="actor">The current actor profile that is accepting the request</param>
 	/// <returns></returns>
-	public Task AcceptFollower(Uri inbox, Profile target, Profile actor);
+	public Task AcceptFollower(Uri inbox, Profile target, IEnumerable<Claim> claims, Profile actor);
 
 	/// <summary>
 	/// Construct an AP document that rejects the target's follow request and send it do the specified inbox
@@ -117,9 +128,10 @@ public interface IActivityScheduler
 	/// <remarks>This will be represented as a Reject:Follow Activity</remarks>
 	/// <param name="inbox"></param>
 	/// <param name="target">The profile that previously made the request</param>
+	/// <param name="claims"></param>
 	/// <param name="actor">The current actor profile that is accepting the request</param>
 	/// <returns></returns>
-	public Task RejectFollower(Uri inbox, Profile target, Profile actor);
+	public Task RejectFollower(Uri inbox, Profile target, IEnumerable<Claim> claims, Profile actor);
 
 	/// <summary>
 	/// Construct an AP document that notifies the target's follow request is pending acceptance and send it
@@ -129,8 +141,9 @@ public interface IActivityScheduler
 	/// <param name="inbox"></param>
 	/// <param name="target">The profile that previously made the request</param>
 	/// <param name="actor">The current actor profile that is accepting the request</param>
+	/// <param name="claims"></param>
 	/// <returns></returns>
-	public Task PendingFollower(Uri inbox, Profile target, Profile actor);
+	public Task PendingFollower(Uri inbox, Profile target, Profile actor, IEnumerable<Claim> claims);
 
 	/// <summary>
 	/// Construct an AP Flag document concerning the report's subjects and send it to the specified inbox. Reports are
@@ -139,7 +152,9 @@ public interface IActivityScheduler
 	/// <remarks>Only sends the subset of the report that shares a domain with the recipient inbox</remarks>
 	/// <param name="inbox"></param>
 	/// <param name="report"></param>
+	/// <param name="claims"></param>
 	/// <param name="scope"></param>
 	/// <returns></returns>
-	public Task Report(Uri inbox, ModerationReport report, ModerationReport.Scope scope = ModerationReport.Scope.Profile);
+	public Task Report(Uri inbox, ModerationReport report, IEnumerable<Claim> claims,
+		ModerationReport.Scope scope = ModerationReport.Scope.Profile);
 }

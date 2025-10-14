@@ -49,7 +49,8 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 		if (!post.FediId.HasLocalAuthority(_config)) return;
 		_logger.LogInformation("Handling PostEvent {EventType} for {PostId}", context.Message.Type, context.Message.Subject);
 
-		var svc = _profileService.As(context.Message.Claims.Select(c => (Claim)c));
+		var claims = context.Message.Claims.Select(Extensions.MapClaim).ToList();
+		var svc = _profileService.As(claims);
 		if (await svc.LookupProfile(context.Message.Sender) is not { } sender)
 		{
 			_logger.LogError("Sender not found for {@Event}", context.Message);
@@ -59,26 +60,26 @@ public class OutboundPostConsumer : IConsumer<PostEvent>
 		switch (context.Message.Type)
 		{
 			case nameof(PostEventPublisher.Published):
-				await DeliverAudienceAndMentions(post, sender, _scheduler.Publish);
+				await DeliverAudienceAndMentions(post, sender, (inbox, post1, onBehalfOf, extraMention) => _scheduler.Publish(inbox, post1, onBehalfOf, claims, extraMention));
 				break;
 			case nameof(PostEventPublisher.Updated):
-				await DeliverAudienceAndMentions(post, sender, _scheduler.Update);
+				await DeliverAudienceAndMentions(post, sender, (inbox, post1, onBehalfOf, extraMention) => _scheduler.Update(inbox, post1, onBehalfOf, claims, extraMention));
 				break;
 			case nameof(PostEventPublisher.Shared):
-				await DeliverFollowers(post, sender, _scheduler.Share);
+				await DeliverFollowers(post, sender, (inbox, post1, onBehalfOf) => _scheduler.Share(inbox, post1, claims, onBehalfOf));
 				break;
 			case nameof(PostEventPublisher.Deleted):
 				var mentions = await GetMentionedProfiles(post).ToListAsync();
 				foreach (var mention in mentions)
 				{
-					await _scheduler.Delete(mention.Subject.Inbox, post, sender);
+					await _scheduler.Delete(mention.Subject.Inbox, post, claims, sender);
 				}
-				await DeliverAudience(post, sender, _scheduler.Delete);
+				await DeliverAudience(post, sender, (inbox, post1, onBehalfOf) => _scheduler.Delete(inbox, post1, claims, onBehalfOf));
 				break;
 			case nameof(PostEventPublisher.Liked):
 				await foreach (var inbox in GetAuthorsInboxes(post))
 				{
-					await _scheduler.Like(inbox, post, sender);
+					await _scheduler.Like(inbox, post, claims, sender);
 				}
 				break;
 			default:

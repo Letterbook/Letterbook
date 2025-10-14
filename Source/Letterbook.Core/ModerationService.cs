@@ -87,7 +87,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 		foreach (var inbox in report.Forwarded)
 		{
-			await _activity.Report(inbox, report);
+			await _activity.Report(inbox, report, _claims);
 		}
 
 		return report;
@@ -180,7 +180,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 		foreach (var inbox in forwardTo)
 		{
-			await _activity.Report(inbox, report, sendScope);
+			await _activity.Report(inbox, report, _claims, sendScope);
 		}
 
 		return report;

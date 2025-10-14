@@ -26,6 +26,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private readonly IApCrawlScheduler _crawler;
 	private readonly IHostSigningKeyProvider _hostSigningKeyProvider;
 	private readonly IActivityScheduler _activity;
+	private IEnumerable<Claim> _claims;
 
 	public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options, Instrumentation instrumentation,
 		IDataAdapter data, IProfileEventPublisher profileEvents, IActivityPubClient client, IApCrawlScheduler crawler,
@@ -40,6 +41,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		_crawler = crawler;
 		_hostSigningKeyProvider = hostSigningKeyProvider;
 		_activity = activity;
+		_claims = default!;
 	}
 
 	public Task<Profile> CreateProfile(Profile profile)
@@ -256,7 +258,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		}
 
 		// TODO(moderation): Check for requiresApproval
-		await _activity.Follow(target.Inbox, target, self);
+		await _activity.Follow(target.Inbox, target, _claims, self);
 		self.Follow(target, FollowState.Pending);
 
 		await _data.Commit();
@@ -347,15 +349,15 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		switch (relation.State)
 		{
 			case FollowState.Accepted:
-				await _activity.AcceptFollower(inbox, follower, actor);
+				await _activity.AcceptFollower(inbox, follower, _claims, actor);
 				return relation;
 			case FollowState.None:
 			case FollowState.Rejected:
-				await _activity.RejectFollower(inbox, follower, actor);
+				await _activity.RejectFollower(inbox, follower, _claims, actor);
 				return relation;
 			case FollowState.Pending:
 			default:
-				await _activity.PendingFollower(inbox, follower, actor);
+				await _activity.PendingFollower(inbox, follower, actor, _claims);
 				return relation;
 		}
 	}
@@ -393,7 +395,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		self.RemoveFromAudience(relation.Follower);
 
 		await _data.Commit();
-		await _activity.RemoveFollower(relation.Follower.Inbox, relation.Follower, self);
+		await _activity.RemoveFollower(relation.Follower.Inbox, relation.Follower, _claims, self);
 		relation.State = FollowState.None;
 		return relation;
 	}
@@ -437,7 +439,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		if (!relation.Follows.HasLocalAuthority(_coreConfig))
 		{
 			var target = relation.Follows;
-			await _activity.Unfollow(target.Inbox, target, self);
+			await _activity.Unfollow(target.Inbox, target, _claims, self);
 		}
 
 		relation.State = FollowState.None;
@@ -719,5 +721,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return await _client.As(onBehalfOf).Fetch<TResult>(id);
 	}
 
-	public IAuthzProfileService As(IEnumerable<Claim> claims) => this;
+	public IAuthzProfileService As(IEnumerable<Claim> claims)
+	{
+		_claims = claims;
+		return this;
+	}
 }

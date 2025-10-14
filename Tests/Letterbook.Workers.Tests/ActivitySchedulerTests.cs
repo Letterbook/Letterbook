@@ -44,7 +44,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		{
 			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
 			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
-			await _publisher.Follow(target.Inbox, target, actor);
+			await _publisher.Follow(target.Inbox, target, [], actor);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -54,7 +54,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		[Fact(DisplayName = "Should publish follow messages")]
 		public async Task CanSendFollow()
 		{
-			await _publisher.Follow(_target.Inbox, _target, _actor);
+			await _publisher.Follow(_target.Inbox, _target, [], _actor);
 			await Harness.Published.Any<ActivityMessage>();
 			await Harness.Consumed.Any<ActivityMessage>();
 
@@ -69,7 +69,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		{
 			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
 			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
-			await _publisher.Unfollow(target.Inbox, target, actor);
+			await _publisher.Unfollow(target.Inbox, target, [], actor);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -79,7 +79,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		[Fact(DisplayName = "Should publish unfollow messages")]
 		public async Task CanSendUnfollow()
 		{
-			await _publisher.Unfollow(_target.Inbox, _target, _actor);
+			await _publisher.Unfollow(_target.Inbox, _target, [], _actor);
 			await Harness.Published.Any<ActivityMessage>();
 			await Harness.Consumed.Any<ActivityMessage>();
 
@@ -94,7 +94,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		{
 			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
 			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
-			await _publisher.AcceptFollower(target.Inbox, target, actor);
+			await _publisher.AcceptFollower(target.Inbox, target, [], actor);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -104,7 +104,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		[Fact(DisplayName = "Should publish accept follower messages")]
 		public async Task CanSendAccept()
 		{
-			await _publisher.AcceptFollower(_target.Inbox, _target, _actor);
+			await _publisher.AcceptFollower(_target.Inbox, _target, [], _actor);
 			await Harness.Published.Any<ActivityMessage>();
 			await Harness.Consumed.Any<ActivityMessage>();
 
@@ -119,7 +119,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		{
 			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
 			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
-			await _publisher.RejectFollower(target.Inbox, target, actor);
+			await _publisher.RejectFollower(target.Inbox, target, [], actor);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -129,7 +129,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		[Fact(DisplayName = "Should publish reject follower messages")]
 		public async Task CanSendReject()
 		{
-			await _publisher.RejectFollower(_target.Inbox, _target, _actor);
+			await _publisher.RejectFollower(_target.Inbox, _target, [], _actor);
 			await Harness.Published.Any<ActivityMessage>();
 			await Harness.Consumed.Any<ActivityMessage>();
 
@@ -144,7 +144,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		{
 			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
 			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
-			await _publisher.PendingFollower(target.Inbox, target, actor);
+			await _publisher.PendingFollower(target.Inbox, target, actor, []);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -154,7 +154,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		[Fact(DisplayName = "Should publish pending accept follower messages")]
 		public async Task CanSendPending()
 		{
-			await _publisher.PendingFollower(_target.Inbox, _target, _actor);
+			await _publisher.PendingFollower(_target.Inbox, _target, _actor, []);
 			await Harness.Published.Any<ActivityMessage>();
 			await Harness.Consumed.Any<ActivityMessage>();
 
@@ -169,7 +169,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		{
 			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
 			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
-			await _publisher.RemoveFollower(target.Inbox, target, actor);
+			await _publisher.RemoveFollower(target.Inbox, target, [], actor);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -179,7 +179,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		[Fact(DisplayName = "Should publish remove follower messages")]
 		public async Task CanSendRemove()
 		{
-			await _publisher.RemoveFollower(_target.Inbox, _target, _actor);
+			await _publisher.RemoveFollower(_target.Inbox, _target, [], _actor);
 			await Harness.Published.Any<ActivityMessage>();
 			await Harness.Consumed.Any<ActivityMessage>();
 
@@ -206,7 +206,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 				report.RelatedPosts.Add(post);
 			}
 			report.RelatedPosts.Add(otherPost);
-			await _publisher.Report(target[0].Inbox, report, ModerationReport.Scope.Full);
+			await _publisher.Report(target[0].Inbox, report, [], ModerationReport.Scope.Full);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -230,7 +230,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 				report.RelatedPosts.Add(post);
 			}
 			report.RelatedPosts.Add(otherPost);
-			await _publisher.Report(target[0].Inbox, report, ModerationReport.Scope.Domain);
+			await _publisher.Report(target[0].Inbox, report, [], ModerationReport.Scope.Domain);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -243,7 +243,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 			var actor = new FakeProfile("letterbook.example").UseSeed(0).Generate();
 			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
 			var report = new FakeReport(actor, target).UseSeed(2).Generate();
-			await _publisher.Report(target.Inbox, report);
+			await _publisher.Report(target.Inbox, report, []);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -257,7 +257,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 			var target = new FakeProfile("peer.example").UseSeed(1).Generate();
 			var post = new FakePost(target).UseSeed(1).Generate();
 			var report = new FakeReport(actor, post).UseSeed(2).Generate();
-			await _publisher.Report(target.Inbox, report);
+			await _publisher.Report(target.Inbox, report, []);
 			var actual = (await Harness.Published.SelectAsync<ActivityMessage>().FirstOrDefault())?.Context.Message.Data;
 
 			Assert.NotNull(actual);
@@ -269,7 +269,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		{
 			var report = new FakeReport(_actor, _target).Generate();
 
-			await _publisher.Report(_target.Inbox, report);
+			await _publisher.Report(_target.Inbox, report, []);
 			await Harness.Published.Any<ActivityMessage>();
 			await Harness.Consumed.Any<ActivityMessage>();
 
@@ -282,7 +282,7 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 			var report = new FakeReport(_actor, _target).Generate();
 			report.Subjects.Add(new FakeProfile("peer.example").Generate());
 
-			await _publisher.Report(_target.Inbox, report);
+			await _publisher.Report(_target.Inbox, report, []);
 			await Harness.Published.Any<ActivityMessage>();
 			await Harness.Consumed.SelectAsync<ActivityMessage>().Skip(1).FirstOrDefaultAsync();
 

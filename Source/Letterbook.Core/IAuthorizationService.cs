@@ -65,6 +65,14 @@ public interface IAuthorizationService
 	public Decision Publish<T>(IEnumerable<Claim> claims, T resource);
 
 	/// <summary>
+	/// Authorize sending or receiving messages from a federated peer
+	/// </summary>
+	/// <param name="claims"></param>
+	/// <param name="peer"></param>
+	/// <returns></returns>
+	public Decision Federate(IEnumerable<Claim> claims, Uri peer);
+
+	/// <summary>
 	/// Authorize reading or viewing a resource
 	/// </summary>
 	/// <param name="claims"></param>

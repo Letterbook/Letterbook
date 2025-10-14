@@ -41,6 +41,11 @@ public class AuthorizationService : IAuthorizationService
 		return Decision.Allow("todo", claims);
 	}
 
+	public Decision Federate(IEnumerable<Claim> claims, Uri peer)
+	{
+		return Decision.Allow("todo", claims);
+	}
+
 	public Decision View<T>(IEnumerable<Claim> claims, T target)
 	{
 		return Decision.Allow("todo", claims);

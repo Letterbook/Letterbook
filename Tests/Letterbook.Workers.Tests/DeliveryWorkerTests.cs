@@ -60,7 +60,7 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	[MemberData(nameof(GenerateDoc), 50)]
 	public async Task CanSend(ASObject asDoc, Uri inbox)
 	{
-		await _publisher.Deliver(inbox, asDoc, _profile);
+		await _publisher.Deliver(inbox, asDoc, [], _profile);
 
 		Assert.True(await _harness.Published.Any<ActivityMessage>());
 		Assert.True(await _harness.Consumed.Any<ActivityMessage>());
