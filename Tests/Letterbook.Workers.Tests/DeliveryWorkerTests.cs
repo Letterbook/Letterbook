@@ -14,6 +14,7 @@ using MassTransit;
 using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 
@@ -47,6 +48,8 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 
 		MockAuthorizeAllowAll();
 		_harness.Start().Wait();
+
+		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer> { new(new Uri("https://peer.example")) }.BuildMock());
 	}
 
 	[Fact]

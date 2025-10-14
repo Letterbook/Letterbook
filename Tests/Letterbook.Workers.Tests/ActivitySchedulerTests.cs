@@ -7,6 +7,7 @@ using Letterbook.Workers.Publishers;
 using MassTransit;
 using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 
@@ -30,6 +31,8 @@ public class Activities : WithMockBus<IActivityScheduler, ActivityScheduler>
 		_target = new FakeProfile("peer.example").Generate();
 
 		MockAuthorizeAllowAll();
+
+		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer> { new(new Uri("https://peer.example")) }.BuildMock());
 	}
 
 	protected override void ConfigureBus(IBusRegistrationConfigurator bus)

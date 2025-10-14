@@ -2,12 +2,13 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
-using ActivityPub.Types.Conversion;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Workers.Contracts;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Claim = System.Security.Claims.Claim;
 
@@ -19,14 +20,16 @@ public class ActivityScheduler : IActivityScheduler
 	private readonly ILogger<ActivityScheduler> _logger;
 	private readonly IActivityPubDocument _document;
 	private readonly IBus _bus;
-	private readonly IAuthorizationService _authz;
+	private readonly IAuthorizationService _authorize;
+	private readonly IDataAdapter _data;
 
 	public ActivityScheduler(ILogger<ActivityScheduler> logger, IOptions<CoreOptions> options, IActivityPubDocument document, IBus bus,
-		IAuthorizationService authz)
+		IAuthorizationService authorize, IDataAdapter data)
 	{
 		_options = options.Value;
 		_bus = bus;
-		_authz = authz;
+		_authorize = authorize;
+		_data = data;
 		_logger = logger;
 		_document = document;
 	}
@@ -34,7 +37,10 @@ public class ActivityScheduler : IActivityScheduler
 	/// <inheritdoc />
 	public async Task Deliver(Uri inbox, ASType activity, IEnumerable<Claim> claims, Profile? onBehalfOf)
 	{
-		if (!_authz.Federate(claims, inbox))
+		if (await _data.Peers(inbox).SingleOrDefaultAsync() is not {} peer)
+			return;
+		claims = claims.ToList();
+		if (!_authorize.Federate(claims, peer.Restrictions.Where(r => !r.Value.Expired()).Select(r => r.Key)))
 			return;
 		await _bus.Publish(FormatMessage(inbox, activity, onBehalfOf));
 		_logger.LogInformation("Scheduled message type {Activity} for delivery to {Inbox}",
