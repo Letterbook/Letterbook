@@ -7,6 +7,8 @@ public class Peer
 {
 	public string Hostname { get; set; }
 	public string Authority { get; set; }
+	public string? PublicRemark { get; set; }
+	public string? PrivateComment { get; set; }
 	public IDictionary<Restrictions, DateTimeOffset> Restrictions { get; set; } = new Dictionary<Restrictions, DateTimeOffset>();
 
 	public Peer(Uri address)
