@@ -101,6 +101,13 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<ModerationPolicy> AllPolicies();
 
 	/// <summary>
+	/// Query for peer hosts
+	/// </summary>
+	/// <param name="peerId"></param>
+	/// <returns></returns>
+	public IQueryable<Peer> Peers(params Uri[] peerIds);
+
+	/// <summary>
 	/// Query for navigation entities, using the given object as a root entity
 	/// </summary>
 	/// <remarks>Consumers should be sure to set an OrderBy property</remarks>
@@ -134,6 +141,7 @@ public interface IDataAdapter : IDisposable
 	public void Add(ModerationReport report);
 	public void Add(ModerationPolicy policy);
 	public void Add(InviteCode code);
+	public void Add(Peer peer);
 	public void AddRange(IEnumerable<Profile> profile);
 	public void AddRange(IEnumerable<Account> account);
 	public void AddRange(IEnumerable<Post> posts);

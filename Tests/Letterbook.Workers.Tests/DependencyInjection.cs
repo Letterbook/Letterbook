@@ -4,6 +4,7 @@ using ActivityPub.Types.Conversion;
 using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Authorization;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Core.Tests;
@@ -32,6 +33,7 @@ public static class DependencyInjection
 			.AddScoped<IActivityPubDocument, Document>()
 			.AddSingleton<Instrumentation>()
 			.AddSingleton<MappingConfigProvider>()
+			.AddSingleton<IAuthorizationService, AuthorizationService>()
 			.AddSingleton<IOptions<CoreOptions>>(mocks.CoreOptionsMock);
 	}
 

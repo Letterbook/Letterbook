@@ -14,6 +14,7 @@ using MassTransit;
 using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 
@@ -47,6 +48,8 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 
 		MockAuthorizeAllowAll();
 		_harness.Start().Wait();
+
+		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer> { new(new Uri("https://peer.example")) }.BuildMock());
 	}
 
 	[Fact]
@@ -60,7 +63,7 @@ public sealed class DeliveryWorkerTests : WithMocks, IAsyncDisposable
 	[MemberData(nameof(GenerateDoc), 50)]
 	public async Task CanSend(ASObject asDoc, Uri inbox)
 	{
-		await _publisher.Deliver(inbox, asDoc, _profile);
+		await _publisher.Deliver(inbox, asDoc, [], _profile);
 
 		Assert.True(await _harness.Published.Any<ActivityMessage>());
 		Assert.True(await _harness.Consumed.Any<ActivityMessage>());

@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MockQueryable;
 using Moq;
 using Audience = Letterbook.Core.Models.Audience;
+using Claim = System.Security.Claims.Claim;
 
 namespace Letterbook.Workers.Tests;
 
@@ -78,7 +79,7 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
 		Assert.Empty(_harness.Consumed.Select<PostEvent>().AsEnumerable().Select(m => m.Exception).WhereNotNull());
 		ActivityPublisherMock.Verify(m =>
-			m.Publish(follower.Inbox, It.IsAny<Post>(), It.Is<Profile>(profile => profile.GetId() == _profile.GetId()), null));
+			m.Publish(follower.Inbox, It.IsAny<Post>(), It.Is<Profile>(profile => profile.GetId() == _profile.GetId()), It.IsAny<IEnumerable<Claim>>(), null));
 	}
 
 	[Fact(DisplayName = "Should send on Publish")]
@@ -95,7 +96,7 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 		await _publisher.Published(_post, _profile.GetId(), []);
 
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
-		ActivityPublisherMock.Verify(m => m.Publish(recipient.Inbox, _post, _profile, null));
+		ActivityPublisherMock.Verify(m => m.Publish(recipient.Inbox, _post, _profile, It.IsAny<IEnumerable<Claim>>(), null));
 	}
 
 	[Fact(DisplayName = "Should send on Update")]
@@ -112,7 +113,7 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 		await _publisher.Updated(_post, _profile.GetId(), []);
 
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
-		ActivityPublisherMock.Verify(m => m.Update(recipient.Inbox, _post, _profile, null));
+		ActivityPublisherMock.Verify(m => m.Update(recipient.Inbox, _post, _profile, It.IsAny<IEnumerable<Claim>>(), null));
 	}
 
 	[Fact(DisplayName = "Should send on Delete")]
@@ -129,6 +130,6 @@ public class OutboundPostConsumerTests : WithMocks, IAsyncDisposable
 		await _publisher.Deleted(_post, _profile.GetId(), []);
 
 		Assert.True(await _harness.Consumed.Any<PostEvent>());
-		ActivityPublisherMock.Verify(m => m.Delete(recipient.Inbox, _post, _profile));
+		ActivityPublisherMock.Verify(m => m.Delete(recipient.Inbox, _post, It.IsAny<IEnumerable<Claim>>(), _profile));
 	}
 }

@@ -50,6 +50,7 @@
     <ProjectReference Include="..\Letterbook.Adapter.Db\Letterbook.Adapter.Db.csproj" />
     <ProjectReference Include="..\Letterbook.Adapter.TimescaleFeeds\Letterbook.Adapter.TimescaleFeeds.csproj" />
     <ProjectReference Include="..\Letterbook.Api.Authentication.HttpSignature\Letterbook.Api.Authentication.HttpSignature.csproj" />
+    <ProjectReference Include="..\Letterbook.AspNet\Letterbook.AspNet.csproj" />
     <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj" />
     <ProjectReference Include="..\Letterbook.Workers\Letterbook.Workers.csproj" />
   </ItemGroup>
@@ -68,5 +69,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Filters\" />
   </ItemGroup>
 </Project>

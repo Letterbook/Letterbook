@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Medo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -115,6 +116,14 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public IQueryable<Models.ModerationPolicy> AllPolicies() => _context.ModerationPolicy;
 
+	public IQueryable<Models.Peer> Peers(params Uri[] peerIds)
+	{
+		var ids = peerIds.Select(each => each.GetAuthority()).ToList();
+		return ids.Count == 1
+			? _context.Peers.Where(p => p.Authority == ids[0])
+			: _context.Peers.Where(p => ids.Contains(p.Authority));
+	}
+
 	public IQueryable<T> QueryFrom<T>(Models.Profile profile, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
 		where T : class
 	{
@@ -153,6 +162,7 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	public void Add(Models.ModerationReport report) => _context.ModerationReport.Add(report);
 	public void Add(Models.ModerationPolicy policy) => _context.ModerationPolicy.Add(policy);
 	public void Add(Models.InviteCode code) => _context.InviteCodes.Add(code);
+	public void Add(Models.Peer peer) => _context.Peers.Add(peer);
 
 	public void AddRange(IEnumerable<Models.Profile> profile)
 	{

@@ -2,13 +2,15 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using ActivityPub.Types.AS;
 using ActivityPub.Types.AS.Extended.Activity;
-using ActivityPub.Types.Conversion;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Workers.Contracts;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Claim = System.Security.Claims.Claim;
 
 namespace Letterbook.Workers.Publishers;
 
@@ -18,18 +20,28 @@ public class ActivityScheduler : IActivityScheduler
 	private readonly ILogger<ActivityScheduler> _logger;
 	private readonly IActivityPubDocument _document;
 	private readonly IBus _bus;
+	private readonly IAuthorizationService _authorize;
+	private readonly IDataAdapter _data;
 
-	public ActivityScheduler(ILogger<ActivityScheduler> logger, IOptions<CoreOptions> options, IActivityPubDocument document, IBus bus)
+	public ActivityScheduler(ILogger<ActivityScheduler> logger, IOptions<CoreOptions> options, IActivityPubDocument document, IBus bus,
+		IAuthorizationService authorize, IDataAdapter data)
 	{
 		_options = options.Value;
 		_bus = bus;
+		_authorize = authorize;
+		_data = data;
 		_logger = logger;
 		_document = document;
 	}
 
 	/// <inheritdoc />
-	public async Task Deliver(Uri inbox, ASType activity, Profile? onBehalfOf)
+	public async Task Deliver(Uri inbox, ASType activity, IEnumerable<Claim> claims, Profile? onBehalfOf)
 	{
+		if (await _data.Peers(inbox).SingleOrDefaultAsync() is not {} peer)
+			return;
+		claims = claims.ToList();
+		if (!_authorize.Federate(claims, peer.Restrictions.Where(r => !r.Value.Expired()).Select(r => r.Key)))
+			return;
 		await _bus.Publish(FormatMessage(inbox, activity, onBehalfOf));
 		_logger.LogInformation("Scheduled message type {Activity} for delivery to {Inbox}",
 			activity.GetType(), inbox);
@@ -38,81 +50,81 @@ public class ActivityScheduler : IActivityScheduler
 	}
 
 	/// <inheritdoc />
-	public async Task Publish(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default)
+	public async Task Publish(Uri inbox, Post post, Profile onBehalfOf, IEnumerable<Claim> claims, Mention? extraMention = default)
 	{
 		var doc = PopulateMentions(post, extraMention);
 		var activity = _document.Create(onBehalfOf, doc);
-		await Deliver(inbox, activity, onBehalfOf);
+		await Deliver(inbox, activity, claims, onBehalfOf);
 	}
 
 	/// <inheritdoc />
-	public async Task Update(Uri inbox, Post post, Profile onBehalfOf, Mention? extraMention = default)
+	public async Task Update(Uri inbox, Post post, Profile onBehalfOf, IEnumerable<Claim> claims, Mention? extraMention = default)
 	{
 		var doc = PopulateMentions(post, extraMention);
 		var activity = _document.Update(onBehalfOf, doc);
-		await Deliver(inbox, activity, onBehalfOf);
+		await Deliver(inbox, activity, claims, onBehalfOf);
 	}
 
 	/// <inheritdoc />
-	public async Task Delete(Uri inbox, Post post, Profile onBehalfOf)
+	public async Task Delete(Uri inbox, Post post, IEnumerable<Claim> claims, Profile onBehalfOf)
 	{
 		var activity = _document.Delete(onBehalfOf, post.FediId);
-		await Deliver(inbox, activity, onBehalfOf);
+		await Deliver(inbox, activity, claims, onBehalfOf);
 	}
 
 	/// <inheritdoc />
-	public async Task Share(Uri inbox, Post post, Profile onBehalfOf)
+	public async Task Share(Uri inbox, Post post, IEnumerable<Claim> claims, Profile onBehalfOf)
 	{
 		var activity = _document.Announce(onBehalfOf, post.FediId);
-		await Deliver(inbox, activity, onBehalfOf);
+		await Deliver(inbox, activity, claims, onBehalfOf);
 	}
 
 	/// <inheritdoc />
-	public async Task Like(Uri inbox, Post post, Profile onBehalfOf)
+	public async Task Like(Uri inbox, Post post, IEnumerable<Claim> claims, Profile onBehalfOf)
 	{
 		var activity = _document.Like(onBehalfOf, post.FediId);
-		await Deliver(inbox, activity, onBehalfOf);
+		await Deliver(inbox, activity, claims, onBehalfOf);
 	}
 
 	/// <inheritdoc />
-	public async Task Follow(Uri inbox, Profile target, Profile actor)
+	public async Task Follow(Uri inbox, Profile target, IEnumerable<Claim> claims, Profile actor)
 	{
 		var document = _document.Follow(actor, target, implicitId: true);
-		await Deliver(inbox, document, actor);
+		await Deliver(inbox, document, claims, actor);
 	}
 
 	/// <inheritdoc />
-	public async Task Unfollow(Uri inbox, Profile target, Profile actor)
+	public async Task Unfollow(Uri inbox, Profile target, IEnumerable<Claim> claims, Profile actor)
 	{
 		var document = _document.Undo(actor, _document.Follow(actor, target, implicitId: true));
-		await Deliver(inbox, document, actor);
+		await Deliver(inbox, document, claims, actor);
 	}
 
 	/// <inheritdoc />
-	public async Task RemoveFollower(Uri inbox, Profile target, Profile actor) => await RejectFollower(inbox, target, actor);
+	public async Task RemoveFollower(Uri inbox, Profile target, IEnumerable<Claim> claims, Profile actor) => await RejectFollower(inbox, target, claims, actor);
 
 	/// <inheritdoc />
-	public async Task AcceptFollower(Uri inbox, Profile target, Profile actor)
+	public async Task AcceptFollower(Uri inbox, Profile target, IEnumerable<Claim> claims, Profile actor)
 	{
 		var document = _document.Accept(actor, _document.Follow(target, actor));
-		await Deliver(inbox, document, actor);
+		await Deliver(inbox, document, claims, actor);
 	}
 
 	/// <inheritdoc />
-	public async Task RejectFollower(Uri inbox, Profile target, Profile actor)
+	public async Task RejectFollower(Uri inbox, Profile target, IEnumerable<Claim> claims, Profile actor)
 	{
 		var document = _document.Reject(actor, _document.Follow(target, actor));
-		await Deliver(inbox, document, actor);
+		await Deliver(inbox, document, claims, actor);
 	}
 
-	public async Task PendingFollower(Uri inbox, Profile target, Profile actor)
+	public async Task PendingFollower(Uri inbox, Profile target, Profile actor, IEnumerable<Claim> claims)
 	{
 		var document = _document.TentativeAccept(actor, _document.Follow(target, actor));
-		await Deliver(inbox, document, actor);
+		await Deliver(inbox, document, claims, actor);
 	}
 
 	/// <inheritdoc />
-	public async Task Report(Uri inbox, ModerationReport report, ModerationReport.Scope scope)
+	public async Task Report(Uri inbox, ModerationReport report, IEnumerable<Claim> claims, ModerationReport.Scope scope)
 	{
 		var systemActor = Profile.GetModeratorsProfile();
 		switch (scope)
@@ -120,12 +132,12 @@ public class ActivityScheduler : IActivityScheduler
 			case ModerationReport.Scope.Profile:
 				foreach (var subject in report.Subjects)
 				{
-					await Deliver(inbox, _document.Flag(systemActor!, inbox, report, scope, subject), systemActor);
+					await Deliver(inbox, _document.Flag(systemActor!, inbox, report, scope, subject), claims, systemActor);
 				}
 				break;
 			case ModerationReport.Scope.Domain:
 			case ModerationReport.Scope.Full:
-				await Deliver(inbox, _document.Flag(systemActor!, inbox, report, scope), systemActor);
+				await Deliver(inbox, _document.Flag(systemActor!, inbox, report, scope), claims, systemActor);
 				break;
 			default:
 				throw new ArgumentOutOfRangeException(nameof(scope), scope, null);

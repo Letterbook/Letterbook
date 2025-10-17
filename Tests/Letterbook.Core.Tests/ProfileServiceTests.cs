@@ -1,4 +1,5 @@
 using System.Net;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using Bogus;
 using Letterbook.Core.Adapters;
@@ -284,7 +285,7 @@ public class ProfileServiceTests : WithMocks
 
 		Assert.Equal(FollowState.Pending, actual.State);
 		Assert.Contains(target, _profile.FollowingCollection.Select(r => r.Follows));
-		ActivityPublisherMock.Verify(m => m.Follow(target.Inbox, target, _profile));
+		ActivityPublisherMock.Verify(m => m.Follow(target.Inbox, target, It.IsAny<IEnumerable<Claim>>(), _profile));
 		ActivityPublisherMock.VerifyNoOtherCalls();
 	}
 

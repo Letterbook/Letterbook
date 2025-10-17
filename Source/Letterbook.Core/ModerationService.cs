@@ -87,7 +87,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 		foreach (var inbox in report.Forwarded)
 		{
-			await _activity.Report(inbox, report);
+			await _activity.Report(inbox, report, _claims);
 		}
 
 		return report;
@@ -180,7 +180,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 		foreach (var inbox in forwardTo)
 		{
-			await _activity.Report(inbox, report, sendScope);
+			await _activity.Report(inbox, report, _claims, sendScope);
 		}
 
 		return report;
@@ -355,6 +355,30 @@ public class ModerationService : IModerationService, IAuthzModerationService
 			await _data.Commit();
 
 		return policy;
+	}
+
+	public async Task<ICollection<Restrictions>> GetOrInitPeerRestrictions(Uri peerId)
+	{
+		var allowed = _authz.View<Peer>(_claims);
+		if (!allowed)
+			throw CoreException.Unauthorized(allowed);
+
+		if (await _data.Peers(peerId).SingleOrDefaultAsync() is not { } peer)
+		{
+			peer = new Peer(peerId);
+			_data.Add(peer);
+			await _data.Commit();
+		}
+
+		return peer.Restrictions.Where(r => !r.Value.Expired()).Select(r => r.Key).ToHashSet();
+	}
+	public Task<Peer> SetPeerRestriction(Uri peerId, Restrictions restriction, DateTimeOffset expiration)
+	{
+		throw new NotImplementedException();
+	}
+	public Task<Peer> RemovePeerRestriction(Uri peerId, Restrictions restriction)
+	{
+		throw new NotImplementedException();
 	}
 
 	public IAuthzModerationService As(IEnumerable<Claim> claims)

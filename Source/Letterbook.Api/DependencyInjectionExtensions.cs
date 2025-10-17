@@ -11,6 +11,7 @@ using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Api.Authentication.HttpSignature.DependencyInjection;
 using Letterbook.Api.Authentication.HttpSignature.Handler;
 using Letterbook.Api.Swagger;
+using Letterbook.AspNet;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Authorization;
@@ -104,6 +105,7 @@ public static class DependencyInjectionExtensions
 		services.AddScoped<IPostService, PostService>();
 		services.AddScoped<IDataAdapter, DataAdapter>();
 		services.AddScoped<IAuthzPostService, PostService>();
+		services.AddScoped<IModerationService, ModerationService>();
 		services.AddSingleton<IAuthorizationService, AuthorizationService>();
 		services.AddSingleton<Instrumentation>();
 		services.AddSingleton<IInviteCodeGenerator, RandomInviteCode>();
@@ -120,6 +122,7 @@ public static class DependencyInjectionExtensions
 		// Register HTTP signature authentication services
 		services.AddSingleton<IHostSigningKeyProvider, DevelopmentHostSigningKeyProvider>();
 		services.AddScoped<IVerificationKeyProvider, ActivityPubClientVerificationKeyProvider>();
+		services.AddAspnetServices();
 
 		return services;
 	}
@@ -232,6 +235,7 @@ public static class DependencyInjectionExtensions
 			;
 		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
+		builder.Services.AddAspnetServices();
 		builder.Services.AddIdentity<Account, IdentityRole<Guid>>(identity => identity.ConfigureIdentity())
 			.AddEntityFrameworkStores<RelationalContext>()
 			.AddDefaultTokenProviders();
