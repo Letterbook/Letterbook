@@ -135,11 +135,16 @@ public class Program
 		{
 			if (!coreOptions.Database.MigrateAtRuntime) return;
 			using var scope = app.Services.CreateScope();
+			Log.Logger.Information("Migrating primary database...");
 			var data = scope.ServiceProvider.GetRequiredService<RelationalContext>();
 			data.Database.Migrate();
+			Log.Logger.Information("Migrating primary database... Done");
 
+
+			Log.Logger.Information("Migrating feeds database...");
 			var feeds = scope.ServiceProvider.GetRequiredService<FeedsContext>();
 			feeds.Database.Migrate();
+			Log.Logger.Information("Migrating feeds database... Done");
 		}
 
 		static bool ProfileIdentityPaths(HttpContext context)
