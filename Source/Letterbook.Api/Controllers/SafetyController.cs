@@ -1,0 +1,95 @@
+using Letterbook.Api.Dto;
+using Letterbook.Api.Swagger;
+using Letterbook.Core;
+using Letterbook.Core.Exceptions;
+using Letterbook.Core.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using nietras.SeparatedValues;
+using Swashbuckle.AspNetCore.Annotations;
+
+namespace Letterbook.Api.Controllers;
+
+[Authorize(Policy = Constants.ApiPolicy)]
+[ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
+[Route("lb/v1/[controller]")]
+public class SafetyController : ControllerBase
+{
+	private readonly ILogger<SafetyController> _logger;
+	private readonly IModerationService _moderation;
+
+	public SafetyController(ILogger<SafetyController> logger, IModerationService moderation)
+	{
+		_logger = logger;
+		_moderation = moderation;
+	}
+
+	[HttpPost("{selfId}/peers/import")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[SwaggerOperation("Import", "Import a list of restricted peers")]
+	public async Task<IActionResult> ImportDenyList([FromBody] string csv, [FromQuery] DenyListFormat format)
+	{
+		IEnumerable<Peer> peers = ParseMastodon(csv);
+
+		await Task.CompletedTask;
+		throw new NotImplementedException();
+	}
+
+	private IEnumerable<Peer> ParseMastodon(string csv)
+	{
+		var now = DateTimeOffset.UtcNow;
+		using var reader = Sep.Reader().FromText(csv);
+		foreach (var required in MastodonHeaders.All)
+		{
+			if (!reader.Header.ColNames.Contains(required))
+				throw CoreException.InvalidRequest($"Missing required header {required}");
+		}
+
+		var peers = new List<Peer>();
+		foreach (var row in reader)
+		{
+			var peer = new Peer(new Uri(row[MastodonHeaders.Domain].ToString()));
+			switch (row[MastodonHeaders.Severity].ToString())
+			{
+				case "silence":
+					peer.Restrictions.Add(Restrictions.LimitDiscovery, DateTimeOffset.MaxValue);
+					peer.Restrictions.Add(Restrictions.Warn, DateTimeOffset.MaxValue);
+					break;
+				case "suspend":
+				default:
+					peer.Restrictions.Add(Restrictions.Defederate, DateTimeOffset.MaxValue);
+					break;
+			}
+
+			if(row[MastodonHeaders.RejectMedia].TryParse<bool>(out var rejectMedia) && rejectMedia)
+			{
+				peer.Restrictions.Add(Restrictions.DenyAttachments, DateTimeOffset.MaxValue);
+			}
+
+			if(row[MastodonHeaders.RejectReports].TryParse<bool>(out var rejectReports) && rejectReports)
+			{
+				peer.Restrictions.Add(Restrictions.DenyReports, DateTimeOffset.MaxValue);
+			}
+
+			if (row[MastodonHeaders.Obfuscate].TryParse<bool>(out var obfuscate) && !obfuscate)
+				peer.PublicRemark = row[MastodonHeaders.PublicComment].ToString();
+
+			peer.PrivateComment = $"Imported at {now}";
+			peers.Add(peer);
+		}
+
+		return peers;
+	}
+}
+
+public static class MastodonHeaders
+{
+	public static string[] All = [Domain, Severity, RejectMedia, RejectReports, PublicComment, Obfuscate];
+
+	public static string Domain => "#domain";
+	public static string Severity => "#severity";
+	public static string RejectMedia => "#reject_media";
+	public static string RejectReports => "#reject_reports";
+	public static string PublicComment => "#public_comment";
+	public static string Obfuscate => "#obfuscate";
+}
