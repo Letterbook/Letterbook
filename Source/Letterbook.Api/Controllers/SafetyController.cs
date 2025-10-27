@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using nietras.SeparatedValues;
 using Swashbuckle.AspNetCore.Annotations;
+using IAuthorizationService = Letterbook.Core.IAuthorizationService;
 
 namespace Letterbook.Api.Controllers;
 
@@ -17,25 +18,49 @@ public class SafetyController : ControllerBase
 {
 	private readonly ILogger<SafetyController> _logger;
 	private readonly IModerationService _moderation;
+	private readonly IAuthorizationService _authz;
 
-	public SafetyController(ILogger<SafetyController> logger, IModerationService moderation)
+	public SafetyController(ILogger<SafetyController> logger, IModerationService moderation, IAuthorizationService authz)
 	{
 		_logger = logger;
 		_moderation = moderation;
+		_authz = authz;
 	}
 
 	[HttpPost("{selfId}/peers/import")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[SwaggerOperation("Import", "Import a list of restricted peers")]
-	public async Task<IActionResult> ImportDenyList([FromBody] string csv, [FromQuery] DenyListFormat format)
+	public async Task<IActionResult> ImportDenyList([FromBody] string csv, [FromQuery] DenyListFormat format,
+		[FromQuery] ModerationService.MergeStrategy mergeStrategy)
 	{
-		IEnumerable<Peer> peers = ParseMastodon(csv);
+		if (!_authz.Create<Peer>(User.Claims))
+			return Forbid();
 
-		await Task.CompletedTask;
-		throw new NotImplementedException();
+		var peers = format switch
+		{
+			DenyListFormat.Letterbook => ParseLetterbook(csv),
+			DenyListFormat.Mastodon => ParseMastodon(csv),
+			_ => null
+		};
+		if (peers is null) return BadRequest();
+		await _moderation.As(User.Claims).ImportPeerRestrictions(peers, mergeStrategy);
+
+		return Ok();
 	}
 
-	private IEnumerable<Peer> ParseMastodon(string csv)
+	private static List<Peer> ParseLetterbook(string csv)
+	{
+		throw new NotImplementedException();
+		// var now = DateTimeOffset.UtcNow;
+		// using var reader = Sep.Reader().FromText(csv);
+		// foreach (var required in Enum.GetValues<Restrictions>().Except([Restrictions.None]))
+		// {
+		// 	if (!reader.Header.ColNames.Contains(required.ToString()))
+		// 		throw CoreException.InvalidRequest($"Missing required header {required}");
+		// }
+	}
+
+	private static List<Peer> ParseMastodon(string csv)
 	{
 		var now = DateTimeOffset.UtcNow;
 		using var reader = Sep.Reader().FromText(csv);
@@ -48,7 +73,7 @@ public class SafetyController : ControllerBase
 		var peers = new List<Peer>();
 		foreach (var row in reader)
 		{
-			var peer = new Peer(new Uri(row[MastodonHeaders.Domain].ToString()));
+			var peer = new Peer(row[MastodonHeaders.Domain].ToString());
 			switch (row[MastodonHeaders.Severity].ToString())
 			{
 				case "silence":
@@ -61,12 +86,12 @@ public class SafetyController : ControllerBase
 					break;
 			}
 
-			if(row[MastodonHeaders.RejectMedia].TryParse<bool>(out var rejectMedia) && rejectMedia)
+			if (row[MastodonHeaders.RejectMedia].TryParse<bool>(out var rejectMedia) && rejectMedia)
 			{
 				peer.Restrictions.Add(Restrictions.DenyAttachments, DateTimeOffset.MaxValue);
 			}
 
-			if(row[MastodonHeaders.RejectReports].TryParse<bool>(out var rejectReports) && rejectReports)
+			if (row[MastodonHeaders.RejectReports].TryParse<bool>(out var rejectReports) && rejectReports)
 			{
 				peer.Restrictions.Add(Restrictions.DenyReports, DateTimeOffset.MaxValue);
 			}

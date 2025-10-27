@@ -2157,6 +2157,63 @@
         }
       }
     },
+    "/lb/v1/safety/{selfId}/peers/import": {
+      "post": {
+        "tags": [
+          "Safety"
+        ],
+        "summary": "Import",
+        "description": "Import a list of restricted peers",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/DenyListFormat"
+            }
+          },
+          {
+            "name": "mergeStrategy",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/MergeStrategy"
+            }
+          },
+          {
+            "name": "selfId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "string"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/lb/v1/timelines/{profileId}": {
       "get": {
         "tags": [
@@ -2678,6 +2735,14 @@
         },
         "additionalProperties": false
       },
+      "DenyListFormat": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
       "FollowState": {
         "enum": [
           0,
@@ -3072,6 +3137,16 @@
         "additionalProperties": false
       },
       "MentionVisibility": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "MergeStrategy": {
         "enum": [
           0,
           1,

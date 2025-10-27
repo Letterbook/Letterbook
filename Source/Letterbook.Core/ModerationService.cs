@@ -376,6 +376,68 @@ public class ModerationService : IModerationService, IAuthzModerationService
 	{
 		throw new NotImplementedException();
 	}
+
+	public async Task ImportPeerRestrictions(ICollection<Peer> peers, MergeStrategy strategy)
+	{
+		// TODO: batch and handle out-of-band, if necessary
+		var allowed = _authz.Update<Peer>(_claims);
+		if (!allowed)
+			throw CoreException.Unauthorized(allowed);
+
+		var imports = peers.ToDictionary(p => p.Authority);
+		var existing = _data.Peers(peers.ToArray()).ToAsyncEnumerable();
+
+		await foreach (var peer in existing)
+		{
+			switch (strategy)
+			{
+				case MergeStrategy.KeepAll:
+					KeepAll(peer, imports[peer.Authority]);
+					break;
+				case MergeStrategy.KeepUnexpired:
+					KeepUnexpired(peer, imports[peer.Authority]);
+					break;
+				case MergeStrategy.ReplaceAll:
+					peer.Restrictions = imports[peer.Authority].Restrictions;
+					break;
+				case MergeStrategy.Skip:
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(strategy), strategy, null);
+			}
+
+			imports.Remove(peer.Authority);
+		}
+
+		foreach (var import in imports)
+		{
+			_data.Add(import.Value);
+		}
+
+		await _data.Commit();
+
+		return;
+
+		void KeepAll(Peer peer, Peer import)
+		{
+			foreach (var restriction in import.Restrictions)
+			{
+				if (!peer.Restrictions.ContainsKey(restriction.Key))
+					peer.Restrictions.Add(restriction.Key, restriction.Value);
+			}
+		}
+		void KeepUnexpired(Peer peer, Peer import)
+		{
+			foreach (var restriction in import.Restrictions)
+			{
+				if (peer.Restrictions.TryGetValue(restriction.Key, out var exp))
+					if (exp.Expired())
+						peer.Restrictions[restriction.Key] = restriction.Value;
+				peer.Restrictions.Add(restriction.Key, restriction.Value);
+			}
+		}
+	}
+
 	public Task<Peer> RemovePeerRestriction(Uri peerId, Restrictions restriction)
 	{
 		throw new NotImplementedException();
@@ -385,5 +447,13 @@ public class ModerationService : IModerationService, IAuthzModerationService
 	{
 		_claims = claims;
 		return this;
+	}
+
+	public enum MergeStrategy
+	{
+		KeepAll,
+		KeepUnexpired,
+		ReplaceAll,
+		Skip,
 	}
 }
