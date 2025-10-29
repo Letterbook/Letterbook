@@ -38,12 +38,12 @@ public class SafetyControllerTests : WithMockContext
 	}
 
 	[Fact]
-	public async Task ShouldImportOne_Mastodon()
+	public async Task ShouldImportMastodon_Defederate()
 	{
-		var csv = """
-		          #domain,#severity,#reject_media,#reject_reports,#public_comment,#obfuscate
-		          ap.example,suspend,FALSE,FALSE,letterbook:test,TRUE
-		          """;
+		const string csv = """
+		                   #domain,#severity,#reject_media,#reject_reports,#public_comment,#obfuscate
+		                   ap.example,suspend,FALSE,FALSE,letterbook:test,TRUE
+		                   """;
 
 		var result = await _controller.ImportDenyList(csv, DenyListFormat.Mastodon, ModerationService.MergeStrategy.ReplaceAll);
 
@@ -52,5 +52,50 @@ public class SafetyControllerTests : WithMockContext
 			p => p.Any(peer => peer.Restrictions.ContainsKey(Models.Restrictions.Defederate)
 				&& peer.Restrictions.Count == 1)
 			), ModerationService.MergeStrategy.ReplaceAll));
+	}
+
+	[Fact]
+	public async Task ShouldImportMastodon_MultipleRestrictions()
+	{
+		const string csv = """
+		                   #domain,#severity,#reject_media,#reject_reports,#public_comment,#obfuscate
+		                   ap.example,silence,TRUE,TRUE,letterbook:test,FALSE
+		                   """;
+
+		var result = await _controller.ImportDenyList(csv, DenyListFormat.Mastodon, ModerationService.MergeStrategy.KeepAll);
+
+		Assert.IsType<OkResult>(result);
+		AuthzModerationServiceMock.Verify(m => m.ImportPeerRestrictions(It.Is<ICollection<Models.Peer>>(
+			p => p.Any(peer => peer.Restrictions.ContainsKey(Models.Restrictions.LimitDiscovery)
+			                   && peer.Restrictions.ContainsKey(Models.Restrictions.DenyAttachments)
+			                   && peer.Restrictions.ContainsKey(Models.Restrictions.DenyReports)
+			                   && peer.Restrictions.ContainsKey(Models.Restrictions.Warn)
+			                   && peer.Restrictions.Count == 4)
+		), ModerationService.MergeStrategy.KeepAll));
+	}
+
+	[Fact]
+	public async Task ShouldImportMastodon_MultiplePeers()
+	{
+		const string csv = """
+		                   #domain,#severity,#reject_media,#reject_reports,#public_comment,#obfuscate
+		                   ap.example,silence,TRUE,TRUE,letterbook:test,FALSE
+		                   ap2.example,silence,TRUE,TRUE,letterbook:test,FALSE
+		                   ap3.example,silence,TRUE,TRUE,letterbook:test,FALSE
+		                   ap4.example,silence,TRUE,TRUE,letterbook:test,FALSE
+		                   ap5.example,silence,TRUE,TRUE,letterbook:test,FALSE
+		                   """;
+
+		var result = await _controller.ImportDenyList(csv, DenyListFormat.Mastodon, ModerationService.MergeStrategy.KeepAll);
+
+		Assert.IsType<OkResult>(result);
+		AuthzModerationServiceMock.Verify(m => m.ImportPeerRestrictions(It.Is<ICollection<Models.Peer>>(
+			collection => collection.Count == 5
+				&& collection.Any(peer => peer.Hostname == "ap.example")
+				&& collection.Any(peer => peer.Hostname == "ap2.example")
+				&& collection.Any(peer => peer.Hostname == "ap3.example")
+				&& collection.Any(peer => peer.Hostname == "ap4.example")
+				&& collection.Any(peer => peer.Hostname == "ap5.example")
+		), ModerationService.MergeStrategy.KeepAll));
 	}
 }
