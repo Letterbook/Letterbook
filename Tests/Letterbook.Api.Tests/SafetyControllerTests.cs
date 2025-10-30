@@ -50,8 +50,8 @@ public class SafetyControllerTests : WithMockContext
 		Assert.IsType<OkResult>(result);
 		AuthzModerationServiceMock.Verify(m => m.ImportPeerRestrictions(It.Is<ICollection<Models.Peer>>(
 			p => p.Any(peer => peer.Restrictions.ContainsKey(Models.Restrictions.Defederate)
-				&& peer.Restrictions.Count == 1)
-			), ModerationService.MergeStrategy.ReplaceAll));
+			                   && peer.Restrictions.Count == 1)
+		), ModerationService.MergeStrategy.ReplaceAll));
 	}
 
 	[Fact]
@@ -91,11 +91,11 @@ public class SafetyControllerTests : WithMockContext
 		Assert.IsType<OkResult>(result);
 		AuthzModerationServiceMock.Verify(m => m.ImportPeerRestrictions(It.Is<ICollection<Models.Peer>>(
 			collection => collection.Count == 5
-				&& collection.Any(peer => peer.Hostname == "ap.example")
-				&& collection.Any(peer => peer.Hostname == "ap2.example")
-				&& collection.Any(peer => peer.Hostname == "ap3.example")
-				&& collection.Any(peer => peer.Hostname == "ap4.example")
-				&& collection.Any(peer => peer.Hostname == "ap5.example")
+			              && collection.Any(peer => peer.Hostname == "ap.example")
+			              && collection.Any(peer => peer.Hostname == "ap2.example")
+			              && collection.Any(peer => peer.Hostname == "ap3.example")
+			              && collection.Any(peer => peer.Hostname == "ap4.example")
+			              && collection.Any(peer => peer.Hostname == "ap5.example")
 		), ModerationService.MergeStrategy.KeepAll));
 	}
 }

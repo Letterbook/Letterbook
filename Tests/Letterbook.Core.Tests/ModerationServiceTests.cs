@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MockQueryable;
 using Moq;
@@ -20,6 +21,7 @@ public class ModerationServiceTests : WithMocks
 	private readonly List<ModerationReport> _reports;
 	private readonly List<Account> _accounts;
 	private readonly List<ModerationPolicy> _policies;
+	private readonly Peer _peer;
 
 	public ModerationServiceTests(ITestOutputHelper output)
 	{
@@ -32,6 +34,13 @@ public class ModerationServiceTests : WithMocks
 		_posts = new FakePost(_profiles[0]).Generate(3);
 		_opts = new CoreOptions();
 		_reports = new FakeReport(_profiles[2], _profiles[0], _opts).Generate(1);
+		_peer = new Peer(_profiles[0].FediId)
+		{
+			Restrictions = new Dictionary<Restrictions, DateTimeOffset>()
+			{
+				{ Restrictions.None, DateTimeOffset.MaxValue },
+			}
+		};
 		_policies =
 		[
 			new() { Id = 0, Title = "Policy 0" },
@@ -45,7 +54,8 @@ public class ModerationServiceTests : WithMocks
 		DataAdapterMock.Setup(m => m.Accounts(It.IsAny<Guid[]>())).Returns(_accounts.BuildMock());
 		DataAdapterMock.Setup(m => m.Posts(It.IsAny<PostId[]>())).Returns(_posts.BuildMock());
 		DataAdapterMock.Setup(m => m.ModerationReports(It.IsAny<ModerationReportId[]>())).Returns(_reports.BuildMock());
-		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer> { new(_profiles[0].FediId) }.BuildMock());
+		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer> { _peer }.BuildMock());
+		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Peer[]>())).Returns(new List<Peer> { _peer }.BuildMock());
 
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 
@@ -408,7 +418,7 @@ public class ModerationServiceTests : WithMocks
 	}
 
 	[Fact(DisplayName = "Should init a new peer")]
-	public async Task ShouldInit()
+	public async Task ShouldInitPeer()
 	{
 		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer>().BuildMock());
 		var peer = new Uri("https://peer.example");
@@ -417,5 +427,138 @@ public class ModerationServiceTests : WithMocks
 		Assert.NotNull(actual);
 		DataAdapterMock.Verify(m => m.Add(It.IsAny<Peer>()));
 		DataAdapterMock.Verify(m => m.Commit());
+	}
+
+	[Fact(DisplayName = "Should get an existing peer")]
+	public async Task ShouldGetPeer()
+	{
+		var result = await _service.As([]).GetOrInitPeerRestrictions(_profiles[0].FediId);
+
+		var actual = Assert.Single(result);
+		Assert.Equal(Restrictions.None, actual);
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<Peer>()), Times.Never);
+		DataAdapterMock.Verify(m => m.Commit(), Times.Never);
+	}
+
+	[Fact(DisplayName = "Should set a restriction on a new peer")]
+	public async Task ShouldSetNewPeer()
+	{
+		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer>().BuildMock());
+		var peer = new Uri("https://peer.example");
+		var actual = await _service.As([]).SetPeerRestriction(peer, Restrictions.Defederate, DateTimeOffset.MaxValue);
+
+		Assert.Contains(Restrictions.Defederate, actual.Restrictions.Keys);
+		DataAdapterMock.Verify(m => m.Commit());
+	}
+
+	[Fact(DisplayName = "Should set a restriction on an existing peer")]
+	public async Task ShouldSetPeer()
+	{
+		var actual = await _service.As([]).SetPeerRestriction(_profiles[0].FediId, Restrictions.Defederate, DateTimeOffset.MaxValue);
+
+		Assert.Contains(Restrictions.Defederate, actual.Restrictions.Keys);
+		DataAdapterMock.Verify(m => m.Commit());
+	}
+
+	[Fact(DisplayName = "Should remove a restriction from an existing peer")]
+	public async Task ShouldRemovePeer()
+	{
+		var actual = await _service.As([]).RemovePeerRestriction(_profiles[0].FediId, Restrictions.None);
+
+		Assert.DoesNotContain(Restrictions.None, actual.Restrictions.Keys);
+		DataAdapterMock.Verify(m => m.Commit());
+	}
+
+	[Fact(DisplayName = "Should import new peers")]
+	public async Task ShouldImportNew()
+	{
+		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Peer[]>())).Returns(new List<Peer>().BuildMock());
+		var expected = new List<Peer>()
+		{
+			new("peer.example") { Restrictions = { { Restrictions.Defederate, DateTimeOffset.MaxValue } } },
+			new("peer2.example") { Restrictions = { { Restrictions.Warn, DateTimeOffset.MaxValue } } },
+		};
+
+		await _service.As([]).ImportPeerRestrictions(expected, ModerationService.MergeStrategy.ReplaceAll);
+
+		DataAdapterMock.Verify(m => m.Add(expected[0]));
+		DataAdapterMock.Verify(m => m.Add(expected[1]));
+	}
+
+	[Fact(DisplayName = "Should import and replace all restrictions")]
+	public async Task ShouldImportReplace()
+	{
+		var peers = DataAdapterMock.Object.Peers(_profiles[0].FediId).AsAsyncEnumerable();
+		var expected = new List<Peer>()
+		{
+			new(_profiles[0].FediId) { Restrictions = { { Restrictions.Defederate, DateTimeOffset.MaxValue } } },
+		};
+
+		var result = await _service.As([]).ImportPeerRestrictions(expected, ModerationService.MergeStrategy.ReplaceAll);
+
+		var actual = Assert.Single(result);
+		Assert.DoesNotContain(Restrictions.None, actual.Restrictions);
+		Assert.Equal(DateTimeOffset.MaxValue, actual.Restrictions[Restrictions.Defederate]);
+
+		DataAdapterMock.Verify(m => m.Commit());
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<Peer>()), Times.Never);
+	}
+
+	[Fact(DisplayName = "Should import and keep all restrictions")]
+	public async Task ShouldImportKeep()
+	{
+		var expected = new List<Peer>()
+		{
+			new(_profiles[0].FediId) { Restrictions = { { Restrictions.None, DateTimeOffset.UtcNow } } },
+		};
+
+		var result = await _service.As([]).ImportPeerRestrictions(expected, ModerationService.MergeStrategy.KeepAll);
+
+		var actual = Assert.Single(result);
+		Assert.Equal(DateTimeOffset.MaxValue, actual.Restrictions[Restrictions.None]);
+
+		DataAdapterMock.Verify(m => m.Commit());
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<Peer>()), Times.Never);
+	}
+
+	[Fact(DisplayName = "Should import and skip all peers with existing restrictions")]
+	public async Task ShouldImportSkip()
+	{
+		var expected = new List<Peer>()
+		{
+			new(_profiles[0].FediId) { Restrictions = { { Restrictions.Defederate, DateTimeOffset.UtcNow } } },
+		};
+
+		var result = await _service.As([]).ImportPeerRestrictions(expected, ModerationService.MergeStrategy.Skip);
+
+		var actual = Assert.Single(result);
+		Assert.DoesNotContain(Restrictions.Defederate, actual.Restrictions);
+		Assert.Equal(DateTimeOffset.MaxValue, actual.Restrictions[Restrictions.None]);
+
+		DataAdapterMock.Verify(m => m.Commit());
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<Peer>()), Times.Never);
+	}
+
+	[Fact(DisplayName = "Should import and keep unexpired restrictions")]
+	public async Task ShouldImportKeepUnexpired()
+	{
+		var expected = new List<Peer>()
+		{
+			new(_profiles[0].FediId) { Restrictions =
+			{
+				{ Restrictions.None, DateTimeOffset.UtcNow },
+				{ Restrictions.Warn, DateTimeOffset.MaxValue },
+			} },
+		};
+
+		var result = await _service.As([]).ImportPeerRestrictions(expected, ModerationService.MergeStrategy.KeepUnexpired);
+
+		var actual = Assert.Single(result);
+		Assert.DoesNotContain(Restrictions.Defederate, actual.Restrictions);
+		Assert.Equal(DateTimeOffset.MaxValue, actual.Restrictions[Restrictions.None]);
+		Assert.Equal(DateTimeOffset.MaxValue, actual.Restrictions[Restrictions.Warn]);
+
+		DataAdapterMock.Verify(m => m.Commit());
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<Peer>()), Times.Never);
 	}
 }
