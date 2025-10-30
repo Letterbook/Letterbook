@@ -45,6 +45,7 @@ public class ModerationServiceTests : WithMocks
 		DataAdapterMock.Setup(m => m.Accounts(It.IsAny<Guid[]>())).Returns(_accounts.BuildMock());
 		DataAdapterMock.Setup(m => m.Posts(It.IsAny<PostId[]>())).Returns(_posts.BuildMock());
 		DataAdapterMock.Setup(m => m.ModerationReports(It.IsAny<ModerationReportId[]>())).Returns(_reports.BuildMock());
+		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer> { new(_profiles[0].FediId) }.BuildMock());
 
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 
@@ -404,5 +405,17 @@ public class ModerationServiceTests : WithMocks
 		var actual = await _service.As([]).RetirePolicy(_policies[2].Id, true);
 
 		Assert.True(actual.Retired > DateTimeOffset.UtcNow);
+	}
+
+	[Fact(DisplayName = "Should init a new peer")]
+	public async Task ShouldInit()
+	{
+		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer>().BuildMock());
+		var peer = new Uri("https://peer.example");
+		var actual = await _service.As([]).GetOrInitPeerRestrictions(peer);
+
+		Assert.NotNull(actual);
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<Peer>()));
+		DataAdapterMock.Verify(m => m.Commit());
 	}
 }
