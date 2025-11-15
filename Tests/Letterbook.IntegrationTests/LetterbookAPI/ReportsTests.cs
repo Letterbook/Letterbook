@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
+using Bogus;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
@@ -15,13 +16,14 @@ namespace Letterbook.IntegrationTests.LetterbookAPI;
 
 [Trait("Infra", "Postgres")]
 [Trait("Driver", "Api")]
-public class ReportsTests : IClassFixture<HostFixture<ReportsTests>>, ITestSeed, IDisposable
+public partial class TrustAndSafetyTests : IClassFixture<HostFixture<TrustAndSafetyTests>>, ITestSeed, IDisposable
 {
-	private readonly HostFixture<ReportsTests> _host;
+	private readonly HostFixture<TrustAndSafetyTests> _host;
 	private readonly IServiceScope _scope;
 	private readonly Mapper _mapper;
 	private readonly JsonSerializerOptions _json;
 	private readonly HttpClient _client;
+	private readonly Faker _fake;
 
 	public void Dispose()
 	{
@@ -30,12 +32,13 @@ public class ReportsTests : IClassFixture<HostFixture<ReportsTests>>, ITestSeed,
 		_client.Dispose();
 	}
 
-	public ReportsTests(HostFixture<ReportsTests> host, ITestOutputHelper output)
+	public TrustAndSafetyTests(HostFixture<TrustAndSafetyTests> host, ITestOutputHelper output)
 	{
 		_host = host;
 		_scope = host.CreateScope();
 		_client = _host.CreateClient(_host.DefaultOptions);
 		_client.DefaultRequestHeaders.Authorization = new("Test", $"{_host.Accounts[0].Id}");
+		_fake = new Faker();
 
 		var mappings = _scope.ServiceProvider.GetRequiredService<MappingConfigProvider>().ModerationReports;
 		_mapper = new Mapper(mappings);

@@ -9,20 +9,20 @@ using Xunit.Abstractions;
 
 namespace Letterbook.Api.Tests;
 
-public class SafetyControllerTests : WithMockContext
+public class PeersControllerTests : WithMockContext
 {
-	private readonly SafetyController _controller;
+	private readonly PeersController _controller;
 	private readonly Guid _accountId;
 
-	public SafetyControllerTests(ITestOutputHelper output)
+	public PeersControllerTests(ITestOutputHelper output)
 	{
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 		_accountId = new Faker().Random.Guid();
 		MockAuthorizeAllowAll();
 		Auth(_accountId);
-		var logger = output.BuildLoggerFor<SafetyController>();
+		var logger = output.BuildLoggerFor<PeersController>();
 
-		_controller = new SafetyController(logger, ModerationServiceMock.Object, AuthorizationServiceMock.Object)
+		_controller = new PeersController(logger, ModerationServiceMock.Object, AuthorizationServiceMock.Object)
 		{
 			ControllerContext = new ControllerContext()
 			{

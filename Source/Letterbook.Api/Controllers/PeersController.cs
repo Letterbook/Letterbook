@@ -14,20 +14,20 @@ namespace Letterbook.Api.Controllers;
 [Authorize(Policy = Constants.ApiPolicy)]
 [ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 [Route("lb/v1/[controller]")]
-public class SafetyController : ControllerBase
+public class PeersController : ControllerBase
 {
-	private readonly ILogger<SafetyController> _logger;
+	private readonly ILogger<PeersController> _logger;
 	private readonly IModerationService _moderation;
 	private readonly IAuthorizationService _authz;
 
-	public SafetyController(ILogger<SafetyController> logger, IModerationService moderation, IAuthorizationService authz)
+	public PeersController(ILogger<PeersController> logger, IModerationService moderation, IAuthorizationService authz)
 	{
 		_logger = logger;
 		_moderation = moderation;
 		_authz = authz;
 	}
 
-	[HttpPost("{selfId}/peers/import")]
+	[HttpPost("import")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[SwaggerOperation("Import", "Import a list of restricted peers")]
 	public async Task<IActionResult> ImportDenyList([FromBody] string csv, [FromQuery] DenyListFormat format,

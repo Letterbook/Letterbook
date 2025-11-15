@@ -1,61 +1,15 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using AutoMapper;
-using Bogus;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models.Dto;
-using Letterbook.Core.Models.Mappers;
-using Letterbook.IntegrationTests.Fixtures;
-using Microsoft.Extensions.DependencyInjection;
-using Xunit.Abstractions;
 
 namespace Letterbook.IntegrationTests.LetterbookAPI;
 
 [Trait("Infra", "Postgres")]
 [Trait("Driver", "Api")]
-public class PolicyTests : IClassFixture<HostFixture<PolicyTests>>, ITestSeed, IDisposable
+public partial class TrustAndSafetyTests
 {
-	private readonly HostFixture<PolicyTests> _host;
-	private readonly IServiceScope _scope;
-	private readonly Mapper _mapper;
-	private readonly JsonSerializerOptions _json;
-	private readonly HttpClient _client;
-	private readonly Faker _fake;
-
-	public void Dispose()
-	{
-		GC.SuppressFinalize(this);
-		_scope.Dispose();
-		_client.Dispose();
-	}
-
-	public PolicyTests(HostFixture<PolicyTests> host, ITestOutputHelper output)
-	{
-		_host = host;
-		_scope = host.CreateScope();
-		_client = _host.CreateClient(_host.DefaultOptions);
-		_client.DefaultRequestHeaders.Authorization = new("Test", $"{_host.Accounts[0].Id}");
-		_fake = new Faker();
-
-		var mappings = _scope.ServiceProvider.GetRequiredService<MappingConfigProvider>().ModerationReports;
-		_mapper = new Mapper(mappings);
-		_json = new JsonSerializerOptions(JsonSerializerDefaults.Web)
-		{
-			ReferenceHandler = ReferenceHandler.IgnoreCycles
-		};
-		_json.AddDtoSerializer();
-	}
-
-	[Fact]
-	public void Exists()
-	{
-		Assert.NotNull(_host);
-	}
-
 	[Fact(DisplayName = "Should create a new policy")]
-	public async Task CanCreate()
+	public async Task CanCreatePolicy()
 	{
 		var given = new ModerationPolicyDto
 		{
