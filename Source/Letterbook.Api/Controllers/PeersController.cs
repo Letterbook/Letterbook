@@ -30,7 +30,7 @@ public class PeersController : ControllerBase
 	[HttpPost("import")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[SwaggerOperation("Import", "Import a list of restricted peers")]
-	public async Task<IActionResult> ImportDenyList([FromBody] string csv, [FromQuery] DenyListFormat format,
+	public async Task<IActionResult> ImportDenyList([FromForm] string csv, [FromQuery] DenyListFormat format,
 		[FromQuery] ModerationService.MergeStrategy mergeStrategy)
 	{
 		if (!_authz.Create<Peer>(User.Claims))

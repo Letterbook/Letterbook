@@ -402,6 +402,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+/.idea/**/db-forest-config.xml
 
 ##
 ## Visual studio for Mac

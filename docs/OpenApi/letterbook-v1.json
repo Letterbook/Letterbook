@@ -34,19 +34,19 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "type": "string"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "type": "string"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "type": "string"
+                "type": "object",
+                "properties": {
+                  "csv": {
+                    "type": "string"
+                  }
+                }
+              },
+              "encoding": {
+                "csv": {
+                  "style": "form"
+                }
               }
             }
           }
