@@ -38,13 +38,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "csv": {
-                    "type": "string"
+                  "csvFile": {
+                    "type": "string",
+                    "format": "binary"
                   }
                 }
               },
               "encoding": {
-                "csv": {
+                "csvFile": {
                   "style": "form"
                 }
               }

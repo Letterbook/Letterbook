@@ -1,11 +1,35 @@
 @page
+@using Letterbook.Core.Extensions
 @model Letterbook.Web.Areas.Administration.Pages.Peers
 
 @{
     Layout = "_Layout";
-    ViewData["title"] = "Manage Peer Instances";
+    ViewData["title"] = "Admin - Peers";
 }
 
 <section class="administration">
-    <h1>Yo</h1>
+    <h1>Manage Federated Peers</h1>
+    <form asp-page-handler="search" method="get">
+        <label for="query">Domain Search</label>
+        <input type="search" id="query" name="search"/>
+    </form>
+    <table class="peer-list">
+        <thead>
+        <th>Hostname</th>
+        <th>Private Notes</th>
+        <th>Public Remarks</th>
+        <th>Restrictions</th>
+        </thead>
+        <tbody>
+        @foreach (var peer in Model.PeerList)
+        {
+            <tr>
+                <td>@peer.Hostname</td>
+                <td>@peer.PrivateComment</td>
+                <td>@peer.PublicRemark</td>
+                <td>@(string.Join(", ", peer.Restrictions.Where(r => !r.Value.Expired()).Select(p => p.Key)))</td>
+            </tr>
+        }
+        </tbody>
+    </table>
 </section>

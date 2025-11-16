@@ -469,6 +469,34 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		return peer;
 	}
 
+	public IAsyncEnumerable<Peer> ListPeers(Uri? peerIdCursor, int limit = 20)
+	{
+		var allowed = _authz.List<Peer>(_claims);
+		if (!allowed)
+			throw CoreException.Unauthorized(allowed);
+
+		var query = _data.AllPeers().TagWithCallSite().OrderBy(p => p.Authority).Take(limit);
+		if (peerIdCursor is { } cursor)
+		{
+			query = query.Where(peer => peer.Authority.CompareTo(cursor.GetAuthority()) > 0);
+		}
+
+		return query.AsAsyncEnumerable();
+	}
+	public Task<Peer> LookupPeer(Uri peerId)
+	{
+		throw new NotImplementedException();
+	}
+	public IAsyncEnumerable<Peer> SearchPeers(string query, int limit = 20)
+	{
+		return _data.AllPeers()
+			.TagWithCallSite()
+			.OrderBy(p => p.Authority)
+			.Where(p => p.Authority.StartsWith(query))
+			.Take(limit)
+			.AsAsyncEnumerable();
+	}
+
 	public IAuthzModerationService As(IEnumerable<Claim> claims)
 	{
 		_claims = claims;

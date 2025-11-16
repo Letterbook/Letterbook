@@ -131,6 +131,8 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			: _context.Peers.Where(p => peers.Contains(p));
 	}
 
+	public IQueryable<Models.Peer> AllPeers() => _context.Peers;
+
 	public IQueryable<T> QueryFrom<T>(Models.Profile profile, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
 		where T : class
 	{

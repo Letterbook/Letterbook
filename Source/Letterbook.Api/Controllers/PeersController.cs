@@ -27,25 +27,59 @@ public class PeersController : ControllerBase
 		_authz = authz;
 	}
 
+	// [HttpPost("import")]
+	// [ProducesResponseType(StatusCodes.Status200OK)]
+	// [SwaggerOperation("Import", "Import a list of restricted peers")]
+	// public async Task<IActionResult> ImportDenyList([FromForm] string csv, [FromQuery] DenyListFormat format,
+	// 	[FromQuery] ModerationService.MergeStrategy mergeStrategy)
+	// {
+	// 	if (!_authz.Create<Peer>(User.Claims))
+	// 		return Forbid();
+	//
+	// 	var peers = format switch
+	// 	{
+	// 		DenyListFormat.Letterbook => ParseLetterbook(csv),
+	// 		DenyListFormat.Mastodon => ParseMastodon(csv),
+	// 		_ => null
+	// 	};
+	// 	if (peers is null) return BadRequest();
+	// 	await _moderation.As(User.Claims).ImportPeerRestrictions(peers, mergeStrategy);
+	//
+	// 	return Ok();
+	// }
+
 	[HttpPost("import")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[SwaggerOperation("Import", "Import a list of restricted peers")]
-	public async Task<IActionResult> ImportDenyList([FromForm] string csv, [FromQuery] DenyListFormat format,
+	public async Task<IActionResult> ImportDenyList(IFormFile csvFile, [FromQuery] DenyListFormat format,
 		[FromQuery] ModerationService.MergeStrategy mergeStrategy)
 	{
 		if (!_authz.Create<Peer>(User.Claims))
 			return Forbid();
 
-		var peers = format switch
+		try
 		{
-			DenyListFormat.Letterbook => ParseLetterbook(csv),
-			DenyListFormat.Mastodon => ParseMastodon(csv),
-			_ => null
-		};
-		if (peers is null) return BadRequest();
-		await _moderation.As(User.Claims).ImportPeerRestrictions(peers, mergeStrategy);
+			await using var stream = csvFile.OpenReadStream();
+			using var reader = new StreamReader(stream);
+			var csv = await reader.ReadToEndAsync();
 
-		return Ok();
+			var peers = format switch
+			{
+				DenyListFormat.Letterbook => ParseLetterbook(csv),
+				DenyListFormat.Mastodon => ParseMastodon(csv),
+				_ => null
+			};
+			if (peers is null) return BadRequest();
+			await _moderation.As(User.Claims).ImportPeerRestrictions(peers, mergeStrategy);
+
+			return Ok();
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine(e);
+			throw;
+		}
+
 	}
 
 	private static List<Peer> ParseLetterbook(string csv)
