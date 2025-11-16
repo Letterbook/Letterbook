@@ -9,6 +9,55 @@
     "version": "v1"
   },
   "paths": {
+    "/lb/v1/peers/import": {
+      "post": {
+        "tags": [
+          "Peers"
+        ],
+        "summary": "Import",
+        "description": "Import a list of restricted peers",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/DenyListFormat"
+            }
+          },
+          {
+            "name": "mergeStrategy",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/MergeStrategy"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "csv": {
+                    "type": "string"
+                  }
+                }
+              },
+              "encoding": {
+                "csv": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/lb/v1/policies/public/policy": {
       "get": {
         "tags": [
@@ -2678,6 +2727,14 @@
         },
         "additionalProperties": false
       },
+      "DenyListFormat": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
       "FollowState": {
         "enum": [
           0,
@@ -3072,6 +3129,16 @@
         "additionalProperties": false
       },
       "MentionVisibility": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "MergeStrategy": {
         "enum": [
           0,
           1,

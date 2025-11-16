@@ -372,18 +372,114 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 		return peer.Restrictions.Where(r => !r.Value.Expired()).Select(r => r.Key).ToHashSet();
 	}
-	public Task<Peer> SetPeerRestriction(Uri peerId, Restrictions restriction, DateTimeOffset expiration)
+
+	public async Task<Peer> SetPeerRestriction(Uri peerId, Restrictions restriction, DateTimeOffset expiration)
 	{
-		throw new NotImplementedException();
+		var allowed = _authz.Update<Peer>(_claims);
+		if (!allowed)
+			throw CoreException.Unauthorized(allowed);
+
+		if (await _data.Peers(peerId).SingleOrDefaultAsync() is not { } peer)
+		{
+			peer = new Peer(peerId);
+			_data.Add(peer);
+		}
+
+		peer.Restrictions[restriction] = expiration;
+		await _data.Commit();
+		return peer;
 	}
-	public Task<Peer> RemovePeerRestriction(Uri peerId, Restrictions restriction)
+
+	public async Task<ICollection<Peer>> ImportPeerRestrictions(ICollection<Peer> imports, MergeStrategy strategy)
 	{
-		throw new NotImplementedException();
+		// TODO: batch and handle out-of-band, if necessary
+		var allowed = _authz.Update<Peer>(_claims);
+		if (!allowed)
+			throw CoreException.Unauthorized(allowed);
+
+		var peers = imports.ToDictionary(p => p.Authority);
+		var existing = _data.Peers(imports.ToArray()).AsAsyncEnumerable();
+
+		await foreach (var peer in existing)
+		{
+			switch (strategy)
+			{
+				case MergeStrategy.KeepAll:
+					KeepAll(peer, peers[peer.Authority]);
+					break;
+				case MergeStrategy.KeepUnexpired:
+					KeepUnexpired(peer, peers[peer.Authority]);
+					break;
+				case MergeStrategy.ReplaceAll:
+					peer.Restrictions = peers[peer.Authority].Restrictions;
+					break;
+				case MergeStrategy.Skip:
+					if(peer.Restrictions.Count == 0)
+						peer.Restrictions = peers[peer.Authority].Restrictions;
+					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(strategy), strategy, null);
+			}
+
+			peers[peer.Authority] = peer;
+			imports.Remove(peer);
+		}
+
+		foreach (var import in imports)
+		{
+			_data.Add(import);
+		}
+
+		await _data.Commit();
+
+		return peers.Values;
+
+		void KeepAll(Peer peer, Peer import)
+		{
+			foreach (var restriction in import.Restrictions)
+			{
+				peer.Restrictions.TryAdd(restriction.Key, restriction.Value);
+			}
+		}
+		void KeepUnexpired(Peer peer, Peer import)
+		{
+			foreach (var restriction in import.Restrictions)
+			{
+				if (peer.Restrictions.TryAdd(restriction.Key, restriction.Value)) continue;
+				if (!peer.Restrictions.TryGetValue(restriction.Key, out var exp)) continue;
+				if (exp.Expired())
+					peer.Restrictions[restriction.Key] = restriction.Value;
+			}
+		}
+	}
+
+	public async Task<Peer> RemovePeerRestriction(Uri peerId, Restrictions restriction)
+	{
+		var allowed = _authz.Update<Peer>(_claims);
+		if (!allowed)
+			throw CoreException.Unauthorized(allowed);
+
+		if (await _data.Peers(peerId).SingleOrDefaultAsync() is not { } peer)
+		{
+			throw CoreException.MissingData<Peer>(peerId);
+		}
+
+		peer.Restrictions.Remove(restriction);
+		await _data.Commit();
+		return peer;
 	}
 
 	public IAuthzModerationService As(IEnumerable<Claim> claims)
 	{
 		_claims = claims;
 		return this;
+	}
+
+	public enum MergeStrategy
+	{
+		KeepAll,
+		KeepUnexpired,
+		ReplaceAll,
+		Skip,
 	}
 }

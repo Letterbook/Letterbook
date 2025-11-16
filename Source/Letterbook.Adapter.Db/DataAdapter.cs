@@ -124,6 +124,13 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			: _context.Peers.Where(p => ids.Contains(p.Authority));
 	}
 
+	public IQueryable<Models.Peer> Peers(params Models.Peer[] peers)
+	{
+		return peers.Length == 1
+			? _context.Peers.Where(p => p == peers[0])
+			: _context.Peers.Where(p => peers.Contains(p));
+	}
+
 	public IQueryable<T> QueryFrom<T>(Models.Profile profile, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
 		where T : class
 	{

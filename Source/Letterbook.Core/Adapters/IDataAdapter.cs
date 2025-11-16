@@ -106,6 +106,7 @@ public interface IDataAdapter : IDisposable
 	/// <param name="peerId"></param>
 	/// <returns></returns>
 	public IQueryable<Peer> Peers(params Uri[] peerIds);
+	public IQueryable<Peer> Peers(params Peer[] peers);
 
 	/// <summary>
 	/// Query for navigation entities, using the given object as a root entity

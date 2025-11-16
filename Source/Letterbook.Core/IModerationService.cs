@@ -114,6 +114,7 @@ public interface IAuthzModerationService
 	public Task<ModerationPolicy> RetirePolicy(ModerationPolicyId policyId, bool restore = false);
 	public Task<ICollection<Restrictions>> GetOrInitPeerRestrictions(Uri peerId);
 	public Task<Peer> SetPeerRestriction(Uri peerId, Restrictions restriction, DateTimeOffset expiration);
+	public Task<ICollection<Peer>> ImportPeerRestrictions(ICollection<Peer> imports, ModerationService.MergeStrategy strategy);
 	public Task<Peer> RemovePeerRestriction(Uri peerId, Restrictions restriction);
 }
 
