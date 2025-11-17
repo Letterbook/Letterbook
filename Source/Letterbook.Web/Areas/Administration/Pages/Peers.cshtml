@@ -13,15 +13,26 @@
         <label for="query">Domain Search</label>
         <input type="search" id="query" name="search"/>
     </form>
+    @if (Model.ListCursor != null || Model.Search != null)
+    {
+        <a asp-area="Administration" asp-page="Peers">First Page</a>
+    }
     @if (Model.PeerList.Count >= Model.Limit)
     {
-        <form method="get">
-            <input type="hidden" name="@(Model.Search != null ? "search" : "cursor")" value="@Model.PeerList.Last().Hostname">
-            <input type="hidden" name="limit" value="@Model.Limit">
-            <button type="submit">Next Page</button>
-        </form>
+        <a asp-area="Administration" asp-page="Peers"
+           asp-all-route-data="@(Model.Search != null ? new Dictionary<string, string> { { "search", Model.PeerList.Last().Hostname } } : new Dictionary<string, string> { { "cursor", Model.PeerList.Last().Hostname } })">
+            Next Page >>
+        </a>
     }
     <table class="peer-list">
+        @if (Model.Search != null)
+        {
+            <caption>Domains like <code>@Model.Search</code></caption>
+        }
+        else
+        {
+            <caption>All domains</caption>
+        }
         <thead>
         <th class="col-hostname">Hostname</th>
         <th>Private Notes</th>
@@ -31,7 +42,12 @@
         @foreach (var peer in Model.PeerList)
         {
             <tr>
-                <th rowspan="2" class="col-hostname">@peer.Hostname</th>
+                <th rowspan="2" class="col-hostname">
+                    <a asp-area="Administration" asp-page="Peer" asp-route-domain="@peer.Hostname" class="peer-link" role="button">
+                        @* Line break in sensible places, instead of mid-word *@
+                        @(peer.Hostname.Replace(".", "\u200b."))
+                    </a>
+                </th>
                 <td>@peer.PrivateComment</td>
                 <td>@peer.PublicRemark</td>
             </tr>
@@ -43,12 +59,15 @@
         }
         </tbody>
     </table>
+    @if (Model.ListCursor != null || Model.Search != null)
+    {
+        <a asp-area="Administration" asp-page="Peers">First Page</a>
+    }
     @if (Model.PeerList.Count >= Model.Limit)
     {
-        <form method="get">
-            <input type="hidden" name="@(Model.Search != null ? "search" : "cursor")" value="@Model.PeerList.Last().Hostname">
-            <input type="hidden" name="limit" value="@Model.Limit">
-            <button type="submit">Next Page</button>
-        </form>
+        <a asp-area="Administration" asp-page="Peers"
+           asp-all-route-data="@(Model.Search != null ? new Dictionary<string, string> { { "search", Model.PeerList.Last().Hostname } } : new Dictionary<string, string> { { "cursor", Model.PeerList.Last().Hostname } })">
+            Next Page >>
+        </a>
     }
 </section>

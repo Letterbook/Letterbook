@@ -472,7 +472,11 @@ button {
 .app .peer-list {
     .col-hostname {
         max-width: 8em;
-    } 
+    }
+    
+    .peer-link {
+        width: 100%;
+    }
 }
 
 /* Collapsible menus */
