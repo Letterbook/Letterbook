@@ -7,5 +7,21 @@
 }
 
 <section class="peer-detail administration">
-    <h1>@Model.Domain</h1>
+    <h1>Manage Peer Connection</h1>
+    <div role="doc-subtitle">@Model.Domain</div>
+    <form method="post">
+        <label for="private-note">Private Notes</label>
+        <textarea id="private-note" name="private-note"></textarea>
+        <label for="public-remark">Public Remarks</label>
+        <input id="public-remark" name="public-remark"/>
+        @foreach (var name in Enum.GetNames<Models.Restrictions>())
+        {
+            <div>
+                <label>
+                <input type="checkbox" role="switch" id="@name" name="@name"/>
+                @name</label>
+            </div>
+        }
+        <button type="submit">Save</button>
+    </form>
 </section>

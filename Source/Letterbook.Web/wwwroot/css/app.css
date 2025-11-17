@@ -104,6 +104,13 @@
         width: 100%;
         height: 100%;
     }
+    div[role=doc-subtitle] {
+        --pico-font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+        font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+        margin-top: -.5em;
+        margin-bottom: 1em;
+        font-size: 1.5em;
+    }
 }
 
 button {
