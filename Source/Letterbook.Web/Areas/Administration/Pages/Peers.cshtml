@@ -13,23 +13,42 @@
         <label for="query">Domain Search</label>
         <input type="search" id="query" name="search"/>
     </form>
+    @if (Model.PeerList.Count >= Model.Limit)
+    {
+        <form method="get">
+            <input type="hidden" name="@(Model.Search != null ? "search" : "cursor")" value="@Model.PeerList.Last().Hostname">
+            <input type="hidden" name="limit" value="@Model.Limit">
+            <button type="submit">Next Page</button>
+        </form>
+    }
     <table class="peer-list">
         <thead>
-        <th>Hostname</th>
+        <th class="col-hostname">Hostname</th>
         <th>Private Notes</th>
         <th>Public Remarks</th>
-        <th>Restrictions</th>
         </thead>
         <tbody>
         @foreach (var peer in Model.PeerList)
         {
             <tr>
-                <td>@peer.Hostname</td>
+                <th rowspan="2" class="col-hostname">@peer.Hostname</th>
                 <td>@peer.PrivateComment</td>
                 <td>@peer.PublicRemark</td>
-                <td>@(string.Join(", ", peer.Restrictions.Where(r => !r.Value.Expired()).Select(p => p.Key)))</td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    @(string.Join(", ", peer.Restrictions.Where(r => !r.Value.Expired()).OrderByDescending(p => p.Key).Select(r => r.Key)))
+                </td>
             </tr>
         }
         </tbody>
     </table>
+    @if (Model.PeerList.Count >= Model.Limit)
+    {
+        <form method="get">
+            <input type="hidden" name="@(Model.Search != null ? "search" : "cursor")" value="@Model.PeerList.Last().Hostname">
+            <input type="hidden" name="limit" value="@Model.Limit">
+            <button type="submit">Next Page</button>
+        </form>
+    }
 </section>

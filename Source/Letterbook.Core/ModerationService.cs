@@ -475,11 +475,13 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		if (!allowed)
 			throw CoreException.Unauthorized(allowed);
 
-		var query = _data.AllPeers().TagWithCallSite().OrderBy(p => p.Authority).Take(limit);
+		var query = _data.AllPeers().TagWithCallSite();
 		if (peerIdCursor is { } cursor)
 		{
 			query = query.Where(peer => peer.Authority.CompareTo(cursor.GetAuthority()) > 0);
 		}
+
+		query = query.OrderBy(p => p.Authority).Take(limit);
 
 		return query.AsAsyncEnumerable();
 	}

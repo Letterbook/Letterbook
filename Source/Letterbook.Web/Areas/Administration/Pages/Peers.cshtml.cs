@@ -15,7 +15,7 @@ public class Peers : PageModel
 	[FromQuery]
 	public string? Search { get; set; }
 
-	[FromQuery]
+	[FromQuery(Name = "cursor")]
 	public string? ListCursor { get; set; }
 
 	[FromQuery]
@@ -48,7 +48,7 @@ public class Peers : PageModel
 	{
 		IAsyncEnumerable<Models.Peer> results;
 		if (ListCursor is not null &&
-		    !Uri.TryCreate($"https://{ListCursor}", UriKind.Absolute, out var uri))
+		    Uri.TryCreate($"https://{ListCursor}", UriKind.Absolute, out var uri))
 		{
 			results = _moderationService.As(User.Claims).ListPeers(uri, Limit);
 		}
