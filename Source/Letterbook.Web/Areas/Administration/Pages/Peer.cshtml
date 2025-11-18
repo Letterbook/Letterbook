@@ -16,10 +16,13 @@
         <input id="public-remark" name="public-remark"/>
         @foreach (var name in Enum.GetNames<Models.Restrictions>())
         {
-            <div>
-                <label>
-                <input type="checkbox" role="switch" id="@name" name="@name"/>
-                @name</label>
+            <div class="restriction-item">
+                <div class="restriction-col">
+                    <label>
+                        <input type="checkbox" role="switch" id="@name" name="@name"/>
+                        @name</label></div>
+                <label for="@name-expiration" class="when-enabled">Until</label>
+                <input id="@name-expiration" type="date" name="@name-expiration" class="when-enabled" value="9999-12-31"/>
             </div>
         }
         <button type="submit">Save</button>

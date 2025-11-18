@@ -486,6 +486,35 @@ button {
     }
 }
 
+.app .peer-detail {
+    .restriction-item {
+        display: flex;
+        flex-direction: row;
+        height: 1.5lh;
+        align-items: center;
+        
+        input[type="date"] {
+            width: initial;
+        }
+
+        .restriction-col {
+            width: 16em;
+        }
+        label.when-enabled {
+            margin-right: 1em;
+        }
+        .when-enabled {
+            display: none;
+            height: 1.5lh;
+            padding-bottom: .25em;
+            padding-top: .25em;
+        }
+        &:has(input:checked) .when-enabled{
+            display: initial;
+        }
+    }
+}
+
 /* Collapsible menus */
 /* Always collapsible */
 .menu-collapsible,
