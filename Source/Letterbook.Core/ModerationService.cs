@@ -359,18 +359,24 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 	public async Task<ICollection<Restrictions>> GetOrInitPeerRestrictions(Uri peerId)
 	{
+		var peer = await GetOrInitPeer(peerId);
+
+		return peer.Restrictions.Where(r => !r.Value.Expired()).Select(r => r.Key).ToHashSet();
+	}
+
+	public async Task<Peer> GetOrInitPeer(Uri peerId)
+	{
 		var allowed = _authz.View<Peer>(_claims);
 		if (!allowed)
 			throw CoreException.Unauthorized(allowed);
 
-		if (await _data.Peers(peerId).SingleOrDefaultAsync() is not { } peer)
-		{
-			peer = new Peer(peerId);
-			_data.Add(peer);
-			await _data.Commit();
-		}
+		if (await _data.Peers(peerId).SingleOrDefaultAsync() is { } peer) return peer;
 
-		return peer.Restrictions.Where(r => !r.Value.Expired()).Select(r => r.Key).ToHashSet();
+		peer = new Peer(peerId);
+		_data.Add(peer);
+		await _data.Commit();
+
+		return peer;
 	}
 
 	public async Task<Peer> SetPeerRestriction(Uri peerId, Restrictions restriction, DateTimeOffset expiration)
@@ -499,6 +505,14 @@ public class ModerationService : IModerationService, IAuthzModerationService
 			.Where(p => p.Authority.StartsWith(query))
 			.Take(limit)
 			.AsAsyncEnumerable();
+	}
+
+	public async Task<Peer> UpdatePeer(Peer peer)
+	{
+		_data.Update(peer);
+		await _data.Commit();
+
+		return peer;
 	}
 
 	public IAuthzModerationService As(IEnumerable<Claim> claims)

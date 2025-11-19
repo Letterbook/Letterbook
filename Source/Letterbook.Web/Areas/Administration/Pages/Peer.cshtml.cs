@@ -9,6 +9,7 @@ public class Peer : PageModel
 {
 	private readonly ILogger<Peer> _logger;
 	private readonly IModerationService _moderationService;
+	private readonly IAuthorizationService _authz;
 
 	[FromRoute] public string Domain { get; set; } = default!;
 	[BindProperty] public FormModel Form { get; set; } = default!;
@@ -17,40 +18,48 @@ public class Peer : PageModel
 	public string PublicRemarks { get; set; } = "";
 	public string PrivateNotes { get; set; } = "";
 
-	public Peer(ILogger<Peer> logger, IModerationService moderationService)
+	public Peer(ILogger<Peer> logger, IModerationService moderationService, IAuthorizationService authz)
 	{
 		_logger = logger;
 		_moderationService = moderationService;
+		_authz = authz;
 	}
 
 	public async Task<IActionResult> OnGet()
 	{
+		if (!_authz.Update<Models.Peer>(User.Claims))
+			return Forbid();
 		if (!Uri.TryCreate($"https://{Domain}", UriKind.Absolute, out var uri))
 			return BadRequest();
 
 		if (await _moderationService.As(User.Claims).LookupPeer(uri) is not { } data)
 			return NotFound();
 		Data = data;
-		Form = new FormModel()
-		{
-			PrivateNotes = Data.PrivateComment ?? "",
-			PublicRemarks = Data.PublicRemark ?? "",
-			Restrictions = Enum.GetValues<Models.Restrictions>().Select((key) => new RestrictionModel()
-			{
-				Enabled = Data.Restrictions.ContainsKey(key),
-				Expires = Data.Restrictions.TryGetValue(key, out var expires) ? expires : DateTimeOffset.MaxValue,
-				Restriction = key
-			}).ToList()
-		};
+		Form = FormModel.FromPeer(Data);
 		PublicRemarks = Data.PublicRemark ?? "";
 		PrivateNotes = Data.PrivateComment ?? "";
 
 		return Page();
 	}
 
-	public void OnPost()
+	public async Task<IActionResult> OnPost()
 	{
-		_logger.LogInformation("Form Restrictions: {@Restrictions}", Form);
+		if (!_authz.Update<Models.Peer>(User.Claims))
+			return Forbid();
+		if (!Uri.TryCreate($"https://{Domain}", UriKind.Absolute, out var uri))
+			return BadRequest();
+
+		var peer = await _moderationService.As(User.Claims).GetOrInitPeer(uri);
+		peer.PublicRemark = Form.PublicRemarks;
+		peer.PrivateComment = Form.PrivateNotes;
+		peer.Restrictions = Form.Restrictions.Where(e => e.Enabled).ToDictionary(e => e.Restriction, e => e.Expires.ToUniversalTime());
+
+		Data = await _moderationService.As(User.Claims).UpdatePeer(peer);
+		Form = FormModel.FromPeer(Data);
+		PublicRemarks = Data.PublicRemark ?? "";
+		PrivateNotes = Data.PrivateComment ?? "";
+
+		return Page();
 	}
 
 	public string FormatRestriction(string name)
@@ -70,5 +79,20 @@ public class Peer : PageModel
 		public string PublicRemarks { get; set; } = "";
 		public string PrivateNotes { get; set; } = "";
 		public List<RestrictionModel> Restrictions { get; set; } = [];
+
+		public static FormModel FromPeer(Models.Peer peer)
+		{
+			return new FormModel()
+			{
+				PrivateNotes = peer.PrivateComment ?? "",
+				PublicRemarks = peer.PublicRemark ?? "",
+				Restrictions = Enum.GetValues<Models.Restrictions>().Select((key) => new RestrictionModel()
+				{
+					Expires = peer.Restrictions.TryGetValue(key, out var expires) && !expires.Expired() ? expires : DateTimeOffset.MaxValue,
+					Enabled = peer.Restrictions.TryGetValue(key, out var enabled) && !enabled.Expired(),
+					Restriction = key
+				}).ToList()
+			};
+		}
 	}
 }

@@ -202,6 +202,7 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public void Update(Models.Audience audience) => _context.Update(audience);
 	public void Update(Models.InviteCode code) => _context.Update(code);
+	public void Update(Models.Peer peer) => _context.Update(peer);
 
 	public void UpdateRange(IEnumerable<Models.Profile> profile)
 	{
