@@ -118,7 +118,7 @@ public interface IAuthzModerationService
 	public Task<ICollection<Peer>> ImportPeerRestrictions(ICollection<Peer> imports, ModerationService.MergeStrategy strategy);
 	public Task<Peer> RemovePeerRestriction(Uri peerId, Restrictions restriction);
 	public IAsyncEnumerable<Peer> ListPeers(Uri? peerIdCursor = null, int limit = 20);
-	public Task<Peer> LookupPeer(Uri peerId);
+	public Task<Peer?> LookupPeer(Uri peerId);
 	public IAsyncEnumerable<Peer> SearchPeers(string query, int limit = 20);
 }
 

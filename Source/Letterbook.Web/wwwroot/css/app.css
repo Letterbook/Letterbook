@@ -99,6 +99,9 @@
     .spacer {
         flex: 1 0 auto;
     }
+    .highlight {
+        color: var(--lb-color-contrast);
+    }
     
     img.fill {
         width: 100%;
@@ -110,6 +113,7 @@
         margin-top: -.5em;
         margin-bottom: 1em;
         font-size: 1.5em;
+        font-weight: 600;
     }
 }
 

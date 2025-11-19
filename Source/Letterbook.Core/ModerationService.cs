@@ -485,10 +485,12 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 		return query.AsAsyncEnumerable();
 	}
-	public Task<Peer> LookupPeer(Uri peerId)
+
+	public async Task<Peer?> LookupPeer(Uri peerId)
 	{
-		throw new NotImplementedException();
+		return await _data.Peers(peerId).SingleOrDefaultAsync();
 	}
+
 	public IAsyncEnumerable<Peer> SearchPeers(string query, int limit = 20)
 	{
 		return _data.AllPeers()

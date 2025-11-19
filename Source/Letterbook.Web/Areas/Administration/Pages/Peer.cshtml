@@ -8,21 +8,29 @@
 
 <section class="peer-detail administration">
     <h1>Manage Peer Connection</h1>
-    <div role="doc-subtitle">@Model.Domain</div>
+    <div role="doc-subtitle" class="highlight">@Model.Domain</div>
     <form method="post">
         <label for="private-note">Private Notes</label>
-        <textarea id="private-note" name="private-note"></textarea>
+        <textarea id="private-note" asp-for="Form.PrivateNotes"></textarea>
         <label for="public-remark">Public Remarks</label>
-        <input id="public-remark" name="public-remark"/>
-        @foreach (var name in Enum.GetNames<Models.Restrictions>())
+        <input id="public-remark" asp-for="Form.PublicRemarks"/>
+        @foreach (var (key, i) in Model.Form.Restrictions.Select((key, i) => (key, i)))
         {
             <div class="restriction-item">
                 <div class="restriction-col">
                     <label>
-                        <input type="checkbox" role="switch" id="@name" name="@name"/>
-                        @name</label></div>
-                <label for="@name-expiration" class="when-enabled">Until</label>
-                <input id="@name-expiration" type="date" name="@name-expiration" class="when-enabled" value="9999-12-31"/>
+                        <input type="checkbox" 
+                               role="switch"
+                               asp-for="Form.Restrictions[@i].Enabled" />
+                        @(Model.FormatRestriction(key.Restriction.ToString()))</label></div>
+                <label asp-for="Form.Restrictions[@i].Expires" class="when-enabled">Until</label>
+                <input class="when-enabled"
+                       type="date"
+                       asp-for="Form.Restrictions[@i].Expires"
+                       value="@key.Expires.ToString("yyyy-MM-dd")"/>
+                <input type="hidden" 
+                       value="@(key.Restriction)"
+                       asp-for="Form.Restrictions[@i].Restriction"/>
             </div>
         }
         <button type="submit">Save</button>
