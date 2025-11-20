@@ -52,14 +52,14 @@ public class Peer : PageModel
 		var peer = await _moderationService.As(User.Claims).GetOrInitPeer(uri);
 		peer.PublicRemark = Form.PublicRemarks;
 		peer.PrivateComment = Form.PrivateNotes;
-		peer.Restrictions = Form.Restrictions.Where(e => e.Enabled).ToDictionary(e => e.Restriction, e => e.Expires.ToUniversalTime());
+		peer.Restrictions = Form.Restrictions.Where(e => e.Enabled).ToDictionary(e => e.Id, e => e.Expires.ToUniversalTime());
 
 		Data = await _moderationService.As(User.Claims).UpdatePeer(peer);
 		Form = FormModel.FromPeer(Data);
 		PublicRemarks = Data.PublicRemark ?? "";
 		PrivateNotes = Data.PrivateComment ?? "";
 
-		return Page();
+		return RedirectToPage();
 	}
 
 	public string FormatRestriction(string name)
@@ -69,7 +69,7 @@ public class Peer : PageModel
 
 	public class RestrictionModel
 	{
-		public Models.Restrictions Restriction { get; set; }
+		public Models.Restrictions Id { get; set; }
 		public DateTimeOffset Expires { get; set; }
 		public bool Enabled { get; set; }
 	}
@@ -86,11 +86,11 @@ public class Peer : PageModel
 			{
 				PrivateNotes = peer.PrivateComment ?? "",
 				PublicRemarks = peer.PublicRemark ?? "",
-				Restrictions = Enum.GetValues<Models.Restrictions>().Select((key) => new RestrictionModel()
+				Restrictions = Enum.GetValues<Models.Restrictions>().Select((name) => new RestrictionModel()
 				{
-					Expires = peer.Restrictions.TryGetValue(key, out var expires) && !expires.Expired() ? expires : DateTimeOffset.MaxValue,
-					Enabled = peer.Restrictions.TryGetValue(key, out var enabled) && !enabled.Expired(),
-					Restriction = key
+					Expires = peer.Restrictions.TryGetValue(name, out var expires) && !expires.Expired() ? expires : DateTimeOffset.MaxValue,
+					Enabled = peer.Restrictions.TryGetValue(name, out var enabled) && !enabled.Expired(),
+					Id = name
 				}).ToList()
 			};
 		}

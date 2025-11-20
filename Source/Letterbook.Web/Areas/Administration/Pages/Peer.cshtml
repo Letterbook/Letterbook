@@ -14,23 +14,25 @@
         <textarea id="private-note" asp-for="Form.PrivateNotes"></textarea>
         <label for="public-remark">Public Remarks</label>
         <input id="public-remark" asp-for="Form.PublicRemarks"/>
-        @foreach (var (key, i) in Model.Form.Restrictions.Select((key, i) => (key, i)))
+        @foreach (var (each, i) in Model.Form.Restrictions.Select((key, i) => (key, i)))
         {
             <div class="restriction-item">
                 <div class="restriction-col">
-                    <label>
-                        <input type="checkbox" 
+                    <label asp-for="Form.Restrictions[@i].Enabled">
+                        <input type="checkbox"
                                role="switch"
-                               asp-for="Form.Restrictions[@i].Enabled" />
-                        @(Model.FormatRestriction(key.Restriction.ToString()))</label></div>
+                               asp-for="Form.Restrictions[@i].Enabled"/>
+                        @(Model.FormatRestriction(each.Id.ToString()))
+                    </label>
+                </div>
                 <label asp-for="Form.Restrictions[@i].Expires" class="when-enabled">Until</label>
                 <input class="when-enabled"
                        type="date"
                        asp-for="Form.Restrictions[@i].Expires"
-                       value="@key.Expires.ToString("yyyy-MM-dd")"/>
-                <input type="hidden" 
-                       value="@(key.Restriction)"
-                       asp-for="Form.Restrictions[@i].Restriction"/>
+                       value="@each.Expires.ToString("yyyy-MM-dd")"/>
+                <input type="hidden"
+                       value="@(each.Id)"
+                       asp-for="Form.Restrictions[@i].Id"/>
             </div>
         }
         <button type="submit">Save</button>
