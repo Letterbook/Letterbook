@@ -3,6 +3,7 @@ using Letterbook.Api.Controllers;
 using Letterbook.Api.Dto;
 using Letterbook.Core;
 using Letterbook.Core.Tests.Fakes;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit.Abstractions;
@@ -44,14 +45,26 @@ public class PeersControllerTests : WithMockContext
 		                   #domain,#severity,#reject_media,#reject_reports,#public_comment,#obfuscate
 		                   ap.example,suspend,FALSE,FALSE,letterbook:test,TRUE
 		                   """;
+		var payload = BuildPayload(csv);
 
-		var result = await _controller.ImportDenyList(csv, DenyListFormat.Mastodon, ModerationService.MergeStrategy.ReplaceAll);
+		var result = await _controller.ImportDenyList(payload, DenyListFormat.Mastodon, ModerationService.MergeStrategy.ReplaceAll);
 
 		Assert.IsType<OkResult>(result);
 		AuthzModerationServiceMock.Verify(m => m.ImportPeerRestrictions(It.Is<ICollection<Models.Peer>>(
 			p => p.Any(peer => peer.Restrictions.ContainsKey(Models.Restrictions.Defederate)
 			                   && peer.Restrictions.Count == 1)
 		), ModerationService.MergeStrategy.ReplaceAll));
+	}
+
+	private static FormFile BuildPayload(string csv)
+	{
+		var stream = new MemoryStream();
+		var streamWriter = new StreamWriter(stream);
+		streamWriter.Write(csv);
+		streamWriter.Flush();
+		stream.Position = 0;
+		var payload = new FormFile(stream, stream.Position, stream.Length, "csv", "blocklist.csv");
+		return payload;
 	}
 
 	[Fact]
@@ -62,7 +75,7 @@ public class PeersControllerTests : WithMockContext
 		                   ap.example,silence,TRUE,TRUE,letterbook:test,FALSE
 		                   """;
 
-		var result = await _controller.ImportDenyList(csv, DenyListFormat.Mastodon, ModerationService.MergeStrategy.KeepAll);
+		var result = await _controller.ImportDenyList(BuildPayload(csv), DenyListFormat.Mastodon, ModerationService.MergeStrategy.KeepAll);
 
 		Assert.IsType<OkResult>(result);
 		AuthzModerationServiceMock.Verify(m => m.ImportPeerRestrictions(It.Is<ICollection<Models.Peer>>(
@@ -86,7 +99,7 @@ public class PeersControllerTests : WithMockContext
 		                   ap5.example,silence,TRUE,TRUE,letterbook:test,FALSE
 		                   """;
 
-		var result = await _controller.ImportDenyList(csv, DenyListFormat.Mastodon, ModerationService.MergeStrategy.KeepAll);
+		var result = await _controller.ImportDenyList(BuildPayload(csv), DenyListFormat.Mastodon, ModerationService.MergeStrategy.KeepAll);
 
 		Assert.IsType<OkResult>(result);
 		AuthzModerationServiceMock.Verify(m => m.ImportPeerRestrictions(It.Is<ICollection<Models.Peer>>(

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Web.Areas.Administration.Pages;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -69,7 +70,7 @@ public class PeerControllerTests : WithMockContext
 
 		var response = await _page.OnPost();
 
-		Assert.IsType<PageResult>(response, exactMatch: false);
+		Assert.IsType<RedirectToPageResult>(response, exactMatch: false);
 
 		var actual = _page.Form.Restrictions.First(r => r.Id == Models.Restrictions.Warn);
 		Assert.False(actual.Enabled);
