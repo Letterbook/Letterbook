@@ -1,4 +1,5 @@
 @page
+@using Letterbook.Core
 @using Letterbook.Web.Pages.Shared
 @model Letterbook.Web.Areas.Administration.Pages.PeerImport
 
@@ -13,9 +14,9 @@
         <label class="center" for="csv-file">
             Select CSV file
         </label>
-        <input id="csv-file" class="file-upload" type="file" asp-for="CsvFile" accept=".csv,text/csv"/>
+        <input id="csv-file" class="file-upload" type="file" asp-for="CsvFile" accept=".csv,text/csv" required/>
         <fieldset>
-            <legend>List Format</legend>
+            <legend>List format:</legend>
             <label for="mastodon-format">
                 <input id="mastodon-format" type="radio" asp-for="LetterbookFormat" value="false"
                        checked/>
@@ -26,5 +27,20 @@
                 Letterbook
             </label>
         </fieldset>
+        <fieldset>
+            <legend>How to handle conflicts with existing restrictions:</legend>
+            @foreach (var each in Enum.GetValues<ModerationService.MergeStrategy>())
+            {
+                <label for="strategy-@each">
+                    <input id="strategy-@each"
+                           type="radio"
+                           asp-for="Strategy"
+                           value="@each"
+                           checked="@(each == ModerationService.MergeStrategy.KeepUnexpired)"/>
+                    @(Model.FormateStrategy(each.ToString()))
+                </label>
+            }
+        </fieldset>
+        <button type="submit">Upload</button>
     </form>
 </section>
