@@ -1,3 +1,4 @@
+using System.Text;
 using Bogus;
 using Letterbook.Api.Controllers;
 using Letterbook.Api.Dto;
@@ -56,17 +57,6 @@ public class PeersControllerTests : WithMockContext
 		), ModerationService.MergeStrategy.ReplaceAll));
 	}
 
-	private static FormFile BuildPayload(string csv)
-	{
-		var stream = new MemoryStream();
-		var streamWriter = new StreamWriter(stream);
-		streamWriter.Write(csv);
-		streamWriter.Flush();
-		stream.Position = 0;
-		var payload = new FormFile(stream, stream.Position, stream.Length, "csv", "blocklist.csv");
-		return payload;
-	}
-
 	[Fact]
 	public async Task ShouldImportMastodon_MultipleRestrictions()
 	{
@@ -110,5 +100,11 @@ public class PeersControllerTests : WithMockContext
 			              && collection.Any(peer => peer.Hostname == "ap4.example")
 			              && collection.Any(peer => peer.Hostname == "ap5.example")
 		), ModerationService.MergeStrategy.KeepAll));
+	}
+
+	private static FormFile BuildPayload(string csv)
+	{
+		var bytes = Encoding.UTF8.GetBytes(csv);
+		return new FormFile(new MemoryStream(bytes), 0, bytes.Length, "csv", "blocklist.csv");
 	}
 }
