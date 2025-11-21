@@ -37,7 +37,7 @@
                            asp-for="Strategy"
                            value="@each"
                            checked="@(each == ModerationService.MergeStrategy.KeepUnexpired)"/>
-                    @(Model.FormateStrategy(each.ToString()))
+                    @(Model.FormatStrategy(each.ToString()))
                 </label>
             }
         </fieldset>

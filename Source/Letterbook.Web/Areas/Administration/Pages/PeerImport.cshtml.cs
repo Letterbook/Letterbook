@@ -16,7 +16,7 @@ public class PeerImport : PageModel
 
 	}
 
-	public string FormateStrategy(string name)
+	public string FormatStrategy(string name)
 	{
 		return string.Join(' ', StringFormatters.SplitExp().Split(name));
 	}
