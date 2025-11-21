@@ -102,6 +102,22 @@
     .highlight {
         color: var(--lb-color-contrast);
     }
+    .file-upload {
+        border-color: var(--pico-form-element-border-color);
+        border-width: .25em;
+        border-style: dashed;
+        cursor: pointer;
+        text-align: center;
+        display: inline-block;
+        align-content: center;
+        vertical-align: middle;
+        height: 4lh;
+        
+        input[type="file"] {
+            width: auto;
+            height: 1lh;
+        }
+    }
     
     img.fill {
         width: 100%;

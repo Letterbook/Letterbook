@@ -1,0 +1,30 @@
+@page
+@using Letterbook.Web.Pages.Shared
+@model Letterbook.Web.Areas.Administration.Pages.PeerImport
+
+@{
+    Layout = "_Layout";
+    ViewData["title"] = "Admin - Peer Import";
+}
+
+<section class="administration">
+    <h1>Import Restriction List</h1>
+    <form method="post">
+        <label class="center" for="csv-file">
+            Select CSV file
+        </label>
+        <input id="csv-file" class="file-upload" type="file" asp-for="CsvFile" accept=".csv,text/csv"/>
+        <fieldset>
+            <legend>List Format</legend>
+            <label for="mastodon-format">
+                <input id="mastodon-format" type="radio" asp-for="LetterbookFormat" value="false"
+                       checked/>
+                Mastodon
+            </label>
+            <label for="letterbook-format">
+                <input id="letterbook-format" type="radio" asp-for="LetterbookFormat" value="true"/>
+                Letterbook
+            </label>
+        </fieldset>
+    </form>
+</section>
