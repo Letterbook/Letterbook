@@ -118,6 +118,11 @@
             height: 1lh;
         }
     }
+    .area-menu {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
     
     img.fill {
         width: 100%;

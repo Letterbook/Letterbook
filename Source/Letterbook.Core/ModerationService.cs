@@ -267,6 +267,26 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		return report;
 	}
 
+	public IAsyncEnumerable<ModerationReport> ListReports(DateTimeOffset? cursor = null, bool includeClosed = false,
+		bool oldestFirst = false, int limit = 20)
+	{
+		var q = _data.AllModerationReports()
+			.TagWithCallSite()
+			.Include(r => r.Moderators)
+			.Include(r => r.Subjects)
+			.Include(r => r.RelatedPosts)
+			.Include(r => r.Reporter)
+			.Where(r => includeClosed || r.Closed > DateTimeOffset.UtcNow);
+		q = cursor is { } c
+			? q.Where(r => oldestFirst ? r.Updated.CompareTo(c) > 1 : r.Updated.CompareTo(c) < 1)
+			: q;
+		q = oldestFirst ? q.OrderBy(r => r.Updated) : q.OrderByDescending(r => r.Updated);
+
+		return q.Take(limit)
+			.AsSplitQuery()
+			.AsAsyncEnumerable();
+	}
+
 	public IAsyncEnumerable<ModerationReport> Search(string query, bool assignedToMe = true, bool unassigned = true, bool includeClosed = false)
 	{
 		throw new NotImplementedException();

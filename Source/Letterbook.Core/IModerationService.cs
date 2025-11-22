@@ -72,6 +72,17 @@ public interface IAuthzModerationService
 	public Task<ModerationReport> ReceiveReport(Uri reporterId, ModerationReport report);
 
 	/// <summary>
+	/// Iterate through all reports
+	/// </summary>
+	/// <param name="cursor"></param>
+	/// <param name="includeClosed"></param>
+	/// <param name="oldestFirst"></param>
+	/// <param name="limit"></param>
+	/// <returns></returns>
+	public IAsyncEnumerable<ModerationReport> ListReports(DateTimeOffset? cursor = null, bool includeClosed = false,
+		bool oldestFirst = false, int limit = 20);
+
+	/// <summary>
 	/// Search for reports
 	/// </summary>
 	/// <param name="query"></param>
