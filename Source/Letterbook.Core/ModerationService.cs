@@ -359,18 +359,24 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 	public async Task<ICollection<Restrictions>> GetOrInitPeerRestrictions(Uri peerId)
 	{
+		var peer = await GetOrInitPeer(peerId);
+
+		return peer.Restrictions.Where(r => !r.Value.Expired()).Select(r => r.Key).ToHashSet();
+	}
+
+	public async Task<Peer> GetOrInitPeer(Uri peerId)
+	{
 		var allowed = _authz.View<Peer>(_claims);
 		if (!allowed)
 			throw CoreException.Unauthorized(allowed);
 
-		if (await _data.Peers(peerId).SingleOrDefaultAsync() is not { } peer)
-		{
-			peer = new Peer(peerId);
-			_data.Add(peer);
-			await _data.Commit();
-		}
+		if (await _data.Peers(peerId).SingleOrDefaultAsync() is { } peer) return peer;
 
-		return peer.Restrictions.Where(r => !r.Value.Expired()).Select(r => r.Key).ToHashSet();
+		peer = new Peer(peerId);
+		_data.Add(peer);
+		await _data.Commit();
+
+		return peer;
 	}
 
 	public async Task<Peer> SetPeerRestriction(Uri peerId, Restrictions restriction, DateTimeOffset expiration)
@@ -466,6 +472,46 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 		peer.Restrictions.Remove(restriction);
 		await _data.Commit();
+		return peer;
+	}
+
+	public IAsyncEnumerable<Peer> ListPeers(Uri? peerIdCursor, int limit = 20)
+	{
+		var allowed = _authz.List<Peer>(_claims);
+		if (!allowed)
+			throw CoreException.Unauthorized(allowed);
+
+		var query = _data.AllPeers().TagWithCallSite();
+		if (peerIdCursor is { } cursor)
+		{
+			query = query.Where(peer => peer.Authority.CompareTo(cursor.GetAuthority()) > 0);
+		}
+
+		query = query.OrderBy(p => p.Authority).Take(limit);
+
+		return query.AsAsyncEnumerable();
+	}
+
+	public async Task<Peer?> LookupPeer(Uri peerId)
+	{
+		return await _data.Peers(peerId).SingleOrDefaultAsync();
+	}
+
+	public IAsyncEnumerable<Peer> SearchPeers(string query, int limit = 20)
+	{
+		return _data.AllPeers()
+			.TagWithCallSite()
+			.OrderBy(p => p.Authority)
+			.Where(p => p.Authority.StartsWith(query))
+			.Take(limit)
+			.AsAsyncEnumerable();
+	}
+
+	public async Task<Peer> UpdatePeer(Peer peer)
+	{
+		_data.Update(peer);
+		await _data.Commit();
+
 		return peer;
 	}
 

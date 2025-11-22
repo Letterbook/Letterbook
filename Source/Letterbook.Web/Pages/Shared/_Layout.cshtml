@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Letterbook.Core
+@inject IAuthorizationService Authz
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
@@ -21,9 +24,16 @@
             @if (User.Identity?.IsAuthenticated == true)
             {
                 <partial name="_ProfileSelector"/>
-                <a asp-area="" asp-page="/Notifications">Notifications</a>
-                <a asp-area="" asp-page="/Search">Search</a>
-                <a asp-area="" asp-page="/Settings">Settings</a>
+                <a asp-area="" asp-page="/Account">Account</a>
+                @if (Authz.List<Models.ModerationReport>(User.Claims) ||
+                     Authz.List<Models.Account>(User.Claims) ||
+                     Authz.List<Models.Peer>(User.Claims))
+                {
+                    <a asp-area="Administration" asp-page="/Peers">Admin</a>
+                }
+
+                @* <a asp-area="" asp-page="/Notifications">Notifications</a> *@
+                @* <a asp-area="" asp-page="/Search">Search</a> *@
                 <div class="spacer min-md"></div>
                 <footer>
                     <a asp-area="" asp-page="/About">About</a>

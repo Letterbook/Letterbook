@@ -86,6 +86,11 @@ public interface IAuthorizationService
 	public Decision View<T>(IEnumerable<Claim> claims);
 
 	/// <summary>
+	/// Authorize listing or searching any arbitrary set of resources with a given type
+	/// </summary>
+	public Decision List<T>(IEnumerable<Claim> claims);
+
+	/// <summary>
 	/// Authorize at least one claim on the Profile. This supports early exit for requests that are definitely unauthorized. In most cases
 	/// some additional authorization will still be necessary.
 	/// </summary>

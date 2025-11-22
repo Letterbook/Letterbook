@@ -99,10 +99,37 @@
     .spacer {
         flex: 1 0 auto;
     }
+    .highlight {
+        color: var(--lb-color-contrast);
+    }
+    .file-upload {
+        border-color: var(--pico-form-element-border-color);
+        border-width: .25em;
+        border-style: dashed;
+        cursor: pointer;
+        text-align: center;
+        display: inline-block;
+        align-content: center;
+        vertical-align: middle;
+        height: 4lh;
+        
+        input[type="file"] {
+            width: auto;
+            height: 1lh;
+        }
+    }
     
     img.fill {
         width: 100%;
         height: 100%;
+    }
+    div[role=doc-subtitle] {
+        --pico-font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+        font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+        margin-top: -.5em;
+        margin-bottom: 1em;
+        font-size: 1.5em;
+        font-weight: 600;
     }
 }
 
@@ -466,6 +493,45 @@ button {
         margin-bottom: revert;
         border-bottom: revert;
         padding-bottom: revert;
+    }
+}
+
+.app .peer-list {
+    .col-hostname {
+        max-width: 8em;
+    }
+    
+    .peer-link {
+        width: 100%;
+    }
+}
+
+.app .peer-detail {
+    .restriction-item {
+        display: flex;
+        flex-direction: row;
+        height: 1.5lh;
+        align-items: center;
+        
+        input[type="date"] {
+            width: initial;
+        }
+
+        .restriction-col {
+            width: 16em;
+        }
+        label.when-enabled {
+            margin-right: 1em;
+        }
+        .when-enabled {
+            display: none;
+            height: 1.5lh;
+            padding-bottom: .25em;
+            padding-top: .25em;
+        }
+        &:has(input:checked) .when-enabled{
+            display: initial;
+        }
     }
 }
 

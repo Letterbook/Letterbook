@@ -112,10 +112,16 @@ public interface IAuthzModerationService
 	public IAsyncEnumerable<ModerationPolicy> ListPolicies(bool includeRetired = false);
 	public Task<ModerationPolicy> AddPolicy(ModerationPolicy policy);
 	public Task<ModerationPolicy> RetirePolicy(ModerationPolicyId policyId, bool restore = false);
+
 	public Task<ICollection<Restrictions>> GetOrInitPeerRestrictions(Uri peerId);
+	public Task<Peer> GetOrInitPeer(Uri peerId);
 	public Task<Peer> SetPeerRestriction(Uri peerId, Restrictions restriction, DateTimeOffset expiration);
 	public Task<ICollection<Peer>> ImportPeerRestrictions(ICollection<Peer> imports, ModerationService.MergeStrategy strategy);
 	public Task<Peer> RemovePeerRestriction(Uri peerId, Restrictions restriction);
+	public IAsyncEnumerable<Peer> ListPeers(Uri? peerIdCursor = null, int limit = 20);
+	public Task<Peer?> LookupPeer(Uri peerId);
+	public IAsyncEnumerable<Peer> SearchPeers(string query, int limit = 20);
+	public Task<Peer> UpdatePeer(Peer peer);
 }
 
 public interface IModerationService

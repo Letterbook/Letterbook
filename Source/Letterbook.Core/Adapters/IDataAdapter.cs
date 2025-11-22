@@ -109,6 +109,12 @@ public interface IDataAdapter : IDisposable
 	public IQueryable<Peer> Peers(params Peer[] peers);
 
 	/// <summary>
+	/// Query across all peer hosts
+	/// </summary>
+	/// <returns></returns>
+	public IQueryable<Peer> AllPeers();
+
+	/// <summary>
 	/// Query for navigation entities, using the given object as a root entity
 	/// </summary>
 	/// <remarks>Consumers should be sure to set an OrderBy property</remarks>
@@ -151,6 +157,7 @@ public interface IDataAdapter : IDisposable
 	public void Update(Post post);
 	public void Update(Audience audience);
 	public void Update(InviteCode code);
+	public void Update(Peer peer);
 	public void UpdateRange(IEnumerable<Profile> profile);
 	public void UpdateRange(IEnumerable<Account> account);
 	public void Delete(object record);

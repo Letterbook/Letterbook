@@ -131,6 +131,8 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 			: _context.Peers.Where(p => peers.Contains(p));
 	}
 
+	public IQueryable<Models.Peer> AllPeers() => _context.Peers;
+
 	public IQueryable<T> QueryFrom<T>(Models.Profile profile, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)
 		where T : class
 	{
@@ -200,6 +202,7 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 
 	public void Update(Models.Audience audience) => _context.Update(audience);
 	public void Update(Models.InviteCode code) => _context.Update(code);
+	public void Update(Models.Peer peer) => _context.Update(peer);
 
 	public void UpdateRange(IEnumerable<Models.Profile> profile)
 	{

@@ -70,6 +70,11 @@ public class AuthorizationService : IAuthorizationService
 		return Decision.Allow("todo", claims);
 	}
 
+	public Decision List<T>(IEnumerable<Claim> claims)
+	{
+		return Decision.Allow("todo", claims);
+	}
+
 	public Decision Any(IEnumerable<Claim> claims, ProfileId profileId)
 	{
 		return Decision.Allow("todo", claims);

@@ -35,6 +35,7 @@
       <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
       <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
       <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+      <PackageReference Include="Sep" />
       <PackageReference Include="Swashbuckle.AspNetCore.Annotations" />
       <PackageReference Include="System.Linq.Async" />
     </ItemGroup>

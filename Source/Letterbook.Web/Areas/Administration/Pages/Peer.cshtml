@@ -1,0 +1,40 @@
+@page "{domain}"
+@model Letterbook.Web.Areas.Administration.Pages.Peer
+
+@{
+    Layout = "_Layout";
+    ViewData["title"] = "Admin - Peer";
+}
+
+<section class="peer-detail administration">
+    <h1>Manage Peer Connection</h1>
+    <div role="doc-subtitle" class="highlight">@Model.Domain</div>
+    <form method="post">
+        <label for="private-note">Private Notes</label>
+        <textarea id="private-note" asp-for="Form.PrivateNotes"></textarea>
+        <label for="public-remark">Public Remarks</label>
+        <input id="public-remark" asp-for="Form.PublicRemarks"/>
+        @foreach (var (each, i) in Model.Form.Restrictions.Select((key, i) => (key, i)))
+        {
+            <div class="restriction-item">
+                <div class="restriction-col">
+                    <label asp-for="Form.Restrictions[@i].Enabled">
+                        <input type="checkbox"
+                               role="switch"
+                               asp-for="Form.Restrictions[@i].Enabled"/>
+                        @(Model.FormatRestriction(each.Id.ToString()))
+                    </label>
+                </div>
+                <label asp-for="Form.Restrictions[@i].Expires" class="when-enabled">Until</label>
+                <input class="when-enabled"
+                       type="date"
+                       asp-for="Form.Restrictions[@i].Expires"
+                       value="@each.Expires.ToString("yyyy-MM-dd")"/>
+                <input type="hidden"
+                       value="@(each.Id)"
+                       asp-for="Form.Restrictions[@i].Id"/>
+            </div>
+        }
+        <button type="submit">Save</button>
+    </form>
+</section>
