@@ -35,6 +35,7 @@
       <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" />
       <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
       <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+      <PackageReference Include="Sep" />
       <PackageReference Include="Swashbuckle.AspNetCore.Annotations" />
       <PackageReference Include="System.Linq.Async" />
     </ItemGroup>
@@ -47,11 +48,6 @@
       <ProjectReference Include="..\Letterbook.Generators\Letterbook.Generators\Letterbook.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" SetTargetFramework="TargetFramework=netstandard2.0" />
       <!-- Letterbook.Generators must be built targeting the same framework as this project to allow the use of runtime features such as static abstract members on interfaces -->
       <ProjectReference Include="..\Letterbook.Generators\Letterbook.Generators\Letterbook.Generators.csproj" ReferenceOutputAssembly="true" SetTargetFramework="TargetFramework=$(TargetFramework)" />
-    </ItemGroup>
-    <ItemGroup>
-      <Reference Include="Sep">
-        <HintPath>..\..\..\..\.nuget\packages\sep\0.11.3\lib\net9.0\Sep.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>
