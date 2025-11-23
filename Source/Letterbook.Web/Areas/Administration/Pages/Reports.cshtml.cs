@@ -20,11 +20,12 @@ public class Reports : PageModel
 
 	public async Task<IActionResult> OnGet()
 	{
-		if (!_authz.List<Reports>(User.Claims))
-			return Forbid();
-
+		if (User.Identity == null || !User.Identity.IsAuthenticated)
+			return Challenge();
 		if (!User.Claims.TryGetAccountId(out var id))
 			return Challenge();
+		if (!_authz.List<Reports>(User.Claims))
+			return Forbid();
 
 		var reports = _moderation.As(User.Claims).ListReports();
 		await foreach (var report in reports)

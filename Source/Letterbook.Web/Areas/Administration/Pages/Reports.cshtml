@@ -10,7 +10,7 @@
     <h1>Manage Reports</h1>
     <table>
         <thead>
-        <th>
+        <th class="report-col-time">
             Updated
         </th>
         <th>
@@ -23,7 +23,11 @@
         @foreach (var row in Model.List)
         {
             <tr>
-                <td>@row.Updated</td>
+                <td>
+                    <time datetime="@row.Updated.ToString("O")">
+                        @row.Updated.ToString("MMM\u00A0d h:mm\u00A0tt")
+                    </time>
+                </td>
                 <td>@row.Summary</td>
                 <td>@(row.Moderators.FirstOrDefault()?.UserName ?? "")</td>
             </tr>

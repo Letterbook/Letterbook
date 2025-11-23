@@ -540,6 +540,12 @@ button {
     }
 }
 
+.app .administration {
+    .report-col-time {
+        min-width: 10em;
+    }
+}
+
 /* Collapsible menus */
 /* Always collapsible */
 .menu-collapsible,
