@@ -1,0 +1,87 @@
+@page "{reportId}"
+@model Letterbook.Web.Areas.Administration.Pages.Report
+
+@{
+    Layout = "_Layout";
+    ViewData["title"] = "Admin - Report";
+}
+
+
+
+<section class="administration report">
+    <header>
+        <h1>
+            Report from <span class="profile-reporter">@(Model.Self.Reporter?.DisplayName is { } name ? $"{name}" : "an anonymous neighbor")</span> on <time datetime="@Model.Self.Created.ToString("O")">@(Model.Self.Created.ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
+        </h1>
+        <div class="report-stats report-section">
+            <div class="row">
+                <strong class="report-stats-header">Reported by</strong>
+                <span class="profile-reporter">
+                    @if (Model.Self.Reporter is { } reporter)
+                    {
+                        @(reporter.DisplayName) <a href="/profile/@reporter.Id">(@reporter.Handle)</a>
+                    }
+                    else
+                    {
+                        @("anonymous")
+                    }
+                </span>
+            </div>
+            <div class="row">
+                <strong class="report-stats-header">Submitted</strong>
+                <time datetime="@(Model.Self.Created.ToString("O"))">@(Model.Self.Created.ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
+            </div>
+            <div class="row">
+                <strong class="report-stats-header">Updated</strong>
+                <time datetime="@(Model.Self.Updated.ToString("O"))">@(Model.Self.Updated.ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
+            </div>
+            <div class="row">
+                <strong class="report-stats-header">Policies</strong>
+                @foreach(var policy in Model.Self.Policies)
+                {
+                    <span>@policy.Title</span>
+                }
+                @if (Model.Self.Policies.Count == 0)
+                {
+                    <span>none provided</span>
+                }
+            </div>
+            <div class="row">
+                <strong class="report-stats-header">Forwarded to</strong>
+                @foreach (var uri in Model.Self.Forwarded)
+                {
+                    <span class="peer-domain">@uri.Host</span> 
+                }
+            </div>
+        </div>
+        <div class="report-reason report-section">
+            <label for="reason">Summary provided by the reporter</label>
+            <textarea id="reason" readonly>@Model.Self.Summary</textarea>
+        </div>
+        <div class="report-posts report-section report-section-small">
+            <h2>Reported Posts</h2>
+            @foreach (var p in Model.Self.RelatedPosts)
+            {
+                @foreach (var c in p.Contents)
+                {
+                    @(c.Html)
+                    <br/>
+                }
+            }
+        </div>
+        <div class="report-subjects report-section report-section-small">
+            <h2>Reported Profiles</h2>
+            @foreach (var p in Model.Self.Subjects)
+            {
+                <p>@p.DisplayName</p>
+            }
+        </div>
+        <div class="report-other-profiles report-section report-section-small">
+            <h2>Other Related Profiles</h2>
+            @foreach (var p in Model.Self.RelatedPosts.SelectMany(p => p.Creators).Except(Model.Self.Subjects))
+            {
+                <p>@p.DisplayName</p>
+            }
+        </div>
+    </header>
+</section>

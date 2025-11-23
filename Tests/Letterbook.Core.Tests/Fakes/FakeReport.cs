@@ -5,7 +5,7 @@ namespace Letterbook.Core.Tests.Fakes;
 
 public sealed class FakeReport : Faker<ModerationReport>
 {
-	public FakeReport() : this(new FakeProfile().Generate(), new FakeProfile().Generate(), new CoreOptions()) { }
+	public FakeReport() : this(new FakeProfile(), new FakeProfile(), new CoreOptions()) { }
 
 	public FakeReport(Profile reporter, Profile subject, CoreOptions opts)
 	{
@@ -13,6 +13,17 @@ public sealed class FakeReport : Faker<ModerationReport>
 
 		RuleFor(r => r.Reporter, () => reporter);
 		RuleFor(r => r.Subjects, () => [subject]);
+		RuleFor(r => r.Created, (faker) => faker.Date.RecentOffset(5));
+		RuleFor(r => r.Updated, (faker, report) => faker.Random.Bool() ? report.Created : faker.Date.BetweenOffset(report.Created, DateTimeOffset.UtcNow));
+		RuleFor(r => r.Closed, (faker, report) => faker.Random.Bool(0.1f) ? DateTimeOffset.UtcNow : DateTimeOffset.MaxValue);
+	}
+
+	public FakeReport(FakeProfile reporter, FakeProfile subject, CoreOptions opts)
+	{
+		CustomInstantiator(f => new ModerationReport(opts, f.Lorem.Sentence()));
+
+		RuleFor(r => r.Reporter, (faker ) => faker.Random.Bool() ? reporter.Generate() : null);
+		RuleFor(r => r.Subjects, () => subject.Generate(1));
 		RuleFor(r => r.Created, (faker) => faker.Date.RecentOffset(5));
 		RuleFor(r => r.Updated, (faker, report) => faker.Random.Bool() ? report.Created : faker.Date.BetweenOffset(report.Created, DateTimeOffset.UtcNow));
 		RuleFor(r => r.Closed, (faker, report) => faker.Random.Bool(0.1f) ? DateTimeOffset.UtcNow : DateTimeOffset.MaxValue);

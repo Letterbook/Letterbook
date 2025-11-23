@@ -99,7 +99,7 @@
     .spacer {
         flex: 1 0 auto;
     }
-    .highlight {
+    .peer-domain {
         color: var(--lb-color-contrast);
     }
     .file-upload {
@@ -543,6 +543,20 @@ button {
 .app .administration {
     .report-col-time {
         min-width: 10em;
+    }
+    
+    .report-section {
+        margin-bottom: var(--pico-form-element-spacing-vertical);
+        border-bottom: 1px solid var(--pico-form-element-border-color);
+    }
+    
+    .report-stats .row {
+        display: flex;
+        column-gap: .5em;
+    }
+    
+    .report-stats-header {
+        flex-basis: 7em;
     }
 }
 

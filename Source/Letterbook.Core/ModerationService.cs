@@ -278,9 +278,9 @@ public class ModerationService : IModerationService, IAuthzModerationService
 			.Include(r => r.Reporter)
 			.Where(r => includeClosed || r.Closed > DateTimeOffset.UtcNow);
 		q = cursor is { } c
-			? q.Where(r => oldestFirst ? r.Updated.CompareTo(c) > 1 : r.Updated.CompareTo(c) < 1)
+			? q.Where(r => oldestFirst ? r.Created.CompareTo(c) > 1 : r.Created.CompareTo(c) < 1)
 			: q;
-		q = oldestFirst ? q.OrderBy(r => r.Updated) : q.OrderByDescending(r => r.Updated);
+		q = oldestFirst ? q.OrderBy(r => r.Created) : q.OrderByDescending(r => r.Created);
 
 		return q.Take(limit)
 			.AsSplitQuery()

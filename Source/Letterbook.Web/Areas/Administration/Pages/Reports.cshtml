@@ -25,7 +25,8 @@
             <tr>
                 <td>
                     <time datetime="@row.Updated.ToString("O")">
-                        @row.Updated.ToString("MMM\u00A0d h:mm\u00A0tt")
+                        <a asp-area="Administration" asp-page="Report"
+                           asp-route-reportid="@row.Id">@row.Created.ToString("MMM\u00A0d h:mm\u00A0tt")</a>
                     </time>
                 </td>
                 <td>@row.Summary</td>
