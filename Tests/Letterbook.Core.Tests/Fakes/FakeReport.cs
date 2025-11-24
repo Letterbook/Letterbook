@@ -15,7 +15,6 @@ public sealed class FakeReport : Faker<ModerationReport>
 		RuleFor(r => r.Subjects, () => [subject]);
 		RuleFor(r => r.Created, (faker) => faker.Date.RecentOffset(5));
 		RuleFor(r => r.Updated, (faker, report) => faker.Random.Bool() ? report.Created : faker.Date.BetweenOffset(report.Created, DateTimeOffset.UtcNow));
-		RuleFor(r => r.Closed, (faker, report) => faker.Random.Bool(0.1f) ? DateTimeOffset.UtcNow : DateTimeOffset.MaxValue);
 	}
 
 	public FakeReport(FakeProfile reporter, FakeProfile subject, CoreOptions opts)

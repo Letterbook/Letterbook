@@ -57,7 +57,7 @@ public class ModerationServiceTests : WithMocks
 		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer> { _peer }.BuildMock());
 		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Peer[]>())).Returns(new List<Peer> { _peer }.BuildMock());
 
-		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
+		output.WriteLine($"Bogus seed: {Init.WithSeed(550443795)}");
 
 		MockAuthorizeAllowAll();
 	}
