@@ -19,7 +19,7 @@
                 <span class="profile-reporter">
                     @if (Model.Self.Reporter is { } reporter)
                     {
-                        @(reporter.DisplayName) <a href="/profile/@reporter.Id">(@reporter.Handle)</a>
+                        @(reporter.DisplayName) @(" (")<a href="/profile/@reporter.Id">@@@reporter.Handle</a>@(")")
                     }
                     else
                     {
@@ -60,13 +60,10 @@
         </div>
         <div class="report-posts report-section report-section-small">
             <h2>Reported Posts</h2>
-            @foreach (var p in Model.Self.RelatedPosts)
+            @foreach (var post in Model.Self.RelatedPosts)
             {
-                @foreach (var c in p.Contents)
-                {
-                    @(c.Html)
-                    <br/>
-                }
+                // TODO: replace with more tailored view
+                <partial name="Shared/_TimelinePostPartial" model="post"/>
             }
         </div>
         <div class="report-subjects report-section report-section-small">
