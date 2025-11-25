@@ -9,11 +9,11 @@
 
 
 <section class="administration report">
-    <header>
+    <header class="report-section">
         <h1>
             Report from <span class="profile-reporter">@(Model.Self.Reporter?.DisplayName is { } name ? $"{name}" : "an anonymous neighbor")</span> on <time datetime="@Model.Self.Created.ToString("O")">@(Model.Self.Created.ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
         </h1>
-        <div class="report-stats report-section">
+        <div class="report-stats">
             <div class="row">
                 <strong class="report-stats-header">Reported by</strong>
                 <span class="profile-reporter">
@@ -54,18 +54,22 @@
                 }
             </div>
         </div>
-        <div class="report-reason report-section">
-            <label for="reason">Summary provided by the reporter</label>
-            <textarea id="reason" readonly>@Model.Self.Summary</textarea>
-        </div>
+    </header>
+    <div class="report-reason report-section">
+        <label for="reason">Summary provided by the reporter</label>
+        <textarea id="reason" readonly>@Model.Self.Summary</textarea>
+    </div>
+    <div class="column">
         <div class="report-posts report-section report-section-small">
-            <h2>Reported Posts</h2>
-            @foreach (var post in Model.Self.RelatedPosts)
-            {
-                // TODO: replace with more tailored view
-                <partial name="Shared/_TimelinePostPartial" model="post"/>
-            }
-        </div>
+        <h2>Reported Posts</h2>
+        @foreach (var post in Model.Self.RelatedPosts)
+        {
+            // TODO: replace with more tailored view
+            <partial name="_ReportPostPartial" model="post"/>
+        }
+    </div>
+    </div>
+    <div class="column">
         <div class="report-subjects report-section report-section-small">
             <h2>Reported Profiles</h2>
             @foreach (var p in Model.Self.Subjects)
@@ -80,5 +84,5 @@
                 <p>@p.DisplayName</p>
             }
         </div>
-    </header>
+    </div>
 </section>
