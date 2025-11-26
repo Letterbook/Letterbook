@@ -72,7 +72,7 @@
     }
 
     .user-text {
-        font-family: var(--lb-font-family), sans-serif;
+        font-family: var(--lb-font-family-user), sans-serif;
     }
     
     .icon {
@@ -596,6 +596,10 @@ button {
             width: calc(50% - 1em);
         }
     }
+    
+    .report-reason {
+        font-family: var(--lb-font-family-user);
+    }
 
     .report-col-time {
         min-width: 10em;
@@ -618,7 +622,7 @@ button {
     .report-other-profiles,
     .report-subjects{
         .profile-stats {
-            font-family: var(--lb-font-family), sans-serif;
+            font-family: var(--lb-font-family);
         }
     }
     
