@@ -1,4 +1,5 @@
 @page "{reportId}"
+@using Letterbook.Core.Extensions
 @model Letterbook.Web.Areas.Administration.Pages.Report
 
 @{
@@ -57,7 +58,7 @@
     </header>
     <div class="report-reason report-section">
         <label for="reason">Summary provided by the reporter</label>
-        <textarea id="reason" readonly>@Model.Self.Summary</textarea>
+        <textarea id="reason" class="user-text" readonly>@Model.Self.Summary</textarea>
     </div>
     <div class="column">
         <div class="report-posts report-section report-section-small">
@@ -72,16 +73,16 @@
     <div class="column">
         <div class="report-subjects report-section report-section-small">
             <h2>Reported Profiles</h2>
-            @foreach (var p in Model.Self.Subjects)
+            @foreach (var profile in Model.Self.Subjects)
             {
-                <p>@p.DisplayName</p>
+                <partial name="_ReportProfilePartial" model="profile"/>
             }
         </div>
         <div class="report-other-profiles report-section report-section-small">
             <h2>Other Related Profiles</h2>
-            @foreach (var p in Model.Self.RelatedPosts.SelectMany(p => p.Creators).Except(Model.Self.Subjects))
+            @foreach (var profile in Model.Self.RelatedPosts.SelectMany(p => p.Creators).Except(Model.Self.Subjects).Prepend(Model.Self.Reporter).WhereNotNull())
             {
-                <p>@p.DisplayName</p>
+                <partial name="_ReportProfilePartial" model="profile"/>
             }
         </div>
     </div>

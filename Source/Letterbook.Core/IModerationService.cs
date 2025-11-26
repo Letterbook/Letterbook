@@ -90,7 +90,9 @@ public interface IAuthzModerationService
 	/// <param name="unassigned"></param>
 	/// <param name="includeClosed"></param>
 	/// <returns></returns>
-	public IAsyncEnumerable<ModerationReport> Search(string query, bool assignedToMe = true, bool unassigned = true, bool includeClosed = false);
+	public IAsyncEnumerable<ModerationReport> SearchReports(string query, bool assignedToMe = true, bool unassigned = true, bool includeClosed = false);
+
+	public IQueryable<ModerationReport> QueryReport(ModerationReportId id);
 
 	/// <summary>
 	/// Find reports created by this profile

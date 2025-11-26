@@ -287,7 +287,12 @@ public class ModerationService : IModerationService, IAuthzModerationService
 			.AsAsyncEnumerable();
 	}
 
-	public IAsyncEnumerable<ModerationReport> Search(string query, bool assignedToMe = true, bool unassigned = true, bool includeClosed = false)
+	public IAsyncEnumerable<ModerationReport> SearchReports(string query, bool assignedToMe = true, bool unassigned = true, bool includeClosed = false)
+	{
+		throw new NotImplementedException();
+	}
+
+	public IQueryable<ModerationReport> QueryReport(ModerationReportId id)
 	{
 		throw new NotImplementedException();
 	}

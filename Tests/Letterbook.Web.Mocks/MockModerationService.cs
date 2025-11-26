@@ -81,10 +81,16 @@ public class MockModerationService : IModerationService, IAuthzModerationService
 		}).ToAsyncEnumerable();
 	}
 
-	public IAsyncEnumerable<Models.ModerationReport> Search(string query, bool assignedToMe = true, bool unassigned = true, bool includeClosed = false)
+	public IAsyncEnumerable<Models.ModerationReport> SearchReports(string query, bool assignedToMe = true, bool unassigned = true, bool includeClosed = false)
 	{
-		return _moderationService.Search(query, assignedToMe, unassigned, includeClosed);
+		return _moderationService.SearchReports(query, assignedToMe, unassigned, includeClosed);
 	}
+
+	public IQueryable<Models.ModerationReport> QueryReport(Models.ModerationReportId id)
+	{
+		return _moderationService.QueryReport(id);
+	}
+
 	public IAsyncEnumerable<Models.ModerationReport> FindCreatedBy(Models.ProfileId reporter, bool includeClosed = false)
 	{
 		return _moderationService.FindCreatedBy(reporter, includeClosed);

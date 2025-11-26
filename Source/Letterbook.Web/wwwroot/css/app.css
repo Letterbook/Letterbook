@@ -71,6 +71,10 @@
         }
     }
 
+    .user-text {
+        font-family: var(--lb-font-family), sans-serif;
+    }
+    
     .icon {
         max-height: 1em;
         max-width: 1em;
@@ -611,6 +615,15 @@ button {
         flex-basis: 7em;
     }
 
+    .report-other-profiles,
+    .report-subjects{
+        .profile-stats {
+            font-family: var(--lb-font-family), sans-serif;
+        }
+    }
+    
+    .report-other-profiles,
+    .report-subjects,
     .report-posts {
         .post-footer {
             display: flex;

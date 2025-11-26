@@ -43,6 +43,8 @@
     /* Background colors */
     --charcoal: hsla(204, 19%, 26%, 1);
     --cool-paper: hsl(210, 16.7%, 95.3%);
+    
+    --lb-font-family: sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
 }
 
 /* Light color scheme (Default) */

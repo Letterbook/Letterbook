@@ -1,0 +1,32 @@
+@model Models.Profile
+
+<article>
+    <header class="post-author">
+        <div class="post-pfp">
+            <a asp-page="Profile" asp-route-id="@Model.Handle">
+                <img class="pfp-sm inline" src="/img/user-square.png" alt="@Model..DisplayName profile picture"/>
+            </a>
+        </div>
+        <div class="post-profile-container">
+            <a href="/profile/@Model.Id">
+                <div class="display-name">@Model.DisplayName</div>
+                <div class="handle">@@@Model.Handle@@@Model.Authority</div>
+            </a>
+        </div>
+    </header>
+    <div class="profile-stats">
+        <div ><strong>Followers</strong></div>
+        <div ><strong>Following</strong></div>
+        <div ><strong>Joined</strong></div>
+        <div ><strong>Posts</strong></div>
+        <dl>
+            <dt>Reported In</dt>
+            <dd>--</dd>
+        </dl>
+        <dl>
+            <dt>Reports Submitted</dt>
+            <dd>--</dd>
+        </dl>
+    </div>
+    
+</article>
