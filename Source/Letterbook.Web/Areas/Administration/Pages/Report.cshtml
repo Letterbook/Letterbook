@@ -47,8 +47,8 @@
             @if(Model.Self.Closed <= DateTimeOffset.UtcNow)
             {
                 <div class="row">
-                    <strong class="report-stats-header secondary">Closed</strong>
-                    <time
+                    <strong class="report-stats-header">Closed</strong>
+                    <time class="color-secondary"
                         datetime="@(Model.Self.Closed.ToString("O"))">@(Model.Self.Closed.ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
                 </div>
             }

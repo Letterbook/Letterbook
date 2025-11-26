@@ -44,11 +44,6 @@ public class Report : PageModel
 		AccountId = accountId;
 
 		await InitPage();
-
-		//temporary
-		if (Self.Reporter is not null)
-			Self.Forwarded.Add(new Uri("https://social.neighbor.example"));
-
 		return Page();
 	}
 
