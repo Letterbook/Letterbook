@@ -161,6 +161,32 @@
         font-weight: 600;
     }
 }
+details:open {
+    summary {
+        small {
+            margin-bottom: 0.5em;
+        }
+        .open {
+            display: revert;
+        }
+        .closed {
+            display: none;
+        }
+    }
+}
+details:not(:open) {
+    summary {
+        small {
+            margin-bottom: 0.5em;
+        }
+        .open {
+            display: none;
+        }
+        .closed {
+            display: revert;
+        }
+    }
+}
 
 button {
     &.btn-link {
@@ -594,6 +620,18 @@ button {
 
         .column {
             width: calc(50% - 1em);
+        }
+        
+        .row {
+            padding-left: 2em;
+            text-indent: -2em;
+        }
+    }
+
+    .report-notes {
+        margin-top: 1em;
+        .row {
+            width: calc(100% - 2em);
         }
     }
     

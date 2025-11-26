@@ -8,8 +8,25 @@ namespace Letterbook.Web.Mocks;
 public class MockModerationService : IModerationService, IAuthzModerationService
 {
 	private ModerationService _moderationService;
-	private static List<Models.ModerationReport> _mockReports = new FakeReport().Generate(55).ToList();
+	private static Faker _faker = new Faker();
+	private static readonly Lazy<List<Models.ModerationReport>> MockReports = new Lazy<List<Models.ModerationReport>>(() =>
+	{
+		var reports = new FakeReport().Generate(55).ToList();
+		foreach (var mockReport in reports)
+		{
+			mockReport.Remarks = Enumerable.Range(0, _faker.Random.Int(0, 6)).Select(_ => new Models.ModerationRemark
+			{
+				Report = mockReport,
+				Author = _faker.PickRandom(_mockAccounts),
+				Created = _faker.Date.BetweenOffset(mockReport.Created, DateTimeOffset.UtcNow),
+				Text = _faker.Lorem.Sentence(3, 9)
+			}).ToList();
+		}
+
+		return reports;
+	});
 	private static List<Models.Account> _mockAccounts = new FakeAccount().Generate(3).ToList();
+	private static List<Models.ModerationReport> _mockReports => MockReports.Value;
 
 	public MockModerationService(ModerationService moderationService)
 	{
@@ -62,19 +79,18 @@ public class MockModerationService : IModerationService, IAuthzModerationService
 	public IAsyncEnumerable<Models.ModerationReport> ListReports(DateTimeOffset? cursor = null, bool includeClosed = false, bool oldestFirst = false, int limit = 20)
 	{
 		var list = oldestFirst ? _mockReports.OrderBy(r => r.Created) : _mockReports.OrderByDescending(r => r.Created);
-		var faker = new Faker();
 
 		return list.Take(limit).Select(e =>
 		{
-			if (faker.Random.Bool(0.15f) && e.Moderators.Count == 0)
+			if (_faker.Random.Bool(0.15f) && e.Moderators.Count == 0)
 			{
-				e.Moderators.Add(faker.PickRandom(_mockAccounts));
+				e.Moderators.Add(_faker.PickRandom(_mockAccounts));
 			}
 
 			if (e.RelatedPosts.Count == 0)
 			{
 				var fakePost = new FakePost(e.Subjects, 1, null);
-				var posts = fakePost.UseSeed(e.GetHashCode()).Generate(faker.Random.Int(0, 3));
+				var posts = fakePost.UseSeed(e.GetHashCode()).Generate(_faker.Random.Int(0, 3));
 				e.RelatedPosts = posts;
 			}
 			return e;

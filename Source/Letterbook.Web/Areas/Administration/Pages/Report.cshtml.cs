@@ -21,6 +21,7 @@ public class Report : PageModel
 	public List<Models.ProfileId> SubjectIDs { get; set; } = [];
 
 	[FromRoute] public Models.ModerationReportId ReportId { get; set; }
+	[FromForm] public string ModeratorRemark { get; set; } = default!;
 
 	public Report(IModerationService moderation, IProfileService profiles, IAuthorizationService authz)
 	{
@@ -42,6 +43,17 @@ public class Report : PageModel
 		Self = report;
 		AccountId = accountId;
 
+		await InitPage();
+
+		//temporary
+		if (Self.Reporter is not null)
+			Self.Forwarded.Add(new Uri("https://social.neighbor.example"));
+
+		return Page();
+	}
+
+	private async Task InitPage()
+	{
 		SubjectIDs = Self.Subjects.Select(p => p.Id).ToList();
 		RelatedProfileIDs = Self.RelatedPosts
 			.SelectMany(p => p.Creators)
@@ -57,11 +69,29 @@ public class Report : PageModel
 			.TagWithCallSite()
 			.ProjectTo<Projections.ReportProfile>(Projections.ReportProfile.FromCoreModel(ReportId))
 			.ToDictionaryAsync(p => p.Id);
+	}
 
-		//temporary
-		if (Self.Reporter is not null)
-			Self.Forwarded.Add(new Uri("https://social.neighbor.example"));
+	public async Task<IActionResult> OnPostRemark()
+	{
+		if (User.Identity == null || !User.Identity.IsAuthenticated)
+			return Challenge();
+		if (!User.Claims.TryGetAccountId(out var accountId))
+			return Challenge();
+		if (!_authz.Update<Models.ModerationReport>(User.Claims))
+			return Forbid();
+		if (await _moderation.As(User.Claims).LookupReport(ReportId) is not { } report)
+			return NotFound();
 
-		return Page();
+		var remark = new Models.ModerationRemark
+		{
+			Report = report,
+			Author = new Models.Account(){Id = accountId},
+			Created = DateTimeOffset.UtcNow,
+			Text = ModeratorRemark
+		};
+		AccountId = accountId;
+		Self = await _moderation.As(User.Claims).AddRemark(ReportId, remark);
+
+		return RedirectToPage();
 	}
 }
