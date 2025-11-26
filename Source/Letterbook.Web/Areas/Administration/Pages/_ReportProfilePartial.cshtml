@@ -41,7 +41,7 @@
                 }
                 else
                 {
-                    <dd><a asp-area="Administration" asp-page="Report" asp-route-id="@r.Id">
+                    <dd><a asp-area="Administration" asp-page="Report" asp-route-reportId="@r.Id">
                         @r.Created.ToString("d") - @("(")@r.Remarks.Count notes@(")")
                     </a></dd>
                 }
@@ -61,7 +61,7 @@
                 }
                 else
                 {
-                    <dd><a asp-area="Administration" asp-page="Report" asp-route-id="@r.Id">
+                    <dd><a asp-area="Administration" asp-page="Report" asp-route-reportId="@r.Id">
                         @r.Created.ToString("d") - @("(")@r.Remarks.Count notes@(")")
                     </a></dd>
                 }

@@ -44,6 +44,14 @@
                 <time
                     datetime="@(Model.Self.Updated.ToString("O"))">@(Model.Self.Updated.ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
             </div>
+            @if(Model.Self.Closed <= DateTimeOffset.UtcNow)
+            {
+                <div class="row">
+                    <strong class="report-stats-header secondary">Closed</strong>
+                    <time
+                        datetime="@(Model.Self.Closed.ToString("O"))">@(Model.Self.Closed.ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
+                </div>
+            }
             <div class="row">
                 <strong class="report-stats-header">Policies</strong>
                 @foreach (var policy in Model.Self.Policies)
@@ -63,6 +71,9 @@
                 }
             </div>
         </div>
+        <form asp-page-handler="close" method="post">
+            <button type="submit">Close</button>
+        </form>
         <div class="report-notes">
             <h2>Moderator Remarks</h2>
             @if (Model.Self.Remarks.Count > 0)

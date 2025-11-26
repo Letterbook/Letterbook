@@ -94,4 +94,18 @@ public class Report : PageModel
 
 		return RedirectToPage();
 	}
+
+	public async Task<IActionResult> OnPostClose()
+	{
+		if (User.Identity == null || !User.Identity.IsAuthenticated)
+			return Challenge();
+		if (!User.Claims.TryGetAccountId(out var accountId))
+			return Challenge();
+		if (!_authz.Update<Models.ModerationReport>(User.Claims))
+			return Forbid();
+
+		await _moderation.As(User.Claims).CloseReport(ReportId, accountId);
+
+		return RedirectToPage();
+	}
 }
