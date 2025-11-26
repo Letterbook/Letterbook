@@ -36,7 +36,15 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 	public async Task<ModerationReport?> LookupReport(ModerationReportId id)
 	{
-		if (await _data.ModerationReports(id).FirstOrDefaultAsync() is not {} report)
+		if (await _data.ModerationReports(id)
+			    .Include(r => r.Reporter)
+			    .Include(r => r.Subjects)
+			    .Include(r => r.RelatedPosts).ThenInclude(p => p.Creators)
+			    .Include(r => r.RelatedPosts).ThenInclude(p => p.Contents)
+			    .Include(r => r.Remarks)
+			    .Include(r => r.Moderators)
+			    .Include(r => r.Policies)
+			    .FirstOrDefaultAsync() is not {} report)
 			throw CoreException.MissingData<ModerationReport>(id);
 
 		var authz = _authz.View(_claims, report);

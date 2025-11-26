@@ -108,7 +108,7 @@ public class MockProfileService : IProfileService, IAuthzProfileService
 	{
 		return _profileService.QueryProfiles(handle);
 	}
-	public IQueryable<Models.Profile> QueryProfiles(Models.ProfileId id)
+	public IQueryable<Models.Profile> QueryProfiles(params Models.ProfileId[] id)
 	{
 		return _profileService.QueryProfiles(id);
 	}

@@ -73,16 +73,22 @@
     <div class="column">
         <div class="report-subjects report-section report-section-small">
             <h2>Reported Profiles</h2>
-            @foreach (var profile in Model.Self.Subjects)
+            @foreach (var id in Model.SubjectIDs)
             {
-                <partial name="_ReportProfilePartial" model="profile"/>
+                @if(Model.Profiles.TryGetValue(id, out var model))
+                {
+                    <partial name="_ReportProfilePartial" model="model"/>
+                }
             }
         </div>
         <div class="report-other-profiles report-section report-section-small">
             <h2>Other Related Profiles</h2>
-            @foreach (var profile in Model.Self.RelatedPosts.SelectMany(p => p.Creators).Except(Model.Self.Subjects).Prepend(Model.Self.Reporter).WhereNotNull())
+            @foreach (var id in Model.RelatedProfileIDs)
             {
-                <partial name="_ReportProfilePartial" model="profile"/>
+                @if(Model.Profiles.TryGetValue(id, out var model))
+                {
+                    <partial name="_ReportProfilePartial" model="model"/>
+                }
             }
         </div>
     </div>

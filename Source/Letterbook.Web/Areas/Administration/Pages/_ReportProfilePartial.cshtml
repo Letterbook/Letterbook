@@ -1,4 +1,4 @@
-@model Models.Profile
+@model Letterbook.Web.Projections.ReportProfile
 
 <article>
     <header class="post-author">
@@ -15,17 +15,61 @@
         </div>
     </header>
     <div class="profile-stats">
-        <div ><strong>Followers</strong></div>
-        <div ><strong>Following</strong></div>
-        <div ><strong>Joined</strong></div>
-        <div ><strong>Posts</strong></div>
+        <div class="row">
+            <strong class="report-stats-header">Followers</strong>
+            <span >@Model.FollowersCount</span>
+        </div>
+        <div class="row">
+            <strong class="report-stats-header">Following</strong>
+            <span >@Model.FollowingCount</span>
+        </div>
+        <div class="row">
+            <strong class="report-stats-header">Joined</strong>
+            <span >@Model.Created.ToString("d")</span>
+        </div>
+        <div class="row">
+            <strong class="report-stats-header">Posts</strong>
+            <span >@Model.PostsCount</span>
+        </div>
         <dl>
             <dt>Reported In</dt>
-            <dd>--</dd>
+            @foreach (var r in Model.ReportSubject)
+            {
+                @if (r.Id == Model.ReportId)
+                {
+                    <dd><em >This report</em></dd>
+                }
+                else
+                {
+                    <dd><a asp-area="Administration" asp-page="Report" asp-route-id="@r.Id">
+                        @r.Created.ToString("d") - @("(")@r.Remarks.Count notes@(")")
+                    </a></dd>
+                }
+            }
+            @if(Model.ReportSubject.Count == 0)
+            {
+                <dd>--</dd>
+            }
         </dl>
         <dl>
             <dt>Reports Submitted</dt>
-            <dd>--</dd>
+            @foreach (var r in Model.Reports)
+            {
+                @if (r.Id == Model.ReportId)
+                {
+                    <dd><em >This report</em></dd>
+                }
+                else
+                {
+                    <dd><a asp-area="Administration" asp-page="Report" asp-route-id="@r.Id">
+                        @r.Created.ToString("d") - @("(")@r.Remarks.Count notes@(")")
+                    </a></dd>
+                }
+            }
+            @if(Model.Reports.Count == 0)
+            {
+                <dd>--</dd>
+            }
         </dl>
     </div>
     
