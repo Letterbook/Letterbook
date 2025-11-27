@@ -77,6 +77,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		"Search Path=public;" +
 		"Include Error Detail=true";
 
+	public InviteCode InviteCode { get; set; } = new InviteCode(new RandomInviteCode());
 	public List<Profile> Profiles { get; set; } = new();
 	public List<Account> Accounts { get; set; } = new();
 	public List<ModerationReport> Reports { get; set; } = new();
@@ -180,6 +181,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 		_context.ModerationPolicy.AddRange(Policies);
 		_context.ModerationReport.AddRange(Reports);
+		_context.SaveChanges();
+
+		_context.InviteCodes.Add(InviteCode);
 		_context.SaveChanges();
 
 		_feedsContext.Database.EnsureDeleted();

@@ -235,7 +235,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return _data.AllProfiles().Where(p => p.Handle == handle);
 	}
 
-	public IQueryable<Profile> QueryProfiles(ProfileId id)
+	public IQueryable<Profile> QueryProfiles(params ProfileId[] id)
 	{
 		return _data.Profiles(id);
 	}

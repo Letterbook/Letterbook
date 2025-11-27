@@ -1,0 +1,37 @@
+@page
+@model Letterbook.Web.Areas.Administration.Pages.Reports
+
+@{
+    Layout = "_Layout";
+    ViewData["title"] = "Admin - Reports";
+}
+
+<section class="administration">
+    <h1>Manage Reports</h1>
+    <table>
+        <thead>
+        <th class="report-col-time">
+            Updated
+        </th>
+        <th>
+            Summary
+        </th>
+        <th>
+            Assigned Moderator
+        </th>
+        </thead>
+        @foreach (var row in Model.List)
+        {
+            <tr>
+                <td>
+                    <time datetime="@row.Updated.ToString("O")">
+                        <a asp-area="Administration" asp-page="Report"
+                           asp-route-reportid="@row.Id">@row.Created.ToString("MMM\u00A0d h:mm\u00A0tt")</a>
+                    </time>
+                </td>
+                <td>@row.Summary</td>
+                <td>@(row.Moderators.FirstOrDefault()?.UserName ?? "")</td>
+            </tr>
+        }
+    </table>
+</section>

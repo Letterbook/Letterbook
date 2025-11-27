@@ -36,13 +36,17 @@
     --lb-color-contrast-light: hsl(27, 100%, 67.5%);
 
     /* Accent color "Spring Bud" */
-    --lb-color-accent: light-dark(hsla(77, 89%, 49%, 1) hsla(77, 89%, 41%, 1));
-    --lb-color-accent-dark: light-dark(hsl(79, 89%, 42.4%) hsl(79, 89%, 38%));
-    --lb-color-accent-light: light-dark(hsl(77, 70%, 66%) hsl(77, 81%, 43%));
+    --lb-color-accent: light-dark(hsla(77, 89%, 49%, 1), hsla(77, 89%, 41%, 1));
+    --lb-color-accent-dark: light-dark(hsl(79, 89%, 42.4%), hsl(79, 89%, 38%));
+    --lb-color-accent-light: light-dark(hsl(77, 70%, 66%), hsl(77, 81%, 43%));
 
     /* Background colors */
     --charcoal: hsla(204, 19%, 26%, 1);
     --cool-paper: hsl(210, 16.7%, 95.3%);
+
+    --lb-font-family-user: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+    --lb-font-family-brand: "Share Tech Mono", monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+    --lb-font-family: system-ui, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, Helvetica, Arial, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"
 }
 
 /* Light color scheme (Default) */
@@ -100,11 +104,11 @@
 }
 
 code, pre, .letterbook-brand {
-    --pico-font-family: "Share Tech Mono", monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+    font-family: var(--lb-font-family-brand);
 }
 
 .profile-description, .profile-custom-field, .profile-name-container, article:not(dialog *) {
-    --pico-font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+    /*--pico-font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";*/
     font-family: inclusve_sans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
 }
 
@@ -115,6 +119,7 @@ code, pre, .letterbook-brand {
 input:invalid {
     border-color: var(--pico-form-element-invalid-border-color);
     border-width: var(--pico-border-width);
+
     &:focus {
         border-color: var(--pico-contrast);
     }

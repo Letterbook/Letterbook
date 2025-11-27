@@ -1,0 +1,29 @@
+@using Letterbook.Web.Tags
+@using Microsoft.AspNetCore.Html
+@model Models.Post
+
+<article>
+    <header class="post-header">
+        <div class="post-author">
+            <div class="post-pfp">
+                <a asp-page="Profile" asp-route-id="@Model.Creators.FirstOrDefault()?.Handle">
+                    <img class="pfp-sm inline" src="/img/user-square.png" alt="@Model.Creators.FirstOrDefault()?.DisplayName profile picture"/>
+                </a>
+            </div>
+            <div class="post-profile-container">
+                <a asp-page="Profile" asp-route-id="@Model.Creators.FirstOrDefault()?.Handle">
+                    <div class="display-name">@Model.Creators.FirstOrDefault()?.DisplayName</div>
+                    <div class="handle">@@@Model.Creators.FirstOrDefault()?.Handle</div>
+                </a>
+            </div>
+        </div>
+    </header>
+    <div class="post-body">
+        @(new HtmlString(Model.Contents.FirstOrDefault()?.Html))
+    </div>
+    <footer class="post-footer">
+        <time datetime="@((Model.UpdatedDate ?? Model.CreatedDate).ToString("r"))">
+            @((Model.UpdatedDate ?? Model.CreatedDate).ToString("MMM\u00A0d h:mm\u00A0tt"))
+        </time>
+    </footer>
+</article>

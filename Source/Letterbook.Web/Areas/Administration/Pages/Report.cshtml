@@ -1,0 +1,152 @@
+@page "{reportId}"
+@using Letterbook.Core.Extensions
+@model Letterbook.Web.Areas.Administration.Pages.Report
+
+@{
+    Layout = "_Layout";
+    ViewData["title"] = "Admin - Report";
+}
+
+
+
+<section class="administration report">
+    <header class="report-section">
+        <h1>
+            Report from <span
+                class="profile-reporter">@(Model.Self.Reporter?.DisplayName is { } name ? $"{name}" : "an anonymous neighbor")</span>
+            on
+            <time
+                datetime="@Model.Self.Created.ToString("O")">@(Model.Self.Created.ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
+        </h1>
+        <div class="report-stats">
+            <div class="row">
+                <strong class="report-stats-header">Reported by</strong>
+                <span class="profile-reporter">
+                    @if (Model.Self.Reporter is { } reporter)
+                    {
+                        @(reporter.DisplayName)
+                        @(" (")<a href="/profile/@reporter.Id">@@@reporter.Handle</a>
+                        @(")")
+                    }
+                    else
+                    {
+                        @("anonymous")
+                    }
+                </span>
+            </div>
+            <div class="row">
+                <strong class="report-stats-header">Submitted</strong>
+                <time
+                    datetime="@(Model.Self.Created.ToString("O"))">@(Model.Self.Created.ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
+            </div>
+            <div class="row">
+                <strong class="report-stats-header">Updated</strong>
+                <time
+                    datetime="@(Model.Self.Updated.ToString("O"))">@(Model.Self.Updated.ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
+            </div>
+            @if(Model.Self.Closed <= DateTimeOffset.UtcNow)
+            {
+                <div class="row">
+                    <strong class="report-stats-header">Closed</strong>
+                    <time class="color-secondary"
+                        datetime="@(Model.Self.Closed.ToString("O"))">@(Model.Self.Closed.ToString("MMM\u00A0d h:mm\u00A0tt"))</time>
+                </div>
+            }
+            <div class="row">
+                <strong class="report-stats-header">Policies</strong>
+                @foreach (var policy in Model.Self.Policies)
+                {
+                    <span>@policy.Title</span>
+                }
+                @if (Model.Self.Policies.Count == 0)
+                {
+                    <span>none provided</span>
+                }
+            </div>
+            <div class="row">
+                <strong class="report-stats-header">Forwarded to</strong>
+                @foreach (var uri in Model.Self.Forwarded)
+                {
+                    <span class="peer-domain">@uri.Host</span>
+                }
+            </div>
+        </div>
+        <form asp-page-handler="close" method="post">
+            <button type="submit">Close</button>
+        </form>
+        <div class="report-notes">
+            <h2>Moderator Remarks</h2>
+            @if (Model.Self.Remarks.Count > 0)
+            {
+                <details>
+                    <summary>
+                        <small class="open">Show less</small>
+                        @if (Model.Self.Remarks.Count > 2)
+                        {
+                            <small class="closed">Show more</small>
+                        }
+                        @foreach (var remark in Model.Self.Remarks.OrderBy(r => r.Created).TakeLast(2))
+                        {
+                            <div class="row closed">
+                                <time datetime="@remark.Created.ToString("O")">[@remark.Created.ToString("g")]</time>
+                                <span>@remark.Author.UserName</span> -
+                                <span>@remark.Text</span>
+                            </div>
+                        }
+                    </summary>
+                    @foreach (var remark in Model.Self.Remarks.OrderBy(r => r.Created))
+                    {
+                        <div class="row">
+                            <time datetime="@remark.Created.ToString("O")">[@remark.Created.ToString("g")]</time>
+                            <span>@remark.Author.UserName</span> -
+                            <span>@remark.Text</span>
+                        </div>
+                    }
+                </details>
+            }
+            <form asp-page-handler="remark" method="post">
+                <fieldset role="group">
+                    <input asp-for="ModeratorRemark" asp-action="Remark"/>
+                    <input type="submit" value="Add Remark">
+                </fieldset>
+            </form>
+        </div>
+    </header>
+    <div class="report-reason report-section">
+        <h2 >Summary</h2>
+        <label for="reason">Provided by the reporter</label>
+        <textarea id="reason" class="user-text" readonly>@Model.Self.Summary</textarea>
+    </div>
+    <div class="column">
+        <div class="report-posts report-section report-section-small">
+            <h2>Reported Posts</h2>
+            @foreach (var post in Model.Self.RelatedPosts)
+            {
+                // TODO: replace with more tailored view
+                <partial name="_ReportPostPartial" model="post"/>
+            }
+        </div>
+    </div>
+    <div class="column">
+        <div class="report-subjects report-section report-section-small">
+            <h2>Reported Profiles</h2>
+            @foreach (var id in Model.SubjectIDs)
+            {
+                @if (Model.Profiles.TryGetValue(id, out var model))
+                {
+                    <partial name="_ReportProfilePartial" model="model"/>
+                }
+            }
+        </div>
+        <div class="report-other-profiles report-section report-section-small">
+            <h2>Other Related Profiles</h2>
+            @foreach (var id in Model.RelatedProfileIDs)
+            {
+                @if (Model.Profiles.TryGetValue(id, out var model))
+                {
+                    <partial name="_ReportProfilePartial" model="model"/>
+                }
+            }
+        </div>
+    </div>
+</section>

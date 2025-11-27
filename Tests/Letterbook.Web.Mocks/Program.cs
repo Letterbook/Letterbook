@@ -85,7 +85,9 @@ public class Program
 			.AddScoped<ProfileService>()
 			.AddScoped<IProfileService, MockProfileService>()
 			.AddScoped<TimelineService>()
-			.AddScoped<ITimelineService, MockTimelineService>();
+			.AddScoped<ITimelineService, MockTimelineService>()
+			.AddScoped<ModerationService>()
+			.AddScoped<IModerationService, MockModerationService>();
 
 		var app = builder.Build();
 

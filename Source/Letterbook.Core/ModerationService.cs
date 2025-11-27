@@ -36,7 +36,15 @@ public class ModerationService : IModerationService, IAuthzModerationService
 
 	public async Task<ModerationReport?> LookupReport(ModerationReportId id)
 	{
-		if (await _data.ModerationReports(id).FirstOrDefaultAsync() is not {} report)
+		if (await _data.ModerationReports(id)
+			    .Include(r => r.Reporter)
+			    .Include(r => r.Subjects)
+			    .Include(r => r.RelatedPosts).ThenInclude(p => p.Creators)
+			    .Include(r => r.RelatedPosts).ThenInclude(p => p.Contents)
+			    .Include(r => r.Remarks)
+			    .Include(r => r.Moderators)
+			    .Include(r => r.Policies)
+			    .FirstOrDefaultAsync() is not {} report)
 			throw CoreException.MissingData<ModerationReport>(id);
 
 		var authz = _authz.View(_claims, report);
@@ -267,7 +275,32 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		return report;
 	}
 
-	public IAsyncEnumerable<ModerationReport> Search(string query, bool assignedToMe = true, bool unassigned = true, bool includeClosed = false)
+	public IAsyncEnumerable<ModerationReport> ListReports(DateTimeOffset? cursor = null, bool includeClosed = false,
+		bool oldestFirst = false, int limit = 20)
+	{
+		var q = _data.AllModerationReports()
+			.TagWithCallSite()
+			.Include(r => r.Moderators)
+			.Include(r => r.Subjects)
+			.Include(r => r.RelatedPosts)
+			.Include(r => r.Reporter)
+			.Where(r => includeClosed || r.Closed > DateTimeOffset.UtcNow);
+		q = cursor is { } c
+			? q.Where(r => oldestFirst ? r.Created.CompareTo(c) > 1 : r.Created.CompareTo(c) < 1)
+			: q;
+		q = oldestFirst ? q.OrderBy(r => r.Created) : q.OrderByDescending(r => r.Created);
+
+		return q.Take(limit)
+			.AsSplitQuery()
+			.AsAsyncEnumerable();
+	}
+
+	public IAsyncEnumerable<ModerationReport> SearchReports(string query, bool assignedToMe = true, bool unassigned = true, bool includeClosed = false)
+	{
+		throw new NotImplementedException();
+	}
+
+	public IQueryable<ModerationReport> QueryReport(ModerationReportId id)
 	{
 		throw new NotImplementedException();
 	}

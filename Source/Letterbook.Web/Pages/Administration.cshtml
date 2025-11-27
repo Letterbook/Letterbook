@@ -1,0 +1,21 @@
+@page
+@model Letterbook.Web.Pages.Administration
+
+@{
+    Layout = "_Layout";
+    ViewData["title"] = "Admin";
+}
+
+<section>
+    <h1>Admin</h1>
+    <nav>
+        <ul class="area-menu">
+            <li>
+                <a asp-area="Administration" asp-page="Peers">Manage Peers</a>
+            </li>
+            <li>
+                <a asp-area="Administration" asp-page="Reports">Manage Reports</a>
+            </li>
+        </ul>
+    </nav>
+</section>

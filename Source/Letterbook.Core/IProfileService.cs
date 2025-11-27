@@ -46,7 +46,7 @@ public interface IAuthzProfileService
 	IAsyncEnumerable<Profile> FindProfiles(string handle);
 	IQueryable<Profile> QueryProfiles(string handle, string host);
 	IQueryable<Profile> QueryProfiles(string handle);
-	IQueryable<Profile> QueryProfiles(ProfileId id);
+	IQueryable<Profile> QueryProfiles(params ProfileId[] id);
 
 	/// <see cref="Follow(Medo.Uuid7,Medo.Uuid7)"/>
 	Task<FollowerRelation> Follow(ProfileId selfId, Uri targetId);
