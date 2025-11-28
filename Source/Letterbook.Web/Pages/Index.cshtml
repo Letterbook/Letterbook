@@ -6,6 +6,8 @@
 
 @if(User.Identity?.IsAuthenticated == true)
 {
+    @await  Component.InvokeAsync("PostEditor")
+    
     <section class="timeline">
         <h1>Home</h1>
         @foreach (var post in await Model.GetPosts())
@@ -13,7 +15,6 @@
             <partial name="Shared/_TimelinePostPartial" model="post"/>
         }
     </section>
-    @await  Component.InvokeAsync("PostEditor")
 }
 else
 {

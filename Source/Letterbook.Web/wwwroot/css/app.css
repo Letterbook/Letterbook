@@ -56,6 +56,8 @@
     main {
         grid-area: main;
         overflow-y: visible;
+        display: flex;
+        flex-direction: column;
     }
 
     .box {
@@ -233,6 +235,7 @@ button {
 
 .app .thread,
 .app .timeline {
+    order: 0;
     article {
         padding: 0;
         display: grid;
@@ -380,6 +383,8 @@ button {
 .app .post-editor {
     position: sticky;
     bottom: calc(100% - 100vh);
+    background: pink;
+    order: 10;
 }
 
 .app .thread {
