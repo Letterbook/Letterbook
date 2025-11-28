@@ -91,13 +91,10 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\reply-line.svg" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\search-line.svg" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\settings-3-line.svg" />
+      <_ContentIncludedByDefault Remove="Pages\Components\PostEditorViewComponent\Default.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
       <Compile Remove="Pages\ProfileWithhost.cshtml.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="ViewComponents\" />
     </ItemGroup>
 </Project>

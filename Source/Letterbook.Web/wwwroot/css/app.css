@@ -55,7 +55,7 @@
 
     main {
         grid-area: main;
-        overflow-y: auto;
+        overflow-y: visible;
     }
 
     .box {
@@ -375,6 +375,11 @@ button {
     .handle {
         font-size: 0.75em;
     }
+}
+
+.app .post-editor {
+    position: sticky;
+    bottom: calc(100% - 100vh);
 }
 
 .app .thread {

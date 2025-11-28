@@ -13,6 +13,7 @@
             <partial name="Shared/_TimelinePostPartial" model="post"/>
         }
     </section>
+    @await  Component.InvokeAsync("PostEditor")
 }
 else
 {
