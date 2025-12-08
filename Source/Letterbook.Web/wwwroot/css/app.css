@@ -162,6 +162,10 @@
         font-size: 1.5em;
         font-weight: 600;
     }
+    
+    .text-center {
+        text-align: center;
+    }
 }
 details:open {
     summary {
