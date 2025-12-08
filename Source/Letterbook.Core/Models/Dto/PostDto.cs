@@ -10,9 +10,9 @@ public class PostRequestDto
 	public string? Source { get; set; }
 	public ICollection<MiniProfileDto>? Creators { get; set; } = new HashSet<MiniProfileDto>();
 	public DateTimeOffset? CreatedDate { get; set; } = DateTimeOffset.UtcNow;
-	public ICollection<ContentDto> Contents { get; set; } = new HashSet<ContentDto>();
-	public ICollection<AudienceDto> Audience { get; set; } = new HashSet<AudienceDto>();
-	public ICollection<MentionDto> AddressedTo { get; set; } = new HashSet<MentionDto>();
+	public IList<ContentDto> Contents { get; set; } = new List<ContentDto>();
+	public IList<AudienceDto> Audience { get; set; } = new List<AudienceDto>();
+	public IList<MentionDto> AddressedTo { get; set; } = new List<MentionDto>();
 	public PostDto? InReplyTo { get; set; }
 }
 

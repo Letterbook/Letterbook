@@ -74,6 +74,7 @@ public class Program
 		builder.Services.ConfigureAccountManagement(builder.Configuration);
 		builder.Services.AddRazorPages()
 			.AddRazorPagesOptions(options => options.AddWebRoutes());
+		builder.Services.AddControllers();
 		builder.Services.Configure<RouteOptions>(opts => opts.ConfigureWebRoutes());
 		builder.Services.AddAuthorization(options =>
 		{
@@ -116,6 +117,7 @@ public class Program
 		});
 
 		app.MapRazorPages();
+		app.MapControllers();
 
 		app.Run();
 	}

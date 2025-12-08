@@ -1,7 +1,25 @@
-@page
-@model Models.Profile
+@using Letterbook.Web.Tags
+@model Letterbook.Web.Forms.PostEditorForm;
 
 <section class="post-editor">
-    <h1>This is where I would put a post editor</h1>
-    <a href="#" role="doc-subtitle">IF I HAD ONE</a>
+    <details>
+        <summary class="no-arrow" role="button">
+            <div class="closed display-button">
+                <app-icon type="@Icon.Send"/>
+                <span>Post</span>
+            </div>
+            <div class="open"><span>Cancel</span></div>
+        </summary>
+        <form method="post" asp-controller="PostEditor" asp-action="Submit" asp-area="">
+            @* <label for="post-editor"></label> *@
+            <textarea id="post-editor" asp-for="@Model.Data.Contents[0].Text"></textarea>
+            <label asp-for="@Model.Data.Audience">Visibility</label>
+            <select asp-for="@Model.Data.Audience" asp-items="@Model.AudienceItems" multiple="@false"></select>
+            <input type="hidden" asp-for="@Model.Data.Contents[0].Type" value="Note"/>
+            <button type="submit">
+                <app-icon type="@Icon.Send"/>
+                <span>Post</span>
+            </button>
+        </form>
+    </details>
 </section>

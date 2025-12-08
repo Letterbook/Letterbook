@@ -204,6 +204,10 @@ button {
     }
 }
 
+summary.no-arrow::after {
+    display: none;
+}
+
 .app img.inline {
     height: 1lh;
     display: inline-block;
@@ -383,9 +387,15 @@ button {
 .app .post-editor {
     position: sticky;
     bottom: calc(100% - 100vh);
-    background: pink;
     order: 10;
     z-index: 10;
+    background: var(--pico-background-color);
+    padding: 1em;
+    border: var(--pico-border-width) solid var(--pico-form-element-border-color);
+    width: 95%;
+    border-radius: calc(2 * var(--pico-border-radius));
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .app .thread {

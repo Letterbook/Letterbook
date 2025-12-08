@@ -6,7 +6,7 @@
 
 @if(User.Identity?.IsAuthenticated == true)
 {
-    @await  Component.InvokeAsync("PostEditor")
+    <vc:post-editor self-id="@Model.Self?.Id ?? default" post-id="default(Models.PostId?)"></vc:post-editor>
     
     <section class="timeline">
         <h1>Home</h1>
