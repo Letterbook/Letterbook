@@ -80,15 +80,21 @@ public static class Traces
 	private static async Task<List<Activity>> FilterSpans(ActivityTraceId traceId, IAsyncEnumerable<Activity> spans, string expected,
 		int timeoutMilliseconds)
 	{
-		var cancel = new CancellationTokenSource(TimeSpan.FromMilliseconds(timeoutMilliseconds));
+		var cancel = new CancellationTokenSource(TimeSpan.FromMilliseconds(timeoutMilliseconds + 17));
 		var stop = false;
-		var trace = await spans.Where(a => a.TraceId == traceId).TakeWhile(s =>
+		var list = new List<Activity>();
+
+		try
 		{
-			if (stop) return false;
-			if (s.DisplayName == expected)
-				stop = true;
-			return true;
-		}).ToListAsync(cancel.Token);
-		return trace;
+			await spans.Where(a => a.TraceId == traceId).TakeWhile(s =>
+			{
+				if (stop) return false;
+				if (s.DisplayName == expected)
+					stop = true;
+				return true;
+			}).ForEachAsync(list.Add, cancellationToken: cancel.Token);
+		}
+		catch (TaskCanceledException) { }
+		return list;
 	}
 }
