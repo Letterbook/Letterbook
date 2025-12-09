@@ -131,6 +131,7 @@ public class PostService : IAuthzPostService, IPostService
 				.ReplaceFrom(post.Creators.SelectMany(p => p.Headlining).ToHashSet()).ToHashSet();
 			followers.UnionWith(post.Audience);
 			post.Audience = followers;
+			post.Audience = post.Audience.ReplaceFrom([Audience.Public]);
 			_logger.LogDebug("Normalized Audience for followers {Audience}", post.Audience.Select(a => a.FediId));
 		}
 		foreach (var audience in post.Audience)

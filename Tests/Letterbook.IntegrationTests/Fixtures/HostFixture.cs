@@ -100,6 +100,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	private readonly RelationalContext _context;
 	private readonly FeedsContext _feedsContext;
 	private readonly CollectionSubject<Activity> _spans = new();
+	private string _peerHost = "peer.example";
 
 	public HostFixture(IMessageSink sink)
 	{
@@ -170,6 +171,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 		_context.Database.EnsureDeleted();
 		_context.Database.Migrate();
+		_context.Peers.Add(new Peer(_peerHost));
 		_context.Accounts.AddRange(Accounts);
 		_context.Profiles.AddRange(Profiles);
 		_context.Profiles.Add(Profile.GetOrAddInstanceProfile(Options));
@@ -271,14 +273,13 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	{
 		var generic = new Faker();
 		var authority = Options.BaseUri() ?? new Uri("letterbook.example");
-		var peer = "peer.example";
 		Accounts.AddRange(new FakeAccount(false).Generate(2));
 		Accounts.Add(new FakeAccount().Generate());
 		Profiles.AddRange(new FakeProfile(authority, Accounts[0]).Generate(3)); // P0-2
 		Profiles.Add(new FakeProfile(authority, Accounts[1]).Generate()); // P3
 		Profiles.AddRange(new FakeProfile().Generate(3)); // P4-6
 		Profiles.AddRange(new FakeProfile(authority).Generate(3)); // P7-9 (Group: Follow)
-		Profiles.AddRange(new FakeProfile(peer).Generate(4)); // P10-13 (Group: remote followers)
+		Profiles.AddRange(new FakeProfile(_peerHost).Generate(4)); // P10-13 (Group: remote followers)
 
 		// P0 follows P4 and P5
 		// P4 follows P0

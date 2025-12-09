@@ -2516,6 +2516,10 @@
               "$ref": "#/components/schemas/Profile"
             },
             "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
