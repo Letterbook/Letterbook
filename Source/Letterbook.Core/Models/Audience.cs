@@ -13,17 +13,19 @@ namespace Letterbook.Core.Models;
 /// </summary>
 public class Audience : IEquatable<Audience>, IFederated
 {
-	private static Audience _public = FromUri(new Uri(Constants.ActivityPubPublicCollection));
+	private static Audience _public = FromUri(new Uri(Constants.ActivityPubPublicCollection), label: "Public");
 
 	private Audience()
 	{
 		FediId = default!;
+		Label = default!;
 	}
 
 	public Uri FediId { get; set; }
 	public Profile? Source { get; set; }
 	public string Authority => FediId.GetAuthority();
 	public List<Profile> Members { get; set; } = new();
+	public string Label { get; set; }
 
 	// TODO: This needs access controls (i.e., you can't target someone else's followers)
 	// Might also need group access control (like a public group)
@@ -35,8 +37,8 @@ public class Audience : IEquatable<Audience>, IFederated
 	/// public objects. So Letterbook infers the followers audience in this case.
 	/// </summary>
 	public static Audience Public => _public;
-	public static Audience FromUri(Uri id, Profile? source = null) => new() { FediId = id, Source = source };
-	public static Audience Followers(Profile creator) => FromUri(creator.Followers, creator);
+	public static Audience FromUri(Uri id, Profile? source = null, string label = "Custom") => new() { FediId = id, Source = source, Label = label};
+	public static Audience Followers(Profile creator) => FromUri(creator.Followers, creator, "Followers");
 
 	Uuid7 IFederated.GetId() => Uuid7.Empty;
 	string IFederated.GetId25() => Uuid7.Empty.ToId25String();
@@ -45,16 +47,16 @@ public class Audience : IEquatable<Audience>, IFederated
 	{
 		var builder = new UriBuilder(creator.Followers);
 		builder.Fragment += "subscribe";
-		return FromUri(builder.Uri, creator);
+		return FromUri(builder.Uri, creator, "Subscribers");
 	}
 
 	public static Audience Boosts(Profile creator)
 	{
 		var builder = new UriBuilder(creator.Followers);
 		builder.Fragment += "boosts";
-		return FromUri(builder.Uri, creator);
+		return FromUri(builder.Uri, creator, "Boosts");
 	}
-	public static Audience FromMention(Profile subject) => FromUri(subject.FediId, subject);
+	public static Audience FromMention(Profile subject) => FromUri(subject.FediId, subject, "Mentions");
 
 	public bool Equals(Audience? other)
 	{
