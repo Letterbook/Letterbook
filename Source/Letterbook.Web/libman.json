@@ -3,7 +3,7 @@
   "defaultProvider": "jsdelivr",
   "libraries": [
     {
-      "library": "@picocss/pico@2.0.6",
+      "library": "@picocss/pico@2.1.1",
       "destination": "wwwroot/lib/picocss",
       "files": [
         "css/pico.min.css",

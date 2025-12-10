@@ -75,6 +75,8 @@ public class BaseMappings : AutoMapper.Profile
 		CreateMap<string?, Guid>().ConstructUsing(str => str == null ? Uuid7.NewUuid7().ToGuid() : Uuid7.FromId25String(str).ToGuid());
 		CreateMap<string, Models.Profile>(MemberList.None)
 			.ConstructUsing(s => Models.Profile.CreateEmpty(new ProfileId(ProfileId.FromString(s))));
+		CreateMap<Uri, Audience>()
+			.ConstructUsing(uri => Audience.FromUri(uri, null, ""));
 
 		CreateMap<Uuid7, ProfileId>(MemberList.None).ConvertUsing(id => new(id));
 		CreateMap<ProfileId, Uuid7>(MemberList.None).ConvertUsing(id => id.Id);

@@ -4,6 +4,7 @@ using Letterbook.Core.Extensions;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Letterbook.Web.Forms;
+using Letterbook.Web.Mappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Letterbook.Web.Controllers
@@ -21,7 +22,7 @@ namespace Letterbook.Web.Controllers
 		    _logger = logger;
 		    _posts = posts;
 		    _authz = authz;
-		    _mapper = new Mapper(mappingConfig.Posts);
+		    _mapper = new Mapper(FormsProfileProvider.Profile);
 	    }
 
         [HttpPost]
@@ -35,9 +36,11 @@ namespace Letterbook.Web.Controllers
 		        return Challenge();
 
 	        var post = _mapper.Map<Models.Post>(form.Data);
-	        var result = await _posts.As(User.Claims).Draft(selfId, post, post.InReplyTo?.GetId(), publish: true);
+	        // var result = await _posts.As(User.Claims).Draft(selfId, post, post.InReplyTo?.GetId(), publish: true);
 
-	        return RedirectToPage(nameof(Pages.Thread), new { postId = result.Id });
+	        await Task.CompletedTask;
+	        // return RedirectToPage(nameof(Pages.Thread), new { postId = result.Id });
+	        return Accepted();
         }
     }
 }

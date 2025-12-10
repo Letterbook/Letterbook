@@ -3,7 +3,6 @@ using Letterbook.Core;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Web.Forms;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Letterbook.Web.ViewComponents;
 
@@ -25,15 +24,13 @@ public class PostEditorViewComponent : ViewComponent
 		if(selfId is not null &&
 		   await _profiles.As((User.Identity as ClaimsIdentity)?.Claims ?? []).LookupProfile(selfId.Value) is { } profile)
 		{
-			model.AudienceItems = profile.Headlining
+			model.Audience = profile.Headlining
+				.Except([Models.Audience.FromMention(profile)])
 				.Prepend(Models.Audience.Public)
-				.Select(a => new SelectListItem(a.FediId.PathAndQuery + a.FediId.Fragment, a.FediId.ToString()))
 				.ToList();
 		}
 
-		model.Data.Contents = [new ContentDto(){Type = "Note"}];
-		// if(postId is not null &&
-		   // )
+		// model.Data.Contents = [new ContentDto(){Type = "Note"}];
 
 		return View(model);
 	}
