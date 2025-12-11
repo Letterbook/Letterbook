@@ -32,7 +32,7 @@ public class ProfileMappings : AutoMapper.Profile
 			{
 				Label = src.Label,
 				Family = src.Family.ToString(),
-				PublicKeyPem = PemStringBuilder(src.PublicKey).ToString().Trim(),
+				PublicKeyPem = PemStringBuilder(src.PublicKey).ToString().Trim().ReplaceLineEndings("\n"),
 				Created = src.Created,
 				Expires = src.Expires,
 				FediId = src.FediId
