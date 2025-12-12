@@ -12,7 +12,7 @@
         </summary>
         <form method="post" asp-controller="PostEditor" asp-action="Submit" asp-area="">
             @* <label for="post-editor"></label> *@
-            <textarea id="post-editor" asp-for="@Model.Data.Contents" autocomplete="off" autofocus rows="4"></textarea>
+            <textarea id="post-editor" asp-for="@Model.Data.Note" autocomplete="off" autofocus rows="4"></textarea>
             <details class="dropdown">
                 <summary>Visibility</summary>
                 <ul>

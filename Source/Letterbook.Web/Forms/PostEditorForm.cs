@@ -10,6 +10,12 @@ public class PostEditorFormData
 {
 	public Models.PostId? Id;
 	public List<Models.ProfileId> Authors { get; set; } = [];
-	public string Contents { get; set; } = "";
+	public PostEditorContentData Note { get; set; } = new();
 	public Dictionary<string, string> Audience { get; set; } = [];
+}
+
+public class PostEditorContentData
+{
+	public Guid Id;
+	public string Contents { get; set; } = "";
 }
