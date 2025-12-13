@@ -1,8 +1,6 @@
 using AutoMapper;
 using Letterbook.Core;
 using Letterbook.Core.Extensions;
-using Letterbook.Core.Models.Dto;
-using Letterbook.Core.Models.Mappers;
 using Letterbook.Web.Forms;
 using Letterbook.Web.Mappers;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +15,12 @@ namespace Letterbook.Web.Controllers
 	    private readonly IAuthorizationService _authz;
 	    private readonly Mapper _mapper;
 
-	    public PostEditorController(ILogger<PostEditorController> logger, IPostService posts, IAuthorizationService authz, MappingConfigProvider mappingConfig)
+	    public PostEditorController(ILogger<PostEditorController> logger, IPostService posts, IAuthorizationService authz, FormsProfileProvider formMaps)
 	    {
 		    _logger = logger;
 		    _posts = posts;
 		    _authz = authz;
-		    _mapper = new Mapper(FormsProfileProvider.Profile);
+		    _mapper = new Mapper(formMaps.Profile);
 	    }
 
         [HttpPost]
@@ -36,11 +34,14 @@ namespace Letterbook.Web.Controllers
 		        return Challenge();
 
 	        var post = _mapper.Map<Models.Post>(form.Data);
-	        // var result = await _posts.As(User.Claims).Draft(selfId, post, post.InReplyTo?.GetId(), publish: true);
+	        var svc = _posts.As(User.Claims);
+	        var result = await svc.Draft(selfId, post, post.InReplyTo?.GetId(), publish: true);
 
-	        await Task.CompletedTask;
-	        // return RedirectToPage(nameof(Pages.Thread), new { postId = result.Id });
-	        return Accepted();
+	        if (result is null) return BadRequest();
+	        // var redirect = Url.PageLink(nameof(Pages.Thread), values: new { PostId = result.Id });
+
+	        // return Redirect($"/thread/{result.Id}");
+	        return RedirectToPage("/" + nameof(Pages.Thread), new { postId = result.Id });
         }
     }
 }

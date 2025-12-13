@@ -1,13 +1,20 @@
 using AutoMapper;
+using Letterbook.Core;
 using Letterbook.Core.Models.Mappers;
+using Microsoft.Extensions.Options;
 
 namespace Letterbook.Web.Mappers;
 
-public static class FormsProfileProvider
+public class FormsProfileProvider
 {
-	public static MapperConfiguration Profile = new MapperConfiguration(cfg =>
+	public FormsProfileProvider(IOptions<CoreOptions> options)
 	{
-		cfg.AddProfile<BaseMappings>();
-		cfg.AddProfile<FormMappings>();
-	});
+		Profile = new MapperConfiguration(cfg =>
+		{
+			cfg.AddProfile<BaseMappings>();
+			cfg.AddProfile(new FormMappings(options));
+		});
+	}
+
+	public MapperConfiguration Profile { get; }
 }

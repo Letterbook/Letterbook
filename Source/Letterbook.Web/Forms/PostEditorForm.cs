@@ -8,7 +8,7 @@ public class PostEditorForm
 
 public class PostEditorFormData
 {
-	public Models.PostId? Id;
+	public Models.PostId Id;
 	public List<Models.ProfileId> Authors { get; set; } = [];
 	public PostEditorContentData Note { get; set; } = new();
 	public Dictionary<string, string> Audience { get; set; } = [];
