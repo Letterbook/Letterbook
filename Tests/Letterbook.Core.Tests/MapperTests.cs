@@ -78,6 +78,17 @@ public class MapperTests : WithMocks
 			Assert.NotNull(actual);
 		}
 
+		[Fact(DisplayName = "Should map PostRequestDto URIs")]
+		public void MapPostRequest_Uris()
+		{
+			var actual = _postMapper.Map<Models.Post>(_postDto as PostRequestDto);
+
+			Assert.Matches(actual.Id.ToString(), actual.FediId.ToString());
+			Assert.Matches(actual.Id.ToString(), actual.Likes?.ToString());
+			Assert.Matches(actual.Id.ToString(), actual.Replies?.ToString());
+			Assert.Matches(actual.Id.ToString(), actual.Shares?.ToString());
+		}
+
 		[InlineData("text/plain")]
 		[InlineData("text/markdown")]
 		[InlineData("text/html")]

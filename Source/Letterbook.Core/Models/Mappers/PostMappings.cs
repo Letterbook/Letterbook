@@ -65,7 +65,11 @@ public class PostMappings : AutoMapper.Profile
 			.ForMember(post => post.Id, opt => opt.Condition(dto => dto.Id != null))
 			.ForMember(post => post.CreatedDate, opt => opt.ConvertUsing<DateTimeOffsetMapper, DateTimeOffset?>())
 			.ForMember(post => post.InReplyTo, opt => opt.Ignore())
-			.ForSourceMember(src => src.InReplyTo, opt => opt.DoNotValidate());
+			.ForSourceMember(src => src.InReplyTo, opt => opt.DoNotValidate())
+			.AfterMap((_, post) =>
+			{
+				post.SetUris(options.Value);
+			});
 
 
 		CreateMap<Models.Profile, MiniProfileDto>(MemberList.Destination);
