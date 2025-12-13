@@ -1,3 +1,4 @@
+using Letterbook.Web.Mappers;
 using Letterbook.Web.Routes;
 using Medo;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +10,11 @@ namespace Letterbook.Web;
 
 public static class DependencyInjection
 {
+	public static IServiceCollection AddWebServices(this IServiceCollection services)
+	{
+		return services.AddSingleton<FormsProfileProvider>();
+	}
+
 	public static AuthorizationOptions AddWebAuthzPolicy(this AuthorizationOptions options)
 	{
 		options.AddPolicy(Constants.AuthzPolicy, policy =>

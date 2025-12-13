@@ -57,6 +57,7 @@ public class Program
 			.AddDbAdapter(builder.Configuration)
 			.AddFeedsAdapter(builder.Configuration)
 			.AddActivityPubClient(builder.Configuration)
+			.AddWebServices()
 			.AddWebCookies();
 		builder.Services.AddIdentity<Models.Account, IdentityRole<Guid>>(identity => identity.ConfigureIdentity())
 			.AddEntityFrameworkStores<RelationalContext>()
