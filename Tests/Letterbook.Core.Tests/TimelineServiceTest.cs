@@ -177,8 +177,9 @@ public class TimelineServiceTest : WithMocks
 	[Fact(DisplayName = "HandleUpdate should add post to mentioned profiles' feeds")]
 	public async Task AddToMentionsOnUpdate()
 	{
+		var toProfile = new FakeProfile(_opts.DomainName).Generate();
 		var oldPost = _testPost.ShallowClone();
-		var mentioned = new Mention(_testPost, _profile, MentionVisibility.To);
+		var mentioned = new Mention(_testPost, toProfile, MentionVisibility.To);
 		var expected = Audience.FromMention(mentioned.Subject);
 		_testPost.AddressedTo = [mentioned];
 
