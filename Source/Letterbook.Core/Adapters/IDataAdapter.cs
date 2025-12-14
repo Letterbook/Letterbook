@@ -149,6 +149,7 @@ public interface IDataAdapter : IDisposable
 	public void Add(ModerationPolicy policy);
 	public void Add(InviteCode code);
 	public void Add(Peer peer);
+	public void Add(Audience audience);
 	public void AddRange(IEnumerable<Profile> profile);
 	public void AddRange(IEnumerable<Account> account);
 	public void AddRange(IEnumerable<Post> posts);

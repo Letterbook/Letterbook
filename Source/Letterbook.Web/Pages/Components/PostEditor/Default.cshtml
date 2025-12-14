@@ -1,0 +1,36 @@
+@using Letterbook.Web.Tags
+@model Letterbook.Web.Forms.PostEditorForm;
+
+<section class="post-editor">
+    <details>
+        <summary class="no-arrow display-button" role="button">
+            <div class="closed display-button text-center">
+                <app-icon type="@Icon.Send"/>
+                <span>Post</span>
+            </div>
+            <div class="open display-button text-center"><span>Cancel</span></div>
+        </summary>
+        <form method="post" asp-controller="PostEditor" asp-action="Submit" asp-area="">
+            @* <label for="post-editor"></label> *@
+            <textarea id="post-editor" asp-for="@Model.Data.Note.Contents" autocomplete="off" autofocus rows="4"></textarea>
+            <details class="dropdown">
+                <summary>Visibility</summary>
+                <ul>
+                    @foreach(var each in Model.Audience)
+                    {
+                        <li>
+                            <label>
+                                <input type="checkbox" name="Data.Audience[@each.FediId]" value="@each.Label"/>
+                                @each.Label
+                            </label>
+                        </li>
+                    }
+                </ul>
+            </details>
+            <button type="submit">
+                <app-icon type="@Icon.Send"/>
+                <span>Post</span>
+            </button>
+        </form>
+    </details>
+</section>

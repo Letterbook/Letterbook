@@ -23,7 +23,7 @@ public class AccountControllerTests : WithMockContext
 	{
 		output.WriteLine($"Bogus seed: {Init.WithSeed()}");
 
-		UrlMock = CreateMockUrlHelper(PageContext);
+		UrlMock = MockHelpers.CreateMockUrlHelper(PageContext);
 		_account = new FakeAccount().Generate();
 		_principal = new ClaimsPrincipal(new ClaimsIdentity([new Claim(Jwt.Sub, _account.Id.ToString())], "Test"));
 		_page = new Account(AccountServiceMock.Object, Mock.Of<ILogger<Account>>())
@@ -83,13 +83,5 @@ public class AccountControllerTests : WithMockContext
 		Assert.Equal(_account.Name, _page.DisplayName);
 		Assert.Equal(_account.Email, _page.Email);
 		UrlMock.Verify();
-	}
-
-	private static Mock<IUrlHelper> CreateMockUrlHelper(ActionContext context)
-	{
-		var urlHelper = new Mock<IUrlHelper>();
-		urlHelper.SetupGet(h => h.ActionContext)
-			.Returns(context);
-		return urlHelper;
 	}
 }

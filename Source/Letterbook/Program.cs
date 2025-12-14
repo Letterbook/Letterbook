@@ -59,6 +59,7 @@ public class Program
 			.AddPublishers()
 			.AddDbAdapter(builder.Configuration)
 			.AddFeedsAdapter(builder.Configuration)
+			.AddWebServices()
 			.AddWebCookies()
 			.AddAspnetServices();
 		builder.Services.AddIdentity<Account, IdentityRole<Guid>>(identity => identity.ConfigureIdentity())

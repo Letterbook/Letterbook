@@ -86,25 +86,13 @@ public class Post : IFederated, IEquatable<Post>
 	[SetsRequiredMembers]
 	public Post(CoreOptions opts) : this()
 	{
-		var builder = new UriBuilder(opts.BaseUri());
 		Id = Uuid7.NewUuid7();
 		ContentRootIdUri = default!;
 
-		builder.Path += $"post/{Id}";
-		var path = builder.Path;
-		FediId = builder.Uri;
-
-		builder.Path += "/replies";
-		Replies = builder.Uri;
-		builder.Path = path + "/likes";
-		Likes = builder.Uri;
-		builder.Path = path + "/shares";
-		Shares = builder.Uri;
+		SetUris(opts);
 
 		Thread = new ThreadContext(Id, opts);
 		Thread.Posts.Add(this);
-		Authority = FediId.GetAuthority();
-		Hostname = FediId.Host;
 	}
 
 	public PostId Id { get; set; }
@@ -139,6 +127,24 @@ public class Post : IFederated, IEquatable<Post>
 	public Uuid7 GetId() => Id.Id;
 	public string GetId25() => Id.ToString();
 	public Post ShallowClone() => (Post)MemberwiseClone();
+
+	public void SetUris(CoreOptions opts)
+    	{
+    		var builder = new UriBuilder(opts.BaseUri());
+    		builder.Path += $"post/{Id}";
+    		var path = builder.Path;
+    		FediId = builder.Uri;
+
+    		builder.Path += "/replies";
+    		Replies = builder.Uri;
+    		builder.Path = path + "/likes";
+    		Likes = builder.Uri;
+    		builder.Path = path + "/shares";
+    		Shares = builder.Uri;
+
+    		Authority = FediId.GetAuthority();
+    		Hostname = FediId.Host;
+    	}
 
 	public T AddContent<T>(T content) where T : Content
 	{

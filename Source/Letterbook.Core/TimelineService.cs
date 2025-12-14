@@ -84,9 +84,12 @@ public class TimelineService : IAuthzTimelineService, ITimelineService
 		var recipient = await _data.Profiles(profileId).Include(p => p.Audiences).SingleOrDefaultAsync();
 
 		_logger.LogDebug("Getting feed for {Profile} with membership in {Count} Audiences", profileId, recipient?.Audiences.Count);
-		return recipient != null
+		var results = recipient != null
 			? _feeds.GetTimelineEntries(recipient.Audiences, begin, limit).ToList()
 			: throw CoreException.MissingData("Couldn't lookup Profile to load Feed", typeof(Guid), profileId);
+
+		_logger.LogDebug("Loaded {Count} timeline posts", results.Count);
+		return results;
 	}
 
 	/// <summary>

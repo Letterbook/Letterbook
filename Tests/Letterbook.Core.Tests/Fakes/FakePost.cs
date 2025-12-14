@@ -27,7 +27,8 @@ public class FakePost : Faker<Post>
 		_creators = creators;
 		_authority = _creators.First().FediId.Authority;
 		RuleFor(p => p.Id, faker => new PostId(faker.Random.Guid7()));
-		RuleFor(p => p.FediId, (faker, post) => faker.FediId(_authority, "post", post.Id.Id));
+		if(opts == null)
+			RuleFor(p => p.FediId, (faker, post) => faker.FediId(_authority, "post", post.Id.Id));
 		RuleFor(p => p.Creators, () => _creators);
 		RuleFor(p => p.CreatedDate, faker => faker.Date.Recent().ToUniversalTime());
 		RuleFor(p => p.PublishedDate, (_, post) => post.CreatedDate);
@@ -37,8 +38,8 @@ public class FakePost : Faker<Post>
 			FediId = faker.FediId(_authority, "thread"),
 			RootId = post.Id
 		});
-		RuleFor(p => p.Authority, (_, post) => post.FediId.GetAuthority());
-		RuleFor(p => p.Hostname, (_, post) => post.FediId.Host);
+		RuleFor(p => p.Authority, (_, post) => opts != null ? opts.BaseUri().GetAuthority() : post.FediId.GetAuthority());
+		RuleFor(p => p.Hostname, (_, post) => opts != null ? opts.BaseUri().Host : post.FediId.Host);
 		RuleFor(p => p.Audience, (faker, post) =>
 		{
 			var audience = post.Creators.SelectMany(c => c.Headlining);
@@ -47,12 +48,18 @@ public class FakePost : Faker<Post>
 
 			return audience.ToList();
 		});
-		RuleFor(p => p.Likes, (_, post) => new Uri(post.FediId + "/likes"));
-		RuleFor(p => p.Replies, (_, post) => new Uri(post.FediId + "/replies"));
-		RuleFor(p => p.Shares, (_, post) => new Uri(post.FediId + "/shares"));
+		if(opts == null)
+		{
+			RuleFor(p => p.Likes, (_, post) => new Uri(post.FediId + "/likes"));
+			RuleFor(p => p.Replies, (_, post) => new Uri(post.FediId + "/replies"));
+			RuleFor(p => p.Shares, (_, post) => new Uri(post.FediId + "/shares"));
+		}
 
 		FinishWith((_, post) =>
 		{
+			if (opts != null)
+				post.SetUris(opts);
+
 			var note = new FakeNote(post, opts);
 			foreach (var n in note.Generate(contents))
 			{

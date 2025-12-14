@@ -274,7 +274,7 @@ public sealed class PostsTests : IClassFixture<HostFixture<PostsTests>>, ITestSe
 	[Fact(DisplayName = "Should delete an existing post")]
 	public async Task CanDeletePost()
 	{
-		var profile = _profiles[1];
+		var profile = _profiles[9];
 		var post = _posts[profile][2];
 		var payload = new HttpRequestMessage(HttpMethod.Delete, $"/lb/v1/posts/{profile.GetId25()}/post/{post.GetId25()}");
 		var traceId = Traces.TraceRequest(payload.Headers);

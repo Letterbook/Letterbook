@@ -51,7 +51,8 @@ public class MapperTests : WithMocks
 		[Fact(DisplayName = "Should round trip Post IDs")]
 		public void MapRoundTrip()
 		{
-			var expected = new FakePost(CoreOptionsMock.Value.DomainName).Generate();
+			var author = new FakeProfile(CoreOptionsMock.Value.DomainName).Generate();
+			var expected = new FakePost(author, opts: CoreOptionsMock.Value).Generate();
 			var intermediate = _postMapper.Map<PostDto>(expected);
 			var actual = _postMapper.Map<Post>(intermediate);
 
@@ -76,6 +77,17 @@ public class MapperTests : WithMocks
 			var actual = _postMapper.Map<Models.Post>(_postDto as PostRequestDto);
 
 			Assert.NotNull(actual);
+		}
+
+		[Fact(DisplayName = "Should map PostRequestDto URIs")]
+		public void MapPostRequest_Uris()
+		{
+			var actual = _postMapper.Map<Models.Post>(_postDto as PostRequestDto);
+
+			Assert.Matches(actual.Id.ToString(), actual.FediId.ToString());
+			Assert.Matches(actual.Id.ToString(), actual.Likes?.ToString());
+			Assert.Matches(actual.Id.ToString(), actual.Replies?.ToString());
+			Assert.Matches(actual.Id.ToString(), actual.Shares?.ToString());
 		}
 
 		[InlineData("text/plain")]

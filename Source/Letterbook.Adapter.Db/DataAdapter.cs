@@ -172,6 +172,7 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	public void Add(Models.ModerationPolicy policy) => _context.ModerationPolicy.Add(policy);
 	public void Add(Models.InviteCode code) => _context.InviteCodes.Add(code);
 	public void Add(Models.Peer peer) => _context.Peers.Add(peer);
+	public void Add(Models.Audience audience) => _context.Audience.Add(audience);
 
 	public void AddRange(IEnumerable<Models.Profile> profile)
 	{
