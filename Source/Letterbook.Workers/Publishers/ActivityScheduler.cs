@@ -38,7 +38,10 @@ public class ActivityScheduler : IActivityScheduler
 	public async Task Deliver(Uri inbox, ASType activity, IEnumerable<Claim> claims, Profile? onBehalfOf)
 	{
 		if (await _data.Peers(inbox).SingleOrDefaultAsync() is not {} peer)
+		{
+			_logger.LogDebug("Not delivering {Activity} to unknown peer {Inbox} for {Profile}", activity.Type, inbox, onBehalfOf?.Id);
 			return;
+		}
 		claims = claims.ToList();
 		if (!_authorize.Federate(claims, peer.Restrictions.Where(r => !r.Value.Expired()).Select(r => r.Key)))
 			return;

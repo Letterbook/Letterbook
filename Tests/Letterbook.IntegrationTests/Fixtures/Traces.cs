@@ -60,7 +60,8 @@ public static class Traces
 		int timeoutMilliseconds = 1000)
 	{
 		var trace = await FilterSpans(traceId, spans, expected, timeoutMilliseconds);
-		Assert.Contains(expected, trace.Select(s => s.DisplayName));
+		var actual = trace.Select(s => s.DisplayName);
+		Assert.Contains(expected, actual);
 	}
 
 	/// Assert that a span with the expected display name is not present

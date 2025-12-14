@@ -289,8 +289,8 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		// P1 has requested to follow P5
 		Profiles[1].FollowingCollection.Add(new FollowerRelation(Profiles[1], Profiles[5], FollowState.Pending));
 		// P9 follows P8 and P7
-		Follow(Profiles[0], Profiles[8]);
-		Follow(Profiles[0], Profiles[7]);
+		Follow(Profiles[9], Profiles[8]);
+		Follow(Profiles[9], Profiles[7]);
 		// P8 follows P9 (local) and P13 (remote)
 		Follow(Profiles[8], Profiles[9]);
 		Follow(Profiles[8], Profiles[13]);
@@ -298,6 +298,8 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		Follow(Profiles[10], Profiles[7]);
 		Follow(Profiles[11], Profiles[7]);
 		Follow(Profiles[12], Profiles[7]);
+		// P10 (remote) follow P9
+		Follow(Profiles[10], Profiles[9]);
 
 		// P13 (remote) blocks P1 and P2
 		Profiles[13].Block(Profiles[2]);
@@ -311,10 +313,12 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		// P1 creates posts 0-7
 		Posts.Add(Profiles[1], new FakePost(Profiles[0], opts: Options).Generate(8));
 		// P2 creates post 0, and draft 1
-		Posts.Add(Profiles[2], new FakePost(Profiles[2]).Generate(1));
+		Posts.Add(Profiles[2], new FakePost(Profiles[2], opts: Options).Generate(1));
 		Posts[Profiles[2]].Add(new FakePost(Profiles[2], draft: true).Generate());
 		// P8 creates post 0
 		Posts.Add(Profiles[8], new FakePost(Profiles[8]).Generate(1));
+		// P9 creates post 0-2
+		Posts.Add(Profiles[9], new FakePost(Profiles[9]).Generate(3));
 		// P13 creates posts 0-1
 		Posts.Add(Profiles[13], new FakePost(Profiles[13]).Generate(2));
 
