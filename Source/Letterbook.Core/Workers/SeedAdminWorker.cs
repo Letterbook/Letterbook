@@ -84,6 +84,11 @@ public class SeedAdminWorker : IScopedWorker
 				_logger.LogInformation("Seeding moderator profile {Id}", Profile.SystemModeratorsId);
 			}
 
+			if (!await _data.Audiences(Audience.Public.FediId).AnyAsync(cancellationToken: cancellationToken))
+			{
+				_data.Add(Audience.Public);
+			}
+
 			await _data.Commit();
 		}
 		catch (OperationCanceledException ex)
