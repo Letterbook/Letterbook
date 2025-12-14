@@ -51,7 +51,8 @@ public class MapperTests : WithMocks
 		[Fact(DisplayName = "Should round trip Post IDs")]
 		public void MapRoundTrip()
 		{
-			var expected = new FakePost(CoreOptionsMock.Value.DomainName).Generate();
+			var author = new FakeProfile(CoreOptionsMock.Value.DomainName).Generate();
+			var expected = new FakePost(author, opts: CoreOptionsMock.Value).Generate();
 			var intermediate = _postMapper.Map<PostDto>(expected);
 			var actual = _postMapper.Map<Post>(intermediate);
 

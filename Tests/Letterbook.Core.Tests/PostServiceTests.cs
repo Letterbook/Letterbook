@@ -96,6 +96,19 @@ public class PostServiceTests : WithMocks
 		Assert.Equal(_post.AddressedTo.Count, actual.AddressedTo.Count);
 	}
 
+	[Fact(DisplayName = "Should add public posts to author's mentions")]
+	public async Task CanAddToSelfMention()
+	{
+		_post.Audience.Add(Audience.Public);
+		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<ProfileId[]>()))
+			.Returns(new List<Profile> { _profile }.BuildMock());
+		DataAdapterMock.Setup(m => m.Posts(_post.Id)).Returns(new List<Post>{_post}.BuildMock());
+
+		var actual = await _service.Draft(_profile.Id, _post, publish: true);
+
+		Assert.Contains(actual.Audience, audience => audience == Audience.FromMention(_profile));
+	}
+
 	[Fact(DisplayName = "Should update post")]
 	public async Task CanUpdate()
 	{

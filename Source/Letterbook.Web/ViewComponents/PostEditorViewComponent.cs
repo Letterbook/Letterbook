@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Letterbook.Core;
-using Letterbook.Core.Models.Dto;
 using Letterbook.Web.Forms;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,8 +28,6 @@ public class PostEditorViewComponent : ViewComponent
 				.Prepend(Models.Audience.Public)
 				.ToList();
 		}
-
-		// model.Data.Contents = [new ContentDto(){Type = "Note"}];
 
 		return View(model);
 	}
