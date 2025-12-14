@@ -127,10 +127,15 @@ public class PostService : IAuthzPostService, IPostService
 				post.Audience.Select(a => a.FediId),
 				post.Creators.SelectMany(p => p.Headlining).Select(a => a.FediId));
 
-			var followers = post.Creators.Select(Audience.Followers).ToHashSet()
+			var audience = post.Creators.Select(Audience.Followers).ToHashSet()
 				.ReplaceFrom(post.Creators.SelectMany(p => p.Headlining).ToHashSet()).ToHashSet();
-			followers.UnionWith(post.Audience);
-			post.Audience = followers;
+			audience.UnionWith(post.Audience);
+
+			var selfAudience = post.Creators.SelectMany(c => c.Headlining)
+				.Where(a => a.Source != null && a == Audience.FromMention(a.Source));
+			audience.UnionWith(selfAudience);
+
+			post.Audience = audience;
 			post.Audience = post.Audience.ReplaceFrom([Audience.Public]);
 			_logger.LogDebug("Normalized Audience for followers {Audience}", post.Audience.Select(a => a.FediId));
 		}
