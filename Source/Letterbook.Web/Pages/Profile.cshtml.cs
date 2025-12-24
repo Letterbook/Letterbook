@@ -89,6 +89,8 @@ public class Profile : PageModel
 
 		if (await _profiles.QueryProfiles(profileId)
 			    .TagWithCallSite()
+			    .Include(p => p.Posts).ThenInclude(p => p.Contents)
+			    .Include(p => p.Posts).ThenInclude(p => p.Creators)
 			    .AsSplitQuery()
 			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel(postsBefore))
 			    .FirstOrDefaultAsync() is not { } profile)
@@ -107,6 +109,8 @@ public class Profile : PageModel
 		var host = parts.Length == 2 ? parts[1] : _opts.BaseUri().GetAuthority();
 		if (await _profiles.QueryProfiles(handle, host)
 			    .TagWithCallSite()
+			    .Include(p => p.Posts).ThenInclude(p => p.Contents)
+			    .Include(p => p.Posts).ThenInclude(p => p.Creators)
 			    .AsSplitQuery()
 			    .ProjectTo<Projections.Profile>(Projections.Profile.FromCoreModel(postsBefore))
 			    .FirstOrDefaultAsync() is not { } profile)
