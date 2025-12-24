@@ -1,9 +1,8 @@
 using System.Security.Claims;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
-using Medo;
+using Letterbook.Core.Queries;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -78,18 +77,27 @@ public class TimelineService : IAuthzTimelineService, ITimelineService
 
 
 	/// <inheritdoc />
-	public async Task<IEnumerable<Post>> GetFeed(Uuid7 profileId, DateTimeOffset begin, int limit = 40)
+	public async Task<IEnumerable<Post>> GetFeed(ProfileId profileId, DateTimeOffset begin, int limit = 40)
 	{
 		// TODO(moderation): Account for moderation conditions (block, mute, etc)
-		var recipient = await _data.Profiles(profileId).Include(p => p.Audiences).SingleOrDefaultAsync();
+		var audiences = await _data.Profiles(profileId).Include(p => p.Audiences).SelectMany(p => p.Audiences).ToListAsync();
+		if (audiences.Count == 0)
+		{
+			_logger.LogWarning("Can't get feed for profile {ProfileId} because they are not a member of any audience", profileId);
+			return [];
+		}
 
-		_logger.LogDebug("Getting feed for {Profile} with membership in {Count} Audiences", profileId, recipient?.Audiences.Count);
-		var results = recipient != null
-			? _feeds.GetTimelineEntries(recipient.Audiences, begin, limit).ToList()
-			: throw CoreException.MissingData("Couldn't lookup Profile to load Feed", typeof(Guid), profileId);
+		_logger.LogDebug("Getting feed for {Profile} with membership in {Count} Audiences", profileId, audiences.Count);
+		var ids = await _feeds.GetTimelineEntries(audiences, begin, limit)
+			.ToArrayAsync();
+		_logger.LogDebug("Loaded {Count} timeline posts for {ProfileId}", ids.Length, profileId);
 
-		_logger.LogDebug("Loaded {Count} timeline posts", results.Count);
-		return results;
+		var results = await _data.Posts(ids.Select(p => p.Id).ToArray()).WithTimelineFields().TagWithCallSite().ToDictionaryAsync(p => p.Id);
+		return ids.Select(id =>
+		{
+			results.TryGetValue(id.Id, out var post);
+			return post;
+		}).WhereNotNull().ToList();
 	}
 
 	/// <summary>

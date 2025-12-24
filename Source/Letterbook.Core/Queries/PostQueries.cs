@@ -25,4 +25,15 @@ public static class PostQueries
 			.Include(p => p.Audience)
 			.Include(p => p.Contents)
 			.AsSplitQuery();
+
+	/// <summary>
+	/// Include necessary data to fill out a feed
+	/// </summary>
+	/// <param name="query"></param>
+	/// <returns></returns>
+	public static IQueryable<Post> WithTimelineFields(this IQueryable<Post> query) =>
+		query.WithCommonFields()
+			.Include(p => p.AddressedTo).ThenInclude(m => m.Subject)
+			.AsSplitQuery()
+			.AsNoTrackingWithIdentityResolution();
 }

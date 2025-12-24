@@ -15,5 +15,5 @@ public interface IAuthzTimelineService
 	public Task HandleShare(Post post, Profile sharedBy);
 	public Task HandleUpdate(Post post, Post oldPost);
 	public Task HandleDelete(Post note);
-	public Task<IEnumerable<Post>> GetFeed(Uuid7 profileId, DateTimeOffset begin, int limit = 40);
+	public Task<IEnumerable<Post>> GetFeed(ProfileId profileId, DateTimeOffset begin, int limit = 40);
 }
