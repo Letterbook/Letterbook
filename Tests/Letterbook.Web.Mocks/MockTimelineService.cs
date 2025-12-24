@@ -37,7 +37,7 @@ public class MockTimelineService : ITimelineService, IAuthzTimelineService
 	{
 		return _timelineService.HandleDelete(note);
 	}
-	public Task<IEnumerable<Models.Post>> GetFeed(Uuid7 profileId, DateTimeOffset begin, int limit = 40)
+	public Task<IEnumerable<Models.Post>> GetFeed(Models.ProfileId profileId, DateTimeOffset begin, int limit = 40)
 	{
 		_log.LogInformation("Called the mock service");
 		var result = Enumerable.Range(0, limit)
