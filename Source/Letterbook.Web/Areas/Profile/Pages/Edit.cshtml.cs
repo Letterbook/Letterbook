@@ -54,8 +54,10 @@ public class Edit : PageModel
 		if (ModelState.IsValid) {
 			await _profiles.As(User.Claims).UpdateDisplayName(profile.Id, DisplayName);
 			await _profiles.As(User.Claims).UpdateDescription(profile.Id, Description);
-			return RedirectToPage("Profile", new { handle = profile.Handle });
+			// RedirectToPage
+			return RedirectToPage("Profile", new { id = profile.Handle });
 		}
+
 		return Page();
 	}
 }

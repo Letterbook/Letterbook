@@ -6,21 +6,21 @@
     ViewData["title"] = $"Edit {Model.Handle}";
 }
 
-<div>
+<div class="profile">
     <h1>Edit @@@Model.Handle</h1>
 
     <form method="post" asp-route-handle="@Model.Handle">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div class="form-group">
-            <label asp-for="DisplayName"></label>
+        <div>
+            <label asp-for="DisplayName">Display name</label>
             <input type="text" asp-for="DisplayName" />
-            <span asp-validation-for="DisplayName"></span>
+            <small asp-validation-for="DisplayName"></small>
         </div>
-        <div class="form-group">
-            <label asp-for="Description"></label>
+        <div>
+            <label asp-for="Description">Introduction</label>
             <textarea asp-for="Description"></textarea>
-            <span asp-validation-for="Description"></span>
+            <small asp-validation-for="Description"></small>
         </div>
-        <button>Update</button>
+        <button type="submit">Update</button>
     </form>
 </div>
