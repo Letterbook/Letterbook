@@ -9,18 +9,36 @@
 <div class="profile">
     <h1>Edit @@@Model.Handle</h1>
 
-    <form method="post" asp-route-handle="@Model.Handle">
+    <form method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div>
+        <div class="form-section">
+            <h2>Basic Info</h2>
             <label asp-for="DisplayName">Display name</label>
-            <input type="text" asp-for="DisplayName" />
+            <input type="text" asp-for="DisplayName"/>
             <small asp-validation-for="DisplayName"></small>
-        </div>
-        <div>
+
             <label asp-for="Description">Introduction</label>
             <textarea asp-for="Description"></textarea>
             <small asp-validation-for="Description"></small>
         </div>
+        <div class="form-section">
+            <h2>Custom Attributes</h2>
+            <p class="subhead">Your pronouns, fluent languages, websites, other social accounts, or anything else you want to share</p>
+            
+            <div class="form-row">
+                <div class="form-col"><label id="AttributeLabels">Labels</label></div>
+                <div class="form-col"><label id="AttributeValues">Values</label></div>
+            </div>
+            @foreach (var (cf, i) in @Model.CustomFields.Select((e, i) => (e, i)))
+            {
+                
+                <div class="form-row form-dense">
+                    <input type="text" asp-for="CustomFields[i].Label" aria-labelledby="AttributeLabels" value="@(cf?.Label ?? "")"/>
+                    <input type="text" asp-for="CustomFields[i].Value" aria-labelledby="AttributeValues" value="@(cf?.Value ?? "")"/>
+                </div>
+                }
+        </div>
+        <input type="hidden" asp-for="@Model.Id" />
         <button type="submit">Update</button>
     </form>
 </div>

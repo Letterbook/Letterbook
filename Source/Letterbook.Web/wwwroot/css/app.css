@@ -166,6 +166,36 @@
     .text-center {
         text-align: center;
     }
+    
+    
+    .form-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: space-between;
+        
+        .form-col {
+            align-content: flex-start;
+            flex-grow: 1;
+        }
+    }
+    
+    .form-section {
+        margin-bottom: 2.5em;
+    }
+    
+    .form-dense {
+        input {
+            height: fit-content;
+            padding-bottom: .5em;
+            padding-top: .5em;
+            margin-bottom: .5em;
+        }
+    }
+
+    :is(h1,h2) + .subhead {
+        margin-top: -1em;
+    }
 }
 details:open {
     summary {
