@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Letterbook.Core;
+using Letterbook.Core.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -38,7 +39,7 @@ public class Edit : PageModel
 	public Models.ProfileId Id { get; set; }
 
 	[BindProperty]
-	public Models.CustomField[] CustomFields { get; set; }
+	public CustomField[] CustomFields { get; set; }
 
 	public async Task<IActionResult> OnGet(Models.ProfileId id)
     {
@@ -49,7 +50,7 @@ public class Edit : PageModel
 		Handle = profile.Handle;
 		DisplayName = profile.DisplayName;
 		Description = profile.Description;
-		CustomFields = new Models.CustomField[_options.MaxCustomFields];
+		CustomFields = new CustomField[_options.MaxCustomFields];
 		for (var i = 0; i < profile.CustomFields.Length && i < CustomFields.Length; i++)
 		{
 			CustomFields[i] = profile.CustomFields[i];
@@ -66,7 +67,7 @@ public class Edit : PageModel
 
 		if (!ModelState.IsValid) return Page();
 
-		profile.CustomFields = CustomFields;
+		profile.CustomFields = CustomFields.Select(dto => dto.ToModel()).WhereNotNull().ToArray();
 		profile.DisplayName = DisplayName;
 		profile.Description = Description;
 		await _profiles.As(User.Claims).UpdateProfile(profile);
@@ -74,5 +75,38 @@ public class Edit : PageModel
 		// RedirectToPage
 		return RedirectToPage("Profile", new { id = profile.Handle });
 
+	}
+}
+
+public class CustomField : IEquatable<CustomField>
+{
+	public string? Label { get; set; }
+	public string? Value { get; set; }
+
+	public Models.CustomField? ToModel() =>
+		Label != null && Value != null ? new Models.CustomField() { Label = Label, Value = Value } : null;
+
+	public static CustomField FromModel(Models.CustomField m) => new() { Label = m.Label, Value = m.Value };
+
+	public static implicit operator CustomField(Models.CustomField cf) => FromModel(cf);
+
+	public bool Equals(CustomField? other)
+	{
+		if (other is null) return false;
+		if (ReferenceEquals(this, other)) return true;
+		return Label == other.Label && Value == other.Value;
+	}
+
+	public override bool Equals(object? obj)
+	{
+		if (obj is null) return false;
+		if (ReferenceEquals(this, obj)) return true;
+		if (obj.GetType() != GetType()) return false;
+		return Equals((CustomField)obj);
+	}
+
+	public override int GetHashCode()
+	{
+		return HashCode.Combine(Label, Value);
 	}
 }
