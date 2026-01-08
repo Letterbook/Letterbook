@@ -33,7 +33,7 @@ public class ProfileServiceTests : WithMocks
 
 		_service = new ProfileService(Mock.Of<ILogger<ProfileService>>(), CoreOptionsMock, Mock.Of<Instrumentation>(),
 			DataAdapterMock.Object, Mock.Of<IProfileEventPublisher>(), ActivityPubClientMock.Object, ApCrawlerSchedulerMock.Object,
-			Mock.Of<IHostSigningKeyProvider>(), ActivityPublisherMock.Object);
+			Mock.Of<IHostSigningKeyProvider>(), ActivityPublisherMock.Object, AuthorizationServiceMock.Object);
 		_profile = _fakeProfile.Generate();
 
 		DataAdapterMock.Setup(m => m.Profiles(Profile.SystemInstanceId))

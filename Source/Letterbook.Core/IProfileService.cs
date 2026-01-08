@@ -27,7 +27,7 @@ public interface IAuthzProfileService
 	Task<UpdateResponse<Profile>> InsertCustomField(ProfileId localId, int index, string key, string value);
 	Task<UpdateResponse<Profile>> RemoveCustomField(ProfileId localId, int index);
 	Task<UpdateResponse<Profile>> UpdateCustomField(ProfileId localId, int index, string key, string value);
-	Task<UpdateResponse<Profile>> UpdateProfile(Profile profile);
+	Task<Profile> UpdateProfile(Profile updated);
 
 	/// <summary>
 	/// Lookup a profile, optionally including relationship information to another profile

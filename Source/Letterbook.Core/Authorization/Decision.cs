@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Security.Claims;
+using Letterbook.Core.Exceptions;
 
 namespace Letterbook.Core.Authorization;
 
@@ -21,6 +22,11 @@ public class Decision
 
 	public static Decision Deny(string reason, IEnumerable<Claim>? claims) =>
 		new DecisionBuilder(claims).Decide(false, reason);
+
+	public void AssertAllowed()
+	{
+		if (!IsAllowed) throw CoreException.Unauthorized(this);
+	}
 
 	public bool Allowed => IsAllowed;
 
