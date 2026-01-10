@@ -26,11 +26,12 @@ public class ProfileService : IProfileService, IAuthzProfileService
 	private readonly IApCrawlScheduler _crawler;
 	private readonly IHostSigningKeyProvider _hostSigningKeyProvider;
 	private readonly IActivityScheduler _activity;
+	private readonly IAuthorizationService _authz;
 	private IEnumerable<Claim> _claims;
 
 	public ProfileService(ILogger<ProfileService> logger, IOptions<CoreOptions> options, Instrumentation instrumentation,
 		IDataAdapter data, IProfileEventPublisher profileEvents, IActivityPubClient client, IApCrawlScheduler crawler,
-		IHostSigningKeyProvider hostSigningKeyProvider, IActivityScheduler activity)
+		IHostSigningKeyProvider hostSigningKeyProvider, IActivityScheduler activity, IAuthorizationService authz)
 	{
 		_logger = logger;
 		_instrumentation = instrumentation;
@@ -41,6 +42,7 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		_crawler = crawler;
 		_hostSigningKeyProvider = hostSigningKeyProvider;
 		_activity = activity;
+		_authz = authz;
 		_claims = default!;
 	}
 
@@ -189,9 +191,18 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		};
 	}
 
-	public Task<UpdateResponse<Profile>> UpdateProfile(Profile profile)
+	public async Task<Profile> UpdateProfile(Profile updated)
 	{
-		throw new NotImplementedException();
+		var profile = await _data.Profiles(updated.Id).FirstOrDefaultAsync()
+		              ?? throw CoreException.MissingData<Profile>(updated.Id);
+		_authz.Update(_claims, updated).AssertAllowed();
+		var original = profile.ShallowClone();
+
+		profile.UpdateFrom(updated);
+
+		await _data.Commit();
+		await _profileEvents.Updated(original, profile);
+		return profile;
 	}
 
 	public async Task<Profile?> LookupProfile(ProfileId profileId, ProfileId? relatedProfile)

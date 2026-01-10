@@ -323,6 +323,14 @@ public class Profile : IFederatedActor, IEquatable<Profile>
 			new FollowerRelation(target, this, FollowState.None)).State;
 	}
 
+	public void UpdateFrom(Profile updated)
+	{
+		Description = updated.Description;
+		DisplayName = updated.DisplayName;
+		CustomFields = updated.CustomFields;
+		Updated = DateTimeOffset.UtcNow;
+	}
+
 	// Eventually: CreateGroup, CreateBot, Mayyyyyybe CreateService?
 	// The only use case I'm imagining for a service is to represent the server itself
 	public static Profile CreateIndividual(Uri baseUri, string handle) => Create(baseUri, handle, ActivityActorType.Person);

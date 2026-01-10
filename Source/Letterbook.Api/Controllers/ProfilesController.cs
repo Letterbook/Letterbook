@@ -93,9 +93,7 @@ public class ProfilesController : ControllerBase
 			return Unauthorized(decision);
 
 		var result = await _profiles.As(User.Claims).UpdateProfile(profile);
-		return result.Updated != null
-			? Ok(_mapper.Map<FullProfileDto>(result.Updated))
-			: NotFound();
+		return Ok(_mapper.Map<FullProfileDto>(result));
 	}
 
 	[HttpPost("{profileId}/field/{index}")]

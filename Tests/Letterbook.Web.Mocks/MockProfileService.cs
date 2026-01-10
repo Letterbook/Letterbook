@@ -53,9 +53,9 @@ public class MockProfileService : IProfileService, IAuthzProfileService
 	{
 		return _profileService.UpdateCustomField(localId, index, key, value);
 	}
-	public Task<Models.UpdateResponse<Models.Profile>> UpdateProfile(Models.Profile profile)
+	public Task<Models.Profile> UpdateProfile(Models.Profile updated)
 	{
-		return _profileService.UpdateProfile(profile);
+		return _profileService.UpdateProfile(updated);
 	}
 	public Task<Models.Profile?> LookupProfile(Models.ProfileId profileId, Models.ProfileId? relatedProfile = null)
 	{
