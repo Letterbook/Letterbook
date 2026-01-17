@@ -16,5 +16,5 @@ public static partial class StringFormatters
 	/// </example>
 	/// <returns></returns>
 	[GeneratedRegex("(^[a-z]+|[A-Z]+(?![a-z])|[A-Z][^A-Z]+)")]
-	public static partial Regex SplitExp();
+	public static partial Regex SplitWords();
 }

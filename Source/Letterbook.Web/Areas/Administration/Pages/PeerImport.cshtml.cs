@@ -48,6 +48,6 @@ public class PeerImport : PageModel
 
 	public string FormatStrategy(string name)
 	{
-		return string.Join(' ', StringFormatters.SplitExp().Split(name));
+		return string.Join(' ', StringFormatters.SplitWords().Split(name));
 	}
 }

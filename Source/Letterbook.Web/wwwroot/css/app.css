@@ -161,12 +161,15 @@
         margin-bottom: 1em;
         font-size: 1.5em;
         font-weight: 600;
+        
+        &.system-text {
+            font-family: sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+        }
     }
     
     .text-center {
         text-align: center;
     }
-    
     
     .form-row {
         display: flex;

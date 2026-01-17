@@ -92,8 +92,8 @@ public class Program
 
 		var app = builder.Build();
 
-		// app.UseStatusCodePagesWithReExecute("/error/{0}");
-		app.UseDeveloperExceptionPage();
+		app.UseExceptionHandler("/error");
+		app.UseStatusCodePagesWithReExecute("/error/{0}");
 		app.UseStaticFiles(new StaticFileOptions
 		{
 			FileProvider = new ManifestEmbeddedFileProvider(Assembly.GetAssembly(typeof(Web.Program))!, "wwwroot"),
