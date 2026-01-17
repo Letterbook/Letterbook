@@ -1,0 +1,31 @@
+@page "{err?}"
+@model Letterbook.Web.Mocks.Pages.ErrorsTest
+
+@{
+    // Layout = null;
+}
+
+<h1>Generate synthetic errors</h1>
+<ul>
+    <li>
+        <a asp-page="ErrorsTest" asp-route-err="Unauthorized">Unauthorized</a>
+    </li>
+    <li>
+        <a asp-page="ErrorsTest" asp-route-err="MissingData">Not Found</a>
+    </li>
+    <li>
+        <a asp-page="ErrorsTest" asp-route-err="Duplicate">Duplicate Data</a>
+    </li>
+    <li>
+        <a asp-page="ErrorsTest" asp-route-err="Invalid">Client error</a>
+    </li>
+    <li>
+        <a asp-page="ErrorsTest" asp-route-err="Wrong">Wrong Host</a>
+    </li>
+    <li>
+        <a asp-page="ErrorsTest" asp-route-err="Error">Internal Error</a>
+    </li>
+    <li>
+        <a asp-page="ErrorsTest" asp-route-err="Other">Unknown Error</a>
+    </li>
+</ul>

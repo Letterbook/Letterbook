@@ -64,7 +64,7 @@ public class Peer : PageModel
 
 	public string FormatRestriction(string name)
 	{
-		return string.Join(' ', StringFormatters.SplitExp().Split(name));
+		return string.Join(' ', StringFormatters.SplitWords().Split(name));
 	}
 
 	public class RestrictionModel

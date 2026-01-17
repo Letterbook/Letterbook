@@ -86,13 +86,6 @@ public class Program
 
 		var app = builder.Build();
 
-		// Configure the HTTP request pipeline.
-		if (!app.Environment.IsDevelopment())
-		{
-			// Not sure if this works, with mixed Razor/WebApi
-			app.UseExceptionHandler("/Error");
-		}
-
 		if (!app.Environment.IsProduction())
 		{
 			app.Use((context, next) =>
@@ -102,8 +95,9 @@ public class Program
 			});
 		}
 
-		app.UseStaticFiles();
+		app.UseExceptionHandler("/error");
 		app.UseStatusCodePagesWithReExecute("/error/{0}");
+		app.UseStaticFiles();
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();
