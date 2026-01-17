@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Letterbook.Web.Mocks.Pages;
 
-public class ErrorsTest(ILogger<ErrorsTest> logger) : PageModel
+public class MockError(ILogger<MockError> logger) : PageModel
 {
 	public void OnGet(string err)
 	{
