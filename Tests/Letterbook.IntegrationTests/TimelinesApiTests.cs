@@ -5,10 +5,8 @@ using System.Text.Json.Serialization;
 using Letterbook.Core.Extensions;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers.Converters;
-using Letterbook.Core.Values;
 using Letterbook.IntegrationTests.Fixtures;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
 
 namespace Letterbook.IntegrationTests;
 
@@ -56,10 +54,10 @@ public class TimelinesApiTests : IClassFixture<HostFixture<TimelinesApiTests>>, 
 	{
 		var response = await _client.GetAsync($"/lb/v1/timelines/{_host.Profiles[0].GetId25()}");
 
-		Assert.NotNull(response);
-		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-		var actual = Assert.IsAssignableFrom<IEnumerable<PostDto>>(
-			await response.Content.ReadFromJsonAsync<IEnumerable<PostDto>>(_json));
+			Assert.NotNull(response);
+			Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+			var actual = Assert.IsAssignableFrom<IEnumerable<PostDto>>(
+				await response.Content.ReadFromJsonAsync<IEnumerable<PostDto>>(_json));
 
 		Assert.NotEmpty(actual);
 	}
