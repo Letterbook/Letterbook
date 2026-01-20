@@ -192,12 +192,19 @@ public class Client : IActivityPubClient, IActivityPubAuthenticatedClient, IDisp
 	}
 
 	public async Task<T> Fetch<T>(Uri id) where T : IFederated => await SendFetch<T>(id, SignedRequest(HttpMethod.Get, id));
+	public async Task<T> Fetch<T>(Uri id, CancellationToken cancellationToken) where T : IFederated => await SendFetch<T>(id, SignedRequest(HttpMethod.Get, id), cancellationToken);
+
 	public async Task<T> Fetch<T>(Uri id, SigningKey actorSigningKey) where T : IFederated
 		=> await SendFetch<T>(id, SignedRequest(HttpMethod.Get, id, new []{ actorSigningKey }, actorSigningKey.FediId));
 
-	private async Task<T> SendFetch<T>(Uri id, HttpRequestMessage httpRequestMessage) where T : IFederated
+	public async Task<T> Fetch<T>(Uri id, SigningKey actorSigningKey, CancellationToken cancellationToken) where T : IFederated
+		=> await SendFetch<T>(id, SignedRequest(HttpMethod.Get, id, new []{ actorSigningKey }, actorSigningKey.FediId), cancellationToken);
+
+	private async Task<T> SendFetch<T>(Uri id, HttpRequestMessage httpRequestMessage, CancellationToken? cancellationToken = null) where T : IFederated
 	{
-		var response = await _httpClient.SendAsync(httpRequestMessage);
+		var response = cancellationToken is null
+			? await _httpClient.SendAsync(httpRequestMessage)
+			: await _httpClient.SendAsync(httpRequestMessage, cancellationToken.Value);
 		var stream = await ReadResponse(response);
 		if (stream is null) throw ClientException.RemoteObjectError(id, "Peer provided no response");
 

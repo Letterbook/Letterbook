@@ -24,8 +24,10 @@ public static class DependencyInjection
 {
 	public static IServiceCollection AddLetterbookCore(this IServiceCollection services, IConfigurationManager config)
 	{
+		var section = config.GetSection(CoreOptions.ConfigKey);
 		// Register options
-		services.Configure<CoreOptions>(config.GetSection(CoreOptions.ConfigKey));
+		services.Configure<CoreOptions>(section);
+		var options = config.Get<CoreOptions>() ?? throw ConfigException.Missing(nameof(CoreOptions));
 
 		// Register Services
 		services
@@ -57,7 +59,15 @@ public static class DependencyInjection
 				AllowedAtRules = new HashSet<CssRuleType>(),
 				AllowCssCustomProperties = false,
 				AllowDataAttributes = false
-			}));
+			}))
+			// Default HttpClientConfig
+			.ConfigureHttpClientDefaults(builder =>
+			{
+				builder.ConfigureHttpClient(client =>
+				{
+					client.DefaultRequestHeaders.UserAgent.TryParseAdd($"Letterbook/0.0-dev ({options.DomainName})");
+				});
+			});
 
 		// Register service workers
 		services.AddScopedService<SeedAdminWorker>()
