@@ -179,6 +179,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_context.SaveChanges();
 
 		_context.Posts.AddRange(Posts.SelectMany(pair => pair.Value));
+		_context.Posts.AddRange(Timeline);
 		_context.SaveChanges();
 
 		_context.ModerationPolicy.AddRange(Policies);
@@ -399,7 +400,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 			// Pick or add new Creator
 			if (Profiles.Count > 0 && faker.Random.Bool(0.9f))
 			{
-				creator = faker.PickRandom(Profiles);
+				creator = faker.PickRandom(Profiles[3..7]);
 			}
 			else
 			{
