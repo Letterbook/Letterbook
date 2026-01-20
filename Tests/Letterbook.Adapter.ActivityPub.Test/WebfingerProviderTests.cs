@@ -96,9 +96,7 @@ public class WebfingerProviderTests : WithMocks
 			m.StatusCode = HttpStatusCode.OK;
 			m.Content = new StringContent(json, new UTF8Encoding(), new MediaTypeHeaderValue("application/jrd+json"));
 		});
-		// ActivityPubClientMock.Setup(m => m.Fetch<Models.Profile>(_profile.FediId, It.IsAny<CancellationToken>()))
-		// 	.ReturnsAsync(_profile);
-		var actual = await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token);
+		await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token);
 
 		ActivityPubClientMock.Verify(m => m.Fetch<Models.Profile>(It.IsAny<Uri>(), It.IsAny<CancellationToken>()), Times.Once());
 	}
