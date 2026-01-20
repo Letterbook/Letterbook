@@ -52,11 +52,8 @@ public static class DependencyInjectionExtensions
 			.AddHttpClient<IActivityPubClient, Client>(client =>
 			{
 				client.DefaultRequestHeaders.Accept.ParseAdd(Constants.ActivityPubAccept);
-				client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("dotnet",
-					Environment.Version.ToString(2)));
 				// TODO: get version from Product Version
-				client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("letterbook", "0.0-dev"));
-				client.DefaultRequestHeaders.UserAgent.TryParseAdd(coreOptions.DomainName);
+				client.DefaultRequestHeaders.UserAgent.TryParseAdd($"Letterbook/0.0-dev ({coreOptions.DomainName})");
 			})
 			.AddSigningClient();
 

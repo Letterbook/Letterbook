@@ -12,6 +12,7 @@
       <PackageReference Include="AutoMapper" />
       <PackageReference Include="AutoMapper.Collection" />
       <PackageReference Include="BouncyCastle.Cryptography" />
+      <PackageReference Include="DarkLink.Web.WebFinger.Client" />
       <PackageReference Include="GitHubActionsTestLogger">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -19,6 +20,7 @@
       <PackageReference Include="NSign.Abstractions" />
       <PackageReference Include="NSign.Client" />
       <PackageReference Include="NSign.SignatureProviders" />
+      <PackageReference Include="SimpleIdServer.Webfinger.Client" />
     </ItemGroup>
 
     <ItemGroup>

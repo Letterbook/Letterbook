@@ -11,6 +11,7 @@
     <PackageVersion Include="Bogus" Version="35.6.5" />
     <PackageVersion Include="BouncyCastle.Cryptography" Version="2.6.2" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="DarkLink.Web.WebFinger.Client" Version="1.0.0" />
     <PackageVersion Include="DarkLink.Web.WebFinger.Server" Version="1.0.0" />
     <PackageVersion Include="EntityFrameworkCore.Projectables" Version="4.0.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
@@ -89,6 +90,7 @@
     <PackageVersion Include="Serilog.Sinks.Grafana.Loki" Version="8.3.2" />
     <PackageVersion Include="ServiceStack" Version="8.10.0" />
     <PackageVersion Include="ServiceStack.Mvc" Version="8.10.0" />
+    <PackageVersion Include="SimpleIdServer.Webfinger.Client" Version="6.0.6" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.6" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.6" />
     <PackageVersion Include="System.Formats.Asn1" Version="9.0.12" />
