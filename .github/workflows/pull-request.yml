@@ -146,9 +146,5 @@ jobs:
         env:
           BROWSER: firefox
           
-integration-test:
-    env:
-      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
-
-    steps:
-      - uses: .github/workflows/integration-test.yml
+  integration-test:
+    uses: ./.github/workflows/integration-test.yml

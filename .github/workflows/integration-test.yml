@@ -4,10 +4,6 @@
 name: Integration test
 
 on:
-  push:
-    branches: [ ]
-  pull_request:
-    branches: [ ]
   workflow_dispatch:
   workflow_call:
 
