@@ -147,25 +147,8 @@ jobs:
           BROWSER: firefox
           
 integration-test:
-    runs-on: ubuntu-latest
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
     steps:
-        - uses: actions/checkout@v4
-        - name: Setup .NET
-          uses: actions/setup-dotnet@v4
-          with:
-            dotnet-version: 8.0.x
-        - name: Set up Docker Compose
-          uses: docker/setup-compose-action@v1
-        - name: Start database
-          run: bash scripts/start-database.sh
-        - name: Run tests
-          run: bash scripts/integration-test.sh
-        - name: Upload dotnet test results # https://docs.github.com/en/actions/tutorials/build-and-test-code/net
-          uses: actions/upload-artifact@v4
-          with:
-            name: integration-test-results-${{github.run_number}}
-            path: Tests/Letterbook.IntegrationTests/TestResults/
-          if: ${{ always() }}
+        - uses: .github/workflows/integration-test.yml
