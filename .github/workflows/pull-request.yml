@@ -151,4 +151,4 @@ integration-test:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
     steps:
-        - uses: .github/workflows/integration-test.yml
+      - uses: .github/workflows/integration-test.yml
