@@ -5,6 +5,10 @@ name: Integration test
 
 on:
   workflow_dispatch:
+    inputs:
+      dotnet-test-args:
+        type: string
+        description: Arguments for dotnet test
   workflow_call:
 
 jobs:
@@ -23,7 +27,7 @@ jobs:
     - name: Start database
       run: bash scripts/start-database.sh
     - name: Run tests
-      run: bash scripts/integration-test.sh
+      run: bash scripts/integration-test.sh ${{ github.event.inputs.dotnet-test-args }}
     - name: Upload dotnet test results # https://docs.github.com/en/actions/tutorials/build-and-test-code/net
       uses: actions/upload-artifact@v4
       with:
