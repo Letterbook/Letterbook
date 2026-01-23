@@ -22,3 +22,5 @@ We want to run something like:
 ```sh
 dotnet build Letterbook.sln
 ```
+
+Got this error when using the smallrest runner: "The runner cancelled the job because it exceeds the maximum run time", so trying largest.

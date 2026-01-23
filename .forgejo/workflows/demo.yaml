@@ -1,7 +1,7 @@
 on: [push]
 jobs:
   test:
-    runs-on: codeberg-tiny
+    runs-on: codeberg-medium # https://codeberg.org/actions/meta#available-runners
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET Core
@@ -9,3 +9,5 @@ jobs:
         with:
           dotnet-version: 9.0.x
       - run: dotnet build Letterbook.sln 
+      - name: Integration tests
+        run: bash scripts/integration-test.sh # ${{ github.event.inputs.dotnet-test-args }} 
