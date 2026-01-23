@@ -151,4 +151,26 @@ public class WebfingerProviderTests : WithMocks
 			return default!;
 		}
 	}
+
+	// https://docs.joinmastodon.org/spec/webfinger/
+	[Fact(DisplayName = "Should translate query into correct URL")]
+	public async Task TranslatesQueryIntoUrl()
+	{
+		HttpMessageHandlerMock.SetupResponse(m =>
+		{
+			m.StatusCode = HttpStatusCode.OK;
+			m.Content = new StringContent("{}", new UTF8Encoding(), new MediaTypeHeaderValue("application/jrd+json"));
+		});
+
+		ActivityPubClientMock.Setup(m => m.Fetch<Models.Profile>(_profile.FediId, It.IsAny<CancellationToken>()))
+			.ReturnsAsync(_profile);
+
+		await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token);
+
+		HttpMessageHandlerMock.Verify(it => it.SendMessageAsync(
+			It.Is<HttpRequestMessage>(message =>
+				message.RequestUri ==
+				new Uri($"https://{_profile.FediId.Authority}/.well-known/webfinger?resource=acct%3A{_profile.Handle}%40{_profile.FediId.Authority}")
+			), It.IsAny<CancellationToken>()));
+	}
 }
