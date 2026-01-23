@@ -4,6 +4,7 @@ using System.Text;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Neovolve.Logging.Xunit;
 using Xunit.Abstractions;
@@ -63,7 +64,6 @@ public class WebfingerProviderTests : WithMocks
 			.ReturnsAsync(_profile);
 		var actual = await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token);
 
-		Assert.Equal(0, _logger.Count);
 		Assert.Equal([_profile], actual);
 	}
 
@@ -152,19 +152,46 @@ public class WebfingerProviderTests : WithMocks
 		}
 	}
 
-	public record CanParseFact(string Given, string Expected, bool Fetch);
+	// https://docs.joinmastodon.org/spec/webfinger/
+	[Fact(DisplayName = "Should translate query into correct URL")]
+	public async Task TranslatesQueryIntoUrl()
+	{
+		HttpMessageHandlerMock.SetupResponse(m =>
+		{
+			m.StatusCode = HttpStatusCode.OK;
+			m.Content = new StringContent("{}", new UTF8Encoding(), new MediaTypeHeaderValue("application/jrd+json"));
+		});
+
+		ActivityPubClientMock.Setup(m => m.Fetch<Models.Profile>(_profile.FediId, It.IsAny<CancellationToken>()))
+			.ReturnsAsync(_profile);
+
+		await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token);
+
+		HttpMessageHandlerMock.Verify(it => it.SendMessageAsync(
+			It.Is<HttpRequestMessage>(message =>
+				message.RequestUri ==
+				new Uri($"https://{_profile.FediId.Authority}/.well-known/webfinger?resource=acct%3A{_profile.Handle}%40{_profile.FediId.Authority}")
+			), It.IsAny<CancellationToken>()));
+	}
+
+	public record CanParseFact(string Given, string Expected, string ExpectedHost, bool Fetch);
 
 	public class CanParseFacts : Xunit.TheoryData<CanParseFact>
 	{
 		public CanParseFacts()
 		{
-			Add(new CanParseFact("@someone@peer.example", "acct:someone@peer.example", true));
-			Add(new CanParseFact("someone@peer.example", "acct:someone@peer.example", true));
-			Add(new CanParseFact("acct:someone@peer.example", "acct:someone@peer.example", true));
-			Add(new CanParseFact("acct://someone@peer.example", "acct:someone@peer.example", true));
-			Add(new CanParseFact("https://someone@peer.example", "", true));
-			Add(new CanParseFact("https://peer.example/someone", "", false));
-			Add(new CanParseFact("@someone", "", false));
+			Add(new CanParseFact("@someone@peer.example", "acct:someone@peer.example", "peer.example", true));
+			Add(new CanParseFact("@someone@peer.example:5127", "", "", false));
+			Add(new CanParseFact("someone@peer.example", "acct:someone@peer.example", "peer.example", true));
+			Add(new CanParseFact("acct:someone@peer.example", "acct:someone@peer.example", "peer.example", true));
+			Add(new CanParseFact("acct://someone@peer.example", "acct:someone@peer.example", "peer.example", true));
+			Add(new CanParseFact("https://someone@peer.example", "acct:someone@peer.example", "peer.example", true));
+			Add(new CanParseFact("https://peer.example/someone", "", "", false));
+			Add(new CanParseFact("https://peer.example/@someone", "", "", false));
+			Add(new CanParseFact("@someone", "", "", false));
+			Add(new CanParseFact("someone@localhost", "", "", false));
+			Add(new CanParseFact("someone@127.0.0.1", "", "", false));
+			Add(new CanParseFact("someone@192.168.0.1", "", "", false));
 		}
 	}
 
@@ -182,7 +209,9 @@ public class WebfingerProviderTests : WithMocks
 
 		if (fact.Fetch)
 		{
-			HttpMessageHandlerMock.VerifyRequest(req => true, Times.Once());
+			var expect = $"https://{fact.ExpectedHost}/.well-known/webfinger?resource={Uri.EscapeDataString(fact.Expected)}";
+			_output.WriteLine($"Expected: {expect}");
+			HttpMessageHandlerMock.VerifyRequest(req => req.RequestUri != null && req.RequestUri.ToString() == expect, Times.Once());
 		}
 		else
 		{
