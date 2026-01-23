@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Net;
 using Moq;
 using Moq.Language.Flow;
@@ -54,5 +55,10 @@ public static class HttpHandlerMockExtensions
 			setup(response);
 			return response;
 		});
+	}
+
+	public static void VerifyRequest(this Mock<MockableMessageHandler> mock, Expression<Func<HttpRequestMessage, bool>> predicate, Times times)
+	{
+		mock.Verify(handler => handler.SendMessageAsync(It.Is(predicate), It.IsAny<CancellationToken>()), times);
 	}
 }

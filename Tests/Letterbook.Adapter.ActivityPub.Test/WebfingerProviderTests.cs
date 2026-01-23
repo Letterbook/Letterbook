@@ -41,19 +41,19 @@ public class WebfingerProviderTests : WithMocks
 	public async Task CanSearchSuccess()
 	{
 		var json = $$"""
-		           {
-		             "subject" : "acct:{{_profile.Handle}}@{{_profile.FediId.Authority}}",
-		             "aliases" : [ "{{_profile.FediId}}" ],
-		             "properties" : { },
-		             "links" : [ {
-		               "rel" : "self",
-		               "type" : "application/activity+json",
-		               "href" : "{{_profile.FediId}}",
-		               "titles" : { },
-		               "properties" : { }
-		             } ]
-		           }
-		           """;
+		             {
+		               "subject" : "acct:{{_profile.Handle}}@{{_profile.FediId.Authority}}",
+		               "aliases" : [ "{{_profile.FediId}}" ],
+		               "properties" : { },
+		               "links" : [ {
+		                 "rel" : "self",
+		                 "type" : "application/activity+json",
+		                 "href" : "{{_profile.FediId}}",
+		                 "titles" : { },
+		                 "properties" : { }
+		               } ]
+		             }
+		             """;
 		HttpMessageHandlerMock.SetupResponse(m =>
 		{
 			m.StatusCode = HttpStatusCode.OK;
@@ -149,6 +149,44 @@ public class WebfingerProviderTests : WithMocks
 			await Task.Delay(1000, cancellationToken);
 			_output.WriteLine("delay complete");
 			return default!;
+		}
+	}
+
+	public record CanParseFact(string Given, string Expected, bool Fetch);
+
+	public class CanParseFacts : Xunit.TheoryData<CanParseFact>
+	{
+		public CanParseFacts()
+		{
+			Add(new CanParseFact("@someone@peer.example", "acct:someone@peer.example", true));
+			Add(new CanParseFact("someone@peer.example", "acct:someone@peer.example", true));
+			Add(new CanParseFact("acct:someone@peer.example", "acct:someone@peer.example", true));
+			Add(new CanParseFact("acct://someone@peer.example", "acct:someone@peer.example", true));
+			Add(new CanParseFact("https://someone@peer.example", "", true));
+			Add(new CanParseFact("https://peer.example/someone", "", false));
+			Add(new CanParseFact("@someone", "", false));
+		}
+	}
+
+	[ClassData(typeof(CanParseFacts))]
+	[Theory(DisplayName = "Should parse query terms")]
+	public async Task CanParse(CanParseFact fact)
+	{
+		HttpMessageHandlerMock.SetupResponse(m =>
+		{
+			m.StatusCode = HttpStatusCode.OK;
+			m.Content = new StringContent("{}", new UTF8Encoding(), new MediaTypeHeaderValue("application/jrd+json"));
+		});
+
+		await _webfinger.SearchProfiles(fact.Given, _cancel.Token);
+
+		if (fact.Fetch)
+		{
+			HttpMessageHandlerMock.VerifyRequest(req => true, Times.Once());
+		}
+		else
+		{
+			HttpMessageHandlerMock.VerifyRequest(req => true, Times.Never());
 		}
 	}
 }

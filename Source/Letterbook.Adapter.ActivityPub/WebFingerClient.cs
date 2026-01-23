@@ -24,25 +24,21 @@ public class WebFingerClient : IGlobalSearchProvider, IProfileSearchProvider
 
 	public async Task<IEnumerable<Models.Profile>> SearchProfiles(string query, CancellationToken cancellationToken)
 	{
-		var parts = query.Split('@', 2,
-			StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-		if (parts.Length != 2)
+		query = string.Join('@', query.Split('@', 2,
+			StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
+
+		if (!(Uri.TryCreate(query, UriKind.Absolute, out var uri)  && !string.IsNullOrEmpty(uri.UserInfo)) &&
+		    !Uri.TryCreate($"acct://{query.Replace("acct:", null)}", UriKind.Absolute, out uri) ||
+		    string.IsNullOrEmpty(uri.UserInfo))
 		{
 			_logger.LogDebug("Can't process search for {Query}", query);
 			return [];
 		}
 
-		if (!Uri.TryCreate($"https://{parts[1]}", UriKind.Absolute, out var host) ||
-		    !Uri.TryCreate($"acct:{parts[0]}", UriKind.Absolute, out var resource))
-		{
-			_logger.LogDebug("Can't parse {Query}", query);
-			return [];
-		}
-
-		var webfinger = await _httpClient.GetResourceDescriptorAsync(host, resource, cancellationToken);
+		var webfinger = await _httpClient.GetResourceDescriptorAsync(uri.Host, uri, cancellationToken);
 		if (webfinger == null)
 		{
-			_logger.LogDebug("Invalid response to query {Host} for {Resource}", host, resource);
+			_logger.LogDebug("Invalid response to query {Host} for {Resource}", uri.Host, uri);
 			return [];
 		}
 
