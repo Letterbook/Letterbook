@@ -154,7 +154,7 @@ public class WebfingerProviderTests : WithMocks
 
 	// https://docs.joinmastodon.org/spec/webfinger/
 	[Fact(DisplayName = "Should translate query into correct URL")]
-	public async Task ParsesQueryIntoUrl()
+	public async Task TranslatesQueryIntoUrl()
 	{
 		HttpMessageHandlerMock.SetupResponse(m =>
 		{
