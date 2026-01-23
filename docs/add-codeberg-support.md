@@ -24,3 +24,9 @@ dotnet build Letterbook.sln
 ```
 
 Got this error when using the smallrest runner: "The runner cancelled the job because it exceeds the maximum run time", so trying largest.
+
+### Lazy runners
+
+https://codeberg.org/actions/meta#lazy-runners
+
+> ...we are considering experiments like offsite runners which only run when solar energy is available.
