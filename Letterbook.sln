@@ -118,6 +118,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Web.Mocks", "Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Letterbook.Generators.Tests", "Source\Letterbook.Generators\Letterbook.Generators.Tests\Letterbook.Generators.Tests.csproj", "{7FC7ECD9-14EF-489B-9B31-256E913F1F8B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Notes", "Notes", "{AF8E9E0A-604F-465C-8200-DB724C137C43}"
+	ProjectSection(SolutionItems) = preProject
+		docs\add-codeberg-support.md = docs\add-codeberg-support.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -249,5 +254,6 @@ Global
 		{B3D30FDD-B364-49F9-AA57-0FDB7F3901B7} = {1030FFE8-DD29-4671-AE2A-412E00251F41}
 		{F09B99D6-8328-4181-844B-DA908D421642} = {1030FFE8-DD29-4671-AE2A-412E00251F41}
 		{7FC7ECD9-14EF-489B-9B31-256E913F1F8B} = {1030FFE8-DD29-4671-AE2A-412E00251F41}
+		{AF8E9E0A-604F-465C-8200-DB724C137C43} = {D5E41A46-D753-4214-AF70-1839E56B4A14}
 	EndGlobalSection
 EndGlobal
