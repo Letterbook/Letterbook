@@ -33,7 +33,7 @@ public class WebFingerClient : IGlobalSearchProvider, IProfileSearchProvider
 		}
 
 		if (!Uri.TryCreate($"https://{parts[1]}", UriKind.Absolute, out var host) ||
-		    !Uri.TryCreate($"acct:{parts[0]}", UriKind.Absolute, out var resource))
+		    !Uri.TryCreate($"acct:{parts[0]}@{parts[1]}", UriKind.Absolute, out var resource))
 		{
 			_logger.LogDebug("Can't parse {Query}", query);
 			return [];
