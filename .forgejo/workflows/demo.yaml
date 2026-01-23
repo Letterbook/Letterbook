@@ -1,6 +1,6 @@
 on: [push]
 jobs:
   test:
-    runs-on: docker
+    runs-on: codeberg-tiny
     steps:
       - run: echo All good!
