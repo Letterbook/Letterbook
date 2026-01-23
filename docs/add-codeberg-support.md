@@ -30,3 +30,12 @@ Got this error when using the smallrest runner: "The runner cancelled the job be
 https://codeberg.org/actions/meta#lazy-runners
 
 > ...we are considering experiments like offsite runners which only run when solar energy is available.
+
+### repository 'https://data.forgejo.org/docker/setup-compose-action/' not found
+
+This did not work:
+
+```yaml
+- name: Set up Docker Compose
+    uses: docker/setup-compose-action@v1
+```
