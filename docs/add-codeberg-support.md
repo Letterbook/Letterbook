@@ -14,3 +14,11 @@ The runner can be installed locally.
 https://forgejo.org/docs/next/user/actions/quick-start/
 
 That does work only the runner must be `runs-on: codeberg-tiny`. A message in the UI says "No matching online runner with label: docker".
+
+### Run build?
+
+We want to run something like:
+
+```sh
+dotnet build Letterbook.sln
+```

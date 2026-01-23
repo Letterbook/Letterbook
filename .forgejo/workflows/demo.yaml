@@ -3,4 +3,9 @@ jobs:
   test:
     runs-on: codeberg-tiny
     steps:
-      - run: echo All good!
+      - uses: actions/checkout@v4
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+      - run: dotnet build Letterbook.sln 
