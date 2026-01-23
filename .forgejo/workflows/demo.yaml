@@ -2,6 +2,12 @@ on: [push]
 jobs:
   test:
     runs-on: codeberg-medium # https://codeberg.org/actions/meta#available-runners
+    services:
+      pgsql:
+        image: postgres:15
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: postgres
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET Core

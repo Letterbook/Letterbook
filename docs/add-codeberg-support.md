@@ -39,3 +39,7 @@ This did not work:
 - name: Set up Docker Compose
     uses: docker/setup-compose-action@v1
 ```
+
+### Use built-in services instead of docker compose
+
+> PostgreSQL, MariaDB and other services can be run from container images -- [forgejo.org](https://forgejo.org/docs/latest/user/actions/advanced-features/#services)
