@@ -10,8 +10,8 @@ jobs:
           POSTGRES_USER: letterbook
           POSTGRES_PASSWORD: letterbookpw
           POSTGRES_DB: letterbook_feeds
-        ports:
-          - "5433:5432"
+        # ports: # I think these are ignored so
+        #   - "5433:5432"
       pgsql:
         image: postgres:16-alpine
         env:
@@ -36,4 +36,5 @@ jobs:
         env:
           ConnectionStringHost: pgsql
           FeedsConnectionStringHost: timescale
+          FeedsConnectionStringPort: 5432
         run: bash ./scripts/integration-test.sh # ${{ github.event.inputs.dotnet-test-args }} 

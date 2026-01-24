@@ -8,7 +8,7 @@ public class TimescaleFixture<T>
 	// @todo: duplicate of HostFixture.FeedsConnectionString
 	private readonly string _connectionString =
 		$"Server={FeedsConnectionStringHost()};" +
-		"Port=5433;" +
+		$"Port={FeedsConnectionStringPort()};" +
 		$"Database=letterbook_feeds_{typeof(T).Name};" +
 		"User Id=letterbook;" +
 		"Password=letterbookpw;" +
@@ -18,6 +18,9 @@ public class TimescaleFixture<T>
 
 	private static string FeedsConnectionStringHost()
 		=> Environment.GetEnvironmentVariable(nameof(FeedsConnectionStringHost)) ?? "localhost";
+
+	private static string FeedsConnectionStringPort()
+		=> Environment.GetEnvironmentVariable(nameof(FeedsConnectionStringPort)) ?? "5433";
 
 	private readonly DbContextOptions<FeedsContext> _opts;
 

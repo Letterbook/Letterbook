@@ -63,6 +63,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	private static string FeedsConnectionStringHost()
 		=> Environment.GetEnvironmentVariable(nameof(FeedsConnectionStringHost)) ?? "localhost";
 
+	private static string FeedsConnectionStringPort()
+		=> Environment.GetEnvironmentVariable(nameof(FeedsConnectionStringPort)) ?? "5433";
+
 	private string ConnectionString =
 		$"Database=letterbook_{typeof(T).Name};" +
 		$"Server={ConnectionStringHost()};" +
@@ -77,7 +80,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 	private string FeedsConnectionString =
 		$"Database=letterbook_feeds_{typeof(T).Name};" +
 		$"Server={FeedsConnectionStringHost()};" +
-		"Port=5433;" +
+		$"Port={FeedsConnectionStringPort()};" +
 		"User Id=letterbook;" +
 		"Password=letterbookpw;" +
 		"SSL Mode=Disable;" +

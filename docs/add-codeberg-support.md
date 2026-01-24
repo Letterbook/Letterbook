@@ -172,3 +172,22 @@ Test database connection with:
 ```
 
 That is because it calculates the connection string itself rather than reading from HostFixture.
+
+### Both databases are running on default port
+
+I don't think this has any effect:
+
+```yaml`
+ports:
+    - "5433:5432"
+```
+
+You can tell because this works:
+
+```sh
+PGPASSWORD=letterbookpw psql -h timescale -U letterbook -c '\dt' letterbook_feeds
+```
+
+That is using the default port.
+
+So we need to allow setting ports on connections as well.
