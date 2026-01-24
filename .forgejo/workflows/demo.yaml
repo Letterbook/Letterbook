@@ -10,7 +10,7 @@ jobs:
           - POSTGRES_PASSWORD=letterbookpw
           - POSTGRES_DB=letterbook_feeds
         ports:
-          - "5433:5432"
+          - "5433:5433"
         volumes:
           - ts_data:/var/lib/postgresql/data
       pgsql:

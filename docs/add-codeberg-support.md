@@ -45,3 +45,23 @@ This did not work:
 > PostgreSQL, MariaDB and other services can be run from container images -- [forgejo.org](https://forgejo.org/docs/latest/user/actions/advanced-features/#services).
 
 The configuration can be directly copied and pasted from docker-compose.yml by the looks.
+
+### failed to start container: Error response from daemon: rootlessport listen tcp 0.0.0.0:5432: bind: address already in use
+
+```sh
+medium@actions-tiny.aburayama.m.codeberg.org(version:v12.5.3) received task 2982672 of job test, be triggered by event: push
+workflow prepared
+🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
+  🐳  docker pull image=postgres:16-alpine platform=linux/amd64 username= forcePull=false
+  🐳  docker pull image=timescale/timescaledb:2.17.2-pg15-oss platform=linux/amd64 username= forcePull=false
+  🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=false
+Cleaning up services for job test
+Cleaning up network for job test, and network name is: WORKFLOW-ef46779af3352479cc45538d237c581a
+  🐳  docker pull image=postgres:16-alpine platform=linux/amd64 username= forcePull=false
+  🐳  docker pull image=timescale/timescaledb:2.17.2-pg15-oss platform=linux/amd64 username= forcePull=false
+  🐳  docker create image=postgres:16-alpine platform=linux/amd64 entrypoint=[] cmd=[] network="WORKFLOW-ef46779af3352479cc45538d237c581a"
+  🐳  docker create image=timescale/timescaledb:2.17.2-pg15-oss platform=linux/amd64 entrypoint=[] cmd=[] network="WORKFLOW-ef46779af3352479cc45538d237c581a"
+  🐳  docker run image=postgres:16-alpine platform=linux/amd64 entrypoint=[] cmd=[] network="WORKFLOW-ef46779af3352479cc45538d237c581a"
+  🐳  docker run image=timescale/timescaledb:2.17.2-pg15-oss platform=linux/amd64 entrypoint=[] cmd=[] network="WORKFLOW-ef46779af3352479cc45538d237c581a"
+failed to start container: Error response from daemon: rootlessport listen tcp 0.0.0.0:5432: bind: address already in use
+```
