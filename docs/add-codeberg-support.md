@@ -99,3 +99,21 @@ ConnectionStringPort=1337 ./scripts/integration-test.sh
 ### The IP address of pgsql is on the same network as the container running the steps and there is no need for port binding
 
 > The IP address of pgsql is on the same network as the container running the steps and there is no need for port binding. The postgres:15 image exposes the PostgreSQL port 5432 and a client will be able to connect as shown in this example. -- [forgejo.org](https://forgejo.org/docs/latest/user/actions/advanced-features/#services)
+
+### Database connection test fails
+
+```yaml
+ - name: Test database connection 
+ - run: apt-get update -qq; apt-get install -y -qq  postgresql-client; PGPASSWORD=letterbookpw psql -h localhost -U postgres -c '\dt' test
+```
+
+```sh
+psql: error: connection to server at "localhost" (::1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+```
+
+### The job can address the service using its name, in this case pgsql.
+
+From [the docs](https://forgejo.org/docs/next/user/actions/advanced-features/#services) -- does that mean we need to use that rather than localhost?
