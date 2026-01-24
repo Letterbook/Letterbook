@@ -10,7 +10,7 @@ jobs:
           - POSTGRES_PASSWORD=letterbookpw
           - POSTGRES_DB=letterbook_feeds
         ports:
-          - "5433:5433"
+          - "5433:5432"
         volumes:
           - ts_data:/var/lib/postgresql/data
       pgsql:
@@ -24,7 +24,7 @@ jobs:
           - POSTGRES_PASSWORD=letterbookpw
           - POSTGRES_DB=letterbook
         ports:
-          - "1337:1337"
+          - "1337:5432"
         volumes:
           - db_data:/var/lib/postgresql/data
           - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf:z
@@ -36,8 +36,8 @@ jobs:
         with:
           dotnet-version: 9.0.x
       #- run: dotnet build Letterbook.sln 
-      # - name: Test
-      #   run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger console
+      - name: Test
+        run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger console
       - name: Integration tests
         env:
           ConnectionStringPort: "1337"

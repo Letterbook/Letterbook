@@ -93,3 +93,5 @@ which is okay as long as you can configure the tests with it.
 ```sh
 ConnectionStringPort=1337 ./scripts/integration-test.sh
 ```
+
+### Npgsql.NpgsqlException : Failed to connect to 127.0.0.1:1337
