@@ -38,6 +38,4 @@ jobs:
         if: false
         run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger console
       - name: Integration tests
-        env:
-          ConnectionStringPort: "5432"
         run: bash ./scripts/integration-test.sh # ${{ github.event.inputs.dotnet-test-args }} 
