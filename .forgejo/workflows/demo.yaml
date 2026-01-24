@@ -4,6 +4,7 @@ jobs:
   # No volume involved & the container is implicit
   #
   simple-no-container:
+    if: false
     runs-on: codeberg-medium
     services:
       pgsql:
@@ -14,8 +15,9 @@ jobs:
     steps:
     - run: |
        apt-get update -qq
-       apt-get install -y -qq  postgresql-client
+       apt-get install -y -qq postgresql-client
        PGPASSWORD=letterbookpw psql -h pgsql -U postgres -c '\dt' test
+
   build-and-test:
     runs-on: codeberg-medium # https://codeberg.org/actions/meta#available-runners
     services:
@@ -35,7 +37,7 @@ jobs:
           POSTGRES_DB: letterbook
     steps:
       - name: Test database connection 
-        run: apt-get update -qq; apt-get install -y -qq postgresql-client; PGPASSWORD=letterbookpw psql -h pgsql -U postgres -c '\dt' test
+        run: apt-get update -qq; apt-get install -y -qq postgresql-client; PGPASSWORD=letterbookpw psql -h pgsql -U letterbook -c '\dt' letterbook
       - uses: actions/checkout@v4
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
@@ -46,5 +48,7 @@ jobs:
         if: false
         run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger console
       - name: Integration tests
-        if: false
+        env:
+          ConnectionStringHost: pgsql
+          FeedsConnectionStringHost: timescale
         run: bash ./scripts/integration-test.sh # ${{ github.event.inputs.dotnet-test-args }} 

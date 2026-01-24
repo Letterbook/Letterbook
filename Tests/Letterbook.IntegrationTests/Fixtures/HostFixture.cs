@@ -57,13 +57,16 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 	private readonly IMessageSink _sink;
 
-	private static string ConnectionStringPort()
-		=> Environment.GetEnvironmentVariable("ConnectionStringPort") ?? "5432";
+	private static string ConnectionStringHost()
+		=> Environment.GetEnvironmentVariable(nameof(ConnectionStringHost)) ?? "localhost";
+
+	private static string FeedsConnectionStringHost()
+		=> Environment.GetEnvironmentVariable(nameof(FeedsConnectionStringHost)) ?? "localhost";
 
 	private string ConnectionString =
 		$"Database=letterbook_{typeof(T).Name};" +
-		"Server=localhost;" +
-		$"Port={ConnectionStringPort()};" +
+		$"Server={ConnectionStringHost()};" +
+		$"Port=5432;" +
 		"User Id=letterbook;" +
 		"Password=letterbookpw;" +
 		"SSL Mode=Disable;" +
@@ -72,7 +75,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 	private string FeedsConnectionString =
 		$"Database=letterbook_feeds_{typeof(T).Name};" +
-		"Server=localhost;" +
+		$"Server={FeedsConnectionStringHost()};" +
 		"Port=5433;" +
 		"User Id=letterbook;" +
 		"Password=letterbookpw;" +

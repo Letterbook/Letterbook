@@ -117,3 +117,41 @@ connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection re
 ### The job can address the service using its name, in this case pgsql.
 
 From [the docs](https://forgejo.org/docs/next/user/actions/advanced-features/#services) -- does that mean we need to use that rather than localhost?
+
+Nope:
+
+> psql: error: could not translate host name "pgsql" to address: Name or service not known
+
+### This very simple one works
+
+```yaml
+simple-no-container:
+    runs-on: codeberg-medium
+    services:
+      pgsql:
+        image: code.forgejo.org/oci/postgres:15
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: postgres
+    steps:
+    - run: |
+       apt-get update -qq
+       apt-get install -y -qq  postgresql-client
+       PGPASSWORD=postgres psql -h pgsql -U postgres -c '\dt' test
+
+```
+
+I notice we are trying to set environment variables differently to the sample above.
+
+```yaml
+pgsql:
+    image: postgres:16-alpine
+    environment:
+        - POSTGRES_USER=letterbook
+        - POSTGRES_PASSWORD=letterbookpw
+        - POSTGRES_DB=letterbook
+```
+
+I think that might just be being ignored.
+
+So it's not just a drop-in from `docker-compose.yml`.
