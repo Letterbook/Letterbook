@@ -170,3 +170,5 @@ Test database connection with:
 ---- Npgsql.NpgsqlException : Failed to connect to 127.0.0.1:5433
 -------- System.Net.Sockets.SocketException : Connection refused
 ```
+
+That is because it calculates the connection string itself rather than reading from HostFixture.

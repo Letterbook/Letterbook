@@ -1,23 +1,6 @@
-on: [push]
+# https://forgejo.org/docs/next/user/actions/reference/#onworkflow_dispatch
+on: [push, workflow_dispatch]
 jobs:
-  #
-  # No volume involved & the container is implicit
-  #
-  simple-no-container:
-    if: false
-    runs-on: codeberg-medium
-    services:
-      pgsql:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: letterbookpw
-    steps:
-    - run: |
-       apt-get update -qq
-       apt-get install -y -qq postgresql-client
-       PGPASSWORD=letterbookpw psql -h pgsql -U postgres -c '\dt' test
-
   build-and-test:
     runs-on: codeberg-medium # https://codeberg.org/actions/meta#available-runners
     services:
@@ -38,6 +21,8 @@ jobs:
     steps:
       - name: Test database connection 
         run: apt-get update -qq; apt-get install -y -qq postgresql-client; PGPASSWORD=letterbookpw psql -h pgsql -U letterbook -c '\dt' letterbook
+      - name: Test timescale database connection 
+        run: PGPASSWORD=letterbookpw psql -h timescale -U letterbook -c '\dt' letterbook_feeds
       - uses: actions/checkout@v4
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
