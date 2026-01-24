@@ -7,7 +7,7 @@ jobs:
     runs-on: codeberg-medium
     services:
       pgsql:
-        image: code.forgejo.org/oci/postgres:15
+        image: postgres:16-alpine
         env:
           POSTGRES_DB: test
           POSTGRES_PASSWORD: postgres
