@@ -94,8 +94,32 @@ which is okay as long as you can configure the tests with it.
 ConnectionStringPort=1337 ./scripts/integration-test.sh
 ```
 
-### Npgsql.NpgsqlException : Failed to connect to 127.0.0.1:1337
+### Npgsql.NpgsqlException : Failed to connect to 127.0.0.1:1337 No connection could be made because the target machine actively refused it.
 
-### The IP address of pgsql is on the same network as the container running the steps and there is no need for port binding
+```sh
+---- Npgsql.NpgsqlException : Failed to connect to 127.0.0.1:5433
+      -------- System.Net.Sockets.SocketException : No connection could be made because the target machine actively refused it.
+```
+
+#### The IP address of pgsql is on the same network as the container running the steps and there is no need for port binding
 
 > The IP address of pgsql is on the same network as the container running the steps and there is no need for port binding. The postgres:15 image exposes the PostgreSQL port 5432 and a client will be able to connect as shown in this example. -- [forgejo.org](https://forgejo.org/docs/latest/user/actions/advanced-features/#services)
+
+Iiiiiintersting -- I get the same locally if I stop the tailscale container.
+
+So you have to have both running.
+
+### Npgsql.NpgsqlException : Failed to connect to 127.0.0.1:5432 Connection refused
+
+This is ia different error -- do we have password issue?
+
+```sh
+---- Npgsql.NpgsqlException : Failed to connect to 127.0.0.1:5432
+-------- System.Net.Sockets.SocketException : Connection refused
+```
+
+No password issue because you get this with incorrect password:
+
+```sh
+Npgsql.PostgresException : 28P01: password authentication failed for user "letterbook"
+```
