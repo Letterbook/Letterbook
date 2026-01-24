@@ -155,3 +155,18 @@ pgsql:
 I think that might just be being ignored.
 
 So it's not just a drop-in from `docker-compose.yml`.
+
+Test database connection with:
+
+```yaml
+- name: Test database connection 
+  run: apt-get update -qq; apt-get install -y -qq postgresql-client; PGPASSWORD=letterbookpw psql -h pgsql -U letterbook -c '\dt' letterbook
+```
+
+### Test failure TimescaleDataFixture Failed to connect to 127.0.0.1:5433
+
+```sh
+ Class fixture type 'Letterbook.IntegrationTests.Fixtures.TimescaleDataFixture`1[[Letterbook.IntegrationTests.FeedsAdapterTest, Letterbook.IntegrationTests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]' threw in its constructor
+---- Npgsql.NpgsqlException : Failed to connect to 127.0.0.1:5433
+-------- System.Net.Sockets.SocketException : Connection refused
+```

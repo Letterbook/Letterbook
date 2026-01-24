@@ -73,6 +73,7 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		"Search Path=public;" +
 		"Include Error Detail=true";
 
+	// @todo: duplicated in TimescaleFixture
 	private string FeedsConnectionString =
 		$"Database=letterbook_feeds_{typeof(T).Name};" +
 		$"Server={FeedsConnectionStringHost()};" +
