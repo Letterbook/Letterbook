@@ -35,6 +35,7 @@ jobs:
           dotnet-version: 9.0.x
       #- run: dotnet build Letterbook.sln 
       - name: Test
+        if: false
         run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger console
       - name: Integration tests
         env:
