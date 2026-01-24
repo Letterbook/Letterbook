@@ -57,10 +57,13 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 	private readonly IMessageSink _sink;
 
+	private static string ConnectionStringPort()
+		=> Environment.GetEnvironmentVariable("ConnectionStringPort") ?? "5432";
+
 	private string ConnectionString =
 		$"Database=letterbook_{typeof(T).Name};" +
 		"Server=localhost;" +
-		"Port=5432;" +
+		$"Port={ConnectionStringPort()};" +
 		"User Id=letterbook;" +
 		"Password=letterbookpw;" +
 		"SSL Mode=Disable;" +

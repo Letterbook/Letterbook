@@ -36,12 +36,9 @@ jobs:
         with:
           dotnet-version: 9.0.x
       #- run: dotnet build Letterbook.sln 
-      - name: Test
-        run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger console
-      # - name: Set up Docker Compose
-      #   uses: docker/setup-compose-action@v1
-      # Not sure how to do this
-      # - name: Start database
-      #   run: bash scripts/start-database.sh
-      # - name: Integration tests
-      #   run: bash scripts/integration-test.sh # ${{ github.event.inputs.dotnet-test-args }} 
+      # - name: Test
+      #   run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger console
+      - name: Integration tests
+        env:
+          ConnectionStringPort: "1337"
+        run: bash ./scripts/integration-test.sh # ${{ github.event.inputs.dotnet-test-args }} 

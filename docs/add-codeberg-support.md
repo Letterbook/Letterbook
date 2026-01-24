@@ -65,3 +65,31 @@ Cleaning up network for job test, and network name is: WORKFLOW-ef46779af3352479
   🐳  docker run image=timescale/timescaledb:2.17.2-pg15-oss platform=linux/amd64 entrypoint=[] cmd=[] network="WORKFLOW-ef46779af3352479cc45538d237c581a"
 failed to start container: Error response from daemon: rootlessport listen tcp 0.0.0.0:5432: bind: address already in use
 ```
+
+You can set those ports to anything:
+
+```yaml
+pgsql:
+        image: postgres:16-alpine
+        command:
+          - postgres
+          - -c
+          - config_file=/etc/postgresql/postgresql.conf
+        environment:
+          - POSTGRES_USER=letterbook
+          - POSTGRES_PASSWORD=letterbookpw
+          - POSTGRES_DB=letterbook
+        ports:
+          - "1337:1337"
+        volumes:
+          - db_data:/var/lib/postgresql/data
+          - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf:z
+          - ./volumes/pg_hba.conf:/etc/postgresql/pg_hba.conf:z
+```
+
+which is okay as long as you can configure the tests with it.
+
+
+```sh
+ConnectionStringPort=1337 ./scripts/integration-test.sh
+```
