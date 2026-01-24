@@ -42,4 +42,6 @@ This did not work:
 
 ### Use built-in services instead of docker compose
 
-> PostgreSQL, MariaDB and other services can be run from container images -- [forgejo.org](https://forgejo.org/docs/latest/user/actions/advanced-features/#services)
+> PostgreSQL, MariaDB and other services can be run from container images -- [forgejo.org](https://forgejo.org/docs/latest/user/actions/advanced-features/#services).
+
+The configuration can be directly copied and pasted from docker-compose.yml by the looks.
