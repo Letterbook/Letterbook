@@ -2,33 +2,31 @@ on: [push]
 jobs:
   build-and-test:
     runs-on: codeberg-medium # https://codeberg.org/actions/meta#available-runners
-    # services:
-    #   timescale:
-    #     image: timescale/timescaledb:2.17.2-pg15-oss
-    #     environment:
-    #       - POSTGRES_USER=letterbook
-    #       - POSTGRES_PASSWORD=letterbookpw
-    #       - POSTGRES_DB=letterbook_feeds
-    #     ports:
-    #       - "5433:5432"
-    #     volumes:
-    #       - ts_data:/var/lib/postgresql/data
-    #   pgsql:
-    #     image: postgres:16-alpine
-    #     command:
-    #       - postgres
-    #       - -c
-    #       - config_file=/etc/postgresql/postgresql.conf
-    #     environment:
-    #       - POSTGRES_USER=letterbook
-    #       - POSTGRES_PASSWORD=letterbookpw
-    #       - POSTGRES_DB=letterbook
-    #     # ports: # The IP address of pgsql is on the same network as the container running the steps and there is no need for port binding -- https://forgejo.org/docs/latest/user/actions/advanced-features/#services
-    #     #   - "5432:5432"
-    #     volumes:
-    #       - db_data:/var/lib/postgresql/data
-    #       - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf:z
-    #       - ./volumes/pg_hba.conf:/etc/postgresql/pg_hba.conf:z
+    services:
+      timescale:
+        image: timescale/timescaledb:2.17.2-pg15-oss
+        environment:
+          - POSTGRES_USER=letterbook
+          - POSTGRES_PASSWORD=letterbookpw
+          - POSTGRES_DB=letterbook_feeds
+        ports:
+          - "5433:5432"
+        volumes:
+          - ts_data:/var/lib/postgresql/data
+      pgsql:
+        image: postgres:16-alpine
+        command:
+          - postgres
+          - -c
+          - config_file=/etc/postgresql/postgresql.conf
+        environment:
+          - POSTGRES_USER=letterbook
+          - POSTGRES_PASSWORD=letterbookpw
+          - POSTGRES_DB=letterbook
+        volumes:
+          - db_data:/var/lib/postgresql/data
+          - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf:z
+          - ./volumes/pg_hba.conf:/etc/postgresql/pg_hba.conf:z
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET Core
