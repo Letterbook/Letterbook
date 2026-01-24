@@ -3,16 +3,16 @@ jobs:
   test:
     runs-on: codeberg-medium # https://codeberg.org/actions/meta#available-runners
     services:
-      timescale:
-        image: timescale/timescaledb:2.17.2-pg15-oss
-        environment:
-          - POSTGRES_USER=letterbook
-          - POSTGRES_PASSWORD=letterbookpw
-          - POSTGRES_DB=letterbook_feeds
-        ports:
-          - "5433:5432"
-        volumes:
-          - ts_data:/var/lib/postgresql/data
+      # timescale:
+      #   image: timescale/timescaledb:2.17.2-pg15-oss
+      #   environment:
+      #     - POSTGRES_USER=letterbook
+      #     - POSTGRES_PASSWORD=letterbookpw
+      #     - POSTGRES_DB=letterbook_feeds
+      #   ports:
+      #     - "5433:5432"
+      #   volumes:
+      #     - ts_data:/var/lib/postgresql/data
       pgsql:
         image: postgres:16-alpine
         command:
@@ -23,8 +23,6 @@ jobs:
           - POSTGRES_USER=letterbook
           - POSTGRES_PASSWORD=letterbookpw
           - POSTGRES_DB=letterbook
-        ports:
-          - "1337:5432"
         volumes:
           - db_data:/var/lib/postgresql/data
           - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf:z
@@ -40,5 +38,5 @@ jobs:
         run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger console
       - name: Integration tests
         env:
-          ConnectionStringPort: "1337"
+          ConnectionStringPort: "5432"
         run: bash ./scripts/integration-test.sh # ${{ github.event.inputs.dotnet-test-args }} 
