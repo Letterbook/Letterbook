@@ -4,10 +4,21 @@ jobs:
     runs-on: codeberg-medium # https://codeberg.org/actions/meta#available-runners
     services:
       pgsql:
-        image: postgres:15
-        env:
-          POSTGRES_DB: test
-          POSTGRES_PASSWORD: postgres
+        image: postgres:16-alpine
+        command:
+          - postgres
+          - -c
+          - config_file=/etc/postgresql/postgresql.conf
+        environment:
+          - POSTGRES_USER=letterbook
+          - POSTGRES_PASSWORD=letterbookpw
+          - POSTGRES_DB=letterbook
+        ports:
+          - "5432:5432"
+        volumes:
+          - db_data:/var/lib/postgresql/data
+          - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf:z
+          - ./volumes/pg_hba.conf:/etc/postgresql/pg_hba.conf:z
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET Core
