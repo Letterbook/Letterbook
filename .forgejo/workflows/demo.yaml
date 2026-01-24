@@ -10,7 +10,7 @@ jobs:
           POSTGRES_USER: letterbook
           POSTGRES_PASSWORD: letterbookpw
           POSTGRES_DB: letterbook_feeds
-        # ports: # I think these are ignored so
+        # ports: # I think these are ignored because each service is automatically hosted at different address.
         #   - "5433:5432"
       pgsql:
         image: postgres:16-alpine
@@ -28,13 +28,13 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-      #- run: dotnet build Letterbook.sln 
+      - name: Build
+        run: dotnet build Letterbook.sln 
       - name: Test
-        if: false
-        run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger console
+        run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger console --no-restore --no-build
       - name: Integration tests
         env:
           ConnectionStringHost: pgsql
           FeedsConnectionStringHost: timescale
           FeedsConnectionStringPort: 5432
-        run: bash ./scripts/integration-test.sh # ${{ github.event.inputs.dotnet-test-args }} 
+        run: bash ./scripts/integration-test.sh --no-build --no-restore # ${{ github.event.inputs.dotnet-test-args }} 
