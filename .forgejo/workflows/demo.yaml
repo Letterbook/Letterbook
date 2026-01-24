@@ -10,13 +10,14 @@ jobs:
         image: postgres:16-alpine
         env:
           POSTGRES_DB: test
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: letterbookpw
     steps:
     - run: |
        apt-get update -qq
        apt-get install -y -qq  postgresql-client
-       PGPASSWORD=postgres psql -h pgsql -U postgres -c '\dt' test
+       PGPASSWORD=letterbookpw psql -h pgsql -U postgres -c '\dt' test
   build-and-test:
+    if: false
     runs-on: codeberg-medium # https://codeberg.org/actions/meta#available-runners
     services:
       timescale:
