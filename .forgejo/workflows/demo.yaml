@@ -28,6 +28,7 @@ jobs:
           - ./volumes/postgresql.conf:/etc/postgresql/postgresql.conf:z
           - ./volumes/pg_hba.conf:/etc/postgresql/pg_hba.conf:z
     steps:
+      - run: apt-get update -qq; apt-get install -y -qq  postgresql-client; PGPASSWORD=letterbookpw psql -h localhost -U postgres -c '\dt' test
       - uses: actions/checkout@v4
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
