@@ -17,26 +17,25 @@ jobs:
        apt-get install -y -qq  postgresql-client
        PGPASSWORD=letterbookpw psql -h pgsql -U postgres -c '\dt' test
   build-and-test:
-    if: false
     runs-on: codeberg-medium # https://codeberg.org/actions/meta#available-runners
     services:
       timescale:
         image: timescale/timescaledb:2.17.2-pg15-oss
-        environment:
-          - POSTGRES_USER=letterbook
-          - POSTGRES_PASSWORD=letterbookpw
-          - POSTGRES_DB=letterbook_feeds
+        env:
+          POSTGRES_USER: letterbook
+          POSTGRES_PASSWORD: letterbookpw
+          POSTGRES_DB: letterbook_feeds
         ports:
           - "5433:5432"
       pgsql:
         image: postgres:16-alpine
-        environment:
-          - POSTGRES_USER=letterbook
-          - POSTGRES_PASSWORD=letterbookpw
-          - POSTGRES_DB=letterbook
+        env:
+          POSTGRES_USER: letterbook
+          POSTGRES_PASSWORD: letterbookpw
+          POSTGRES_DB: letterbook
     steps:
       - name: Test database connection 
-        run: apt-get update -qq; apt-get install -y -qq postgresql-client; PGPASSWORD=letterbookpw psql -h localhost -U postgres -c '\dt' test
+        run: apt-get update -qq; apt-get install -y -qq postgresql-client; PGPASSWORD=letterbookpw psql -h pgsql -U postgres -c '\dt' test
       - uses: actions/checkout@v4
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
@@ -47,4 +46,5 @@ jobs:
         if: false
         run: dotnet test Letterbook.UnitTests.slnf --configuration Release --logger console
       - name: Integration tests
+        if: false
         run: bash ./scripts/integration-test.sh # ${{ github.event.inputs.dotnet-test-args }} 
