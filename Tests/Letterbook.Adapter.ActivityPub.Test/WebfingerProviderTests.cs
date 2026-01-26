@@ -192,6 +192,9 @@ public class WebfingerProviderTests : WithMocks
 			Add(new CanParseFact("someone@localhost", "", "", false));
 			Add(new CanParseFact("someone@127.0.0.1", "", "", false));
 			Add(new CanParseFact("someone@192.168.0.1", "", "", false));
+			Add(new CanParseFact("some other string", "", "", false));
+			Add(new CanParseFact("a string that @resembles a handle", "", "", false));
+			Add(new CanParseFact("a string that acct:resembles a handle", "", "", false));
 		}
 	}
 

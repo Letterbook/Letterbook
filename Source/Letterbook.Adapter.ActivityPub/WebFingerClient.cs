@@ -36,7 +36,16 @@ public partial class WebFingerClient : IGlobalSearchProvider, IProfileSearchProv
 		query = string.Join('@', query.Split('@', 2,
 			StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
 
-		var builder = new UriBuilder(query);
+		UriBuilder builder;
+		try
+		{
+			builder = new UriBuilder(query);
+		}
+		catch (UriFormatException )
+		{
+			_logger.LogDebug("Can't process search for {Query}", query);
+			return [];
+		}
 
 		if (string.IsNullOrEmpty(builder.UserName) ||
 		    string.IsNullOrEmpty(builder.Host) ||
@@ -53,7 +62,6 @@ public partial class WebFingerClient : IGlobalSearchProvider, IProfileSearchProv
 
 		var acct = $"{builder.UserName}@{builder.Host}";
 		builder.Fragment = "";
-		builder.Scheme = "";
 		builder.Scheme = Uri.UriSchemeHttps;
 		builder.Port = 443;
 		builder.UserName = "";
