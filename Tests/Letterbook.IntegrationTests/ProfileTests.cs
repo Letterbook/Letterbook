@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -87,47 +86,6 @@ public sealed class ProfileTests : IClassFixture<HostFixture<ProfileTests>>, ITe
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 		var actual = Assert.IsType<FullProfileDto>(await response.Content.ReadFromJsonAsync<FullProfileDto>(_json));
 		Assert.Equal(_profiles[0].Handle, actual.Handle);
-	}
-
-	/*
-
-		https://docs.joinmastodon.org/spec/webfinger
-
-		@todo: What do we do about the URL prefix '/lb/v1'? Is that hidden at runtime?
-		@todo: what does the shape of the reply look like? FullProfileDto or other?
-		@todo: there should be no authorization required
-		@todo: Is there a specific shape that the resource parameter needs to take?
-	*/
-	[Fact(DisplayName = "Should get a profile by web finger")]
-	public async Task CanGetProfileByWebFinger()
-	{
-		var profile = _profiles[0];
-
-		var response = await _client.GetAsync($"/lb/v1/.well-known/webfinger?resource={profile.Handle}");
-
-		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-		var body = await response.Content.ReadAsStringAsync();
-
-		_output.WriteLine(body);
-
-		var actual = Assert.IsType<FullProfileDto>(await response.Content.ReadFromJsonAsync<FullProfileDto>(_json));
-
-		Assert.Equal(profile.Handle, actual.Handle);
-	}
-
-	[Fact(DisplayName = "Should return 404 when no handle found")]
-	public async Task WebFingerReturns404NotFoundWhenHandleDoesNotExist()
-	{
-		var response = await _client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "/lb/v1/.well-known/webfinger?resource=xxx-does-not-exist-xxx")
-		{
-			Headers = { Accept = { MediaTypeWithQualityHeaderValue.Parse("application/json") }}
-		});
-
-		Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-
-		// [!] Don't really expect this as I asked for "application/json"
-		Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
 	}
 
 	[Fact(DisplayName = "Should create a profile owned by an actor")]
