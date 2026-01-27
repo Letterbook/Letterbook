@@ -3,7 +3,6 @@ using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
-using MassTransit.Testing;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -24,13 +23,22 @@ public class WebFingerController : ControllerBase
 		_mapper = new Mapper(mappingConfig.Profiles);
 	}
 
-	// https://mastodon.social/.well-known/webfinger?resource=acct:gargron@mastodon.social
 	[HttpGet(".well-known/webfinger")]
 	[ProducesResponseType<FullProfileDto>(StatusCodes.Status200OK)]
 	[SwaggerOperation("Get", "Lookup a profile by web finger")]
-	public async Task<IActionResult> GetByWebFinger([FromQuery]string resource)
+	public async Task<IActionResult> GetByWebFinger([FromQuery(Name = "resource")]string[] resources /* acct:handle@authority */)
 	{
-		var result = await _profiles.As(User.Claims).FindProfiles(resource).FirstOrDefaultAsync();
+		if (resources.Length != 1)
+			return BadRequest();
+
+		var resource = resources[0];
+
+		if (string.IsNullOrEmpty(resource) || !Uri.TryCreate(resource, UriKind.Absolute, out var resourceUrl))
+			return BadRequest();
+
+		var handle = resourceUrl.AbsolutePath.Split('@').First();
+
+		var result = await _profiles.As(User.Claims).FindProfiles(handle).FirstOrDefaultAsync();
 
 		return result != null ? Ok(_mapper.Map<FullProfileDto>(result)): NotFound();
 	}
