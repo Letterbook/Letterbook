@@ -508,4 +508,28 @@ public class ProfileServiceTests : WithMocks
 
 		Assert.Equal(FollowState.None, actual?.State);
 	}
+
+	[Fact(DisplayName = "Should find profile by account URI like 'acct:handle@authority'")]
+	public async Task FindByAccountUri()
+	{
+		DataAdapterMock.Setup(m => m.AllProfiles()).Returns(new List<Profile> { _profile }.BuildMock());
+
+		var actual = await _service.LookupProfile(new Uri($"acct:{_profile.Handle}@{_profile.Authority}"), null);
+
+		Assert.Equal(_profile.Handle, actual?.Handle);
+	}
+
+	[Fact(DisplayName = "Should find profile by incomplete account URI like 'acct:handle'")]
+	public async Task FindByAccountUriAllowsIncompleteUri()
+	{
+		DataAdapterMock.Setup(m => m.AllProfiles()).Returns(new List<Profile> { _profile }.BuildMock());
+
+		var uriStringMissingAtSymbolAndAuthority = $"acct:{_profile.Handle}";
+
+		var actual = await _service.LookupProfile(new Uri(uriStringMissingAtSymbolAndAuthority), null);
+
+		Assert.Equal(_profile.Handle, actual?.Handle);
+	}
+
+	// TEST: Does authority need to be validated? What if it is a different server?
 }

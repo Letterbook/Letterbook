@@ -42,7 +42,6 @@ public interface IAuthzProfileService
 
 	/// <see cref="LookupProfile(Medo.Uuid7,System.Nullable{Medo.Uuid7})"/>
 	Task<Profile?> LookupProfile(Uri fediId, ProfileId? relatedProfile = null);
-	Task<Profile?> LookupProfile(AccountUri accountUri, ProfileId? relatedProfile = null);
 	IAsyncEnumerable<Profile> FindProfiles(string handle, string host);
 	IAsyncEnumerable<Profile> FindProfiles(string handle);
 	IQueryable<Profile> QueryProfiles(string handle, string host);

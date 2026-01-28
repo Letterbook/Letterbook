@@ -34,10 +34,10 @@ public class WebFingerController : ControllerBase
 
 		var resource = resources[0];
 
-		if (string.IsNullOrEmpty(resource) || !AccountUri.TryParse(resource, out var accountUri))
+		if (string.IsNullOrEmpty(resource) || !Uri.TryCreate(resource, UriKind.Absolute, out var accountUri))
 			return BadRequest();
 
-		var result = await _profiles.As(User.Claims).LookupProfile(accountUri!, null);
+		var result = await _profiles.As(User.Claims).LookupProfile(accountUri);
 
 		return result != null ? Ok(_mapper.Map<FullProfileDto>(result)): NotFound();
 	}
