@@ -2383,6 +2383,49 @@
           }
         }
       }
+    },
+    "/lb/v1/.well-known/webfinger": {
+      "get": {
+        "tags": [
+          "WebFinger"
+        ],
+        "summary": "Get",
+        "description": "Lookup a profile by web finger",
+        "parameters": [
+          {
+            "name": "resource",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FullProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
