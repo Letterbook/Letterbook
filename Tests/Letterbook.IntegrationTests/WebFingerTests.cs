@@ -95,10 +95,14 @@ public sealed class WebFingerTests : IClassFixture<HostFixture<WebFingerTests>>,
 		var response = await _client.GetAsync($"/lb/v1/.well-known/webfinger?resource={resourceMissingAcctSchemePrefix}");
 
 		Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+		var actual = Assert.IsType<BadRequestProblem>(await response.Content.ReadFromJsonAsync<BadRequestProblem>(_json));
+
+		Assert.Equal($"Resource query parameter is invalid. Value supplied was '{resourceMissingAcctSchemePrefix}'.", actual.ErrorMessage);
 	}
 
 	// https://datatracker.ietf.org/doc/html/rfc7033#section-4.2
-	[Fact(DisplayName = "Should return HTTP 400 when resource query parameter is omitted")]
+	[Fact(DisplayName = "Should return HTTP 400 when resource query parameter value is omitted")]
 	public async Task WebFingerReturns400WhenResourceIsOmitted()
 	{
 		var response = await _client.GetAsync("/lb/v1/.well-known/webfinger?resource=");
@@ -108,6 +112,10 @@ public sealed class WebFingerTests : IClassFixture<HostFixture<WebFingerTests>>,
 		response = await _client.GetAsync("/lb/v1/.well-known/webfinger");
 
 		Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+		var actual = Assert.IsType<BadRequestProblem>(await response.Content.ReadFromJsonAsync<BadRequestProblem>(_json));
+
+		Assert.Equal("Resource query parameter is required.", actual.ErrorMessage);
 	}
 
 	/*
@@ -121,5 +129,17 @@ public sealed class WebFingerTests : IClassFixture<HostFixture<WebFingerTests>>,
 		var response = await _client.GetAsync("/lb/v1/.well-known/webfinger?resource=acct:A&resource=acct:B");
 
 		Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+		// [!] Not using BadRequestObjectResult here as it cannot be deserialized.
+
+		var actual = Assert.IsType<BadRequestProblem>(await response.Content.ReadFromJsonAsync<BadRequestProblem>(_json));
+
+		Assert.Equal("Resource query parameter was supplied too many times.", actual.ErrorMessage);
 	}
+}
+
+// @todo: consider moving to Letterbook.Core.Models.Dto?
+public class BadRequestProblem
+{
+	public string? ErrorMessage { get; set; }
 }

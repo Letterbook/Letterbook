@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
-using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Microsoft.AspNetCore.Mvc;
@@ -29,16 +28,27 @@ public class WebFingerController : ControllerBase
 	[SwaggerOperation("Get", "Lookup a profile by web finger")]
 	public async Task<IActionResult> GetByWebFinger([FromQuery(Name = "resource")]string[] resources /* acct:handle@authority */)
 	{
-		if (resources.Length != 1)
-			return BadRequest();
+		if (resources.Length == 0)
+			return BadRequest("Resource query parameter is required.");
+
+		if (resources.Length > 1)
+			return BadRequest("Resource query parameter was supplied too many times.");
 
 		var resource = resources[0];
 
 		if (string.IsNullOrEmpty(resource) || !Uri.TryCreate(resource, UriKind.Absolute, out var accountUri))
-			return BadRequest();
+			return BadRequest($"Resource query parameter is invalid. Value supplied was '{resource}'.");
 
 		var result = await _profiles.As(User.Claims).LookupProfile(accountUri);
 
 		return result != null ? Ok(_mapper.Map<FullProfileDto>(result)): NotFound();
+	}
+
+	private BadRequestObjectResult BadRequest(string message)
+	{
+		return base.BadRequest(new
+		{
+			ErrorMessage = message
+		});
 	}
 }
