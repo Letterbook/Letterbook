@@ -227,6 +227,11 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		return result;
 	}
 
+	public async Task<Profile?> LookupProfile(AccountUri accountUri, ProfileId? relatedProfile = null)
+	{
+		return await FindProfiles(accountUri.User).FirstOrDefaultAsync();
+	}
+
 	public IAsyncEnumerable<Profile> FindProfiles(string handle, string host)
 	{
 		return QueryProfiles(handle, host).AsAsyncEnumerable();

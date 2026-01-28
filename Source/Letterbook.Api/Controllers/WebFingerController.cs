@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Letterbook.Api.Swagger;
 using Letterbook.Core;
+using Letterbook.Core.Models;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
 using Microsoft.AspNetCore.Mvc;
@@ -33,12 +34,10 @@ public class WebFingerController : ControllerBase
 
 		var resource = resources[0];
 
-		if (string.IsNullOrEmpty(resource) || !Uri.TryCreate(resource, UriKind.Absolute, out var resourceUrl))
+		if (string.IsNullOrEmpty(resource) || !AccountUri.TryParse(resource, out var accountUri))
 			return BadRequest();
 
-		var handle = resourceUrl.AbsolutePath.Split('@').First();
-
-		var result = await _profiles.As(User.Claims).FindProfiles(handle).FirstOrDefaultAsync();
+		var result = await _profiles.As(User.Claims).LookupProfile(accountUri!, null);
 
 		return result != null ? Ok(_mapper.Map<FullProfileDto>(result)): NotFound();
 	}
