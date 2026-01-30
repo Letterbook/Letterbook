@@ -30,21 +30,17 @@ public static class AccountsCommand
 
 		createCommand.SetAction(async result =>
 		{
-			var name = result.GetValue(usernameOption);
-			var email = result.GetValue(emailOption);
+			var name = result.GetRequiredValue(usernameOption);
+			var email = result.GetRequiredValue(emailOption);
+			var password = "$1Password";
 
 			Console.WriteLine($"Creating account with username <{name}> and email <{email}>");
 
-			var newAccount = await CreateNewAccountAsync(accountService, dataAdapter, email, name);
+			var newAccount = await CreateNewAccountAsync(accountService, dataAdapter, email, name, password);
 
-			if (newAccount.Succeeded)
-			{
-				Console.WriteLine($"Created account with id <{newAccount.Succeeded}>");
-			}
-			else
-			{
-				Console.WriteLine($"Failed: <{string.Join(", ", newAccount.Errors.Select(it => it.Description))}>");
-			}
+			Console.WriteLine(newAccount.Succeeded
+				? $"Created account with handle <{name}>, email <{email}> and password <{password}>"
+				: $"Failed: <{string.Join(", ", newAccount.Errors.Select(it => it.Description))}>");
 		});
 
 		return new("accounts")
@@ -57,16 +53,12 @@ public static class AccountsCommand
 	private static async Task<IdentityResult> CreateNewAccountAsync(
 		IAccountService accountService,
 		IDataAdapter dataAdapter,
-		string? email, string? name)
+		string email, string name, string password)
 	{
 		dataAdapter.Add(new InviteCode("dummy-for-cli"));
 
 		await dataAdapter.Commit();
 
-		var inviteCode = dataAdapter.InviteCodes("dummy-for-cli").SingleOrDefault();
-
-		Console.WriteLine($"Added dummy invite code <{inviteCode}>");
-
-		return await accountService.RegisterAccount(email, name, "xxx-todo-xxx", "dummy-for-cli");
+		return await accountService.RegisterAccount(email, name, password, "dummy-for-cli");
 	}
 }

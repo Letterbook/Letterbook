@@ -102,6 +102,14 @@ That does mean we need additional dependencies in this case where we're operatin
 
 Actually it may be required for API as well.
 
+Successfully added invite code, next thing is password:
+
+> Failed: <Passwords must have at least one digit ('0'-'9')., Passwords must have at least one uppercase ('A'-'Z').>
+
+We can either auto generate one or force user to supply.
+
+Added a constant one to bypass that message and now account creation succeeds.
+
 ## Processing arguments
 
 ## Dependency injection
