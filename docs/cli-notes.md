@@ -1,5 +1,9 @@
 ﻿# Notes on adding CLI
 
+## Log 
+
+### 30-Jan-2026
+
 Other servers have a cli:
 
 * https://docs.gotosocial.org/en/v0.20.3/admin/cli/
@@ -89,6 +93,14 @@ Scoped provider required.
 var provider = host.Services.CreateScope().ServiceProvider;
 
 > Failed: <The invite code is not valid>
+
+### 31-Jan-2026
+
+Can we suppress the "The invite code is not valid" message by adding the necessary data in the background. CLI user doesn't care about invites.
+
+That does mean we need additional dependencies in this case where we're operating with internal services.
+
+Actually it may be required for API as well.
 
 ## Processing arguments
 
