@@ -17,3 +17,9 @@ dotnet run --project Source/Letterbook.Cli/ accounts create USERNAME --email EMA
 The CLI reuses the same dependency injection as the API to minimize duplication.
 
 It executes at the service layer -- does not use the API.
+
+## Configuration
+
+See `appsettings.Development.json`.
+
+## Logging

@@ -16,6 +16,16 @@ namespace Letterbook.Cli;
 
 public static class ServiceContainer
 {
+	/*
+
+		This is mimicking what happens in Letterbook.Api.DependencyInjectionExtensions.ConfigureHostBuilder which invoked from
+		Letterbook.Api.Program. (See Source/Letterbook.Api/DependencyInjectionExtensions.cs.)
+
+		It tries to create the bare minimum relevant services required to perform domain use cases.
+
+		Ideally it should not include things that are not relevant like anything to do with AspNetCore.
+
+	*/
 	public static async Task<IHost> CreateAsync()
 	{
 		var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
@@ -31,23 +41,32 @@ public static class ServiceContainer
 		builder.Configuration.AddJsonFile(Path.Combine("Source", "Letterbook.Cli", "appsettings.Development.json"), optional: false);
 
 		/*
-			Also used here: Source\Letterbook.Api\DependencyInjectionExtensions.cs
+			Also used here: Source/Letterbook.Api/DependencyInjectionExtensions.cs
 
-			@todo: perhaps doesn't make sense for this project to depend on Letterbook.Api.
-			That's where `AddServices` comes from.
+			@todo: AddServices is in namespace Letterbook.Api. It perhaps doesn't make sense for this project to depend on Letterbook.Api.
 		*/
 		builder.Services.AddServices(builder.Configuration);
 
+		builder.AddOtherRequiredServices();
+
+		var host = builder.Build();
+
+		await host.StartAsync();
+
+		return host;
+	}
+
+	/// <summary>
+	/// Additional dependencies that required otherwise they cause failures.
+	/// </summary>
+	/// <param name="builder"></param>
+	private static void AddOtherRequiredServices(this HostApplicationBuilder builder)
+	{
 		// AccountEventPublisher': Unable to resolve service for type 'MassTransit.IBus' while attempting to activate 'Letterbook.Workers.Publishers.AccountEventPublisher'.
 		builder.Services.AddMassTransit(bus =>
 		{
 			bus.AddWorkerBus(builder.Configuration);
 		}).AddPublishers();
-
-		// System.InvalidOperationException: Unable to resolve service for type 'Letterbook.Core.Adapters.IAccountEventPublisher' while attempting to activate 'Letterbook.Core.AccountService'.
-		builder.Services.AddScoped<IAccountEventPublisher, AccountEventPublisher>();
-
-		builder.Services.ConfigureAccountManagement(builder.Configuration);
 
 		// Unable to resolve service for type 'Microsoft.AspNetCore.Identity.UserManager`1[Letterbook.Core.Models.Account]' while attempting to activate 'Letterbook.Core.AccountService'
 		builder.Services.AddIdentity<Account, IdentityRole<Guid>>(options => { options.User.RequireUniqueEmail = false; })
@@ -55,21 +74,6 @@ public static class ServiceContainer
 			.AddDefaultTokenProviders();
 
 		//  Unable to resolve service for type 'Letterbook.Core.Adapters.IActivityPubClient'
-		builder.Services.AddHttpClient<IActivityPubClient, Client>(client =>
-			{
-				// @todo: May not need `IActivityPubClient`.
-
-				// @todo: uncomment next three
-				// client.DefaultRequestHeaders.Accept.ParseAdd(Constants.ActivityPubAccept);
-				// // TODO: get version from Product Version
-				// client.DefaultRequestHeaders.UserAgent.TryParseAdd($"Letterbook/0.0-dev ({coreOptions.DomainName})");
-			})
-			.AddSigningClient();
-
-		var host = builder.Build();
-
-		await host.StartAsync();
-
-		return host;
+		builder.Services.AddHttpClient<IActivityPubClient, Client>();
 	}
 }

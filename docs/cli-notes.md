@@ -110,6 +110,21 @@ We can either auto generate one or force user to supply.
 
 Added a constant one to bypass that message and now account creation succeeds.
 
+Now you should be able to log in with it.
+
+[Run the server](https://github.com/Letterbook/Letterbook/blob/main/CONTRIBUTING.md#quick-start) and log in there with email and password.
+
+#### Controlling logging
+
+There are lots of logs being written to console, for example
+
+```shell
+info: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[63]
+      User profile is available. Using 'C:\Users\BenBiddington\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+```
+
+How do you turn those off?
+
 ## Processing arguments
 
 ## Dependency injection
