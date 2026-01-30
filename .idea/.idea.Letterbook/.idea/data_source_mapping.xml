@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="DataSourcePerFileMappings">
-    <file url="file://$PROJECT_DIR$/Source/Letterbook.Adapter.Db/Migrations/20251208054742_AddAudienceLabel.cs" value="5ab6bc48-60a8-485c-adf1-6d006218d540" />
-  </component>
-</project>

@@ -11,3 +11,9 @@ Based on [the Mastodon CLI](https://docs.joinmastodon.org/admin/tootctl/#account
 ```shell
 dotnet run --project Source/Letterbook.Cli/ accounts create USERNAME --email EMAIL 
 ```
+
+## Design
+
+The CLI reuses the same dependency injection as the API to minimize duplication.
+
+It executes at the service layer -- does not use the API.
