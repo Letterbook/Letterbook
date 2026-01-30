@@ -2,15 +2,14 @@
 using Letterbook.Adapter.Db;
 using Letterbook.Api;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Workers;
-using Letterbook.Workers.Publishers;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Cli;
 
@@ -38,7 +37,9 @@ public static class ServiceContainer
 
 		   @todo: Make it so the file is found based on the executable path instead.
 		*/
-		builder.Configuration.AddJsonFile(Path.Combine("Source", "Letterbook.Cli", "appsettings.Development.json"), optional: false);
+		builder.Configuration
+			.AddJsonFile(Path.Combine("Source", "Letterbook.Cli", "appsettings.Development.json"), optional: false)
+			.AddEnvironmentVariables();
 
 		/*
 			Also used here: Source/Letterbook.Api/DependencyInjectionExtensions.cs
@@ -47,6 +48,8 @@ public static class ServiceContainer
 		*/
 		builder.Services.AddServices(builder.Configuration);
 
+		builder.AddLogging();
+
 		builder.AddOtherRequiredServices();
 
 		var host = builder.Build();
@@ -54,6 +57,16 @@ public static class ServiceContainer
 		await host.StartAsync();
 
 		return host;
+	}
+
+	// https://learn.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-5.0#configure-logging
+	private static void AddLogging(this HostApplicationBuilder builder)
+	{
+		builder.Services.AddLogging(loggingBuilder =>
+		{
+			loggingBuilder.ClearProviders();
+			loggingBuilder.AddConsole();
+		});
 	}
 
 	/// <summary>

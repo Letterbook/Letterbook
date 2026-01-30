@@ -3,26 +3,31 @@ using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Cli.Commands;
 
 public static class AccountsCommand
 {
-	public static Command Create(IAccountService accountService, IDataAdapter dataAdapter)
+	public class CliLogCategory
+	{
+
+	}
+
+	public static Command Create(IAccountService accountService, IDataAdapter dataAdapter, ILogger<CliLogCategory> log)
 	{
 		return new("accounts")
 		{
 			Description = "Account commands",
 			Subcommands =
 			{
-				CreateCommand(accountService, dataAdapter),
-				ListCommand(dataAdapter)
+				CreateCommand(log, accountService, dataAdapter),
+				ListCommand(log, dataAdapter)
 			}
 		};
 	}
 
-	private static Command CreateCommand(IAccountService accountService, IDataAdapter dataAdapter)
+	private static Command CreateCommand(ILogger log, IAccountService accountService, IDataAdapter dataAdapter)
 	{
 		var usernameOption = new Argument<string>("NAME")
 		{
@@ -60,16 +65,20 @@ public static class AccountsCommand
 		return createCommand;
 	}
 
-	private static Command ListCommand(IDataAdapter dataAdapter)
+	private static Command ListCommand(ILogger log, IDataAdapter dataAdapter)
 	{
 		Command listCommand = new("list")
 		{
 			Description = "List accounts"
 		};
 
+		var allAccounts = dataAdapter.AllAccounts();
+
+		log.LogDebug($"Found <{allAccounts.Count()}> accounts");
+
 		listCommand.SetAction(_ =>
 		{
-			foreach (var account in dataAdapter.AllAccounts())
+			foreach (var account in allAccounts)
 			{
 				Console.WriteLine($"{account.Id} {account.Name} {account.Email}");
 			}

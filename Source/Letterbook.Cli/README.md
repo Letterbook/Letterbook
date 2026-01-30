@@ -29,3 +29,19 @@ It executes at the service layer -- does not use the API.
 See `appsettings.Development.json`.
 
 ## Logging
+
+See `appsettings.Development.json` under "Logging".
+
+### Set log level
+
+[Use environment variable](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-5.0#command-shell):
+
+```shell
+Logging__LogLevel__Letterbook=Debug dotnet run --project Source/Letterbook.Cli accounts list
+```
+
+#### Turn on all info
+
+```shell
+Logging__LogLevel__Default=Information dotnet run --project Source/Letterbook.Cli accounts list
+```

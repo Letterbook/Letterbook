@@ -125,6 +125,15 @@ info: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[63]
 
 How do you turn those off?
 
+Logging is not done by serilog here, it is the default built-in, so configure like:
+
+```csharp
+builder.Services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.ClearProviders();
+});
+```
+
 ## Processing arguments
 
 ## Dependency injection
