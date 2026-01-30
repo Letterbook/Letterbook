@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Text.Json;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
@@ -80,7 +81,7 @@ public static class AccountsCommand
 		{
 			foreach (var account in allAccounts)
 			{
-				Console.WriteLine($"{account.Id} {account.Name} {account.Email}");
+				Console.WriteLine($"{JsonSerializer.Serialize(account, new JsonSerializerOptions { WriteIndented = true })}");
 			}
 		});
 

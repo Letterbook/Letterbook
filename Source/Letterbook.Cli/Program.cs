@@ -16,9 +16,9 @@ var root = new RootCommand("Root command for CLI")
 	Subcommands =
 	{
 		AccountsCommand.Create(
-			provider.GetService<IAccountService>(),
-			provider.GetService<IDataAdapter>(),
-			provider.GetService<ILogger<AccountsCommand.CliLogCategory>>()),
+			provider.GetService<IAccountService>()!,
+			provider.GetService<IDataAdapter>()!,
+			provider.GetService<ILogger<AccountsCommand.CliLogCategory>>()!),
 	}
 };
 
