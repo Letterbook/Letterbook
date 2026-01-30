@@ -3,12 +3,26 @@ using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Letterbook.Cli.Commands;
 
 public static class AccountsCommand
 {
 	public static Command Create(IAccountService accountService, IDataAdapter dataAdapter)
+	{
+		return new("accounts")
+		{
+			Description = "Account commands",
+			Subcommands =
+			{
+				CreateCommand(accountService, dataAdapter),
+				ListCommand(dataAdapter)
+			}
+		};
+	}
+
+	private static Command CreateCommand(IAccountService accountService, IDataAdapter dataAdapter)
 	{
 		var usernameOption = new Argument<string>("NAME")
 		{
@@ -21,11 +35,11 @@ public static class AccountsCommand
 			Description = "Email address of the new account"
 		};
 
-		Command createCommand = new("create")
+		Command createCommand = new Command("create")
 		{
 			Description = "Create a new account",
 			Arguments = { usernameOption },
-			Options = { emailOption }
+			Options = { emailOption },
 		};
 
 		createCommand.SetAction(async result =>
@@ -43,11 +57,25 @@ public static class AccountsCommand
 				: $"Failed: <{string.Join(", ", newAccount.Errors.Select(it => it.Description))}>");
 		});
 
-		return new("accounts")
+		return createCommand;
+	}
+
+	private static Command ListCommand(IDataAdapter dataAdapter)
+	{
+		Command listCommand = new("list")
 		{
-			Description = "Account commands",
-			Subcommands = { createCommand }
+			Description = "List accounts"
 		};
+
+		listCommand.SetAction(_ =>
+		{
+			foreach (var account in dataAdapter.AllAccounts())
+			{
+				Console.WriteLine($"{account.Id} {account.Name} {account.Email}");
+			}
+		});
+
+		return listCommand;
 	}
 
 	private static async Task<IdentityResult> CreateNewAccountAsync(

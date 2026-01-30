@@ -9,7 +9,13 @@ dotnet run --project Source/Letterbook.Cli/
 Based on [the Mastodon CLI](https://docs.joinmastodon.org/admin/tootctl/#accounts-create).
 
 ```shell
-dotnet run --project Source/Letterbook.Cli/ accounts create USERNAME --email EMAIL 
+dotnet run --project Source/Letterbook.Cli accounts create USERNAME --email EMAIL 
+```
+
+### List accounts
+
+```shell
+dotnet run --project Source/Letterbook.Cli accounts list
 ```
 
 ## Design
