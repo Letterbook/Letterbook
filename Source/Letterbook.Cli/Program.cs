@@ -11,8 +11,14 @@ using var host = await Letterbook.Cli.ServiceContainer.CreateAsync();
 
 var provider = host.Services.CreateScope().ServiceProvider;
 
+var useApiOption = new Option<bool>("useApi");
+
 var root = new RootCommand("Root command for CLI")
 {
+	Options =
+	{
+		useApiOption
+	},
 	Subcommands =
 	{
 		AccountsCommand.Create(

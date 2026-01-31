@@ -1,7 +1,11 @@
 ﻿using Letterbook.Adapter.ActivityPub;
 using Letterbook.Adapter.Db;
 using Letterbook.Api;
+using Letterbook.Cli.Adapters;
+using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Exceptions;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Letterbook.Workers;
 using MassTransit;
@@ -48,6 +52,13 @@ public static class ServiceContainer
 		*/
 		builder.Services.AddServices(builder.Configuration);
 
+		if (builder.Configuration.GetSection("Toggles").GetValue<bool>("UseApi"))
+		{
+			Console.WriteLine("Using API");
+
+			builder.AddApiImplementations();
+		}
+
 		builder.AddLogging();
 
 		builder.AddOtherRequiredServices();
@@ -57,6 +68,16 @@ public static class ServiceContainer
 		await host.StartAsync();
 
 		return host;
+	}
+
+	private static void AddApiImplementations(this HostApplicationBuilder builder)
+	{
+		// See: Source/Letterbook.Adapter.ActivityPub/DependencyInjectionExtensions.cs
+		var coreOptions = builder.Configuration.GetSection(CoreOptions.ConfigKey).Get<CoreOptions>()
+		                  ?? throw ConfigException.Missing(nameof(CoreOptions));
+
+		builder.Services.AddScoped<IAccountService, NetworkAccountService>();
+		builder.Services.AddHttpClient<IAccountService, NetworkAccountService>(it => it.BaseAddress = coreOptions.BaseUri());
 	}
 
 	// https://learn.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-5.0#configure-logging

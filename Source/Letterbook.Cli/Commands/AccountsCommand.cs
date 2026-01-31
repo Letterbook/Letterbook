@@ -17,6 +17,7 @@ public static class AccountsCommand
 
 	public static Command Create(IAccountService accountService, IDataAdapter dataAdapter, ILogger<CliLogCategory> log)
 	{
+		log.LogDebug(accountService.GetType().FullName);
 		return new("accounts")
 		{
 			Description = "Account commands",

@@ -134,20 +134,120 @@ builder.Services.AddLogging(loggingBuilder =>
 });
 ```
 
-## Processing arguments
+### 31-Jan-2026 (3.20 PM)
 
-## Dependency injection
+Having a go at making the CLI go via API instead.
 
-How are things wired up then?
+We'd like it to be a runtime option, something like 
 
-## Use API?
+```shell
+dotnet run --project Source/Letterbook.Cli accounts list --useApi
+```
 
-## Publish as a tool?
+--or-- via configuration
 
-## Local only?
+```shell
+Toggles__UseApi=true dotnet run --project Source/Letterbook.Cli accounts list
+```
 
-Assume that development configuration is all we need at the moment.
+The latter is easier because the service container will be able to read the configuration to decide.
 
-## Integration tests
+The former is more difficult because the CLI runtime is after dependencies have been created.
+
+Requires API to be running, not the UI:
+
+```shell
+dotnet watch run --project Source/Letterbook.Api --launch-profile dev
+```
+
+Snake casing caught me out, the url is:
+
+```
+/lb/v1/user_account/register
+```
+
+The use of third-party `IdentityResult` is annoying as there is no way to construct one with errors.
+
+The request is succeeding, but I get e=this error as it's trying to return:
+
+```shell
+dbug: Letterbook.Cli.Adapters.NetworkAccountService[0]
+      System.NotSupportedException: Serialization and deserialization of 'System.Reflection.MethodBase' instances is not supported. Path: $.TargetSite.
+       ---> System.NotSupportedException: Serialization and deserialization of 'System.Reflection.MethodBase' instances is not supported.
+         at System.Text.Json.Serialization.Converters.UnsupportedTypeConverter`1.Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+         at System.Text.Json.Serialization.JsonConverter`1.TryWrite(Utf8JsonWriter writer, T& value, JsonSerializerOptions options, WriteStack& state)
+         at System.Text.Json.Serialization.Metadata.JsonPropertyInfo`1.GetMemberAndWriteJson(Object obj, WriteStack& state, Utf8JsonWriter writer)
+         at System.Text.Json.Serialization.Converters.ObjectDefaultConverter`1.OnTryWrite(Utf8JsonWriter writer, T value, JsonSerializerOptions options, WriteStack& state)
+         at System.Text.Json.Serialization.JsonConverter`1.TryWrite(Utf8JsonWriter writer, T& value, JsonSerializerOptions options, WriteStack& state)
+         at System.Text.Json.Serialization.JsonConverter`1.WriteCore(Utf8JsonWriter writer, T& value, JsonSerializerOptions options, WriteStack& state)
+         --- End of inner exception stack trace ---
+         at System.Text.Json.ThrowHelper.ThrowNotSupportedException(WriteStack& state, Exception innerException)
+         at System.Text.Json.Serialization.JsonConverter`1.WriteCore(Utf8JsonWriter writer, T& value, JsonSerializerOptions options, WriteStack& state)
+         at System.Text.Json.Serialization.Metadata.JsonTypeInfo`1.SerializeAsync(PipeWriter pipeWriter, T rootValue, Int32 flushThreshold, CancellationToken cancellationToken, Object rootValueBoxed)
+         at System.Text.Json.Serialization.Metadata.JsonTypeInfo`1.SerializeAsync(PipeWriter pipeWriter, T rootValue, Int32 flushThreshold, CancellationToken cancellationToken, Object rootValueBoxed)
+         at System.Text.Json.Serialization.Metadata.JsonTypeInfo`1.SerializeAsync(PipeWriter pipeWriter, T rootValue, Int32 flushThreshold, CancellationToken cancellationToken, Object rootValueBoxed)
+         at Microsoft.AspNetCore.Mvc.Formatters.SystemTextJsonOutputFormatter.WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeResultAsync>g__Logged|22_0(ResourceInvoker invoker, IActionResult result)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeResultFilters>g__Awaited|28_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+         at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+         at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+         at Letterbook.Api.Authentication.HttpSignature.Infrastructure.HttpSignatureVerificationMiddleware.InvokeAsync(HttpContext context, RequestDelegate next) in C:\Users\BenBiddington\sauce\Letterbook\Source\Letterbook.Api.Authentication.HttpSignature\Infrastructure\HttpSignatureVerificationMiddleware.cs:line 43
+         at Microsoft.AspNetCore.Builder.UseMiddlewareExtensions.InterfaceMiddlewareBinder.<>c__DisplayClass2_0.<<CreateMiddleware>b__0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+         at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+
+      HEADERS
+      =======
+      Host: localhost:5127
+      Content-Type: application/json; charset=utf-8
+      Transfer-Encoding: chunked
+```
+
+Will try the list method as well.
+
+Can't do this because there is no network endpoint available for listing accounts.
+
+The error is coming from the log on part at `(1)`:
+
+```csharp
+[AllowAnonymous]
+	[HttpPost]
+	[ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
+	public async Task<IActionResult> Register([FromBody] RegistrationRequest registration)
+	{
+		try
+		{
+			var registerAccount = await _accountService
+				.RegisterAccount(registration.Email, registration.Handle, registration.Password, registration.InviteCode);
+
+			if (registerAccount is null) return Forbid();
+			if (!registerAccount.Succeeded) return BadRequest(registerAccount.Errors);
+
+			return await Login(new LoginRequest { Email = registration.Email, Password = registration.Password }); // (1)
+		}
+		catch (Exception e)
+		{
+			return BadRequest(e);
+		}
+	}
+```
+
+If I comment it out and return ok then everything works.
+
+Will have to look at that next.
+
+## Ideas
+
+### Publish as a tool?
+
+### Integration tests
 
 The CLI is purely a client of the domain so we should be able to test it the same way.
+
+Is it worth verifying that the CLI invokes the correct domain operation?
