@@ -41,6 +41,23 @@ public class AccountsApiTests : IClassFixture<HostFixture<AccountsApiTests>>, IT
 		};
 	}
 
+	/*
+
+		If this fails with:
+
+			Xunit.Sdk.TrueException
+            System.ArgumentNullException: Value cannot be null. (Parameter 's')
+               at System.ArgumentNullException.Throw(String paramName)
+               at System.Text.Encoding.GetBytes(String s)
+               at Letterbook.Api.Controllers.UserAccountController.Login(LoginRequest loginRequest) in
+
+		then try this:
+
+			dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Source/Letterbook.Api
+
+		See: CONTRIBUTING.md.
+
+	*/
 	[Fact(DisplayName = "Should allow registration")]
 	public async Task CanRegister()
 	{
