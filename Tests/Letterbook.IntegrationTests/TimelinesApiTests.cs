@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 namespace Letterbook.IntegrationTests;
 
 // Future Infra: MessageQueue, ObjectStore, Email, BulkEmail, Cache, Backplane
+
+// Future Infra: MessageQueue, ObjectStore, Email, BulkEmail, Cache, Backplane
 [Trait("Infra", "Postgres")]
 [Trait("Infra", "Timescale")]
 [Trait("Driver", "Api")]

@@ -93,6 +93,8 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		AllowAutoRedirect = false
 	};
 
+	public IDataAdapter DataAdapter { get; private set; }
+
 	private readonly IServiceScope _scope;
 
 	public readonly CoreOptions Options;
@@ -133,6 +135,8 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_scope = CreateScope();
 		_context = CreateContext(_scope);
 		_feedsContext = CreateFeedsContext(_scope);
+
+		DataAdapter = _scope.ServiceProvider.GetRequiredService<IDataAdapter>();
 
 		InitializeTestData();
 	}
