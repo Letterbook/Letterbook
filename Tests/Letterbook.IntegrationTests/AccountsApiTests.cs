@@ -53,9 +53,13 @@ public class AccountsApiTests : IClassFixture<HostFixture<AccountsApiTests>>, IT
 
 		then try this:
 
-			dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Source/Letterbook.Api
+			dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Source/Letterbook
 
 		See: CONTRIBUTING.md.
+
+		If you'd like to see it fail:
+
+			dotnet user-secrets clear --project Source/Letterbook
 
 	*/
 	[Fact(DisplayName = "Should allow registration")]
