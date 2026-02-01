@@ -218,6 +218,9 @@ public class ProfileService : IProfileService, IAuthzProfileService
 
 	public async Task<Profile?> LookupProfile(Uri fediId, ProfileId? relatedProfile)
 	{
+		if (fediId.Scheme == "acct")
+			return await LookupProfileByAccountUri(fediId);
+
 		var result = await _data.Profiles(fediId).WithRelation(relatedProfile).FirstOrDefaultAsync();
 		if (result?.FollowersCollection.FirstOrDefault() is {} relation && relation.State == FollowState.Blocked)
 		{
@@ -225,6 +228,13 @@ public class ProfileService : IProfileService, IAuthzProfileService
 		}
 
 		return result;
+	}
+
+	// https://datatracker.ietf.org/doc/html/rfc7565
+	private async Task<Profile?> LookupProfileByAccountUri(Uri accountUri)
+	{
+		var user = accountUri.AbsolutePath.Split('@').First();
+		return await FindProfiles(user).FirstOrDefaultAsync();
 	}
 
 	public IAsyncEnumerable<Profile> FindProfiles(string handle, string host)

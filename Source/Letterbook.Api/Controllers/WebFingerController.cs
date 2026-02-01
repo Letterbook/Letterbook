@@ -1,0 +1,54 @@
+﻿using AutoMapper;
+using Letterbook.Api.Swagger;
+using Letterbook.Core;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
+
+namespace Letterbook.Api.Controllers;
+
+[ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
+[Route("/lb/v1")]
+public class WebFingerController : ControllerBase
+{
+	private readonly IProfileService _profiles;
+	private readonly Mapper _mapper;
+
+	public WebFingerController(
+		IProfileService profiles,
+		MappingConfigProvider mappingConfig)
+	{
+		_profiles = profiles;
+		_mapper = new Mapper(mappingConfig.Profiles);
+	}
+
+	[HttpGet(".well-known/webfinger")]
+	[ProducesResponseType<FullProfileDto>(StatusCodes.Status200OK)]
+	[SwaggerOperation("Get", "Lookup a profile by web finger")]
+	public async Task<IActionResult> GetByWebFinger([FromQuery(Name = "resource")]string[] resources /* acct:handle@authority */)
+	{
+		if (resources.Length == 0)
+			return BadRequest("Resource query parameter is required.");
+
+		if (resources.Length > 1)
+			return BadRequest("Resource query parameter was supplied too many times.");
+
+		var resource = resources[0];
+
+		if (string.IsNullOrEmpty(resource) || !Uri.TryCreate(resource, UriKind.Absolute, out var accountUri))
+			return BadRequest($"Resource query parameter is invalid. Value supplied was '{resource}'.");
+
+		var result = await _profiles.As(User.Claims).LookupProfile(accountUri);
+
+		return result != null ? Ok(_mapper.Map<FullProfileDto>(result)): NotFound();
+	}
+
+	private BadRequestObjectResult BadRequest(string message)
+	{
+		return base.BadRequest(new
+		{
+			ErrorMessage = message
+		});
+	}
+}
