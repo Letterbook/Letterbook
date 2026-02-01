@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Net;
 using ActivityPub.Types.AS;
 using Bogus;
-using Letterbook.Adapter.Db;
 using Letterbook.Adapter.TimescaleFeeds;
 using Letterbook.Adapter.TimescaleFeeds.EntityModels;
 using Letterbook.Api.Authentication.HttpSignature.Handler;
@@ -21,7 +20,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Npgsql;
 using OpenTelemetry.Trace;
@@ -135,7 +133,6 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_scope = CreateScope();
 		_context = CreateContext(_scope);
 		_feedsContext = CreateFeedsContext(_scope);
-
 		DataAdapter = _scope.ServiceProvider.GetRequiredService<IDataAdapter>();
 
 		InitializeTestData();

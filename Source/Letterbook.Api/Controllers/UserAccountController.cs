@@ -73,10 +73,6 @@ public class UserAccountController : ControllerBase
 		{
 			return StatusCode(429, new { e.Expiration, e.Message });
 		}
-		catch (Exception e)
-		{
-			return StatusCode(500, e.ToString());
-		}
 	}
 
 	[HttpPost]
