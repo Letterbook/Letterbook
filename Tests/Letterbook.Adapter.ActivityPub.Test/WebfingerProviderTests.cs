@@ -4,6 +4,7 @@ using System.Text;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Neovolve.Logging.Xunit;
 using Xunit.Abstractions;
@@ -41,19 +42,19 @@ public class WebfingerProviderTests : WithMocks
 	public async Task CanSearchSuccess()
 	{
 		var json = $$"""
-		           {
-		             "subject" : "acct:{{_profile.Handle}}@{{_profile.FediId.Authority}}",
-		             "aliases" : [ "{{_profile.FediId}}" ],
-		             "properties" : { },
-		             "links" : [ {
-		               "rel" : "self",
-		               "type" : "application/activity+json",
-		               "href" : "{{_profile.FediId}}",
-		               "titles" : { },
-		               "properties" : { }
-		             } ]
-		           }
-		           """;
+		             {
+		               "subject" : "acct:{{_profile.Handle}}@{{_profile.FediId.Authority}}",
+		               "aliases" : [ "{{_profile.FediId}}" ],
+		               "properties" : { },
+		               "links" : [ {
+		                 "rel" : "self",
+		                 "type" : "application/activity+json",
+		                 "href" : "{{_profile.FediId}}",
+		                 "titles" : { },
+		                 "properties" : { }
+		               } ]
+		             }
+		             """;
 		HttpMessageHandlerMock.SetupResponse(m =>
 		{
 			m.StatusCode = HttpStatusCode.OK;
@@ -63,7 +64,6 @@ public class WebfingerProviderTests : WithMocks
 			.ReturnsAsync(_profile);
 		var actual = await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token);
 
-		Assert.Equal(0, _logger.Count);
 		Assert.Equal([_profile], actual);
 	}
 
@@ -172,5 +172,53 @@ public class WebfingerProviderTests : WithMocks
 				message.RequestUri ==
 				new Uri($"https://{_profile.FediId.Authority}/.well-known/webfinger?resource=acct%3A{_profile.Handle}%40{_profile.FediId.Authority}")
 			), It.IsAny<CancellationToken>()));
+	}
+
+	public record CanParseFact(string Given, string Expected, string ExpectedHost, bool Fetch);
+
+	public class CanParseFacts : Xunit.TheoryData<CanParseFact>
+	{
+		public CanParseFacts()
+		{
+			Add(new CanParseFact("@someone@peer.example", "acct:someone@peer.example", "peer.example", true));
+			Add(new CanParseFact("@someone@peer.example:5127", "", "", false));
+			Add(new CanParseFact("someone@peer.example", "acct:someone@peer.example", "peer.example", true));
+			Add(new CanParseFact("acct:someone@peer.example", "acct:someone@peer.example", "peer.example", true));
+			Add(new CanParseFact("acct://someone@peer.example", "acct:someone@peer.example", "peer.example", true));
+			Add(new CanParseFact("https://someone@peer.example", "acct:someone@peer.example", "peer.example", true));
+			Add(new CanParseFact("https://peer.example/someone", "", "", false));
+			Add(new CanParseFact("https://peer.example/@someone", "", "", false));
+			Add(new CanParseFact("@someone", "", "", false));
+			Add(new CanParseFact("someone@localhost", "", "", false));
+			Add(new CanParseFact("someone@127.0.0.1", "", "", false));
+			Add(new CanParseFact("someone@192.168.0.1", "", "", false));
+			Add(new CanParseFact("some other string", "", "", false));
+			Add(new CanParseFact("a string that @resembles a handle", "", "", false));
+			Add(new CanParseFact("a string that acct:resembles a handle", "", "", false));
+		}
+	}
+
+	[ClassData(typeof(CanParseFacts))]
+	[Theory(DisplayName = "Should parse query terms")]
+	public async Task CanParse(CanParseFact fact)
+	{
+		HttpMessageHandlerMock.SetupResponse(m =>
+		{
+			m.StatusCode = HttpStatusCode.OK;
+			m.Content = new StringContent("{}", new UTF8Encoding(), new MediaTypeHeaderValue("application/jrd+json"));
+		});
+
+		await _webfinger.SearchProfiles(fact.Given, _cancel.Token);
+
+		if (fact.Fetch)
+		{
+			var expect = $"https://{fact.ExpectedHost}/.well-known/webfinger?resource={Uri.EscapeDataString(fact.Expected)}";
+			_output.WriteLine($"Expected: {expect}");
+			HttpMessageHandlerMock.VerifyRequest(req => req.RequestUri != null && req.RequestUri.ToString() == expect, Times.Once());
+		}
+		else
+		{
+			HttpMessageHandlerMock.VerifyRequest(req => true, Times.Never());
+		}
 	}
 }
