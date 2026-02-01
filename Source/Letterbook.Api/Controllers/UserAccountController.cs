@@ -6,6 +6,7 @@ using Letterbook.Core;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -71,6 +72,10 @@ public class UserAccountController : ControllerBase
 		catch (RateLimitException e)
 		{
 			return StatusCode(429, new { e.Expiration, e.Message });
+		}
+		catch (Exception e)
+		{
+			return StatusCode(500, e.ToString());
 		}
 	}
 
