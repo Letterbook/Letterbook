@@ -90,19 +90,12 @@ public class UserAccountController : ControllerBase
 	[ProducesResponseType<TokenResponse>(StatusCodes.Status200OK)]
 	public async Task<IActionResult> Register([FromBody] RegistrationRequest registration)
 	{
-		try
-		{
-			var registerAccount = await _accountService
-				.RegisterAccount(registration.Email, registration.Handle, registration.Password, registration.InviteCode);
+		var registerAccount = await _accountService
+			.RegisterAccount(registration.Email, registration.Handle, registration.Password, registration.InviteCode);
 
-			if (registerAccount is null) return Forbid();
-			if (!registerAccount.Succeeded) return BadRequest(registerAccount.Errors);
+		if (registerAccount is null) return Forbid();
+		if (!registerAccount.Succeeded) return BadRequest(registerAccount.Errors);
 
-			return await Login(new LoginRequest { Email = registration.Email, Password = registration.Password });
-		}
-		catch (Exception e)
-		{
-			return BadRequest(e);
-		}
+		return await Login(new LoginRequest { Email = registration.Email, Password = registration.Password });
 	}
 }
