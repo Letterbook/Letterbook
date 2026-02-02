@@ -22,11 +22,11 @@ public class UnhandledExceptionsTests : IClassFixture<ApiFixture>
 
 	/*
 
-		[FAILING] Intended to show that unhandled exceptions DO NOT fail with error like:
+		Intended to show that unhandled exceptions DO NOT fail with error like:
 
 			 Serialization and deserialization of 'System.Reflection.MethodBase' instances is not supported.
 
-		The above message shows there is a problem somewhere in middleware. Finding it has proven difficult.
+		The above message shows there is a problem somewhere in middleware.
 
 	*/
 	[Fact(DisplayName = "Should print stack trace of unhandled exceptions")]
