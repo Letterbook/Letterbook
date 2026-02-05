@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Source/Letterbook
+
 #
 # Run with filter
 #
