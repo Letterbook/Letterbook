@@ -26,9 +26,11 @@ public class WebfingerProvider : IResourceDescriptorProvider
 	public async Task<JsonResourceDescriptor?> GetResourceDescriptorAsync(Uri resource, IReadOnlyList<string> relations,
 		HttpRequest request, CancellationToken cancellationToken)
 	{
+		var authority = _options.BaseUri().Authority;
+
 		var match = Regex.Match(resource.AbsolutePath, "^.*@"
-													   + _options.BaseUri().Host
-													   + "$");
+		                                               + authority
+		                                               + "$");
 		if (!match.Success)
 		{
 			_logger.LogInformation("Invalid Webfinger query for {Resource}", resource);
@@ -40,7 +42,7 @@ public class WebfingerProvider : IResourceDescriptorProvider
 		var handle = match.Value.Split('@', 2,
 			StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
 		if (handle == null) return default;
-		var profile = await _profiles.As([]).FindProfiles(handle, _options.DomainName).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+		var profile = await _profiles.As([]).FindProfiles(handle, authority).FirstOrDefaultAsync(cancellationToken: cancellationToken);
 		if (profile != null)
 		{
 			var descriptor = JsonResourceDescriptor.Empty with
