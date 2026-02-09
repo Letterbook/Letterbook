@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using DarkLink.Web.WebFinger.Shared;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers.Converters;
 using Letterbook.IntegrationTests.Fixtures;
@@ -56,7 +57,7 @@ public sealed class WebFingerTests : IClassFixture<HostFixture<WebFingerTests>>,
 
 		var response = await _client.SendAsync(
 			new HttpRequestMessage(
-				HttpMethod.Get, $"/lb/v1/.well-known/webfinger?resource=acct:{profile.Handle}@{profile.Authority}")
+				HttpMethod.Get, $"/.well-known/webfinger?resource=acct:{profile.Handle}@{profile.Authority}")
 			{
 				// Authorization is not required
 				Headers = { Authorization = AuthenticationHeaderValue.Parse("None") }
@@ -64,16 +65,18 @@ public sealed class WebFingerTests : IClassFixture<HostFixture<WebFingerTests>>,
 
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-		var actual = Assert.IsType<FullProfileDto>(await response.Content.ReadFromJsonAsync<FullProfileDto>(_json));
+		var actual = Assert.IsType<JsonResourceDescriptor>(await response.Content.ReadFromJsonAsync<JsonResourceDescriptor>(_json));
 
-		Assert.Equal(profile.Handle, actual.Handle);
+		_output.WriteLine(JsonSerializer.Serialize(actual, _json));
+
+		Assert.Equal($"acct:{profile.Handle}@{profile.Authority}", actual.Subject?.AbsoluteUri);
 	}
 
 	[Fact(DisplayName = "Should return HTTP 404 when the handle does not exist")]
 	public async Task WebFingerReturns404NotFoundWhenHandleDoesNotExist()
 	{
 		var response = await _client.SendAsync(
-			new HttpRequestMessage(HttpMethod.Get, "/lb/v1/.well-known/webfinger?resource=acct:xxx-does-not-exist-xxx")
+			new HttpRequestMessage(HttpMethod.Get, "/.well-known/webfinger?resource=acct:xxx-does-not-exist-xxx")
 		{
 			Headers = { Accept = { MediaTypeWithQualityHeaderValue.Parse("application/json") }}
 		});
@@ -92,7 +95,7 @@ public sealed class WebFingerTests : IClassFixture<HostFixture<WebFingerTests>>,
 
 		var resourceMissingAcctSchemePrefix = $"{profile.Handle}@{profile.Authority}";
 
-		var response = await _client.GetAsync($"/lb/v1/.well-known/webfinger?resource={resourceMissingAcctSchemePrefix}");
+		var response = await _client.GetAsync($"/.well-known/webfinger?resource={resourceMissingAcctSchemePrefix}");
 
 		Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -105,11 +108,11 @@ public sealed class WebFingerTests : IClassFixture<HostFixture<WebFingerTests>>,
 	[Fact(DisplayName = "Should return HTTP 400 when resource query parameter value is omitted")]
 	public async Task WebFingerReturns400WhenResourceIsOmitted()
 	{
-		var response = await _client.GetAsync("/lb/v1/.well-known/webfinger?resource=");
+		var response = await _client.GetAsync("/.well-known/webfinger?resource=");
 
 		Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-		response = await _client.GetAsync("/lb/v1/.well-known/webfinger");
+		response = await _client.GetAsync("/.well-known/webfinger");
 
 		Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -126,7 +129,7 @@ public sealed class WebFingerTests : IClassFixture<HostFixture<WebFingerTests>>,
 	[Fact(DisplayName = "Should return HTTP 400 when resource query parameter is added twice")]
 	public async Task WebFingerReturns400WhenResourceIsAddedTwice()
 	{
-		var response = await _client.GetAsync("/lb/v1/.well-known/webfinger?resource=acct:A&resource=acct:B");
+		var response = await _client.GetAsync("/.well-known/webfinger?resource=acct:A&resource=acct:B");
 
 		Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -141,5 +144,5 @@ public sealed class WebFingerTests : IClassFixture<HostFixture<WebFingerTests>>,
 // @todo: consider moving to Letterbook.Core.Models.Dto?
 public class BadRequestProblem
 {
-	public string? ErrorMessage { get; set; }
+	public string? ErrorMessage { get; init; }
 }
