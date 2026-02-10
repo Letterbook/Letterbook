@@ -15,7 +15,7 @@
     <PackageVersion Include="DarkLink.Web.WebFinger.Server" Version="1.0.0" />
     <PackageVersion Include="EntityFrameworkCore.Projectables" Version="4.0.0" />
     <PackageVersion Include="GitHubActionsTestLogger" Version="2.4.1" />
-    <PackageVersion Include="HtmlSanitizer" Version="9.0.889" />
+    <PackageVersion Include="HtmlSanitizer" Version="9.0.892" />
     <PackageVersion Include="ILogger.Moq" Version="2.0.0" />
     <PackageVersion Include="Letterbook.Uuid7" Version="2.1.1-patch.12" />
     <PackageVersion Include="Markdig" Version="0.44.0" />
