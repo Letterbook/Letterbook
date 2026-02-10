@@ -101,11 +101,22 @@ public class Program
 		}
 
 		// app.UseHttpsRedirection();
+		app.UseWhen(
+			context => !context.Request.Path.StartsWithSegments("/actor") &&
+			           !context.Request.Path.StartsWithSegments("/object") &&
+			           !context.Request.Path.StartsWithSegments("/.well-known") &&
+			           !context.Request.Path.StartsWithSegments("/api"),
+			appBuilder =>
+			{
+				appBuilder.UseStatusCodePagesWithReExecute("/error/{0}");
+				appBuilder.UseExceptionHandler("/error");
+			}
+		);
+
 		app.UseStaticFiles(new StaticFileOptions
 		{
 			FileProvider = new ManifestEmbeddedFileProvider(Assembly.GetAssembly(typeof(Web.Program))!, "wwwroot"),
 		});
-		app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 		app.UseHealthChecks("/healthz");
 		app.MapPrometheusScrapingEndpoint();
