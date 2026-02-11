@@ -137,6 +137,7 @@ public static class DependencyInjection
 	public static JsonSerializerOptions AddDtoSerializer(this JsonSerializerOptions options)
 	{
 		options.Converters.Add(new Uuid7JsonConverter());
+		options.Converters.Add(new ExceptionConverter());
 		options.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 
 		foreach (var converterType in Assembly.GetExecutingAssembly().GetTypes()

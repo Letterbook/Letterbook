@@ -117,7 +117,7 @@ dotnet ef database update --project Source/Letterbook.Adapter.TimescaleFeeds/Let
 
 3. Add an application host secret
 ```shell
-dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Letterbook
+dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Source/Letterbook
 ```
 
 4. Run Letterbook (in watch mode)
