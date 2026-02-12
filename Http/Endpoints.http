@@ -12,3 +12,8 @@ Accept: application/ld+json; profile="https://www.w3.org/ns/activitystreams"
 ### Webfinger Peer
 GET {{peer}}/.well-known/webfinger?resource=acct:{{peer_user}}@{{peer_domain}} 
 
+### Nodeinfo
+GET {{host}}/.well-known/nodeinfo
+
+### Nodeinfo
+GET {{host}}/node_info/2.1
