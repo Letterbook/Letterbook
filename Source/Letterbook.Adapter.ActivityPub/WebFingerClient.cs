@@ -27,10 +27,10 @@ public partial class WebFingerClient : IGlobalSearchProvider, IProfileSearchProv
 		_apClient = apClient;
 	}
 
-	public async Task<IEnumerable<Models.IFederated>> SearchAny(string query, CancellationToken cancellationToken) =>
+	public async Task<IEnumerable<Models.IFederated>> SearchAny(string query, CancellationToken cancellationToken, int limit = 1) =>
 		await SearchProfiles(query, cancellationToken);
 
-	public async Task<IEnumerable<Models.Profile>> SearchProfiles(string query, CancellationToken cancellationToken)
+	public async Task<IEnumerable<Models.Profile>> SearchProfiles(string query, CancellationToken cancellationToken, int limit = 1)
 	{
 		query = MatchAcct().Replace(query, "");
 		query = string.Join('@', query.Split('@', 2,
