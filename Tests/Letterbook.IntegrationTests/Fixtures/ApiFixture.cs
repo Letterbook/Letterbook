@@ -121,7 +121,7 @@ public class ApiFixture : WebApplicationFactory<Program>
 		services.ReplaceScoped(MockIAuthzPostService.Object);
 		services.ReplaceScoped(MockAuthorizationService.Object);
 		services.ReplaceScoped(Mock.Of<IFeedsAdapter>(MockBehavior.Strict));
-		services.ReplaceScoped(Mock.Of<IGlobalSearchProvider>(MockBehavior.Strict));
+		services.ReplaceScoped(Mock.Of<ISearchProvider>(MockBehavior.Strict));
 		services.ReplaceScoped(Mock.Of<IHostSigningKeyProvider>(MockBehavior.Strict));
 		services.ReplaceScoped(Mock.Of<IModerationEventPublisher>(MockBehavior.Strict));
 		services.ReplaceScoped(Mock.Of<IPostEventPublisher>(MockBehavior.Strict));

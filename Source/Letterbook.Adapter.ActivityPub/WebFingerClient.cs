@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Adapter.ActivityPub;
 
-public partial class WebFingerClient : IGlobalSearchProvider, IProfileSearchProvider
+public partial class WebFingerClient : ISearchProvider
 {
 	private readonly ILogger<WebFingerClient> _logger;
 	private readonly HttpClient _httpClient;
