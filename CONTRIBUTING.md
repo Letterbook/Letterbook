@@ -108,21 +108,20 @@ This will get you up an running quickly. You can skip ahead for some discussion 
 docker-compose up -d
 ```
 
-2. Migrate the database
-```shell
-dotnet tool restore
-dotnet ef database update --project Source/Letterbook.Adapter.Db/Letterbook.Adapter.Db.csproj
-dotnet ef database update --project Source/Letterbook.Adapter.TimescaleFeeds/Letterbook.Adapter.TimescaleFeeds.csproj
-```
-
-3. Add an application host secret
+2. Add an application host secret
 ```shell
 dotnet user-secrets set "HostSecret" "$(openssl rand -base64 32)" --project Source/Letterbook
 ```
 
+3. Restore development and runtime dependencies
+```shell
+dotnet tool restore
+dotnet restore Letterbook.sln
+dotnet build
+```
+
 4. Run Letterbook (in watch mode)
 ```shell
-dotnet restore Letterbook.sln
 dotnet watch run --project Source/Letterbook --launch-profile dev
 ```
 
