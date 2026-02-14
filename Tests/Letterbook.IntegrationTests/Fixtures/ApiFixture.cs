@@ -125,10 +125,8 @@ public class ApiFixture : WebApplicationFactory<Program>
 		services.ReplaceScoped(Mock.Of<IHostSigningKeyProvider>(MockBehavior.Strict));
 		services.ReplaceScoped(Mock.Of<IModerationEventPublisher>(MockBehavior.Strict));
 		services.ReplaceScoped(Mock.Of<IPostEventPublisher>(MockBehavior.Strict));
-		services.ReplaceScoped(Mock.Of<IPostSearchProvider>(MockBehavior.Strict));
 		services.ReplaceScoped(Mock.Of<IPostService>(MockBehavior.Strict));
 		services.ReplaceScoped(Mock.Of<IProfileEventPublisher>(MockBehavior.Strict));
-		services.ReplaceScoped(Mock.Of<IProfileSearchProvider>(MockBehavior.Strict));
 	}
 
 	/// <summary>
