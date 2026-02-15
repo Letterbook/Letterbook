@@ -1,15 +1,13 @@
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
-using System.Text.RegularExpressions;
 using Letterbook.Core.Adapters;
-using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Letterbook.Core;
 
-public partial class SearchService : ISearchService, ISearchServiceAuth
+public class SearchService : ISearchService, ISearchServiceAuth
 {
 	private readonly ILogger<SearchService> _logger;
 	private readonly IEnumerable<ISearchProvider> _providers;
@@ -35,59 +33,25 @@ public partial class SearchService : ISearchService, ISearchServiceAuth
 
 	public async IAsyncEnumerable<IFederated> SearchAll(string query, [EnumeratorCancellation] CancellationToken cancel, int limit = 100)
 	{
-		var matches = LocalHandleRegex().Matches(query);
-		if (matches.Count != 0)
+		// first provider is local data
+		// if we have the data, just use that
+		var data = _providers.First();
+		var found = false;
+		foreach (var r in await data.SearchAny(query, cancel, _opts, limit))
 		{
-			var found = false;
-			await foreach (var p in _data.AllProfiles().Where(p => p.Handle == matches[0].Value && p.Authority == _opts.BaseUri().GetAuthority()).ToAsyncEnumerable().WithCancellation(cancel))
-			{
-				found = true;
-				yield return p;
-			}
-			if(found)
-				yield break;
+			found = true;
+			limit--;
+			yield return r;
 		}
 
-		// @handle@host - search local db profiles and providers, exit early
-		if (UriExtensions.TryParseHandle(query, out var handle, out var host))
-		{
-			var found = false;
-			await foreach (var p in _data.AllProfiles().Where(p => p.Handle == handle && p.Authority == host.GetAuthority()).ToAsyncEnumerable().WithCancellation(cancel))
-			{
-				found = true;
-				yield return p;
-			}
-			if (found)
-				yield break;
-		}
-
-		// uri://something - search local db profiles, posts, and providers, exit early
-		if (Uri.TryCreate(query, UriKind.Absolute, out var queryUri))
-		{
-			var found = false;
-			await foreach (var p in _data.Profiles(queryUri).ToAsyncEnumerable().WithCancellation(cancel))
-			{
-				found = true;
-				yield return p;
-			}
-			if (!found)
-			{
-				await foreach (var p in _data.Posts(queryUri).ToAsyncEnumerable().WithCancellation(cancel))
-				{
-					found = true;
-					yield return p;
-				}
-			}
-
-			if (found)
-				yield break;
-		}
+		if (found)
+			yield break;
 
 		var pendingData = false;
-		// anything else - search providers, then add to db
-		foreach (var provider in _providers)
+		// for all other providers, add the discovered result to local data before returning
+		foreach (var provider in _providers.Skip(1))
 		{
-			var result = await provider.SearchAny(query, cancel);
+			var result = await provider.SearchAny(query, cancel, _opts);
 			foreach (var resource in result)
 			{
 
@@ -96,16 +60,16 @@ public partial class SearchService : ISearchService, ISearchServiceAuth
 				{
 					case Post post:
 						pendingData = true;
-						_logger.LogDebug("Adding post {Id} to local data from search", post.FediId);
+						_logger.LogDebug("Discovered post {Id} from search", resource.FediId);
 						_data.Add(post);
 						break;
 					case Profile profile:
 						pendingData = true;
-						_logger.LogDebug("Adding profile {Id} to local data from search", profile.FediId);
+						_logger.LogDebug("Discovered profile {Id} from search", resource.FediId);
 						_data.Add(profile);
 						break;
 					default:
-						_logger.LogDebug("Search returned type {Type} {Id}", resource.GetType().ToString(), resource.FediId);
+						_logger.LogDebug("Search returned unexpected type {Type} {Id}", resource.GetType().ToString(), resource.FediId);
 						continue;
 				}
 				if (_authz.View(_claims, resource))
@@ -121,40 +85,81 @@ public partial class SearchService : ISearchService, ISearchServiceAuth
 
 	public async IAsyncEnumerable<Profile> SearchProfiles(string query, [EnumeratorCancellation] CancellationToken cancel, int limit = 100)
 	{
-		foreach (var provider in _providers)
+		// first provider is local data
+		// if we have the data, just use that
+		var data = _providers.First();
+		var found = false;
+		foreach (var r in await data.SearchProfiles(query, cancel, _opts, limit))
 		{
-			var result = await provider.SearchProfiles(query, cancel, limit);
-			foreach (var profile in result)
+			found = true;
+			limit--;
+			yield return r;
+		}
+
+		if (found)
+			yield break;
+
+		var pendingData = false;
+		// for all other providers, add the discovered result to local data before returning
+		foreach (var provider in _providers.Skip(1))
+		{
+			var result = await provider.SearchProfiles(query, cancel, _opts);
+			foreach (var resource in result)
 			{
+
 				limit--;
-				if (_authz.View(_claims, profile))
-					yield return profile;
+				pendingData = true;
+				_logger.LogDebug("Discovered profile {Id} from search", resource.FediId);
+				_data.Add(resource);
+
+				if (_authz.View(_claims, resource))
+					yield return resource;
 			}
 
-			if (limit <= 0) yield break;
+			if (limit <= 0) break;
 		}
+
+		if (pendingData)
+			await _data.Commit();
 	}
 
 	public async IAsyncEnumerable<Post> SearchPosts(string query, [EnumeratorCancellation] CancellationToken cancel, int limit = 100)
 	{
-		foreach (var provider in _providers)
+		// first provider is local data
+		// if we have the data, just use that
+		var data = _providers.First();
+		var found = false;
+		foreach (var r in await data.SearchPosts(query, cancel, _opts, limit))
 		{
-			var result = await provider.SearchPosts(query, cancel, limit);
-			foreach (var profile in result)
+			found = true;
+			limit--;
+			yield return r;
+		}
+
+		if (found)
+			yield break;
+
+		var pendingData = false;
+		// for all other providers, add the discovered result to local data before returning
+		foreach (var provider in _providers.Skip(1))
+		{
+			var result = await provider.SearchPosts(query, cancel, _opts);
+			foreach (var resource in result)
 			{
+
 				limit--;
-				if (_authz.View(_claims, profile))
-					yield return profile;
+				pendingData = true;
+				_logger.LogDebug("Discovered post {Id} from search", resource.FediId);
+				_data.Add(resource);
+
+				if (_authz.View(_claims, resource))
+					yield return resource;
 			}
 
-			if (limit <= 0) yield break;
+			if (limit <= 0) break;
 		}
-	}
 
-	// match any string that begins with '@' and includes one or more characters other than '@'
-	// I'm sure other software disagrees, but there should be no reason we can't support literally any unicode character as part of a
-	// profile handle, except the special character @ which separates the username from the hostname
-	[GeneratedRegex("""(?<=^@)[^@]+$""")]
-	// [GeneratedRegex("""(?<=^@)\w+$""")]
-	private static partial Regex LocalHandleRegex();
+		if (pendingData)
+			await _data.Commit();
+	}
 }

@@ -54,10 +54,10 @@ public class Program
 			.AddDbTelemetry();
 		builder.Services.AddHealthChecks();
 		builder.Services.AddLetterbookCore(builder.Configuration)
+			.AddDbAdapter(builder.Configuration)
 			.AddActivityPubClient(builder.Configuration)
 			.AddApiProperties(builder.Configuration)
 			.AddPublishers()
-			.AddDbAdapter(builder.Configuration)
 			.AddFeedsAdapter(builder.Configuration)
 			.AddWebServices()
 			.AddWebCookies()
