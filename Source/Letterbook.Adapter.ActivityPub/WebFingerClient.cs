@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using DarkLink.Web.WebFinger.Shared;
 using Letterbook.Adapter.ActivityPub.Exceptions;
+using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
 using Microsoft.Extensions.Logging;
@@ -22,10 +23,12 @@ public class WebFingerClient : ISearchProvider
 		_apClient = apClient;
 	}
 
-	public async Task<IEnumerable<Models.IFederated>> SearchAny(string query, CancellationToken cancellationToken, int limit = 1) =>
-		await SearchProfiles(query, cancellationToken);
+	public async Task<IEnumerable<Models.IFederated>> SearchAny(string query, CancellationToken cancellationToken, CoreOptions options,
+		int limit = 100) =>
+		await SearchProfiles(query, cancellationToken, options);
 
-	public async Task<IEnumerable<Models.Profile>> SearchProfiles(string query, CancellationToken cancellationToken, int limit = 1)
+	public async Task<IEnumerable<Models.Profile>> SearchProfiles(string query, CancellationToken cancellationToken, CoreOptions options,
+		int limit = 100)
 	{
 		if (!UriExtensions.TryParseHandle(query, out var handle, out var host))
 		{

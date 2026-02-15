@@ -8,6 +8,12 @@ public static partial class UriExtensions
 	[GeneratedRegex("^acct:(?=[^/])")]
 	public static partial Regex MatchAcct();
 
+	// match any string that begins with '@' and includes one or more characters other than '@'
+	// I'm sure other software disagrees, but there should be no reason we can't support literally any unicode character as part of a
+	// profile handle, except the special character @ which separates the username from the hostname
+	[GeneratedRegex("""(?<=^@)[^@]+$""")]
+	public static partial Regex MatchLocalHandle();
+
 	public static string GetAuthority(this Uri uri) => uri.IsDefaultPort
 		? string.Join('.', uri.Host.Split('.').Reverse())
 		: string.Join('.', uri.Host.Split('.').Reverse()) + $":{uri.Port}";
@@ -51,5 +57,18 @@ public static partial class UriExtensions
 		builder.UserName = "";
 		host = builder.Uri;
 		return true;
+	}
+
+	public static bool TryParseLocalHandle(string query, [NotNullWhen(true)] out string? handle)
+	{
+		var matches = MatchLocalHandle().Matches(query);
+		if (matches.Count > 0)
+		{
+			handle = matches[0].Value;
+			return true;
+		}
+
+		handle = null;
+		return false;
 	}
 }
