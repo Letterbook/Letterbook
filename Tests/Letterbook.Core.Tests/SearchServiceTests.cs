@@ -155,6 +155,8 @@ public class SearchServiceTests : WithMocks
 
 	[InlineData("@handle")]
 	[InlineData("@handle@host")]
+	[InlineData("@handle@host.example")]
+	[InlineData("@handle@host.example@still.going")]
 	[InlineData("https://host.example/value")]
 	[InlineData("any other text")]
 	[Theory(DisplayName = "SearchAll should call providers")]
@@ -181,7 +183,7 @@ public class SearchServiceTests : WithMocks
 		DataAdapterMock.Verify(m => m.Add(It.IsAny<Profile>()), Times.Once);
 	}
 
-	[Fact(DisplayName = "SearchAll should add profiles")]
+	[Fact(DisplayName = "SearchAll should add posts")]
 	public async Task AllShouldAddPostsToDb()
 	{
 		var provider = new Mock<ISearchProvider>();
