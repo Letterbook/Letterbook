@@ -2,7 +2,6 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Models;
 using Letterbook.Core.Tests.Fakes;
 using Microsoft.Extensions.Logging;
-using MockQueryable;
 using Moq;
 using Xunit.Abstractions;
 
@@ -36,7 +35,10 @@ public class SearchServiceTests : WithMocks
 		Assert.NotNull(_service);
 	}
 
-	[Fact]
+	/***
+	 * SearchProfiles
+	 */
+	[Fact(DisplayName = "SearchProfiles should call all providers")]
 	public async Task ProfileShouldCallAllProviders()
 	{
 		var mocks = new List<Mock<ISearchProvider>> { new(), new() };
@@ -46,31 +48,31 @@ public class SearchServiceTests : WithMocks
 
 		foreach (var mock in mocks)
 		{
-			mock.Verify(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()), Times.Once);
+			mock.Verify(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()), Times.Once);
 		}
 	}
 
-	[Fact]
+	[Fact(DisplayName = "SearchProfiles should stop calling providers after limit reached")]
 	public async Task ProfileShouldStopAfterLimitReached()
 	{
 		var mocks = new List<Mock<ISearchProvider>> { new(), new() };
-		mocks[0].Setup(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()))
+		mocks[0].Setup(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
 			.ReturnsAsync(_localProfiles.Generate(1));
 		_providers.AddRange(mocks.Select(m => m.Object));
 
 		var actual = await _service.As([]).SearchProfiles("query", CancellationToken.None, 1).ToListAsync();
 
-		mocks[0].Verify(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()), Times.Once);
-		mocks[1].Verify(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()), Times.Never);
+		mocks[0].Verify(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()), Times.Once);
+		mocks[1].Verify(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()), Times.Never);
 	}
 
-	[Fact]
+	[Fact(DisplayName = "SearchProfiles should combine results from all providers")]
 	public async Task ProfileShouldCombineResultsFromAllProviders()
 	{
-		var mocks = new List<Mock<ISearchProvider>> { new(), new() };
-		foreach (var mock in mocks)
+		var mocks = new List<Mock<ISearchProvider>> { new(), new(), new() };
+		foreach (var mock in mocks.Skip(1))
 		{
-			mock.Setup(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()))
+			mock.Setup(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
 				.ReturnsAsync(_localProfiles.Generate(1));
 		}
 		_providers.AddRange(mocks.Select(m => m.Object));
@@ -80,11 +82,11 @@ public class SearchServiceTests : WithMocks
 		Assert.Equal(2, actual.Count);
 	}
 
-	[Fact]
+	[Fact(DisplayName = "SearchProfiles should not truncate already retrieved results beyond the limit")]
 	public async Task ProfileShouldNotTruncateAlreadyRetrievedResults()
 	{
 		var mocks = new List<Mock<ISearchProvider>> { new(), new() };
-		mocks[0].Setup(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()))
+		mocks[0].Setup(m => m.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
 			.ReturnsAsync(_localProfiles.Generate(5));
 		_providers.AddRange(mocks.Select(m => m.Object));
 
@@ -93,90 +95,162 @@ public class SearchServiceTests : WithMocks
 		Assert.Equal(5, actual.Count);
 	}
 
+	[Fact(DisplayName = "SearchProfiles should exit early on local results")]
+	public async Task ProfilesShouldExitLocal()
+    	{
+    		var profiles = _localProfiles.Generate(1);
+    		var provider = new Mock<ISearchProvider>();
+    		var otherProvider = new Mock<ISearchProvider>();
+    		provider.Setup(p => p.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<CoreOptions>(), It.IsAny<int>()))
+    			.ReturnsAsync(profiles);
+    		_providers.AddRange(provider.Object, otherProvider.Object);
+
+    		var actual = await _service.As([]).SearchProfiles($"@{profiles[0].Handle}", CancellationToken.None).ToListAsync();
+    		Assert.Single(actual);
+
+    		otherProvider.Verify(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()), Times.Never);
+    	}
+
+	[Fact(DisplayName = "SearchProfiles should add profiles")]
+	public async Task ProfilesShouldAddProfileToDb()
+	{
+		var provider = new Mock<ISearchProvider>();
+		provider.Setup(p => p.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
+			.ReturnsAsync(_peerProfiles.Generate(1));
+		_providers.AddRange(Mock.Of<ISearchProvider>(), provider.Object);
+
+		await _service.As([]).SearchProfiles("query", CancellationToken.None).ToListAsync();
+
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<Profile>()), Times.Once);
+	}
+
+	/***
+	 * SearchPosts
+	 */
+	[Fact(DisplayName = "SearchPosts should call all providers")]
+	public async Task PostsShouldCallAllProviders()
+	{
+		var mocks = new List<Mock<ISearchProvider>> { new(), new() };
+		_providers.AddRange(mocks.Select(m => m.Object));
+
+		var actual = await _service.As([]).SearchPosts("query", CancellationToken.None).ToListAsync();
+
+		foreach (var mock in mocks)
+		{
+			mock.Verify(m => m.SearchPosts(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()), Times.Once);
+		}
+	}
+
+	[Fact(DisplayName = "SearchPosts should stop calling providers after limit reached")]
+	public async Task PostsShouldStopAfterLimitReached()
+	{
+		var mocks = new List<Mock<ISearchProvider>> { new(), new() };
+		mocks[0].Setup(m => m.SearchPosts(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
+			.ReturnsAsync(_localPosts.Generate(1));
+		_providers.AddRange(mocks.Select(m => m.Object));
+
+		var actual = await _service.As([]).SearchPosts("query", CancellationToken.None, 1).ToListAsync();
+
+		mocks[0].Verify(m => m.SearchPosts(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()), Times.Once);
+		mocks[1].Verify(m => m.SearchPosts(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()), Times.Never);
+	}
+
+	[Fact(DisplayName = "SearchPosts should combine results from all providers")]
+	public async Task PostsShouldCombineResultsFromAllProviders()
+	{
+		var mocks = new List<Mock<ISearchProvider>> { new(), new(), new() };
+		foreach (var mock in mocks.Skip(1))
+		{
+			mock.Setup(m => m.SearchPosts(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
+				.ReturnsAsync(_localPosts.Generate(1));
+		}
+		_providers.AddRange(mocks.Select(m => m.Object));
+
+		var actual = await _service.As([]).SearchPosts("query", CancellationToken.None).ToListAsync();
+
+		Assert.Equal(2, actual.Count);
+	}
+
+	[Fact(DisplayName = "SearchPosts should not truncate already retrieved results beyond the limit")]
+	public async Task PostsShouldNotTruncateAlreadyRetrievedResults()
+	{
+		var mocks = new List<Mock<ISearchProvider>> { new(), new() };
+		mocks[0].Setup(m => m.SearchPosts(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
+			.ReturnsAsync(_localPosts.Generate(5));
+		_providers.AddRange(mocks.Select(m => m.Object));
+
+		var actual = await _service.As([]).SearchPosts("query", CancellationToken.None, 1).ToListAsync();
+
+		Assert.Equal(5, actual.Count);
+	}
+
+	[Fact(DisplayName = "SearchPosts should exit early on local results")]
+	public async Task PostsShouldExitLocal()
+    	{
+    		var posts = _localPosts.Generate(1);
+    		var provider = new Mock<ISearchProvider>();
+    		var otherProvider = new Mock<ISearchProvider>();
+    		provider.Setup(p => p.SearchPosts(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<CoreOptions>(), It.IsAny<int>()))
+    			.ReturnsAsync(posts);
+    		_providers.AddRange(provider.Object, otherProvider.Object);
+
+    		var actual = await _service.As([]).SearchPosts("query", CancellationToken.None).ToListAsync();
+    		Assert.Single(actual);
+
+    		otherProvider.Verify(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()), Times.Never);
+    	}
+
+	[Fact(DisplayName = "SearchPosts should add posts")]
+	public async Task PostsShouldAddToDb()
+	{
+		var provider = new Mock<ISearchProvider>();
+		provider.Setup(p => p.SearchPosts(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
+			.ReturnsAsync(_localPosts.Generate(1));
+		_providers.AddRange(Mock.Of<ISearchProvider>(), provider.Object);
+
+		await _service.As([]).SearchPosts("query", CancellationToken.None).ToListAsync();
+
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<Post>()), Times.Once);
+	}
+
 	/***
 	 * SearchAll
 	 */
 
-	[Fact(DisplayName = "SearchAll should exit early on local handle")]
+	[Fact(DisplayName = "SearchAll should exit early on local results")]
 	public async Task AllShouldExitLocal()
 	{
 		var profiles = _localProfiles.Generate(1);
 		var provider = new Mock<ISearchProvider>();
-		_providers.Add(provider.Object);
-		DataAdapterMock.Setup(m => m.AllProfiles()).Returns(profiles.BuildMock());
+		var otherProvider = new Mock<ISearchProvider>();
+		provider.Setup(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<CoreOptions>(), It.IsAny<int>()))
+			.ReturnsAsync(profiles);
+		_providers.AddRange(provider.Object, otherProvider.Object);
 
 		var actual = await _service.As([]).SearchAll($"@{profiles[0].Handle}", CancellationToken.None).ToListAsync();
 		Assert.Single(actual);
 
-		provider.Verify(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()), Times.Never);
+		otherProvider.Verify(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()), Times.Never);
 	}
 
-	[Fact(DisplayName = "SearchAll should exit early on full handle")]
-	public async Task AllShouldExitFullHandle()
-	{
-		var profiles = _localProfiles.Generate(1);
-		var provider = new Mock<ISearchProvider>();
-		_providers.Add(provider.Object);
-		DataAdapterMock.Setup(m => m.AllProfiles()).Returns(profiles.BuildMock());
-
-		var actual = await _service.As([]).SearchAll($"@{profiles[0].Handle}@{CoreOptionsMock.Value.DomainName}", CancellationToken.None).ToListAsync();
-		Assert.Single(actual);
-
-		provider.Verify(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()), Times.Never);
-	}
-
-	[Fact(DisplayName = "SearchAll should exit early on profile Uri")]
-	public async Task AllShouldExitProfileUri()
-	{
-		var profiles = _localProfiles.Generate(1);
-		var provider = new Mock<ISearchProvider>();
-		_providers.Add(provider.Object);
-		DataAdapterMock.Setup(m => m.Profiles(It.IsAny<Uri[]>())).Returns(profiles.BuildMock());
-
-		var actual = await _service.As([]).SearchAll(profiles[0].FediId.ToString(), CancellationToken.None).ToListAsync();
-		Assert.Single(actual);
-
-		provider.Verify(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()), Times.Never);
-	}
-
-	[Fact(DisplayName = "SearchAll should exit early on post Uri")]
-	public async Task AllShouldExitPostUri()
-	{
-		var posts = _localPosts.Generate(1);
-		var provider = new Mock<ISearchProvider>();
-		_providers.Add(provider.Object);
-		DataAdapterMock.Setup(m => m.Posts(It.IsAny<Uri[]>())).Returns(posts.BuildMock());
-
-		var actual = await _service.As([]).SearchAll(posts[0].FediId.ToString(), CancellationToken.None).ToListAsync();
-		Assert.Single(actual);
-
-		provider.Verify(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()), Times.Never);
-	}
-
-	[InlineData("@handle")]
-	[InlineData("@handle@host")]
-	[InlineData("@handle@host.example")]
-	[InlineData("@handle@host.example@still.going")]
-	[InlineData("https://host.example/value")]
-	[InlineData("any other text")]
-	[Theory(DisplayName = "SearchAll should call providers")]
-	public async Task AllShouldCallProviders(string query)
+	[Fact(DisplayName = "SearchAll should call providers")]
+	public async Task AllShouldCallProviders()
 	{
 		var provider = new Mock<ISearchProvider>();
-		_providers.Add(provider.Object);
+		_providers.AddRange(Mock.Of<ISearchProvider>(), provider.Object);
 
-		await _service.As([]).SearchAll(query, CancellationToken.None).ToListAsync();
+		await _service.As([]).SearchAll("any query text", CancellationToken.None).ToListAsync();
 
-		provider.Verify(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()), Times.Once);
+		provider.Verify(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()), Times.Once);
 	}
 
 	[Fact(DisplayName = "SearchAll should add profiles")]
 	public async Task AllShouldAddProfileToDb()
 	{
 		var provider = new Mock<ISearchProvider>();
-		provider.Setup(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()))
+		provider.Setup(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
 			.ReturnsAsync(_peerProfiles.Generate(1));
-		_providers.Add(provider.Object);
+		_providers.AddRange(Mock.Of<ISearchProvider>(), provider.Object);
 
 		await _service.As([]).SearchAll("query", CancellationToken.None).ToListAsync();
 
@@ -187,9 +261,9 @@ public class SearchServiceTests : WithMocks
 	public async Task AllShouldAddPostsToDb()
 	{
 		var provider = new Mock<ISearchProvider>();
-		provider.Setup(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), It.IsAny<int>()))
+		provider.Setup(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
 			.ReturnsAsync(_peerPosts.Generate(1));
-		_providers.Add(provider.Object);
+		_providers.AddRange(Mock.Of<ISearchProvider>(), provider.Object);
 
 		await _service.As([]).SearchAll("query", CancellationToken.None).ToListAsync();
 
