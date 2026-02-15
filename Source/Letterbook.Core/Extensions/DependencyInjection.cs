@@ -37,6 +37,7 @@ public static class DependencyInjection
 			.AddScoped<IAuthzPostService, PostService>()
 			.AddScoped<ITimelineService, TimelineService>()
 			.AddScoped<IModerationService, ModerationService>()
+			.AddScoped<ISearchService, SearchService>()
 			.AddSingleton<MappingConfigProvider>()
 			.AddSingleton<Instrumentation>()
 			.AddSingleton<IInviteCodeGenerator, RandomInviteCode>()

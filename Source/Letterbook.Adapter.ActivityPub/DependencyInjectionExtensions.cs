@@ -34,6 +34,7 @@ public static class DependencyInjectionExtensions
 			.Configure<AddContentDigestOptions>(options => options.WithHash(AddContentDigestOptions.Hash.Sha256))
 			.AddSingleton<IActivityPubDocument, Document>()
 			.AddScoped<IVerificationKeyProvider, ActivityPubClientVerificationKeyProvider>()
+			.AddScoped<ISearchProvider, WebFingerClient>()
 			.ConfigureMessageSigningOptions(options =>
 			{
 				options.WithMandatoryComponent(SignatureComponent.Method);

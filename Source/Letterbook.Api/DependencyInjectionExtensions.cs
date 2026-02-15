@@ -233,8 +233,8 @@ public static class DependencyInjectionExtensions
 		builder.Services.AddHealthChecks()
 			// .Add();
 			;
-		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddServices(builder.Configuration);
+		builder.Services.AddActivityPubClient(builder.Configuration);
 		builder.Services.AddAspnetServices();
 		builder.Services.AddIdentity<Account, IdentityRole<Guid>>(identity => identity.ConfigureIdentity())
 			.AddEntityFrameworkStores<RelationalContext>()

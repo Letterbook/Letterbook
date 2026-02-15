@@ -1,14 +1,14 @@
 using System.Linq.Expressions;
+using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Extensions;
-using Medo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Adapter.Db;
 
-public class DataAdapter : IDataAdapter, IAsyncDisposable
+public class DataAdapter : IDataAdapter, IAsyncDisposable, ISearchProvider
 {
 	private readonly ILogger<DataAdapter> _logger;
 	private readonly RelationalContext _context;
@@ -274,4 +274,79 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable
 	{
 		await _context.DisposeAsync();
 	}
+
+	public async Task<IEnumerable<Models.IFederated>> SearchAny(string query, CancellationToken cancellationToken, CoreOptions options,
+		int limit = 100)
+	{
+		var result = new List<Models.IFederated>();
+		result.AddRange(await SearchProfilesData(query, options, limit, cancellationToken));
+		limit -= result.Count;
+
+		result.AddRange(await SearchPostsData(query, limit, cancellationToken));
+		return result;
+	}
+
+	public async Task<IEnumerable<Models.Profile>> SearchProfiles(string query, CancellationToken cancellationToken, CoreOptions options,
+		int limit = 100)
+	{
+		return await SearchProfilesData(query, options, limit, cancellationToken);
+	}
+
+	public async Task<IEnumerable<Models.Post>> SearchPosts(string query, CancellationToken cancellationToken, CoreOptions options,
+		int limit = 100)
+	{
+		return await SearchPostsData(query, limit, cancellationToken);
+	}
+
+	private async Task<List<Models.Profile>> SearchProfilesData(string query, CoreOptions opts, int limit, CancellationToken cancel)
+	{
+		var result = new List<Models.Profile>();
+		// @handle
+		if (UriExtensions.TryParseLocalHandle(query, out var local))
+		{
+			var localHandles = await _context.Profiles.Where(p => p.Handle == local && p.Authority == opts.BaseUri().GetAuthority()).Take(limit)
+				.TagWith("search")
+				.ToListAsync(cancel);
+			limit -= localHandles.Count;
+			result.AddRange(localHandles);
+		}
+
+		// @handle@host
+		if (UriExtensions.TryParseHandle(query, out var handle, out var host))
+		{
+			var handles = await _context.Profiles.Where(p => p.Handle == local && p.Authority == opts.BaseUri().GetAuthority()).Take(limit)
+				.TagWith("search")
+				.ToListAsync(cancel);
+			limit -= handles.Count;
+			result.AddRange(handles);
+		}
+
+		// uri://something
+		if (Uri.TryCreate(query, UriKind.Absolute, out var queryUri))
+		{
+			var uris = await Profiles(queryUri).Take(limit)
+				.TagWith("search")
+				.ToListAsync(cancel);
+			result.AddRange(uris);
+		}
+
+		return result;
+	}
+
+	private async Task<List<Models.Post>> SearchPostsData(string query, int limit, CancellationToken cancel)
+    	{
+    		var result = new List<Models.Post>();
+
+    		// uri://something
+    		if (Uri.TryCreate(query, UriKind.Absolute, out var queryUri))
+    		{
+    			var uris = await Posts(queryUri).Take(limit)
+					.TagWith("search")
+				    .ToListAsync(cancel);
+    			result.AddRange(uris);
+    		}
+
+    		return result;
+    	}
+
 }

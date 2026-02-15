@@ -17,7 +17,8 @@ public static class DependencyInjection
 				options.UseNpgsql(dataSource);
 				options.UseProjectables();
 			})
-			.AddScoped<IDataAdapter, DataAdapter>();
+			.AddScoped<IDataAdapter, DataAdapter>()
+			.AddScoped<ISearchProvider, DataAdapter>();
 	}
 
 	public static IOpenTelemetryBuilder AddDbTelemetry(this IOpenTelemetryBuilder builder)
