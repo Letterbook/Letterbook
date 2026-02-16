@@ -1,24 +1,20 @@
 using System.Collections.Immutable;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using DarkLink.Web.WebFinger.Client;
 using DarkLink.Web.WebFinger.Shared;
 using Letterbook.Adapter.ActivityPub.Exceptions;
+using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Letterbook.Adapter.ActivityPub;
 
-public partial class WebFingerClient : ISearchProvider
+public class WebFingerClient : ISearchProvider
 {
 	private readonly ILogger<WebFingerClient> _logger;
 	private readonly HttpClient _httpClient;
 	private readonly IActivityPubClient _apClient;
-
-	[GeneratedRegex("^acct:(?=[^/])")]
-	private static partial Regex MatchAcct();
 
 	public WebFingerClient(ILogger<WebFingerClient> logger, HttpClient httpClient, IActivityPubClient apClient)
 	{
@@ -27,50 +23,23 @@ public partial class WebFingerClient : ISearchProvider
 		_apClient = apClient;
 	}
 
-	public async Task<IEnumerable<Models.IFederated>> SearchAny(string query, CancellationToken cancellationToken, int limit = 1) =>
-		await SearchProfiles(query, cancellationToken);
+	public async Task<IEnumerable<Models.IFederated>> SearchAny(string query, CancellationToken cancellationToken, CoreOptions options,
+		int limit = 100) =>
+		await SearchProfiles(query, cancellationToken, options);
 
-	public async Task<IEnumerable<Models.Profile>> SearchProfiles(string query, CancellationToken cancellationToken, int limit = 1)
+	public async Task<IEnumerable<Models.Profile>> SearchProfiles(string query, CancellationToken cancellationToken, CoreOptions options,
+		int limit = 100)
 	{
-		query = MatchAcct().Replace(query, "");
-		query = string.Join('@', query.Split('@', 2,
-			StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries));
-
-		UriBuilder builder;
-		try
-		{
-			builder = new UriBuilder(query);
-		}
-		catch (UriFormatException )
+		if (!UriExtensions.TryParseHandle(query, out var handle, out var host))
 		{
 			_logger.LogDebug("Can't process search for {Query}", query);
 			return [];
 		}
 
-		if (string.IsNullOrEmpty(builder.UserName) ||
-		    string.IsNullOrEmpty(builder.Host) ||
-		    builder.Path != "/" ||
-		    !string.IsNullOrEmpty(builder.Password) ||
-		    !string.IsNullOrEmpty(builder.Query) ||
-		    !builder.Uri.IsDefaultPort ||
-		    builder.Uri.IsLoopback ||
-		    builder.Uri.HostNameType != UriHostNameType.Dns)
-		{
-			_logger.LogDebug("Can't process search for {Query}", query);
-			return [];
-		}
-
-		var acct = $"{builder.UserName}@{builder.Host}";
-		builder.Fragment = "";
-		builder.Scheme = Uri.UriSchemeHttps;
-		builder.Port = 443;
-		builder.UserName = "";
-		var host = builder.Uri;
-
-		var webfinger = await _httpClient.WebfingerQuery(host, acct, cancellationToken);
+		var webfinger = await _httpClient.WebfingerQuery(host, handle, cancellationToken);
 		if (webfinger == null)
 		{
-			_logger.LogDebug("Invalid response to query {Host} for {Resource}", host, acct);
+			_logger.LogDebug("Invalid response to query {Host} for {Resource}", host, handle);
 			return [];
 		}
 
@@ -121,13 +90,12 @@ public partial class WebFingerClient : ISearchProvider
 }
 
 public static class WebfingerExtensions {
-
-public static async Task<JsonResourceDescriptor?> WebfingerQuery(this HttpClient client, Uri host, string acct, CancellationToken cancellationToken)
+	public static async Task<JsonResourceDescriptor?> WebfingerQuery(this HttpClient client, Uri host, string handle, CancellationToken cancellationToken)
 	{
 		var uri = new UriBuilder(host)
 		{
 			Path = "/.well-known/webfinger",
-			Query = $"resource={Uri.EscapeDataString("acct:" + acct)}"
+			Query = $"resource={Uri.EscapeDataString($"acct:{handle}@{host.Host}")}"
 		}.Uri;
 
 		var options = new JsonSerializerOptions();

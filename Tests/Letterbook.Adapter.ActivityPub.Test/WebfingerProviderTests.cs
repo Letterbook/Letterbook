@@ -4,7 +4,6 @@ using System.Text;
 using Letterbook.Core.Tests;
 using Letterbook.Core.Tests.Fakes;
 using Letterbook.Core.Tests.Mocks;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Neovolve.Logging.Xunit;
 using Xunit.Abstractions;
@@ -62,7 +61,7 @@ public class WebfingerProviderTests : WithMocks
 		});
 		ActivityPubClientMock.Setup(m => m.Fetch<Models.Profile>(_profile.FediId, It.IsAny<CancellationToken>()))
 			.ReturnsAsync(_profile);
-		var actual = await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token);
+		var actual = await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token, default!);
 
 		Assert.Equal([_profile], actual);
 	}
@@ -96,7 +95,7 @@ public class WebfingerProviderTests : WithMocks
 			m.StatusCode = HttpStatusCode.OK;
 			m.Content = new StringContent(json, new UTF8Encoding(), new MediaTypeHeaderValue("application/jrd+json"));
 		});
-		await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token);
+		await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token, default!);
 
 		ActivityPubClientMock.Verify(m => m.Fetch<Models.Profile>(It.IsAny<Uri>(), It.IsAny<CancellationToken>()), Times.Once());
 	}
@@ -138,7 +137,7 @@ public class WebfingerProviderTests : WithMocks
 		_cancel.CancelAfter(50);
 
 		_output.WriteLine("call search");
-		var actual = await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token);
+		var actual = await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token, default!);
 
 		Assert.Equal([_profile], actual);
 		return;
@@ -165,7 +164,7 @@ public class WebfingerProviderTests : WithMocks
 		ActivityPubClientMock.Setup(m => m.Fetch<Models.Profile>(_profile.FediId, It.IsAny<CancellationToken>()))
 			.ReturnsAsync(_profile);
 
-		await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token);
+		await _webfinger.SearchProfiles($"@{_profile.Handle}@{_profile.FediId.Authority}", _cancel.Token, default!);
 
 		HttpMessageHandlerMock.Verify(it => it.SendMessageAsync(
 			It.Is<HttpRequestMessage>(message =>
@@ -208,7 +207,7 @@ public class WebfingerProviderTests : WithMocks
 			m.Content = new StringContent("{}", new UTF8Encoding(), new MediaTypeHeaderValue("application/jrd+json"));
 		});
 
-		await _webfinger.SearchProfiles(fact.Given, _cancel.Token);
+		await _webfinger.SearchProfiles(fact.Given, _cancel.Token, default!);
 
 		if (fact.Fetch)
 		{
