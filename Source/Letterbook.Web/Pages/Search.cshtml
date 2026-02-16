@@ -1,0 +1,56 @@
+@page
+@model Letterbook.Web.Pages.Search
+
+@{
+    ViewData["Title"] = "Search";
+}
+
+<section class="search">
+    <h1>Search</h1>
+    <form>
+        <input asp-for="@Model.Query" type="search"/>
+        <p>Search for:</p>
+        <fieldset>
+            <input id="type-any" type="radio" asp-for="@Model.SearchType" value="any" checked/>
+            <label for="type-any">Anything</label>
+            <input id="type-profiles" type="radio" asp-for="@Model.SearchType" value="profiles"/>
+            <label for="type-profiles">Profiles</label>
+            <input id="type-posts" type="radio" asp-for="@Model.SearchType" value="posts"/>
+            <label for="type-posts">Posts</label>
+        </fieldset>
+    </form>
+    <div class="search-results">
+        @if (Model.Profiles.Any())
+        {
+            <details open="@Model.Profiles.Any()">
+                <summary role="button">
+                    Profiles
+                </summary>
+                <ul>
+                    @foreach (var p in Model.Profiles)
+                    {
+                        <li>
+                            <a asp-page="Profile" asp-route-id="@p.Id">@p.DisplayName</a>
+                        </li>
+                    }
+                </ul>
+            </details>
+        }
+        @if (Model.Posts.Any())
+        {
+            <details open="@(Model.Posts.Any() && !Model.Profiles.Any())">
+                <summary role="button">
+                    Posts
+                </summary>
+                <ul>
+                    @foreach (var p in Model.Posts)
+                    {
+                        <li>
+                            <a asp-page="Thread" asp-route-postId="@p.Id">@(p.Preview ?? p.Id.ToString())</a>
+                        </li>
+                    }
+                </ul>
+            </details>
+        }
+    </div>
+</section>
