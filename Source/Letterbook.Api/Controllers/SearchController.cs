@@ -1,23 +1,26 @@
-﻿using Letterbook.Core;
+﻿using AutoMapper;
+using Letterbook.Core;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Letterbook.Api.Controllers;
 
 [Route("lb/v1")]
-public class SearchController(ISearchProvider searchProvider): ControllerBase
+public class SearchController(ISearchProvider searchProvider, MappingConfigProvider mappingConfig): ControllerBase
 {
 	[HttpGet("search_profiles")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[SwaggerOperation("Search", "Search for a profile")]
-	public IActionResult SearchProfiles([FromQuery(Name = "q")] string query)
+	public async Task<IActionResult> SearchProfiles([FromQuery(Name = "q")] string query)
 	{
-		searchProvider.SearchProfiles(query, CancellationToken.None, new CoreOptions
-		{
+		var mapper = new Mapper(mappingConfig.Profiles);
 
-		}, 100);
-		return Ok();
+		var result = await searchProvider.SearchProfiles(query, CancellationToken.None, new CoreOptions(), 100);
+
+		return Ok(mapper.Map<IEnumerable<FullProfileDto>>(result));
 	}
 }
