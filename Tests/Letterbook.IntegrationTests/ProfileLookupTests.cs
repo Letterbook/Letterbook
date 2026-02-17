@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -7,6 +8,7 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers.Converters;
 using Letterbook.IntegrationTests.Fixtures;
+using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
 using Xunit.Abstractions;
 
@@ -91,6 +93,20 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 		Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
 
 		Assert.Contains("Profile search failed on purpose", await response.Content.ReadAsStringAsync());
+	}
+
+	[Fact(DisplayName = "Should require authorization")]
+	public async Task RejectUnauthorizedRequest()
+	{
+		using var _client = fixture.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("None");
+
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.social");
+
+		// @todo: Should this really return 401 instead of redirecting to log-in?
+		Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+		Assert.Equal("/Identity/Account/Login", response.Headers.Location!.AbsolutePath);
 	}
 
 	// TEST: is authentication required?
