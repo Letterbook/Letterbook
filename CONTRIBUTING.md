@@ -249,6 +249,36 @@ Settings -> Build, Execution, Deployment -> Unit Testing -> Test Runner
 
 ![Screenshot of a grafana dashboard showing a distributed trace with correlated logs](docs/grafana-trace-detail.png)
 
+## Troubleshooting
+
+### Build fails Check Generated Files step
+
+```shell
+Run CHANGED=$(git status --porcelain -uno)
+  CHANGED=$(git status --porcelain -uno)
+  if [ -n "$CHANGED" ]; then
+    echo "$CHANGED"
+    echo 'Failed: Stale files'
+    exit 1
+  fi
+  shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+  env:
+    NUGET_PACKAGES: /home/runner/work/Letterbook/Letterbook/.nuget/packages
+    DOTNET_ROOT: /usr/share/dotnet
+  
+ M docs/OpenApi/letterbook-v1.json
+Failed: Stale files
+Error: Process completed with exit code 1.
+```
+
+This means you need to commit some changes to documentation files to `docs/OpenApi`.
+
+To see what they are, do the same the [the build script](./.github/workflows/pull-request.yml) does:
+
+```shell
+dotnet build Letterbook.sln --configuration Release && git status --porcelain -uno
+```
+
 ### Telemetry
 
 Letterbook is normally very debuggable. You can just pick a launch profile and run it with debugging enabled. But, it's still a good idea to use and get familiar with the telemetry. At some point, there will be Letterbook instances running in production, and simply attaching a debugger will no longer be an option. We provide some observability backends to in docker compose, to use during development. Using our own telemetry during development helps us to make that telemetry more useful. It also generally makes it more apparent what the server is doing.
