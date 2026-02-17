@@ -12,18 +12,21 @@ using Xunit.Abstractions;
 
 namespace Letterbook.IntegrationTests;
 
-public class ProfileLookupTests(ApiFixture fixture, ITestOutputHelper log) : IClassFixture<ApiFixture>
+public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper log) : IClassFixture<ProfileLookupFixture>
 {
 	private readonly ITestOutputHelper _log = log;
+	private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
+	{
+		Converters = { new Uuid7JsonConverter() },
+		ReferenceHandler = ReferenceHandler.IgnoreCycles
+	};
 
 	[Fact(DisplayName = "Should invoke search profiles")]
 	public async Task InvokeCorrectSearchMethod()
 	{
-		var mockSearchProvider = new Mock<ISearchProvider>(MockBehavior.Default);
-
 		var expectedProfile = Models.Profile.CreateIndividual(new Uri("acct:letterbook.social"), "ben");
 
-		mockSearchProvider.Setup(it => it.SearchProfiles(
+		fixture.MockSearchProvider.Setup(it => it.SearchProfiles(
 			It.IsAny<string>(),
 			It.IsAny<CancellationToken>(),
 			It.IsAny<CoreOptions>(),
@@ -32,7 +35,34 @@ public class ProfileLookupTests(ApiFixture fixture, ITestOutputHelper log) : ICl
 				expectedProfile
 			});
 
-		fixture.ReplaceScoped(mockSearchProvider.Object);
+		using var _client = fixture.CreateClient();
+
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.social");
+
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+		fixture.MockSearchProvider
+			.Verify(it => it.SearchProfiles(
+				"ben@letterbook.social",
+				It.IsAny<CancellationToken>(),
+				It.IsAny<CoreOptions>(), // What is core options for? What value should it have?
+				100));
+
+		var actual = Assert.IsType<FullProfileDto[]>(await response.Content.ReadFromJsonAsync<FullProfileDto[]>(_json));
+
+		var actualProfile = Assert.Single(actual);
+
+		Assert.Equal(expectedProfile.Handle, actualProfile.Handle);
+	}
+
+	[Fact(DisplayName = "Should return empty list when nothing is found")]
+	public async Task ReturnEmptyWhenNothingFound()
+	{
+		fixture.MockSearchProvider.Setup(it => it.SearchProfiles(
+			It.IsAny<string>(),
+			It.IsAny<CancellationToken>(),
+			It.IsAny<CoreOptions>(),
+			It.IsAny<int>())).ReturnsAsync([]);
 
 		using var _client = fixture.CreateClient();
 
@@ -40,25 +70,40 @@ public class ProfileLookupTests(ApiFixture fixture, ITestOutputHelper log) : ICl
 
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-		mockSearchProvider
-			.Verify(it => it.SearchProfiles(
-				"ben@letterbook.social",
-				It.IsAny<CancellationToken>(),
-				It.IsAny<CoreOptions>(), // What is core options for? What value should it have?
-				100));
+		var actual = Assert.IsType<FullProfileDto[]>(await response.Content.ReadFromJsonAsync<FullProfileDto[]>(_json));
 
-		var json = new JsonSerializerOptions(JsonSerializerDefaults.Web)
-		{
-			Converters = { new Uuid7JsonConverter() },
-			ReferenceHandler = ReferenceHandler.IgnoreCycles
-		};
+		Assert.Empty(actual);
+	}
 
-		var actual = Assert.IsType<FullProfileDto[]>(await response.Content.ReadFromJsonAsync<FullProfileDto[]>(json));
+	[Fact(DisplayName = "Should return HTTP 500 when search throws exception")]
+	public async Task Return500WhenSearchThrowsException()
+	{
+		fixture.MockSearchProvider.Setup(it => it.SearchProfiles(
+			It.IsAny<string>(),
+			It.IsAny<CancellationToken>(),
+			It.IsAny<CoreOptions>(),
+			It.IsAny<int>())).ThrowsAsync(new Exception("Profile search failed on purpose."));
 
-		var actualProfile = Assert.Single(actual);
+		using var _client = fixture.CreateClient();
 
-		Assert.Equal(expectedProfile.Handle, actualProfile.Handle);
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.social");
+
+		Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+
+		Assert.Contains("Profile search failed on purpose", await response.Content.ReadAsStringAsync());
 	}
 
 	// TEST: is authentication required?
+	// TEST: what happens if you supply 'q' more than once?
+}
+
+// ReSharper disable once ClassNeverInstantiated.Global
+public class ProfileLookupFixture : ApiFixture
+{
+	public Mock<ISearchProvider> MockSearchProvider { get; } = new(MockBehavior.Strict);
+
+	public ProfileLookupFixture()
+	{
+		ReplaceScoped(MockSearchProvider.Object);
+	}
 }
