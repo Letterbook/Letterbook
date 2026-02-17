@@ -3,12 +3,14 @@ using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Letterbook.Api.Controllers;
 
 [Route("lb/v1")]
+[Authorize(Policy = Constants.ApiPolicy)]
 public class SearchController(ISearchProvider searchProvider, MappingConfigProvider mappingConfig): ControllerBase
 {
 	[HttpGet("search_profiles")]
