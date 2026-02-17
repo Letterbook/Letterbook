@@ -137,6 +137,30 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 		Assert.Equal("ben", actualProfile.Handle);
 	}
 
+	[Fact(DisplayName = "Should return empty for unknown external profile")]
+	public async Task ReturnEmptyForUnknownProfile()
+	{
+		var unknownProfile = Models.Profile.CreateEmpty(new Uri("acct:xxx@xxx.unknown.xxx"));
+
+		await using var hostFixture = new HostFixture<ProfileLookupTests>(new NullMessageSink());
+
+		hostFixture
+			.MockActivityPubClient.Setup(it => it.Fetch<Models.Profile>(It.IsAny<Uri>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(unknownProfile);
+
+		using var _client = hostFixture.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+		_client.DefaultRequestHeaders.Authorization = new("Test", $"{hostFixture.Accounts[0].Id}");
+
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=xxx@xxx.unknown.xxx");
+
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+		var actual = Assert.IsType<FullProfileDto[]>(await response.Content.ReadFromJsonAsync<FullProfileDto[]>(_json));
+
+		Assert.Empty(actual);
+	}
+
 	// TEST: [!] searching for nonexistent profile hangs
 	// TEST: [!] searching for local profile should return it
 	// TEST: what happens if you supply 'q' more than once?
