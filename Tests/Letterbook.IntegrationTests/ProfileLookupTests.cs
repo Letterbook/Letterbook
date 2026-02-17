@@ -11,10 +11,11 @@ using Letterbook.IntegrationTests.Fixtures;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Letterbook.IntegrationTests;
 
-public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper log) : IClassFixture<ProfileLookupFixture>
+public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper log) : IClassFixture<ProfileLookupFixture>, ITestSeed
 {
 	private readonly ITestOutputHelper _log = log;
 	private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
@@ -109,6 +110,35 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 		Assert.Equal("/Identity/Account/Login", response.Headers.Location!.AbsolutePath);
 	}
 
+	[Fact(DisplayName = "Should use webfinger for external profile")]
+	public async Task FallBackToWebFinger()
+	{
+		var externalProfile = Models.Profile.CreateEmpty(new Uri("acct:ben@mastodon.social"));
+		externalProfile.Handle = "ben";
+
+		await using var hostFixture = new HostFixture<ProfileLookupTests>(new NullMessageSink());
+
+		hostFixture
+			.MockActivityPubClient.Setup(it => it.Fetch<Models.Profile>(It.IsAny<Uri>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(externalProfile);
+
+		using var _client = hostFixture.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+		_client.DefaultRequestHeaders.Authorization = new("Test", $"{hostFixture.Accounts[0].Id}");
+
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@mastodon.social");
+
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+		var actual = Assert.IsType<FullProfileDto[]>(await response.Content.ReadFromJsonAsync<FullProfileDto[]>(_json));
+
+		var actualProfile = Assert.Single(actual);
+
+		Assert.Equal("ben", actualProfile.Handle);
+	}
+
+	// TEST: [!] searching for nonexistent profile hangs
+	// TEST: [!] searching for local profile should return it
 	// TEST: what happens if you supply 'q' more than once?
 }
 
