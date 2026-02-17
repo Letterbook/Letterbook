@@ -109,7 +109,6 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 		Assert.Equal("/Identity/Account/Login", response.Headers.Location!.AbsolutePath);
 	}
 
-	// TEST: is authentication required?
 	// TEST: what happens if you supply 'q' more than once?
 }
 
