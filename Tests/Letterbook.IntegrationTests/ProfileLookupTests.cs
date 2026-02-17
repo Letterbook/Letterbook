@@ -1,23 +1,51 @@
 ﻿using System.Net;
+using Letterbook.Core;
+using Letterbook.Core.Adapters;
 using Letterbook.IntegrationTests.Fixtures;
+using Moq;
 using Xunit.Abstractions;
 
 namespace Letterbook.IntegrationTests;
 
-public class ProfileLookupTests(ApiFixture fixture, ITestOutputHelper log) : IClassFixture<ApiFixture>
+public class ProfileLookupTests : IClassFixture<ApiFixture>
 {
-	[Fact(DisplayName = "Should invoke search all profile")]
+	private readonly ApiFixture _fixture;
+	private readonly ITestOutputHelper _log;
+
+	public ProfileLookupTests(ApiFixture fixture, ITestOutputHelper log)
+	{
+		_fixture = fixture;
+		_log = log;
+	}
+
+	[Fact(DisplayName = "Should invoke search profiles")]
 	public async Task InvokeCorrectSearchMethod()
 	{
-		using var _client = fixture.CreateClient();
+		var mockSearchProvider = new Mock<ISearchProvider>(MockBehavior.Default);
+
+		mockSearchProvider.Setup(it => it.SearchProfiles(
+			It.IsAny<string>(),
+			It.IsAny<CancellationToken>(),
+			It.IsAny<CoreOptions>(),
+			It.IsAny<int>())).ReturnsAsync(new List<Models.Profile>
+			{
+				Models.Profile.CreateIndividual(new Uri("acct:letterbook.social"), "ben")
+			});
+
+		_fixture.ReplaceScoped(mockSearchProvider.Object);
+
+		using var _client = _fixture.CreateClient();
 
 		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.social");
 
-		var body = await response.Content.ReadAsStringAsync();
-
-		log.WriteLine(body);
-
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+		mockSearchProvider
+			.Verify(it => it.SearchProfiles(
+				"ben@letterbook.social",
+				It.IsAny<CancellationToken>(),
+				It.IsAny<CoreOptions>(), // What is core options for? What value shoud it have?
+				100));
 	}
 
 	// TEST: is authentication required?
