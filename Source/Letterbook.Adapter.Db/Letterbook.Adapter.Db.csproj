@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Letterbook.Adapter.ActivityPub\Letterbook.Adapter.ActivityPub.csproj" />
         <ProjectReference Include="..\Letterbook.Core\Letterbook.Core.csproj"/>
     </ItemGroup>
 
