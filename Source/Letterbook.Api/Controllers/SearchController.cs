@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Letterbook.Api.Swagger;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models.Dto;
@@ -11,6 +12,7 @@ namespace Letterbook.Api.Controllers;
 
 [Route("lb/v1")]
 [Authorize(Policy = Constants.ApiPolicy)]
+[ApiExplorerSettings(GroupName = Docs.LetterbookV1)]
 public class SearchController(ISearchProvider searchProvider, MappingConfigProvider mappingConfig): ControllerBase
 {
 	[HttpGet("search_profiles")]
