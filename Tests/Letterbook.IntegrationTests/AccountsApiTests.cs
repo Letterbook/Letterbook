@@ -12,6 +12,15 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Letterbook.IntegrationTests;
 
+public class A(HostFixture<A> fixture) : IClassFixture<HostFixture<A>>, ITestSeed
+{
+	[Fact]
+	public void Test1()
+	{
+		using var client = fixture.CreateClient();
+	}
+}
+
 [Trait("Infra", "Postgres")]
 [Trait("Infra", "Timescale")]
 [Trait("Driver", "Api")]
