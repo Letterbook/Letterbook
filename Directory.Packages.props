@@ -63,7 +63,7 @@
     <PackageVersion Include="NSign.AspNetCore" Version="1.2.2" />
     <PackageVersion Include="NSign.Client" Version="1.2.2" />
     <PackageVersion Include="NSign.SignatureProviders" Version="1.2.2" />
-    <PackageVersion Include="Nunit" Version="4.4.0" />
+    <PackageVersion Include="Nunit" Version="4.5.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.11.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
