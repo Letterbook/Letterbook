@@ -92,12 +92,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		AllowAutoRedirect = false
 	};
 
-	public IDataAdapter DataAdapter { get; private set; }
-
 	private readonly IServiceScope _scope;
 
 	public readonly CoreOptions Options;
-	private NpgsqlDataSourceBuilder _ds;
 	private readonly RelationalContext _context;
 	private readonly FeedsContext _feedsContext;
 	private readonly CollectionSubject<Activity> _spans = new();
@@ -129,13 +126,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 			Port = "5127"
 		};
 
-		_ds = new NpgsqlDataSourceBuilder(ConnectionString);
-		_ds.EnableDynamicJson();
 		_scope = CreateScope();
 		_context = CreateContext(_scope);
 		_feedsContext = CreateFeedsContext(_scope);
-		DataAdapter = _scope.ServiceProvider.GetRequiredService<IDataAdapter>();
-
 		InitializeTestData();
 	}
 

@@ -29,7 +29,7 @@ public class AccountsApiTests : IClassFixture<HostFixture<AccountsApiTests>>, IT
 	private readonly HttpClient _client;
 
 	private readonly JsonSerializerOptions _json;
-	private readonly IDataAdapter _dataAdapter;
+	private readonly Models.InviteCode _inviteCode;
 
 	public AccountsApiTests(HostFixture<AccountsApiTests> host)
 	{
@@ -40,8 +40,7 @@ public class AccountsApiTests : IClassFixture<HostFixture<AccountsApiTests>>, IT
 		};
 		_client = host.CreateClient(clientOptions);
 		_client.DefaultRequestHeaders.Authorization = new("Test", $"{host.Accounts[0].Id}");
-
-		_dataAdapter = host.DataAdapter;
+		_inviteCode = host.InviteCode;
 
 		_json = new JsonSerializerOptions(JsonSerializerDefaults.Web)
 		{
@@ -74,24 +73,15 @@ public class AccountsApiTests : IClassFixture<HostFixture<AccountsApiTests>>, IT
 	[Fact(DisplayName = "Should allow registration")]
 	public async Task CanRegister()
 	{
-		await AddInviteCode("abc");
-
 		var response = await _client.PostAsync("/lb/v1/user_account/register", JsonContent.Create(new RegistrationRequest
 		{
 			Handle = "example-handle",
-			InviteCode = "abc",
+			InviteCode = _inviteCode.Code,
 			Password = "$Password1",
 			ConfirmPassword = "$Password1",
 			Email = "anything@domain.com",
 		}));
 
 		Assert.True(response.StatusCode == HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
-	}
-
-	private async Task AddInviteCode(string value)
-	{
-		_dataAdapter.Add(new Models.InviteCode(value));
-
-		await _dataAdapter.Commit();
 	}
 }
