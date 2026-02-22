@@ -41,13 +41,13 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 
 		using var _client = fixture.CreateClient();
 
-		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.social");
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.example");
 
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
 		fixture.MockSearchProvider
 			.Verify(it => it.SearchProfiles(
-				"ben@letterbook.social",
+				"ben@letterbook.example",
 				It.IsAny<CancellationToken>(),
 				It.IsAny<CoreOptions>(), // What is core options for? What value should it have?
 				100));
@@ -94,7 +94,7 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 
 		using var _client = fixture.CreateClient();
 
-		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.social");
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.example");
 
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
@@ -114,7 +114,7 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 
 		using var _client = fixture.CreateClient();
 
-		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.social");
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.example");
 
 		Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
 
@@ -128,7 +128,7 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 
 		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("None");
 
-		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.social");
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.example");
 
 		// @todo: Should this really return 401 instead of redirecting to log-in?
 		Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
@@ -165,7 +165,7 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 	[Fact(DisplayName = "Should return empty for unknown external profile")]
 	public async Task ReturnEmptyForUnknownProfile()
 	{
-		var unknownProfile = Models.Profile.CreateEmpty(new Uri("acct:xxx@xxx.unknown.xxx"));
+		var unknownProfile = Models.Profile.CreateEmpty(new Uri("acct:xxx@xxx.unknown.example"));
 
 		await using var hostFixture = new HostFixture<ProfileLookupTests>(new NullMessageSink());
 
@@ -177,7 +177,7 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 
 		_client.DefaultRequestHeaders.Authorization = new("Test", $"{hostFixture.Accounts[0].Id}");
 
-		var response = await _client.GetAsync("/lb/v1/search_profiles?q=xxx@xxx.unknown.xxx");
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=xxx@xxx.unknown.example");
 
 		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
