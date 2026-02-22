@@ -314,7 +314,7 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable, ISearchProvider
 		// @handle@host
 		if (UriExtensions.TryParseHandle(query, out var handle, out var host))
 		{
-			var handles = await _context.Profiles.Where(p => p.Handle == local && p.Authority == opts.BaseUri().GetAuthority()).Take(limit)
+			var handles = await _context.Profiles.Where(p => p.Handle == handle && p.Authority == opts.BaseUri().GetAuthority()).Take(limit)
 				.TagWith("search")
 				.ToListAsync(cancel);
 			limit -= handles.Count;
