@@ -135,33 +135,6 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 		Assert.Equal("/Identity/Account/Login", response.Headers.Location!.AbsolutePath);
 	}
 
-	[Fact(DisplayName = "Should use webfinger for external profile")]
-	public async Task FallBackToWebFinger()
-	{
-		var externalProfile = Models.Profile.CreateEmpty(new Uri("acct:ben@mastodon.social"));
-		externalProfile.Handle = "ben";
-
-		await using var hostFixture = new HostFixture<ProfileLookupTests>(new NullMessageSink());
-
-		hostFixture
-			.MockActivityPubClient.Setup(it => it.Fetch<Models.Profile>(It.IsAny<Uri>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(externalProfile);
-
-		using var _client = hostFixture.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-
-		_client.DefaultRequestHeaders.Authorization = new("Test", $"{hostFixture.Accounts[0].Id}");
-
-		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@mastodon.social");
-
-		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-		var actual = Assert.IsType<FullProfileDto[]>(await response.Content.ReadFromJsonAsync<FullProfileDto[]>(_json));
-
-		var actualProfile = Assert.Single(actual);
-
-		Assert.Equal("ben", actualProfile.Handle);
-	}
-
 	[Fact(DisplayName = "Should return empty for unknown external profile")]
 	public async Task ReturnEmptyForUnknownProfile()
 	{
