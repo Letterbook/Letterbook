@@ -22,6 +22,8 @@ public class Search : PageModel
 
 	public async Task<IActionResult> OnGet()
 	{
+		if (User.Identity?.IsAuthenticated != true)
+			return Challenge();
 		if (Query is null) return Page();
 		var svc = _svc.As(User.Claims);
 

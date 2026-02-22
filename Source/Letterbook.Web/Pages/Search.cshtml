@@ -30,7 +30,7 @@
                     @foreach (var p in Model.Profiles)
                     {
                         <li>
-                            <a asp-page="Profile" asp-route-id="@p.Id">@p.DisplayName</a>
+                            <a asp-page="Profile" asp-route-id="@($"{p.Handle}@{p.FediId.Host}")">@p.DisplayName</a>
                         </li>
                     }
                 </ul>
