@@ -10,13 +10,17 @@ using Moq;
 
 namespace Letterbook.IntegrationTests;
 
+/// <summary>
+/// End-to-end usage examples.
+/// </summary>
+/// <param name="hostFixture"></param>
 public class ProfileLookupExamples(HostFixture<ProfileLookupExamples> hostFixture): IClassFixture<HostFixture<ProfileLookupExamples>>, ITestSeed {
 	private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
 	{
 		Converters = { new Uuid7JsonConverter() },
 		ReferenceHandler = ReferenceHandler.IgnoreCycles
 	};
-	
+
 	[Fact(DisplayName = "Should use webfinger for external profile")]
 	public async Task FallBackToWebFinger()
 	{
@@ -41,7 +45,6 @@ public class ProfileLookupExamples(HostFixture<ProfileLookupExamples> hostFixtur
 
 		Assert.Equal("ben", actualProfile.Handle);
 	}
-
 
 	[Fact(DisplayName = "Should return empty for unknown external profile")]
 	public async Task ReturnEmptyForUnknownProfile()
