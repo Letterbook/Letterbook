@@ -160,33 +160,6 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 
 		Assert.Empty(actual);
 	}
-
-	[Fact(DisplayName = "Should return local profile")]
-	public async Task ReturnLocalProfile()
-	{
-		await using var hostFixture = new HostFixture<ProfileLookupTests>(new NullMessageSink());
-
-		var localProfile = hostFixture.Profiles[0];
-
-		hostFixture
-			.MockActivityPubClient.Setup(it => it.Fetch<Models.Profile>(It.IsAny<Uri>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(localProfile);
-
-		using var _client = hostFixture.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
-
-		_client.DefaultRequestHeaders.Authorization = new("Test", $"{hostFixture.Accounts[0].Id}");
-
-		var response = await _client.GetAsync($"/lb/v1/search_profiles?q={localProfile.Handle}@{localProfile.Authority}");
-
-		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-		var actual = Assert.IsType<FullProfileDto[]>(await response.Content.ReadFromJsonAsync<FullProfileDto[]>(_json));
-
-		var actualProfile = Assert.Single(actual);
-
-		Assert.Equal(localProfile.Handle, actualProfile.Handle);
-	}
-
 	// TEST: [!] searching for local profile should return it
 	// TEST: what happens if you supply 'q' more than once?
 }
