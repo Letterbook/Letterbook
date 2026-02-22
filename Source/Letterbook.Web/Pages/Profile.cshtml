@@ -33,17 +33,17 @@
                 switch (Model.YouFollow)
                 {
                     case FollowState.Accepted:
-                        <form asp-page-handler="Unfollow" asp-route-followId="@Model.GetId" method="post">
+                        <form asp-page-handler="Unfollow" asp-route-followId="@Model.GetId" asp-route-handle="@Model.FullHandle" method="post">
                             <button type="submit">Unfollow</button>
                         </form>
                         break;
                     case FollowState.None:
-                        <form asp-page-handler="FollowRequest" asp-route-followId="@Model.GetId" method="post">
+                        <form asp-page-handler="FollowRequest" asp-route-followId="@Model.GetId" asp-route-handle="@Model.FullHandle" method="post">
                             <button type="submit">Follow</button>
                         </form>
                         break;
                     case FollowState.Pending:
-                        <form asp-page-handler="Unfollow" asp-route-followId="@Model.GetId" method="post">
+                        <form asp-page-handler="Unfollow" asp-route-followId="@Model.GetId" asp-route-handle="@Model.FullHandle" method="post">
                             <button type="submit">Cancel Follow Request</button>
                         </form>
                         break;

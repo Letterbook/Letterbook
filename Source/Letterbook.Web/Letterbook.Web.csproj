@@ -76,25 +76,4 @@
         <Content Remove="Pages\ProfileWithhost.cshtml" />
         <Content Remove="Pages\Shared\Components\ProfileViewComponent.cshtml" />
     </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="wwwroot\lib\picocss\css\pico.min.css" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\picocss\LICENSE.md" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\account-box-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\file-damage-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\heart-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\License" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\mail-open-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\more-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\notification-2-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\repeat-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\reply-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\search-line.svg" />
-      <_ContentIncludedByDefault Remove="wwwroot\lib\remixicon\settings-3-line.svg" />
-      <_ContentIncludedByDefault Remove="Pages\Components\PostEditorViewComponent\Default.cshtml" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Pages\ProfileWithhost.cshtml.cs" />
-    </ItemGroup>
 </Project>

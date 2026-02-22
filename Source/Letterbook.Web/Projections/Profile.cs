@@ -6,11 +6,13 @@ namespace Letterbook.Web.Projections;
 public class Profile
 {
 	public static MapperConfiguration FromCoreModel(DateTimeOffset postsBeforeDate) =>
-		new(cfg => cfg.CreateProjection<Models.Profile, Profile>().ForMember(d => d.Posts,
-			opt => opt.MapFrom(s => s.Posts.OrderByDescending(p => p.CreatedDate).Where(p => p.CreatedDate < postsBeforeDate).Take(100))));
+		new(cfg => cfg.CreateProjection<Models.Profile, Profile>()
+			.ForMember(d => d.Posts, opt => opt.MapFrom(s => s.Posts.OrderByDescending(p => p.CreatedDate).Where(p => p.CreatedDate < postsBeforeDate).Take(100)))
+			.ForMember(d => d.Host, opt => opt.MapFrom(s => s.FediId.Host)));
 
 	public ProfileId Id { get; set; }
 	public string Handle { get; set; } = "";
+	public string Host { get; set; } = "";
 	public string Authority { get; set; } = "";
 	public string DisplayName { get; set; } = "";
 	public string Description { get; set; } = "";

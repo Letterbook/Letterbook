@@ -25,7 +25,7 @@ public class Profile : PageModel
 
 	/// The full conventional fediverse @user@domain username.
 	/// Ostensibly globally unique
-	public string FullHandle => $"{BareHandle}@{_profile.Authority}";
+	public string FullHandle => $"{BareHandle}@{_profile.Host}";
 
 	public Models.Profile? UserProfile => _self;
 
@@ -106,7 +106,7 @@ public class Profile : PageModel
 	{
 		var parts = id.Split("@", 2, StringSplitOptions.RemoveEmptyEntries);
 		var handle = parts[0];
-		var host = parts.Length == 2 ? parts[1] : _opts.BaseUri().GetAuthority();
+		var host = parts.Length == 2 && UriExtensions.TryParseDomain(parts[1], out var d) ? d.GetAuthority() : _opts.BaseUri().GetAuthority();
 		if (await _profiles.QueryProfiles(handle, host)
 			    .TagWithCallSite()
 			    .Include(p => p.Posts).ThenInclude(p => p.Contents)

@@ -18,6 +18,11 @@ public static partial class UriExtensions
 		? string.Join('.', uri.Host.Split('.').Reverse())
 		: string.Join('.', uri.Host.Split('.').Reverse()) + $":{uri.Port}";
 
+	public static bool TryParseDomain(string domain, [NotNullWhen(true)]out Uri? uri)
+	{
+		return Uri.TryCreate(domain, UriKind.Absolute, out uri) && uri.Host != "" || Uri.TryCreate($"https://{domain}", UriKind.Absolute, out uri) && uri.Host != "";
+	}
+
 	public static bool TryParseHandle(string query, [NotNullWhen(true)]out string? handle, [NotNullWhen(true)]out Uri? host)
 	{
 		query = MatchAcct().Replace(query, "");
