@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using OpenIddict.Abstractions;
 using Xunit.Abstractions;
 
 namespace Letterbook.IntegrationTests;
@@ -96,5 +97,35 @@ public sealed class DataAdapterTests : IClassFixture<HostFixture<DataAdapterTest
 		Assert.True(adHocProjection.Followers >= 4);
 		Assert.True(automapProjection.Followers >= 4);
 		Assert.Equal(0, noProjection.FollowersCount);
+	}
+
+	[Fact(DisplayName = "Search profile example: @handle")]
+	public async Task ProfileSearchExamples()
+	{
+		var localProfile = _profiles[0];
+
+		Assert.Single(
+			await _adapter.SearchProfiles(
+				$"@{localProfile.Handle}", CancellationToken.None, new CoreOptions
+				{
+					DomainName = "localhost",
+					Scheme = "http",
+					Port = "5127"
+				}));
+	}
+
+	[Fact(DisplayName = "Search profile example: @handle@host")]
+	public async Task ProfileSearchExamplesHandleAndHost()
+	{
+		var localProfile = _profiles[0];
+
+		Assert.Single(
+			await _adapter.SearchProfiles(
+				$"@{localProfile.Handle}@{localProfile.Authority}", CancellationToken.None, new CoreOptions
+				{
+					DomainName = "localhost",
+					Scheme = "http",
+					Port = "5127"
+				}));
 	}
 }
