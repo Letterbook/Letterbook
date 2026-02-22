@@ -8,6 +8,7 @@ using Letterbook.Core.Adapters;
 using Letterbook.Core.Models.Dto;
 using Letterbook.Core.Models.Mappers.Converters;
 using Letterbook.IntegrationTests.Fixtures;
+using Medo;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Moq;
 using Xunit.Abstractions;
@@ -27,7 +28,7 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 	[Fact(DisplayName = "Should invoke search profiles")]
 	public async Task InvokeCorrectSearchMethod()
 	{
-		var expectedProfile = Models.Profile.CreateIndividual(new Uri("acct:letterbook.social"), "ben");
+		var expectedProfile = Models.Profile.CreateIndividual(new Uri("acct:letterbook.example"), "ben");
 
 		fixture.MockSearchProvider.Setup(it => it.SearchProfiles(
 			It.IsAny<string>(),
@@ -56,6 +57,30 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 		var actualProfile = Assert.Single(actual);
 
 		Assert.Equal(expectedProfile.Handle, actualProfile.Handle);
+	}
+
+	[Fact(DisplayName = "Should use the first value of q supplied")]
+	public async Task Return500WhenQSuppliedMoreThanOnce()
+	{
+		fixture.MockSearchProvider.Setup(it => it.SearchProfiles(
+			It.IsAny<string>(),
+			It.IsAny<CancellationToken>(),
+			It.IsAny<CoreOptions>(),
+			It.IsAny<int>())).ReturnsAsync(new List<Models.Profile>
+		{
+			Models.Profile.CreateEmpty(new Models.ProfileId(Uuid7.Empty))
+		});
+
+		using var _client = fixture.CreateClient();
+
+		await _client.GetAsync("/lb/v1/search_profiles?q=a&q=b&q=c");
+
+		fixture.MockSearchProvider
+			.Verify(it => it.SearchProfiles(
+				"a",
+				It.IsAny<CancellationToken>(),
+				It.IsAny<CoreOptions>(),
+				100));
 	}
 
 	[Fact(DisplayName = "Should return empty list when nothing is found")]
@@ -186,9 +211,6 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 
 		Assert.Equal(localProfile.Handle, actualProfile.Handle);
 	}
-
-	// TEST: [!] searching for local profile should return it
-	// TEST: what happens if you supply 'q' more than once?
 }
 
 // ReSharper disable once ClassNeverInstantiated.Global
