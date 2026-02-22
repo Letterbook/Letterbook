@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models.Dto;
@@ -57,6 +58,16 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 		var actualProfile = Assert.Single(actual);
 
 		Assert.Equal(expectedProfile.Handle, actualProfile.Handle);
+	}
+
+	[Fact(DisplayName = "Should use FallbackSearchProvider")]
+	public async Task UseFallbackSearchProvider()
+	{
+		await using var hostFixture = new HostFixture<ProfileLookupTests>(new NullMessageSink());
+
+		var actual = hostFixture.CreateScope().ServiceProvider.GetService(typeof(ISearchProvider));
+
+		Assert.IsType<FallbackSearchProvider>(actual);
 	}
 
 	[Fact(DisplayName = "Should use the first value of q supplied")]
