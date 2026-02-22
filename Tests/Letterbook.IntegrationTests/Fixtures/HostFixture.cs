@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -91,12 +92,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		AllowAutoRedirect = false
 	};
 
-	public IDataAdapter DataAdapter { get; private set; }
-
 	private readonly IServiceScope _scope;
 
 	public readonly CoreOptions Options;
-	private NpgsqlDataSourceBuilder _ds;
 	private readonly RelationalContext _context;
 	private readonly FeedsContext _feedsContext;
 	private readonly CollectionSubject<Activity> _spans = new();
@@ -128,13 +126,9 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 			Port = "5127"
 		};
 
-		_ds = new NpgsqlDataSourceBuilder(ConnectionString);
-		_ds.EnableDynamicJson();
 		_scope = CreateScope();
 		_context = CreateContext(_scope);
 		_feedsContext = CreateFeedsContext(_scope);
-		DataAdapter = _scope.ServiceProvider.GetRequiredService<IDataAdapter>();
-
 		InitializeTestData();
 	}
 
@@ -236,6 +230,25 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 			.ConfigureServices(services =>
 			{
+				var feeds = BuildTestDataSource(FeedsConnectionString);
+				var data = BuildTestDataSource(ConnectionString);
+
+				// Suppress warning about too many EFCore service providers created
+				// The warning refers to the app domain, which for us is the entire integration tests project
+				// It's expected that we will create quite a few due to the way we isolate test data
+				services
+					.AddDbContext<FeedsContext>(options =>
+					{
+						options.ConfigureWarnings(w => w.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning))
+							.UseNpgsql(feeds);
+					})
+					.AddDbContext<RelationalContext>(options =>
+					{
+						options.ConfigureWarnings(w => w.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning))
+							.UseNpgsql(data)
+							.UseProjectables();
+					});
+
 				// SeedAdminWorker executes before we have a chance to create the test database
 				// So we just remove it
 				var seedDescriptor = services.SingleOrDefault(d => d.ImplementationType == typeof(WorkerScope<SeedAdminWorker>));
@@ -269,6 +282,14 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 			});
 
 		base.ConfigureWebHost(builder);
+	}
+
+	private static NpgsqlDataSource BuildTestDataSource(string connectionString)
+	{
+		var dataSource = new NpgsqlDataSourceBuilder(connectionString);
+		dataSource.EnableDynamicJson();
+		var ds = dataSource.Build();
+		return ds;
 	}
 
 	private void InitTestData()

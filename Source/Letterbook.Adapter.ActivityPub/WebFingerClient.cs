@@ -36,7 +36,8 @@ public class WebFingerClient : ISearchProvider
 			return [];
 		}
 
-		var webfinger = await _httpClient.WebfingerQuery(host, handle, cancellationToken);
+		var webfinger = await WebfingerQuery(cancellationToken, host, handle);
+
 		if (webfinger == null)
 		{
 			_logger.LogDebug("Invalid response to query {Host} for {Resource}", host, handle);
@@ -73,6 +74,19 @@ public class WebFingerClient : ISearchProvider
 		}
 
 		return links;
+	}
+
+	private async Task<JsonResourceDescriptor?> WebfingerQuery(CancellationToken cancellationToken, Uri host, string handle)
+	{
+		try
+		{
+			return await _httpClient.WebfingerQuery(host, handle, cancellationToken);
+		}
+		catch (HttpRequestException e)
+		{
+			_logger.LogWarning("Failed to query '{handle}' at '{host}'. {e}", handle, host, e);
+			return null;
+		}
 	}
 
 	private record ValueLink(
