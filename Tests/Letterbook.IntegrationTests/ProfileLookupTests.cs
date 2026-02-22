@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Letterbook.Adapter.ActivityPub;
+using Letterbook.Adapter.Db;
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Models.Dto;
@@ -67,7 +68,9 @@ public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper 
 
 		var actual = hostFixture.CreateScope().ServiceProvider.GetService(typeof(ISearchProvider));
 
-		Assert.IsType<FallbackSearchProvider>(actual);
+		var fallbackSearchProvider = Assert.IsType<FallbackSearchProvider>(actual);
+		Assert.IsType<DataAdapter>(fallbackSearchProvider.Primary);
+		Assert.IsType<WebFingerClient>(fallbackSearchProvider.Secondary);
 	}
 
 	[Fact(DisplayName = "Should use the first value of q supplied")]

@@ -5,6 +5,9 @@ namespace Letterbook.Adapter.ActivityPub;
 
 public class FallbackSearchProvider(ISearchProvider primary, ISearchProvider? secondary) : ISearchProvider
 {
+	public ISearchProvider? Primary => primary;
+	public ISearchProvider? Secondary => secondary;
+
 	public Task<IEnumerable<Models.IFederated>> SearchAny(string query, CancellationToken cancellationToken, CoreOptions options, int limit = 100)
 		=> primary.SearchAny(query, cancellationToken, options, limit);
 
