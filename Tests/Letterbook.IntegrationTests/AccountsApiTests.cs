@@ -70,7 +70,7 @@ public class AccountsApiTests : IClassFixture<HostFixture<AccountsApiTests>>, IT
 			InviteCode = _inviteCode.Code,
 			Password = "$Password1",
 			ConfirmPassword = "$Password1",
-			Email = "anything@domain.com",
+			Email = "anything@domain.example",
 		}));
 
 		Assert.True(response.StatusCode == HttpStatusCode.OK, await response.Content.ReadAsStringAsync());
