@@ -123,9 +123,8 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 		_sink = sink;
 		Options = new CoreOptions
 		{
-			DomainName = "localhost",
-			Scheme = "http",
-			Port = "5127"
+			DomainName = "letterbook.example",
+			Scheme = "https",
 		};
 
 		_ds = new NpgsqlDataSourceBuilder(ConnectionString);
@@ -233,14 +232,21 @@ public class HostFixture<T> : WebApplicationFactory<Program>
 
 		builder
 			.UseConfiguration(cfg)
-
 			.ConfigureServices(services =>
 			{
+				services.AddOptions<CoreOptions>()
+					.Configure(options =>
+					{
+						options.DomainName = Options.DomainName;
+						options.Port = Options.Port;
+						options.Scheme = Options.Scheme;
+					});
 				// SeedAdminWorker executes before we have a chance to create the test database
 				// So we just remove it
 				var seedDescriptor = services.SingleOrDefault(d => d.ImplementationType == typeof(WorkerScope<SeedAdminWorker>));
 
 				if (seedDescriptor != null) services.Remove(seedDescriptor);
+
 
 				services.AddAuthentication("Test")
 					.AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { })
