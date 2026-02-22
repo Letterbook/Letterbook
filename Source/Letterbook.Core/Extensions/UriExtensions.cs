@@ -41,8 +41,8 @@ public static partial class UriExtensions
 		    builder.Path != "/" ||
 		    !string.IsNullOrEmpty(builder.Password) ||
 		    !string.IsNullOrEmpty(builder.Query) ||
-		    !builder.Uri.IsDefaultPort ||
-		    builder.Uri.IsLoopback ||
+		    // !builder.Uri.IsDefaultPort ||
+		    // builder.Uri.IsLoopback ||
 		    builder.Uri.HostNameType != UriHostNameType.Dns)
 		{
 			handle = null;
