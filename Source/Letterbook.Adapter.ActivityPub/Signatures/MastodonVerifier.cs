@@ -80,11 +80,12 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 		if (!componentProvider.TryGetHeaderValues(Headers.Signature, out var values))
 			throw VerifierException.NoSignatures();
 
-		var mastodonSignatures = values!
+		var mastodonSignatures = values
 			.Select(header => header.Split(',', StringSplitOptions.RemoveEmptyEntries))
-			.Where(parts => parts.Length > 1);
+			.Where(parts => parts.Length > 1)
+			.ToList();
 
-		if (!mastodonSignatures.Any()) throw VerifierException.NoValidSignatures(componentProvider);
+		if (mastodonSignatures.Count == 0) throw VerifierException.NoValidSignatures(componentProvider);
 
 		return mastodonSignatures.Select(ParseSignatureValue);
 	}
@@ -129,20 +130,16 @@ public partial class MastodonVerifier : ISignatureVerifier, ISignatureParser
 		void ParseSpec(string headersString, SignatureInputSpec spec)
 		{
 			_logger.LogDebug("Parsing Mastodon signature headers '{Headers}'", headersString);
-			var match = DerivedComponentsRegex().Match(headersString);
-			if (match.Success)
-			{
-				foreach (var token in match.Value.Split(new[] { ' ', '(', ')' }, StringSplitOptions.RemoveEmptyEntries))
-				{
-					spec.SignatureParameters.AddComponent(new DerivedComponent("@" + token));
-				}
-			}
 
 			var comps = headersString
-				.Substring(match.Length + 1)
 				.Split(new[] { ' ', '"' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
 				.Select<string, SignatureComponent>(s =>
 				{
+					if (DerivedComponentsRegex().IsMatch(s))
+					{
+						var token = string.Join("", s.Split([' ', '(', ')'], StringSplitOptions.RemoveEmptyEntries));
+						return new DerivedComponent("@" + token);
+					}
 					if (DerivedComponents.Contains(s)) return new DerivedComponent(s);
 					if (DerivedComponents.Contains("@" + s)) return new DerivedComponent("@" + s);
 					return new HttpHeaderComponent(s);

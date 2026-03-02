@@ -57,6 +57,13 @@ namespace Letterbook.Adapter.ActivityPub.Test
 			"sha-256=uU0nuZNNPgilLlLX2n2r+sSE7+N6U4DukIj3rOLvzek="
 		)]
 		[InlineData(
+			"stream",
+			"Hello world",
+			Hash.Sha256,
+			"sha-256=:ZOyIygCyaOW6GjVnihtTFtIS9PNmskdyMlNKiuyjfzw=:",
+			"sha-256=ZOyIygCyaOW6GjVnihtTFtIS9PNmskdyMlNKiuyjfzw="
+		)]
+		[InlineData(
 			"string",
 			"hello",
 			Hash.Sha256,
@@ -110,6 +117,7 @@ namespace Letterbook.Adapter.ActivityPub.Test
 
 			Assert.Same(_response, await invoker.SendAsync(_request, default));
 
+			_mockInnerHandler.Verify();
 			_mockInnerHandler.Protected().Verify<Task<HttpResponseMessage>>(
 				"SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
 		}

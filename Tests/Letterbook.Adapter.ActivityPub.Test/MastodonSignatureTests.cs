@@ -10,12 +10,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using NSign;
+using NSign.Client;
 using static NSign.Constants;
 using NSign.Signatures;
 using Xunit.Abstractions;
 
 namespace Letterbook.Adapter.ActivityPub.Test;
-
 
 public class MastodonSignatureTests
 {
@@ -32,46 +32,77 @@ public class MastodonSignatureTests
 	private string _testKeyRsaPublic =
 #pragma warning restore CS0414 // Field is assigned but its value is never used
 		"""
-        -----BEGIN RSA PUBLIC KEY-----
-        MIIBCgKCAQEAzf5EIIQ6LHWujJzGlNA2txC5174T6WIXQBTsu/n02/dEqL6kEZIV
-        +/0QthIqRowdbuQTHfgE8qmooeSL6H6teNeaUOTsyJWnMxDsFarUDVZmZHzJy1Nf
-        09j+BG32myD9459OddlM1Us5PVu3k+xK4eKMbx+pMu2eUzuZVsg7xDu2KZbJBbDJ
-        3SD+SuNwbLmG72KnOYmCyp6W84ZVf6d2ji8IMF2k/mC2xUBRtJfohgCZTcnToeog
-        kY6G1qq9sxen29oNiycc/WcrmL6AEx6ImGx35yOdxvOPB5FYUjzB7bn8muSV5JBU
-        sZhLTLZ8le287KgO34OTCLnMeYnse51BGQIDAQAB
-        -----END RSA PUBLIC KEY-----
-        """;
+		-----BEGIN RSA PUBLIC KEY-----
+		MIIBCgKCAQEAzf5EIIQ6LHWujJzGlNA2txC5174T6WIXQBTsu/n02/dEqL6kEZIV
+		+/0QthIqRowdbuQTHfgE8qmooeSL6H6teNeaUOTsyJWnMxDsFarUDVZmZHzJy1Nf
+		09j+BG32myD9459OddlM1Us5PVu3k+xK4eKMbx+pMu2eUzuZVsg7xDu2KZbJBbDJ
+		3SD+SuNwbLmG72KnOYmCyp6W84ZVf6d2ji8IMF2k/mC2xUBRtJfohgCZTcnToeog
+		kY6G1qq9sxen29oNiycc/WcrmL6AEx6ImGx35yOdxvOPB5FYUjzB7bn8muSV5JBU
+		sZhLTLZ8le287KgO34OTCLnMeYnse51BGQIDAQAB
+		-----END RSA PUBLIC KEY-----
+		""";
 
 	private string _testKeyRsaPrivate =
 		"""
-        -----BEGIN RSA PRIVATE KEY-----
-        MIIEpAIBAAKCAQEAzf5EIIQ6LHWujJzGlNA2txC5174T6WIXQBTsu/n02/dEqL6k
-        EZIV+/0QthIqRowdbuQTHfgE8qmooeSL6H6teNeaUOTsyJWnMxDsFarUDVZmZHzJ
-        y1Nf09j+BG32myD9459OddlM1Us5PVu3k+xK4eKMbx+pMu2eUzuZVsg7xDu2KZbJ
-        BbDJ3SD+SuNwbLmG72KnOYmCyp6W84ZVf6d2ji8IMF2k/mC2xUBRtJfohgCZTcnT
-        oeogkY6G1qq9sxen29oNiycc/WcrmL6AEx6ImGx35yOdxvOPB5FYUjzB7bn8muSV
-        5JBUsZhLTLZ8le287KgO34OTCLnMeYnse51BGQIDAQABAoIBAQCxG4tBlc5aiXfg
-        x65pJjfU39mZJ4EBKOgqnZMI75jaQtfSac6wmLS0Klni4O1eKHvp6siQ/LxsUvh8
-        8P5lj/zgKCcypBD9SMYvvr3sxyp4qS9x+GSbn3yFrUyBTHY53HzN5xtTcdiAjqOR
-        ILlOwluDqP/rTwJvmiOFFnn5RkE0rkMIrNu55xGm4LP/j1NlAMXXzpQJxkWQC2jK
-        OIB+hcC3Eo04NC+AnWGy3vQF7qavf0LkVpg+cDjtc+uPnk5nnljh3WsR/duuRLy6
-        dQnJComrXjlU98NSySfp2ZWQ3FAIqudzZsybmTf8YmKsXMdcOm1uyXI5FmI4LrgN
-        wMGTMCGNAoGBAO3oB+B4Qj3ulI6z+Iltm1rBPZVLQ9ndYmhhETmeeyhw3F3PrV3A
-        SdGTjyF5erl7TfMyv6hLezxvxO0F/oqA9PcUINWq/RUQpaDy2h7/5Nj4ZF+aaP3N
-        vxmtXGS/N/cTCtTuiyg3MLSc5iZFlHUqZR3GOqlpc4DHBGVtx+V6G5FjAoGBAN2o
-        5UK5VZ15Qfsy3Aqeb6lXILa35GjVUJrNwBxQzN0K0kxpA7sD5SdxacXrNCuAfLDt
-        9YkeqrhKdH8B4akd7sSIixhgD/HoVDd8rAlz/uNlbICwkSu0N7Z3cfKWHP2I2dom
-        YW8C2yeDX3mUUoChTefqDDhbjyCPlc64qrNgx8pTAoGABejpqS3Tl25Bynm2BtPu
-        NAbw3LCN8u+I7kbbAq9pJ8wF7V6nU9je/JHJ0G8QGWNywEPWdvvJB+tO3QR1GkOx
-        0iFx31zsBIXxV1oxCOwaZzlkZOuVCBkAUkb4MJh/b2fNsRRr6IfWceYj4XeBBJgV
-        AvRVqLex4tUOyuY7PPwXizkCgYApI0ZhSspD7pQ7TaYe5mas0/nDT3+5oRVTlan4
-        11oeD/sVqUvC8qcd2eOakttc03zQzWkLaMCgcVkLlUrPOznsCbde770l1UuD/MRl
-        AL0mcNVhUOOwa8MHP0XLkuaQe0yLOyJMGwiXXb9jbg6dxtIRn5NjBkMa9OsFsaok
-        nmqV9wKBgQDlbohqEBOUIJrn+X6aw+Hffg3PQ1Pa//OPH3rixeo82OGODRozh5x5
-        vR3iE5UnokwNVw54uaVxOAua417Stems54faYmsVOaqNUFoFRD1b4r1iF80Q2qY6
-        f0EeAt13B99rqdgXE5DLGf7PppP2q/Z3zmR1w/tQv8x2HgJPkVHeXw==
-        -----END RSA PRIVATE KEY-----
-        """;
+		-----BEGIN RSA PRIVATE KEY-----
+		MIIEpAIBAAKCAQEAzf5EIIQ6LHWujJzGlNA2txC5174T6WIXQBTsu/n02/dEqL6k
+		EZIV+/0QthIqRowdbuQTHfgE8qmooeSL6H6teNeaUOTsyJWnMxDsFarUDVZmZHzJ
+		y1Nf09j+BG32myD9459OddlM1Us5PVu3k+xK4eKMbx+pMu2eUzuZVsg7xDu2KZbJ
+		BbDJ3SD+SuNwbLmG72KnOYmCyp6W84ZVf6d2ji8IMF2k/mC2xUBRtJfohgCZTcnT
+		oeogkY6G1qq9sxen29oNiycc/WcrmL6AEx6ImGx35yOdxvOPB5FYUjzB7bn8muSV
+		5JBUsZhLTLZ8le287KgO34OTCLnMeYnse51BGQIDAQABAoIBAQCxG4tBlc5aiXfg
+		x65pJjfU39mZJ4EBKOgqnZMI75jaQtfSac6wmLS0Klni4O1eKHvp6siQ/LxsUvh8
+		8P5lj/zgKCcypBD9SMYvvr3sxyp4qS9x+GSbn3yFrUyBTHY53HzN5xtTcdiAjqOR
+		ILlOwluDqP/rTwJvmiOFFnn5RkE0rkMIrNu55xGm4LP/j1NlAMXXzpQJxkWQC2jK
+		OIB+hcC3Eo04NC+AnWGy3vQF7qavf0LkVpg+cDjtc+uPnk5nnljh3WsR/duuRLy6
+		dQnJComrXjlU98NSySfp2ZWQ3FAIqudzZsybmTf8YmKsXMdcOm1uyXI5FmI4LrgN
+		wMGTMCGNAoGBAO3oB+B4Qj3ulI6z+Iltm1rBPZVLQ9ndYmhhETmeeyhw3F3PrV3A
+		SdGTjyF5erl7TfMyv6hLezxvxO0F/oqA9PcUINWq/RUQpaDy2h7/5Nj4ZF+aaP3N
+		vxmtXGS/N/cTCtTuiyg3MLSc5iZFlHUqZR3GOqlpc4DHBGVtx+V6G5FjAoGBAN2o
+		5UK5VZ15Qfsy3Aqeb6lXILa35GjVUJrNwBxQzN0K0kxpA7sD5SdxacXrNCuAfLDt
+		9YkeqrhKdH8B4akd7sSIixhgD/HoVDd8rAlz/uNlbICwkSu0N7Z3cfKWHP2I2dom
+		YW8C2yeDX3mUUoChTefqDDhbjyCPlc64qrNgx8pTAoGABejpqS3Tl25Bynm2BtPu
+		NAbw3LCN8u+I7kbbAq9pJ8wF7V6nU9je/JHJ0G8QGWNywEPWdvvJB+tO3QR1GkOx
+		0iFx31zsBIXxV1oxCOwaZzlkZOuVCBkAUkb4MJh/b2fNsRRr6IfWceYj4XeBBJgV
+		AvRVqLex4tUOyuY7PPwXizkCgYApI0ZhSspD7pQ7TaYe5mas0/nDT3+5oRVTlan4
+		11oeD/sVqUvC8qcd2eOakttc03zQzWkLaMCgcVkLlUrPOznsCbde770l1UuD/MRl
+		AL0mcNVhUOOwa8MHP0XLkuaQe0yLOyJMGwiXXb9jbg6dxtIRn5NjBkMa9OsFsaok
+		nmqV9wKBgQDlbohqEBOUIJrn+X6aw+Hffg3PQ1Pa//OPH3rixeo82OGODRozh5x5
+		vR3iE5UnokwNVw54uaVxOAua417Stems54faYmsVOaqNUFoFRD1b4r1iF80Q2qY6
+		f0EeAt13B99rqdgXE5DLGf7PppP2q/Z3zmR1w/tQv8x2HgJPkVHeXw==
+		-----END RSA PRIVATE KEY-----
+		""";
+
+	private string _mastodonPrivateKey =
+		"""
+		-----BEGIN RSA PRIVATE KEY-----
+		MIIEowIBAAKCAQEAqIAYvNFGbZ5g4iiK6feSdXD4bDStFM58A7tHycYXaYtzZQpI
+		eHXAmaXuZzXIwtrP4N0gIk8JNwZvXj2UPS+S07t0V9wNK94he01LV5EMz/GN4eNn
+		FmDL64HIEuKLvV8TvgjbUPRD6Y5X0UpKi2ZIFLSb96Q5w0Z/k7ntpVKV52y8kz5F
+		jr/O/0JuHryZe0yItzJh8kzFfeMf0EXzfSnaKvT7P9jhgC6uTre+jXyvVZjiHDrn
+		qvvucdI3I7DRfXo1OqARBrLjy+TdseUAjNYJ+OuPRI1URIWQI01DCHqcohVu9+Ar
+		+BiCjFp3ua+XMuJvrvbD61d1Fvig/9nbBRR+8QIDAQABAoIBAAgySHnFWI6gItR3
+		fkfiqIm80cHCN3Xk1C6iiVu+3oBOZbHpW9R7vl9e/WOA/9O+LPjiSsQOegtWnVvd
+		RRjrl7Hj20VDlZKv5Mssm6zOGAxksrcVbqwdj+fUJaNJCL0AyyseH0x/IE9T8rDC
+		I1GH+3tB3JkhkIN/qjipdX5ab8MswEPu8IC4ViTpdBgWYY/xBcAHPw4xuL0tcwzh
+		FBlf4DqoEVQo8GdK5GAJ2Ny0S4xbXHUURzx/R4y4CCts7niAiLGqd9jmLU1kUTMk
+		QcXfQYK6l+unLc7wDYAz7sFEHh04M48VjWwiIZJnlCqmQbLda7uhhu8zkF1DqZTu
+		ulWDGQECgYEA0TIAc8BQBVab979DHEEmMdgqBwxLY3OIAk0b+r50h7VBGWCDPRsC
+		STD73fQY3lNet/7/jgSGwwAlAJ5PpMXxXiZAE3bUwPmHzgF7pvIOOLhA8O07tHSO
+		L2mvQe6NPzjZ+6iAO2U9PkClxcvGvPx2OBvisfHqZLmxC9PIVxzruQECgYEAzjM6
+		BTUXa6T/qHvLFbN699BXsUOGmHBGaLRapFDBfVvgZrwqYQcZpBBhesLdGTGSqwE7
+		gWsITPIJ+Ldo+38oGYyVys+w/V67q6ud7hgSDTW3hSvm+GboCjk6gzxlt9hQ0t9X
+		8vfDOYhEXvVUJNv3mYO60ENqQhILO4bQ0zi+VfECgYBb/nUccfG+pzunU0Cb6Dp3
+		qOuydcGhVmj1OhuXxLFSDG84Tazo7juvHA9mp7VX76mzmDuhpHPuxN2AzB2SBEoE
+		cSW0aYld413JRfWukLuYTc6hJHIhBTCRwRQFFnae2s1hUdQySm8INT2xIc+fxBXo
+		zrp+Ljg5Wz90SAnN5TX0AQKBgDaatDOq0o/r+tPYLHiLtfWoE4Dau+rkWJDjqdk3
+		lXWn/e3WyHY3Vh/vQpEqxzgju45TXjmwaVtPATr+/usSykCxzP0PMPR3wMT+Rm1F
+		rIoY/odij+CaB7qlWwxj0x/zRbwB7x1lZSp4HnrzBpxYL+JUUwVRxPLIKndSBTza
+		GvVRAoGBAIVBcNcRQYF4fvZjDKAb4fdBsEuHmycqtRCsnkGOz6ebbEQznSaZ0tZE
+		+JuouZaGjyp8uPjNGD5D7mIGbyoZ3KyG4mTXNxDAGBso1hrNDKGBOrGaPhZx8LgO
+		4VXJ+ybXrATf4jr8ccZYsZdFpOphPzz+j55Mqg5vac5P1XjmsGTb
+		-----END RSA PRIVATE KEY-----
+		""";
 
 	#endregion
 
@@ -157,6 +188,51 @@ public class MastodonSignatureTests
 
 		var verifier = new MastodonVerifier(_verifierLogger);
 		Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(actual, _signingKey));
+	}
+
+	// This exactly reproduces Mastodon's unit test named 'with a valid signature on a POST request'
+	[Fact(DisplayName = "Should match mastodon signatures")]
+	public void TestMatchMastodon()
+	{
+		_serviceCollection
+			.Configure<AddContentDigestOptions>(options => options.WithHash(AddContentDigestOptions.Hash.Sha256))
+			.ConfigureMessageSigningOptions(options =>
+			{
+				options.WithMandatoryComponent(SignatureComponent.Authority);
+				options.WithMandatoryComponent(new HttpHeaderComponent("Date"));
+				options.WithOptionalComponent(new HttpHeaderComponent("Digest"));
+				options.WithMandatoryComponent(SignatureComponent.RequestTarget);
+			});
+		var provider = _serviceCollection.BuildServiceProvider();
+
+		RSA rsa = OperatingSystem.IsWindows() ? new RSACng() : new RSAOpenSsl();
+		rsa.ImportFromPem(_mastodonPrivateKey);
+
+		var key = new Models.SigningKey
+		{
+			Family = Models.SigningKey.KeyFamily.Rsa,
+			PublicKey = rsa.ExportSubjectPublicKeyInfo(),
+			PrivateKey = rsa.ExportPkcs8PrivateKey(),
+			FediId = new Uri("https://remote.domain/users/bob#main-key")
+		};
+
+		var message = new HttpRequestMessage(HttpMethod.Post, "http://www.example.com/activitypub/success");
+		message.Headers.Date = DateTimeOffset.Parse("Wed, 20 Dec 2023 10:00:00 GMT");
+		message.Content = new StringContent("Hello world");
+		message.Content.Headers.Add("Digest", "SHA-256=ZOyIygCyaOW6GjVnihtTFtIS9PNmskdyMlNKiuyjfzw=");
+
+		var signer = new MastodonSigner(_logger, provider.GetRequiredService<IOptionsSnapshot<MessageSigningOptions>>());
+		var req = signer.SignRequest(message, key);
+		var actual = req.Headers.GetValues("Signature").FirstOrDefault();
+
+		const string expected =
+			"""
+			keyId="https://remote.domain/users/bob#main-key",algorithm="rsa-sha256",headers="host date digest (request-target)",signature="gmhMjgMROGElJU3fpehV2acD5kMHeELi8EFP2UPHOdQ54H0r55AxIpji+J3lPe+N2qSb/4H1KXIh6f0lRu8TGSsu12OQmg5hiO8VA9flcA/mh9Lpk+qwlQZIPRqKP9xUEfqD+Z7ti5wPzDKrWAUK/7FIqWgcT/mlqB1R1MGkpMFc/q4CIs2OSNiWgA4K+Kp21oQxzC2kUuYob04gAZ7cyE/FTia5t08uv6lVYFdRsn4XNPn1MsHgFBwBMRG79ng3SyhoG4PrqBEi5q2IdLq3zfre/M6He3wlCpyO2VJNdGVoTIzeZ0Zz8jUscPV3XtWUchpGclLGSaKaq/JyNZeiYQ=="
+			""";
+		Assert.Equal(expected, actual);
+
+		var verifier = new MastodonVerifier(_verifierLogger);
+		Assert.Equal(VerificationResult.SuccessfullyVerified, verifier.VerifyRequestSignature(req, key));
 	}
 
 	[Fact(DisplayName = "Should handle host/@authority")]

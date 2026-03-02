@@ -7,10 +7,8 @@ namespace Letterbook.Adapter.ActivityPub.Signatures;
 public class MastodonComponentBuilder : ISignatureComponentVisitor
 {
 	private readonly RequestComponentProvider _requestComponentProvider;
-	private List<string> _derivedParams = new List<string>();
-	private List<string> _derivedParamsValues = new List<string>();
-	private List<string> _headerParams = new List<string>();
-	private List<string> _headerParamsValues = new List<string>();
+	private readonly List<string> _params = [];
+	private readonly List<string> _paramsValues = [];
 
 	/* Draft 19 looks like
      * "@signature-params": ("@method" "@authority" "@path" "content-digest" "content-length" "content-type");created=1618884473;keyid="test-key-rsa-pss"
@@ -122,24 +120,24 @@ public class MastodonComponentBuilder : ISignatureComponentVisitor
 
 	private void AddHeader(string header, string value)
 	{
-		_headerParams.Add(header);
-		_headerParamsValues.Add($"{header}: {value}");
+		_params.Add(header);
+		_paramsValues.Add($"{header}: {value}");
 	}
 
 	private void AddRequestTarget(string value)
 	{
-		_derivedParams.Add("(request-target)");
-		_derivedParamsValues.Add($"(request-target): {value}");
+		_params.Add("(request-target)");
+		_paramsValues.Add($"(request-target): {value}");
 	}
 
 	private string BuildSigningDocument()
 	{
-		return string.Join('\n', _derivedParamsValues.Concat(_headerParamsValues));
+		return string.Join('\n', _paramsValues);
 	}
 
 	private string BuildDocumentSpec()
 	{
-		return string.Join(' ', _derivedParams.Concat(_headerParams));
+		return string.Join(' ', _params);
 	}
 
 	#endregion
