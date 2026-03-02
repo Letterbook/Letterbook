@@ -35,7 +35,7 @@ public class AddContentDigestHandler : DelegatingHandler
 
 			// Required by mastodon/draft-cavage-8 (note the missing colons. It's likely to be ambiguous if you try to use multiple algorithms)
 			if (pair.i == 0)
-				request.Content.Headers.Add(DigestHeader, $"{algName.ToUpperInvariant()}={digestValue}");
+				request.Content.Headers.Add(DigestHeader, $"{algName}={digestValue}");
 
 		}
 		return await base.SendAsync(request, cancellationToken);
