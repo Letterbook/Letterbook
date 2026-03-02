@@ -403,13 +403,7 @@ public class ModerationService : IModerationService, IAuthzModerationService
 		if (!allowed)
 			throw CoreException.Unauthorized(allowed);
 
-		if (await _data.Peers(peerId).SingleOrDefaultAsync() is { } peer) return peer;
-
-		peer = new Peer(peerId);
-		_data.Add(peer);
-		await _data.Commit();
-
-		return peer;
+		return await _data.GetOrInitPeer(peerId);
 	}
 
 	public async Task<Peer> SetPeerRestriction(Uri peerId, Restrictions restriction, DateTimeOffset expiration)

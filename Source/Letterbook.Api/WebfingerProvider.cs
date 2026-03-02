@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-using System.Security.Claims;
 using System.Text.RegularExpressions;
 using DarkLink.Web.WebFinger.Server;
 using DarkLink.Web.WebFinger.Shared;
@@ -32,31 +30,31 @@ public class WebfingerProvider : IResourceDescriptorProvider
 		if (!match.Success)
 		{
 			_logger.LogInformation("Invalid Webfinger query for {Resource}", resource);
-			_logger.LogDebug("Invalid Webfinger query from {UserAgent}",
-				request.Headers.TryGetValue("User-Agent", out var ua) ? ua : "unknown");
+			_logger.LogDebug("Invalid Webfinger query from {Ip} via {UserAgent}",
+				request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown IP address",
+				request.Headers.TryGetValue("User-Agent", out var ua) ? ua : "unknown agent");
 			return default;
 		}
 
 		var handle = match.Value.Split('@', 2,
 			StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
 		if (handle == null) return default;
-		var profile = await _profiles.As([]).FindProfiles(handle, _options.DomainName).FirstOrDefaultAsync(cancellationToken: cancellationToken);
-		if (profile != null)
+		var profile = await _profiles.As([]).FindProfiles(handle, _options.BaseUri().GetAuthority()).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+		if (profile == null) return default;
+		var descriptor = JsonResourceDescriptor.Empty with
 		{
-			var descriptor = JsonResourceDescriptor.Empty with
-			{
-				Subject = resource,
-				Links = ImmutableList.Create(
-					DarkLink.Web.WebFinger.Shared.Link.Create("self") with
-					{
-						Type = Core.Constants.ActivityPubAccept,
-						Href = profile.FediId,
-					}),
-			};
+			Subject = resource,
+			Links =
+			[
+				DarkLink.Web.WebFinger.Shared.Link.Create("self") with
+				{
+					Type = Core.Constants.ActivityPubAccept,
+					Href = profile.FediId,
+				},
+			],
+		};
 
-			return descriptor;
-		}
+		return descriptor;
 
-		return default;
 	}
 }

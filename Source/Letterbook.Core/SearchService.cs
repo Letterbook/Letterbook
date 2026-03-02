@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using Letterbook.Core.Adapters;
+using Letterbook.Core.Extensions;
 using Letterbook.Core.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -54,12 +55,16 @@ public class SearchService : ISearchService, ISearchServiceAuth
 			var result = await provider.SearchAny(query, cancel, _opts);
 			foreach (var resource in result)
 			{
-
+				var peer = await _data.GetOrInitPeer(resource.FediId);
+				if (!peer.AuthorizeFederation())
+					continue;
 				limit--;
 				switch (resource)
 				{
 					case Post post:
 						pendingData = true;
+						if(peer.Restrictions.Where(r => !r.Value.Expired()).Any(r => r.Key == Restrictions.DenyPosts))
+							continue;
 						_logger.LogDebug("Discovered post {Id} from search", resource.FediId);
 						_data.Add(post);
 						break;
@@ -106,6 +111,9 @@ public class SearchService : ISearchService, ISearchServiceAuth
 			var result = await provider.SearchProfiles(query, cancel, _opts);
 			foreach (var resource in result)
 			{
+				var peer = await _data.GetOrInitPeer(resource.FediId);
+				if (!peer.AuthorizeFederation())
+					continue;
 
 				limit--;
 				pendingData = true;
@@ -146,6 +154,9 @@ public class SearchService : ISearchService, ISearchServiceAuth
 			var result = await provider.SearchPosts(query, cancel, _opts);
 			foreach (var resource in result)
 			{
+				var peer = await _data.GetOrInitPeer(resource.FediId);
+				if(peer.Restrictions.Where(r => !r.Value.Expired()).Any(r => r.Key is Restrictions.DenyPosts or Restrictions.Defederate))
+					continue;
 
 				limit--;
 				pendingData = true;

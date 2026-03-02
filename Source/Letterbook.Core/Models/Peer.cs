@@ -1,4 +1,3 @@
-using System.Net;
 using Letterbook.Core.Exceptions;
 using Letterbook.Core.Extensions;
 using nietras.SeparatedValues;
@@ -30,6 +29,11 @@ public class Peer : IEquatable<Peer>
 	{
 		Hostname = default!;
 		Authority = default!;
+	}
+
+	public bool AuthorizeFederation()
+	{
+		return !Restrictions.ToList().Any(r => r.Key == Models.Restrictions.Defederate && r.Value > DateTimeOffset.UtcNow);
 	}
 
 	public bool Equals(Peer? other)

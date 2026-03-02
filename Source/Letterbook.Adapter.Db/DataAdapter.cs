@@ -131,6 +131,17 @@ public class DataAdapter : IDataAdapter, IAsyncDisposable, ISearchProvider
 			: _context.Peers.Where(p => peers.Contains(p));
 	}
 
+	public async Task<Models.Peer> GetOrInitPeer(Uri peerId)
+	{
+		if (await Peers(peerId).SingleOrDefaultAsync() is { } peer) return peer;
+
+		peer = new Models.Peer(peerId);
+		_context.Peers.Add(peer);
+		await Commit();
+
+		return peer;
+	}
+
 	public IQueryable<Models.Peer> AllPeers() => _context.Peers;
 
 	public IQueryable<T> QueryFrom<T>(Models.Profile profile, Expression<Func<Models.Profile, IEnumerable<T>>> queryExpression)

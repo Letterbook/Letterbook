@@ -107,6 +107,7 @@ public interface IDataAdapter : IDisposable
 	/// <returns></returns>
 	public IQueryable<Peer> Peers(params Uri[] peerIds);
 	public IQueryable<Peer> Peers(params Peer[] peers);
+	public Task<Peer> GetOrInitPeer(Uri peerId);
 
 	/// <summary>
 	/// Query across all peer hosts
