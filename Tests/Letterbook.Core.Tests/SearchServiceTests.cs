@@ -15,6 +15,7 @@ public class SearchServiceTests : WithMocks
 	private FakeProfile _peerProfiles;
 	private readonly FakePost _localPosts;
 	private readonly FakePost _peerPosts;
+	private readonly Models.Peer _peer;
 
 	public SearchServiceTests(ITestOutputHelper output)
 	{
@@ -26,6 +27,8 @@ public class SearchServiceTests : WithMocks
 		_service = new SearchService(Mock.Of<ILogger<SearchService>>(), _providers, AuthorizationServiceMock.Object, DataAdapterMock.Object,
 			CoreOptionsMock);
 
+		_peer = new Peer("peer.example");
+		DataAdapterMock.Setup(m => m.GetOrInitPeer(It.IsAny<Uri>())).ReturnsAsync(_peer);
 		MockAuthorizeAllowAll();
 	}
 
@@ -124,6 +127,23 @@ public class SearchServiceTests : WithMocks
 		DataAdapterMock.Verify(m => m.Add(It.IsAny<Profile>()), Times.Once);
 	}
 
+	[Fact(DisplayName = "SearchProfiles should not include defederated profiles")]
+	public async Task ProfilesShouldRespectDefederate()
+	{
+		var provider = new Mock<ISearchProvider>();
+		var peer = new Peer("peer.example");
+		peer.Restrictions.Add(Restrictions.Defederate, DateTimeOffset.MaxValue);
+		DataAdapterMock.Setup(m => m.GetOrInitPeer(It.IsAny<Uri>())).ReturnsAsync(peer);
+		provider.Setup(p => p.SearchProfiles(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
+			.ReturnsAsync(_peerProfiles.Generate(1));
+		_providers.AddRange(provider.Object);
+
+		var actual = await _service.As([]).SearchProfiles("query", CancellationToken.None).ToListAsync();
+		Assert.Empty(actual);
+
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<Profile>()), Times.Never);
+	}
+
 	/***
 	 * SearchPosts
 	 */
@@ -213,6 +233,23 @@ public class SearchServiceTests : WithMocks
 		DataAdapterMock.Verify(m => m.Add(It.IsAny<Post>()), Times.Once);
 	}
 
+	[Fact(DisplayName = "SearchPosts should not include defederated content")]
+	public async Task PostssShouldRespectDefederate()
+	{
+		var provider = new Mock<ISearchProvider>();
+		var peer = new Peer("peer.example");
+		peer.Restrictions.Add(Restrictions.Defederate, DateTimeOffset.MaxValue);
+		DataAdapterMock.Setup(m => m.GetOrInitPeer(It.IsAny<Uri>())).ReturnsAsync(peer);
+		provider.Setup(p => p.SearchPosts(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
+			.ReturnsAsync(_localPosts.Generate(1));
+		_providers.AddRange(provider.Object);
+
+		var actual = await _service.As([]).SearchPosts("query", CancellationToken.None).ToListAsync();
+		Assert.Empty(actual);
+
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<Profile>()), Times.Never);
+	}
+
 	/***
 	 * SearchAll
 	 */
@@ -268,5 +305,22 @@ public class SearchServiceTests : WithMocks
 		await _service.As([]).SearchAll("query", CancellationToken.None).ToListAsync();
 
 		DataAdapterMock.Verify(m => m.Add(It.IsAny<Post>()), Times.Once);
+	}
+
+	[Fact(DisplayName = "SearchAll should not include defederated content")]
+	public async Task AllShouldRespectDefederate()
+	{
+		var provider = new Mock<ISearchProvider>();
+		var peer = new Peer("peer.example");
+		peer.Restrictions.Add(Restrictions.Defederate, DateTimeOffset.MaxValue);
+		DataAdapterMock.Setup(m => m.GetOrInitPeer(It.IsAny<Uri>())).ReturnsAsync(peer);
+		provider.Setup(p => p.SearchAny(It.IsAny<string>(), It.IsAny<CancellationToken>(), CoreOptionsMock.Value, It.IsAny<int>()))
+			.ReturnsAsync(_localPosts.Generate(1));
+		_providers.AddRange(provider.Object);
+
+		var actual = await _service.As([]).SearchPosts("query", CancellationToken.None).ToListAsync();
+		Assert.Empty(actual);
+
+		DataAdapterMock.Verify(m => m.Add(It.IsAny<Profile>()), Times.Never);
 	}
 }

@@ -31,7 +31,7 @@ public class WebfingerProvider : IResourceDescriptorProvider
 		{
 			_logger.LogInformation("Invalid Webfinger query for {Resource}", resource);
 			_logger.LogDebug("Invalid Webfinger query from {Ip} via {UserAgent}",
-				request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown IP address",
+				request.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "unknown IP address",
 				request.Headers.TryGetValue("User-Agent", out var ua) ? ua : "unknown agent");
 			return default;
 		}

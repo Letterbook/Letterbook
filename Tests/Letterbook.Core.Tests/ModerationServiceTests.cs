@@ -56,6 +56,7 @@ public class ModerationServiceTests : WithMocks
 		DataAdapterMock.Setup(m => m.ModerationReports(It.IsAny<ModerationReportId[]>())).Returns(_reports.BuildMock());
 		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer> { _peer }.BuildMock());
 		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Peer[]>())).Returns(new List<Peer> { _peer }.BuildMock());
+		DataAdapterMock.Setup(m => m.GetOrInitPeer(It.IsAny<Uri>())).ReturnsAsync(_peer);
 
 		output.WriteLine($"Bogus seed: {Init.WithSeed(550443795)}");
 
@@ -420,13 +421,11 @@ public class ModerationServiceTests : WithMocks
 	[Fact(DisplayName = "Should init a new peer")]
 	public async Task ShouldInitPeer()
 	{
-		DataAdapterMock.Setup(m => m.Peers(It.IsAny<Uri[]>())).Returns(new List<Peer>().BuildMock());
 		var peer = new Uri("https://peer.example");
 		var actual = await _service.As([]).GetOrInitPeerRestrictions(peer);
 
 		Assert.NotNull(actual);
-		DataAdapterMock.Verify(m => m.Add(It.IsAny<Peer>()));
-		DataAdapterMock.Verify(m => m.Commit());
+		DataAdapterMock.Verify(m => m.GetOrInitPeer(peer), Times.Once());
 	}
 
 	[Fact(DisplayName = "Should get an existing peer")]
