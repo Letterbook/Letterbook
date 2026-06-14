@@ -12,10 +12,12 @@ public class ProfileMappings : AutoMapper.Profile
 	public ProfileMappings()
 	{
 		CreateMap<Models.Profile, FullProfileDto>(MemberList.Destination)
+			.MaxDepth(64)
 			.ForMember(dto => dto.Followers, opt => opt.MapFrom(src => src.FollowersCount))
 			.ForMember(dto => dto.Following, opt => opt.MapFrom(src => src.FollowingCount))
 			.ForMember(dto => dto.Created, opt => opt.Ignore());
 		CreateMap<FullProfileDto, Models.Profile>(MemberList.Source)
+			.MaxDepth(64)
 			.ForSourceMember(dto => dto.Updated, opt => opt.DoNotValidate())
 			.ForSourceMember(dto => dto.Created, opt => opt.DoNotValidate())
 			.ForSourceMember(dto => dto.Keys, opt => opt.DoNotValidate())
@@ -25,9 +27,11 @@ public class ProfileMappings : AutoMapper.Profile
 			.ForMember(profile => profile.Following, opt => opt.Ignore())
 			.ForMember(profile => profile.Updated, opt => opt.Ignore())
 			.ForMember(profile => profile.Keys, opt => opt.Ignore());
-		CreateMap<Models.Profile, MiniProfileDto>(MemberList.Destination);
+		CreateMap<Models.Profile, MiniProfileDto>(MemberList.Destination)
+			.MaxDepth(64);
 
 		CreateMap<SigningKey, PublicKeyDto>()
+			.MaxDepth(64)
 			.ConvertUsing(src => new PublicKeyDto
 			{
 				Label = src.Label,

@@ -47,15 +47,18 @@ public static class AstMapper
 		ConfigureContentTypes(cfg);
 
 		cfg.CreateMap<Content, NaturalLanguageString>(MemberList.None)
+			.MaxDepth(64)
 			.ForMember(d => d.DefaultValue, opt => opt.MapFrom(s => s.Html));
 
 		cfg.CreateMap<string, NaturalLanguageString>(MemberList.None)
+			.MaxDepth(64)
 			.ConstructUsing(s => new NaturalLanguageString()
 			{
 				DefaultValue = s
 			});
 
 		cfg.CreateMap<Models.Post, NoteObject>(MemberList.Destination)
+			.MaxDepth(64)
 			.ForMember(d => d.Id, opt => opt.MapFrom(s => s.FediId))
 			.ForMember(d => d.AttributedTo, opt => opt.MapFrom(s => s.Creators.Select(p => p.FediId)))
 			.ForMember(d => d.Audience, opt => opt.MapFrom(s => s.Audience.Select(a => a.FediId)))
@@ -108,6 +111,7 @@ public static class AstMapper
 	private static void ConfigureProfile(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<Models.Profile, ProfileActor>(MemberList.None)
+			.MaxDepth(64)
 			.ConstructUsing((profile, _) => profile.Type switch
 			{
 				ActivityActorType.Application => new ProfileApplicationActor { Inbox = profile.Inbox, Outbox = profile.Outbox },
@@ -131,6 +135,7 @@ public static class AstMapper
 	private static void ConfigureContentTypes(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<Content, ASObject>(MemberList.None)
+			.MaxDepth(64)
 			.ForMember(d => d.Id, opt => opt.MapFrom(s => s.FediId))
 			.ForMember(d => d.AttributedTo, opt => opt.MapFrom<FediIdResolver, IEnumerable<Models.Profile>>(s => s.Post.Creators))
 			.ForMember(d => d.Published, opt => opt.MapFrom(s => s.Post.PublishedDate))
@@ -142,6 +147,7 @@ public static class AstMapper
 			.ForSourceMember(s => s.SortKey, opt => opt.DoNotValidate());
 
 		cfg.CreateMap<Note, ASObject>(MemberList.Source)
+			.MaxDepth(64)
 			.ConstructUsing(_ => new NoteObject())
 			.IncludeBase<Content, ASObject>()
 			.ForMember(d => d.Content, opt => opt.MapFrom(s => s.Html))
@@ -153,6 +159,7 @@ public static class AstMapper
 	private static void FromFlag(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<FlagActivity, ModerationReport>(MemberList.Destination)
+			.MaxDepth(64)
 			.ConstructUsing(src => ConstructModerationReport(src))
 			.ForMember(d => d.Reporter, opt => opt.MapFrom<ProfileResolver, Linkable<ASObject>>(src => src.Actor.First()))
 			.ForMember(d => d.Subjects, opt => opt.MapFrom<ProfileResolver, IEnumerable<Linkable<ASObject>>>(src => src.Object.Take(1)))
@@ -205,6 +212,7 @@ public static class AstMapper
 			.IncludeBase<ProfileActor, Models.Profile>();
 
 		cfg.CreateMap<ProfileActor, Models.Profile>(MemberList.Destination)
+			.MaxDepth(64)
 			.ConstructUsing(_ => Models.Profile.CreateEmpty(Uuid7.NewUuid7()))
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
 			.ForMember(dest => dest.Authority, opt => opt.MapFrom(MapAuthority))
@@ -253,8 +261,10 @@ public static class AstMapper
 	private static void ConfigureKeyTypes(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<PublicKey, SigningKey>()
+			.MaxDepth(64)
 			.ConvertUsing<PublicKeyConverter>();
 		cfg.CreateMap<SigningKey, PublicKey>()
+			.MaxDepth(64)
 			.ConvertUsing<PublicKeyConverter>();
 	}
 
@@ -266,6 +276,7 @@ public static class AstMapper
 	private static void FromNote(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<ASObject, Post>(MemberList.Destination)
+			.MaxDepth(64)
 			.ForMember(dest => dest.Id, opt => opt.Ignore())
 			.ForMember(dest => dest.RelatedReports, opt => opt.Ignore())
 			.ForMember(dest => dest.FediId, opt => opt.MapFrom(src => src.Id))
@@ -304,54 +315,69 @@ public static class AstMapper
 	private static void FromASType(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<ASType, Models.Profile>()
+			.MaxDepth(64)
 			.ConvertUsing<ASTypeConverter>();
 		cfg.CreateMap<ASType, Models.IFederatedActor>()
+			.MaxDepth(64)
 			.ConvertUsing<ASTypeConverter>();
 	}
 
 	private static void ConfigureBaseTypes(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<ASObject?, Uri?>()
+			.MaxDepth(64)
 			.ConvertUsing<IdConverter>();
 
 		cfg.CreateMap<Linkable<ASObject>?, Uri?>()
+			.MaxDepth(64)
 			.ConvertUsing<IdConverter>();
 
 		cfg.CreateMap<Linkable<ASCollection>?, Uri?>()
+			.MaxDepth(64)
 			.ConvertUsing<IdConverter>();
 
 		cfg.CreateMap<string, ReadOnlyMemory<byte>>()
+			.MaxDepth(64)
 			.ConvertUsing<PublicKeyConverter>();
 
 		cfg.CreateMap<NaturalLanguageString?, string?>()
+			.MaxDepth(64)
 			.ConvertUsing<NaturalLanguageStringConverter>();
 	}
 
 	private static void ConfigureUriTypes(IMapperConfigurationExpression cfg)
 	{
 		cfg.CreateMap<Models.Profile, Uri>(MemberList.None)
+			.MaxDepth(64)
 			.ConstructUsing(profile => profile.FediId);
 
 		cfg.CreateMap<Uri, ASObject>(MemberList.None)
+			.MaxDepth(64)
 			.ConstructUsing(uri => new ASObject() { Id = uri.ToString() });
 
 		cfg.CreateMap<Uri, Linkable<ASObject>>(MemberList.None)
+			.MaxDepth(64)
 			.ConstructUsing(uri => new Linkable<ASObject>(new ASLink() { HRef = uri }));
 
 		cfg.CreateMap<Uri, LinkableList<ASObject>>(MemberList.None)
+			.MaxDepth(64)
 			.ConstructUsing(uri => new Linkable<ASObject>(new ASLink() { HRef = uri }));
 
 		cfg.CreateMap<IEnumerable<Uri>, LinkableList<ASObject>>(MemberList.None)
+			.MaxDepth(64)
 			.ConstructUsing((list, maps) => new LinkableList<ASObject>(list.Select(each => maps.Mapper.Map<Linkable<ASObject>>(each))));
 
 		cfg.CreateMap<Audience, Uri>(MemberList.None)
+			.MaxDepth(64)
 			.ConstructUsing(audience => audience.FediId);
 	}
 
 	private static void ConfigureDateTypes(IMapperConfigurationExpression cfg)
 	{
-		cfg.CreateMap<DateTime, DateTimeOffset>(MemberList.None);
+		cfg.CreateMap<DateTime, DateTimeOffset>(MemberList.None)
+			.MaxDepth(64);
 		cfg.CreateMap<DateTimeOffset, DateTime>(MemberList.None)
+			.MaxDepth(64)
 			.ConstructUsing(dto => dto.DateTime);
 	}
 }

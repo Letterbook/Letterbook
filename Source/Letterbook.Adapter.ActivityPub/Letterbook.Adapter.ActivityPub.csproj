@@ -9,7 +9,7 @@
     
     <ItemGroup>
       <PackageReference Include="ActivityPub.Types" />
-      <PackageReference Include="AutoMapper" />
+      <PackageReference Include="AutoMapper" NoWarn="NU1903" /> <!-- Mitigated by .MaxDepth() -->
       <PackageReference Include="AutoMapper.Collection" />
       <PackageReference Include="BouncyCastle.Cryptography" />
       <PackageReference Include="DarkLink.Web.WebFinger.Client" />

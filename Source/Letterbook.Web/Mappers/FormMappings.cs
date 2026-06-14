@@ -10,6 +10,7 @@ public class FormMappings : AutoMapper.Profile
 	public FormMappings(IOptions<CoreOptions> options)
 	{
 		CreateMap<Forms.PostEditorFormData, Models.Post>(MemberList.Source)
+			.MaxDepth(64)
 			.ConstructUsing(formData => new Models.Post(options.Value))
 			.ForMember(post => post.Id, opt => opt.Condition(dto => dto.Id != Uuid7.Empty))
 			.ForMember(post => post.Creators, opt => opt.MapFrom(data => data.Authors))
@@ -29,12 +30,14 @@ public class FormMappings : AutoMapper.Profile
 			});
 
 		CreateMap<Forms.PostEditorContentData, Models.Note>(MemberList.Source)
+			.MaxDepth(64)
 			.ForMember(note => note.Id, opt => opt.Condition(form => form.Id != Guid.Empty))
 			.ForMember(note => note.SourceText, opt => opt.MapFrom(dto => dto.Contents))
 			.ForMember(note => note.SourceContentType, opt => opt.MapFrom((dto) => Models.Content.PlainTextMediaType))
 			.ForMember(note => note.Html, opt => opt.MapFrom(dto => dto.Contents));
 
 		CreateMap<Forms.PostEditorContentData, Models.Content>(MemberList.None)
+			.MaxDepth(64)
 			.ConstructUsing((formData, ctx) => ctx.Mapper.Map<Models.Note>(formData)) // switch on other future types
 			.ForMember(post => post.Id, opt => opt.Condition(form => form.Id != Guid.Empty))
 			.AfterMap((_, ct) =>
