@@ -10,27 +10,35 @@ public class PostMappings : AutoMapper.Profile
 	public PostMappings(IOptions<CoreOptions> options)
 	{
 		CreateMap<MentionDto, Mention>(MemberList.Source)
+			.MaxDepth(64)
 			.ForMember(dest => dest.Subject, opt => opt.MapFrom(src => src.Mentioned));
 
-		CreateMap<ThreadContext, ThreadDto>(MemberList.Destination);
-		CreateMap<ThreadDto, ThreadContext>(MemberList.Source);
+		CreateMap<ThreadContext, ThreadDto>(MemberList.Destination)
+			.MaxDepth(64);
+		CreateMap<ThreadDto, ThreadContext>(MemberList.Source)
+			.MaxDepth(64);
 
 		CreateMap<Mention, MentionDto>(MemberList.Destination)
+			.MaxDepth(64)
 			.ForMember(dest => dest.Mentioned, opt => opt.MapFrom(src => src.Subject.Id));
 
 		CreateMap<Note, ContentDto>(MemberList.Destination)
+			.MaxDepth(64)
 			.IncludeBase<Content, ContentDto>()
 			.ForMember(dto => dto.Text, opt => opt.MapFrom(src => src.SourceText));
 		CreateMap<Content, ContentDto>(MemberList.Destination)
+			.MaxDepth(64)
 			.ForMember(dest => dest.SourceContentType, opt => opt.Ignore())
 			.ForMember(dest => dest.Text, opt => opt.Ignore());
 		CreateMap<ContentDto, Note>(MemberList.Source)
+			.MaxDepth(64)
 			.ForMember(note => note.SourceText, opt => opt.MapFrom(dto => dto.Text))
 			.ForMember(note => note.SourceContentType, opt => opt.MapFrom((dto) => dto.SourceContentType ?? Content.PlainTextMediaType))
 			.ForMember(note => note.Html, opt => opt.MapFrom(dto => dto.Text))
 			.ForSourceMember(src => src.SourceContentType, opt => opt.DoNotValidate())
 			.ForSourceMember(src => src.Type, opt => opt.DoNotValidate());
 		CreateMap<ContentDto, Content>(MemberList.None)
+			.MaxDepth(64)
 			.ConstructUsing((dto, ctx) =>
 			{
 				return dto.Type switch
@@ -45,8 +53,10 @@ public class PostMappings : AutoMapper.Profile
 				ct.SetLocalFediId(options.Value);
 			});
 
-		CreateMap<Post, PostDto>(MemberList.Destination);
+		CreateMap<Post, PostDto>(MemberList.Destination)
+			.MaxDepth(64);
 		CreateMap<PostDto, Post>(MemberList.Source)
+			.MaxDepth(64)
 			.IncludeBase<PostRequestDto, Post>()
 			.ConstructUsing(_ => NewPost(options.Value))
 			.ForMember(post => post.Id, opt => opt.Condition(dto => dto.Id != null))
@@ -61,6 +71,7 @@ public class PostMappings : AutoMapper.Profile
 			.ForSourceMember(src => src.Thread, opt => opt.DoNotValidate());
 
 		CreateMap<PostRequestDto, Post>(MemberList.Source)
+			.MaxDepth(64)
 			.ConstructUsing(_ => NewPost(options.Value))
 			.ForMember(post => post.Id, opt => opt.Condition(dto => dto.Id != null))
 			.ForMember(post => post.CreatedDate, opt => opt.ConvertUsing<DateTimeOffsetMapper, DateTimeOffset?>())
@@ -72,8 +83,10 @@ public class PostMappings : AutoMapper.Profile
 			});
 
 
-		CreateMap<Models.Profile, MiniProfileDto>(MemberList.Destination);
-		CreateMap<MiniProfileDto, Models.Profile>(MemberList.Source);
+		CreateMap<Models.Profile, MiniProfileDto>(MemberList.Destination)
+			.MaxDepth(64);
+		CreateMap<MiniProfileDto, Models.Profile>(MemberList.Source)
+			.MaxDepth(64);
 	}
 
 	private static Post NewPost(CoreOptions options) => new(options);

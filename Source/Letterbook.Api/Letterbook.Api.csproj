@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="ActivityPub.Types" />
-    <PackageReference Include="AutoMapper" />
+    <PackageReference Include="AutoMapper" NoWarn="NU1903" /> <!-- Mitigated by .MaxDepth() -->
     <PackageReference Include="AutoMapper.Collection" />
     <PackageReference Include="DarkLink.Web.WebFinger.Server" />
     <PackageReference Include="GitHubActionsTestLogger">

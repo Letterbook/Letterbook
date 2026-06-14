@@ -15,7 +15,7 @@
       ]
     },
     "docfx": {
-      "version": "2.78.4",
+      "version": "2.78.5",
       "commands": [
         "docfx"
       ]
@@ -27,7 +27,7 @@
       ]
     },
     "dotnet-outdated-tool": {
-      "version": "4.7.0",
+      "version": "4.8.1",
       "commands": [
         "dotnet-outdated"
       ]
