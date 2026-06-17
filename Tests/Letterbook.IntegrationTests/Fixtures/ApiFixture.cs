@@ -2,6 +2,7 @@
 using Letterbook.Core;
 using Letterbook.Core.Adapters;
 using Letterbook.Core.Workers;
+using MassTransit.Courier.Contracts;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -145,6 +146,15 @@ public class ApiFixture : WebApplicationFactory<Program>
 
 	public void ReplaceScoped<TServiceType>(TServiceType replacement) where TServiceType : class
 	{
+		if (replacement is Mock)
+		{
+			// Save confusion by failing early here.
+			// You're allowed to supply any type as `TServiceType`.
+			// If you forget to call '.Object' on your mock, then no error results but nothing is replaced either.
+			throw new ArgumentException($"Unable to replace using type '{replacement.GetType()}'. " +
+			                            $"Pass the object instead of the mock.");
+		}
+
 		_initializers.Add(s => s.ReplaceScoped(replacement));
 	}
 }
@@ -153,7 +163,7 @@ internal static class IServiceCollectionExtensions
 {
 	public static void ReplaceScoped<TServiceType>(this IServiceCollection self, TServiceType replacement) where TServiceType : class
 	{
-		self.RemoveAll<TServiceType>();
-		self.AddScoped<TServiceType>(_ => replacement);
+		self.RemoveAll<TServiceType>()
+			.AddScoped<TServiceType>(_ => replacement);
 	}
 }

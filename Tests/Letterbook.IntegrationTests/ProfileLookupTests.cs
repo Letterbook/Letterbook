@@ -1,0 +1,212 @@
+﻿using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Letterbook.Adapter.ActivityPub;
+using Letterbook.Adapter.Db;
+using Letterbook.Core;
+using Letterbook.Core.Adapters;
+using Letterbook.Core.Models.Dto;
+using Letterbook.Core.Models.Mappers.Converters;
+using Letterbook.IntegrationTests.Fixtures;
+using Medo;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Moq;
+using Xunit.Abstractions;
+using Xunit.Sdk;
+
+namespace Letterbook.IntegrationTests;
+
+public class ProfileLookupTests(ProfileLookupFixture fixture, ITestOutputHelper log) : IClassFixture<ProfileLookupFixture>, ITestSeed
+{
+	private readonly ITestOutputHelper _log = log;
+	private readonly JsonSerializerOptions _json = new(JsonSerializerDefaults.Web)
+	{
+		Converters = { new Uuid7JsonConverter() },
+		ReferenceHandler = ReferenceHandler.IgnoreCycles
+	};
+
+	[Fact(DisplayName = "Should invoke search profiles")]
+	public async Task InvokeCorrectSearchMethod()
+	{
+		var expectedProfile = Models.Profile.CreateIndividual(new Uri("acct:letterbook.example"), "ben");
+
+		fixture.MockSearchProvider.Setup(it => it.SearchProfiles(
+			It.IsAny<string>(),
+			It.IsAny<CancellationToken>(),
+			It.IsAny<CoreOptions>(),
+			It.IsAny<int>())).ReturnsAsync(new List<Models.Profile>
+			{
+				expectedProfile
+			});
+
+		using var _client = fixture.CreateClient();
+
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.example");
+
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+		fixture.MockSearchProvider
+			.Verify(it => it.SearchProfiles(
+				"ben@letterbook.example",
+				It.IsAny<CancellationToken>(),
+				It.IsAny<CoreOptions>(), // What is core options for? What value should it have?
+				100));
+
+		var actual = Assert.IsType<FullProfileDto[]>(await response.Content.ReadFromJsonAsync<FullProfileDto[]>(_json));
+
+		var actualProfile = Assert.Single(actual);
+
+		Assert.Equal(expectedProfile.Handle, actualProfile.Handle);
+	}
+
+	[Fact(DisplayName = "Should use FallbackSearchProvider")]
+	public async Task UseFallbackSearchProvider()
+	{
+		await using var hostFixture = new HostFixture<ProfileLookupTests>(new NullMessageSink());
+
+		var actual = hostFixture.CreateScope().ServiceProvider.GetService(typeof(ISearchProvider));
+
+		var fallbackSearchProvider = Assert.IsType<FallbackSearchProvider>(actual);
+		Assert.IsType<DataAdapter>(fallbackSearchProvider.Primary);
+		Assert.IsType<WebFingerClient>(fallbackSearchProvider.Secondary);
+	}
+
+	[Fact(DisplayName = "Should use the first value of q supplied")]
+	public async Task Return500WhenQSuppliedMoreThanOnce()
+	{
+		fixture.MockSearchProvider.Setup(it => it.SearchProfiles(
+			It.IsAny<string>(),
+			It.IsAny<CancellationToken>(),
+			It.IsAny<CoreOptions>(),
+			It.IsAny<int>())).ReturnsAsync(new List<Models.Profile>
+		{
+			Models.Profile.CreateEmpty(new Models.ProfileId(Uuid7.Empty))
+		});
+
+		using var _client = fixture.CreateClient();
+
+		await _client.GetAsync("/lb/v1/search_profiles?q=a&q=b&q=c");
+
+		fixture.MockSearchProvider
+			.Verify(it => it.SearchProfiles(
+				"a",
+				It.IsAny<CancellationToken>(),
+				It.IsAny<CoreOptions>(),
+				100));
+	}
+
+	[Fact(DisplayName = "Should return empty list when nothing is found")]
+	public async Task ReturnEmptyWhenNothingFound()
+	{
+		fixture.MockSearchProvider.Setup(it => it.SearchProfiles(
+			It.IsAny<string>(),
+			It.IsAny<CancellationToken>(),
+			It.IsAny<CoreOptions>(),
+			It.IsAny<int>())).ReturnsAsync([]);
+
+		using var _client = fixture.CreateClient();
+
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.example");
+
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+		var actual = Assert.IsType<FullProfileDto[]>(await response.Content.ReadFromJsonAsync<FullProfileDto[]>(_json));
+
+		Assert.Empty(actual);
+	}
+
+	[Fact(DisplayName = "Should return HTTP 500 when search throws exception")]
+	public async Task Return500WhenSearchThrowsException()
+	{
+		fixture.MockSearchProvider.Setup(it => it.SearchProfiles(
+			It.IsAny<string>(),
+			It.IsAny<CancellationToken>(),
+			It.IsAny<CoreOptions>(),
+			It.IsAny<int>())).ThrowsAsync(new Exception("Profile search failed on purpose."));
+
+		using var _client = fixture.CreateClient();
+
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.example");
+
+		Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+
+		Assert.Contains("Profile search failed on purpose", await response.Content.ReadAsStringAsync());
+	}
+
+	[Fact(DisplayName = "Should require authorization")]
+	public async Task RejectUnauthorizedRequest()
+	{
+		using var _client = fixture.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+		_client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("None");
+
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=ben@letterbook.example");
+
+		// @todo: Should this really return 401 instead of redirecting to log-in?
+		Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+		Assert.Equal("/Identity/Account/Login", response.Headers.Location!.AbsolutePath);
+	}
+
+	[Fact(DisplayName = "Should return empty for unknown external profile")]
+	public async Task ReturnEmptyForUnknownProfile()
+	{
+		var unknownProfile = Models.Profile.CreateEmpty(new Uri("acct:xxx@xxx.unknown.example"));
+
+		await using var hostFixture = new HostFixture<ProfileLookupTests>(new NullMessageSink());
+
+		hostFixture
+			.MockActivityPubClient.Setup(it => it.Fetch<Models.Profile>(It.IsAny<Uri>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(unknownProfile);
+
+		using var _client = hostFixture.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+		_client.DefaultRequestHeaders.Authorization = new("Test", $"{hostFixture.Accounts[0].Id}");
+
+		var response = await _client.GetAsync("/lb/v1/search_profiles?q=xxx@xxx.unknown.example");
+
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+		var actual = Assert.IsType<FullProfileDto[]>(await response.Content.ReadFromJsonAsync<FullProfileDto[]>(_json));
+
+		Assert.Empty(actual);
+	}
+
+	[Fact(DisplayName = "Should return local profile")]
+	public async Task ReturnLocalProfile()
+	{
+		await using var hostFixture = new HostFixture<ProfileLookupTests>(new NullMessageSink());
+
+		var localProfile = hostFixture.Profiles[0];
+
+		hostFixture
+			.MockActivityPubClient.Setup(it => it.Fetch<Models.Profile>(It.IsAny<Uri>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(localProfile);
+
+		using var _client = hostFixture.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+		_client.DefaultRequestHeaders.Authorization = new("Test", $"{hostFixture.Accounts[0].Id}");
+
+		var response = await _client.GetAsync($"/lb/v1/search_profiles?q={localProfile.Handle}@{localProfile.Authority}");
+
+		Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+		var actual = Assert.IsType<FullProfileDto[]>(await response.Content.ReadFromJsonAsync<FullProfileDto[]>(_json));
+
+		var actualProfile = Assert.Single(actual);
+
+		Assert.Equal(localProfile.Handle, actualProfile.Handle);
+	}
+}
+
+// ReSharper disable once ClassNeverInstantiated.Global
+public class ProfileLookupFixture : ApiFixture
+{
+	public Mock<ISearchProvider> MockSearchProvider { get; } = new(MockBehavior.Strict);
+
+	public ProfileLookupFixture()
+	{
+		ReplaceScoped(MockSearchProvider.Object);
+	}
+}

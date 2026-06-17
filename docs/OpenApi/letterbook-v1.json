@@ -2207,6 +2207,32 @@
         }
       }
     },
+    "/lb/v1/search_profiles": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "Search",
+        "description": "Search for a profile",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
     "/lb/v1/timelines/{profileId}": {
       "get": {
         "tags": [

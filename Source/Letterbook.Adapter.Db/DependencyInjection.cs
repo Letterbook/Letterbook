@@ -1,3 +1,4 @@
+using Letterbook.Adapter.ActivityPub;
 using Letterbook.Core.Adapters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,14 @@ public static class DependencyInjection
 				options.UseProjectables();
 			})
 			.AddScoped<IDataAdapter, DataAdapter>()
-			.AddScoped<ISearchProvider, DataAdapter>();
+			.AddScoped<ISearchProvider, DataAdapter>()
+			.AddKeyedScoped<ISearchProvider, DataAdapter>("primary")
+			.AddKeyedScoped<ISearchProvider, WebFingerClient>("secondary")
+			.AddScoped<ISearchProvider, FallbackSearchProvider>(
+				s => new FallbackSearchProvider(
+					s.GetKeyedService<ISearchProvider>("primary")!,
+					s.GetKeyedService<ISearchProvider>("secondary")!)
+			);
 	}
 
 	public static IOpenTelemetryBuilder AddDbTelemetry(this IOpenTelemetryBuilder builder)

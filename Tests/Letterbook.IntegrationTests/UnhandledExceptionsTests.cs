@@ -64,7 +64,7 @@ public class UnhandledExceptionsTests : IClassFixture<ApiFixture>
 			InviteCode = "abc",
 			Password = "$Password1",
 			ConfirmPassword = "$Password1",
-			Email = "anything@domain.com",
+			Email = "anything@domain.example",
 		}));
 
 		var body = await response.Content.ReadAsStringAsync();
@@ -97,7 +97,7 @@ public class UnhandledExceptionsTests : IClassFixture<ApiFixture>
 			InviteCode = "abc",
 			Password = "$Password1",
 			ConfirmPassword = "$Password1",
-			Email = "anything@domain.com",
+			Email = "anything@domain.example",
 		}));
 
 		Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
