@@ -15,13 +15,13 @@
       ]
     },
     "docfx": {
-      "version": "2.78.5",
+      "version": "2.78.6",
       "commands": [
         "docfx"
       ]
     },
     "microsoft.web.librarymanager.cli": {
-      "version": "3.0.71",
+      "version": "3.0.114",
       "commands": [
         "libman"
       ]
@@ -33,7 +33,7 @@
       ]
     },
     "verify.tool": {
-      "version": "0.7.0",
+      "version": "0.9.1",
       "commands": [
         "dotnet-verify"
       ]
